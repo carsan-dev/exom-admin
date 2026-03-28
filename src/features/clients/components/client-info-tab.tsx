@@ -32,7 +32,7 @@ export function ClientInfoTab({ profile }: ClientInfoTabProps) {
     return (
       <Card>
         <CardContent className="pt-6 text-sm text-muted-foreground">
-          Este cliente todavia no tiene datos de perfil ampliados.
+          Este cliente todavía no tiene datos de perfil ampliados.
         </CardContent>
       </Card>
     )
@@ -42,11 +42,11 @@ export function ClientInfoTab({ profile }: ClientInfoTabProps) {
     { label: 'Nivel', value: LEVEL_LABELS[profile.level] },
     { label: 'Peso actual', value: formatMetric(profile.current_weight, 'kg') },
     { label: 'Altura', value: formatMetric(profile.height, 'cm') },
-    { label: 'Calorias objetivo', value: profile.target_calories ? `${profile.target_calories} kcal` : 'Sin registrar' },
+    { label: 'Calorías objetivo', value: profile.target_calories ? `${profile.target_calories} kcal` : 'Sin registrar' },
     { label: 'Objetivo de masa muscular', value: formatMetric(profile.muscle_mass_goal, 'kg') },
     { label: 'Fecha de nacimiento', value: formatDate(profile.birth_date) },
     { label: 'Creado', value: formatDate(profile.created_at) },
-    { label: 'Ultima actualizacion', value: formatDate(profile.updated_at) },
+    { label: 'Última actualización', value: formatDate(profile.updated_at) },
   ]
 
   return (
@@ -54,11 +54,11 @@ export function ClientInfoTab({ profile }: ClientInfoTabProps) {
       <Card>
         <CardHeader>
           <CardTitle className="text-xl">Objetivo principal</CardTitle>
-          <CardDescription>Motivacion y foco actual del cliente</CardDescription>
+          <CardDescription>Motivación y foco actual del cliente</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-xl border border-border/60 bg-background/60 p-4 text-sm leading-6 text-foreground">
-            {profile.main_goal || 'El cliente todavia no ha definido un objetivo principal.'}
+            {profile.main_goal || 'El cliente todavía no ha definido un objetivo principal.'}
           </div>
         </CardContent>
       </Card>

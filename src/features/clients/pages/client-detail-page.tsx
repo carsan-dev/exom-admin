@@ -39,7 +39,7 @@ function getErrorCopy(errorStatus: number | undefined, currentUserRole?: string)
       message:
         currentUserRole === 'ADMIN'
           ? 'Solo puedes abrir perfiles de clientes asignados a tu cuenta. Vuelve al listado para revisar tu cartera actual.'
-          : 'No tienes permisos para abrir este perfil desde tu sesion actual.',
+          : 'No tienes permisos para abrir este perfil desde tu sesión actual.',
       toneClass: 'bg-status-warning/10 text-status-warning',
       canRetry: false,
     }
@@ -57,7 +57,7 @@ function getErrorCopy(errorStatus: number | undefined, currentUserRole?: string)
   if (errorStatus === 500) {
     return {
       title: 'Error del servidor',
-      message: 'El servidor no ha podido cargar el perfil del cliente. Intentalo de nuevo en unos segundos.',
+      message: 'El servidor no ha podido cargar el perfil del cliente. Inténtalo de nuevo en unos segundos.',
       toneClass: 'bg-status-error/10 text-status-error',
       canRetry: true,
     }
@@ -151,7 +151,7 @@ export function ClientDetailPage() {
             Info general
           </TabsTrigger>
           <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="metrics">
-            Metricas
+            Métricas
           </TabsTrigger>
           <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="streak">
             Racha

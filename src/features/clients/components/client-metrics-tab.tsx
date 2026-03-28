@@ -47,7 +47,7 @@ export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
     return (
       <Card>
         <CardContent className="pt-6 text-sm text-muted-foreground">
-          Aun no hay metricas corporales registradas para este cliente.
+          Aún no hay métricas corporales registradas para este cliente.
         </CardContent>
       </Card>
     )
@@ -68,9 +68,9 @@ export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Scale className="h-5 w-5 text-brand-primary" />
-              <CardTitle className="text-xl">Evolucion del peso</CardTitle>
+              <CardTitle className="text-xl">Evolución del peso</CardTitle>
             </div>
-            <CardDescription>Ultimas mediciones con peso registrado</CardDescription>
+            <CardDescription>Últimas mediciones con peso registrado</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-64 w-full">
@@ -106,9 +106,9 @@ export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-brand-primary" />
-            <CardTitle className="text-xl">Ultimas 10 metricas</CardTitle>
+            <CardTitle className="text-xl">Últimas 10 métricas</CardTitle>
           </div>
-          <CardDescription>Historial reciente de composicion corporal y medidas</CardDescription>
+          <CardDescription>Historial reciente de composición corporal y medidas</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -118,7 +118,7 @@ export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
                 <TableHead>Peso</TableHead>
                 <TableHead>Masa muscular</TableHead>
                 <TableHead>Altura</TableHead>
-                <TableHead>Sueno</TableHead>
+                <TableHead>Sueño</TableHead>
                 <TableHead>Cuello</TableHead>
                 <TableHead>Hombros</TableHead>
                 <TableHead>Pecho</TableHead>

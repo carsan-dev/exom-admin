@@ -83,7 +83,7 @@ export function ChangeRoleDialog({ user, open, onOpenChange }: ChangeRoleDialogP
         <DialogHeader>
           <DialogTitle>Cambiar rol</DialogTitle>
           <DialogDescription>
-            Actualiza el rol de {user ? getUserDisplayName(user) : 'este usuario'} segun el nivel de acceso que necesite.
+            Actualiza el rol de {user ? getUserDisplayName(user) : 'este usuario'} según el nivel de acceso que necesite.
           </DialogDescription>
         </DialogHeader>
 

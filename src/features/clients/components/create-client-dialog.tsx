@@ -76,7 +76,7 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
         <DialogHeader>
           <DialogTitle>Nuevo cliente</DialogTitle>
           <DialogDescription>
-            Crea una nueva cuenta y el backend la asignara automaticamente al admin actual.
+            Crea una nueva cuenta y el backend la asignará automáticamente al admin actual.
           </DialogDescription>
         </DialogHeader>
 
@@ -90,7 +90,7 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
                   <FormItem>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
-                      <Input placeholder="Lucia" {...field} />
+                      <Input placeholder="Lucía" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -104,7 +104,7 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
                   <FormItem>
                     <FormLabel>Apellido</FormLabel>
                     <FormControl>
-                      <Input placeholder="Martinez" {...field} />
+                      <Input placeholder="Martínez" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -132,9 +132,9 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contrasena</FormLabel>
+                    <FormLabel>Contraseña</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Minimo 8 caracteres" autoComplete="new-password" {...field} />
+                      <Input type="password" placeholder="Mínimo 8 caracteres" autoComplete="new-password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

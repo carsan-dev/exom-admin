@@ -58,12 +58,12 @@ export function ClientsPage() {
         ? `${total} clientes asignados en esta vista`
         : `${total} clientes asignados a tu cuenta`
       : isSuperAdmin
-        ? 'Todavia no hay clientes asignados en esta vista'
-        : 'Todavia no hay clientes asignados a tu cuenta'
-  const emptyTitle = isSuperAdmin ? 'Todavia no hay clientes asignados en esta vista' : 'Aun no tienes clientes asignados'
+        ? 'Todavía no hay clientes asignados en esta vista'
+        : 'Todavía no hay clientes asignados a tu cuenta'
+  const emptyTitle = isSuperAdmin ? 'Todavía no hay clientes asignados en esta vista' : 'Aún no tienes clientes asignados'
   const emptyDescription = isSuperAdmin
-    ? 'Esta vista solo muestra clientes asignados. Crea un cliente o espera nuevas asignaciones para empezar a gestionar perfiles, metricas y accesos.'
-    : 'Crea el primer cliente para empezar a gestionar perfiles, metricas y estados de acceso.'
+    ? 'Esta vista solo muestra clientes asignados. Crea un cliente o espera nuevas asignaciones para empezar a gestionar perfiles, métricas y accesos.'
+    : 'Crea el primer cliente para empezar a gestionar perfiles, métricas y estados de acceso.'
   const tableDescription = isSuperAdmin
     ? 'Vista paginada de clientes asignados con acciones avanzadas de desbloqueo y cambio de rol'
     : 'Vista paginada de clientes asignados al admin actual'
@@ -82,7 +82,7 @@ export function ClientsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Gestion de clientes</p>
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Gestión de clientes</p>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">Clientes</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -109,7 +109,7 @@ export function ClientsPage() {
             <div className="space-y-2">
               <h2 className="text-2xl font-semibold text-foreground">No se ha podido cargar el listado</h2>
               <p className="max-w-xl text-sm text-muted-foreground">
-                {getApiErrorMessage(clientsQuery.error, 'Intentalo de nuevo en unos segundos.')}
+                {getApiErrorMessage(clientsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
               </p>
             </div>
             <Button onClick={() => clientsQuery.refetch()}>Reintentar</Button>
@@ -147,7 +147,7 @@ export function ClientsPage() {
 
             <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
-                Pagina {page} de {totalPages}
+                Página {page} de {totalPages}
               </p>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page === 1}>

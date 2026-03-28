@@ -54,7 +54,7 @@ export function UnlockDialog({ client, open, onOpenChange }: UnlockDialogProps) 
         </DialogHeader>
 
         <div className="rounded-xl border border-status-warning/20 bg-status-warning/10 p-4 text-sm text-foreground">
-          La cuenta recuperara el acceso al panel y se reiniciaran sus intentos de login fallidos.
+          La cuenta recuperará el acceso al panel y se reiniciarán sus intentos de login fallidos.
         </div>
 
         <DialogFooter>

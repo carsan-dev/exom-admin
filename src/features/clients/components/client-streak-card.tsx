@@ -17,7 +17,7 @@ export function ClientStreakCard({ streak }: ClientStreakCardProps) {
     return (
       <Card>
         <CardContent className="pt-6 text-sm text-muted-foreground">
-          El cliente todavia no tiene una racha registrada.
+          El cliente todavía no tiene una racha registrada.
         </CardContent>
       </Card>
     )
@@ -26,18 +26,18 @@ export function ClientStreakCard({ streak }: ClientStreakCardProps) {
   const items = [
     {
       label: 'Racha actual',
-      value: `${streak.current_days} dias`,
+      value: `${streak.current_days} días`,
       icon: Flame,
       accent: 'text-status-warning',
     },
     {
-      label: 'Mejor record',
-      value: `${streak.longest_days} dias`,
+      label: 'Mejor récord',
+      value: `${streak.longest_days} días`,
       icon: Trophy,
       accent: 'text-brand-primary',
     },
     {
-      label: 'Ultima actividad',
+      label: 'Última actividad',
       value: streak.last_active_date ? dateFormatter.format(new Date(streak.last_active_date)) : 'Sin actividad',
       icon: CalendarClock,
       accent: 'text-status-info',
@@ -48,7 +48,7 @@ export function ClientStreakCard({ streak }: ClientStreakCardProps) {
     <Card>
       <CardHeader>
         <CardTitle className="text-xl">Racha del cliente</CardTitle>
-        <CardDescription>Actividad reciente y mejor consistencia historica</CardDescription>
+        <CardDescription>Actividad reciente y mejor consistencia histórica</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-3">
         {items.map((item) => {
