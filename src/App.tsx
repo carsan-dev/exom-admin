@@ -18,6 +18,8 @@ import { RecapsPage } from '@/features/recaps/pages/recaps-page'
 import { ChallengesPage } from '@/features/challenges/pages/challenges-page'
 import { AchievementsPage } from '@/features/achievements/pages/achievements-page'
 import { NotificationsPage } from '@/features/notifications/pages/notifications-page'
+import { ClientDetailPage } from '@/features/clients/pages/client-detail-page'
+import { Toaster } from '@/components/ui/sonner'
 
 const router = createBrowserRouter([
   {
@@ -34,6 +36,7 @@ const router = createBrowserRouter([
           { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: 'dashboard', element: <DashboardPage /> },
           { path: 'clients', element: <ClientsPage /> },
+          { path: 'clients/:id', element: <ClientDetailPage /> },
           { path: 'exercises', element: <ExercisesPage /> },
           { path: 'trainings', element: <TrainingsPage /> },
           { path: 'ingredients', element: <IngredientsPage /> },
@@ -55,6 +58,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <Toaster closeButton richColors />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )

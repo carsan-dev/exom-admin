@@ -1,0 +1,18 @@
+import { z } from 'zod'
+import { LEVEL_OPTIONS, ROLE_OPTIONS } from './types'
+
+export const createClientSchema = z.object({
+  email: z.string().trim().email('Introduce un email valido'),
+  password: z.string().min(8, 'La contrasena debe tener al menos 8 caracteres'),
+  first_name: z.string().trim().min(1, 'El nombre es obligatorio'),
+  last_name: z.string().trim().min(1, 'El apellido es obligatorio'),
+  level: z.enum(LEVEL_OPTIONS).optional(),
+  main_goal: z.string().trim().max(160, 'El objetivo no puede superar 160 caracteres').optional(),
+})
+
+export const updateRoleSchema = z.object({
+  role: z.enum(ROLE_OPTIONS),
+})
+
+export type CreateClientFormValues = z.infer<typeof createClientSchema>
+export type UpdateRoleFormValues = z.infer<typeof updateRoleSchema>
