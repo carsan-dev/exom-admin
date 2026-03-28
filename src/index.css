@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+/* Dark mode via class on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── EXOM Design Tokens ──────────────────────────────────────────────── */
+:root {
+  /* Dark mode (default) */
+  --background: #30271e;
+  --background-secondary: #423e35;
+  --background-surface: #503c04;
+  --background-darker: #0b1708;
+
+  --foreground: #f7e681;
+  --foreground-secondary: #e3bc18;
+  --foreground-muted: #888444;
+  --foreground-accent: #d3f858;
+
+  --card: #423e35;
+  --card-foreground: #f7e681;
+  --popover: #423e35;
+  --popover-foreground: #f7e681;
+
+  --primary: #c8e848;
+  --primary-foreground: #1a1410;
+  --secondary: #4a5b21;
+  --secondary-foreground: #f7e681;
+  --muted: #423e35;
+  --muted-foreground: #888444;
+  --accent: #4a5b21;
+  --accent-foreground: #d3f858;
+  --destructive: #f44336;
+  --destructive-foreground: #ffffff;
+
+  --border: #1c3b00;
+  --input: #423e35;
+  --ring: #c8e848;
+
+  --radius: 0.5rem;
+
+  /* Brand palette */
+  --brand-primary: #c8e848;
+  --brand-secondary: #a2c809;
+  --brand-tertiary: #88a834;
+  --brand-soft: #4a5b21;
+
+  /* Status */
+  --status-success: #4caf50;
+  --status-warning: #ffc107;
+  --status-error: #f44336;
+  --status-info: #2196f3;
+}
+
+.light {
+  --background: #f5f0e8;
+  --background-secondary: #ede8e0;
+  --background-surface: #e5e0d8;
+  --background-darker: #ffffff;
+
+  --foreground: #1a1410;
+  --foreground-secondary: #3d3520;
+  --foreground-muted: #6b6040;
+  --foreground-accent: #4a5b21;
+
+  --card: #ffffff;
+  --card-foreground: #1a1410;
+  --popover: #ffffff;
+  --popover-foreground: #1a1410;
+
+  --primary: #a2c809;
+  --primary-foreground: #ffffff;
+  --secondary: #ede8e0;
+  --secondary-foreground: #1a1410;
+  --muted: #ede8e0;
+  --muted-foreground: #6b6040;
+  --accent: #ede8e0;
+  --accent-foreground: #4a5b21;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border: #d8d0c0;
+  --input: #ede8e0;
+  --ring: #a2c809;
+}
+
+/* ── Tailwind v4 theme mapping ───────────────────────────────────────── */
+@theme inline {
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-surface: var(--background-surface);
+  --color-background-darker: var(--background-darker);
+
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-accent: var(--foreground-accent);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand-primary: #c8e848;
+  --color-brand-secondary: #a2c809;
+  --color-brand-tertiary: #88a834;
+  --color-brand-soft: #4a5b21;
+
+  --color-status-success: #4caf50;
+  --color-status-warning: #ffc107;
+  --color-status-error: #f44336;
+  --color-status-info: #2196f3;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ── Base styles ─────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-soft);
+}
