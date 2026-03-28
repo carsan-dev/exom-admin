@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router'
 import { ChevronRight } from 'lucide-react'
+import { useClientProfile } from '@/features/clients/api'
+import { getUserDisplayName } from '@/features/clients/types'
 
 const routeLabels: Record<string, string> = {
   dashboard: 'Dashboard',
@@ -20,6 +22,8 @@ const routeLabels: Record<string, string> = {
 export function Breadcrumbs() {
   const { pathname } = useLocation()
   const segments = pathname.split('/').filter(Boolean)
+  const clientId = segments[0] === 'clients' ? segments[1] : undefined
+  const clientProfile = useClientProfile(clientId)
 
   if (segments.length === 0) return null
 
@@ -28,7 +32,12 @@ export function Breadcrumbs() {
       {segments.map((segment, idx) => {
         const isLast = idx === segments.length - 1
         const to = '/' + segments.slice(0, idx + 1).join('/')
-        const label = routeLabels[segment] ?? segment
+        const label =
+          clientId && idx === 1
+            ? clientProfile.data
+              ? getUserDisplayName(clientProfile.data)
+              : 'Detalle'
+            : routeLabels[segment] ?? segment
 
         return (
           <span key={to} className="flex items-center gap-1">

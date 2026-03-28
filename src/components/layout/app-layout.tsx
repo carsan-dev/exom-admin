@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { Sidebar } from './sidebar'
 import { Header } from './header'
 
