@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Sidebar } from './sidebar'
 import { Header } from './header'
 
@@ -19,7 +19,8 @@ export function AppLayout() {
 
         {/* Mobile sidebar — overlay */}
         <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
-          <SheetContent side="left" className="p-0 w-60">
+          <SheetContent side="left" className="p-0 w-60" aria-describedby={undefined}>
+            <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
             <Sidebar isOpen={true} onClose={() => setMobileSidebarOpen(false)} />
           </SheetContent>
         </Sheet>
