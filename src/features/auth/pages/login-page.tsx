@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -16,8 +17,15 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>
 
 export function LoginPage() {
-  const { login, loginWithGoogle, error, isLoading, clearError } = useAuth()
+  const { login, loginWithGoogle, error, isLoading, isAuthenticated, clearError } = useAuth()
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isAuthenticated, navigate])
 
   const {
     register,
@@ -61,7 +69,7 @@ export function LoginPage() {
                   Volver
                 </Button>
                 <Button className="flex-1" asChild>
-                  <a href="mailto:soporte@exom.app">Contactar soporte</a>
+                  <a href="mailto:soporte@exom.app">Contactar entrenador</a>
                 </Button>
               </div>
             </CardContent>
