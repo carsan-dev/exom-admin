@@ -2,6 +2,38 @@ import { z } from 'zod'
 import { LEVEL_OPTIONS } from '../exercises/types'
 import { TRAINING_TYPE_OPTIONS } from './types'
 
+export function normalizeTrainingTagLabel(tag: string) {
+  return tag.trim().replace(/\s+/g, ' ')
+}
+
+export function getTrainingTagKey(tag: string) {
+  return normalizeTrainingTagLabel(tag).toLocaleLowerCase()
+}
+
+export function normalizeTrainingTags(tags: string[]) {
+  const seen = new Set<string>()
+  const normalizedTags: string[] = []
+
+  for (const tag of tags) {
+    const normalizedTag = normalizeTrainingTagLabel(tag)
+    const tagKey = getTrainingTagKey(normalizedTag)
+
+    if (!normalizedTag || seen.has(tagKey)) {
+      continue
+    }
+
+    seen.add(tagKey)
+    normalizedTags.push(normalizedTag)
+  }
+
+  return normalizedTags
+}
+
+const trainingTagSchema = z
+  .string()
+  .transform(normalizeTrainingTagLabel)
+  .refine((value) => value.length > 0, 'Las etiquetas no pueden estar vacias')
+
 export const trainingExerciseSchema = z.object({
   exercise_id: z.string().uuid('Selecciona un ejercicio'),
   order: z.number().int().min(0),
@@ -19,7 +51,14 @@ export const trainingSchema = z.object({
   warmup_description: z.string().max(1000).optional().or(z.literal('')),
   warmup_duration_min: z.number().int().positive().optional().or(z.literal(0)).nullable(),
   cooldown_description: z.string().max(1000).optional().or(z.literal('')),
-  tags: z.array(z.string()),
+  tags: z.array(trainingTagSchema).superRefine((tags, context) => {
+    if (new Set(tags.map(getTrainingTagKey)).size !== tags.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'No repitas etiquetas',
+      })
+    }
+  }),
   exercises: z.array(trainingExerciseSchema).min(1, 'Agrega al menos un ejercicio'),
 })
 

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
-import type { TrainingFormValues } from './schemas'
+import { normalizeTrainingTags, type TrainingFormValues } from './schemas'
 import type { Training } from './types'
 import type { Exercise, PaginatedResponse } from '../exercises/types'
 
@@ -13,6 +13,7 @@ const trainingsQueryKeys = {
   detail: (id?: string) => ['trainings', id] as const,
 }
 
+const trainingTagsQueryKey = ['trainings', 'tags'] as const
 const exercisesListQueryKey = ['exercises', 'list-all'] as const
 
 function normalizeTrainingPayload(values: TrainingFormValues) {
@@ -25,7 +26,7 @@ function normalizeTrainingPayload(values: TrainingFormValues) {
     warmup_description: values.warmup_description?.trim() || undefined,
     warmup_duration_min: values.warmup_duration_min ?? undefined,
     cooldown_description: values.cooldown_description?.trim() || undefined,
-    tags: values.tags,
+    tags: normalizeTrainingTags(values.tags),
     exercises: values.exercises.map((ex) => ({
       exercise_id: ex.exercise_id,
       order: ex.order,
@@ -64,6 +65,17 @@ export function useTraining(id?: string) {
   })
 }
 
+export function useTrainingTags() {
+  return useQuery({
+    queryKey: trainingTagsQueryKey,
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      const response = await api.get<ApiEnvelope<{ tags: string[] }>>('/trainings/tags')
+      return unwrapResponse(response).tags
+    },
+  })
+}
+
 export function useCreateTraining() {
   const queryClient = useQueryClient()
 
@@ -73,7 +85,10 @@ export function useCreateTraining() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: trainingTagsQueryKey }),
+      ])
     },
   })
 }
@@ -87,7 +102,10 @@ export function useUpdateTraining() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: trainingTagsQueryKey }),
+      ])
     },
   })
 }
@@ -101,7 +119,10 @@ export function useDeleteTraining() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: trainingTagsQueryKey }),
+      ])
     },
   })
 }

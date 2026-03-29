@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { X, Plus } from 'lucide-react'
+import { ChevronDown, LoaderCircle, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Form,
   FormControl,
@@ -31,8 +39,14 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { LEVEL_LABELS, LEVEL_OPTIONS } from '../../exercises/types'
-import { getApiErrorMessage, useCreateTraining, useUpdateTraining } from '../api'
-import { trainingSchema, type TrainingFormValues } from '../schemas'
+import { getApiErrorMessage, useCreateTraining, useTrainingTags, useUpdateTraining } from '../api'
+import {
+  getTrainingTagKey,
+  normalizeTrainingTagLabel,
+  normalizeTrainingTags,
+  trainingSchema,
+  type TrainingFormValues,
+} from '../schemas'
 import { TRAINING_TYPE_LABELS, TRAINING_TYPE_OPTIONS, type Training } from '../types'
 import { ExercisePicker } from './exercise-picker'
 
@@ -67,7 +81,7 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
     warmup_description: training.warmup_description ?? '',
     warmup_duration_min: training.warmup_duration_min,
     cooldown_description: training.cooldown_description ?? '',
-    tags: training.tags,
+    tags: normalizeTrainingTags(training.tags),
     exercises: [...training.exercises]
       .sort((a, b) => a.order - b.order)
       .map((te) => ({
@@ -83,21 +97,47 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
 interface TagsFieldProps {
   value: string[]
   onChange: (value: string[]) => void
+  error?: string
 }
 
-function TagsField({ value, onChange }: TagsFieldProps) {
+function TagsField({ value, onChange, error }: TagsFieldProps) {
   const [input, setInput] = useState('')
+  const tagsQuery = useTrainingTags()
+  const availableTags = tagsQuery.data ?? []
 
-  const add = () => {
-    const trimmed = input.trim().toLowerCase()
-    if (trimmed && !value.includes(trimmed)) {
-      onChange([...value, trimmed])
+  const hasTag = (tag: string) => {
+    const tagKey = getTrainingTagKey(tag)
+    return value.some((currentTag) => getTrainingTagKey(currentTag) === tagKey)
+  }
+
+  const add = (rawTag = input) => {
+    const normalizedTag = normalizeTrainingTagLabel(rawTag)
+
+    if (normalizedTag && !hasTag(normalizedTag)) {
+      onChange(normalizeTrainingTags([...value, normalizedTag]))
     }
+
     setInput('')
   }
 
   const remove = (tag: string) => {
-    onChange(value.filter((t) => t !== tag))
+    const tagKey = getTrainingTagKey(tag)
+    onChange(value.filter((currentTag) => getTrainingTagKey(currentTag) !== tagKey))
+  }
+
+  const toggle = (tag: string) => {
+    const normalizedTag = normalizeTrainingTagLabel(tag)
+
+    if (!normalizedTag) {
+      return
+    }
+
+    if (hasTag(normalizedTag)) {
+      remove(normalizedTag)
+      return
+    }
+
+    onChange(normalizeTrainingTags([...value, normalizedTag]))
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -126,24 +166,85 @@ function TagsField({ value, onChange }: TagsFieldProps) {
           </Badge>
         ))}
       </div>
-      <div className="flex gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Añadir etiqueta (Enter)"
-          className="h-8 text-sm"
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={add}
-          disabled={!input.trim()}
-        >
-          <Plus className="h-3 w-3" />
-        </Button>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" variant="outline" size="sm" className="sm:w-auto">
+              Etiquetas existentes
+              <ChevronDown className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="max-h-72 w-60 overflow-y-auto">
+            <DropdownMenuLabel>Etiquetas guardadas</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {tagsQuery.isLoading ? (
+              <div className="flex items-center gap-2 px-2 py-2 text-xs text-muted-foreground">
+                <LoaderCircle className="h-3 w-3 animate-spin" />
+                Cargando etiquetas...
+              </div>
+            ) : tagsQuery.isError ? (
+              <div className="px-2 py-2 text-xs text-status-error">
+                {getApiErrorMessage(tagsQuery.error, 'No se han podido cargar las etiquetas')}
+              </div>
+            ) : availableTags.length === 0 ? (
+              <div className="px-2 py-2 text-xs text-muted-foreground">Aun no hay etiquetas guardadas.</div>
+            ) : (
+              availableTags.map((tag) => (
+                <DropdownMenuCheckboxItem
+                  key={tag}
+                  checked={hasTag(tag)}
+                  onCheckedChange={() => toggle(tag)}
+                  onSelect={(event) => event.preventDefault()}
+                >
+                  {tag}
+                </DropdownMenuCheckboxItem>
+              ))
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="flex flex-1 gap-2">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Nueva etiqueta (Enter)"
+            className="h-8 text-sm"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => add()}
+            disabled={!normalizeTrainingTagLabel(input)}
+          >
+            <Plus className="h-3 w-3" />
+          </Button>
+        </div>
       </div>
+
+      {tagsQuery.isError ? (
+        <div className="flex items-center gap-2 text-xs text-status-error">
+          <span>{getApiErrorMessage(tagsQuery.error, 'No se han podido cargar las etiquetas existentes')}.</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-auto px-1 py-0 text-xs"
+            onClick={() => tagsQuery.refetch()}
+          >
+            Reintentar
+          </Button>
+        </div>
+      ) : tagsQuery.isLoading ? (
+        <p className="text-xs text-muted-foreground">Cargando etiquetas existentes...</p>
+      ) : availableTags.length === 0 ? (
+        <p className="text-xs text-muted-foreground">Aun no hay etiquetas guardadas. Puedes crear la primera.</p>
+      ) : (
+        <p className="text-xs text-muted-foreground">Selecciona etiquetas existentes o crea una nueva.</p>
+      )}
+
+      {error && <p className="text-xs text-status-error">{error}</p>}
     </div>
   )
 }
@@ -159,6 +260,9 @@ export function TrainingFormDialog({
   const createTraining = useCreateTraining()
   const updateTraining = useUpdateTraining()
   const isPending = createTraining.isPending || updateTraining.isPending
+  const generalSectionRef = useRef<HTMLDivElement | null>(null)
+  const warmupSectionRef = useRef<HTMLDivElement | null>(null)
+  const exercisesSectionRef = useRef<HTMLDivElement | null>(null)
 
   const dialogTitle = isEditing ? 'Editar entrenamiento' : isDuplicate ? 'Duplicar entrenamiento' : 'Nuevo entrenamiento'
   const dialogDescription = isEditing
@@ -175,27 +279,59 @@ export function TrainingFormDialog({
   useEffect(() => {
     if (!open) {
       form.reset(defaultValues)
-    } else if (training) {
-      form.reset(toFormValues(training, isDuplicate))
+      return
     }
+
+    if (training) {
+      form.reset(toFormValues(training, isDuplicate))
+      return
+    }
+
+    form.reset(defaultValues)
   }, [form, open, training, isDuplicate])
 
-  const handleSubmit = form.handleSubmit(async (values) => {
-    try {
-      if (isEditing && training) {
-        await updateTraining.mutateAsync({ id: training.id, values })
-        toast.success('Entrenamiento actualizado correctamente')
-      } else {
-        await createTraining.mutateAsync(values)
-        toast.success(isDuplicate ? 'Entrenamiento duplicado correctamente' : 'Entrenamiento creado correctamente')
+  const scrollToSection = (section: HTMLDivElement | null) => {
+    section?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const handleSubmit = form.handleSubmit(
+    async (values) => {
+      try {
+        if (isEditing && training) {
+          await updateTraining.mutateAsync({ id: training.id, values })
+          toast.success('Entrenamiento actualizado correctamente')
+        } else {
+          await createTraining.mutateAsync(values)
+          toast.success(isDuplicate ? 'Entrenamiento duplicado correctamente' : 'Entrenamiento creado correctamente')
+        }
+
+        onSaved?.()
+        onOpenChange(false)
+      } catch (error) {
+        const action = isEditing ? 'actualizar' : 'crear'
+        toast.error(getApiErrorMessage(error, `No se ha podido ${action} el entrenamiento`))
       }
-      onSaved?.()
-      onOpenChange(false)
-    } catch (error) {
-      const action = isEditing ? 'actualizar' : 'crear'
-      toast.error(getApiErrorMessage(error, `No se ha podido ${action} el entrenamiento`))
-    }
-  })
+    },
+    (errors) => {
+      toast.error('Revisa los campos obligatorios antes de continuar')
+
+      if (errors.exercises) {
+        scrollToSection(exercisesSectionRef.current)
+        return
+      }
+
+      if (errors.warmup_description || errors.warmup_duration_min || errors.cooldown_description) {
+        scrollToSection(warmupSectionRef.current)
+        return
+      }
+
+      scrollToSection(generalSectionRef.current)
+
+      if (errors.name) {
+        form.setFocus('name')
+      }
+    },
+  )
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -208,7 +344,7 @@ export function TrainingFormDialog({
         <Form {...form}>
           <form onSubmit={handleSubmit} className="min-w-0 space-y-5">
             {/* Info general */}
-            <div className="space-y-4">
+            <div ref={generalSectionRef} className="space-y-4">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Información general</p>
 
               {/* Name */}
@@ -326,13 +462,12 @@ export function TrainingFormDialog({
               <FormField
                 control={form.control}
                 name="tags"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel>Etiquetas</FormLabel>
                     <FormControl>
-                      <TagsField value={field.value} onChange={field.onChange} />
+                      <TagsField value={field.value} onChange={field.onChange} error={fieldState.error?.message} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -341,7 +476,7 @@ export function TrainingFormDialog({
             <Separator />
 
             {/* Warmup / Cooldown */}
-            <div className="space-y-4">
+            <div ref={warmupSectionRef} className="space-y-4">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Calentamiento y vuelta a la calma</p>
 
               <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
@@ -408,21 +543,23 @@ export function TrainingFormDialog({
             <Separator />
 
             {/* Exercises */}
-            <FormField
-              control={form.control}
-              name="exercises"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <ExercisePicker
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={form.formState.errors.exercises?.message}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            <div ref={exercisesSectionRef}>
+              <FormField
+                control={form.control}
+                name="exercises"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <ExercisePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={form.formState.errors.exercises?.message}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -430,7 +567,7 @@ export function TrainingFormDialog({
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending
-                  ? isEditing ? 'Guardando...' : 'Creando...'
+                  ? isEditing ? 'Guardando...' : isDuplicate ? 'Creando copia...' : 'Creando...'
                   : isEditing ? 'Guardar cambios' : isDuplicate ? 'Crear copia' : 'Crear entrenamiento'}
               </Button>
             </DialogFooter>

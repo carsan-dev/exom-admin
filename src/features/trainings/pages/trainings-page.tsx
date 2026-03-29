@@ -78,6 +78,31 @@ export function TrainingsPage() {
     setDeleteDialogOpen(true)
   }
 
+  const handleFormDialogOpenChange = (open: boolean) => {
+    setFormDialogOpen(open)
+
+    if (!open) {
+      setEditingTraining(null)
+      setIsDuplicate(false)
+    }
+  }
+
+  const handleDetailDialogOpenChange = (open: boolean) => {
+    setDetailDialogOpen(open)
+
+    if (!open) {
+      setSelectedTraining(null)
+    }
+  }
+
+  const handleDeleteDialogOpenChange = (open: boolean) => {
+    setDeleteDialogOpen(open)
+
+    if (!open) {
+      setSelectedTraining(null)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -202,18 +227,21 @@ export function TrainingsPage() {
       {/* Dialogs */}
       <TrainingFormDialog
         open={formDialogOpen}
-        onOpenChange={setFormDialogOpen}
+        onOpenChange={handleFormDialogOpenChange}
         training={editingTraining}
         isDuplicate={isDuplicate}
         onSaved={() => {
-          if (!editingTraining || isDuplicate) setPage(1)
+          if (!editingTraining || isDuplicate) {
+            setPage(1)
+            setSearch('')
+          }
         }}
       />
 
       <TrainingDetailDialog
         training={selectedTraining}
         open={detailDialogOpen}
-        onOpenChange={setDetailDialogOpen}
+        onOpenChange={handleDetailDialogOpenChange}
         onEdit={handleEdit}
         onDuplicate={handleDuplicate}
       />
@@ -221,7 +249,7 @@ export function TrainingsPage() {
       <DeleteTrainingDialog
         training={selectedTraining}
         open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
+        onOpenChange={handleDeleteDialogOpenChange}
         onDeleted={() => setPage(1)}
       />
     </div>
