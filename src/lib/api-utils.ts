@@ -38,7 +38,7 @@ export function getApiErrorMessage(error: unknown, fallback = 'Ha ocurrido un er
   return fallback
 }
 
-function getApiErrorStatus(error: unknown) {
+export function getApiErrorStatus(error: unknown) {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
     return error.response?.status
   }

@@ -1,22 +1,10 @@
-import axios, { type AxiosResponse } from 'axios'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { type ApiEnvelope, getApiErrorMessage, getApiErrorStatus, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { CreateClientFormValues } from './schemas'
 import type { AdminUserListItem, Client, ClientDetail, PaginatedResponse, Role } from './types'
 
-interface ApiEnvelope<T> {
-  success: boolean
-  data: T
-  timestamp: string
-}
-
-interface ApiErrorResponse {
-  statusCode?: number
-  message?: string | string[]
-  error?: string
-  timestamp?: string
-  path?: string
-}
+export { getApiErrorMessage, getApiErrorStatus }
 
 interface MutationMessage {
   message: string
@@ -38,10 +26,6 @@ const usersQueryKeys = {
   list: (role: Role | undefined, page: number, limit: number) => ['users', role, page, limit] as const,
 }
 
-function unwrapResponse<T>(response: AxiosResponse<ApiEnvelope<T>>) {
-  return response.data.data
-}
-
 function normalizeCreateClientPayload(payload: CreateClientFormValues) {
   return {
     email: payload.email.trim(),
@@ -51,44 +35,6 @@ function normalizeCreateClientPayload(payload: CreateClientFormValues) {
     level: payload.level,
     main_goal: payload.main_goal?.trim() || undefined,
   }
-}
-
-export function getApiErrorMessage(error: unknown, fallback = 'Ha ocurrido un error') {
-  if (axios.isAxiosError<ApiErrorResponse>(error)) {
-    const message = error.response?.data?.message
-
-    if (Array.isArray(message) && message.length > 0) {
-      return message.join(', ')
-    }
-
-    if (typeof message === 'string' && message.trim()) {
-      return message
-    }
-  }
-
-  if (error instanceof Error && error.message) {
-    return error.message
-  }
-
-  return fallback
-}
-
-export function getApiErrorStatus(error: unknown) {
-  if (axios.isAxiosError<ApiErrorResponse>(error)) {
-    return error.response?.status
-  }
-
-  return undefined
-}
-
-function shouldRetryQuery(failureCount: number, error: unknown) {
-  const status = getApiErrorStatus(error)
-
-  if (status === 400 || status === 403 || status === 404) {
-    return false
-  }
-
-  return failureCount < 2
 }
 
 export function useClients(page: number, limit: number) {
