@@ -35,7 +35,7 @@ const trainingTagSchema = z
   .refine((value) => value.length > 0, 'Las etiquetas no pueden estar vacias')
 
 export const trainingExerciseSchema = z.object({
-  exercise_id: z.string().uuid('Selecciona un ejercicio'),
+  exercise_id: z.string().trim().min(1, 'Selecciona un ejercicio'),
   order: z.number().int().min(0),
   sets: z.number().int().min(1, 'Mínimo 1 serie'),
   reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),

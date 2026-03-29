@@ -100,6 +100,38 @@ interface TagsFieldProps {
   error?: string
 }
 
+function getFirstErrorMessage(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') {
+    return undefined
+  }
+
+  if ('message' in error && typeof error.message === 'string' && error.message) {
+    return error.message
+  }
+
+  if (Array.isArray(error)) {
+    for (const item of error) {
+      const nestedMessage = getFirstErrorMessage(item)
+
+      if (nestedMessage) {
+        return nestedMessage
+      }
+    }
+
+    return undefined
+  }
+
+  for (const value of Object.values(error)) {
+    const nestedMessage = getFirstErrorMessage(value)
+
+    if (nestedMessage) {
+      return nestedMessage
+    }
+  }
+
+  return undefined
+}
+
 function TagsField({ value, onChange, error }: TagsFieldProps) {
   const [input, setInput] = useState('')
   const tagsQuery = useTrainingTags()
@@ -313,7 +345,7 @@ export function TrainingFormDialog({
       }
     },
     (errors) => {
-      toast.error('Revisa los campos obligatorios antes de continuar')
+      toast.error(getFirstErrorMessage(errors) ?? 'Revisa los campos obligatorios antes de continuar')
 
       if (errors.exercises) {
         scrollToSection(exercisesSectionRef.current)
@@ -553,7 +585,7 @@ export function TrainingFormDialog({
                       <ExercisePicker
                         value={field.value}
                         onChange={field.onChange}
-                        error={form.formState.errors.exercises?.message}
+                        error={getFirstErrorMessage(form.formState.errors.exercises)}
                       />
                     </FormControl>
                   </FormItem>
