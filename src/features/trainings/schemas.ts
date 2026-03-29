@@ -1,0 +1,27 @@
+import { z } from 'zod'
+import { LEVEL_OPTIONS } from '../exercises/types'
+import { TRAINING_TYPE_OPTIONS } from './types'
+
+export const trainingExerciseSchema = z.object({
+  exercise_id: z.string().uuid('Selecciona un ejercicio'),
+  order: z.number().int().min(0),
+  sets: z.number().int().min(1, 'Mínimo 1 serie'),
+  reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),
+  rest_seconds: z.number().int().min(0).default(60),
+})
+
+export const trainingSchema = z.object({
+  name: z.string().trim().min(1, 'El nombre es obligatorio'),
+  type: z.enum(TRAINING_TYPE_OPTIONS),
+  level: z.enum(LEVEL_OPTIONS),
+  estimated_duration_min: z.number().int().positive().optional().or(z.literal(0)).nullable(),
+  estimated_calories: z.number().int().positive().optional().or(z.literal(0)).nullable(),
+  warmup_description: z.string().max(1000).optional().or(z.literal('')),
+  warmup_duration_min: z.number().int().positive().optional().or(z.literal(0)).nullable(),
+  cooldown_description: z.string().max(1000).optional().or(z.literal('')),
+  tags: z.array(z.string()),
+  exercises: z.array(trainingExerciseSchema).min(1, 'Agrega al menos un ejercicio'),
+})
+
+export type TrainingFormValues = z.infer<typeof trainingSchema>
+export type TrainingExerciseFormValues = z.infer<typeof trainingExerciseSchema>
