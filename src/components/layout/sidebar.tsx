@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { NavLink } from 'react-router'
 import {
   LayoutDashboard,
@@ -60,34 +61,59 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 space-y-1 px-2">
-        {navItems.map(({ to, label, icon: Icon }) => (
-          <Tooltip key={to} delayDuration={0}>
-            <TooltipTrigger asChild>
+      <nav className="flex flex-1 flex-col overflow-y-auto px-2 py-4">
+        {navItems.map(({ to, label, icon: Icon }, index) => (
+          <Fragment key={to}>
+            {isOpen ? (
               <NavLink
                 to={to}
                 onClick={onClose}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors',
+                    'flex w-full items-center rounded-none border-l-2 border-transparent px-3 py-2 text-left text-sm font-medium transition-colors',
                     'hover:bg-brand-soft/30 hover:text-foreground',
-                    isActive
-                      ? 'bg-brand-primary/10 text-brand-primary border-l-2 border-brand-primary pl-[6px]'
-                      : 'text-muted-foreground',
-                    !isOpen && 'justify-center px-2'
+                    index === 0 && 'rounded-t-md',
+                    index === navItems.length - 1 && 'rounded-b-md',
+                    isActive && 'border-brand-primary bg-brand-primary/10 text-brand-primary',
+                    !isActive && 'text-foreground/70'
                   )
                 }
               >
-                <Icon className="h-5 w-5 shrink-0" />
-                {isOpen && <span>{label}</span>}
+                <span className="grid w-full min-w-0 grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-3">
+                  <span className="flex h-5 w-5 items-center justify-center">
+                    <Icon className="h-5 w-5 shrink-0" />
+                  </span>
+                  <span className="truncate whitespace-nowrap leading-none">{label}</span>
+                </span>
               </NavLink>
-            </TooltipTrigger>
-            {!isOpen && (
-              <TooltipContent side="right">
-                <p>{label}</p>
-              </TooltipContent>
+            ) : (
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <NavLink
+                    to={to}
+                    onClick={onClose}
+                    className={({ isActive }) =>
+                      cn(
+                        'flex h-10 w-full items-center justify-center rounded-none px-0 text-sm font-medium transition-colors',
+                        'hover:bg-brand-soft/30 hover:text-foreground',
+                        index === 0 && 'rounded-t-md',
+                        index === navItems.length - 1 && 'rounded-b-md',
+                        isActive && 'bg-brand-primary/10 text-brand-primary',
+                        !isActive && 'text-foreground/70'
+                      )
+                    }
+                  >
+                    <span className="grid w-full place-items-center">
+                      <Icon className="h-5 w-5 shrink-0" />
+                    </span>
+                  </NavLink>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>{label}</p>
+                </TooltipContent>
+              </Tooltip>
             )}
-          </Tooltip>
+          </Fragment>
         ))}
       </nav>
     </aside>
