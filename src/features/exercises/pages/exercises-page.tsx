@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { normalizeSearchText } from '@/lib/search'
 import { getApiErrorMessage, useExercises } from '../api'
 import { DeleteExerciseDialog } from '../components/delete-exercise-dialog'
 import { ExerciseDetailDialog } from '../components/exercise-detail-dialog'
@@ -42,11 +43,12 @@ export function ExercisesPage() {
   const allExercises = exercisesQuery.data?.data ?? []
   const total = exercisesQuery.data?.total ?? 0
   const totalPages = exercisesQuery.data?.totalPages ?? 1
+  const normalizedSearch = normalizeSearchText(search.trim())
 
   // Client-side search filter on the current page
-  const exercises = search.trim()
+  const exercises = normalizedSearch
     ? allExercises.filter((e) =>
-        e.name.toLowerCase().includes(search.trim().toLowerCase())
+        normalizeSearchText(e.name).includes(normalizedSearch)
       )
     : allExercises
 
