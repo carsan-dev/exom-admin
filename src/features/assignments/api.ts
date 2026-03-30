@@ -35,6 +35,7 @@ interface CatalogLoadStateInput {
 }
 
 type QueryParams = Record<string, string | number | boolean | undefined>
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 const assignmentsQueryKeys = {
   weeks: ['assignments', 'week'] as const,
@@ -85,6 +86,10 @@ async function fetchAllPaginatedData<T>(path: string, baseParams: QueryParams = 
   } while (page <= totalPages)
 
   return items
+}
+
+export function isUuidString(value: string | null | undefined): value is string {
+  return typeof value === 'string' && uuidRegex.test(value)
 }
 
 function buildCatalogLoadState({ key, label, count, isLoading, isError, error }: CatalogLoadStateInput): CatalogLoadState {
@@ -173,7 +178,10 @@ export function useAssignmentClients() {
   return useQuery({
     queryKey: assignmentsQueryKeys.clients,
     retry: shouldRetryQuery,
-    queryFn: () => fetchAllPaginatedData<Client>('/admin/clients'),
+    queryFn: async () => {
+      const clients = await fetchAllPaginatedData<Client>('/admin/clients')
+      return clients.filter((client) => isUuidString(client.id))
+    },
   })
 }
 

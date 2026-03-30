@@ -10,6 +10,7 @@ import { useSearchParams } from 'react-router'
 import {
   buildCatalogAvailability,
   getApiErrorMessage,
+  isUuidString,
   useAssignmentClients,
   useAssignmentDietsCatalog,
   useAssignmentsWeek,
@@ -89,7 +90,8 @@ export function AssignmentsPage() {
   const [copyWeekOpen, setCopyWeekOpen] = useState(false)
   const [copyPreviewOpen, setCopyPreviewOpen] = useState(false)
   const [pendingCopyValues, setPendingCopyValues] = useState<CopyWeekValues | null>(null)
-  const selectedClientId = searchParams.get('clientId') ?? ''
+  const selectedClientIdParam = searchParams.get('clientId')
+  const selectedClientId = isUuidString(selectedClientIdParam) ? selectedClientIdParam : ''
 
   const clientsQuery = useAssignmentClients()
   const trainingsQuery = useAssignmentTrainingsCatalog()
@@ -144,10 +146,24 @@ export function AssignmentsPage() {
     setPendingCopyValues(null)
   }, [selectedClientId, weekStart])
 
+  useEffect(() => {
+    if (!selectedClientIdParam) {
+      return
+    }
+
+    if (isUuidString(selectedClientIdParam)) {
+      return
+    }
+
+    const nextSearchParams = new URLSearchParams(searchParams)
+    nextSearchParams.delete('clientId')
+    setSearchParams(nextSearchParams, { replace: true })
+  }, [searchParams, selectedClientIdParam, setSearchParams])
+
   const handleClientChange = (clientId: string) => {
     const nextSearchParams = new URLSearchParams(searchParams)
 
-    if (clientId) {
+    if (isUuidString(clientId)) {
       nextSearchParams.set('clientId', clientId)
     } else {
       nextSearchParams.delete('clientId')
