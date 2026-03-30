@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
-import type { Client, PaginatedResponse } from '../clients/types'
+import type { AdminUserListItem, Client, PaginatedResponse, Role } from '../clients/types'
 import type { Diet } from '../diets/types'
 import type { Training } from '../trainings/types'
+import { toClientOption } from './types'
 import type {
   AssignmentDay,
   AssignmentEditorValues,
@@ -11,6 +12,7 @@ import type {
   CatalogAvailability,
   CatalogKey,
   CatalogLoadState,
+  ClientOption,
   CopyWeekValues,
 } from './types'
 
@@ -35,7 +37,6 @@ interface CatalogLoadStateInput {
 }
 
 type QueryParams = Record<string, string | number | boolean | undefined>
-const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 const assignmentsQueryKeys = {
   weeks: ['assignments', 'week'] as const,
@@ -43,6 +44,22 @@ const assignmentsQueryKeys = {
   clients: ['assignments', 'clients'] as const,
   trainings: ['assignments', 'trainings'] as const,
   diets: ['assignments', 'diets'] as const,
+}
+
+function normalizeClientOptions<T extends Pick<Client, 'id' | 'email' | 'profile'> | Pick<AdminUserListItem, 'id' | 'email' | 'profile'>>(
+  clients: T[],
+) {
+  return clients.filter((client) => hasClientId(client.id)).map((client): ClientOption => toClientOption(client))
+}
+
+function mergeClientOptions(...groups: ClientOption[][]) {
+  const clientsById = new Map<string, ClientOption>()
+
+  groups.flat().forEach((client) => {
+    clientsById.set(client.id, client)
+  })
+
+  return Array.from(clientsById.values())
 }
 
 function normalizeAssignmentPayload(values: AssignmentEditorValues) {
@@ -88,8 +105,8 @@ async function fetchAllPaginatedData<T>(path: string, baseParams: QueryParams = 
   return items
 }
 
-export function isUuidString(value: string | null | undefined): value is string {
-  return typeof value === 'string' && uuidRegex.test(value)
+export function hasClientId(value: string | null | undefined): value is string {
+  return typeof value === 'string' && value.trim().length > 0
 }
 
 function buildCatalogLoadState({ key, label, count, isLoading, isError, error }: CatalogLoadStateInput): CatalogLoadState {
@@ -174,13 +191,30 @@ export function useAssignmentsWeek(clientId?: string, weekStart?: string) {
   })
 }
 
-export function useAssignmentClients() {
+export function useAssignmentClients(currentUserRole?: Role) {
   return useQuery({
-    queryKey: assignmentsQueryKeys.clients,
+    queryKey: [...assignmentsQueryKeys.clients, currentUserRole],
+    enabled: Boolean(currentUserRole),
     retry: shouldRetryQuery,
     queryFn: async () => {
+      if (currentUserRole === 'SUPER_ADMIN') {
+        const [visibleClients, filteredUsers, allUsers] = await Promise.all([
+          fetchAllPaginatedData<Client>('/admin/clients'),
+          fetchAllPaginatedData<AdminUserListItem>('/admin/users', {
+            role: 'CLIENT',
+          }),
+          fetchAllPaginatedData<AdminUserListItem>('/admin/users'),
+        ])
+
+        return mergeClientOptions(
+          normalizeClientOptions(visibleClients),
+          normalizeClientOptions(filteredUsers.filter((user) => user.role === 'CLIENT')),
+          normalizeClientOptions(allUsers.filter((user) => user.role === 'CLIENT')),
+        )
+      }
+
       const clients = await fetchAllPaginatedData<Client>('/admin/clients')
-      return clients.filter((client) => isUuidString(client.id))
+      return normalizeClientOptions(clients)
     },
   })
 }

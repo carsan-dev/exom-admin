@@ -6,11 +6,12 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useAuth } from '@/hooks/use-auth'
 import { useSearchParams } from 'react-router'
 import {
   buildCatalogAvailability,
   getApiErrorMessage,
-  isUuidString,
+  hasClientId,
   useAssignmentClients,
   useAssignmentDietsCatalog,
   useAssignmentsWeek,
@@ -83,6 +84,8 @@ function AssignmentsPageSkeleton() {
 }
 
 export function AssignmentsPage() {
+  const currentUserRole = useAuth((state) => state.user?.role)
+  const isSuperAdmin = currentUserRole === 'SUPER_ADMIN'
   const [searchParams, setSearchParams] = useSearchParams()
   const [weekStart, setWeekStart] = useState(getCurrentWeekStart)
   const [selectedDates, setSelectedDates] = useState<string[]>([])
@@ -91,9 +94,9 @@ export function AssignmentsPage() {
   const [copyPreviewOpen, setCopyPreviewOpen] = useState(false)
   const [pendingCopyValues, setPendingCopyValues] = useState<CopyWeekValues | null>(null)
   const selectedClientIdParam = searchParams.get('clientId')
-  const selectedClientId = isUuidString(selectedClientIdParam) ? selectedClientIdParam : ''
+  const selectedClientId = hasClientId(selectedClientIdParam) ? selectedClientIdParam : ''
 
-  const clientsQuery = useAssignmentClients()
+  const clientsQuery = useAssignmentClients(currentUserRole)
   const trainingsQuery = useAssignmentTrainingsCatalog()
   const dietsQuery = useAssignmentDietsCatalog()
   const assignmentsQuery = useAssignmentsWeek(selectedClientId || undefined, weekStart)
@@ -151,7 +154,7 @@ export function AssignmentsPage() {
       return
     }
 
-    if (isUuidString(selectedClientIdParam)) {
+    if (hasClientId(selectedClientIdParam)) {
       return
     }
 
@@ -163,7 +166,7 @@ export function AssignmentsPage() {
   const handleClientChange = (clientId: string) => {
     const nextSearchParams = new URLSearchParams(searchParams)
 
-    if (isUuidString(clientId)) {
+    if (hasClientId(clientId)) {
       nextSearchParams.set('clientId', clientId)
     } else {
       nextSearchParams.delete('clientId')
@@ -242,7 +245,9 @@ export function AssignmentsPage() {
             <AlertTriangle className="h-8 w-8" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-semibold text-foreground">No se ha podido cargar la cartera</h1>
+            <h1 className="text-2xl font-semibold text-foreground">
+              {isSuperAdmin ? 'No se ha podido cargar el listado de clientes' : 'No se ha podido cargar la cartera'}
+            </h1>
             <p className="max-w-xl text-sm text-muted-foreground">
               {getApiErrorMessage(clientsQuery.error, 'Intentalo de nuevo en unos segundos.')}
             </p>
@@ -257,8 +262,12 @@ export function AssignmentsPage() {
     return (
       <AssignmentsEmptyState
         icon={<Users className="h-8 w-8" />}
-        title="Todavia no tienes clientes asignados"
-        description="En cuanto tengas clientes en cartera podras planificar entrenamientos, dietas y descansos desde esta vista."
+        title={isSuperAdmin ? 'Todavia no hay clientes registrados' : 'Todavia no tienes clientes asignados'}
+        description={
+          isSuperAdmin
+            ? 'En cuanto exista al menos un cliente podras planificar entrenamientos, dietas y descansos desde esta vista.'
+            : 'En cuanto tengas clientes en cartera podras planificar entrenamientos, dietas y descansos desde esta vista.'
+        }
       />
     )
   }

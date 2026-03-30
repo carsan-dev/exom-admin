@@ -1,9 +1,31 @@
 import { addDays, format, parseISO } from 'date-fns'
-import type { Client } from '../clients/types'
+import type { AdminUserListItem, Client } from '../clients/types'
 import type { Diet } from '../diets/types'
 import type { Training } from '../trainings/types'
 
-export type ClientOption = Client
+export interface ClientOption {
+  id: string
+  email: string
+  profile: Pick<NonNullable<Client['profile']>, 'first_name' | 'last_name' | 'avatar_url'> | null
+}
+
+export function toClientOption(client: Pick<Client, 'id' | 'email' | 'profile'>): ClientOption
+export function toClientOption(client: Pick<AdminUserListItem, 'id' | 'email' | 'profile'>): ClientOption
+export function toClientOption(
+  client: Pick<Client, 'id' | 'email' | 'profile'> | Pick<AdminUserListItem, 'id' | 'email' | 'profile'>,
+): ClientOption {
+  return {
+    id: client.id,
+    email: client.email,
+    profile: client.profile
+      ? {
+          first_name: client.profile.first_name,
+          last_name: client.profile.last_name,
+          avatar_url: client.profile.avatar_url,
+        }
+      : null,
+  }
+}
 export type CatalogKey = 'trainings' | 'diets'
 
 export interface AssignmentDayTraining {
