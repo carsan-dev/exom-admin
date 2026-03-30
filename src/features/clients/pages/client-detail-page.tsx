@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, AlertTriangle, ShieldCheck, Unlock } from 'lucide-react'
+import { ArrowLeft, AlertTriangle, CalendarDays, ShieldCheck, Unlock } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -128,6 +128,12 @@ export function ClientDetailPage() {
         </Button>
 
         <div className="flex flex-wrap gap-3">
+          <Button variant="outline" asChild>
+            <Link to={`/assignments?clientId=${client.id}`}>
+              <CalendarDays className="h-4 w-4" />
+              Planificar asignaciones
+            </Link>
+          </Button>
           {client.is_locked && (
             <Button variant="outline" onClick={() => setUnlockDialogOpen(true)}>
               <Unlock className="h-4 w-4" />
