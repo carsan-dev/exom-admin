@@ -1,4 +1,4 @@
-import { addDays, format, parseISO } from 'date-fns'
+import { addDays, endOfMonth, format, parseISO, startOfMonth, startOfWeek } from 'date-fns'
 import type { AdminUserListItem, Client } from '../clients/types'
 import type { Diet } from '../diets/types'
 import type { Training } from '../trainings/types'
@@ -26,7 +26,9 @@ export function toClientOption(
       : null,
   }
 }
+
 export type CatalogKey = 'trainings' | 'diets'
+export type AssignmentsViewMode = 'week' | 'month'
 
 export interface AssignmentDayTraining {
   id: string
@@ -62,16 +64,44 @@ export interface AssignmentWeekResponse {
   days: AssignmentDay[]
 }
 
+export interface AssignmentMonthResponse {
+  client_id: string
+  year: number
+  month: number
+  month_start: string
+  month_end: string
+  days: AssignmentDay[]
+}
+
 export interface AssignmentSummary {
   training_days: number
   diet_days: number
   rest_days: number
 }
 
+export interface AssignmentEditorDayValues {
+  assignment_id?: string | null
+  original_date: string
+  date: string
+  training_id?: string | null
+  diet_id?: string | null
+  is_rest_day: boolean
+}
+
 export interface AssignmentEditorValues {
   client_id: string
-  dates: string[]
+  days: AssignmentEditorDayValues[]
+}
+
+export interface AssignmentUpdateValues {
   date?: string | null
+  training_id?: string | null
+  diet_id?: string | null
+  is_rest_day: boolean
+}
+
+export interface AssignmentBatchDayInput {
+  date: string
   training_id?: string | null
   diet_id?: string | null
   is_rest_day: boolean
@@ -103,11 +133,15 @@ export interface AssignmentPreviewDiet {
   meals_count: number | null
 }
 
-export interface AssignmentPreview {
-  dates: string[]
+export interface AssignmentPreviewDay {
+  date: string
   training: AssignmentPreviewTraining | null
   diet: AssignmentPreviewDiet | null
   is_rest_day: boolean
+}
+
+export interface AssignmentPreview {
+  days: AssignmentPreviewDay[]
 }
 
 export interface CatalogLoadState {
@@ -153,12 +187,43 @@ export interface CopyWeekPreview {
   summary: CopyWeekPreviewSummary
 }
 
-export type SelectableDay = AssignmentDay & {
-  selected: boolean
+export function formatIsoDate(date: Date) {
+  return format(date, 'yyyy-MM-dd')
 }
 
-function formatIsoDate(date: Date) {
-  return format(date, 'yyyy-MM-dd')
+export function getWeekStartDate(date: string | Date) {
+  return startOfWeek(typeof date === 'string' ? parseISO(date) : date, { weekStartsOn: 1 })
+}
+
+export function getVisibleDates(viewMode: AssignmentsViewMode, anchorDate: string) {
+  if (viewMode === 'week') {
+    const start = getWeekStartDate(anchorDate)
+    return Array.from({ length: 7 }, (_, index) => formatIsoDate(addDays(start, index)))
+  }
+
+  const monthStart = startOfMonth(parseISO(anchorDate))
+  const monthEnd = endOfMonth(monthStart)
+  const totalDays = Math.max(
+    Math.round((monthEnd.getTime() - monthStart.getTime()) / (24 * 60 * 60 * 1000)) + 1,
+    0,
+  )
+
+  return Array.from({ length: totalDays }, (_, index) => formatIsoDate(addDays(monthStart, index)))
+}
+
+export function buildPlaceholderDays(
+  viewMode: AssignmentsViewMode,
+  anchorDate: string,
+  clientId: string,
+): AssignmentDay[] {
+  return getVisibleDates(viewMode, anchorDate).map((date) => ({
+    id: null,
+    client_id: clientId,
+    date,
+    is_rest_day: false,
+    training: null,
+    diet: null,
+  }))
 }
 
 export function createAssignmentPreviewTraining(training: Training): AssignmentPreviewTraining {

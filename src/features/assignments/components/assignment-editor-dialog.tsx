@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useFieldArray, useForm } from 'react-hook-form'
 import { AlertTriangle, Eye, RefreshCw } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -28,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import type { Diet } from '../../diets/types'
 import type { Training } from '../../trainings/types'
 import { assignmentEditorSchema, type AssignmentEditorFormValues } from '../schemas'
@@ -58,11 +58,7 @@ interface AssignmentEditorDialogProps {
   onSubmit: (values: AssignmentEditorValues) => Promise<void>
 }
 
-function buildPreviewTraining(
-  trainingId: string | null,
-  availableTrainings: Training[],
-  primaryDay: AssignmentDay | null,
-) {
+function buildPreviewTraining(trainingId: string | null, availableTrainings: Training[], sourceDay?: AssignmentDay) {
   if (!trainingId) {
     return null
   }
@@ -73,9 +69,9 @@ function buildPreviewTraining(
     return createAssignmentPreviewTraining(training)
   }
 
-  if (primaryDay?.training?.id === trainingId) {
+  if (sourceDay?.training?.id === trainingId) {
     return {
-      ...primaryDay.training,
+      ...sourceDay.training,
       exercises_count: null,
     }
   }
@@ -83,11 +79,7 @@ function buildPreviewTraining(
   return null
 }
 
-function buildPreviewDiet(
-  dietId: string | null,
-  availableDiets: Diet[],
-  primaryDay: AssignmentDay | null,
-) {
+function buildPreviewDiet(dietId: string | null, availableDiets: Diet[], sourceDay?: AssignmentDay) {
   if (!dietId) {
     return null
   }
@@ -98,9 +90,9 @@ function buildPreviewDiet(
     return createAssignmentPreviewDiet(diet)
   }
 
-  if (primaryDay?.diet?.id === dietId) {
+  if (sourceDay?.diet?.id === dietId) {
     return {
-      ...primaryDay.diet,
+      ...sourceDay.diet,
       meals_count: null,
     }
   }
@@ -125,80 +117,83 @@ export function AssignmentEditorDialog({
   const form = useForm<AssignmentEditorFormValues>({
     resolver: zodResolver(assignmentEditorSchema),
     defaultValues: {
-      date: null,
-      training_id: null,
-      diet_id: null,
-      is_rest_day: false,
+      days: [],
     },
   })
+  const { fields } = useFieldArray({
+    control: form.control,
+    name: 'days',
+  })
 
-  const primaryDay = selectedDays.length === 1 ? selectedDays[0] : null
-  const isEditingExistingDay = Boolean(primaryDay?.id)
-  const isRestDay = form.watch('is_rest_day')
-  const selectedTrainingId = form.watch('training_id') ?? null
-  const selectedDietId = form.watch('diet_id') ?? null
-  const selectedDates = selectedDays.map((day) => day.date).sort()
+  const sortedSelectedDays = useMemo(
+    () => [...selectedDays].sort((left, right) => left.date.localeCompare(right.date)),
+    [selectedDays],
+  )
+  const selectedDaysKey = useMemo(
+    () =>
+      sortedSelectedDays
+        .map((day) => `${day.id ?? 'new'}:${day.date}:${day.training?.id ?? 'none'}:${day.diet?.id ?? 'none'}:${day.is_rest_day}`)
+        .join('|'),
+    [sortedSelectedDays],
+  )
+  const sourceDayMap = useMemo(
+    () => new Map(sortedSelectedDays.map((day) => [day.date, day])),
+    [sortedSelectedDays],
+  )
+  const watchedDays = form.watch('days') ?? []
   const isRestOnlyMode = catalogAvailability.is_rest_only
   const canUseTrainingCatalog = catalogAvailability.can_use_training_catalog
   const canUseDietCatalog = catalogAvailability.can_use_diet_catalog
+  const canEditSingleDate = fields.length === 1 && Boolean(fields[0]?.assignment_id)
 
   useEffect(() => {
     if (!open) {
       setPreviewOpen(false)
-      form.reset({
-        date: null,
-        training_id: null,
-        diet_id: null,
-        is_rest_day: false,
-      })
+      form.reset({ days: [] })
       return
     }
 
     form.reset({
-      date: primaryDay?.date ?? null,
-      training_id: isRestOnlyMode ? null : isEditingExistingDay ? (primaryDay?.training?.id ?? null) : null,
-      diet_id: isRestOnlyMode ? null : isEditingExistingDay ? (primaryDay?.diet?.id ?? null) : null,
-      is_rest_day: isRestOnlyMode ? true : (primaryDay?.is_rest_day ?? false),
+      days: sortedSelectedDays.map((day) => ({
+        assignment_id: day.id,
+        original_date: day.date,
+        date: day.date,
+        training_id: day.training?.id ?? null,
+        diet_id: day.diet?.id ?? null,
+        is_rest_day: day.is_rest_day,
+      })),
     })
-  }, [
-    form,
-    isEditingExistingDay,
-    isRestOnlyMode,
-    open,
-    primaryDay?.date,
-    primaryDay?.diet?.id,
-    primaryDay?.is_rest_day,
-    primaryDay?.training?.id,
-  ])
+  }, [form, open, selectedDaysKey])
 
   const preview: AssignmentPreview = {
-    dates:
-      selectedDays.length === 1
-        ? [form.watch('date') || selectedDays[0]?.date].filter(Boolean) as string[]
-        : selectedDates,
-    training: buildPreviewTraining(selectedTrainingId, availableTrainings, primaryDay),
-    diet: buildPreviewDiet(selectedDietId, availableDiets, primaryDay),
-    is_rest_day: isRestDay,
+    days: watchedDays.map((day) => ({
+      date: day.date,
+      training: day.is_rest_day
+        ? null
+        : buildPreviewTraining(day.training_id ?? null, availableTrainings, sourceDayMap.get(day.original_date)),
+      diet: day.is_rest_day
+        ? null
+        : buildPreviewDiet(day.diet_id ?? null, availableDiets, sourceDayMap.get(day.original_date)),
+      is_rest_day: day.is_rest_day,
+    })),
   }
 
-  const dialogTitle = isEditingExistingDay
-    ? 'Editar asignacion'
-    : selectedDays.length > 1
-      ? 'Asignacion masiva'
-      : 'Nueva asignacion'
-
-  const dialogDescription = isEditingExistingDay
-    ? 'Ajusta el contenido del dia seleccionado. Tambien puedes moverlo a otra fecha.'
-    : 'Selecciona entrenamiento, dieta o descanso para los dias marcados.'
+  const dialogTitle = sortedSelectedDays.length > 1 ? 'Editar selección' : 'Editar día'
+  const dialogDescription = sortedSelectedDays.length > 1
+    ? 'Configura el contenido de cada fecha desde el mismo modal. Cada fila se guarda con su propia combinación.'
+    : 'Ajusta la planificación del día seleccionado y cambia descanso, entreno o dieta sin salir del modal.'
 
   async function handleSave(values: AssignmentEditorFormValues) {
     await onSubmit({
       client_id: clientId,
-      dates: selectedDates,
-      date: values.date || undefined,
-      training_id: values.training_id ?? null,
-      diet_id: values.diet_id ?? null,
-      is_rest_day: values.is_rest_day,
+      days: values.days.map((day) => ({
+        assignment_id: day.assignment_id ?? null,
+        original_date: day.original_date,
+        date: day.date,
+        training_id: day.training_id ?? null,
+        diet_id: day.diet_id ?? null,
+        is_rest_day: day.is_rest_day,
+      })),
     })
 
     setPreviewOpen(false)
@@ -208,7 +203,7 @@ export function AssignmentEditorDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-5xl">
           <DialogHeader>
             <DialogTitle>{dialogTitle}</DialogTitle>
             <DialogDescription>{dialogDescription}</DialogDescription>
@@ -223,14 +218,14 @@ export function AssignmentEditorDialog({
             >
               <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
                 <p className="text-sm font-medium text-foreground">
-                  {selectedDays.length > 1
-                    ? `${selectedDays.length} dias seleccionados`
-                    : '1 dia seleccionado'}
+                  {sortedSelectedDays.length > 1
+                    ? `${sortedSelectedDays.length} días seleccionados`
+                    : '1 día seleccionado'}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {selectedDates.map((date) => (
-                    <span key={date} className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs text-muted-foreground">
-                      {date}
+                  {sortedSelectedDays.map((day) => (
+                    <span key={day.date} className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs text-muted-foreground">
+                      {day.date}
                     </span>
                   ))}
                 </div>
@@ -244,14 +239,12 @@ export function AssignmentEditorDialog({
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-foreground">
-                        {isRestOnlyMode
-                          ? 'Modo descanso temporal'
-                          : 'Catalogos parcialmente disponibles'}
+                         {isRestOnlyMode ? 'Modo descanso temporal' : 'Catálogos parcialmente disponibles'}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {isRestOnlyMode
-                          ? 'No hay entrenamientos ni dietas disponibles ahora mismo. Puedes marcar descanso mientras reintentas los catalogos.'
-                          : 'Solo podras usar los catalogos ya cargados. Los selectores no disponibles quedan bloqueados hasta recuperar sus datos.'}
+                          ? 'No hay entrenamientos ni dietas disponibles ahora mismo. Puedes marcar descanso mientras reintentas los catálogos.'
+                          : 'Solo podrás usar los catálogos ya cargados. Los selectores no disponibles quedan bloqueados hasta recuperar sus datos.'}
                       </p>
                     </div>
                   </div>
@@ -286,146 +279,176 @@ export function AssignmentEditorDialog({
                 </div>
               )}
 
-              {isEditingExistingDay && (
-                <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fecha</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value ?? ''} type="date" />
-                      </FormControl>
-                      <FormDescription>Mueve la asignacion a otro dia si lo necesitas.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+              <div className="space-y-4">
+                {fields.map((field, index) => {
+                  const sourceDay = sourceDayMap.get(field.original_date)
+                  const isRestDay = watchedDays[index]?.is_rest_day ?? false
 
-              <FormField
-                control={form.control}
-                name="is_rest_day"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Modo de asignacion</FormLabel>
-                    <FormControl>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <Button
-                          type="button"
-                          variant={field.value ? 'outline' : 'default'}
-                          disabled={isRestOnlyMode}
-                          onClick={() => field.onChange(false)}
-                        >
-                          Entrenamiento y/o dieta
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={field.value ? 'default' : 'outline'}
-                          onClick={() => {
-                            field.onChange(true)
-                            form.setValue('training_id', null, { shouldValidate: true })
-                            form.setValue('diet_id', null, { shouldValidate: true })
-                          }}
-                        >
-                          Dia de descanso
-                        </Button>
+                  return (
+                    <div key={field.id} className="space-y-4 rounded-2xl border border-border/70 bg-background/60 p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Día {index + 1}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            Configura el contenido visible para esta fecha.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="outline" className="border-border/70 bg-background text-foreground">
+                            {field.original_date}
+                          </Badge>
+                          {field.assignment_id && (
+                            <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+                              Ya existía
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                    </FormControl>
-                    <FormDescription>El modo descanso limpiara entrenamiento y dieta para los dias afectados.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              <div className="grid gap-4 lg:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="training_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Entrenamiento</FormLabel>
-                      {canUseTrainingCatalog ? (
-                        <Select
-                          disabled={isRestDay}
-                          value={field.value ?? CLEAR_SELECTION_VALUE}
-                          onValueChange={(value) => field.onChange(value === CLEAR_SELECTION_VALUE ? null : value)}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona un entrenamiento" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value={CLEAR_SELECTION_VALUE}>Sin entrenamiento</SelectItem>
-                            {availableTrainings.map((training) => (
-                              <SelectItem key={training.id} value={training.id}>
-                                {training.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      {canEditSingleDate ? (
+                        <FormField
+                          control={form.control}
+                          name={`days.${index}.date`}
+                          render={({ field: dateField }) => (
+                            <FormItem>
+                              <FormLabel>Fecha</FormLabel>
+                              <FormControl>
+                                <Input {...dateField} type="date" />
+                              </FormControl>
+                              <FormDescription>Mueve la asignación si necesitas cambiarla a otro día.</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       ) : (
-                        <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm">
-                          <p className="font-medium text-foreground">
-                            {primaryDay?.training ? `Entreno actual: ${primaryDay.training.name}` : 'Catalogo no disponible'}
-                          </p>
-                          <p className="mt-1 text-muted-foreground">
-                            {primaryDay?.training
-                              ? 'Podras mantener el entreno actual, pero no elegir otro hasta recuperar el catalogo.'
-                              : 'Ahora mismo no puedes seleccionar un entrenamiento nuevo.'}
-                          </p>
+                        <div className="rounded-xl border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+                          Fecha planificada: <span className="font-medium text-foreground">{field.date}</span>
                         </div>
                       )}
-                      <FormDescription>Opcional si quieres asignar solo dieta o descanso.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
-                <FormField
-                  control={form.control}
-                  name="diet_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dieta</FormLabel>
-                      {canUseDietCatalog ? (
-                        <Select
-                          disabled={isRestDay}
-                          value={field.value ?? CLEAR_SELECTION_VALUE}
-                          onValueChange={(value) => field.onChange(value === CLEAR_SELECTION_VALUE ? null : value)}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona una dieta" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value={CLEAR_SELECTION_VALUE}>Sin dieta</SelectItem>
-                            {availableDiets.map((diet) => (
-                              <SelectItem key={diet.id} value={diet.id}>
-                                {diet.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm">
-                          <p className="font-medium text-foreground">
-                            {primaryDay?.diet ? `Dieta actual: ${primaryDay.diet.name}` : 'Catalogo no disponible'}
-                          </p>
-                          <p className="mt-1 text-muted-foreground">
-                            {primaryDay?.diet
-                              ? 'Podras mantener la dieta actual, pero no elegir otra hasta recuperar el catalogo.'
-                              : 'Ahora mismo no puedes seleccionar una dieta nueva.'}
-                          </p>
-                        </div>
-                      )}
-                      <FormDescription>Opcional si quieres asignar solo entrenamiento o descanso.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      <FormField
+                        control={form.control}
+                        name={`days.${index}.is_rest_day`}
+                        render={({ field: restField }) => (
+                          <FormItem>
+                            <FormLabel>Modo de asignación</FormLabel>
+                            <FormControl>
+                              <div className="grid gap-2 sm:grid-cols-2">
+                                <Button
+                                  type="button"
+                                  variant={restField.value ? 'outline' : 'default'}
+                                  onClick={() => restField.onChange(false)}
+                                >
+                                  Entrenamiento y/o dieta
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant={restField.value ? 'default' : 'outline'}
+                                  onClick={() => restField.onChange(true)}
+                                >
+                                  Día de descanso
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormDescription>El descanso se aplica solo a esta fila y no cambia nada hasta que confirmes.</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid gap-4 lg:grid-cols-2">
+                        <FormField
+                          control={form.control}
+                          name={`days.${index}.training_id`}
+                          render={({ field: trainingField }) => (
+                            <FormItem>
+                              <FormLabel>Entrenamiento</FormLabel>
+                              {canUseTrainingCatalog ? (
+                                <Select
+                                  disabled={isRestDay}
+                                  value={trainingField.value ?? CLEAR_SELECTION_VALUE}
+                                  onValueChange={(value) => trainingField.onChange(value === CLEAR_SELECTION_VALUE ? null : value)}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecciona un entrenamiento" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value={CLEAR_SELECTION_VALUE}>Sin entrenamiento</SelectItem>
+                                    {availableTrainings.map((training) => (
+                                      <SelectItem key={training.id} value={training.id}>
+                                        {training.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm">
+                                  <p className="font-medium text-foreground">
+                                    {sourceDay?.training ? `Entreno actual: ${sourceDay.training.name}` : 'Catálogo no disponible'}
+                                  </p>
+                                  <p className="mt-1 text-muted-foreground">
+                                    {sourceDay?.training
+                                      ? 'Podrás mantener el entreno actual, pero no elegir otro hasta recuperar el catálogo.'
+                                      : 'Ahora mismo no puedes seleccionar un entrenamiento nuevo.'}
+                                  </p>
+                                </div>
+                              )}
+                              <FormDescription>Opcional si quieres asignar solo dieta o descanso.</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`days.${index}.diet_id`}
+                          render={({ field: dietField }) => (
+                            <FormItem>
+                              <FormLabel>Dieta</FormLabel>
+                              {canUseDietCatalog ? (
+                                <Select
+                                  disabled={isRestDay}
+                                  value={dietField.value ?? CLEAR_SELECTION_VALUE}
+                                  onValueChange={(value) => dietField.onChange(value === CLEAR_SELECTION_VALUE ? null : value)}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecciona una dieta" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value={CLEAR_SELECTION_VALUE}>Sin dieta</SelectItem>
+                                    {availableDiets.map((diet) => (
+                                      <SelectItem key={diet.id} value={diet.id}>
+                                        {diet.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm">
+                                  <p className="font-medium text-foreground">
+                                    {sourceDay?.diet ? `Dieta actual: ${sourceDay.diet.name}` : 'Catálogo no disponible'}
+                                  </p>
+                                  <p className="mt-1 text-muted-foreground">
+                                    {sourceDay?.diet
+                                      ? 'Podrás mantener la dieta actual, pero no elegir otra hasta recuperar el catálogo.'
+                                      : 'Ahora mismo no puedes seleccionar una dieta nueva.'}
+                                  </p>
+                                </div>
+                              )}
+                              <FormDescription>Opcional si quieres asignar solo entrenamiento o descanso.</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
 
               <DialogFooter>
@@ -448,7 +471,7 @@ export function AssignmentEditorDialog({
                   Vista previa
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isEditingExistingDay ? 'Guardar cambios' : 'Aplicar asignacion'}
+                  Guardar planificación
                 </Button>
               </DialogFooter>
             </form>
@@ -459,7 +482,7 @@ export function AssignmentEditorDialog({
       <AssignmentPreviewDialog
         open={previewOpen}
         preview={preview}
-        mode={isEditingExistingDay ? 'edit' : 'create'}
+        mode={sortedSelectedDays.some((day) => day.id) ? 'edit' : 'create'}
         isSubmitting={isSubmitting}
         onOpenChange={setPreviewOpen}
         onConfirm={form.handleSubmit(async (values) => {

@@ -39,12 +39,12 @@ export function AssignmentsCatalogErrorState({
             </div>
             <div className="space-y-1">
               <p className="text-lg font-semibold text-foreground">
-                {hasLoading && !hasErrors ? 'Cargando catalogos de planificacion' : 'Catalogos incompletos'}
+                {hasLoading && !hasErrors ? 'Cargando catálogos de planificación' : 'Catálogos incompletos'}
               </p>
               <p className="text-sm text-muted-foreground">
                 {onlyRestMode
-                  ? 'Ahora mismo solo puedes marcar descanso o limpiar dias hasta recuperar entrenamientos y dietas.'
-                  : 'Puedes seguir planificando con los catalogos disponibles mientras reintentas los que faltan.'}
+                  ? 'Ahora mismo solo puedes marcar descanso o limpiar días hasta recuperar entrenamientos y dietas.'
+                  : 'Puedes seguir planificando con los catálogos disponibles mientras reintentas los que faltan.'}
               </p>
             </div>
           </div>

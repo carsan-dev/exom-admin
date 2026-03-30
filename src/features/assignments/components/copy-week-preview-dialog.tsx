@@ -51,7 +51,7 @@ export function CopyWeekPreviewDialog({
         <DialogHeader>
           <DialogTitle>Vista previa de copia semanal</DialogTitle>
           <DialogDescription>
-            Revisa como quedara la semana destino antes de sobrescribir sus dias.
+            Revisa cómo quedará la semana destino antes de sobrescribir sus días.
           </DialogDescription>
         </DialogHeader>
 
@@ -68,16 +68,16 @@ export function CopyWeekPreviewDialog({
 
         <div className="flex flex-wrap gap-2">
           <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-status-info">
-            {preview.summary.training_days} dias con entreno
+            {preview.summary.training_days} días con entreno
           </Badge>
           <Badge variant="outline" className="border-status-success/30 bg-status-success/10 text-status-success">
-            {preview.summary.diet_days} dias con dieta
+            {preview.summary.diet_days} días con dieta
           </Badge>
           <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
             {preview.summary.rest_days} descansos
           </Badge>
           <Badge variant="outline" className="border-status-error/30 bg-status-error/10 text-status-error">
-            {preview.summary.cleared_days} dias se limpiaran
+            {preview.summary.cleared_days} días se limpiarán
           </Badge>
         </div>
 
@@ -135,13 +135,13 @@ export function CopyWeekPreviewDialog({
 
                 {day.is_rest_day && (
                   <div className="rounded-xl border border-brand-primary/20 bg-brand-soft/10 p-3">
-                    <p className="font-medium text-foreground">Dia de descanso</p>
+                    <p className="font-medium text-foreground">Día de descanso</p>
                   </div>
                 )}
 
                 {day.will_clear_day && (
                   <div className="rounded-xl border border-status-error/20 bg-status-error/5 p-3">
-                    <p className="font-medium text-foreground">El dia destino quedara sin planificacion</p>
+                    <p className="font-medium text-foreground">El día destino quedará sin planificación</p>
                   </div>
                 )}
               </div>

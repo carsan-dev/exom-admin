@@ -66,7 +66,7 @@ export function CopyWeekDialog({
         <DialogHeader>
           <DialogTitle>Copiar semana</DialogTitle>
           <DialogDescription>
-            Configura la semana destino y revisa la vista previa antes de sobrescribir su planificacion. Usa lunes como fecha de referencia.
+            Configura la semana destino y revisa la vista previa antes de sobrescribir su planificación. Usa lunes como fecha de referencia.
           </DialogDescription>
         </DialogHeader>
 
@@ -101,7 +101,7 @@ export function CopyWeekDialog({
                   <FormControl>
                     <Input {...field} type="date" />
                   </FormControl>
-                  <FormDescription>Selecciona el lunes de la semana donde quieres copiar la planificacion.</FormDescription>
+                  <FormDescription>Selecciona el lunes de la semana donde quieres copiar la planificación.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

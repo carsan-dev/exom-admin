@@ -8,6 +8,8 @@ import { toClientOption } from './types'
 import type {
   AssignmentDay,
   AssignmentEditorValues,
+  AssignmentMonthResponse,
+  AssignmentUpdateValues,
   AssignmentWeekResponse,
   CatalogAvailability,
   CatalogKey,
@@ -24,7 +26,7 @@ interface MutationMessage {
 
 interface UpdateAssignmentPayload {
   assignmentId: string
-  values: AssignmentEditorValues
+  values: AssignmentUpdateValues
 }
 
 interface CatalogLoadStateInput {
@@ -41,9 +43,25 @@ type QueryParams = Record<string, string | number | boolean | undefined>
 const assignmentsQueryKeys = {
   weeks: ['assignments', 'week'] as const,
   week: (clientId?: string, weekStart?: string) => ['assignments', 'week', clientId, weekStart] as const,
+  months: ['assignments', 'month'] as const,
+  month: (clientId?: string, year?: number, month?: number) => ['assignments', 'month', clientId, year, month] as const,
   clients: ['assignments', 'clients'] as const,
   trainings: ['assignments', 'trainings'] as const,
   diets: ['assignments', 'diets'] as const,
+}
+
+function normalizeOptionalId(value: string | null | undefined) {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const normalizedValue = value.trim()
+
+  if (!normalizedValue || normalizedValue === '__none__') {
+    return null
+  }
+
+  return normalizedValue
 }
 
 function normalizeClientOptions<T extends Pick<Client, 'id' | 'email' | 'profile'> | Pick<AdminUserListItem, 'id' | 'email' | 'profile'>>(
@@ -62,21 +80,23 @@ function mergeClientOptions(...groups: ClientOption[][]) {
   return Array.from(clientsById.values())
 }
 
-function normalizeAssignmentPayload(values: AssignmentEditorValues) {
+function normalizeBatchPayload(values: AssignmentEditorValues) {
   return {
     client_id: values.client_id,
-    dates: Array.from(new Set(values.dates)).sort(),
-    training_id: values.is_rest_day ? null : (values.training_id ?? null),
-    diet_id: values.is_rest_day ? null : (values.diet_id ?? null),
-    is_rest_day: values.is_rest_day,
+    days: values.days.map((day) => ({
+      date: day.date,
+      training_id: day.is_rest_day ? null : normalizeOptionalId(day.training_id),
+      diet_id: day.is_rest_day ? null : normalizeOptionalId(day.diet_id),
+      is_rest_day: day.is_rest_day,
+    })),
   }
 }
 
-function normalizeUpdatePayload(values: AssignmentEditorValues) {
+function normalizeUpdatePayload(values: AssignmentUpdateValues) {
   return {
     date: values.date || undefined,
-    training_id: values.is_rest_day ? null : (values.training_id ?? null),
-    diet_id: values.is_rest_day ? null : (values.diet_id ?? null),
+    training_id: values.is_rest_day ? null : normalizeOptionalId(values.training_id),
+    diet_id: values.is_rest_day ? null : normalizeOptionalId(values.diet_id),
     is_rest_day: values.is_rest_day,
   }
 }
@@ -191,6 +211,29 @@ export function useAssignmentsWeek(clientId?: string, weekStart?: string) {
   })
 }
 
+export function useAssignmentsMonth(clientId?: string, year?: number, month?: number) {
+  return useQuery({
+    queryKey: assignmentsQueryKeys.month(clientId, year, month),
+    enabled: Boolean(clientId && year && month),
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      if (!clientId || !year || !month) {
+        throw new Error('Client id, year and month are required')
+      }
+
+      const response = await api.get<ApiEnvelope<AssignmentMonthResponse>>('/assignments/month', {
+        params: {
+          client_id: clientId,
+          year,
+          month,
+        },
+      })
+
+      return unwrapResponse(response)
+    },
+  })
+}
+
 export function useAssignmentClients(currentUserRole?: Role) {
   return useQuery({
     queryKey: [...assignmentsQueryKeys.clients, currentUserRole],
@@ -235,16 +278,19 @@ export function useAssignmentDietsCatalog() {
   })
 }
 
-export function useBulkAssign() {
+export function useBatchAssign() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (values: AssignmentEditorValues) => {
-      const response = await api.post<ApiEnvelope<AssignmentDay[]>>('/assignments/bulk', normalizeAssignmentPayload(values))
+      const response = await api.post<ApiEnvelope<AssignmentDay[]>>('/assignments/batch', normalizeBatchPayload(values))
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+      ])
     },
   })
 }
@@ -258,7 +304,10 @@ export function useCopyWeek() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+      ])
     },
   })
 }
@@ -272,7 +321,10 @@ export function useUpdateAssignment() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+      ])
     },
   })
 }
@@ -286,7 +338,10 @@ export function useDeleteAssignment() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+      ])
     },
   })
 }

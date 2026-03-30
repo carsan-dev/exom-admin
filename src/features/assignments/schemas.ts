@@ -15,17 +15,21 @@ function isMondayDate(value: string) {
   return date.getUTCDay() === 1
 }
 
-const nullableUuidSchema = z.string().uuid('Selecciona una opción válida').nullable().optional()
+const nullableSelectionSchema = z
+  .string()
+  .trim()
+  .min(1, 'Selecciona una opción válida')
+  .refine((value) => value !== '__none__', 'Selecciona una opción válida')
+  .nullable()
+  .optional()
 
-export const assignmentEditorSchema = z
+export const assignmentEditorDaySchema = z
   .object({
-    date: z
-      .string()
-      .nullable()
-      .optional()
-      .refine((value) => value == null || value === '' || isoDateRegex.test(value), 'Selecciona una fecha válida'),
-    training_id: nullableUuidSchema,
-    diet_id: nullableUuidSchema,
+    assignment_id: z.string().nullable().optional(),
+    original_date: z.string().regex(isoDateRegex, 'Fecha original inválida'),
+    date: z.string().regex(isoDateRegex, 'Selecciona una fecha válida'),
+    training_id: nullableSelectionSchema,
+    diet_id: nullableSelectionSchema,
     is_rest_day: z.boolean().default(false),
   })
   .superRefine((value, context) => {
@@ -37,6 +41,10 @@ export const assignmentEditorSchema = z
       })
     }
   })
+
+export const assignmentEditorSchema = z.object({
+  days: z.array(assignmentEditorDaySchema).min(1, 'Selecciona al menos un día'),
+})
 
 export const copyWeekSchema = z
   .object({

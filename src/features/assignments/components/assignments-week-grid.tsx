@@ -20,6 +20,7 @@ export function AssignmentsWeekGrid({
         <AssignmentDayCard
           key={day.date}
           day={day}
+          variant="week"
           isSelected={selectedDates.includes(day.date)}
           disabled={disabled}
           onSelect={onToggleDay}
