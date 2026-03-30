@@ -44,7 +44,7 @@ import {
   MUSCLE_GROUPS,
   type Exercise,
 } from '../types'
-import { ImageUploadField } from './image-upload-field'
+import { ImageUploadField } from '@/components/uploads/image-upload-field'
 import { VideoUploadField } from './video-upload-field'
 
 interface ExerciseFormDialogProps {

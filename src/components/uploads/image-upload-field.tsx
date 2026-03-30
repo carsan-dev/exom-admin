@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react'
-import { Image, X, Upload } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Image, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getApiErrorMessage, usePresignedUrl } from '../api'
+import { getApiErrorMessage, usePresignedUrl } from '@/features/uploads/api'
 
 interface ImageUploadFieldProps {
   value: string
@@ -9,6 +9,7 @@ interface ImageUploadFieldProps {
   fileKeyPrefix: string
   label?: string
   disabled?: boolean
+  onUploadingChange?: (isUploading: boolean) => void
 }
 
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -24,11 +25,29 @@ export function ImageUploadField({
   fileKeyPrefix,
   label = 'Imagen',
   disabled = false,
+  onUploadingChange,
 }: ImageUploadFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const uploadingChangeRef = useRef(onUploadingChange)
   const [progress, setProgress] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const presignedUrl = usePresignedUrl()
+
+  const isUploading = progress !== null || presignedUrl.isPending
+
+  useEffect(() => {
+    uploadingChangeRef.current = onUploadingChange
+  }, [onUploadingChange])
+
+  useEffect(() => {
+    uploadingChangeRef.current?.(isUploading)
+  }, [isUploading])
+
+  useEffect(() => {
+    return () => {
+      uploadingChangeRef.current?.(false)
+    }
+  }, [])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -96,8 +115,6 @@ export function ImageUploadField({
     setProgress(null)
   }
 
-  const isUploading = progress !== null
-
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium leading-none">{label}</p>
@@ -107,7 +124,7 @@ export function ImageUploadField({
           <div className="relative min-w-0 overflow-hidden rounded-lg border border-border/60 bg-muted">
             <img
               src={value}
-              alt="Thumbnail"
+              alt={label}
               className="aspect-video max-h-56 w-full object-cover"
             />
           </div>
@@ -130,12 +147,12 @@ export function ImageUploadField({
         <div className="space-y-2 rounded-lg border border-border/60 bg-muted/50 p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Image className="h-4 w-4 animate-pulse text-brand-primary" />
-            <span>Subiendo imagen... {progress}%</span>
+            <span>Subiendo imagen... {progress ?? 0}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-border">
             <div
               className="h-full bg-brand-primary transition-all duration-200"
-              style={{ width: `${progress}%` }}
+              style={{ width: `${progress ?? 0}%` }}
             />
           </div>
         </div>
@@ -143,12 +160,12 @@ export function ImageUploadField({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={disabled || presignedUrl.isPending}
+          disabled={disabled}
           className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border/70 bg-muted/30 px-4 py-5 text-center transition-colors hover:border-brand-primary/50 hover:bg-brand-soft/5 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Upload className="h-6 w-6 text-muted-foreground" />
           <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">Seleccionar thumbnail</p>
+            <p className="text-sm font-medium text-foreground">Seleccionar imagen</p>
             <p className="text-xs text-muted-foreground">JPG, PNG o WebP · Máx. 5 MB</p>
           </div>
         </button>

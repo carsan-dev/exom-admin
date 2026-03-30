@@ -3,13 +3,9 @@ import { api } from '@/lib/api'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { ExerciseFormValues } from './schemas'
 import type { Exercise, PaginatedResponse } from './types'
+export { usePresignedUrl } from '../uploads/api'
 
 export { getApiErrorMessage }
-
-interface PresignedUrlResponse {
-  upload_url: string
-  file_url: string
-}
 
 const exercisesQueryKeys = {
   all: ['exercises'] as const,
@@ -98,15 +94,6 @@ export function useDeleteExercise() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: exercisesQueryKeys.all })
-    },
-  })
-}
-
-export function usePresignedUrl() {
-  return useMutation({
-    mutationFn: async (payload: { file_key: string; content_type: string }) => {
-      const response = await api.post<ApiEnvelope<PresignedUrlResponse>>('/uploads/presigned', payload)
-      return unwrapResponse(response)
     },
   })
 }
