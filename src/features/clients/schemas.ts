@@ -14,5 +14,10 @@ export const updateRoleSchema = z.object({
   role: z.enum(ROLE_OPTIONS),
 })
 
+export const updateClientAssignmentsSchema = z.object({
+  admin_ids: z.array(z.string().uuid('Selecciona administradores validos')).min(1, 'Selecciona al menos un admin'),
+})
+
 export type CreateClientFormValues = z.infer<typeof createClientSchema>
 export type UpdateRoleFormValues = z.infer<typeof updateRoleSchema>
+export type UpdateClientAssignmentsFormValues = z.infer<typeof updateClientAssignmentsSchema>

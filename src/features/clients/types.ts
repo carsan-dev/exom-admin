@@ -53,6 +53,28 @@ export interface AdminUserListItem {
   profile: Pick<ClientProfile, 'first_name' | 'last_name' | 'avatar_url'> | null
 }
 
+export interface ClientAssignmentAdmin {
+  id: string
+  email: string
+  profile: Pick<ClientProfile, 'first_name' | 'last_name' | 'avatar_url'> | null
+  assigned_at: string
+}
+
+export interface ClientAssignmentsResponse {
+  client_id: string
+  active_admins: ClientAssignmentAdmin[]
+}
+
+export interface UpdateClientAssignmentsValues {
+  admin_ids: string[]
+}
+
+export interface ClientAssignmentDiff {
+  added: AdminUserListItem[]
+  removed: ClientAssignmentAdmin[]
+  unchanged: ClientAssignmentAdmin[]
+}
+
 export interface BodyMetric {
   id: string
   date: string
@@ -116,4 +138,35 @@ export function getUserDisplayName(user: UserWithName) {
   const fullName = [firstName, lastName].filter(Boolean).join(' ')
 
   return fullName || user.email
+}
+
+export function getClientAssignmentDiff(
+  activeAdmins: ClientAssignmentAdmin[],
+  availableAdmins: AdminUserListItem[],
+  nextAdminIds: string[],
+): ClientAssignmentDiff {
+  const activeAdminIds = new Set(activeAdmins.map((admin) => admin.id))
+  const nextAdminIdSet = new Set(nextAdminIds)
+  const adminsById = new Map(availableAdmins.map((admin) => [admin.id, admin]))
+
+  return {
+    added: nextAdminIds
+      .filter((adminId) => !activeAdminIds.has(adminId))
+      .map((adminId) => adminsById.get(adminId))
+      .filter((admin): admin is AdminUserListItem => Boolean(admin)),
+    removed: activeAdmins.filter((admin) => !nextAdminIdSet.has(admin.id)),
+    unchanged: activeAdmins.filter((admin) => nextAdminIdSet.has(admin.id)),
+  }
+}
+
+export function hasClientAssignmentChanges(
+  activeAdmins: ClientAssignmentAdmin[],
+  nextAdminIds: string[],
+) {
+  if (activeAdmins.length !== nextAdminIds.length) {
+    return true
+  }
+
+  const activeAdminIds = new Set(activeAdmins.map((admin) => admin.id))
+  return nextAdminIds.some((adminId) => !activeAdminIds.has(adminId))
 }

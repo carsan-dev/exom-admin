@@ -8,6 +8,7 @@ import { getApiErrorMessage, useClients } from '../api'
 import { ChangeRoleDialog } from '../components/change-role-dialog'
 import { ClientsTable } from '../components/clients-table'
 import { CreateClientDialog } from '../components/create-client-dialog'
+import { ManageClientAssignmentsDialog } from '../components/manage-client-assignments-dialog'
 import { UnlockDialog } from '../components/unlock-dialog'
 import type { Client } from '../types'
 
@@ -43,6 +44,7 @@ export function ClientsPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false)
   const [changeRoleDialogOpen, setChangeRoleDialogOpen] = useState(false)
+  const [manageAssignmentsDialogOpen, setManageAssignmentsDialogOpen] = useState(false)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
 
   const clientsQuery = useClients(page, PAGE_SIZE)
@@ -50,22 +52,22 @@ export function ClientsPage() {
   const total = clientsQuery.data?.total ?? 0
   const totalPages = clientsQuery.data?.totalPages ?? 1
   const pageDescription = isSuperAdmin
-    ? 'Consulta la cartera asignada en esta vista, revisa perfiles completos y gestiona desbloqueos o cambios de rol sin salir del panel.'
+    ? 'Consulta todos los clientes, revisa perfiles completos y gestiona reasignaciones, desbloqueos o cambios de rol sin salir del panel.'
     : 'Consulta clientes asignados, revisa su perfil completo y gestiona desbloqueos sin salir del panel.'
   const pageCountLabel =
     total > 0
       ? isSuperAdmin
-        ? `${total} clientes asignados en esta vista`
+        ? `${total} clientes registrados`
         : `${total} clientes asignados a tu cuenta`
       : isSuperAdmin
-        ? 'Todavía no hay clientes asignados en esta vista'
+        ? 'Todavía no hay clientes registrados'
         : 'Todavía no hay clientes asignados a tu cuenta'
-  const emptyTitle = isSuperAdmin ? 'Todavía no hay clientes asignados en esta vista' : 'Aún no tienes clientes asignados'
+  const emptyTitle = isSuperAdmin ? 'Todavía no hay clientes registrados' : 'Aún no tienes clientes asignados'
   const emptyDescription = isSuperAdmin
-    ? 'Esta vista solo muestra clientes asignados. Crea un cliente o espera nuevas asignaciones para empezar a gestionar perfiles, métricas y accesos.'
+    ? 'Crea el primer cliente para empezar a gestionar perfiles, métricas, accesos y reasignaciones desde el panel.'
     : 'Crea el primer cliente para empezar a gestionar perfiles, métricas y estados de acceso.'
   const tableDescription = isSuperAdmin
-    ? 'Vista paginada de clientes asignados con acciones avanzadas de desbloqueo y cambio de rol'
+    ? 'Vista paginada de todos los clientes con acciones avanzadas de reasignación, desbloqueo y cambio de rol'
     : 'Vista paginada de clientes asignados al admin actual'
 
   const handleUnlock = (client: Client) => {
@@ -76,6 +78,11 @@ export function ClientsPage() {
   const handleChangeRole = (client: Client) => {
     setSelectedClient(client)
     setChangeRoleDialogOpen(true)
+  }
+
+  const handleManageAssignments = (client: Client) => {
+    setSelectedClient(client)
+    setManageAssignmentsDialogOpen(true)
   }
 
   return (
@@ -143,6 +150,7 @@ export function ClientsPage() {
               currentUserRole={currentUserRole}
               onUnlock={handleUnlock}
               onChangeRole={handleChangeRole}
+              onManageAssignments={handleManageAssignments}
             />
 
             <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
@@ -175,6 +183,11 @@ export function ClientsPage() {
       />
       <UnlockDialog client={selectedClient} open={unlockDialogOpen} onOpenChange={setUnlockDialogOpen} />
       <ChangeRoleDialog user={selectedClient} open={changeRoleDialogOpen} onOpenChange={setChangeRoleDialogOpen} />
+      <ManageClientAssignmentsDialog
+        client={selectedClient}
+        open={manageAssignmentsDialogOpen}
+        onOpenChange={setManageAssignmentsDialogOpen}
+      />
     </div>
   )
 }

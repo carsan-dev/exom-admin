@@ -2,7 +2,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { type ApiEnvelope, getApiErrorMessage, getApiErrorStatus, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { CreateClientFormValues } from './schemas'
-import type { AdminUserListItem, Client, ClientDetail, PaginatedResponse, Role } from './types'
+import type {
+  AdminUserListItem,
+  Client,
+  ClientAssignmentsResponse,
+  ClientDetail,
+  PaginatedResponse,
+  Role,
+  UpdateClientAssignmentsValues,
+} from './types'
 
 export { getApiErrorMessage, getApiErrorStatus }
 
@@ -15,16 +23,24 @@ interface UpdateRolePayload {
   role: Role
 }
 
-const clientsQueryKeys = {
+export const clientsQueryKeys = {
   all: ['clients'] as const,
   list: (page: number, limit: number) => ['clients', page, limit] as const,
   detail: (id?: string) => ['clients', id] as const,
 }
 
+const clientAssignmentsQueryKeys = {
+  all: ['client-assignments'] as const,
+  detail: (clientId?: string) => ['client-assignments', clientId] as const,
+}
+
 const usersQueryKeys = {
   all: ['users'] as const,
   list: (role: Role | undefined, page: number, limit: number) => ['users', role, page, limit] as const,
+  admins: ['users', 'ADMIN', 'all'] as const,
 }
+
+const ALL_ADMINS_PAGE_SIZE = 100
 
 function normalizeCreateClientPayload(payload: CreateClientFormValues) {
   return {
@@ -67,9 +83,26 @@ export function useClientProfile(id?: string) {
   })
 }
 
-export function useAllUsers(role?: Role, page = 1, limit = 20) {
+export function useClientAssignments(clientId?: string, enabled = true) {
+  return useQuery({
+    queryKey: clientAssignmentsQueryKeys.detail(clientId),
+    enabled: enabled && Boolean(clientId),
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      if (!clientId) {
+        throw new Error('Client id is required')
+      }
+
+      const response = await api.get<ApiEnvelope<ClientAssignmentsResponse>>(`/admin/clients/${clientId}/assignments`)
+      return unwrapResponse(response)
+    },
+  })
+}
+
+export function useAllUsers(role?: Role, page = 1, limit = 20, enabled = true) {
   return useQuery({
     queryKey: usersQueryKeys.list(role, page, limit),
+    enabled,
     retry: shouldRetryQuery,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedResponse<AdminUserListItem>>>('/admin/users', {
@@ -77,6 +110,36 @@ export function useAllUsers(role?: Role, page = 1, limit = 20) {
       })
 
       return unwrapResponse(response)
+    },
+  })
+}
+
+export function useAllAdminsList(enabled = true) {
+  return useQuery({
+    queryKey: usersQueryKeys.admins,
+    enabled,
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      const admins: AdminUserListItem[] = []
+      let currentPage = 1
+      let totalPages = 1
+
+      while (currentPage <= totalPages) {
+        const response = await api.get<ApiEnvelope<PaginatedResponse<AdminUserListItem>>>('/admin/users', {
+          params: {
+            role: 'ADMIN',
+            page: currentPage,
+            limit: ALL_ADMINS_PAGE_SIZE,
+          },
+        })
+
+        const page = unwrapResponse(response)
+        admins.push(...page.data)
+        totalPages = Math.max(page.totalPages, 1)
+        currentPage += 1
+      }
+
+      return admins
     },
   })
 }
@@ -130,6 +193,28 @@ export function useUpdateRole() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
         queryClient.invalidateQueries({ queryKey: usersQueryKeys.all }),
+      ])
+    },
+  })
+}
+
+export function useUpdateClientAssignments() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ clientId, values }: { clientId: string; values: UpdateClientAssignmentsValues }) => {
+      const response = await api.put<ApiEnvelope<ClientAssignmentsResponse>>(
+        `/admin/clients/${clientId}/assignments`,
+        values,
+      )
+
+      return unwrapResponse(response)
+    },
+    onSuccess: async (_data, { clientId }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.detail(clientId) }),
+        queryClient.invalidateQueries({ queryKey: clientAssignmentsQueryKeys.all }),
       ])
     },
   })

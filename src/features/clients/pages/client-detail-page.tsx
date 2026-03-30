@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, AlertTriangle, CalendarDays, ShieldCheck, Unlock } from 'lucide-react'
+import { ArrowLeft, AlertTriangle, CalendarDays, ShieldCheck, Unlock, Users } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,6 +11,7 @@ import { getApiErrorMessage, getApiErrorStatus, useClientProfile } from '../api'
 import { ChangeRoleDialog } from '../components/change-role-dialog'
 import { ClientHeader } from '../components/client-header'
 import { ClientInfoTab } from '../components/client-info-tab'
+import { ManageClientAssignmentsDialog } from '../components/manage-client-assignments-dialog'
 import { ClientMetricsTab } from '../components/client-metrics-tab'
 import { ClientStreakCard } from '../components/client-streak-card'
 import { UnlockDialog } from '../components/unlock-dialog'
@@ -76,6 +77,7 @@ export function ClientDetailPage() {
   const currentUserRole = useAuth((state) => state.user?.role)
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false)
   const [changeRoleDialogOpen, setChangeRoleDialogOpen] = useState(false)
+  const [manageAssignmentsDialogOpen, setManageAssignmentsDialogOpen] = useState(false)
 
   const clientProfile = useClientProfile(id)
   const errorStatus = getApiErrorStatus(clientProfile.error)
@@ -141,6 +143,12 @@ export function ClientDetailPage() {
             </Button>
           )}
           {currentUserRole === 'SUPER_ADMIN' && (
+            <Button variant="outline" onClick={() => setManageAssignmentsDialogOpen(true)}>
+              <Users className="h-4 w-4" />
+              Gestionar admins
+            </Button>
+          )}
+          {currentUserRole === 'SUPER_ADMIN' && (
             <Button variant="outline" onClick={() => setChangeRoleDialogOpen(true)}>
               <ShieldCheck className="h-4 w-4" />
               Cambiar rol
@@ -177,6 +185,11 @@ export function ClientDetailPage() {
 
       <UnlockDialog client={client} open={unlockDialogOpen} onOpenChange={setUnlockDialogOpen} />
       <ChangeRoleDialog user={client} open={changeRoleDialogOpen} onOpenChange={setChangeRoleDialogOpen} />
+      <ManageClientAssignmentsDialog
+        client={client}
+        open={manageAssignmentsDialogOpen}
+        onOpenChange={setManageAssignmentsDialogOpen}
+      />
     </div>
   )
 }

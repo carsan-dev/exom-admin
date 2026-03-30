@@ -1,4 +1,4 @@
-import { Eye, ShieldCheck, Unlock } from 'lucide-react'
+import { Eye, ShieldCheck, Unlock, Users } from 'lucide-react'
 import { Link } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +19,7 @@ interface ClientsTableProps {
   currentUserRole: Role
   onUnlock: (client: Client) => void
   onChangeRole: (client: Client) => void
+  onManageAssignments: (client: Client) => void
 }
 
 const dateFormatter = new Intl.DateTimeFormat('es-ES', {
@@ -55,7 +56,13 @@ function getStatusLabel(client: Client) {
   return client.is_active ? 'Activa' : 'Inactiva'
 }
 
-export function ClientsTable({ clients, currentUserRole, onUnlock, onChangeRole }: ClientsTableProps) {
+export function ClientsTable({
+  clients,
+  currentUserRole,
+  onUnlock,
+  onChangeRole,
+  onManageAssignments,
+}: ClientsTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -111,6 +118,12 @@ export function ClientsTable({ clients, currentUserRole, onUnlock, onChangeRole 
                   <Button variant="outline" size="sm" onClick={() => onUnlock(client)}>
                     <Unlock className="h-4 w-4" />
                     Desbloquear
+                  </Button>
+                )}
+                {currentUserRole === 'SUPER_ADMIN' && (
+                  <Button variant="outline" size="sm" onClick={() => onManageAssignments(client)}>
+                    <Users className="h-4 w-4" />
+                    Gestionar admins
                   </Button>
                 )}
                 {currentUserRole === 'SUPER_ADMIN' && (
