@@ -28,7 +28,6 @@ function getDayStatus(day: CalendarDay): { color: string; label: string } {
 
   if (day.is_rest_day) return { color: 'bg-muted/60 text-muted-foreground', label: 'Día de descanso' }
 
-  const hasBoth = day.has_training && day.has_diet
   const completedBoth = day.training_completed && day.diet_completed
   const completedSome = day.training_completed || day.diet_completed
 

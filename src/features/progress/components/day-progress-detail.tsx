@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Dumbbell, Salad, StickyNote } from 'lucide-react'
+import { CheckCircle2, Dumbbell, Salad, StickyNote } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
