@@ -15,6 +15,7 @@ import { AssignmentsPage } from '@/features/assignments/pages/assignments-page'
 import { ProgressPage } from '@/features/progress/pages/progress-page'
 import { FeedbackPage } from '@/features/feedback/pages/feedback-page'
 import { RecapsPage } from '@/features/recaps/pages/recaps-page'
+import { RecapDetailPage } from '@/features/recaps/pages/recap-detail-page'
 import { ChallengesPage } from '@/features/challenges/pages/challenges-page'
 import { AchievementsPage } from '@/features/achievements/pages/achievements-page'
 import { NotificationsPage } from '@/features/notifications/pages/notifications-page'
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
           { path: 'progress', element: <ProgressPage /> },
           { path: 'feedback', element: <FeedbackPage /> },
           { path: 'recaps', element: <RecapsPage /> },
+          { path: 'recaps/:id', element: <RecapDetailPage /> },
           { path: 'challenges', element: <ChallengesPage /> },
           { path: 'achievements', element: <AchievementsPage /> },
           { path: 'notifications', element: <NotificationsPage /> },
