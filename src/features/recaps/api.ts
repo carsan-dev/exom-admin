@@ -69,9 +69,18 @@ export function useReviewRecap() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, admin_comments }: { id: string; admin_comments?: string }) => {
+    mutationFn: async ({
+      id,
+      admin_comments,
+      client_feedback_text,
+    }: {
+      id: string
+      admin_comments?: string
+      client_feedback_text?: string
+    }) => {
       const response = await api.put<ApiEnvelope<RecapItem>>(`/recaps/${id}/review`, {
         ...(admin_comments !== undefined ? { admin_comments } : {}),
+        ...(client_feedback_text !== undefined ? { client_feedback_text } : {}),
       })
       return unwrapResponse(response)
     },

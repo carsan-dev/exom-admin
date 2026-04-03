@@ -41,6 +41,9 @@ export interface RecapItem {
   improvement_areas: string[]
   improvement_feedback_text: string | null
   admin_comments: string | null
+  client_feedback_text: string | null
+  client_feedback_sent_at: string | null
+  client_feedback_read_at: string | null
   status: RecapStatus
   reviewed_at: string | null
   archived_at: string | null

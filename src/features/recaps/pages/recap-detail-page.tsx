@@ -88,15 +88,18 @@ export function RecapDetailPage() {
   const recapQuery = useRecapDetail(id)
   const reviewMutation = useReviewRecap()
   const archiveMutation = useArchiveRecap()
-  const [comment, setComment] = useState('')
+  const [internalNote, setInternalNote] = useState('')
+  const [clientFeedback, setClientFeedback] = useState('')
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false)
 
   useEffect(() => {
-    setComment(recapQuery.data?.admin_comments ?? '')
-  }, [recapQuery.data?.admin_comments, recapQuery.data?.id])
+    setInternalNote(recapQuery.data?.admin_comments ?? '')
+    setClientFeedback(recapQuery.data?.client_feedback_text ?? '')
+  }, [recapQuery.data?.admin_comments, recapQuery.data?.client_feedback_text, recapQuery.data?.id])
 
   const recap = recapQuery.data
-  const existingComment = recap?.admin_comments ?? ''
+  const existingInternalNote = recap?.admin_comments ?? ''
+  const existingClientFeedback = recap?.client_feedback_text ?? ''
   const canReviewSubmittedRecap = Boolean(
     recap && recap.status === 'SUBMITTED' && !recap.archived_at,
   )
@@ -107,13 +110,15 @@ export function RecapDetailPage() {
     recap &&
       !reviewMutation.isPending &&
       (canReviewSubmittedRecap ||
-        (canEditReviewedComment && comment.trim() !== existingComment.trim())),
+        (canEditReviewedComment &&
+          (internalNote.trim() !== existingInternalNote.trim() ||
+            clientFeedback.trim() !== existingClientFeedback.trim()))),
   )
 
   const reviewButtonLabel = useMemo(() => {
     if (!recap) return 'Guardar revisión'
     if (recap.status === 'SUBMITTED') return 'Marcar como revisado'
-    if (recap.status === 'REVIEWED') return 'Guardar comentario'
+    if (recap.status === 'REVIEWED') return 'Guardar cambios'
     return 'Pendiente de envío'
   }, [recap])
 
@@ -158,7 +163,8 @@ export function RecapDetailPage() {
     reviewMutation.mutate(
       {
         id: recap.id,
-        admin_comments: comment.trim(),
+        admin_comments: internalNote.trim(),
+        client_feedback_text: clientFeedback.trim(),
       },
       {
         onSuccess: () => {
@@ -402,20 +408,54 @@ export function RecapDetailPage() {
 
       <RecapSectionCard
         title="Revisión del admin"
-        description="Guarda un comentario para el cliente o archiva el recap cuando ya esté procesado."
+        description="Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push."
       >
-        <div className="space-y-3">
-          <textarea
-            placeholder="Escribe una nota interna o un comentario para acompañar la revisión..."
-            value={comment}
-            onChange={(event) => setComment(event.target.value)}
-            rows={4}
-            disabled={Boolean(recap.archived_at) || recap.status === 'DRAFT' || reviewMutation.isPending}
-            className="flex w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-          />
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Comentario para el cliente
+            </label>
+            <textarea
+              placeholder="Escribe un comentario que verá el cliente en su recap..."
+              value={clientFeedback}
+              onChange={(event) => setClientFeedback(event.target.value)}
+              rows={4}
+              disabled={Boolean(recap.archived_at) || recap.status === 'DRAFT' || reviewMutation.isPending}
+              className="flex w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+            />
+            {recap.client_feedback_sent_at && (
+              <p className="text-xs text-muted-foreground">
+                Enviado al cliente: {formatDate(recap.client_feedback_sent_at)}
+                {recap.client_feedback_read_at
+                  ? ` · Leído: ${formatDate(recap.client_feedback_read_at)}`
+                  : ' · Pendiente de lectura'}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Este texto es visible para el cliente. Si lo cambias se enviará una notificación push.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Nota interna (solo visible para el equipo)
+            </label>
+            <textarea
+              placeholder="Notas internas que nunca se comparten con el cliente..."
+              value={internalNote}
+              onChange={(event) => setInternalNote(event.target.value)}
+              rows={3}
+              disabled={Boolean(recap.archived_at) || recap.status === 'DRAFT' || reviewMutation.isPending}
+              className="flex w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+            />
+            <p className="text-xs text-muted-foreground">
+              Esta nota nunca se comparte con el cliente y no genera notificaciones.
+            </p>
+          </div>
+
           {recap.archived_at ? (
             <p className="text-sm text-muted-foreground">
-              Este recap está archivado. El comentario queda en modo lectura.
+              Este recap está archivado. Los comentarios quedan en modo lectura.
             </p>
           ) : recap.status === 'DRAFT' ? (
             <p className="text-sm text-muted-foreground">
@@ -425,7 +465,7 @@ export function RecapDetailPage() {
             <p className="text-sm text-muted-foreground">
               {recap.status === 'SUBMITTED'
                 ? 'Al guardar marcarás este recap como revisado.'
-                : 'Puedes actualizar el comentario antes de archivarlo.'}
+                : 'Puedes actualizar los comentarios antes de archivarlo.'}
             </p>
           )}
         </div>
