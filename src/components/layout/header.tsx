@@ -1,4 +1,4 @@
-import { Menu, Sun, Moon, LogOut, User } from 'lucide-react'
+import { Menu, Sun, Moon, LogOut } from 'lucide-react'
 import { useTheme } from '@/hooks/use-theme'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
@@ -66,11 +66,6 @@ export function Header({ onMenuToggle }: HeaderProps) {
                 <span className="text-xs font-normal text-muted-foreground">{user?.email}</span>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Mi perfil
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-status-error focus:text-status-error"
