@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,6 +14,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -31,10 +32,15 @@ import { getApiErrorMessage, useCreateAchievement, useUpdateAchievement } from '
 import { achievementFormSchema } from '../schemas'
 import {
   buildAchievementFormDefaults,
+  getAchievementCriteriaHelp,
+  getAchievementGoalHelp,
   CRITERIA_TYPE_LABELS,
   CRITERIA_TYPE_OPTIONS,
+  getAchievementModeLabel,
   type AchievementFormValues,
   type AchievementListItem,
+  TRAINING_TYPE_LABELS,
+  TRAINING_TYPE_OPTIONS,
 } from '../types'
 
 interface AchievementFormDialogProps {
@@ -53,6 +59,8 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
     resolver: zodResolver(achievementFormSchema),
     defaultValues: buildAchievementFormDefaults(achievement ?? undefined),
   })
+  const criteriaType = useWatch({ control: form.control, name: 'criteria_type' }) ?? CRITERIA_TYPE_OPTIONS[0]
+  const ruleConfig = useWatch({ control: form.control, name: 'rule_config' })
 
   const isPending = createAchievement.isPending || updateAchievement.isPending
 
@@ -64,6 +72,12 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
 
     form.reset(buildAchievementFormDefaults())
   }, [achievement, form, open])
+
+  useEffect(() => {
+    if (criteriaType !== 'TRAINING_DAYS' && ruleConfig?.training_type) {
+      form.setValue('rule_config.training_type', undefined, { shouldDirty: true, shouldValidate: true })
+    }
+  }, [criteriaType, form, ruleConfig?.training_type])
 
   const handleSubmit = form.handleSubmit(async (values) => {
     try {
@@ -93,7 +107,7 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Editar logro' : 'Nuevo logro'}</DialogTitle>
           <DialogDescription>
-            Configura el nombre, descripción, criterio de desbloqueo y el valor objetivo del logro.
+            Define la regla del logro, su meta numérica y cuándo el desbloqueo depende de una otorgación manual.
           </DialogDescription>
         </DialogHeader>
 
@@ -152,7 +166,10 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
                 name="criteria_type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tipo de criterio</FormLabel>
+                    <FormLabel>Regla</FormLabel>
+                    <FormDescription>
+                      Define qué se mide para desbloquear el logro. `CUSTOM` queda reservado para otorgación manual y no reemplaza el objetivo principal del cliente.
+                    </FormDescription>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
@@ -177,14 +194,73 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
                 name="criteria_value"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Valor objetivo</FormLabel>
+                    <FormLabel>Meta</FormLabel>
+                    <FormDescription>
+                      {getAchievementGoalHelp(criteriaType)}
+                    </FormDescription>
                     <FormControl>
-                      <Input type="number" min="0" step="1" {...field} />
+                      <Input type="number" min="1" step="1" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
+
+            {criteriaType === 'TRAINING_DAYS' && (
+              <FormField
+                control={form.control}
+                name="rule_config.training_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de entrenamiento (opcional)</FormLabel>
+                    <FormDescription>
+                      Si lo dejas vacío, el logro contará cualquier entrenamiento completado.
+                    </FormDescription>
+                    <Select
+                      value={field.value ?? 'ANY'}
+                      onValueChange={(value) => field.onChange(value === 'ANY' ? undefined : value)}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Cualquier entrenamiento" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ANY">Cualquier entrenamiento</SelectItem>
+                        {TRAINING_TYPE_OPTIONS.map((trainingType) => (
+                          <SelectItem key={trainingType} value={trainingType}>
+                            {TRAINING_TYPE_LABELS[trainingType]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <div className="rounded-xl border border-border/70 bg-muted/20 p-4">
+              <p className="text-sm font-medium text-foreground">Vista previa de la regla</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Modo:</span> {getAchievementModeLabel(criteriaType)}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Qué se mide:</span> {getAchievementCriteriaHelp(criteriaType, ruleConfig)}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Meta:</span> {getAchievementGoalHelp(criteriaType)}
+              </p>
+              {criteriaType === 'CUSTOM' ? (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  `CUSTOM` no se autoevalúa. Este logro solo cambia con otorgación o revocación manual.
+                </p>
+              ) : (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Al guardar, el backend sincroniza históricamente este logro en todos los clientes afectados: otorga los desbloqueos faltantes y revoca los que ya no cumplen la regla.
+                </p>
+              )}
             </div>
 
             <DialogFooter>

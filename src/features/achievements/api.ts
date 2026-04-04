@@ -6,9 +6,12 @@ import type {
   AchievementDetailFilters,
   AchievementFilters,
   AchievementFormValues,
+  GrantedAchievementRecord,
   AchievementListItem,
   AchievementsResponse,
   GrantAchievementValues,
+  RecomputeAchievementsResult,
+  RecomputeAchievementsValues,
 } from './types'
 
 export { getApiErrorMessage }
@@ -32,6 +35,10 @@ interface RevokeAchievementPayload {
   user_id: string
 }
 
+interface RecomputeAchievementPayload {
+  values: RecomputeAchievementsValues
+}
+
 export const achievementsQueryKeys = {
   all: ['admin-achievements'] as const,
   list: (page: number, limit: number, search?: string, criteriaType?: string) =>
@@ -47,6 +54,10 @@ function normalizeAchievementPayload(values: AchievementFormValues) {
     icon_url: values.icon_url?.trim() || undefined,
     criteria_type: values.criteria_type,
     criteria_value: values.criteria_value,
+    rule_config:
+      values.criteria_type === 'TRAINING_DAYS' && values.rule_config.training_type
+        ? values.rule_config
+        : undefined,
   }
 }
 
@@ -138,7 +149,9 @@ export function useGrantAchievement() {
 
   return useMutation({
     mutationFn: async ({ id, values }: GrantAchievementPayload) => {
-      const response = await api.post<ApiEnvelope<MutationMessage>>(`/achievements/${id}/grant`, { user_id: values.client_ids[0] })
+      const response = await api.post<ApiEnvelope<GrantedAchievementRecord>>(`/achievements/${id}/grant`, {
+        user_id: values.client_ids[0],
+      })
       return unwrapResponse(response)
     },
     onSuccess: async (_data, variables) => {
@@ -163,6 +176,20 @@ export function useRevokeAchievement() {
         queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.all }),
         queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.detail(variables.id) }),
       ])
+    },
+  })
+}
+
+export function useRecomputeAchievements() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ values }: RecomputeAchievementPayload) => {
+      const response = await api.post<ApiEnvelope<RecomputeAchievementsResult>>('/achievements/recompute', values)
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.all })
     },
   })
 }

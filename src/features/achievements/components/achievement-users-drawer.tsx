@@ -11,12 +11,20 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getApiErrorMessage, useAchievementDetail, useRevokeAchievement } from '../api'
 import {
+  getApiErrorMessage,
+  useAchievementDetail,
+  useRecomputeAchievements,
+  useRevokeAchievement,
+} from '../api'
+import {
+  getAchievementModeLabel,
+  getAchievementRuleLabel,
   getAchievementUserDisplayName,
   getAchievementUserInitials,
-  CRITERIA_TYPE_LABELS,
+  isAutomaticAchievement,
   type AchievementListItem,
+  type RecomputeAchievementsResult,
 } from '../types'
 
 interface AchievementUsersDrawerProps {
@@ -33,16 +41,24 @@ function formatDate(value: string) {
   })
 }
 
+function getRecomputeToastMessage(result: RecomputeAchievementsResult) {
+  return `Recálculo completado: ${result.granted} otorgado${result.granted === 1 ? '' : 's'} y ${result.revoked} revocado${result.revoked === 1 ? '' : 's'}.`
+}
+
 export function AchievementUsersDrawer({ achievement, open, onOpenChange }: AchievementUsersDrawerProps) {
   const [page, setPage] = useState(1)
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([])
   const revokeAchievement = useRevokeAchievement()
+  const recomputeAchievements = useRecomputeAchievements()
 
   useEffect(() => {
     if (!open) {
       setPage(1)
+      setSelectedUserIds([])
       return
     }
     setPage(1)
+    setSelectedUserIds([])
   }, [achievement?.id, open])
 
   const detailQuery = useAchievementDetail(
@@ -54,6 +70,8 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
   const detail = detailQuery.data
   const users = detail?.users.data ?? []
   const totalPages = detail?.users.totalPages ?? 1
+  const selectedUserSet = new Set(selectedUserIds)
+  const canRecompute = achievement ? isAutomaticAchievement(achievement.criteria_type) : false
 
   const handleRevoke = async (userId: string) => {
     if (!achievement) return
@@ -63,6 +81,45 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
       toast.success('Logro revocado correctamente')
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'No se ha podido revocar el logro'))
+    }
+  }
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUserIds((current) =>
+      current.includes(userId) ? current.filter((id) => id !== userId) : [...current, userId],
+    )
+  }
+
+  const handleRecomputeVisible = async () => {
+    if (!achievement || !canRecompute) return
+
+    try {
+      const result = await recomputeAchievements.mutateAsync({
+        values: {
+          achievement_ids: [achievement.id],
+          apply_to_all_visible_clients: true,
+        },
+      })
+      toast.success(getRecomputeToastMessage(result))
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'No se ha podido recalcular el logro'))
+    }
+  }
+
+  const handleRecomputeSelected = async () => {
+    if (!achievement || !canRecompute || selectedUserIds.length === 0) return
+
+    try {
+      const result = await recomputeAchievements.mutateAsync({
+        values: {
+          achievement_ids: [achievement.id],
+          user_ids: selectedUserIds,
+        },
+      })
+      toast.success(getRecomputeToastMessage(result))
+      setSelectedUserIds([])
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'No se ha podido recalcular la selección'))
     }
   }
 
@@ -103,15 +160,53 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm font-medium text-muted-foreground">Criterio:</span>
                 <span className="text-sm text-foreground">
-                  {CRITERIA_TYPE_LABELS[achievement.criteria_type] ?? achievement.criteria_type}
+                  {getAchievementRuleLabel(achievement.criteria_type, achievement.rule_config)}
                 </span>
                 <span className="text-sm text-muted-foreground">·</span>
-                <span className="text-sm text-foreground">Valor: {achievement.criteria_value}</span>
+                <span className="text-sm text-foreground">Meta: {achievement.criteria_value}</span>
+                <span className="text-sm text-muted-foreground">·</span>
+                <span className="text-sm text-foreground">Modo: {getAchievementModeLabel(achievement.criteria_type)}</span>
                 {detailQuery.isRefetching && (
                   <span className="text-sm text-muted-foreground">Actualizando...</span>
                 )}
               </div>
               <p className="mt-3 text-sm text-muted-foreground">{achievement.description}</p>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void handleRecomputeVisible()}
+                  disabled={!canRecompute || recomputeAchievements.isPending}
+                >
+                  {recomputeAchievements.isPending ? 'Recalculando...' : 'Recalcular visibles'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void handleRecomputeSelected()}
+                  disabled={!canRecompute || recomputeAchievements.isPending || selectedUserIds.length === 0}
+                >
+                  Recalcular selección ({selectedUserIds.length})
+                </Button>
+              </div>
+
+              {canRecompute && (
+                <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+                  <p>
+                    <span className="font-medium text-foreground">Recalcular visibles:</span> revisa toda la cartera visible del admin actual y sincroniza otorgados y revocados.
+                  </p>
+                  <p>
+                    <span className="font-medium text-foreground">Recalcular selección:</span> solo usa los clientes listados y seleccionados en este drawer.
+                  </p>
+                </div>
+              )}
+
+              {!canRecompute && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  `CUSTOM` no se autoevalúa. Este logro solo se actualiza con otorgación o revocación manual.
+                </p>
+              )}
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-xl border border-border/60 bg-background p-4">
@@ -134,7 +229,10 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
             ) : (
               <div className="space-y-4">
                 {users.map((row) => (
-                  <div key={row.id} className="rounded-xl border border-border/70 bg-card p-5">
+                  <div
+                    key={row.id}
+                    className={`rounded-xl border p-5 ${selectedUserSet.has(row.user_id) ? 'border-brand-primary/30 bg-brand-soft/10' : 'border-border/70 bg-card'}`}
+                  >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex min-w-0 items-center gap-3">
                         <Avatar className="h-11 w-11 border border-border/60">
@@ -151,14 +249,26 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
                         </div>
                       </div>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => void handleRevoke(row.user_id)}
-                        disabled={revokeAchievement.isPending}
-                      >
-                        Revocar
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        {canRecompute && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleUserSelection(row.user_id)}
+                            disabled={recomputeAchievements.isPending}
+                          >
+                            {selectedUserSet.has(row.user_id) ? 'Quitar selección' : 'Seleccionar'}
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void handleRevoke(row.user_id)}
+                          disabled={revokeAchievement.isPending}
+                        >
+                          Revocar
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}

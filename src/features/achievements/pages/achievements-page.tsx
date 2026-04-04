@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router'
+import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -23,6 +24,7 @@ import {
   CRITERIA_TYPE_OPTIONS,
   type AchievementFilters,
   type AchievementListItem,
+  type CriteriaType,
 } from '../types'
 
 const PAGE_SIZE = 10
@@ -32,11 +34,13 @@ function getPage(value: string | null) {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : 1
 }
 
-function getCriteriaTypeFilter(value: string | null): string {
-  return CRITERIA_TYPE_OPTIONS.includes(value as (typeof CRITERIA_TYPE_OPTIONS)[number]) ? (value as string) : 'ALL'
+function getCriteriaTypeFilter(value: string | null): CriteriaType | 'ALL' {
+  return CRITERIA_TYPE_OPTIONS.includes(value as CriteriaType) ? (value as CriteriaType) : 'ALL'
 }
 
 export function AchievementsPage() {
+  const currentUserRole = useAuth((state) => state.user?.role ?? 'ADMIN')
+  const canDeleteAchievements = currentUserRole === 'SUPER_ADMIN'
   const [searchParams, setSearchParams] = useSearchParams()
   const [searchDraft, setSearchDraft] = useState(searchParams.get('search') ?? '')
   const [createOpen, setCreateOpen] = useState(false)
@@ -68,7 +72,7 @@ export function AchievementsPage() {
 
   const updateSearchParams = (updates: {
     search?: string
-    criteria_type?: string
+    criteria_type?: CriteriaType | 'ALL'
     page?: number
   }) => {
     const nextSearchParams = new URLSearchParams(searchParams)
@@ -113,16 +117,20 @@ export function AchievementsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-foreground">Gestión de logros</h1>
-          <p className="text-sm text-muted-foreground">
-            Crea logros para premiar a tus clientes, configura los criterios de desbloqueo y gestiona quién los tiene.
-          </p>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold text-foreground">Gestión de logros</h1>
+            <p className="text-sm text-muted-foreground">
+              Crea logros para premiar hitos medibles, define su meta de desbloqueo y mantén separada esta gestión del objetivo principal del cliente.
+            </p>
+          </div>
+
+          <Button onClick={() => setCreateOpen(true)}>Nuevo logro</Button>
         </div>
 
-        <Button onClick={() => setCreateOpen(true)}>Nuevo logro</Button>
-      </div>
+        <div className="rounded-xl border border-brand-primary/15 bg-brand-soft/10 p-4 text-sm text-muted-foreground">
+          Los <span className="font-medium text-foreground">logros</span> premian hitos desbloqueables. El <span className="font-medium text-foreground">objetivo principal</span> sigue viviéndose en retos (`MAIN_GOAL`) y no debe mezclarse con la meta de un logro.
+        </div>
 
       <AchievementsStatsCards
         summary={data?.summary}
@@ -155,7 +163,7 @@ export function AchievementsPage() {
                 <Label>Tipo de criterio</Label>
                 <Select
                   value={criteriaType}
-                  onValueChange={(value) => updateSearchParams({ criteria_type: value, page: 1 })}
+                  onValueChange={(value) => updateSearchParams({ criteria_type: value as CriteriaType | 'ALL', page: 1 })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -201,7 +209,8 @@ export function AchievementsPage() {
         onEdit={setEditingAchievement}
         onGrant={setGrantingAchievement}
         onViewUsers={setUsersAchievement}
-        onDelete={setDeletingAchievement}
+        onDelete={canDeleteAchievements ? setDeletingAchievement : (_achievement) => undefined}
+        canDelete={canDeleteAchievements}
       />
 
       <AchievementFormDialog open={createOpen} onOpenChange={setCreateOpen} />
@@ -228,14 +237,16 @@ export function AchievementsPage() {
           if (!open) setUsersAchievement(null)
         }}
       />
-      <DeleteAchievementDialog
-        achievement={deletingAchievement}
-        open={Boolean(deletingAchievement)}
-        onOpenChange={(open) => {
-          if (!open) setDeletingAchievement(null)
-        }}
-        onDeleted={() => setDeletingAchievement(null)}
-      />
+      {canDeleteAchievements && (
+        <DeleteAchievementDialog
+          achievement={deletingAchievement}
+          open={Boolean(deletingAchievement)}
+          onOpenChange={(open) => {
+            if (!open) setDeletingAchievement(null)
+          }}
+          onDeleted={() => setDeletingAchievement(null)}
+        />
+      )}
     </div>
   )
 }

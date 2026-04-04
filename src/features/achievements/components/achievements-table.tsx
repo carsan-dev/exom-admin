@@ -10,7 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { CRITERIA_TYPE_LABELS, type AchievementListItem } from '../types'
+import {
+  getAchievementModeLabel,
+  getAchievementRuleLabel,
+  isAutomaticAchievement,
+  type AchievementListItem,
+} from '../types'
 
 interface AchievementsTableProps {
   items: AchievementListItem[]
@@ -27,6 +32,7 @@ interface AchievementsTableProps {
   onViewUsers: (achievement: AchievementListItem) => void
   onGrant: (achievement: AchievementListItem) => void
   onDelete: (achievement: AchievementListItem) => void
+  canDelete: boolean
 }
 
 export function AchievementsTable({
@@ -44,6 +50,7 @@ export function AchievementsTable({
   onViewUsers,
   onGrant,
   onDelete,
+  canDelete,
 }: AchievementsTableProps) {
   if (isLoading) {
     return (
@@ -51,7 +58,7 @@ export function AchievementsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              {['Logro', 'Criterio', 'Valor', 'Usuarios', 'Acciones'].map((label) => (
+              {['Logro', 'Regla', 'Meta', 'Modo', 'Usuarios', 'Acciones'].map((label) => (
                 <TableHead key={label}>{label}</TableHead>
               ))}
             </TableRow>
@@ -59,7 +66,7 @@ export function AchievementsTable({
           <TableBody>
             {Array.from({ length: 6 }).map((_, rowIndex) => (
               <TableRow key={rowIndex}>
-                {Array.from({ length: 5 }).map((_, cellIndex) => (
+                {Array.from({ length: 6 }).map((_, cellIndex) => (
                   <TableCell key={cellIndex}>
                     <Skeleton className="h-4 w-full" />
                   </TableCell>
@@ -126,8 +133,9 @@ export function AchievementsTable({
           <TableHeader>
             <TableRow>
               <TableHead>Logro</TableHead>
-              <TableHead>Criterio</TableHead>
-              <TableHead>Valor</TableHead>
+              <TableHead>Regla</TableHead>
+              <TableHead>Meta</TableHead>
+              <TableHead>Modo</TableHead>
               <TableHead>Usuarios</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
@@ -143,10 +151,15 @@ export function AchievementsTable({
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
-                    {CRITERIA_TYPE_LABELS[achievement.criteria_type] ?? achievement.criteria_type}
+                    {getAchievementRuleLabel(achievement.criteria_type, achievement.rule_config)}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{achievement.criteria_value}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className={isAutomaticAchievement(achievement.criteria_type) ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700' : 'border-amber-500/20 bg-amber-500/10 text-amber-700'}>
+                    {getAchievementModeLabel(achievement.criteria_type)}
+                  </Badge>
+                </TableCell>
                 <TableCell>
                   <span className="text-sm font-medium text-foreground">{achievement.unlocked_count}</span>
                   <span className="ml-1 text-sm text-muted-foreground">
@@ -164,9 +177,11 @@ export function AchievementsTable({
                     <Button variant="outline" size="sm" onClick={() => onEdit(achievement)}>
                       Editar
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => onDelete(achievement)}>
-                      Eliminar
-                    </Button>
+                    {canDelete && (
+                      <Button variant="outline" size="sm" onClick={() => onDelete(achievement)}>
+                        Eliminar
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
