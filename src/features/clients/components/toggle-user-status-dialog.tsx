@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { useAuth } from '@/hooks/use-auth'
 import { getApiErrorMessage, useUpdateUserStatus } from '../api'
 import { getUserDisplayName, ROLE_LABELS, type Role } from '../types'
 
@@ -30,8 +31,10 @@ interface ToggleUserStatusDialogProps {
 }
 
 export function ToggleUserStatusDialog({ user, open, onOpenChange }: ToggleUserStatusDialogProps) {
+  const currentUserId = useAuth((state) => state.user?.id)
   const updateUserStatus = useUpdateUserStatus()
   const nextStatus = user ? !user.is_active : false
+  const isOwnAccount = user?.id === currentUserId
 
   const handleConfirm = async () => {
     if (!user) {
@@ -57,7 +60,9 @@ export function ToggleUserStatusDialog({ user, open, onOpenChange }: ToggleUserS
         <DialogHeader>
           <DialogTitle>{nextStatus ? 'Reactivar cuenta' : 'Dar de baja cuenta'}</DialogTitle>
           <DialogDescription>
-            {nextStatus
+            {isOwnAccount
+              ? 'Tu propia cuenta no se puede activar o desactivar desde esta pantalla.'
+              : nextStatus
               ? `La cuenta de ${user ? getUserDisplayName(user) : 'este usuario'} volverá a estar operativa con rol ${user ? ROLE_LABELS[user.role] : 'usuario'}.`
               : `La cuenta de ${user ? getUserDisplayName(user) : 'este usuario'} dejará de poder iniciar sesión hasta que la reactives.`}
           </DialogDescription>
@@ -69,7 +74,9 @@ export function ToggleUserStatusDialog({ user, open, onOpenChange }: ToggleUserS
               {nextStatus ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
             </div>
             <p>
-              {nextStatus
+              {isOwnAccount
+                ? 'Esta restricción evita que cierres tu propio acceso por error.'
+                : nextStatus
                 ? 'La cuenta recuperará acceso al panel y podrá volver a operar con normalidad.'
                 : 'Se conservarán sus datos, pero se bloqueará el acceso hasta nueva activación.'}
             </p>
@@ -84,7 +91,7 @@ export function ToggleUserStatusDialog({ user, open, onOpenChange }: ToggleUserS
             type="button"
             variant={nextStatus ? 'default' : 'destructive'}
             onClick={handleConfirm}
-            disabled={updateUserStatus.isPending || !user}
+            disabled={updateUserStatus.isPending || !user || isOwnAccount}
           >
             {updateUserStatus.isPending
               ? nextStatus

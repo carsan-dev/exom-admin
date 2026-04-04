@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useAuth } from '@/hooks/use-auth'
 import { getApiErrorMessage, useUpdateRole } from '../api'
 import { updateRoleSchema, type UpdateRoleFormValues } from '../schemas'
 import { getUserDisplayName, ROLE_LABELS, ROLE_OPTIONS, type Role } from '../types'
@@ -47,6 +48,7 @@ interface ChangeRoleDialogProps {
 }
 
 export function ChangeRoleDialog({ user, open, onOpenChange }: ChangeRoleDialogProps) {
+  const currentUserId = useAuth((state) => state.user?.id)
   const updateRole = useUpdateRole()
   const form = useForm<UpdateRoleFormValues>({
     resolver: zodResolver(updateRoleSchema),
@@ -56,6 +58,7 @@ export function ChangeRoleDialog({ user, open, onOpenChange }: ChangeRoleDialogP
   })
 
   const selectedRole = form.watch('role')
+  const isOwnAccount = user?.id === currentUserId
 
   useEffect(() => {
     if (user) {
@@ -83,7 +86,9 @@ export function ChangeRoleDialog({ user, open, onOpenChange }: ChangeRoleDialogP
         <DialogHeader>
           <DialogTitle>Cambiar rol</DialogTitle>
           <DialogDescription>
-            Actualiza el rol de {user ? getUserDisplayName(user) : 'este usuario'} según el nivel de acceso que necesite.
+            {isOwnAccount
+              ? 'No puedes cambiar tu propio rol desde esta pantalla.'
+              : `Actualiza el rol de ${user ? getUserDisplayName(user) : 'este usuario'} según el nivel de acceso que necesite.`}
           </DialogDescription>
         </DialogHeader>
 
@@ -95,7 +100,7 @@ export function ChangeRoleDialog({ user, open, onOpenChange }: ChangeRoleDialogP
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Rol</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isOwnAccount}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un rol" />
@@ -118,7 +123,7 @@ export function ChangeRoleDialog({ user, open, onOpenChange }: ChangeRoleDialogP
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={updateRole.isPending || !user || selectedRole === user.role}>
+              <Button type="submit" disabled={updateRole.isPending || !user || selectedRole === user.role || isOwnAccount}>
                 {updateRole.isPending ? 'Guardando...' : 'Guardar cambios'}
               </Button>
             </DialogFooter>

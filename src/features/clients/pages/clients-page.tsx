@@ -53,9 +53,9 @@ function AdminsTableSkeleton() {
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
-            className="grid gap-4 rounded-xl border border-border/60 p-4 lg:grid-cols-[2fr_1.4fr_1fr_1fr_1.8fr]"
+            className="grid gap-4 rounded-xl border border-border/60 p-4 lg:grid-cols-[2fr_1.4fr_1fr_1fr_1fr_1.8fr]"
           >
-            {Array.from({ length: 5 }).map((__, columnIndex) => (
+            {Array.from({ length: 6 }).map((__, columnIndex) => (
               <Skeleton key={columnIndex} className="h-10 w-full" />
             ))}
           </div>
@@ -95,12 +95,15 @@ function PaginationBar({ page, totalPages, onPrevious, onNext }: PaginationBarPr
 type ManageableUser = Client | AdminUserListItem
 
 export function ClientsPage() {
-  const currentUserRole = useAuth((state) => state.user?.role ?? 'ADMIN')
+  const currentUser = useAuth((state) => state.user)
+  const currentUserRole = currentUser?.role ?? 'ADMIN'
+  const currentUserId = currentUser?.id
   const isSuperAdmin = currentUserRole === 'SUPER_ADMIN'
 
-  const [activeTab, setActiveTab] = useState<'clients' | 'admins'>('clients')
+  const [activeTab, setActiveTab] = useState<'clients' | 'admins' | 'super-admins'>('clients')
   const [clientPage, setClientPage] = useState(1)
   const [adminPage, setAdminPage] = useState(1)
+  const [superAdminPage, setSuperAdminPage] = useState(1)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [createAdminDialogOpen, setCreateAdminDialogOpen] = useState(false)
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false)
@@ -113,6 +116,7 @@ export function ClientsPage() {
 
   const clientsQuery = useClients(clientPage, PAGE_SIZE)
   const adminsQuery = useAllUsers('ADMIN', adminPage, PAGE_SIZE, isSuperAdmin && activeTab === 'admins')
+  const superAdminsQuery = useAllUsers('SUPER_ADMIN', superAdminPage, PAGE_SIZE, isSuperAdmin && activeTab === 'super-admins')
 
   const clients = clientsQuery.data?.data ?? []
   const totalClients = clientsQuery.data?.total ?? 0
@@ -121,6 +125,10 @@ export function ClientsPage() {
   const admins = adminsQuery.data?.data ?? []
   const totalAdmins = adminsQuery.data?.total ?? 0
   const adminTotalPages = adminsQuery.data?.totalPages ?? 1
+
+  const superAdmins = superAdminsQuery.data?.data ?? []
+  const totalSuperAdmins = superAdminsQuery.data?.total ?? 0
+  const superAdminTotalPages = superAdminsQuery.data?.totalPages ?? 1
 
   const pageTitle = isSuperAdmin ? 'Usuarios' : 'Clientes'
   const pageDescription = isSuperAdmin
@@ -132,6 +140,10 @@ export function ClientsPage() {
       ? totalAdmins > 0
         ? `${totalAdmins} admins registrados`
         : 'Todavía no hay admins registrados'
+      : activeTab === 'super-admins'
+        ? totalSuperAdmins > 0
+          ? `${totalSuperAdmins} super admins registrados`
+          : 'Todavía no hay super admins registrados'
       : totalClients > 0
         ? `${totalClients} clientes registrados`
         : 'Todavía no hay clientes registrados'
@@ -300,6 +312,7 @@ export function ClientsPage() {
         <CardContent className="space-y-6">
           <AdminsTable
             admins={admins}
+            currentUserId={currentUserId}
             onEdit={handleEditUser}
             onUnlock={handleUnlock}
             onChangeRole={handleChangeRole}
@@ -311,6 +324,81 @@ export function ClientsPage() {
             totalPages={adminTotalPages}
             onPrevious={() => setAdminPage((current) => Math.max(1, current - 1))}
             onNext={() => setAdminPage((current) => Math.min(adminTotalPages, current + 1))}
+          />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const renderSuperAdminsPanel = () => {
+    if (superAdminsQuery.isLoading) {
+      return <AdminsTableSkeleton />
+    }
+
+    if (superAdminsQuery.isError) {
+      return (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
+            <div className="rounded-full bg-status-error/10 p-4 text-status-error">
+              <AlertTriangle className="h-8 w-8" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold text-foreground">No se ha podido cargar el listado de super admins</h2>
+              <p className="max-w-xl text-sm text-muted-foreground">
+                {getApiErrorMessage(superAdminsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
+              </p>
+            </div>
+            <Button onClick={() => superAdminsQuery.refetch()}>Reintentar</Button>
+          </CardContent>
+        </Card>
+      )
+    }
+
+    if (superAdmins.length === 0) {
+      return (
+        <Card className="border-dashed border-border/70">
+          <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
+            <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
+              <Users className="h-8 w-8" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold text-foreground">Todavía no hay super admins adicionales</h2>
+              <p className="max-w-xl text-sm text-muted-foreground">
+                Para crear uno nuevo, da de alta primero un admin y después promuévelo a super admin desde la gestión de roles.
+              </p>
+            </div>
+            <Button onClick={() => setCreateAdminDialogOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Crear admin base
+            </Button>
+          </CardContent>
+        </Card>
+      )
+    }
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Listado de super admins</CardTitle>
+          <CardDescription>
+            Puedes editar, desbloquear, cambiar el rol o reactivar otros super admins. Tu propia cuenta queda protegida frente a degradaciones o bajas accidentales.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <AdminsTable
+            admins={superAdmins}
+            currentUserId={currentUserId}
+            onEdit={handleEditUser}
+            onUnlock={handleUnlock}
+            onChangeRole={handleChangeRole}
+            onToggleStatus={handleToggleStatus}
+          />
+
+          <PaginationBar
+            page={superAdminPage}
+            totalPages={superAdminTotalPages}
+            onPrevious={() => setSuperAdminPage((current) => Math.max(1, current - 1))}
+            onNext={() => setSuperAdminPage((current) => Math.min(superAdminTotalPages, current + 1))}
           />
         </CardContent>
       </Card>
@@ -331,7 +419,7 @@ export function ClientsPage() {
 
         <Button
           onClick={() => {
-            if (isSuperAdmin && activeTab === 'admins') {
+            if (isSuperAdmin && activeTab !== 'clients') {
               setCreateAdminDialogOpen(true)
               return
             }
@@ -341,13 +429,17 @@ export function ClientsPage() {
           className="lg:self-start"
         >
           <Plus className="h-4 w-4" />
-          {isSuperAdmin && activeTab === 'admins' ? 'Nuevo admin' : 'Nuevo cliente'}
+          {isSuperAdmin && activeTab !== 'clients' ? 'Nuevo admin' : 'Nuevo cliente'}
         </Button>
       </div>
 
       {isSuperAdmin ? (
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'clients' | 'admins')} className="space-y-4">
-          <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-2">
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as 'clients' | 'admins' | 'super-admins')}
+          className="space-y-4"
+        >
+          <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-3">
             <TabsTrigger
               value="clients"
               className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary"
@@ -360,10 +452,17 @@ export function ClientsPage() {
             >
               Admins
             </TabsTrigger>
+            <TabsTrigger
+              value="super-admins"
+              className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary"
+            >
+              Super Admins
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="clients">{renderClientsPanel()}</TabsContent>
           <TabsContent value="admins">{renderAdminsPanel()}</TabsContent>
+          <TabsContent value="super-admins">{renderSuperAdminsPanel()}</TabsContent>
         </Tabs>
       ) : (
         renderClientsPanel()
