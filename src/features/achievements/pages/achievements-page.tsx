@@ -1,8 +1,241 @@
+import { useEffect, useState, type FormEvent } from 'react'
+import { useSearchParams } from 'react-router'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { useAchievements } from '../api'
+import { AchievementFormDialog } from '../components/achievement-form-dialog'
+import { AchievementUsersDrawer } from '../components/achievement-users-drawer'
+import { AchievementsStatsCards } from '../components/achievements-stats-cards'
+import { AchievementsTable } from '../components/achievements-table'
+import { DeleteAchievementDialog } from '../components/delete-achievement-dialog'
+import { GrantAchievementDialog } from '../components/grant-achievement-dialog'
+import {
+  CRITERIA_TYPE_LABELS,
+  CRITERIA_TYPE_OPTIONS,
+  type AchievementFilters,
+  type AchievementListItem,
+} from '../types'
+
+const PAGE_SIZE = 10
+
+function getPage(value: string | null) {
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 1
+}
+
+function getCriteriaTypeFilter(value: string | null): string {
+  return CRITERIA_TYPE_OPTIONS.includes(value as (typeof CRITERIA_TYPE_OPTIONS)[number]) ? (value as string) : 'ALL'
+}
+
 export function AchievementsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchDraft, setSearchDraft] = useState(searchParams.get('search') ?? '')
+  const [createOpen, setCreateOpen] = useState(false)
+  const [editingAchievement, setEditingAchievement] = useState<AchievementListItem | null>(null)
+  const [grantingAchievement, setGrantingAchievement] = useState<AchievementListItem | null>(null)
+  const [usersAchievement, setUsersAchievement] = useState<AchievementListItem | null>(null)
+  const [deletingAchievement, setDeletingAchievement] = useState<AchievementListItem | null>(null)
+
+  const page = getPage(searchParams.get('page'))
+  const search = searchParams.get('search') ?? ''
+  const criteriaType = getCriteriaTypeFilter(searchParams.get('criteria_type'))
+
+  useEffect(() => {
+    setSearchDraft(search)
+  }, [search])
+
+  const filters: AchievementFilters = {
+    page,
+    limit: PAGE_SIZE,
+    ...(search ? { search } : {}),
+    ...(criteriaType !== 'ALL' ? { criteria_type: criteriaType } : {}),
+  }
+
+  const achievementsQuery = useAchievements(filters)
+  const data = achievementsQuery.data
+  const items = data?.data ?? []
+  const totalPages = data?.totalPages ?? 1
+  const hasActiveFilters = Boolean(search) || criteriaType !== 'ALL'
+
+  const updateSearchParams = (updates: {
+    search?: string
+    criteria_type?: string
+    page?: number
+  }) => {
+    const nextSearchParams = new URLSearchParams(searchParams)
+
+    if (updates.search !== undefined) {
+      const nextSearch = updates.search.trim()
+      if (nextSearch) {
+        nextSearchParams.set('search', nextSearch)
+      } else {
+        nextSearchParams.delete('search')
+      }
+    }
+
+    if (updates.criteria_type !== undefined) {
+      if (updates.criteria_type === 'ALL') {
+        nextSearchParams.delete('criteria_type')
+      } else {
+        nextSearchParams.set('criteria_type', updates.criteria_type)
+      }
+    }
+
+    if (updates.page !== undefined) {
+      if (updates.page <= 1) {
+        nextSearchParams.delete('page')
+      } else {
+        nextSearchParams.set('page', String(updates.page))
+      }
+    }
+
+    setSearchParams(nextSearchParams, { replace: true })
+  }
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    updateSearchParams({ search: searchDraft, page: 1 })
+  }
+
+  const clearFilters = () => {
+    setSearchDraft('')
+    setSearchParams(new URLSearchParams(), { replace: true })
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center h-[60vh] gap-2">
-      <h1 className="text-2xl font-semibold text-foreground">Logros</h1>
-      <p className="text-muted-foreground">Próximamente</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold text-foreground">Gestión de logros</h1>
+          <p className="text-sm text-muted-foreground">
+            Crea logros para premiar a tus clientes, configura los criterios de desbloqueo y gestiona quién los tiene.
+          </p>
+        </div>
+
+        <Button onClick={() => setCreateOpen(true)}>Nuevo logro</Button>
+      </div>
+
+      <AchievementsStatsCards
+        summary={data?.summary}
+        isLoading={achievementsQuery.isLoading}
+        isError={achievementsQuery.isError}
+        isFetching={achievementsQuery.isFetching}
+        onRetry={() => void achievementsQuery.refetch()}
+      />
+
+      <Card>
+        <CardContent className="space-y-4 p-6">
+          <form onSubmit={handleSearchSubmit} className="space-y-4">
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:items-end">
+              <div className="space-y-2">
+                <Label htmlFor="achievement-search">Buscar</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="achievement-search"
+                    value={searchDraft}
+                    onChange={(event) => setSearchDraft(event.target.value)}
+                    placeholder="Nombre o descripción"
+                  />
+                  <Button type="submit" variant="outline">
+                    Buscar
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Tipo de criterio</Label>
+                <Select
+                  value={criteriaType}
+                  onValueChange={(value) => updateSearchParams({ criteria_type: value, page: 1 })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Todos</SelectItem>
+                    {CRITERIA_TYPE_OPTIONS.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {CRITERIA_TYPE_LABELS[value]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </form>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              {data ? `${data.total} logro${data.total === 1 ? '' : 's'} encontrado${data.total === 1 ? '' : 's'}` : 'Cargando resultados...'}
+            </p>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                Limpiar filtros
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <AchievementsTable
+        items={items}
+        page={page}
+        totalPages={totalPages}
+        isLoading={achievementsQuery.isLoading}
+        isError={achievementsQuery.isError}
+        isRefetching={achievementsQuery.isRefetching}
+        hasActiveFilters={hasActiveFilters}
+        onRetry={() => void achievementsQuery.refetch()}
+        onPageChange={(nextPage) => updateSearchParams({ page: nextPage })}
+        onCreate={() => setCreateOpen(true)}
+        onEdit={setEditingAchievement}
+        onGrant={setGrantingAchievement}
+        onViewUsers={setUsersAchievement}
+        onDelete={setDeletingAchievement}
+      />
+
+      <AchievementFormDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <AchievementFormDialog
+        achievement={editingAchievement}
+        open={Boolean(editingAchievement)}
+        onOpenChange={(open) => {
+          if (!open) setEditingAchievement(null)
+        }}
+        onSubmitted={() => setEditingAchievement(null)}
+      />
+      <GrantAchievementDialog
+        achievement={grantingAchievement}
+        open={Boolean(grantingAchievement)}
+        onOpenChange={(open) => {
+          if (!open) setGrantingAchievement(null)
+        }}
+        onGranted={() => setGrantingAchievement(null)}
+      />
+      <AchievementUsersDrawer
+        achievement={usersAchievement}
+        open={Boolean(usersAchievement)}
+        onOpenChange={(open) => {
+          if (!open) setUsersAchievement(null)
+        }}
+      />
+      <DeleteAchievementDialog
+        achievement={deletingAchievement}
+        open={Boolean(deletingAchievement)}
+        onOpenChange={(open) => {
+          if (!open) setDeletingAchievement(null)
+        }}
+        onDeleted={() => setDeletingAchievement(null)}
+      />
     </div>
   )
 }
