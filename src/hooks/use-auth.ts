@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import axios from 'axios'
 import {
   signOut,
   signInWithPopup,
@@ -47,6 +48,24 @@ interface AuthStore {
 
 function validateRole(role: string): role is 'ADMIN' | 'SUPER_ADMIN' {
   return role === 'ADMIN' || role === 'SUPER_ADMIN'
+}
+
+function getBackendErrorMessage(error: unknown) {
+  if (!axios.isAxiosError(error)) {
+    return null
+  }
+
+  const message = error.response?.data?.message
+
+  if (Array.isArray(message) && message.length > 0) {
+    return message.join(', ')
+  }
+
+  if (typeof message === 'string' && message.trim()) {
+    return message
+  }
+
+  return null
 }
 
 export const useAuth = create<AuthStore>()((set) => ({
@@ -113,12 +132,13 @@ export const useAuth = create<AuthStore>()((set) => ({
       set({ user, isAuthenticated: true, isLoading: false, error: null })
     } catch (err: unknown) {
       const axiosError = err as { response?: { status?: number }; name?: string }
+      const backendMessage = getBackendErrorMessage(err)
 
-      let error = 'Credenciales inválidas'
+      let error = backendMessage ?? 'Credenciales inválidas'
       if (axiosError.response?.status === 423 || axiosError.name === 'ACCOUNT_BLOCKED') {
         error = 'ACCOUNT_BLOCKED'
       } else if (axiosError.response?.status === 429) {
-        error = 'Demasiados intentos. Inténtalo más tarde.'
+        error = backendMessage ?? 'Demasiados intentos. Inténtalo más tarde.'
       }
 
       set({ isLoading: false, error })

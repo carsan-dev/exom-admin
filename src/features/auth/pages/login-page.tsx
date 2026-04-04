@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { sendPasswordResetEmail } from 'firebase/auth'
 import { Eye, EyeOff, AlertCircle, Lock } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { auth } from '@/lib/firebase'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -20,6 +23,7 @@ export function LoginPage() {
   const { login, loginWithGoogle, error, isLoading, isAuthenticated, clearError } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+  const [isSendingReset, setIsSendingReset] = useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -30,11 +34,43 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
+    getValues,
+    trigger,
     formState: { errors },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
 
   const onSubmit = (data: LoginForm) => {
     login(data.email, data.password)
+  }
+
+  const handleForgotPassword = async () => {
+    const isEmailValid = await trigger('email')
+
+    if (!isEmailValid) {
+      return
+    }
+
+    const email = getValues('email').trim().toLowerCase()
+
+    setIsSendingReset(true)
+
+    try {
+      await sendPasswordResetEmail(auth, email)
+      toast.success('Si el email existe, recibirá un enlace para restablecer la contraseña.')
+    } catch (error) {
+      const errorCode = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : null
+
+      if (errorCode === 'auth/too-many-requests') {
+        toast.error('Demasiados intentos. Inténtalo más tarde.')
+      } else if (errorCode === 'auth/network-request-failed') {
+        toast.error('No se ha podido solicitar el restablecimiento. Revisa tu conexión e inténtalo de nuevo.')
+      } else {
+        // Mantiene el mismo comportamiento genérico para no revelar si el email existe.
+        toast.success('Si el email existe, recibirá un enlace para restablecer la contraseña.')
+      }
+    } finally {
+      setIsSendingReset(false)
+    }
   }
 
   const isBlocked = error === 'ACCOUNT_BLOCKED'
@@ -140,9 +176,11 @@ export function LoginPage() {
                 <div className="flex justify-end">
                   <button
                     type="button"
+                    onClick={() => void handleForgotPassword()}
+                    disabled={isSendingReset}
                     className="text-xs text-brand-primary hover:text-brand-secondary transition-colors"
                   >
-                    ¿Has olvidado tu contraseña?
+                    {isSendingReset ? 'Enviando enlace...' : '¿Has olvidado tu contraseña?'}
                   </button>
                 </div>
 
