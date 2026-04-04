@@ -31,6 +31,7 @@ export interface RecapItem {
   sleep_hours_range: string | null
   fatigue_level: string | null
   muscle_pain_zones: string[]
+  pain_intensity: string | null
   recovery_notes: string | null
   mood: string | null
   stress_enabled: boolean

@@ -320,6 +320,7 @@ export function RecapDetailPage() {
             <div className="grid gap-3 md:grid-cols-2">
               <DetailField label="Horas de sueño" value={formatRecapOption(recap.sleep_hours_range)} />
               <DetailField label="Fatiga" value={formatRecapOption(recap.fatigue_level)} />
+              <DetailField label="Intensidad del dolor" value={formatRecapOption(recap.pain_intensity)} />
               <div className="rounded-xl border border-border/70 bg-background px-4 py-3 md:col-span-2">
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Zonas con dolor muscular
