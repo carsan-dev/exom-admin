@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Upload, X, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getApiErrorMessage, usePresignedUrl } from '../api'
+import { getApiErrorMessage, useUploadFile } from '../api'
 
 interface VideoUploadFieldProps {
   value: string
@@ -26,7 +26,7 @@ export function VideoUploadField({
   const inputRef = useRef<HTMLInputElement>(null)
   const [progress, setProgress] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const presignedUrl = usePresignedUrl()
+  const uploadFile = useUploadFile()
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -54,32 +54,11 @@ export function VideoUploadField({
       const uuid = crypto.randomUUID()
       const fileKey = `exercises/videos/${uuid}.${ext}`
 
-      const { upload_url, file_url } = await presignedUrl.mutateAsync({
+      const { file_url } = await uploadFile.mutateAsync({
+        file,
         file_key: fileKey,
         content_type: file.type,
-      })
-
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            setProgress(Math.round((event.loaded / event.total) * 100))
-          }
-        }
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve()
-          } else {
-            reject(new Error(`Upload failed: ${xhr.status}`))
-          }
-        }
-
-        xhr.onerror = () => reject(new Error('Error de red durante la subida'))
-        xhr.open('PUT', upload_url)
-        xhr.setRequestHeader('Content-Type', file.type)
-        xhr.send(file)
+        onProgress: setProgress,
       })
 
       onChange(file_url)
@@ -144,7 +123,7 @@ export function VideoUploadField({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={disabled || presignedUrl.isPending}
+          disabled={disabled || uploadFile.isPending}
           className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border/70 bg-muted/30 px-4 py-6 text-center transition-colors hover:border-brand-primary/50 hover:bg-brand-soft/5 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Upload className="h-8 w-8 text-muted-foreground" />

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Image, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getApiErrorMessage, usePresignedUrl } from '@/features/uploads/api'
+import { getApiErrorMessage, useUploadFile } from '@/features/uploads/api'
 
 interface ImageUploadFieldProps {
   value: string
@@ -31,9 +31,9 @@ export function ImageUploadField({
   const uploadingChangeRef = useRef(onUploadingChange)
   const [progress, setProgress] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const presignedUrl = usePresignedUrl()
+  const uploadFile = useUploadFile()
 
-  const isUploading = progress !== null || presignedUrl.isPending
+  const isUploading = progress !== null || uploadFile.isPending
 
   useEffect(() => {
     uploadingChangeRef.current = onUploadingChange
@@ -73,32 +73,11 @@ export function ImageUploadField({
       const uuid = crypto.randomUUID()
       const fileKey = `${fileKeyPrefix}/${uuid}.${ext}`
 
-      const { upload_url, file_url } = await presignedUrl.mutateAsync({
+      const { file_url } = await uploadFile.mutateAsync({
+        file,
         file_key: fileKey,
         content_type: file.type,
-      })
-
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            setProgress(Math.round((event.loaded / event.total) * 100))
-          }
-        }
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve()
-          } else {
-            reject(new Error(`Upload failed: ${xhr.status}`))
-          }
-        }
-
-        xhr.onerror = () => reject(new Error('Error de red durante la subida'))
-        xhr.open('PUT', upload_url)
-        xhr.setRequestHeader('Content-Type', file.type)
-        xhr.send(file)
+        onProgress: setProgress,
       })
 
       onChange(file_url)

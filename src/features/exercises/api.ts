@@ -3,7 +3,7 @@ import { api } from '@/lib/api'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { ExerciseFormValues } from './schemas'
 import type { Exercise, PaginatedResponse } from './types'
-export { usePresignedUrl } from '../uploads/api'
+export { usePresignedUrl, useUploadFile } from '../uploads/api'
 
 export { getApiErrorMessage }
 
