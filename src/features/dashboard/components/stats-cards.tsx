@@ -1,6 +1,8 @@
 import { AlertTriangle, FileText, MessageSquare, Users } from 'lucide-react'
 import { Link } from 'react-router'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/hooks/use-auth'
+import { getUsersRoute } from '@/features/clients/types'
 import type { DashboardStats } from '../types'
 
 interface StatsCardsProps {
@@ -8,13 +10,15 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({ stats }: StatsCardsProps) {
+  const currentUserRole = useAuth((state) => state.user?.role)
+  const usersRoute = getUsersRoute(currentUserRole)
   const cards = [
     {
       title: 'Clientes activos',
       value: stats.activeClients,
       description: `${stats.totalClients} clientes visibles`,
       icon: Users,
-      to: '/clients',
+      to: usersRoute,
       valueClassName: 'text-brand-primary',
     },
     {
@@ -39,7 +43,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       description:
         stats.lockedAccounts > 0 ? 'Requieren atención inmediata' : 'Sin alertas activas',
       icon: AlertTriangle,
-      to: '/clients',
+      to: usersRoute,
       valueClassName: stats.lockedAccounts > 0 ? 'text-status-error' : 'text-foreground',
       cardClassName:
         stats.lockedAccounts > 0

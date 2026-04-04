@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, AlertTriangle, CalendarDays, ShieldCheck, Unlock, Users } from 'lucide-react'
+import { ArrowLeft, AlertTriangle, CalendarDays, ShieldCheck, Unlock, UserCheck, UserX, Users } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,12 +9,15 @@ import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { getApiErrorMessage, getApiErrorStatus, useClientProfile } from '../api'
 import { ChangeRoleDialog } from '../components/change-role-dialog'
+import { ClientAssignedAdminsCard } from '../components/client-assigned-admins-card'
 import { ClientHeader } from '../components/client-header'
 import { ClientInfoTab } from '../components/client-info-tab'
 import { ManageClientAssignmentsDialog } from '../components/manage-client-assignments-dialog'
 import { ClientMetricsTab } from '../components/client-metrics-tab'
 import { ClientStreakCard } from '../components/client-streak-card'
+import { ToggleUserStatusDialog } from '../components/toggle-user-status-dialog'
 import { UnlockDialog } from '../components/unlock-dialog'
+import { getUsersRoute } from '../types'
 
 function DetailPageSkeleton() {
   return (
@@ -75,9 +78,12 @@ function getErrorCopy(errorStatus: number | undefined, currentUserRole?: string)
 export function ClientDetailPage() {
   const { id } = useParams()
   const currentUserRole = useAuth((state) => state.user?.role)
+  const usersRoute = getUsersRoute(currentUserRole)
+  const backLabel = currentUserRole === 'SUPER_ADMIN' ? 'Volver a usuarios' : 'Volver a clientes'
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false)
   const [changeRoleDialogOpen, setChangeRoleDialogOpen] = useState(false)
   const [manageAssignmentsDialogOpen, setManageAssignmentsDialogOpen] = useState(false)
+  const [toggleStatusDialogOpen, setToggleStatusDialogOpen] = useState(false)
 
   const clientProfile = useClientProfile(id)
   const errorStatus = getApiErrorStatus(clientProfile.error)
@@ -105,9 +111,9 @@ export function ClientDetailPage() {
           </div>
           <div className="flex flex-wrap justify-center gap-3">
             <Button variant="outline" asChild>
-              <Link to="/clients">
+              <Link to={usersRoute}>
                 <ArrowLeft className="h-4 w-4" />
-                Volver a clientes
+                {backLabel}
               </Link>
             </Button>
             {errorCopy.canRetry && <Button onClick={() => clientProfile.refetch()}>Reintentar</Button>}
@@ -123,9 +129,9 @@ export function ClientDetailPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button variant="ghost" asChild>
-          <Link to="/clients">
+          <Link to={usersRoute}>
             <ArrowLeft className="h-4 w-4" />
-            Volver a clientes
+            {backLabel}
           </Link>
         </Button>
 
@@ -154,10 +160,20 @@ export function ClientDetailPage() {
               Cambiar rol
             </Button>
           )}
+          {currentUserRole === 'SUPER_ADMIN' && (
+            <Button variant="outline" onClick={() => setToggleStatusDialogOpen(true)}>
+              {client.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+              {client.is_active ? 'Dar de baja' : 'Reactivar'}
+            </Button>
+          )}
         </div>
       </div>
 
       <ClientHeader client={client} />
+
+      {currentUserRole === 'SUPER_ADMIN' && (
+        <ClientAssignedAdminsCard clientId={client.id} onManage={() => setManageAssignmentsDialogOpen(true)} />
+      )}
 
       <Tabs defaultValue="info" className="space-y-4">
         <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-3">
@@ -183,8 +199,9 @@ export function ClientDetailPage() {
         </TabsContent>
       </Tabs>
 
-      <UnlockDialog client={client} open={unlockDialogOpen} onOpenChange={setUnlockDialogOpen} />
+      <UnlockDialog user={client} open={unlockDialogOpen} onOpenChange={setUnlockDialogOpen} />
       <ChangeRoleDialog user={client} open={changeRoleDialogOpen} onOpenChange={setChangeRoleDialogOpen} />
+      <ToggleUserStatusDialog user={client} open={toggleStatusDialogOpen} onOpenChange={setToggleStatusDialogOpen} />
       <ManageClientAssignmentsDialog
         client={client}
         open={manageAssignmentsDialogOpen}

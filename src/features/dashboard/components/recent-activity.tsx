@@ -4,6 +4,8 @@ import { Dumbbell, FileText, MessageSquare, UserPlus } from 'lucide-react'
 import { Link } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/hooks/use-auth'
+import { getUsersRoute } from '@/features/clients/types'
 import type { RecentActivityItem } from '../types'
 
 interface RecentActivityProps {
@@ -19,7 +21,7 @@ function getInitials(name: string) {
     .join('')
 }
 
-function getActivityLink(item: RecentActivityItem) {
+function getActivityLink(item: RecentActivityItem, usersRoute: string) {
   switch (item.type) {
     case 'recap_submitted':
       return `/recaps?clientId=${item.clientId}&status=SUBMITTED`
@@ -28,7 +30,7 @@ function getActivityLink(item: RecentActivityItem) {
     case 'progress_completed':
       return `/progress?clientId=${item.clientId}`
     case 'client_created':
-      return '/clients'
+      return usersRoute
   }
 }
 
@@ -46,6 +48,9 @@ function getActivityIcon(type: RecentActivityItem['type']) {
 }
 
 export function RecentActivity({ items }: RecentActivityProps) {
+  const currentUserRole = useAuth((state) => state.user?.role)
+  const usersRoute = getUsersRoute(currentUserRole)
+
   return (
     <Card>
       <CardHeader>
@@ -91,7 +96,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
                         locale: es,
                       })}
                     </p>
-                    <Link className="text-sm font-medium text-brand-primary hover:underline" to={getActivityLink(item)}>
+                    <Link className="text-sm font-medium text-brand-primary hover:underline" to={getActivityLink(item, usersRoute)}>
                       Ver todos
                     </Link>
                   </div>

@@ -40,6 +40,7 @@ export interface Client {
   is_active: boolean
   is_locked: boolean
   created_at: string
+  active_admins_count?: number
   profile: Pick<ClientProfile, 'first_name' | 'last_name' | 'avatar_url' | 'level' | 'main_goal'> | null
 }
 
@@ -138,6 +139,14 @@ export function getUserDisplayName(user: UserWithName) {
   const fullName = [firstName, lastName].filter(Boolean).join(' ')
 
   return fullName || user.email
+}
+
+export function getUsersRoute(currentUserRole?: Role) {
+  return currentUserRole === 'SUPER_ADMIN' ? '/users' : '/clients'
+}
+
+export function getClientDetailRoute(clientId: string, currentUserRole?: Role) {
+  return `${getUsersRoute(currentUserRole)}/${clientId}`
 }
 
 export function getClientAssignmentDiff(

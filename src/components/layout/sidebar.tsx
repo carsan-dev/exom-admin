@@ -15,8 +15,10 @@ import {
   Award,
   Bell,
 } from 'lucide-react'
+import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { getUsersRoute } from '@/features/clients/types'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -40,6 +42,13 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const currentUserRole = useAuth((state) => state.user?.role)
+  const resolvedNavItems = navItems.map((item) =>
+    item.to === '/clients' && currentUserRole === 'SUPER_ADMIN'
+      ? { ...item, to: getUsersRoute(currentUserRole), label: 'Usuarios' }
+      : item,
+  )
+
   return (
     <aside
       className={cn(
@@ -62,7 +71,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex flex-1 flex-col overflow-y-auto px-2 py-4">
-        {navItems.map(({ to, label, icon: Icon }, index) => (
+        {resolvedNavItems.map(({ to, label, icon: Icon }, index) => (
           <Fragment key={to}>
             {isOpen ? (
               <NavLink
@@ -73,7 +82,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     'flex w-full items-center rounded-none border-l-2 border-transparent px-3 py-2 text-left text-sm font-medium transition-colors',
                     'hover:bg-brand-soft/30 hover:text-foreground',
                     index === 0 && 'rounded-t-md',
-                    index === navItems.length - 1 && 'rounded-b-md',
+                     index === resolvedNavItems.length - 1 && 'rounded-b-md',
                     isActive && 'border-brand-primary bg-brand-primary/10 text-brand-primary',
                     !isActive && 'text-foreground/70'
                   )
@@ -97,7 +106,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         'flex h-10 w-full items-center justify-center rounded-none px-0 text-sm font-medium transition-colors',
                         'hover:bg-brand-soft/30 hover:text-foreground',
                         index === 0 && 'rounded-t-md',
-                        index === navItems.length - 1 && 'rounded-b-md',
+                         index === resolvedNavItems.length - 1 && 'rounded-b-md',
                         isActive && 'bg-brand-primary/10 text-brand-primary',
                         !isActive && 'text-foreground/70'
                       )

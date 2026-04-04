@@ -2,10 +2,12 @@ import { Link, useLocation } from 'react-router'
 import { ChevronRight } from 'lucide-react'
 import { useClientProfile } from '@/features/clients/api'
 import { getUserDisplayName } from '@/features/clients/types'
+import { useAuth } from '@/hooks/use-auth'
 
-const routeLabels: Record<string, string> = {
+const baseRouteLabels: Record<string, string> = {
   dashboard: 'Dashboard',
   clients: 'Clientes',
+  users: 'Usuarios',
   exercises: 'Ejercicios',
   trainings: 'Entrenamientos',
   ingredients: 'Ingredientes',
@@ -21,9 +23,14 @@ const routeLabels: Record<string, string> = {
 
 export function Breadcrumbs() {
   const { pathname } = useLocation()
+  const currentUserRole = useAuth((state) => state.user?.role)
   const segments = pathname.split('/').filter(Boolean)
-  const clientId = segments[0] === 'clients' ? segments[1] : undefined
+  const clientId = segments[0] === 'clients' || segments[0] === 'users' ? segments[1] : undefined
   const clientProfile = useClientProfile(clientId)
+  const routeLabels: Record<string, string> = {
+    ...baseRouteLabels,
+    clients: currentUserRole === 'SUPER_ADMIN' ? 'Usuarios' : 'Clientes',
+  }
 
   if (segments.length === 0) return null
 

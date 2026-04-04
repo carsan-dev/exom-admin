@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useAuth } from '@/hooks/use-auth'
 import { useCreateClient, getApiErrorMessage } from '../api'
 import { createClientSchema, type CreateClientFormValues } from '../schemas'
 import { LEVEL_LABELS, LEVEL_OPTIONS } from '../types'
@@ -47,6 +48,7 @@ const defaultValues: CreateClientFormValues = {
 }
 
 export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClientDialogProps) {
+  const currentUserRole = useAuth((state) => state.user?.role)
   const createClient = useCreateClient()
   const form = useForm<CreateClientFormValues>({
     resolver: zodResolver(createClientSchema),
@@ -76,7 +78,9 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
         <DialogHeader>
           <DialogTitle>Nuevo cliente</DialogTitle>
           <DialogDescription>
-            Crea una nueva cuenta y el backend la asignará automáticamente al admin actual.
+            {currentUserRole === 'ADMIN'
+              ? 'Crea una nueva cuenta y el backend la asignará automáticamente al admin actual.'
+              : 'Crea una nueva cuenta de cliente. Después podrás decidir qué admin o admins la gestionarán.'}
           </DialogDescription>
         </DialogHeader>
 

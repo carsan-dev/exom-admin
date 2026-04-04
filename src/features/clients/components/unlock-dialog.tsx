@@ -14,6 +14,7 @@ import { getUserDisplayName } from '../types'
 interface UnlockTarget {
   id: string
   email: string
+  role?: string
   profile: {
     first_name: string
     last_name: string
@@ -21,21 +22,21 @@ interface UnlockTarget {
 }
 
 interface UnlockDialogProps {
-  client: UnlockTarget | null
+  user: UnlockTarget | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function UnlockDialog({ client, open, onOpenChange }: UnlockDialogProps) {
+export function UnlockDialog({ user, open, onOpenChange }: UnlockDialogProps) {
   const unlockUser = useUnlockUser()
 
   const handleUnlock = async () => {
-    if (!client) {
+    if (!user) {
       return
     }
 
     try {
-      await unlockUser.mutateAsync(client.id)
+      await unlockUser.mutateAsync(user.id)
       toast.success('Cuenta desbloqueada correctamente')
       onOpenChange(false)
     } catch (error) {
@@ -49,7 +50,7 @@ export function UnlockDialog({ client, open, onOpenChange }: UnlockDialogProps) 
         <DialogHeader>
           <DialogTitle>Desbloquear cuenta</DialogTitle>
           <DialogDescription>
-            Vas a restaurar el acceso de {client ? getUserDisplayName(client) : 'este cliente'}.
+            Vas a restaurar el acceso de {user ? getUserDisplayName(user) : 'este usuario'}.
           </DialogDescription>
         </DialogHeader>
 

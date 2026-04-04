@@ -2,6 +2,8 @@ import { Flame, Trophy } from 'lucide-react'
 import { Link } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/hooks/use-auth'
+import { getClientDetailRoute } from '@/features/clients/types'
 import type { TopClient } from '../types'
 
 interface TopClientsProps {
@@ -18,6 +20,8 @@ function getInitials(name: string) {
 }
 
 export function TopClients({ clients }: TopClientsProps) {
+  const currentUserRole = useAuth((state) => state.user?.role)
+
   return (
     <Card>
       <CardHeader>
@@ -40,7 +44,7 @@ export function TopClients({ clients }: TopClientsProps) {
               return (
                 <Link
                   key={client.clientId}
-                  to={`/clients/${client.clientId}`}
+                  to={getClientDetailRoute(client.clientId, currentUserRole)}
                   className="block rounded-xl border border-border/70 p-4 transition-colors hover:border-brand-primary/40"
                 >
                   <div className="flex items-center gap-3">

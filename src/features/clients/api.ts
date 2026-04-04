@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { type ApiEnvelope, getApiErrorMessage, getApiErrorStatus, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
-import type { CreateClientFormValues } from './schemas'
+import type { CreateAdminFormValues, CreateClientFormValues, UpdateUserFormValues } from './schemas'
 import type {
   AdminUserListItem,
   Client,
@@ -21,6 +21,16 @@ interface MutationMessage {
 interface UpdateRolePayload {
   userId: string
   role: Role
+}
+
+interface UpdateUserPayload {
+  userId: string
+  values: UpdateUserFormValues
+}
+
+interface UpdateUserStatusPayload {
+  userId: string
+  is_active: boolean
 }
 
 export const clientsQueryKeys = {
@@ -50,6 +60,23 @@ function normalizeCreateClientPayload(payload: CreateClientFormValues) {
     last_name: payload.last_name.trim(),
     level: payload.level,
     main_goal: payload.main_goal?.trim() || undefined,
+  }
+}
+
+function normalizeCreateAdminPayload(payload: CreateAdminFormValues) {
+  return {
+    email: payload.email.trim(),
+    password: payload.password,
+    first_name: payload.first_name.trim(),
+    last_name: payload.last_name.trim(),
+  }
+}
+
+function normalizeUpdateUserPayload(payload: UpdateUserFormValues) {
+  return {
+    email: payload.email.trim(),
+    first_name: payload.first_name.trim(),
+    last_name: payload.last_name.trim(),
   }
 }
 
@@ -161,6 +188,24 @@ export function useCreateClient() {
   })
 }
 
+export function useCreateAdmin() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (payload: CreateAdminFormValues) => {
+      const response = await api.post<ApiEnvelope<AdminUserListItem>>(
+        '/admin/users/admins',
+        normalizeCreateAdminPayload(payload),
+      )
+
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: usersQueryKeys.all })
+    },
+  })
+}
+
 export function useUnlockUser() {
   const queryClient = useQueryClient()
 
@@ -173,6 +218,51 @@ export function useUnlockUser() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
         queryClient.invalidateQueries({ queryKey: usersQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: clientAssignmentsQueryKeys.all }),
+      ])
+    },
+  })
+}
+
+export function useUpdateUser() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ userId, values }: UpdateUserPayload) => {
+      const response = await api.put<ApiEnvelope<AdminUserListItem>>(
+        `/admin/users/${userId}`,
+        normalizeUpdateUserPayload(values),
+      )
+
+      return unwrapResponse(response)
+    },
+    onSuccess: async (_data, { userId }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.detail(userId) }),
+        queryClient.invalidateQueries({ queryKey: usersQueryKeys.all }),
+      ])
+    },
+  })
+}
+
+export function useUpdateUserStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ userId, is_active }: UpdateUserStatusPayload) => {
+      const response = await api.put<ApiEnvelope<MutationMessage>>(`/admin/users/${userId}/status`, {
+        is_active,
+      })
+
+      return unwrapResponse(response)
+    },
+    onSuccess: async (_data, { userId }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.detail(userId) }),
+        queryClient.invalidateQueries({ queryKey: usersQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: clientAssignmentsQueryKeys.all }),
       ])
     },
   })
@@ -193,6 +283,7 @@ export function useUpdateRole() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
         queryClient.invalidateQueries({ queryKey: usersQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: clientAssignmentsQueryKeys.all }),
       ])
     },
   })

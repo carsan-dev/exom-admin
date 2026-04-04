@@ -134,7 +134,7 @@ export function ManageClientAssignmentsDialog({
   const updateClientAssignments = useUpdateClientAssignments()
 
   const activeAdmins = assignmentsQuery.data?.active_admins ?? []
-  const availableAdmins = adminsQuery.data ?? []
+  const availableAdmins = (adminsQuery.data ?? []).filter((admin) => admin.is_active)
   const adminOptions = buildAdminOptions(activeAdmins, availableAdmins)
   const selectedAdminIdSet = new Set(selectedAdminIds)
   const activeAdminIdSet = new Set(activeAdmins.map((admin) => admin.id))
@@ -201,7 +201,7 @@ export function ManageClientAssignmentsDialog({
         <DialogHeader>
           <DialogTitle>Gestionar admins asignados</DialogTitle>
           <DialogDescription>
-            Actualiza el conjunto activo de admins para {client ? getUserDisplayName(client) : 'este cliente'} sin romper su acceso actual a perfil, progreso y asignaciones.
+            Actualiza el conjunto activo de admins para {client ? getUserDisplayName(client) : 'este cliente'}. Si el cliente queda pausado, puedes dejarlo sin admins asignados.
           </DialogDescription>
         </DialogHeader>
 
@@ -243,13 +243,13 @@ export function ManageClientAssignmentsDialog({
           <div className="space-y-5">
             {activeAdmins.length === 0 && (
               <div className="rounded-xl border border-status-warning/20 bg-status-warning/10 p-4 text-sm text-foreground">
-                Estado inconsistente: este cliente no tiene admins activos ahora mismo. Selecciona al menos uno y guarda para corregirlo.
+                Este cliente no tiene admins activos ahora mismo. Puedes mantenerlo así o asignar uno nuevo cuando retome la actividad.
               </div>
             )}
 
             {selectedAdminIds.length === 0 && (
               <div className="rounded-xl border border-status-warning/20 bg-status-warning/10 p-4 text-sm text-foreground">
-                Esta operación dejaría al cliente sin admins activos. Selecciona al menos un admin antes de guardar.
+                Este cliente quedará sin admins activos. Úsalo cuando quieras dejarlo pausado sin cartera asignada.
               </div>
             )}
 
@@ -379,7 +379,7 @@ export function ManageClientAssignmentsDialog({
                     type="button"
                     variant="outline"
                     onClick={() => void handleSave()}
-                    disabled={updateClientAssignments.isPending || selectedAdminIds.length === 0 || !hasChanges}
+                    disabled={updateClientAssignments.isPending || !hasChanges}
                   >
                     Reintentar guardado
                   </Button>
@@ -402,11 +402,10 @@ export function ManageClientAssignmentsDialog({
               isLoading ||
               isError ||
               hasNoAdminsAvailable ||
-              selectedAdminIds.length === 0 ||
               !hasChanges
             }
           >
-            {updateClientAssignments.isPending ? 'Guardando...' : 'Guardar admins activos'}
+            {updateClientAssignments.isPending ? 'Guardando...' : 'Guardar asignaciones'}
           </Button>
         </DialogFooter>
       </DialogContent>

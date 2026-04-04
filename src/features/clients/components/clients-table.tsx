@@ -1,4 +1,4 @@
-import { Eye, ShieldCheck, Unlock, Users } from 'lucide-react'
+import { Eye, ShieldCheck, Unlock, UserCheck, UserX, Users } from 'lucide-react'
 import { Link } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
-import { getUserDisplayName, LEVEL_LABELS, type Client, type Role } from '../types'
+import { getClientDetailRoute, getUserDisplayName, LEVEL_LABELS, type Client, type Role } from '../types'
 
 interface ClientsTableProps {
   clients: Client[]
@@ -20,6 +20,7 @@ interface ClientsTableProps {
   onUnlock: (client: Client) => void
   onChangeRole: (client: Client) => void
   onManageAssignments: (client: Client) => void
+  onToggleStatus: (client: Client) => void
 }
 
 const dateFormatter = new Intl.DateTimeFormat('es-ES', {
@@ -56,12 +57,31 @@ function getStatusLabel(client: Client) {
   return client.is_active ? 'Activa' : 'Inactiva'
 }
 
+function renderAssignedAdminsCount(client: Client) {
+  const count = client.active_admins_count ?? 0
+
+  if (count === 0) {
+    return (
+      <Badge variant="outline" className="border-status-warning/30 bg-status-warning/10 text-status-warning">
+        Sin admins
+      </Badge>
+    )
+  }
+
+  return (
+    <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-brand-primary">
+      {count} admin{count === 1 ? '' : 's'}
+    </Badge>
+  )
+}
+
 export function ClientsTable({
   clients,
   currentUserRole,
   onUnlock,
   onChangeRole,
   onManageAssignments,
+  onToggleStatus,
 }: ClientsTableProps) {
   return (
     <Table>
@@ -71,6 +91,7 @@ export function ClientsTable({
           <TableHead>Email</TableHead>
           <TableHead>Nivel</TableHead>
           <TableHead>Estado</TableHead>
+          <TableHead>Admins</TableHead>
           <TableHead>Fecha registro</TableHead>
           <TableHead className="text-right">Acciones</TableHead>
         </TableRow>
@@ -105,11 +126,12 @@ export function ClientsTable({
                 {getStatusLabel(client)}
               </Badge>
             </TableCell>
+            <TableCell>{renderAssignedAdminsCount(client)}</TableCell>
             <TableCell className="text-muted-foreground">{dateFormatter.format(new Date(client.created_at))}</TableCell>
             <TableCell>
               <div className="flex flex-wrap justify-end gap-2">
                 <Button variant="ghost" size="sm" asChild>
-                  <Link to={`/clients/${client.id}`}>
+                  <Link to={getClientDetailRoute(client.id, currentUserRole)}>
                     <Eye className="h-4 w-4" />
                     Ver perfil
                   </Link>
@@ -130,6 +152,12 @@ export function ClientsTable({
                   <Button variant="outline" size="sm" onClick={() => onChangeRole(client)}>
                     <ShieldCheck className="h-4 w-4" />
                     Cambiar rol
+                  </Button>
+                )}
+                {currentUserRole === 'SUPER_ADMIN' && (
+                  <Button variant="outline" size="sm" onClick={() => onToggleStatus(client)}>
+                    {client.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                    {client.is_active ? 'Dar de baja' : 'Reactivar'}
                   </Button>
                 )}
               </div>

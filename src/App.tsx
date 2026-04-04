@@ -38,6 +38,8 @@ const router = createBrowserRouter([
           { path: 'dashboard', element: <DashboardPage /> },
           { path: 'clients', element: <ClientsPage /> },
           { path: 'clients/:id', element: <ClientDetailPage /> },
+          { path: 'users', element: <ClientsPage /> },
+          { path: 'users/:id', element: <ClientDetailPage /> },
           { path: 'exercises', element: <ExercisesPage /> },
           { path: 'trainings', element: <TrainingsPage /> },
           { path: 'ingredients', element: <IngredientsPage /> },
