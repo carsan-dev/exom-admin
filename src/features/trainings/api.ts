@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import { normalizeTrainingTags, type TrainingFormValues } from './schemas'
 import type { Training } from './types'
@@ -85,10 +86,14 @@ export function useCreateTraining() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: trainingTagsQueryKey }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+      })
     },
   })
 }
@@ -102,10 +107,14 @@ export function useUpdateTraining() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: trainingTagsQueryKey }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+      })
     },
   })
 }
@@ -119,10 +128,14 @@ export function useDeleteTraining() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: trainingTagsQueryKey }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+      })
     },
   })
 }

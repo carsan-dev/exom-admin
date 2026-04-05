@@ -32,6 +32,8 @@ api.interceptors.response.use(
     if (response.status === 202) {
       const approvalData = response.data?.data ?? response.data
       toast.info(approvalData?.message ?? 'Solicitud enviada para aprobación')
+
+      // Approval requests are a transitional UI state, not a hard failure.
       return Promise.reject(new ApprovalPendingError(approvalData))
     }
 

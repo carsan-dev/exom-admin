@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { invalidateAdminQueries } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { FeedbackItem, FeedbackStats, FeedbackStatusFilter, PaginatedFeedback } from './types'
 
@@ -51,7 +52,10 @@ export function useRespondFeedback() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: feedbackQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        includeDashboard: true,
+        extraQueryKeys: [feedbackQueryKeys.all],
+      })
     },
   })
 }

@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { IngredientFormValues } from './schemas'
 import type { Ingredient, PaginatedResponse } from './types'
@@ -75,7 +76,14 @@ export function useCreateIngredient() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ingredientsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [ingredientsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [ingredientsQueryKeys.all],
+      })
     },
   })
 }
@@ -93,7 +101,14 @@ export function useUpdateIngredient() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ingredientsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [ingredientsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [ingredientsQueryKeys.all],
+      })
     },
   })
 }
@@ -107,7 +122,14 @@ export function useDeleteIngredient() {
       return id
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ingredientsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [ingredientsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [ingredientsQueryKeys.all],
+      })
     },
   })
 }

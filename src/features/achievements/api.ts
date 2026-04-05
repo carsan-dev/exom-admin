@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type {
   AchievementDetail,
@@ -108,7 +109,14 @@ export function useCreateAchievement() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
     },
   })
 }
@@ -121,11 +129,15 @@ export function useUpdateAchievement() {
       const response = await api.put<ApiEnvelope<AchievementListItem>>(`/achievements/${id}`, normalizeAchievementPayload(values))
       return unwrapResponse(response)
     },
-    onSuccess: async (_data, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.detail(variables.id) }),
-      ])
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
     },
   })
 }
@@ -139,7 +151,14 @@ export function useDeleteAchievement() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
     },
   })
 }
@@ -154,11 +173,15 @@ export function useGrantAchievement() {
       })
       return unwrapResponse(response)
     },
-    onSuccess: async (_data, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.detail(variables.id) }),
-      ])
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
     },
   })
 }
@@ -171,11 +194,15 @@ export function useRevokeAchievement() {
       const response = await api.delete<ApiEnvelope<MutationMessage>>(`/achievements/${id}/revoke`, { data: { user_id } })
       return unwrapResponse(response)
     },
-    onSuccess: async (_data, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.detail(variables.id) }),
-      ])
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
     },
   })
 }
@@ -189,7 +216,14 @@ export function useRecomputeAchievements() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: achievementsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [achievementsQueryKeys.all],
+      })
     },
   })
 }

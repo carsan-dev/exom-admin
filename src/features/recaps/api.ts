@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { invalidateAdminQueries } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { PaginatedRecaps, RecapItem, RecapStats, RecapStatusFilter } from './types'
 
@@ -85,10 +86,10 @@ export function useReviewRecap() {
       return unwrapResponse(response)
     },
     onSuccess: async (_data, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: recapsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: recapsQueryKeys.detail(variables.id) }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        includeDashboard: true,
+        extraQueryKeys: [recapsQueryKeys.all, recapsQueryKeys.detail(variables.id)],
+      })
     },
   })
 }
@@ -102,10 +103,10 @@ export function useArchiveRecap() {
       return unwrapResponse(response)
     },
     onSuccess: async (_data, id) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: recapsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: recapsQueryKeys.detail(id) }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        includeDashboard: true,
+        extraQueryKeys: [recapsQueryKeys.all, recapsQueryKeys.detail(id)],
+      })
     },
   })
 }

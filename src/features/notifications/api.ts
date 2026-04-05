@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
 import {
   type ApiEnvelope,
   getApiErrorMessage,
@@ -73,7 +74,14 @@ export function useSendNotification() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: notificationsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [notificationsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [notificationsQueryKeys.all],
+      })
     },
   })
 }
@@ -87,7 +95,14 @@ export function useSendToAllClients() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: notificationsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [notificationsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [notificationsQueryKeys.all],
+      })
     },
   })
 }

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type {
   AssignChallengeValues,
@@ -125,7 +126,14 @@ export function useCreateChallenge() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: challengesQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [challengesQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [challengesQueryKeys.all],
+      })
     },
   })
 }
@@ -138,11 +146,15 @@ export function useUpdateChallenge() {
       const response = await api.put<ApiEnvelope<ChallengeMutationResponse>>(`/challenges/${id}`, normalizeChallengePayload(values))
       return unwrapResponse(response)
     },
-    onSuccess: async (_data, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: challengesQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: challengesQueryKeys.detail(variables.id) }),
-      ])
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [challengesQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [challengesQueryKeys.all],
+      })
     },
   })
 }
@@ -156,7 +168,14 @@ export function useDeleteChallenge() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: challengesQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [challengesQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [challengesQueryKeys.all],
+      })
     },
   })
 }
@@ -169,11 +188,15 @@ export function useAssignChallenge() {
       const response = await api.post<ApiEnvelope<AssignChallengeResponse>>(`/challenges/${id}/assign`, values)
       return unwrapResponse(response)
     },
-    onSuccess: async (_data, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: challengesQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: challengesQueryKeys.detail(variables.id) }),
-      ])
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [challengesQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [challengesQueryKeys.all],
+      })
     },
   })
 }

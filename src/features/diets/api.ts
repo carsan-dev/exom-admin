@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { DietFormValues } from './schemas'
 import type { Diet } from './types'
@@ -76,7 +77,14 @@ export function useCreateDiet() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: dietsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [dietsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [dietsQueryKeys.all],
+      })
     },
   })
 }
@@ -90,7 +98,14 @@ export function useUpdateDiet() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: dietsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [dietsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [dietsQueryKeys.all],
+      })
     },
   })
 }
@@ -104,7 +119,14 @@ export function useDeleteDiet() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: dietsQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [dietsQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [dietsQueryKeys.all],
+      })
     },
   })
 }

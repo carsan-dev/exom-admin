@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { invalidateAdminQueries } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, getApiErrorMessage, getApiErrorStatus, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { CreateAdminFormValues, CreateClientFormValues, UpdateUserFormValues } from './schemas'
 import type {
@@ -180,10 +181,10 @@ export function useCreateClient() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: usersQueryKeys.all }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        includeDashboard: true,
+        extraQueryKeys: [clientsQueryKeys.all, usersQueryKeys.all],
+      })
     },
   })
 }
@@ -201,7 +202,9 @@ export function useCreateAdmin() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: usersQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [usersQueryKeys.all],
+      })
     },
   })
 }
@@ -215,11 +218,10 @@ export function useUnlockUser() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: usersQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: clientAssignmentsQueryKeys.all }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        includeDashboard: true,
+        extraQueryKeys: [clientsQueryKeys.all, usersQueryKeys.all, clientAssignmentsQueryKeys.all],
+      })
     },
   })
 }
@@ -237,11 +239,10 @@ export function useUpdateUser() {
       return unwrapResponse(response)
     },
     onSuccess: async (_data, { userId }) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.detail(userId) }),
-        queryClient.invalidateQueries({ queryKey: usersQueryKeys.all }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        includeDashboard: true,
+        extraQueryKeys: [clientsQueryKeys.all, clientsQueryKeys.detail(userId), usersQueryKeys.all],
+      })
     },
   })
 }
@@ -258,12 +259,15 @@ export function useUpdateUserStatus() {
       return unwrapResponse(response)
     },
     onSuccess: async (_data, { userId }) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.detail(userId) }),
-        queryClient.invalidateQueries({ queryKey: usersQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: clientAssignmentsQueryKeys.all }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        includeDashboard: true,
+        extraQueryKeys: [
+          clientsQueryKeys.all,
+          clientsQueryKeys.detail(userId),
+          usersQueryKeys.all,
+          clientAssignmentsQueryKeys.all,
+        ],
+      })
     },
   })
 }
@@ -280,11 +284,10 @@ export function useUpdateRole() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: usersQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: clientAssignmentsQueryKeys.all }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        includeDashboard: true,
+        extraQueryKeys: [clientsQueryKeys.all, usersQueryKeys.all, clientAssignmentsQueryKeys.all],
+      })
     },
   })
 }
@@ -302,11 +305,10 @@ export function useUpdateClientAssignments() {
       return unwrapResponse(response)
     },
     onSuccess: async (_data, { clientId }) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: clientsQueryKeys.detail(clientId) }),
-        queryClient.invalidateQueries({ queryKey: clientAssignmentsQueryKeys.all }),
-      ])
+      await invalidateAdminQueries(queryClient, {
+        includeDashboard: true,
+        extraQueryKeys: [clientsQueryKeys.all, clientsQueryKeys.detail(clientId), clientAssignmentsQueryKeys.all],
+      })
     },
   })
 }

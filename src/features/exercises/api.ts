@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { ExerciseFormValues } from './schemas'
 import type { Exercise, PaginatedResponse } from './types'
@@ -65,7 +66,14 @@ export function useCreateExercise() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: exercisesQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [exercisesQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [exercisesQueryKeys.all],
+      })
     },
   })
 }
@@ -79,7 +87,14 @@ export function useUpdateExercise() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: exercisesQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [exercisesQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [exercisesQueryKeys.all],
+      })
     },
   })
 }
@@ -93,7 +108,14 @@ export function useDeleteExercise() {
       return unwrapResponse(response)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: exercisesQueryKeys.all })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [exercisesQueryKeys.all],
+      })
+    },
+    onError: async (error) => {
+      await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [exercisesQueryKeys.all],
+      })
     },
   })
 }

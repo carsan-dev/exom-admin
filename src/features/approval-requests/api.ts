@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { approvalManagedResourceQueryKeys, invalidateAdminQueries } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type {
   ApprovalRequest,
@@ -11,6 +12,9 @@ import type {
   ResolveApprovalRequestPayload,
   ResourceApprovalSummary,
 } from './types'
+
+const APPROVAL_LIST_REFETCH_INTERVAL = 15_000
+const APPROVAL_DETAIL_REFETCH_INTERVAL = 10_000
 
 interface ApprovalRequestListFilters {
   status?: ApprovalStatus | 'ALL'
@@ -65,6 +69,9 @@ export function useApprovalRequests(filters: ApprovalRequestFilters, enabled = t
     queryKey: approvalKeys.list(filters),
     enabled,
     retry: shouldRetryQuery,
+    staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
+    refetchInterval: enabled ? APPROVAL_LIST_REFETCH_INTERVAL : false,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedApprovalRequests>>('/approval-requests', {
         params: buildApprovalRequestsQueryParams(filters),
@@ -80,6 +87,9 @@ export function useMyApprovalRequests(filters: MyApprovalRequestFilters, enabled
     queryKey: approvalKeys.my(filters),
     enabled,
     retry: shouldRetryQuery,
+    staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
+    refetchInterval: enabled ? APPROVAL_LIST_REFETCH_INTERVAL : false,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedApprovalRequests>>('/approval-requests/my', {
         params: buildListQueryParams(filters),
@@ -95,6 +105,9 @@ export function useApprovalRequest(id?: string, enabled = true) {
     queryKey: approvalKeys.detail(id),
     enabled: enabled && Boolean(id),
     retry: shouldRetryQuery,
+    staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
+    refetchInterval: enabled && Boolean(id) ? APPROVAL_DETAIL_REFETCH_INTERVAL : false,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       if (!id) {
         throw new Error('Approval request id is required')
@@ -111,7 +124,9 @@ export function useApprovalStats(enabled = true) {
     queryKey: approvalKeys.stats,
     enabled,
     retry: shouldRetryQuery,
-    refetchInterval: enabled ? 30000 : false,
+    staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
+    refetchInterval: enabled ? APPROVAL_LIST_REFETCH_INTERVAL : false,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<ApprovalStats>>('/approval-requests/stats')
       return unwrapResponse(response)
@@ -124,6 +139,9 @@ export function useResourceApprovalStatus(resourceType: string, resourceId?: str
     queryKey: approvalKeys.byResource(resourceType, resourceId),
     enabled: enabled && Boolean(resourceId),
     retry: shouldRetryQuery,
+    staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
+    refetchInterval: enabled && Boolean(resourceId) ? APPROVAL_LIST_REFETCH_INTERVAL : false,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       if (!resourceId) {
         throw new Error('Resource id is required')
@@ -145,6 +163,9 @@ export function useResourceApprovalBatch(resourceType: string, resourceIds: stri
     queryKey: approvalKeys.batch(resourceType, normalizedIds),
     enabled: enabled && normalizedIds.length > 0,
     retry: shouldRetryQuery,
+    staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
+    refetchInterval: enabled && normalizedIds.length > 0 ? APPROVAL_LIST_REFETCH_INTERVAL : false,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<ResourceApprovalSummary[]>>(
         `/approval-requests/resource/${resourceType}/batch`,
@@ -166,12 +187,11 @@ export function useResolveApprovalRequest() {
       const response = await api.put<ApiEnvelope<ApprovalRequest>>(`/approval-requests/${id}/resolve`, values)
       return unwrapResponse(response)
     },
-    onSuccess: async (_data, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: approvalKeys.all }),
-        queryClient.invalidateQueries({ queryKey: approvalKeys.detail(variables.id) }),
-        queryClient.invalidateQueries({ queryKey: approvalKeys.stats }),
-      ])
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        includeApprovalQueries: true,
+        extraQueryKeys: approvalManagedResourceQueryKeys,
+      })
     },
   })
 }
@@ -184,12 +204,10 @@ export function useCancelApprovalRequest() {
       const response = await api.delete<ApiEnvelope<{ message: string }>>(`/approval-requests/${id}`)
       return unwrapResponse(response)
     },
-    onSuccess: async (_data, id) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: approvalKeys.all }),
-        queryClient.invalidateQueries({ queryKey: approvalKeys.detail(id) }),
-        queryClient.invalidateQueries({ queryKey: approvalKeys.stats }),
-      ])
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        includeApprovalQueries: true,
+      })
     },
   })
 }
