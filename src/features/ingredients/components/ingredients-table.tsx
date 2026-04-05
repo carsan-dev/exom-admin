@@ -15,15 +15,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { formatMacroValue, formatUpdatedAt, type Ingredient } from '../types'
+
+interface IngredientApprovalSummary {
+  pending_approval_actions: string[]
+}
 
 interface IngredientsTableProps {
   ingredients: Ingredient[]
+  approvalById?: Record<string, IngredientApprovalSummary>
   onEdit: (ingredient: Ingredient) => void
   onDelete: (ingredient: Ingredient) => void
 }
 
-export function IngredientsTable({ ingredients, onEdit, onDelete }: IngredientsTableProps) {
+export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDelete }: IngredientsTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -42,11 +48,12 @@ export function IngredientsTable({ ingredients, onEdit, onDelete }: IngredientsT
         {ingredients.map((ingredient) => (
           <TableRow key={ingredient.id}>
             <TableCell>
-              <div className="space-y-1">
-                <p className="font-medium text-foreground">{ingredient.name}</p>
-                <div className="text-xs text-muted-foreground md:hidden">
-                  P {formatMacroValue(ingredient.protein_per_100g)} g · C {formatMacroValue(ingredient.carbs_per_100g)} g · G {formatMacroValue(ingredient.fat_per_100g)} g
-                </div>
+                <div className="space-y-1">
+                  <p className="font-medium text-foreground">{ingredient.name}</p>
+                  <ResourceApprovalIndicator pendingActions={approvalById[ingredient.id]?.pending_approval_actions ?? []} />
+                  <div className="text-xs text-muted-foreground md:hidden">
+                    P {formatMacroValue(ingredient.protein_per_100g)} g · C {formatMacroValue(ingredient.carbs_per_100g)} g · G {formatMacroValue(ingredient.fat_per_100g)} g
+                  </div>
               </div>
             </TableCell>
 

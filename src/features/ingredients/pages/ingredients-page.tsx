@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useResourceApprovalBatch } from '@/features/approval-requests/api'
+import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import { getApiErrorMessage, useIngredients } from '../api'
 import { DeleteIngredientDialog } from '../components/delete-ingredient-dialog'
 import { IngredientFormDialog } from '../components/ingredient-form-dialog'
@@ -44,6 +46,8 @@ export function IngredientsPage() {
 
   const ingredientsQuery = useIngredients(page, PAGE_SIZE, activeSearch)
   const ingredients = ingredientsQuery.data?.data ?? []
+  const ingredientApprovalQuery = useResourceApprovalBatch('ingredient', ingredients.map((ingredient) => ingredient.id))
+  const ingredientApprovalById = buildResourceApprovalMap(ingredientApprovalQuery.data ?? [])
   const total = ingredientsQuery.data?.total ?? 0
   const totalPages = Math.max(1, ingredientsQuery.data?.totalPages ?? 1)
   const isSearching = activeSearch.length > 0
@@ -146,6 +150,7 @@ export function IngredientsPage() {
             ) : (
               <IngredientsTable
                 ingredients={ingredients}
+                approvalById={ingredientApprovalById}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { isApprovalPendingError } from '@/lib/api-utils'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -83,6 +84,11 @@ export function IngredientFormDialog({ open, onOpenChange, ingredient, onSaved }
       onSaved?.()
       onOpenChange(false)
     } catch (error) {
+      if (isApprovalPendingError(error)) {
+        onOpenChange(false)
+        return
+      }
+
       const action = isEditing ? 'actualizar' : 'crear'
       toast.error(getApiErrorMessage(error, `No se ha podido ${action} el ingrediente`))
     }

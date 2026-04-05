@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { LEVEL_LABELS, LEVEL_OPTIONS } from '../../exercises/types'
+import { isApprovalPendingError } from '@/lib/api-utils'
 import { getApiErrorMessage, useCreateTraining, useTrainingTags, useUpdateTraining } from '../api'
 import {
   getTrainingTagKey,
@@ -340,6 +341,11 @@ export function TrainingFormDialog({
         onSaved?.()
         onOpenChange(false)
       } catch (error) {
+        if (isApprovalPendingError(error)) {
+          onOpenChange(false)
+          return
+        }
+
         const action = isEditing ? 'actualizar' : 'crear'
         toast.error(getApiErrorMessage(error, `No se ha podido ${action} el entrenamiento`))
       }

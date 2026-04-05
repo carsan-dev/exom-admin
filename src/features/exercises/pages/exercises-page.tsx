@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { normalizeSearchText } from '@/lib/search'
+import { useResourceApprovalBatch } from '@/features/approval-requests/api'
+import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import { getApiErrorMessage, useExercises } from '../api'
 import { DeleteExerciseDialog } from '../components/delete-exercise-dialog'
 import { ExerciseDetailDialog } from '../components/exercise-detail-dialog'
@@ -41,6 +43,8 @@ export function ExercisesPage() {
 
   const exercisesQuery = useExercises(page, PAGE_SIZE)
   const allExercises = exercisesQuery.data?.data ?? []
+  const exerciseApprovalQuery = useResourceApprovalBatch('exercise', allExercises.map((exercise) => exercise.id))
+  const exerciseApprovalById = buildResourceApprovalMap(exerciseApprovalQuery.data ?? [])
   const total = exercisesQuery.data?.total ?? 0
   const totalPages = exercisesQuery.data?.totalPages ?? 1
   const normalizedSearch = normalizeSearchText(search.trim())
@@ -156,6 +160,7 @@ export function ExercisesPage() {
             ) : (
               <ExercisesTable
                 exercises={exercises}
+                approvalById={exerciseApprovalById}
                 onView={handleView}
                 onEdit={handleEdit}
                 onDelete={handleDelete}

@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { ImageUploadField } from '@/components/uploads/image-upload-field'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { isApprovalPendingError } from '@/lib/api-utils'
 import {
   Dialog,
   DialogContent,
@@ -431,6 +432,11 @@ export function DietFormDialog({
         onSaved?.()
         onOpenChange(false)
       } catch (error) {
+        if (isApprovalPendingError(error)) {
+          handleDialogOpenChange(false)
+          return
+        }
+
         const action = isEditing ? 'actualizar' : 'crear'
         toast.error(getApiErrorMessage(error, `No se ha podido ${action} la dieta`))
       }

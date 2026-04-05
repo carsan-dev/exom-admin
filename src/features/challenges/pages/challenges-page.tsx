@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useResourceApprovalBatch } from '@/features/approval-requests/api'
+import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import {
   Select,
   SelectContent,
@@ -89,6 +91,8 @@ export function ChallengesPage() {
   const challengesQuery = useChallenges(filters)
   const data = challengesQuery.data
   const items = data?.data ?? []
+  const challengeApprovalQuery = useResourceApprovalBatch('challenge', items.map((item) => item.id))
+  const challengeApprovalById = buildResourceApprovalMap(challengeApprovalQuery.data ?? [])
   const totalPages = data?.totalPages ?? 1
   const hasActiveFilters = Boolean(search) || type !== 'ALL' || source !== 'ALL' || scope !== 'ALL' || completionStatus !== 'ALL'
 
@@ -287,6 +291,7 @@ export function ChallengesPage() {
 
       <ChallengesTable
         items={items}
+        approvalById={challengeApprovalById}
         page={page}
         totalPages={totalPages}
         isLoading={challengesQuery.isLoading}

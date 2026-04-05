@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { normalizeSearchText } from '@/lib/search'
+import { useResourceApprovalBatch } from '@/features/approval-requests/api'
+import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import { getApiErrorMessage, useDiets } from '../api'
 import { DeleteDietDialog } from '../components/delete-diet-dialog'
 import { DietDetailDialog } from '../components/diet-detail-dialog'
@@ -42,6 +44,8 @@ export function DietsPage() {
 
   const dietsQuery = useDiets(page, PAGE_SIZE)
   const allDiets = dietsQuery.data?.data ?? []
+  const dietApprovalQuery = useResourceApprovalBatch('diet', allDiets.map((diet) => diet.id))
+  const dietApprovalById = buildResourceApprovalMap(dietApprovalQuery.data ?? [])
   const total = dietsQuery.data?.total ?? 0
   const totalPages = dietsQuery.data?.totalPages ?? 1
   const normalizedSearch = normalizeSearchText(search.trim())
@@ -180,6 +184,7 @@ export function DietsPage() {
             ) : (
               <DietsTable
                 diets={diets}
+                approvalById={dietApprovalById}
                 onView={handleView}
                 onEdit={handleEdit}
                 onDuplicate={handleDuplicate}

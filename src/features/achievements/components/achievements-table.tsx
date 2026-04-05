@@ -16,9 +16,15 @@ import {
   isAutomaticAchievement,
   type AchievementListItem,
 } from '../types'
+import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
+
+interface AchievementApprovalSummary {
+  pending_approval_actions: string[]
+}
 
 interface AchievementsTableProps {
   items: AchievementListItem[]
+  approvalById?: Record<string, AchievementApprovalSummary>
   page: number
   totalPages: number
   isLoading: boolean
@@ -37,6 +43,7 @@ interface AchievementsTableProps {
 
 export function AchievementsTable({
   items,
+  approvalById = {},
   page,
   totalPages,
   isLoading,
@@ -146,6 +153,7 @@ export function AchievementsTable({
                 <TableCell>
                   <div className="space-y-1">
                     <p className="font-medium text-foreground">{achievement.name}</p>
+                    <ResourceApprovalIndicator pendingActions={approvalById[achievement.id]?.pending_approval_actions ?? []} />
                     <p className="max-w-sm text-sm text-muted-foreground">{achievement.description}</p>
                   </div>
                 </TableCell>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
+import { isApprovalPendingError } from '@/lib/api-utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -80,6 +81,10 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
       await revokeAchievement.mutateAsync({ id: achievement.id, user_id: userId })
       toast.success('Logro revocado correctamente')
     } catch (error) {
+      if (isApprovalPendingError(error)) {
+        return
+      }
+
       toast.error(getApiErrorMessage(error, 'No se ha podido revocar el logro'))
     }
   }
@@ -102,6 +107,10 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
       })
       toast.success(getRecomputeToastMessage(result))
     } catch (error) {
+      if (isApprovalPendingError(error)) {
+        return
+      }
+
       toast.error(getApiErrorMessage(error, 'No se ha podido recalcular el logro'))
     }
   }
@@ -119,6 +128,11 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
       toast.success(getRecomputeToastMessage(result))
       setSelectedUserIds([])
     } catch (error) {
+      if (isApprovalPendingError(error)) {
+        setSelectedUserIds([])
+        return
+      }
+
       toast.error(getApiErrorMessage(error, 'No se ha podido recalcular la selección'))
     }
   }

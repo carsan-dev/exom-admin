@@ -1,5 +1,6 @@
 import type { MouseEvent } from 'react'
 import { toast } from 'sonner'
+import { isApprovalPendingError } from '@/lib/api-utils'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +37,11 @@ export function DeleteChallengeDialog({ challenge, open, onOpenChange, onDeleted
       onDeleted?.()
       onOpenChange(false)
     } catch (error) {
+      if (isApprovalPendingError(error)) {
+        onOpenChange(false)
+        return
+      }
+
       toast.error(getApiErrorMessage(error, 'No se ha podido eliminar el reto'))
     }
   }

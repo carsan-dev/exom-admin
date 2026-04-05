@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Check, Search, Users } from 'lucide-react'
 import { toast } from 'sonner'
+import { isApprovalPendingError } from '@/lib/api-utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -90,6 +91,11 @@ export function GrantAchievementDialog({ achievement, open, onOpenChange, onGran
       onGranted?.()
       onOpenChange(false)
     } catch (error) {
+      if (isApprovalPendingError(error)) {
+        onOpenChange(false)
+        return
+      }
+
       setSubmitError(getApiErrorMessage(error, 'No se ha podido otorgar el logro'))
     }
   }

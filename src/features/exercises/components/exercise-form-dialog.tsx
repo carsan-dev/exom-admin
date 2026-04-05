@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { isApprovalPendingError } from '@/lib/api-utils'
 import { getApiErrorMessage, useCreateExercise, useUpdateExercise } from '../api'
 import { exerciseSchema, type ExerciseFormValues } from '../schemas'
 import {
@@ -219,6 +220,11 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, onSaved }: Ex
       onSaved?.()
       onOpenChange(false)
     } catch (error) {
+      if (isApprovalPendingError(error)) {
+        onOpenChange(false)
+        return
+      }
+
       const action = isEditing ? 'actualizar' : 'crear'
       toast.error(getApiErrorMessage(error, `No se ha podido ${action} el ejercicio`))
     }

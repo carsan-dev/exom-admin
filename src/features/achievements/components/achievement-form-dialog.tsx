@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
+import { isApprovalPendingError } from '@/lib/api-utils'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -92,6 +93,11 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
       onSubmitted?.()
       onOpenChange(false)
     } catch (error) {
+      if (isApprovalPendingError(error)) {
+        onOpenChange(false)
+        return
+      }
+
       toast.error(
         getApiErrorMessage(
           error,

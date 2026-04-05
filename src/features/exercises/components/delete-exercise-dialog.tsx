@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { isApprovalPendingError } from '@/lib/api-utils'
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,11 @@ export function DeleteExerciseDialog({ exercise, open, onOpenChange, onDeleted }
       onDeleted?.()
       onOpenChange(false)
     } catch (error) {
+      if (isApprovalPendingError(error)) {
+        onOpenChange(false)
+        return
+      }
+
       toast.error(getApiErrorMessage(error, 'No se ha podido eliminar el ejercicio'))
     }
   }

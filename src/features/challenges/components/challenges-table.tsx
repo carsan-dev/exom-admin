@@ -18,9 +18,15 @@ import {
   getChallengeTypeLabel,
   type ChallengeListItem,
 } from '../types'
+import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
+
+interface ChallengeApprovalSummary {
+  pending_approval_actions: string[]
+}
 
 interface ChallengesTableProps {
   items: ChallengeListItem[]
+  approvalById?: Record<string, ChallengeApprovalSummary>
   page: number
   totalPages: number
   isLoading: boolean
@@ -68,6 +74,7 @@ function getModeBadgeClass(challenge: ChallengeListItem) {
 
 export function ChallengesTable({
   items,
+  approvalById = {},
   page,
   totalPages,
   isLoading,
@@ -184,6 +191,7 @@ export function ChallengesTable({
                         <Badge variant="outline" className={cn('font-medium', getModeBadgeClass(challenge))}>
                           {challenge.is_manual ? 'Manual' : 'Automático'}
                         </Badge>
+                        <ResourceApprovalIndicator pendingActions={approvalById[challenge.id]?.pending_approval_actions ?? []} />
                       </div>
                       <p className="max-w-lg text-sm text-muted-foreground">{challenge.description}</p>
                     </div>

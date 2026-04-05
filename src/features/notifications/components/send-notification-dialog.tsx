@@ -4,6 +4,7 @@ import { AlertTriangle, Check, ChevronsUpDown, SendHorizonal, X } from 'lucide-r
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { isApprovalPendingError } from '@/lib/api-utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -321,6 +322,11 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
 
       onOpenChange(false)
     } catch (error) {
+      if (isApprovalPendingError(error)) {
+        onOpenChange(false)
+        return
+      }
+
       toast.error(getApiErrorMessage(error, 'No se ha podido enviar la notificación'))
     }
   })

@@ -17,16 +17,22 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { getLevelBadgeClass, LEVEL_LABELS, type Exercise } from '../types'
+
+interface ExerciseApprovalSummary {
+  pending_approval_actions: string[]
+}
 
 interface ExercisesTableProps {
   exercises: Exercise[]
+  approvalById?: Record<string, ExerciseApprovalSummary>
   onView: (exercise: Exercise) => void
   onEdit: (exercise: Exercise) => void
   onDelete: (exercise: Exercise) => void
 }
 
-export function ExercisesTable({ exercises, onView, onEdit, onDelete }: ExercisesTableProps) {
+export function ExercisesTable({ exercises, approvalById = {}, onView, onEdit, onDelete }: ExercisesTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -42,7 +48,12 @@ export function ExercisesTable({ exercises, onView, onEdit, onDelete }: Exercise
       <TableBody>
         {exercises.map((exercise) => (
           <TableRow key={exercise.id}>
-            <TableCell className="font-medium text-foreground">{exercise.name}</TableCell>
+            <TableCell>
+              <div className="space-y-2">
+                <p className="font-medium text-foreground">{exercise.name}</p>
+                <ResourceApprovalIndicator pendingActions={approvalById[exercise.id]?.pending_approval_actions ?? []} />
+              </div>
+            </TableCell>
 
             <TableCell>
               <div className="flex flex-wrap gap-1">

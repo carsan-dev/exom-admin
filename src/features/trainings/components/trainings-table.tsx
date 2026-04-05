@@ -23,16 +23,22 @@ import {
   TRAINING_TYPE_LABELS,
   type Training,
 } from '../types'
+import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
+
+interface TrainingApprovalSummary {
+  pending_approval_actions: string[]
+}
 
 interface TrainingsTableProps {
   trainings: Training[]
+  approvalById?: Record<string, TrainingApprovalSummary>
   onView: (training: Training) => void
   onEdit: (training: Training) => void
   onDuplicate: (training: Training) => void
   onDelete: (training: Training) => void
 }
 
-export function TrainingsTable({ trainings, onView, onEdit, onDuplicate, onDelete }: TrainingsTableProps) {
+export function TrainingsTable({ trainings, approvalById = {}, onView, onEdit, onDuplicate, onDelete }: TrainingsTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -51,7 +57,10 @@ export function TrainingsTable({ trainings, onView, onEdit, onDuplicate, onDelet
         {trainings.map((training) => (
           <TableRow key={training.id}>
             <TableCell className="font-medium text-foreground max-w-[200px] truncate">
-              {training.name}
+              <div className="space-y-2">
+                <p className="truncate">{training.name}</p>
+                <ResourceApprovalIndicator pendingActions={approvalById[training.id]?.pending_approval_actions ?? []} />
+              </div>
             </TableCell>
 
             <TableCell>

@@ -6,6 +6,22 @@ export interface ApiEnvelope<T> {
   timestamp: string
 }
 
+export class ApprovalPendingError extends Error {
+  public readonly approvalRequestId: string
+  public readonly alreadyExists: boolean
+
+  constructor(data: { approval_request_id: string; already_exists?: boolean }) {
+    super('Approval pending')
+    this.name = 'ApprovalPendingError'
+    this.approvalRequestId = data.approval_request_id
+    this.alreadyExists = data.already_exists ?? false
+  }
+}
+
+export function isApprovalPendingError(error: unknown): error is ApprovalPendingError {
+  return error instanceof ApprovalPendingError
+}
+
 interface ApiErrorResponse {
   statusCode?: number
   message?: string | string[]

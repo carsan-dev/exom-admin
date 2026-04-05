@@ -17,18 +17,24 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { formatUpdatedAt } from '../../ingredients/types'
 import { getMealTypeBadgeClass, type Diet } from '../types'
 
+interface DietApprovalSummary {
+  pending_approval_actions: string[]
+}
+
 interface DietsTableProps {
   diets: Diet[]
+  approvalById?: Record<string, DietApprovalSummary>
   onView: (diet: Diet) => void
   onEdit: (diet: Diet) => void
   onDuplicate: (diet: Diet) => void
   onDelete: (diet: Diet) => void
 }
 
-export function DietsTable({ diets, onView, onEdit, onDuplicate, onDelete }: DietsTableProps) {
+export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplicate, onDelete }: DietsTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -47,7 +53,10 @@ export function DietsTable({ diets, onView, onEdit, onDuplicate, onDelete }: Die
           return (
             <TableRow key={diet.id}>
               <TableCell className="font-medium text-foreground max-w-[200px] truncate">
-                {diet.name}
+                <div className="space-y-2">
+                  <p className="truncate">{diet.name}</p>
+                  <ResourceApprovalIndicator pendingActions={approvalById[diet.id]?.pending_approval_actions ?? []} />
+                </div>
               </TableCell>
 
               <TableCell className="text-center">

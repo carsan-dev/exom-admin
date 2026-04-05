@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { normalizeSearchText } from '@/lib/search'
+import { useResourceApprovalBatch } from '@/features/approval-requests/api'
+import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import { getApiErrorMessage, useTrainings } from '../api'
 import { DeleteTrainingDialog } from '../components/delete-training-dialog'
 import { TrainingDetailDialog } from '../components/training-detail-dialog'
@@ -42,6 +44,8 @@ export function TrainingsPage() {
 
   const trainingsQuery = useTrainings(page, PAGE_SIZE)
   const allTrainings = trainingsQuery.data?.data ?? []
+  const trainingApprovalQuery = useResourceApprovalBatch('training', allTrainings.map((training) => training.id))
+  const trainingApprovalById = buildResourceApprovalMap(trainingApprovalQuery.data ?? [])
   const total = trainingsQuery.data?.total ?? 0
   const totalPages = trainingsQuery.data?.totalPages ?? 1
   const normalizedSearch = normalizeSearchText(search.trim())
@@ -187,6 +191,7 @@ export function TrainingsPage() {
             ) : (
               <TrainingsTable
                 trainings={trainings}
+                approvalById={trainingApprovalById}
                 onView={handleView}
                 onEdit={handleEdit}
                 onDuplicate={handleDuplicate}

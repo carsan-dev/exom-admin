@@ -1,5 +1,7 @@
 import axios from 'axios'
+import { toast } from 'sonner'
 import { getIdToken } from './firebase'
+import { ApprovalPendingError } from './api-utils'
 
 const AUTH_ROUTES_WITHOUT_REDIRECT = new Set([
   '/auth/login',
@@ -26,7 +28,15 @@ api.interceptors.request.use(async (config) => {
 
 // Response interceptor — handle auth errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.status === 202) {
+      const approvalData = response.data?.data ?? response.data
+      toast.info(approvalData?.message ?? 'Solicitud enviada para aprobación')
+      return Promise.reject(new ApprovalPendingError(approvalData))
+    }
+
+    return response
+  },
   (error) => {
     const requestUrl = error.config?.url as string | undefined
     const shouldSkipRedirect = requestUrl

@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router'
 import { useAuth } from '@/hooks/use-auth'
+import { useResourceApprovalBatch } from '@/features/approval-requests/api'
+import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -67,6 +69,8 @@ export function AchievementsPage() {
   const achievementsQuery = useAchievements(filters)
   const data = achievementsQuery.data
   const items = data?.data ?? []
+  const achievementApprovalQuery = useResourceApprovalBatch('achievement', items.map((item) => item.id))
+  const achievementApprovalById = buildResourceApprovalMap(achievementApprovalQuery.data ?? [])
   const totalPages = data?.totalPages ?? 1
   const hasActiveFilters = Boolean(search) || criteriaType !== 'ALL'
 
@@ -197,6 +201,7 @@ export function AchievementsPage() {
 
       <AchievementsTable
         items={items}
+        approvalById={achievementApprovalById}
         page={page}
         totalPages={totalPages}
         isLoading={achievementsQuery.isLoading}
