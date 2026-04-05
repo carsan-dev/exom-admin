@@ -18,7 +18,7 @@ const dateFormatter = new Intl.DateTimeFormat('es-ES', {
 })
 
 export function DayProgressDetail({ date, progress, isLoading }: DayProgressDetailProps) {
-  const formattedDate = dateFormatter.format(new Date(date + 'T00:00:00'))
+  const formattedDate = dateFormatter.format(new Date(date + 'T12:00:00Z'))
 
   return (
     <Card>

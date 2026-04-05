@@ -66,9 +66,9 @@ export function ProgressCalendar({
   }
 
   // Build grid: first weekday of the month (Monday-based, 0=Mon)
-  const firstDay = new Date(year, month - 1, 1)
-  const firstWeekday = (firstDay.getDay() + 6) % 7 // 0=Mon
-  const daysInMonth = new Date(year, month, 0).getDate()
+  const firstDay = new Date(Date.UTC(year, month - 1, 1))
+  const firstWeekday = (firstDay.getUTCDay() + 6) % 7 // 0=Mon
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate()
 
   const gridCells: (string | null)[] = [
     ...Array.from({ length: firstWeekday }, () => null),

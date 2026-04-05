@@ -21,10 +21,11 @@ function getTodayStr() {
 }
 
 function getWeekStart(dateStr: string) {
-  const date = new Date(dateStr + 'T00:00:00')
-  const day = date.getDay()
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const date = new Date(Date.UTC(y, m - 1, d))
+  const day = date.getUTCDay()
   const diff = (day + 6) % 7 // Monday-based
-  date.setDate(date.getDate() - diff)
+  date.setUTCDate(date.getUTCDate() - diff)
   return date.toISOString().split('T')[0]
 }
 

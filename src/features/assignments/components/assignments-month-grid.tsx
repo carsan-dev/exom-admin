@@ -24,7 +24,7 @@ export function AssignmentsMonthGrid({
   const orderedDays = [...days].sort(compareByDate)
   const firstVisibleDay = orderedDays[0]
   const leadingEmptyCells = firstVisibleDay
-    ? Math.max(parseISO(firstVisibleDay.date).getDay() + 6, 0) % 7
+    ? (parseISO(firstVisibleDay.date).getUTCDay() + 6) % 7
     : 0
   const totalCells = leadingEmptyCells + orderedDays.length
   const trailingEmptyCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7)
