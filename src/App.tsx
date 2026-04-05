@@ -20,6 +20,7 @@ import { ChallengesPage } from '@/features/challenges/pages/challenges-page'
 import { AchievementsPage } from '@/features/achievements/pages/achievements-page'
 import { NotificationsPage } from '@/features/notifications/pages/notifications-page'
 import { ClientDetailPage } from '@/features/clients/pages/client-detail-page'
+import { ApprovalRequestsPage } from '@/features/approval-requests/pages/approval-requests-page'
 import { Toaster } from '@/components/ui/sonner'
 
 const router = createBrowserRouter([
@@ -52,6 +53,7 @@ const router = createBrowserRouter([
           { path: 'challenges', element: <ChallengesPage /> },
           { path: 'achievements', element: <AchievementsPage /> },
           { path: 'notifications', element: <NotificationsPage /> },
+          { path: 'approval-requests', element: <ApprovalRequestsPage /> },
         ],
       },
     ],

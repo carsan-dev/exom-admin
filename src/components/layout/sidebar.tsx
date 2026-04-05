@@ -14,11 +14,14 @@ import {
   Trophy,
   Award,
   Bell,
+  ShieldCheck,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Badge } from '@/components/ui/badge'
 import { getUsersRoute } from '@/features/clients/types'
+import { useApprovalStats } from '@/features/approval-requests/api'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -34,6 +37,7 @@ const navItems = [
   { to: '/challenges', label: 'Retos', icon: Trophy },
   { to: '/achievements', label: 'Logros', icon: Award },
   { to: '/notifications', label: 'Notificaciones', icon: Bell },
+  { to: '/approval-requests', label: 'Solicitudes', icon: ShieldCheck },
 ]
 
 interface SidebarProps {
@@ -43,6 +47,8 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const currentUserRole = useAuth((state) => state.user?.role)
+  const approvalStatsQuery = useApprovalStats(currentUserRole === 'SUPER_ADMIN')
+  const pendingApprovals = approvalStatsQuery.data?.pending ?? 0
   const resolvedNavItems = navItems.map((item) =>
     item.to === '/clients' && currentUserRole === 'SUPER_ADMIN'
       ? { ...item, to: getUsersRoute(currentUserRole), label: 'Usuarios' }
@@ -71,7 +77,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex flex-1 flex-col overflow-y-auto px-2 py-4">
-        {resolvedNavItems.map(({ to, label, icon: Icon }, index) => (
+        {resolvedNavItems.map(({ to, label, icon: Icon }, index) => {
+          const approvalBadge = to === '/approval-requests' && currentUserRole === 'SUPER_ADMIN' && pendingApprovals > 0
+            ? pendingApprovals
+            : null
+
+          return (
           <Fragment key={to}>
             {isOpen ? (
               <NavLink
@@ -92,7 +103,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   <span className="flex h-5 w-5 items-center justify-center">
                     <Icon className="h-5 w-5 shrink-0" />
                   </span>
-                  <span className="truncate whitespace-nowrap leading-none">{label}</span>
+                  <span className="flex min-w-0 items-center justify-between gap-2">
+                    <span className="truncate whitespace-nowrap leading-none">{label}</span>
+                    {approvalBadge ? (
+                      <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+                        {approvalBadge}
+                      </Badge>
+                    ) : null}
+                  </span>
                 </span>
               </NavLink>
             ) : (
@@ -118,12 +136,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   </NavLink>
                 </TooltipTrigger>
                 <TooltipContent side="right">
-                  <p>{label}</p>
+                  <p>{approvalBadge ? `${label} (${approvalBadge})` : label}</p>
                 </TooltipContent>
               </Tooltip>
             )}
           </Fragment>
-        ))}
+          )
+        })}
       </nav>
     </aside>
   )
