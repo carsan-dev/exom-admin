@@ -23,6 +23,8 @@ import { ClientDetailPage } from '@/features/clients/pages/client-detail-page'
 import { ApprovalRequestsPage } from '@/features/approval-requests/pages/approval-requests-page'
 import { OnboardingPage } from '@/features/auth/pages/onboarding-page'
 import { Toaster } from '@/components/ui/sonner'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 const router = createBrowserRouter([
   {
@@ -70,6 +72,8 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
       <Toaster closeButton richColors />
+      <Analytics />
+      <SpeedInsights />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
