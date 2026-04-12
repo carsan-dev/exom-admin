@@ -56,7 +56,7 @@ export function DashboardPage() {
   const currentUser = useAuth((state) => state.user)
   const { data, isError, isFetching, isLoading, refetch, error } = useDashboard()
 
-  const adminName = currentUser?.profile.first_name || currentUser?.email || 'admin'
+  const adminName = currentUser?.profile?.first_name || currentUser?.email || 'admin'
 
   if (isLoading) {
     return <DashboardPageSkeleton />

@@ -6,5 +6,5 @@ export interface AuthUser {
     first_name: string
     last_name: string
     avatar_url: string | null
-  }
+  } | null
 }

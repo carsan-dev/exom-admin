@@ -105,7 +105,28 @@ export const useAuth = create<AuthStore>()((set) => ({
         }
 
         set({ user, isAuthenticated: true, isLoading: false, error: null })
-      } catch {
+      } catch (err) {
+        // Profile not found (404) — user exists but has no profile yet
+        if (axios.isAxiosError(err) && err.response?.status === 404) {
+          try {
+            const meRes = await api.get<{ data: { id: string; email: string; role: string } }>('/auth/me')
+            const me = meRes.data.data
+            if (!validateRole(me.role)) {
+              await signOut(auth)
+              set({ user: null, isAuthenticated: false, isLoading: false, error: 'UNAUTHORIZED' })
+              return
+            }
+            set({
+              user: { id: me.id, email: me.email, role: me.role as 'ADMIN' | 'SUPER_ADMIN', profile: null },
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+            })
+            return
+          } catch {
+            // fall through to sign out
+          }
+        }
         await signOut(auth)
         set({ user: null, isAuthenticated: false, isLoading: false })
       }
@@ -164,7 +185,15 @@ export const useAuth = create<AuthStore>()((set) => ({
         return
       }
 
-      set({ user, isAuthenticated: true, isLoading: false, error: null })
+      // profile may be null if user has no profile yet
+      const authUser: AuthUser = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        profile: user.profile ?? null,
+      }
+
+      set({ user: authUser, isAuthenticated: true, isLoading: false, error: null })
     } catch {
       set({ isLoading: false, error: 'Error al iniciar sesión con Google' })
     }

@@ -21,11 +21,11 @@ export function Header({ onMenuToggle }: HeaderProps) {
   const { theme, toggle: toggleTheme } = useTheme()
   const { user, logout } = useAuth()
 
-  const initials = user
+  const initials = user?.profile
     ? `${user.profile.first_name[0] ?? ''}${user.profile.last_name[0] ?? ''}`.toUpperCase()
     : 'AD'
 
-  const fullName = user
+  const fullName = user?.profile
     ? `${user.profile.first_name} ${user.profile.last_name}`
     : 'Administrador'
 
@@ -53,7 +53,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 h-auto px-2 py-1">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.profile.avatar_url ?? undefined} alt={fullName} />
+                <AvatarImage src={user?.profile?.avatar_url ?? undefined} alt={fullName} />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <span className="hidden sm:block text-sm font-medium">{fullName}</span>

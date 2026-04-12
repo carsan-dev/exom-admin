@@ -21,6 +21,7 @@ import { AchievementsPage } from '@/features/achievements/pages/achievements-pag
 import { NotificationsPage } from '@/features/notifications/pages/notifications-page'
 import { ClientDetailPage } from '@/features/clients/pages/client-detail-page'
 import { ApprovalRequestsPage } from '@/features/approval-requests/pages/approval-requests-page'
+import { OnboardingPage } from '@/features/auth/pages/onboarding-page'
 import { Toaster } from '@/components/ui/sonner'
 
 const router = createBrowserRouter([
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
     path: '/',
     element: <ProtectedRoute />,
     children: [
+      {
+        path: 'onboarding',
+        element: <OnboardingPage />,
+      },
       {
         element: <AppLayout />,
         children: [
