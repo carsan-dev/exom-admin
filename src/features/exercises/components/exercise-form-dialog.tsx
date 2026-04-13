@@ -336,6 +336,7 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, onSaved }: Ex
                       label="Video"
                       value={field.value ?? ''}
                       onChange={field.onChange}
+                      onThumbnailChange={(url) => form.setValue('thumbnail_url', url)}
                       disabled={isPending}
                     />
                   </FormControl>

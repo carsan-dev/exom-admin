@@ -1,37 +1,42 @@
 import { useRef, useState } from 'react'
-import { Upload, X, Play } from 'lucide-react'
+import { Upload, X, Play, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { compressVideo } from '@/lib/video-compressor'
 import { getApiErrorMessage, useUploadFile } from '../api'
 
 interface VideoUploadFieldProps {
   value: string
   onChange: (url: string) => void
+  onThumbnailChange?: (url: string) => void
   label?: string
   disabled?: boolean
 }
 
 const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
-const MAX_SIZE_BYTES = 100 * 1024 * 1024 // 100 MB
+const MAX_SIZE_BYTES = 200 * 1024 * 1024 // 200 MB pre-compression
 
 function getExtension(filename: string) {
   return filename.split('.').pop()?.toLowerCase() ?? 'mp4'
 }
 
+type UploadPhase = 'idle' | 'compressing' | 'uploading'
+
 export function VideoUploadField({
   value,
   onChange,
+  onThumbnailChange,
   label = 'Video',
   disabled = false,
 }: VideoUploadFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [progress, setProgress] = useState<number | null>(null)
+  const [phase, setPhase] = useState<UploadPhase>('idle')
+  const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const uploadFile = useUploadFile()
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!e.target) return
-    // Reset input so same file can be re-selected
     e.target.value = ''
 
     if (!file) return
@@ -42,40 +47,65 @@ export function VideoUploadField({
     }
 
     if (file.size > MAX_SIZE_BYTES) {
-      setError('El archivo supera el límite de 100 MB')
+      setError('El archivo supera el límite de 200 MB')
       return
     }
 
     setError(null)
+    setPhase('compressing')
     setProgress(0)
 
     try {
-      const ext = getExtension(file.name)
+      // Compress video + generate thumbnail
+      const { video: compressed, thumbnail } = await compressVideo(file, (ratio) => {
+        setProgress(Math.round(ratio * 100))
+      })
+
+      // Upload compressed video
+      setPhase('uploading')
+      setProgress(0)
+
       const uuid = crypto.randomUUID()
-      const fileKey = `exercises/videos/${uuid}.${ext}`
+      const videoKey = `exercises/videos/${uuid}.mp4`
 
       const { file_url } = await uploadFile.mutateAsync({
-        file,
-        file_key: fileKey,
-        content_type: file.type,
+        file: compressed,
+        file_key: videoKey,
+        content_type: 'video/mp4',
         onProgress: setProgress,
       })
 
       onChange(file_url)
-      setProgress(null)
+
+      // Upload thumbnail
+      if (onThumbnailChange) {
+        const thumbKey = `exercises/thumbnails/${uuid}.jpg`
+        const { file_url: thumbUrl } = await uploadFile.mutateAsync({
+          file: thumbnail,
+          file_key: thumbKey,
+          content_type: 'image/jpeg',
+        })
+        onThumbnailChange(thumbUrl)
+      }
+
+      setPhase('idle')
+      setProgress(0)
     } catch (err) {
       setError(getApiErrorMessage(err, 'No se ha podido subir el video'))
-      setProgress(null)
+      setPhase('idle')
+      setProgress(0)
     }
   }
 
   const handleClear = () => {
     onChange('')
+    onThumbnailChange?.('')
     setError(null)
-    setProgress(null)
+    setPhase('idle')
+    setProgress(0)
   }
 
-  const isUploading = progress !== null
+  const isUploading = phase !== 'idle'
 
   return (
     <div className="space-y-2">
@@ -109,8 +139,16 @@ export function VideoUploadField({
       ) : isUploading ? (
         <div className="space-y-2 rounded-lg border border-border/60 bg-muted/50 p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Play className="h-4 w-4 animate-pulse text-brand-primary" />
-            <span>Subiendo video... {progress}%</span>
+            {phase === 'compressing' ? (
+              <Loader2 className="h-4 w-4 animate-spin text-brand-primary" />
+            ) : (
+              <Play className="h-4 w-4 animate-pulse text-brand-primary" />
+            )}
+            <span>
+              {phase === 'compressing'
+                ? `Comprimiendo video... ${progress}%`
+                : `Subiendo video... ${progress}%`}
+            </span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-border">
             <div
@@ -129,7 +167,7 @@ export function VideoUploadField({
           <Upload className="h-8 w-8 text-muted-foreground" />
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">Seleccionar video</p>
-            <p className="text-xs text-muted-foreground">MP4, MOV o WebM · Máx. 100 MB</p>
+            <p className="text-xs text-muted-foreground">MP4, MOV o WebM · Máx. 200 MB (se comprime automáticamente)</p>
           </div>
         </button>
       )}
