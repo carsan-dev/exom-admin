@@ -43,12 +43,16 @@ export type BodyField =
   | 'neck_cm'
   | 'shoulders_cm'
   | 'chest_cm'
-  | 'arm_cm'
-  | 'forearm_cm'
+  | 'arm_left_cm'
+  | 'arm_right_cm'
+  | 'forearm_left_cm'
+  | 'forearm_right_cm'
   | 'waist_cm'
   | 'hips_cm'
-  | 'thigh_cm'
-  | 'calf_cm'
+  | 'thigh_left_cm'
+  | 'thigh_right_cm'
+  | 'calf_left_cm'
+  | 'calf_right_cm'
 
 export const BODY_FIELD_LABELS: Record<BodyField, string> = {
   weight_kg: 'Peso (kg)',
@@ -57,10 +61,14 @@ export const BODY_FIELD_LABELS: Record<BodyField, string> = {
   neck_cm: 'Cuello (cm)',
   shoulders_cm: 'Hombros (cm)',
   chest_cm: 'Pecho (cm)',
-  arm_cm: 'Brazo (cm)',
-  forearm_cm: 'Antebrazo (cm)',
+  arm_left_cm: 'Brazo izquierdo (cm)',
+  arm_right_cm: 'Brazo derecho (cm)',
+  forearm_left_cm: 'Antebrazo izquierdo (cm)',
+  forearm_right_cm: 'Antebrazo derecho (cm)',
   waist_cm: 'Cintura (cm)',
   hips_cm: 'Cadera (cm)',
-  thigh_cm: 'Muslo (cm)',
-  calf_cm: 'Gemelo (cm)',
+  thigh_left_cm: 'Muslo izquierdo (cm)',
+  thigh_right_cm: 'Muslo derecho (cm)',
+  calf_left_cm: 'Gemelo izquierdo (cm)',
+  calf_right_cm: 'Gemelo derecho (cm)',
 }

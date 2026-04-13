@@ -63,12 +63,16 @@ export function MetricsTable({ clientId, page, onPageChange }: MetricsTableProps
                     <TableHead>Cuello</TableHead>
                     <TableHead>Hombros</TableHead>
                     <TableHead>Pecho</TableHead>
-                    <TableHead>Brazo</TableHead>
-                    <TableHead>Antebrazo</TableHead>
+                    <TableHead>Brazo izq.</TableHead>
+                    <TableHead>Brazo der.</TableHead>
+                    <TableHead>Antebrazo izq.</TableHead>
+                    <TableHead>Antebrazo der.</TableHead>
                     <TableHead>Cintura</TableHead>
                     <TableHead>Cadera</TableHead>
-                    <TableHead>Muslo</TableHead>
-                    <TableHead>Gemelo</TableHead>
+                    <TableHead>Muslo izq.</TableHead>
+                    <TableHead>Muslo der.</TableHead>
+                    <TableHead>Gemelo izq.</TableHead>
+                    <TableHead>Gemelo der.</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -81,12 +85,16 @@ export function MetricsTable({ clientId, page, onPageChange }: MetricsTableProps
                       <TableCell>{formatValue(metric.neck_cm, 'cm')}</TableCell>
                       <TableCell>{formatValue(metric.shoulders_cm, 'cm')}</TableCell>
                       <TableCell>{formatValue(metric.chest_cm, 'cm')}</TableCell>
-                      <TableCell>{formatValue(metric.arm_cm, 'cm')}</TableCell>
-                      <TableCell>{formatValue(metric.forearm_cm, 'cm')}</TableCell>
+                      <TableCell>{formatValue(metric.arm_left_cm, 'cm')}</TableCell>
+                      <TableCell>{formatValue(metric.arm_right_cm, 'cm')}</TableCell>
+                      <TableCell>{formatValue(metric.forearm_left_cm, 'cm')}</TableCell>
+                      <TableCell>{formatValue(metric.forearm_right_cm, 'cm')}</TableCell>
                       <TableCell>{formatValue(metric.waist_cm, 'cm')}</TableCell>
                       <TableCell>{formatValue(metric.hips_cm, 'cm')}</TableCell>
-                      <TableCell>{formatValue(metric.thigh_cm, 'cm')}</TableCell>
-                      <TableCell>{formatValue(metric.calf_cm, 'cm')}</TableCell>
+                      <TableCell>{formatValue(metric.thigh_left_cm, 'cm')}</TableCell>
+                      <TableCell>{formatValue(metric.thigh_right_cm, 'cm')}</TableCell>
+                      <TableCell>{formatValue(metric.calf_left_cm, 'cm')}</TableCell>
+                      <TableCell>{formatValue(metric.calf_right_cm, 'cm')}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

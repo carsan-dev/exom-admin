@@ -86,12 +86,16 @@ export interface BodyMetric {
   neck_cm: number | null
   shoulders_cm: number | null
   chest_cm: number | null
-  arm_cm: number | null
-  forearm_cm: number | null
+  arm_left_cm: number | null
+  arm_right_cm: number | null
+  forearm_left_cm: number | null
+  forearm_right_cm: number | null
   waist_cm: number | null
   hips_cm: number | null
-  thigh_cm: number | null
-  calf_cm: number | null
+  thigh_left_cm: number | null
+  thigh_right_cm: number | null
+  calf_left_cm: number | null
+  calf_right_cm: number | null
   created_at: string
 }
 
