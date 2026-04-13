@@ -60,13 +60,11 @@ export async function compressVideo(
   const videoData = await ff.readFile(outputName)
   const thumbData = await ff.readFile(thumbName)
 
-  // Cleanup
-  await ff.deleteFile(inputName)
-  await ff.deleteFile(outputName)
-  await ff.deleteFile(thumbName)
+  const videoDataArray = videoData instanceof Uint8Array ? videoData : new Uint8Array(videoData as ArrayBuffer)
+  const thumbDataArray = thumbData instanceof Uint8Array ? thumbData : new Uint8Array(thumbData as ArrayBuffer)
 
-  const videoBlob = new Blob([videoData], { type: 'video/mp4' })
-  const thumbBlob = new Blob([thumbData], { type: 'image/jpeg' })
+  const videoBlob = new Blob([videoDataArray], { type: 'video/mp4' })
+  const thumbBlob = new Blob([thumbDataArray], { type: 'image/jpeg' })
 
   const timestamp = Date.now()
   const video = new File([videoBlob], `compressed_${timestamp}.mp4`, { type: 'video/mp4' })

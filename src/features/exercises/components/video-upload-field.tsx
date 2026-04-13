@@ -15,9 +15,6 @@ interface VideoUploadFieldProps {
 const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
 const MAX_SIZE_BYTES = 200 * 1024 * 1024 // 200 MB pre-compression
 
-function getExtension(filename: string) {
-  return filename.split('.').pop()?.toLowerCase() ?? 'mp4'
-}
 
 type UploadPhase = 'idle' | 'compressing' | 'uploading'
 
