@@ -60,7 +60,7 @@ function normalizeCreateClientPayload(payload: CreateClientFormValues) {
     first_name: payload.first_name.trim(),
     last_name: payload.last_name.trim(),
     level: payload.level,
-    main_goal: payload.main_goal?.trim() || undefined,
+    main_goal: payload.main_goal?.trim() || null,
   }
 }
 

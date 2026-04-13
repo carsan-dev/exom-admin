@@ -52,7 +52,7 @@ function normalizeAchievementPayload(values: AchievementFormValues) {
   return {
     name: values.name.trim(),
     description: values.description.trim(),
-    icon_url: values.icon_url?.trim() || undefined,
+    icon_url: values.icon_url?.trim() || null,
     criteria_type: values.criteria_type,
     criteria_value: values.criteria_value,
     rule_config:

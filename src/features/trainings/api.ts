@@ -24,9 +24,9 @@ function normalizeTrainingPayload(values: TrainingFormValues) {
     level: values.level,
     estimated_duration_min: values.estimated_duration_min ?? undefined,
     estimated_calories: values.estimated_calories ?? undefined,
-    warmup_description: values.warmup_description?.trim() || undefined,
+    warmup_description: values.warmup_description?.trim() || null,
     warmup_duration_min: values.warmup_duration_min ?? undefined,
-    cooldown_description: values.cooldown_description?.trim() || undefined,
+    cooldown_description: values.cooldown_description?.trim() || null,
     tags: normalizeTrainingTags(values.tags),
     exercises: values.exercises.map((ex) => ({
       exercise_id: ex.exercise_id,

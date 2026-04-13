@@ -21,7 +21,7 @@ function normalizeSearch(search?: string) {
 function normalizeCreateIngredientPayload(values: IngredientFormValues) {
   return {
     name: values.name.trim(),
-    icon: values.icon?.trim() || undefined,
+    icon: values.icon?.trim() || null,
     calories_per_100g: values.calories_per_100g,
     protein_per_100g: values.protein_per_100g,
     carbs_per_100g: values.carbs_per_100g,

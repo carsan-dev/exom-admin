@@ -20,12 +20,12 @@ function normalizeExercisePayload(values: ExerciseFormValues) {
     muscle_groups: values.muscle_groups,
     equipment: values.equipment,
     level: values.level,
-    video_url: values.video_url?.trim() || undefined,
-    video_stream_id: values.video_stream_id?.trim() || undefined,
-    thumbnail_url: values.thumbnail_url?.trim() || undefined,
-    technique_text: values.technique_text?.trim() || undefined,
-    common_errors_text: values.common_errors_text?.trim() || undefined,
-    explanation_text: values.explanation_text?.trim() || undefined,
+    video_url: values.video_url?.trim() || null,
+    video_stream_id: values.video_stream_id?.trim() || null,
+    thumbnail_url: values.thumbnail_url?.trim() || null,
+    technique_text: values.technique_text?.trim() || null,
+    common_errors_text: values.common_errors_text?.trim() || null,
+    explanation_text: values.explanation_text?.trim() || null,
   }
 }
 
