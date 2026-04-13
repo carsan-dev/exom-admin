@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import imageCompression from 'browser-image-compression'
 import { Image, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getApiErrorMessage, useUploadFile } from '@/features/uploads/api'
@@ -13,7 +14,14 @@ interface ImageUploadFieldProps {
 }
 
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB
+const MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10 MB (pre-compression limit)
+
+const COMPRESSION_OPTIONS = {
+  maxSizeMB: 1,
+  maxWidthOrHeight: 1200,
+  useWebWorker: true,
+  fileType: 'image/webp' as const,
+}
 
 function getExtension(filename: string) {
   return filename.split('.').pop()?.toLowerCase() ?? 'jpg'
@@ -69,14 +77,15 @@ export function ImageUploadField({
     setProgress(0)
 
     try {
-      const ext = getExtension(file.name)
+      const compressed = await imageCompression(file, COMPRESSION_OPTIONS)
+      const ext = compressed.type === 'image/webp' ? 'webp' : getExtension(file.name)
       const uuid = crypto.randomUUID()
       const fileKey = `${fileKeyPrefix}/${uuid}.${ext}`
 
       const { file_url } = await uploadFile.mutateAsync({
-        file,
+        file: compressed,
         file_key: fileKey,
-        content_type: file.type,
+        content_type: compressed.type,
         onProgress: setProgress,
       })
 
@@ -145,7 +154,7 @@ export function ImageUploadField({
           <Upload className="h-6 w-6 text-muted-foreground" />
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">Seleccionar imagen</p>
-            <p className="text-xs text-muted-foreground">JPG, PNG o WebP · Máx. 5 MB</p>
+            <p className="text-xs text-muted-foreground">JPG, PNG o WebP · Máx. 10 MB (se comprime automáticamente)</p>
           </div>
         </button>
       )}
