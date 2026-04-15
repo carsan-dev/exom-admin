@@ -179,18 +179,13 @@ export const useAuth = create<AuthStore>()((set) => ({
 
     try {
       const provider = new GoogleAuthProvider()
-
       const result = await signInWithPopup(auth, provider)
-      console.log('Popup OK:', result.user.uid)
-
       const idToken = await result.user.getIdToken()
-      console.log('getIdToken OK')
 
-      const res = await api.post<BackendAuthResponse>('/auth/social', {
+      const res = await api.post('/auth/social', {
         token: idToken,
         provider: 'google',
       })
-      console.log('/auth/social OK:', res.data)
 
       const { user } = res.data.data
 
@@ -205,34 +200,33 @@ export const useAuth = create<AuthStore>()((set) => ({
         return
       }
 
-      const authUser: AuthUser = {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        profile: user.profile ?? null,
-      }
-
       set({
-        user: authUser,
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          profile: user.profile ?? null,
+        },
         isAuthenticated: true,
         isLoading: false,
         error: null,
       })
     } catch (err: unknown) {
-      console.error('Google login error:', err)
+      console.error('Google login error full:', err)
 
       if (err instanceof FirebaseError) {
-        set({
-          isLoading: false,
-          error: `${err.code}: ${err.message}`,
-        })
+        console.error('Firebase code:', err.code)
+        console.error('Firebase message:', err.message)
+        console.error('Firebase customData:', err.customData)
+        set({ isLoading: false, error: `${err.code}: ${err.message}` })
         return
       }
 
       if (axios.isAxiosError(err)) {
+        console.error('Axios response:', err.response?.data)
         set({
           isLoading: false,
-          error: err.response?.data?.message ?? `HTTP ${err.response?.status ?? ''}`.trim(),
+          error: err.response?.data?.message ?? 'Error del backend',
         })
         return
       }
