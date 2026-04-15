@@ -3,6 +3,16 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+const SheetConsumer = ({ children }: { children: React.ReactNode }) => {
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+  return <>{children}</>
+}
+
 const Sheet = DialogPrimitive.Root
 const SheetTrigger = DialogPrimitive.Trigger
 const SheetClose = DialogPrimitive.Close
@@ -41,8 +51,9 @@ const SheetContent = React.forwardRef<
   SheetContentProps
 >(({ side = 'right', className, children, ...props }, ref) => (
   <SheetPortal>
-    <SheetOverlay />
-    <DialogPrimitive.Content
+    <SheetConsumer>
+      <SheetOverlay />
+      <DialogPrimitive.Content
       ref={ref}
       className={cn(
         'fixed z-50 gap-4 bg-background-secondary p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
@@ -57,6 +68,7 @@ const SheetContent = React.forwardRef<
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
+    </SheetConsumer>
   </SheetPortal>
 ))
 SheetContent.displayName = DialogPrimitive.Content.displayName
