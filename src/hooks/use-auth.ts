@@ -10,6 +10,7 @@ import {
 import { auth, getIdToken } from '@/lib/firebase'
 import { api } from '@/lib/api'
 import type { AuthUser } from '@/types/auth'
+import { FirebaseError } from 'firebase/app'
 
 interface BackendAuthResponse {
   data: {
@@ -109,7 +110,9 @@ export const useAuth = create<AuthStore>()((set) => ({
         // Profile not found (404) — user exists but has no profile yet
         if (axios.isAxiosError(err) && err.response?.status === 404) {
           try {
-            const meRes = await api.get<{ data: { id: string; email: string; role: string } }>('/auth/me')
+            const meRes = await api.get<{ data: { id: string; email: string; role: string } }>(
+              '/auth/me'
+            )
             const me = meRes.data.data
             if (!validateRole(me.role)) {
               await signOut(auth)
@@ -117,7 +120,12 @@ export const useAuth = create<AuthStore>()((set) => ({
               return
             }
             set({
-              user: { id: me.id, email: me.email, role: me.role as 'ADMIN' | 'SUPER_ADMIN', profile: null },
+              user: {
+                id: me.id,
+                email: me.email,
+                role: me.role as 'ADMIN' | 'SUPER_ADMIN',
+                profile: null,
+              },
               isAuthenticated: true,
               isLoading: false,
               error: null,
@@ -168,24 +176,35 @@ export const useAuth = create<AuthStore>()((set) => ({
 
   loginWithGoogle: async () => {
     set({ isLoading: true, error: null })
+
     try {
       const provider = new GoogleAuthProvider()
+
       const result = await signInWithPopup(auth, provider)
+      console.log('Popup OK:', result.user.uid)
+
       const idToken = await result.user.getIdToken()
+      console.log('getIdToken OK')
 
       const res = await api.post<BackendAuthResponse>('/auth/social', {
         token: idToken,
         provider: 'google',
       })
+      console.log('/auth/social OK:', res.data)
+
       const { user } = res.data.data
 
       if (!validateRole(user.role)) {
         await signOut(auth)
-        set({ user: null, isAuthenticated: false, isLoading: false, error: 'UNAUTHORIZED' })
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: 'UNAUTHORIZED',
+        })
         return
       }
 
-      // profile may be null if user has no profile yet
       const authUser: AuthUser = {
         id: user.id,
         email: user.email,
@@ -193,8 +212,31 @@ export const useAuth = create<AuthStore>()((set) => ({
         profile: user.profile ?? null,
       }
 
-      set({ user: authUser, isAuthenticated: true, isLoading: false, error: null })
-    } catch {
+      set({
+        user: authUser,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      })
+    } catch (err: unknown) {
+      console.error('Google login error:', err)
+
+      if (err instanceof FirebaseError) {
+        set({
+          isLoading: false,
+          error: `${err.code}: ${err.message}`,
+        })
+        return
+      }
+
+      if (axios.isAxiosError(err)) {
+        set({
+          isLoading: false,
+          error: err.response?.data?.message ?? `HTTP ${err.response?.status ?? ''}`.trim(),
+        })
+        return
+      }
+
       set({ isLoading: false, error: 'Error al iniciar sesión con Google' })
     }
   },
