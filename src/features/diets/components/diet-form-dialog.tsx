@@ -179,7 +179,6 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
     meals: [...diet.meals]
       .sort((a, b) => a.order - b.order)
       .map((meal) => ({
-        id: meal.id,
         type: meal.type,
         name: meal.name,
         image_url: meal.image_url,
@@ -187,10 +186,9 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
         protein_g: meal.protein_g,
         carbs_g: meal.carbs_g,
         fat_g: meal.fat_g,
-        nutritional_badges: [...meal.nutritional_badges],
+        nutritional_badges: meal.nutritional_badges,
         order: meal.order,
         ingredients: meal.ingredients.map((mi) => ({
-          id: mi.id,
           ingredient_id: mi.ingredient.id,
           quantity: mi.quantity,
           unit: mi.unit,

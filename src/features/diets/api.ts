@@ -24,7 +24,7 @@ const dietsQueryKeys = {
 
 const ingredientsListQueryKey = ['ingredients', 'list-all'] as const
 
-function normalizeDietPayload(values: DietFormValues, options?: { includeNestedIds?: boolean }) {
+function normalizeDietPayload(values: DietFormValues) {
   return {
     name: values.name.trim(),
     total_calories: values.total_calories ?? undefined,
@@ -32,7 +32,6 @@ function normalizeDietPayload(values: DietFormValues, options?: { includeNestedI
     total_carbs_g: values.total_carbs_g ?? undefined,
     total_fat_g: values.total_fat_g ?? undefined,
     meals: values.meals.map((meal) => ({
-      ...(options?.includeNestedIds && meal.id ? { id: meal.id } : {}),
       type: meal.type,
       name: meal.name.trim(),
       image_url: meal.image_url?.trim() ? meal.image_url.trim() : undefined,
@@ -44,7 +43,6 @@ function normalizeDietPayload(values: DietFormValues, options?: { includeNestedI
         meal.nutritional_badges?.map((badge) => badge.trim()).filter(Boolean) ?? [],
       order: meal.order,
       ingredients: meal.ingredients.map((ing) => ({
-        ...(options?.includeNestedIds && ing.id ? { id: ing.id } : {}),
         ingredient_id: ing.ingredient_id,
         quantity: ing.quantity,
         unit: ing.unit,

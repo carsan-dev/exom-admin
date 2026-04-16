@@ -2,14 +2,12 @@ import { z } from 'zod'
 import { MEAL_TYPE_OPTIONS, MEASURE_UNIT_OPTIONS } from './types'
 
 export const mealIngredientSchema = z.object({
-  id: z.string().optional(),
   ingredient_id: z.string().trim().min(1, 'Selecciona un ingrediente'),
   quantity: z.number().positive('Cantidad debe ser mayor que 0'),
   unit: z.enum(MEASURE_UNIT_OPTIONS),
 })
 
 export const mealSchema = z.object({
-  id: z.string().optional(),
   type: z.enum(MEAL_TYPE_OPTIONS),
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
   image_url: z.string().trim().url('URL inválida').optional().or(z.literal('')).nullable(),
