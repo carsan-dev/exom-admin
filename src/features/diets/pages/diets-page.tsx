@@ -1,5 +1,12 @@
 import { useState } from 'react'
-import { AlertTriangle, ChevronLeft, ChevronRight, Plus, Search, UtensilsCrossed } from 'lucide-react'
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Search,
+  UtensilsCrossed,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -44,7 +51,10 @@ export function DietsPage() {
 
   const dietsQuery = useDiets(page, PAGE_SIZE)
   const allDiets = dietsQuery.data?.data ?? []
-  const dietApprovalQuery = useResourceApprovalBatch('diet', allDiets.map((diet) => diet.id))
+  const dietApprovalQuery = useResourceApprovalBatch(
+    'diet',
+    allDiets.map((diet) => diet.id)
+  )
   const dietApprovalById = buildResourceApprovalMap(dietApprovalQuery.data ?? [])
   const total = dietsQuery.data?.total ?? 0
   const totalPages = dietsQuery.data?.totalPages ?? 1
@@ -66,6 +76,8 @@ export function DietsPage() {
   }
 
   const handleEdit = (diet: Diet) => {
+    console.log('Diet seleccionada para editar:', diet)
+    console.log('diet.id al pulsar editar:', diet.id)
     setEditingDiet(diet)
     setIsDuplicate(false)
     setFormDialogOpen(true)
@@ -105,7 +117,9 @@ export function DietsPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Catálogo</p>
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">
+            Catálogo
+          </p>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">Dietas</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -113,7 +127,9 @@ export function DietsPage() {
             </p>
           </div>
           <p className="text-sm text-muted-foreground">
-            {total > 0 ? `${total} dieta${total !== 1 ? 's' : ''} en el catálogo` : 'Aún no hay dietas en el catálogo'}
+            {total > 0
+              ? `${total} dieta${total !== 1 ? 's' : ''} en el catálogo`
+              : 'Aún no hay dietas en el catálogo'}
           </p>
         </div>
 
@@ -133,7 +149,9 @@ export function DietsPage() {
               <AlertTriangle className="h-8 w-8" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">No se ha podido cargar el catálogo</h2>
+              <h2 className="text-2xl font-semibold text-foreground">
+                No se ha podido cargar el catálogo
+              </h2>
               <p className="max-w-xl text-sm text-muted-foreground">
                 {getApiErrorMessage(dietsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
               </p>
@@ -163,7 +181,9 @@ export function DietsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">Listado de dietas</CardTitle>
-            <CardDescription>Vista paginada del catálogo con búsqueda y acciones por dieta</CardDescription>
+            <CardDescription>
+              Vista paginada del catálogo con búsqueda y acciones por dieta
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Search */}
