@@ -431,11 +431,6 @@ export function DietFormDialog({
         meals: values.meals.map((meal, i) => ({ ...meal, order: i })),
       }
 
-      console.log('Diet completa en edición:', diet)
-      console.log('diet.id:', diet?.id)
-      console.log('diet.name:', diet?.name)
-      console.log('isEditing:', isEditing)
-
       try {
         if (isEditing && diet) {
           await updateDiet.mutateAsync({ id: diet.id, values: normalizedValues })

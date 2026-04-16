@@ -76,8 +76,6 @@ export function DietsPage() {
   }
 
   const handleEdit = (diet: Diet) => {
-    console.log('Diet seleccionada para editar:', diet)
-    console.log('diet.id al pulsar editar:', diet.id)
     setEditingDiet(diet)
     setIsDuplicate(false)
     setFormDialogOpen(true)
