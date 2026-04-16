@@ -179,6 +179,7 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
     meals: [...diet.meals]
       .sort((a, b) => a.order - b.order)
       .map((meal) => ({
+        id: meal.id,
         type: meal.type,
         name: meal.name,
         image_url: meal.image_url,
@@ -186,9 +187,10 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
         protein_g: meal.protein_g,
         carbs_g: meal.carbs_g,
         fat_g: meal.fat_g,
-        nutritional_badges: meal.nutritional_badges,
+        nutritional_badges: [...meal.nutritional_badges],
         order: meal.order,
         ingredients: meal.ingredients.map((mi) => ({
+          id: mi.id,
           ingredient_id: mi.ingredient.id,
           quantity: mi.quantity,
           unit: mi.unit,
@@ -246,7 +248,12 @@ export function DietFormDialog({
     defaultValues,
   })
 
-  const { fields: mealFields, append, remove, move } = useFieldArray({
+  const {
+    fields: mealFields,
+    append,
+    remove,
+    move,
+  } = useFieldArray({
     control: form.control,
     name: 'meals',
   })
@@ -276,7 +283,7 @@ export function DietFormDialog({
         carbs_g: acc.carbs_g + (meal.carbs_g ?? 0),
         fat_g: acc.fat_g + (meal.fat_g ?? 0),
       }),
-      { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 },
+      { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 }
     )
     form.setValue('total_calories', Math.round(totals.calories))
     form.setValue('total_protein_g', Math.round(totals.protein_g * 10) / 10)
@@ -298,14 +305,17 @@ export function DietFormDialog({
     }
 
     if (ingredientsQuery.isError) {
-      toast.error('No se pudo cargar el catálogo de ingredientes. Reinténtalo o completa los macros manualmente.')
+      toast.error(
+        'No se pudo cargar el catálogo de ingredientes. Reinténtalo o completa los macros manualmente.'
+      )
       return
     }
 
     if (!ingredientsData) {
-      const message = createDiet.isPending || updateDiet.isPending
-        ? 'Espera a que termine el guardado antes de recalcular los macros.'
-        : 'Espera a que cargue el catálogo de ingredientes antes de recalcular los macros.'
+      const message =
+        createDiet.isPending || updateDiet.isPending
+          ? 'Espera a que termine el guardado antes de recalcular los macros.'
+          : 'Espera a que cargue el catálogo de ingredientes antes de recalcular los macros.'
       toast.info(message)
       return
     }
@@ -342,13 +352,13 @@ export function DietFormDialog({
     if (calculatedItems === 0) {
       if (missingItems > 0) {
         toast.info(
-          `No se pudo calcular porque ${missingItems} ingrediente${missingItems === 1 ? '' : 's'} no está${missingItems === 1 ? '' : 'n'} disponible${missingItems === 1 ? '' : 's'} en el catálogo cargado. Revísalo o completa los macros manualmente.`,
+          `No se pudo calcular porque ${missingItems} ingrediente${missingItems === 1 ? '' : 's'} no está${missingItems === 1 ? '' : 'n'} disponible${missingItems === 1 ? '' : 's'} en el catálogo cargado. Revísalo o completa los macros manualmente.`
         )
         return
       }
 
       toast.info(
-        'El autocálculo solo funciona con ingredientes en gramos. Completa los macros manualmente si usas ml o unidades.',
+        'El autocálculo solo funciona con ingredientes en gramos. Completa los macros manualmente si usas ml o unidades.'
       )
       return
     }
@@ -362,18 +372,20 @@ export function DietFormDialog({
 
     if (missingItems > 0) {
       warnings.push(
-        `${missingItems} ingrediente${missingItems === 1 ? '' : 's'} no está${missingItems === 1 ? '' : 'n'} disponible${missingItems === 1 ? '' : 's'} en el catálogo cargado`,
+        `${missingItems} ingrediente${missingItems === 1 ? '' : 's'} no está${missingItems === 1 ? '' : 'n'} disponible${missingItems === 1 ? '' : 's'} en el catálogo cargado`
       )
     }
 
     if (omittedItems > 0) {
       warnings.push(
-        `${omittedItems} ingrediente${omittedItems === 1 ? '' : 's'} con unidades no compatibles quedó${omittedItems === 1 ? '' : 'ron'} fuera`,
+        `${omittedItems} ingrediente${omittedItems === 1 ? '' : 's'} con unidades no compatibles quedó${omittedItems === 1 ? '' : 'ron'} fuera`
       )
     }
 
     if (warnings.length > 0) {
-      toast.info(`Se calcularon solo los ingredientes en gramos. ${warnings.join('. ')}. Completa esos macros manualmente.`)
+      toast.info(
+        `Se calcularon solo los ingredientes en gramos. ${warnings.join('. ')}. Completa esos macros manualmente.`
+      )
     }
   }
 
@@ -427,7 +439,9 @@ export function DietFormDialog({
           toast.success('Dieta actualizada correctamente')
         } else {
           await createDiet.mutateAsync(normalizedValues)
-          toast.success(isDuplicate ? 'Dieta duplicada correctamente' : 'Dieta creada correctamente')
+          toast.success(
+            isDuplicate ? 'Dieta duplicada correctamente' : 'Dieta creada correctamente'
+          )
         }
         onSaved?.()
         onOpenChange(false)
@@ -442,11 +456,13 @@ export function DietFormDialog({
       }
     },
     (errors) => {
-      toast.error(getFirstErrorMessage(errors) ?? 'Revisa los campos obligatorios antes de continuar')
+      toast.error(
+        getFirstErrorMessage(errors) ?? 'Revisa los campos obligatorios antes de continuar'
+      )
       if (errors.meals) {
         mealsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
-    },
+    }
   )
 
   return (
@@ -506,7 +522,11 @@ export function DietFormDialog({
                               min={0}
                               placeholder="2000"
                               value={field.value ?? ''}
-                              onChange={(e) => field.onChange(e.target.value === '' ? null : parseInt(e.target.value))}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value === '' ? null : parseInt(e.target.value)
+                                )
+                              }
                               className="h-8 text-sm"
                             />
                           </FormControl>
@@ -526,7 +546,11 @@ export function DietFormDialog({
                               step={0.1}
                               placeholder="150"
                               value={field.value ?? ''}
-                              onChange={(e) => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value === '' ? null : parseFloat(e.target.value)
+                                )
+                              }
                               className="h-8 text-sm"
                             />
                           </FormControl>
@@ -546,7 +570,11 @@ export function DietFormDialog({
                               step={0.1}
                               placeholder="200"
                               value={field.value ?? ''}
-                              onChange={(e) => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value === '' ? null : parseFloat(e.target.value)
+                                )
+                              }
                               className="h-8 text-sm"
                             />
                           </FormControl>
@@ -566,7 +594,11 @@ export function DietFormDialog({
                               step={0.1}
                               placeholder="70"
                               value={field.value ?? ''}
-                              onChange={(e) => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value === '' ? null : parseFloat(e.target.value)
+                                )
+                              }
                               className="h-8 text-sm"
                             />
                           </FormControl>
@@ -689,7 +721,9 @@ export function DietFormDialog({
                     {/* Macros de la comida */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <p className="text-xs text-muted-foreground">Macros de la comida (opcional)</p>
+                        <p className="text-xs text-muted-foreground">
+                          Macros de la comida (opcional)
+                        </p>
                         <Button
                           type="button"
                           variant="ghost"
@@ -713,7 +747,11 @@ export function DietFormDialog({
                                   min={0}
                                   placeholder="500"
                                   value={field.value ?? ''}
-                                  onChange={(e) => field.onChange(e.target.value === '' ? null : parseInt(e.target.value))}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value === '' ? null : parseInt(e.target.value)
+                                    )
+                                  }
                                   className="h-7 text-xs"
                                 />
                               </FormControl>
@@ -733,7 +771,11 @@ export function DietFormDialog({
                                   step={0.1}
                                   placeholder="40"
                                   value={field.value ?? ''}
-                                  onChange={(e) => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value === '' ? null : parseFloat(e.target.value)
+                                    )
+                                  }
                                   className="h-7 text-xs"
                                 />
                               </FormControl>
@@ -753,7 +795,11 @@ export function DietFormDialog({
                                   step={0.1}
                                   placeholder="60"
                                   value={field.value ?? ''}
-                                  onChange={(e) => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value === '' ? null : parseFloat(e.target.value)
+                                    )
+                                  }
                                   className="h-7 text-xs"
                                 />
                               </FormControl>
@@ -773,7 +819,11 @@ export function DietFormDialog({
                                   step={0.1}
                                   placeholder="20"
                                   value={field.value ?? ''}
-                                  onChange={(e) => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value === '' ? null : parseFloat(e.target.value)
+                                    )
+                                  }
                                   className="h-7 text-xs"
                                 />
                               </FormControl>
@@ -796,7 +846,9 @@ export function DietFormDialog({
                               onChange={(url) => field.onChange(url || null)}
                               fileKeyPrefix="diets/meals"
                               disabled={isBusy}
-                              onUploadingChange={(uploading) => handleMealUploadChange(mealField.id, uploading)}
+                              onUploadingChange={(uploading) =>
+                                handleMealUploadChange(mealField.id, uploading)
+                              }
                             />
                           </FormControl>
                           <FormMessage className="text-xs" />
@@ -828,7 +880,9 @@ export function DietFormDialog({
                             <IngredientPicker
                               value={field.value}
                               onChange={field.onChange}
-                              error={getFirstErrorMessage(form.formState.errors.meals?.[mealIndex]?.ingredients)}
+                              error={getFirstErrorMessage(
+                                form.formState.errors.meals?.[mealIndex]?.ingredients
+                              )}
                             />
                           </FormControl>
                         </FormItem>
@@ -851,7 +905,8 @@ export function DietFormDialog({
 
               {isUploadingMealImage && (
                 <p className="text-xs text-muted-foreground">
-                  Espera a que termine la subida de la imagen para seguir editando o guardar la dieta.
+                  Espera a que termine la subida de la imagen para seguir editando o guardar la
+                  dieta.
                 </p>
               )}
 
