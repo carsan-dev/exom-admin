@@ -1,14 +1,8 @@
 import { z } from 'zod'
 import { MEAL_TYPE_OPTIONS, MEASURE_UNIT_OPTIONS } from './types'
 
-const legacyIdRegex = /^[a-z][a-z0-9-]*$/
-
 export const mealIngredientSchema = z.object({
-  ingredient_id: z
-    .string()
-    .trim()
-    .min(1, 'Selecciona un ingrediente')
-    .regex(legacyIdRegex, 'ID de ingrediente inválido'),
+  ingredient_id: z.string().trim().min(1, 'Selecciona un ingrediente'),
   quantity: z.number().positive('Cantidad debe ser mayor que 0'),
   unit: z.enum(MEASURE_UNIT_OPTIONS),
 })
