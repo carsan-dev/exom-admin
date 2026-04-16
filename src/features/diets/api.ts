@@ -105,7 +105,7 @@ export function useUpdateDiet() {
     mutationFn: async ({ id, values }: { id: string; values: DietFormValues }) => {
       const response = await api.put<ApiEnvelope<Diet>>(
         `/diets/${id}`,
-        normalizeDietPayload(values, { includeNestedIds: true })
+        normalizeDietPayload(values)
       )
       return unwrapResponse(response)
     },
