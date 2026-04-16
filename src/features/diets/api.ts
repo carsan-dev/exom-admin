@@ -1,7 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
-import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
+import {
+  invalidateAdminQueries,
+  invalidateAdminQueriesOnApprovalPending,
+} from '@/lib/admin-query-invalidations'
+import {
+  type ApiEnvelope,
+  getApiErrorMessage,
+  shouldRetryQuery,
+  unwrapResponse,
+} from '@/lib/api-utils'
 import type { DietFormValues } from './schemas'
 import type { Diet } from './types'
 import type { Ingredient, PaginatedResponse } from '../ingredients/types'
@@ -16,7 +24,7 @@ const dietsQueryKeys = {
 
 const ingredientsListQueryKey = ['ingredients', 'list-all'] as const
 
-function normalizeDietPayload(values: DietFormValues) {
+function normalizeDietPayload(values: DietFormValues, options?: { includeNestedIds?: boolean }) {
   return {
     name: values.name.trim(),
     total_calories: values.total_calories ?? undefined,
@@ -24,6 +32,7 @@ function normalizeDietPayload(values: DietFormValues) {
     total_carbs_g: values.total_carbs_g ?? undefined,
     total_fat_g: values.total_fat_g ?? undefined,
     meals: values.meals.map((meal) => ({
+      ...(options?.includeNestedIds && meal.id ? { id: meal.id } : {}),
       type: meal.type,
       name: meal.name.trim(),
       image_url: meal.image_url?.trim() ? meal.image_url.trim() : undefined,
@@ -31,9 +40,11 @@ function normalizeDietPayload(values: DietFormValues) {
       protein_g: meal.protein_g ?? undefined,
       carbs_g: meal.carbs_g ?? undefined,
       fat_g: meal.fat_g ?? undefined,
-      nutritional_badges: meal.nutritional_badges?.map((badge) => badge.trim()).filter(Boolean) ?? [],
+      nutritional_badges:
+        meal.nutritional_badges?.map((badge) => badge.trim()).filter(Boolean) ?? [],
       order: meal.order,
       ingredients: meal.ingredients.map((ing) => ({
+        ...(options?.includeNestedIds && ing.id ? { id: ing.id } : {}),
         ingredient_id: ing.ingredient_id,
         quantity: ing.quantity,
         unit: ing.unit,
@@ -94,7 +105,10 @@ export function useUpdateDiet() {
 
   return useMutation({
     mutationFn: async ({ id, values }: { id: string; values: DietFormValues }) => {
-      const response = await api.put<ApiEnvelope<Diet>>(`/diets/${id}`, normalizeDietPayload(values))
+      const response = await api.put<ApiEnvelope<Diet>>(
+        `/diets/${id}`,
+        normalizeDietPayload(values, { includeNestedIds: true })
+      )
       return unwrapResponse(response)
     },
     onSuccess: async () => {
