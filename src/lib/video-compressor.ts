@@ -2,11 +2,19 @@ import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
 
 let ffmpeg: FFmpeg | null = null
-const MAX_SHORT_SIDE = 720
-const TARGET_VIDEO_BITRATE = '2M'
-const TARGET_MAX_RATE = '2.3M'
-const TARGET_BUFFER_SIZE = '4M'
-const TARGET_AUDIO_BITRATE = '96k'
+const MAX_SHORT_SIDE = 1080
+const TARGET_AUDIO_BITRATE_BPS = 96_000
+const MIN_VIDEO_BITRATE_BPS = 3_500_000
+const MAX_VIDEO_BITRATE_BPS = 5_500_000
+const PASSTHROUGH_TOTAL_BITRATE_BPS = 6_200_000
+const PASSTHROUGH_MAX_DURATION_SECONDS = 60
+const PASSTHROUGH_MAX_LONG_SIDE = 1920
+
+interface VideoMetadata {
+  width: number
+  height: number
+  duration: number
+}
 
 async function getFFmpeg() {
   if (ffmpeg && ffmpeg.loaded) return ffmpeg
@@ -45,6 +53,23 @@ function toEven(value: number) {
   return rounded % 2 === 0 ? rounded : rounded - 1
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value))
+}
+
+function toKiloBitrate(value: number) {
+  return `${Math.round(value / 1000)}k`
+}
+
+function getSourceBitrate(fileSize: number, duration: number) {
+  if (!Number.isFinite(duration) || duration <= 0) return null
+  return Math.round((fileSize * 8) / duration)
+}
+
+function isMp4File(file: File) {
+  return file.type === 'video/mp4' || getExtension(file.name) === '.mp4'
+}
+
 function getTargetDimensions(width: number, height: number) {
   const shortSide = Math.min(width, height)
   if (shortSide <= MAX_SHORT_SIDE) {
@@ -61,7 +86,34 @@ function getTargetDimensions(width: number, height: number) {
   }
 }
 
-async function getVideoMetadata(file: File): Promise<{ width: number; height: number }> {
+function shouldBypassCompression(file: File, metadata: VideoMetadata) {
+  const sourceBitrate = getSourceBitrate(file.size, metadata.duration)
+  if (sourceBitrate === null) return false
+
+  return (
+    isMp4File(file) &&
+    metadata.duration <= PASSTHROUGH_MAX_DURATION_SECONDS &&
+    Math.max(metadata.width, metadata.height) <= PASSTHROUGH_MAX_LONG_SIDE &&
+    sourceBitrate <= PASSTHROUGH_TOTAL_BITRATE_BPS
+  )
+}
+
+function getEncodingBitrates(file: File, metadata: VideoMetadata) {
+  const sourceBitrate =
+    getSourceBitrate(file.size, metadata.duration) ?? MAX_VIDEO_BITRATE_BPS + TARGET_AUDIO_BITRATE_BPS
+
+  const sourceVideoBitrate = Math.max(TARGET_AUDIO_BITRATE_BPS, sourceBitrate - TARGET_AUDIO_BITRATE_BPS)
+  const targetVideoBitrate = clamp(Math.round(sourceVideoBitrate * 0.85), MIN_VIDEO_BITRATE_BPS, MAX_VIDEO_BITRATE_BPS)
+
+  return {
+    video: toKiloBitrate(targetVideoBitrate),
+    maxRate: toKiloBitrate(Math.round(targetVideoBitrate * 1.25)),
+    buffer: toKiloBitrate(Math.round(targetVideoBitrate * 2.5)),
+    audio: toKiloBitrate(TARGET_AUDIO_BITRATE_BPS),
+  }
+}
+
+async function getVideoMetadata(file: File): Promise<VideoMetadata> {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video')
     const objectUrl = URL.createObjectURL(file)
@@ -76,14 +128,15 @@ async function getVideoMetadata(file: File): Promise<{ width: number; height: nu
     video.onloadedmetadata = () => {
       const width = video.videoWidth
       const height = video.videoHeight
+      const duration = Number.isFinite(video.duration) ? video.duration : 0
       cleanup()
 
-      if (!width || !height) {
-        reject(new Error('No se pudieron leer las dimensiones del video'))
+      if (!width || !height || !duration) {
+        reject(new Error('No se pudieron leer los metadatos del video'))
         return
       }
 
-      resolve({ width, height })
+      resolve({ width, height, duration })
     }
 
     video.onerror = () => {
@@ -102,6 +155,8 @@ export async function compressVideo(
   const ff = await getFFmpeg()
   const metadata = await getVideoMetadata(file)
   const targetSize = getTargetDimensions(metadata.width, metadata.height)
+  const targetBitrates = getEncodingBitrates(file, metadata)
+  const bypassCompression = shouldBypassCompression(file, metadata)
 
   if (onProgress) {
     ff.on('progress', ({ progress }: { progress: number }) => onProgress(progress))
@@ -114,6 +169,19 @@ export async function compressVideo(
   await ff.writeFile(inputName, await fetchFile(file))
 
   try {
+    await ff.exec(['-i', inputName, '-ss', '00:00:01', '-vframes', '1', '-q:v', '4', thumbName])
+
+    const thumbData = await ff.readFile(thumbName)
+    const thumbBuffer = toPlainArrayBuffer(thumbData)
+    const thumbBlob = new Blob([thumbBuffer], { type: 'image/jpeg' })
+    const timestamp = Date.now()
+    const thumbnail = new File([thumbBlob], `thumb_${timestamp}.jpg`, { type: 'image/jpeg' })
+
+    if (bypassCompression) {
+      onProgress?.(1)
+      return { video: file, thumbnail }
+    }
+
     await ff.exec([
       '-i',
       inputName,
@@ -122,38 +190,34 @@ export async function compressVideo(
       '-c:v',
       'libx264',
       '-preset',
-      'medium',
+      'slow',
+      '-profile:v',
+      'high',
+      '-level:v',
+      '4.1',
       '-pix_fmt',
       'yuv420p',
       '-b:v',
-      TARGET_VIDEO_BITRATE,
+      targetBitrates.video,
       '-maxrate',
-      TARGET_MAX_RATE,
+      targetBitrates.maxRate,
       '-bufsize',
-      TARGET_BUFFER_SIZE,
+      targetBitrates.buffer,
       '-c:a',
       'aac',
       '-b:a',
-      TARGET_AUDIO_BITRATE,
+      targetBitrates.audio,
       '-movflags',
       '+faststart',
       outputName,
     ])
 
-    await ff.exec(['-i', inputName, '-ss', '00:00:01', '-vframes', '1', '-q:v', '5', thumbName])
-
     const videoData = await ff.readFile(outputName)
-    const thumbData = await ff.readFile(thumbName)
 
     const videoBuffer = toPlainArrayBuffer(videoData)
-    const thumbBuffer = toPlainArrayBuffer(thumbData)
 
     const videoBlob = new Blob([videoBuffer], { type: 'video/mp4' })
-    const thumbBlob = new Blob([thumbBuffer], { type: 'image/jpeg' })
-
-    const timestamp = Date.now()
     const video = new File([videoBlob], `compressed_${timestamp}.mp4`, { type: 'video/mp4' })
-    const thumbnail = new File([thumbBlob], `thumb_${timestamp}.jpg`, { type: 'image/jpeg' })
 
     return { video, thumbnail }
   } finally {
