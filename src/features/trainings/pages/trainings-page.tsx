@@ -110,7 +110,7 @@ export function TrainingsPage() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none [isolation:isolate] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
           <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Catálogo</p>
           <div>

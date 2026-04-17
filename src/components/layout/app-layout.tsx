@@ -66,7 +66,7 @@ export function AppLayout() {
         </Sheet>
 
         {/* Main content */}
-        <div className="relative flex min-h-[100svh] min-w-0 flex-1 flex-col overflow-x-hidden [isolation:isolate] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] lg:min-h-0 lg:overflow-hidden">
+        <div className="relative flex min-h-[100svh] min-w-0 flex-1 flex-col overflow-x-hidden lg:min-h-0 lg:overflow-hidden">
           <Header
             onMenuToggle={() => {
               if (window.innerWidth >= 1024) {

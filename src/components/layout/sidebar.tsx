@@ -58,7 +58,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'flex flex-col h-full bg-background-secondary border-r border-border transition-all duration-300 overflow-hidden',
+        'flex flex-col h-full bg-background-secondary border-r border-border transition-[width] duration-300 overflow-hidden',
         isOpen ? 'w-60' : 'w-16'
       )}
     >
