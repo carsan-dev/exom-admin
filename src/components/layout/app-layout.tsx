@@ -46,7 +46,11 @@ export function AppLayout() {
 
         {/* Mobile sidebar — overlay */}
         <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
-          <SheetContent side="left" className="p-0 w-60" aria-describedby={undefined}>
+          <SheetContent
+            side="left"
+            className="w-60 border-r border-border bg-background p-0 data-[state=closed]:duration-150 data-[state=open]:duration-200"
+            aria-describedby={undefined}
+          >
             <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
             <Sidebar isOpen={true} onClose={() => setMobileSidebarOpen(false)} />
           </SheetContent>
@@ -63,7 +67,7 @@ export function AppLayout() {
               }
             }}
           />
-          <main ref={mainRef} className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <main ref={mainRef} className="flex-1 overflow-y-auto bg-background p-4 sm:p-6">
             <Outlet />
           </main>
 

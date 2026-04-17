@@ -87,10 +87,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             {isOpen ? (
               <NavLink
                 to={to}
+                onMouseDown={(event) => event.currentTarget.blur()}
                 onClick={onClose}
                 className={({ isActive }) =>
                   cn(
-                    'flex w-full items-center rounded-none border-l-2 border-transparent px-3 py-2 text-left text-sm font-medium transition-colors',
+                    'flex w-full select-none items-center rounded-none border-l-2 border-transparent px-3 py-2 text-left text-sm font-medium outline-none transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-0',
                     'hover:bg-brand-soft/30 hover:text-foreground',
                     index === 0 && 'rounded-t-md',
                      index === resolvedNavItems.length - 1 && 'rounded-b-md',
@@ -118,13 +119,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <TooltipTrigger asChild>
                   <NavLink
                     to={to}
+                    onMouseDown={(event) => event.currentTarget.blur()}
                     onClick={onClose}
                     className={({ isActive }) =>
                       cn(
-                        'flex h-10 w-full items-center justify-center rounded-none px-0 text-sm font-medium transition-colors',
+                        'flex h-10 w-full select-none items-center justify-center rounded-none px-0 text-sm font-medium outline-none transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-0',
                         'hover:bg-brand-soft/30 hover:text-foreground',
                         index === 0 && 'rounded-t-md',
-                         index === resolvedNavItems.length - 1 && 'rounded-b-md',
+                          index === resolvedNavItems.length - 1 && 'rounded-b-md',
                         isActive && 'bg-brand-primary/10 text-brand-primary',
                         !isActive && 'text-foreground/70'
                       )
