@@ -9,10 +9,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
   const theme = useTheme((state) => state.theme)
 
   return (
-    <Sonner
-      theme={theme}
-      className="toaster group"
-      icons={{
+      <Sonner
+        theme={theme}
+        className="toaster group hidden lg:block"
+        icons={{
         success: <CircleCheck className="h-4 w-4" />,
         info: <Info className="h-4 w-4" />,
         warning: <TriangleAlert className="h-4 w-4" />,

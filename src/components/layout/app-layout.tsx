@@ -84,7 +84,7 @@ export function AppLayout() {
           </main>
 
           <div
-            className={`pointer-events-none fixed bottom-4 right-4 z-40 flex transition-all duration-200 lg:absolute lg:bottom-6 lg:right-6 ${
+            className={`pointer-events-none hidden transition-all duration-200 lg:absolute lg:bottom-6 lg:right-6 lg:flex ${
               showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
             }`}
           >
