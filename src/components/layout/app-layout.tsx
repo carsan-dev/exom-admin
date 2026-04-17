@@ -14,31 +14,40 @@ export function AppLayout() {
   const mainRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
-    const scrollContainer = mainRef.current
-
-    if (!scrollContainer) {
-      return
-    }
-
     const handleScroll = () => {
-      setShowScrollTop(scrollContainer.scrollTop > 360)
+      const scrollContainer = mainRef.current
+      const layoutScrollTop = scrollContainer?.scrollTop ?? 0
+      const pageScrollTop = window.scrollY || document.documentElement.scrollTop || 0
+
+      setShowScrollTop(Math.max(layoutScrollTop, pageScrollTop) > 360)
     }
 
     handleScroll()
-    scrollContainer.addEventListener('scroll', handleScroll, { passive: true })
+    const scrollContainer = mainRef.current
+
+    scrollContainer?.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleScroll)
 
     return () => {
-      scrollContainer.removeEventListener('scroll', handleScroll)
+      scrollContainer?.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
     }
   }, [])
 
   const handleScrollToTop = () => {
-    mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+    if ((mainRef.current?.scrollTop ?? 0) > 0) {
+      mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
     <TooltipProvider>
-      <div className="flex h-dvh min-h-0 overflow-hidden bg-background">
+      <div className="flex min-h-screen min-h-[100svh] bg-background lg:h-screen lg:min-h-0 lg:overflow-hidden">
         {/* Desktop sidebar */}
         <div className="hidden lg:flex">
           <Sidebar isOpen={sidebarOpen} />
@@ -57,7 +66,7 @@ export function AppLayout() {
         </Sheet>
 
         {/* Main content */}
-        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="relative flex min-h-[100svh] flex-1 flex-col lg:min-h-0 lg:overflow-hidden">
           <Header
             onMenuToggle={() => {
               if (window.innerWidth >= 1024) {
@@ -69,13 +78,13 @@ export function AppLayout() {
           />
           <main
             ref={mainRef}
-            className="flex-1 overflow-y-auto overscroll-y-contain bg-background p-4 [-webkit-overflow-scrolling:touch] sm:p-6"
+            className="flex-1 bg-background p-4 sm:p-6 lg:overflow-y-auto lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]"
           >
             <Outlet />
           </main>
 
           <div
-            className={`pointer-events-none absolute bottom-4 right-4 z-40 flex transition-all duration-200 sm:bottom-6 sm:right-6 ${
+            className={`pointer-events-none fixed bottom-4 right-4 z-40 flex transition-all duration-200 lg:absolute lg:bottom-6 lg:right-6 ${
               showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
             }`}
           >

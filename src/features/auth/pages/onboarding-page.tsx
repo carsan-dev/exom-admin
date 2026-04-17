@@ -39,7 +39,7 @@ export function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen min-h-[100svh] items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center gap-2">
           <span className="text-4xl font-black tracking-widest text-brand-primary">EXOM</span>

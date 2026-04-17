@@ -8,7 +8,7 @@ export function ProtectedRoute() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
+      <div className="flex min-h-screen min-h-[100svh] flex-col items-center justify-center gap-4 bg-background">
         <div className="text-2xl font-black tracking-widest text-brand-primary">EXOM</div>
         <div className="space-y-2 w-48">
           <Skeleton className="h-2 w-full" />
