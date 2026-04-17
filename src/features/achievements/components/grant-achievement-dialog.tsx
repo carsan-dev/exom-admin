@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { useAssignmentClients } from '../../assignments/api'
 import { getUserDisplayName } from '../../clients/types'
 import { getApiErrorMessage, useGrantAchievement } from '../api'
+import { grantAchievementSchema } from '../schemas'
 import type { AchievementListItem } from '../types'
 import { getAchievementUserInitials } from '../types'
 
@@ -70,23 +71,23 @@ export function GrantAchievementDialog({ achievement, open, onOpenChange, onGran
   const handleSubmit = async () => {
     if (!achievement) return
 
-    if (selectedClientIds.length === 0) {
-      setSubmitError('Selecciona al menos un cliente')
+    const parsedValues = grantAchievementSchema.safeParse({
+      client_ids: selectedClientIds,
+    })
+
+    if (!parsedValues.success) {
+      setSubmitError(parsedValues.error.issues[0]?.message ?? 'Selecciona al menos un cliente')
       return
     }
 
     setSubmitError(null)
 
     try {
-      await Promise.all(
-        selectedClientIds.map((clientId) =>
-          grantAchievement.mutateAsync({ id: achievement.id, values: { client_ids: [clientId] } }),
-        ),
-      )
+      await grantAchievement.mutateAsync({ id: achievement.id, values: parsedValues.data })
       toast.success(
-        selectedClientIds.length === 1
+        parsedValues.data.client_ids.length === 1
           ? 'Logro otorgado correctamente'
-          : `Logro otorgado a ${selectedClientIds.length} clientes`,
+          : `Logro otorgado a ${parsedValues.data.client_ids.length} clientes`,
       )
       onGranted?.()
       onOpenChange(false)

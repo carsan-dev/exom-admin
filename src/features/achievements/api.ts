@@ -31,6 +31,12 @@ interface GrantAchievementPayload {
   values: GrantAchievementValues
 }
 
+interface GrantAchievementsResponse {
+  achievement_id: string
+  requested_users: number
+  granted_users: number
+}
+
 interface RevokeAchievementPayload {
   id: string
   user_id: string
@@ -168,8 +174,8 @@ export function useGrantAchievement() {
 
   return useMutation({
     mutationFn: async ({ id, values }: GrantAchievementPayload) => {
-      const response = await api.post<ApiEnvelope<GrantedAchievementRecord>>(`/achievements/${id}/grant`, {
-        user_id: values.client_ids[0],
+      const response = await api.post<ApiEnvelope<GrantedAchievementRecord | GrantAchievementsResponse>>(`/achievements/${id}/grant`, {
+        user_ids: values.client_ids,
       })
       return unwrapResponse(response)
     },
