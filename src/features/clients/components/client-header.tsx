@@ -23,7 +23,7 @@ function getInitials(client: ClientDetail) {
 
 export function ClientHeader({ client }: ClientHeaderProps) {
   return (
-    <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
+    <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-none [isolation:isolate] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] sm:shadow-sm">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16 border border-border/60 shadow-sm">
