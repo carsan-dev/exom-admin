@@ -12,7 +12,7 @@ export function useDashboard() {
     retry: shouldRetryQuery,
     staleTime: DASHBOARD_REFETCH_INTERVAL,
     refetchInterval: DASHBOARD_REFETCH_INTERVAL,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<DashboardData>>('/dashboard')
       return unwrapResponse(response)

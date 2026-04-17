@@ -47,7 +47,7 @@ export function AppLayout() {
 
   return (
     <TooltipProvider>
-      <div className="flex min-h-screen min-h-[100svh] bg-background lg:h-screen lg:min-h-0 lg:overflow-hidden">
+      <div className="flex min-h-screen min-h-[100svh] overflow-x-hidden bg-background lg:h-screen lg:min-h-0 lg:overflow-hidden">
         {/* Desktop sidebar */}
         <div className="hidden lg:flex">
           <Sidebar isOpen={sidebarOpen} />
@@ -66,7 +66,7 @@ export function AppLayout() {
         </Sheet>
 
         {/* Main content */}
-        <div className="relative flex min-h-[100svh] flex-1 flex-col lg:min-h-0 lg:overflow-hidden">
+        <div className="relative flex min-h-[100svh] min-w-0 flex-1 flex-col overflow-x-hidden lg:min-h-0 lg:overflow-hidden">
           <Header
             onMenuToggle={() => {
               if (window.innerWidth >= 1024) {
@@ -78,7 +78,7 @@ export function AppLayout() {
           />
           <main
             ref={mainRef}
-            className="flex-1 bg-background p-4 sm:p-6 lg:overflow-y-auto lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]"
+            className="min-w-0 flex-1 bg-background p-4 sm:p-6 lg:overflow-y-auto lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]"
           >
             <Outlet />
           </main>

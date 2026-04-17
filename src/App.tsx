@@ -68,13 +68,16 @@ const router = createBrowserRouter([
 ])
 
 export default function App() {
+  const isDevelopment = import.meta.env.DEV
+  const isProduction = import.meta.env.PROD
+
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
       <Toaster closeButton richColors />
-      <Analytics />
-      <SpeedInsights />
-      <ReactQueryDevtools initialIsOpen={false} />
+      {isProduction ? <Analytics /> : null}
+      {isProduction ? <SpeedInsights /> : null}
+      {isDevelopment ? <ReactQueryDevtools initialIsOpen={false} /> : null}
     </QueryClientProvider>
   )
 }

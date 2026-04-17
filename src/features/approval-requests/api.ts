@@ -71,7 +71,7 @@ export function useApprovalRequests(filters: ApprovalRequestFilters, enabled = t
     retry: shouldRetryQuery,
     staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
     refetchInterval: enabled ? APPROVAL_LIST_REFETCH_INTERVAL : false,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedApprovalRequests>>('/approval-requests', {
         params: buildApprovalRequestsQueryParams(filters),
@@ -89,7 +89,7 @@ export function useMyApprovalRequests(filters: MyApprovalRequestFilters, enabled
     retry: shouldRetryQuery,
     staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
     refetchInterval: enabled ? APPROVAL_LIST_REFETCH_INTERVAL : false,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedApprovalRequests>>('/approval-requests/my', {
         params: buildListQueryParams(filters),
@@ -107,7 +107,7 @@ export function useApprovalRequest(id?: string, enabled = true) {
     retry: shouldRetryQuery,
     staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
     refetchInterval: enabled && Boolean(id) ? APPROVAL_DETAIL_REFETCH_INTERVAL : false,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       if (!id) {
         throw new Error('Approval request id is required')
@@ -126,7 +126,7 @@ export function useApprovalStats(enabled = true) {
     retry: shouldRetryQuery,
     staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
     refetchInterval: enabled ? APPROVAL_LIST_REFETCH_INTERVAL : false,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<ApprovalStats>>('/approval-requests/stats')
       return unwrapResponse(response)
@@ -141,7 +141,7 @@ export function useResourceApprovalStatus(resourceType: string, resourceId?: str
     retry: shouldRetryQuery,
     staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
     refetchInterval: enabled && Boolean(resourceId) ? APPROVAL_LIST_REFETCH_INTERVAL : false,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       if (!resourceId) {
         throw new Error('Resource id is required')
@@ -165,7 +165,7 @@ export function useResourceApprovalBatch(resourceType: string, resourceIds: stri
     retry: shouldRetryQuery,
     staleTime: APPROVAL_DETAIL_REFETCH_INTERVAL,
     refetchInterval: enabled && normalizedIds.length > 0 ? APPROVAL_LIST_REFETCH_INTERVAL : false,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<ResourceApprovalSummary[]>>(
         `/approval-requests/resource/${resourceType}/batch`,
