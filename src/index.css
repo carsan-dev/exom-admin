@@ -138,6 +138,14 @@
   border-width: 0;
   border-style: solid;
   border-color: var(--border);
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: var(--background);
 }
 
 body {
@@ -153,6 +161,11 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+a,
+button {
+  touch-action: manipulation;
 }
 
 /* Scrollbar */
