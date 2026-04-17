@@ -28,6 +28,10 @@ function formatDate(dateStr: string) {
   })
 }
 
+function getExpiredMediaLabel(item: FeedbackItem) {
+  return item.media_type === 'VIDEO' ? 'El video ya no está disponible' : 'La imagen ya no está disponible'
+}
+
 interface FeedbackDetailDialogProps {
   item: FeedbackItem | null
   open: boolean
@@ -103,18 +107,31 @@ export function FeedbackDetailDialog({ item, open, onOpenChange }: FeedbackDetai
           </div>
 
           <div className="rounded-lg overflow-hidden bg-muted">
-            {item.media_type === 'IMAGE' ? (
-              <img
-                src={item.media_url}
-                alt="Feedback media"
-                className="w-full max-h-[400px] object-contain"
-              />
+            {item.media_url ? (
+              item.media_type === 'IMAGE' ? (
+                <img
+                  src={item.media_url}
+                  alt="Feedback media"
+                  className="w-full max-h-[400px] object-contain"
+                />
+              ) : (
+                <video
+                  src={item.media_url}
+                  controls
+                  className="w-full max-h-[400px]"
+                />
+              )
             ) : (
-              <video
-                src={item.media_url}
-                controls
-                className="w-full max-h-[400px]"
-              />
+              <div className="flex min-h-56 items-center justify-center px-6 py-10 text-center text-sm text-muted-foreground">
+                <div className="space-y-1">
+                  <p className="font-medium text-foreground">{getExpiredMediaLabel(item)}</p>
+                  <p>
+                    {item.media_deleted_at
+                      ? `Se eliminó automáticamente el ${formatDate(item.media_deleted_at)} según la política de retención.`
+                      : 'Se eliminó automáticamente según la política de retención.'}
+                  </p>
+                </div>
+              </div>
             )}
           </div>
 

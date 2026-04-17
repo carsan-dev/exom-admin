@@ -3,12 +3,13 @@ export interface FeedbackItem {
   client_id: string
   exercise_id: string | null
   media_type: 'VIDEO' | 'IMAGE'
-  media_url: string
+  media_url: string | null
   notes: string | null
   admin_response: string | null
   status: 'PENDING' | 'REVIEWED'
   reviewed_by: string | null
   reviewed_at: string | null
+  media_deleted_at: string | null
   created_at: string
   updated_at: string
   client: {
