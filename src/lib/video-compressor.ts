@@ -2,6 +2,11 @@ import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
 
 let ffmpeg: FFmpeg | null = null
+const MAX_SHORT_SIDE = 720
+const TARGET_VIDEO_BITRATE = '2M'
+const TARGET_MAX_RATE = '2.3M'
+const TARGET_BUFFER_SIZE = '4M'
+const TARGET_AUDIO_BITRATE = '96k'
 
 async function getFFmpeg() {
   if (ffmpeg && ffmpeg.loaded) return ffmpeg
@@ -35,14 +40,71 @@ async function safeDeleteFile(ff: FFmpeg, fileName: string) {
   }
 }
 
+function toEven(value: number) {
+  const rounded = Math.max(2, Math.round(value))
+  return rounded % 2 === 0 ? rounded : rounded - 1
+}
+
+function getTargetDimensions(width: number, height: number) {
+  const shortSide = Math.min(width, height)
+  if (shortSide <= MAX_SHORT_SIDE) {
+    return {
+      width: toEven(width),
+      height: toEven(height),
+    }
+  }
+
+  const scale = MAX_SHORT_SIDE / shortSide
+  return {
+    width: toEven(width * scale),
+    height: toEven(height * scale),
+  }
+}
+
+async function getVideoMetadata(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video')
+    const objectUrl = URL.createObjectURL(file)
+
+    const cleanup = () => {
+      URL.revokeObjectURL(objectUrl)
+      video.removeAttribute('src')
+      video.load()
+    }
+
+    video.preload = 'metadata'
+    video.onloadedmetadata = () => {
+      const width = video.videoWidth
+      const height = video.videoHeight
+      cleanup()
+
+      if (!width || !height) {
+        reject(new Error('No se pudieron leer las dimensiones del video'))
+        return
+      }
+
+      resolve({ width, height })
+    }
+
+    video.onerror = () => {
+      cleanup()
+      reject(new Error('No se pudieron leer los metadatos del video'))
+    }
+
+    video.src = objectUrl
+  })
+}
+
 export async function compressVideo(
   file: File,
   onProgress?: (ratio: number) => void
 ): Promise<{ video: File; thumbnail: File }> {
   const ff = await getFFmpeg()
+  const metadata = await getVideoMetadata(file)
+  const targetSize = getTargetDimensions(metadata.width, metadata.height)
 
   if (onProgress) {
-    ff.on('progress', ({ progress }) => onProgress(progress))
+    ff.on('progress', ({ progress }: { progress: number }) => onProgress(progress))
   }
 
   const inputName = 'input' + getExtension(file.name)
@@ -56,21 +118,23 @@ export async function compressVideo(
       '-i',
       inputName,
       '-vf',
-      'scale=-2:720',
+      `scale=${targetSize.width}:${targetSize.height}:flags=lanczos`,
       '-c:v',
       'libx264',
       '-preset',
-      'fast',
+      'medium',
+      '-pix_fmt',
+      'yuv420p',
       '-b:v',
-      '2M',
+      TARGET_VIDEO_BITRATE,
       '-maxrate',
-      '2.5M',
+      TARGET_MAX_RATE,
       '-bufsize',
-      '5M',
+      TARGET_BUFFER_SIZE,
       '-c:a',
       'aac',
       '-b:a',
-      '128k',
+      TARGET_AUDIO_BITRATE,
       '-movflags',
       '+faststart',
       outputName,
