@@ -4,6 +4,19 @@ import { CHALLENGE_RULE_OPTIONS, CHALLENGE_TYPE_OPTIONS } from './types'
 const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/
 const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
+export function getTodayDateInputValue() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+function isExpiredDateInputValue(value: string) {
+  return isoDateRegex.test(value) && value < getTodayDateInputValue()
+}
+
 export const challengeFormSchema = z
   .object({
     title: z.string().trim().min(1, 'Ingresa un título'),
@@ -17,6 +30,7 @@ export const challengeFormSchema = z
       .string()
       .trim()
       .refine((value) => value === '' || isoDateRegex.test(value), 'Selecciona una fecha válida')
+      .refine((value) => value === '' || !isExpiredDateInputValue(value), 'La fecha límite no puede estar vencida')
       .default(''),
     rule_key: z.enum(CHALLENGE_RULE_OPTIONS).nullable().optional(),
     rule_config: z.record(z.string(), z.unknown()).nullable().optional(),

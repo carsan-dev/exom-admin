@@ -25,7 +25,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { useAssignmentClients } from '../../assignments/api'
 import { getUserDisplayName } from '../../clients/types'
 import { getApiErrorMessage, useAssignChallenge } from '../api'
-import { assignChallengeSchema } from '../schemas'
+import { assignChallengeSchema, getTodayDateInputValue } from '../schemas'
 import { getChallengeScopeLabel, getChallengeTypeLabel, type ChallengeListItem } from '../types'
 
 interface AssignChallengeDialogProps {
@@ -80,6 +80,7 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
   }, [clients, search])
 
   const selectedClientSet = new Set(selectedClientIds)
+  const isExpiredChallenge = Boolean(challenge?.deadline && challenge.deadline.slice(0, 10) < getTodayDateInputValue())
 
   const toggleClient = (clientId: string) => {
     setSubmitError(null)
@@ -90,6 +91,11 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
 
   const handleSubmit = async () => {
     if (!challenge) {
+      return
+    }
+
+    if (isExpiredChallenge) {
+      setSubmitError('Este reto tiene la fecha límite vencida. Edita la fecha o déjalo sin fecha límite antes de asignarlo.')
       return
     }
 
@@ -143,6 +149,12 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
               </Badge>
             </div>
             <p className="mt-2 text-sm text-muted-foreground">{challenge.description}</p>
+          </div>
+        )}
+
+        {isExpiredChallenge && (
+          <div className="rounded-xl border border-status-error/20 bg-status-error/10 p-4 text-sm text-status-error">
+            Este reto tiene la fecha límite vencida. Edita la fecha o déjalo sin fecha límite antes de asignarlo.
           </div>
         )}
 
@@ -279,7 +291,7 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
           <Button
             type="button"
             onClick={() => void handleSubmit()}
-            disabled={assignChallenge.isPending || clientsQuery.isLoading || clients.length === 0}
+            disabled={assignChallenge.isPending || clientsQuery.isLoading || clients.length === 0 || isExpiredChallenge}
           >
             {assignChallenge.isPending ? 'Asignando...' : 'Confirmar asignación'}
           </Button>

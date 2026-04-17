@@ -15,6 +15,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,7 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getApiErrorMessage, useCreateChallenge, useUpdateChallenge } from '../api'
-import { challengeFormSchema } from '../schemas'
+import { challengeFormSchema, getTodayDateInputValue } from '../schemas'
 import {
   buildChallengeFormDefaults,
   CHALLENGE_RULE_METADATA,
@@ -62,6 +63,7 @@ export function ChallengeFormDialog({ open, onOpenChange, challenge, onSubmitted
   const selectedRuleKey = form.watch('rule_key')
   const selectedRule = selectedRuleKey ? CHALLENGE_RULE_METADATA[selectedRuleKey] : null
   const isPending = createChallenge.isPending || updateChallenge.isPending
+  const todayDateInputValue = getTodayDateInputValue()
 
   useEffect(() => {
     if (open) {
@@ -177,8 +179,9 @@ export function ChallengeFormDialog({ open, onOpenChange, challenge, onSubmitted
                   <FormItem>
                     <FormLabel>Fecha límite</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" min={todayDateInputValue} {...field} />
                     </FormControl>
+                    <FormDescription>Déjala vacía para que el reto no tenga fecha límite.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
