@@ -1,21 +1,47 @@
 import { z } from 'zod'
 import { LEVEL_OPTIONS, ROLE_OPTIONS } from './types'
 
-export const createClientSchema = z.object({
-  email: z.string().trim().email('Introduce un email válido'),
-  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-  first_name: z.string().trim().min(1, 'El nombre es obligatorio'),
-  last_name: z.string().trim().min(1, 'El apellido es obligatorio'),
-  level: z.enum(LEVEL_OPTIONS).optional(),
-  main_goal: z.string().trim().max(160, 'El objetivo no puede superar 160 caracteres').optional(),
-})
+export const createClientSchema = z
+  .object({
+    email: z.string().trim().email('Introduce un email válido'),
+    send_invitation: z.boolean(),
+    password: z.string().optional(),
+    first_name: z.string().trim().min(1, 'El nombre es obligatorio'),
+    last_name: z.string().trim().min(1, 'El apellido es obligatorio'),
+    level: z.enum(LEVEL_OPTIONS).optional(),
+    main_goal: z.string().trim().max(160, 'El objetivo no puede superar 160 caracteres').optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.send_invitation) {
+      if (!data.password || data.password.length < 8) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['password'],
+          message: 'La contraseña debe tener al menos 8 caracteres',
+        })
+      }
+    }
+  })
 
-export const createAdminSchema = z.object({
-  email: z.string().trim().email('Introduce un email válido'),
-  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-  first_name: z.string().trim().min(1, 'El nombre es obligatorio'),
-  last_name: z.string().trim().min(1, 'El apellido es obligatorio'),
-})
+export const createAdminSchema = z
+  .object({
+    email: z.string().trim().email('Introduce un email válido'),
+    send_invitation: z.boolean(),
+    password: z.string().optional(),
+    first_name: z.string().trim().min(1, 'El nombre es obligatorio'),
+    last_name: z.string().trim().min(1, 'El apellido es obligatorio'),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.send_invitation) {
+      if (!data.password || data.password.length < 8) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['password'],
+          message: 'La contraseña debe tener al menos 8 caracteres',
+        })
+      }
+    }
+  })
 
 export const updateUserSchema = z.object({
   email: z.string().trim().email('Introduce un email válido'),

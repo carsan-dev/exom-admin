@@ -20,6 +20,13 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { getApiErrorMessage, useCreateAdmin } from '../api'
 import { createAdminSchema, type CreateAdminFormValues } from '../schemas'
 
@@ -30,6 +37,7 @@ interface CreateAdminDialogProps {
 
 const defaultValues: CreateAdminFormValues = {
   email: '',
+  send_invitation: true,
   password: '',
   first_name: '',
   last_name: '',
@@ -48,10 +56,16 @@ export function CreateAdminDialog({ open, onOpenChange }: CreateAdminDialogProps
     }
   }, [form, open])
 
+  const sendInvitation = form.watch('send_invitation')
+
   const handleSubmit = form.handleSubmit(async (values) => {
     try {
       await createAdmin.mutateAsync(values)
-      toast.success('Admin creado correctamente')
+      toast.success(
+        values.send_invitation
+          ? 'Admin creado. Email de invitación enviado.'
+          : 'Admin creado correctamente',
+      )
       onOpenChange(false)
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'No se ha podido crear el admin'))
@@ -116,17 +130,53 @@ export function CreateAdminDialog({ open, onOpenChange }: CreateAdminDialogProps
 
             <FormField
               control={form.control}
-              name="password"
+              name="send_invitation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contraseña temporal</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Mínimo 8 caracteres" autoComplete="new-password" {...field} />
-                  </FormControl>
+                  <FormLabel>Método de contraseña</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === 'invitation')}
+                    value={field.value ? 'invitation' : 'manual'}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="invitation">Enviar email de invitación</SelectItem>
+                      <SelectItem value="manual">Establecer contraseña manual</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {sendInvitation ? (
+              <div className="rounded-xl border border-dashed border-border/60 bg-muted/30 p-3 text-sm text-muted-foreground">
+                El admin recibirá un email para fijar su propia contraseña.
+              </div>
+            ) : (
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña temporal</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Mínimo 8 caracteres"
+                        autoComplete="new-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

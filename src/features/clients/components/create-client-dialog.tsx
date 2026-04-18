@@ -40,6 +40,7 @@ interface CreateClientDialogProps {
 
 const defaultValues: CreateClientFormValues = {
   email: '',
+  send_invitation: true,
   password: '',
   first_name: '',
   last_name: '',
@@ -61,10 +62,16 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
     }
   }, [form, open])
 
+  const sendInvitation = form.watch('send_invitation')
+
   const handleSubmit = form.handleSubmit(async (values) => {
     try {
       await createClient.mutateAsync(values)
-      toast.success('Cliente creado correctamente')
+      toast.success(
+        values.send_invitation
+          ? 'Cliente creado. Email de invitación enviado.'
+          : 'Cliente creado correctamente',
+      )
       onCreated?.()
       onOpenChange(false)
     } catch (error) {
@@ -130,20 +137,56 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
               )}
             />
 
-            <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contraseña</FormLabel>
+            <FormField
+              control={form.control}
+              name="send_invitation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Método de contraseña</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === 'invitation')}
+                    value={field.value ? 'invitation' : 'manual'}
+                  >
                     <FormControl>
-                      <Input type="password" placeholder="Mínimo 8 caracteres" autoComplete="new-password" {...field} />
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <SelectContent>
+                      <SelectItem value="invitation">Enviar email de invitación</SelectItem>
+                      <SelectItem value="manual">Establecer contraseña manual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
+              {sendInvitation ? (
+                <div className="rounded-xl border border-dashed border-border/60 bg-muted/30 p-3 text-sm text-muted-foreground">
+                  El cliente recibirá un email para fijar su propia contraseña.
+                </div>
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contraseña</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Mínimo 8 caracteres"
+                          autoComplete="new-password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}

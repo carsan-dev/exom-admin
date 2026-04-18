@@ -61,7 +61,7 @@ const ALL_ADMINS_PAGE_SIZE = 100
 function normalizeCreateClientPayload(payload: CreateClientFormValues) {
   return {
     email: payload.email.trim(),
-    password: payload.password,
+    ...(payload.send_invitation ? {} : { password: payload.password }),
     first_name: payload.first_name.trim(),
     last_name: payload.last_name.trim(),
     level: payload.level,
@@ -72,7 +72,7 @@ function normalizeCreateClientPayload(payload: CreateClientFormValues) {
 function normalizeCreateAdminPayload(payload: CreateAdminFormValues) {
   return {
     email: payload.email.trim(),
-    password: payload.password,
+    ...(payload.send_invitation ? {} : { password: payload.password }),
     first_name: payload.first_name.trim(),
     last_name: payload.last_name.trim(),
   }
