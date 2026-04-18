@@ -1,8 +1,13 @@
+import { useState } from 'react'
+import { Pencil } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LEVEL_LABELS, type ClientProfile } from '../types'
+import { EditMainGoalDialog } from './edit-main-goal-dialog'
 
 interface ClientInfoTabProps {
   profile: ClientProfile | null
+  clientId: string
 }
 
 const dateFormatter = new Intl.DateTimeFormat('es-ES', {
@@ -27,7 +32,9 @@ function formatDate(value: string | null) {
   return dateFormatter.format(new Date(value))
 }
 
-export function ClientInfoTab({ profile }: ClientInfoTabProps) {
+export function ClientInfoTab({ profile, clientId }: ClientInfoTabProps) {
+  const [editGoalOpen, setEditGoalOpen] = useState(false)
+
   if (!profile) {
     return (
       <Card>
@@ -52,9 +59,15 @@ export function ClientInfoTab({ profile }: ClientInfoTabProps) {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Objetivo principal</CardTitle>
-          <CardDescription>Motivación y foco actual del cliente</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
+          <div>
+            <CardTitle className="text-xl">Objetivo principal</CardTitle>
+            <CardDescription>Motivación y foco actual del cliente</CardDescription>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => setEditGoalOpen(true)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Editar
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="rounded-xl border border-border/60 bg-background/60 p-4 text-sm leading-6 text-foreground">
@@ -75,6 +88,13 @@ export function ClientInfoTab({ profile }: ClientInfoTabProps) {
           </Card>
         ))}
       </div>
+
+      <EditMainGoalDialog
+        open={editGoalOpen}
+        onOpenChange={setEditGoalOpen}
+        clientId={clientId}
+        currentMainGoal={profile.main_goal}
+      />
     </div>
   )
 }

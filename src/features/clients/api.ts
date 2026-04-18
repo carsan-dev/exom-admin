@@ -2,7 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { invalidateAdminQueries } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, getApiErrorMessage, getApiErrorStatus, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
-import type { CreateAdminFormValues, CreateClientFormValues, UpdateUserFormValues } from './schemas'
+import type {
+  CreateAdminFormValues,
+  CreateClientFormValues,
+  UpdateClientProfileFormValues,
+  UpdateUserFormValues,
+} from './schemas'
 import type {
   AdminUserListItem,
   Client,
@@ -287,6 +292,26 @@ export function useUpdateRole() {
       await invalidateAdminQueries(queryClient, {
         includeDashboard: true,
         extraQueryKeys: [clientsQueryKeys.all, usersQueryKeys.all, clientAssignmentsQueryKeys.all],
+      })
+    },
+  })
+}
+
+export function useUpdateClientProfile() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ clientId, values }: { clientId: string; values: UpdateClientProfileFormValues }) => {
+      const payload = {
+        main_goal: values.main_goal?.trim() ? values.main_goal.trim() : null,
+      }
+      const response = await api.patch<ApiEnvelope<ClientDetail>>(`/admin/clients/${clientId}/profile`, payload)
+      return unwrapResponse(response)
+    },
+    onSuccess: async (_data, { clientId }) => {
+      await invalidateAdminQueries(queryClient, {
+        includeDashboard: true,
+        extraQueryKeys: [clientsQueryKeys.all, clientsQueryKeys.detail(clientId)],
       })
     },
   })

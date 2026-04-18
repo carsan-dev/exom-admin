@@ -189,7 +189,7 @@ export function ClientDetailPage() {
         </TabsList>
 
         <TabsContent value="info">
-          <ClientInfoTab profile={client.profile} />
+          <ClientInfoTab profile={client.profile} clientId={client.id} />
         </TabsContent>
         <TabsContent value="metrics">
           <ClientMetricsTab metrics={client.bodyMetrics} />

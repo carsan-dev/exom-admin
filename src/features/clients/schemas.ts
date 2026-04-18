@@ -23,6 +23,10 @@ export const updateUserSchema = z.object({
   last_name: z.string().trim().min(1, 'El apellido es obligatorio'),
 })
 
+export const updateClientProfileSchema = z.object({
+  main_goal: z.string().trim().max(160, 'El objetivo no puede superar 160 caracteres').optional(),
+})
+
 export const updateRoleSchema = z.object({
   role: z.enum(ROLE_OPTIONS),
 })
@@ -36,3 +40,4 @@ export type CreateAdminFormValues = z.infer<typeof createAdminSchema>
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>
 export type UpdateRoleFormValues = z.infer<typeof updateRoleSchema>
 export type UpdateClientAssignmentsFormValues = z.infer<typeof updateClientAssignmentsSchema>
+export type UpdateClientProfileFormValues = z.infer<typeof updateClientProfileSchema>
