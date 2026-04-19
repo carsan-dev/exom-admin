@@ -36,6 +36,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
+import { useNotificationTemplates } from '@/features/notification-templates/api'
+import type { NotificationTemplate } from '@/features/notification-templates/types'
 import { useClients } from '../../clients/api'
 import { getUserDisplayName, type Client } from '../../clients/types'
 import {
@@ -113,6 +115,38 @@ const QUICK_TEMPLATES: ReadonlyArray<{
     type: 'diet',
   },
 ]
+
+function getRouteTypeFromTemplate(route: string | null | undefined): NotificationRouteType {
+  if (!route) {
+    return 'home'
+  }
+
+  if (route.startsWith('/recap')) {
+    return 'recap'
+  }
+
+  if (route.startsWith('/trainings')) {
+    return 'training'
+  }
+
+  if (route.startsWith('/diets')) {
+    return 'diet'
+  }
+
+  if (route.startsWith('/challenges')) {
+    return 'challenge'
+  }
+
+  if (route.startsWith('/calendar')) {
+    return 'calendar'
+  }
+
+  if (route.startsWith('/profile')) {
+    return 'profile'
+  }
+
+  return 'home'
+}
 
 function getInitials(name: string) {
   return name
@@ -255,6 +289,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
   const sendNotification = useSendNotification()
   const sendToAllClients = useSendToAllClients()
   const clientsQuery = useClients(1, ALL_CLIENTS_LIMIT)
+  const templatesQuery = useNotificationTemplates(open)
 
   const form = useForm<SendNotificationFormValues>({
     resolver: zodResolver(sendNotificationSchema),
@@ -268,6 +303,13 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
     ? getApiErrorMessage(clientsQuery.error, 'No se ha podido cargar la cartera de clientes')
     : null
   const isClientsUnavailable = clientsQuery.isLoading || clientsQuery.isError
+  const manualTemplates = useMemo(
+    () =>
+      (templatesQuery.data ?? []).filter(
+        (template) => !template.is_system && template.enabled && template.variables.length === 0,
+      ),
+    [templatesQuery.data],
+  )
 
   useEffect(() => {
     if (!open) {
@@ -281,10 +323,23 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
     }
   }, [clientsQuery.isError, form, sendToAll])
 
-  const applyTemplate = (template: (typeof QUICK_TEMPLATES)[number]) => {
+  const applyTemplate = (template: {
+    title: string
+    body: string
+    type?: NotificationRouteType
+    route?: string | null
+  }) => {
     form.setValue('title', template.title, { shouldValidate: true })
     form.setValue('body', template.body, { shouldValidate: true })
-    form.setValue('type', template.type, { shouldValidate: true })
+    form.setValue('type', template.type ?? getRouteTypeFromTemplate(template.route), { shouldValidate: true })
+  }
+
+  const applyManualTemplate = (template: NotificationTemplate) => {
+    applyTemplate({
+      title: template.title,
+      body: template.body,
+      route: template.route,
+    })
   }
 
   const handleSubmit = form.handleSubmit(async (values) => {
@@ -341,7 +396,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2 rounded-xl border border-border/70 bg-muted/20 p-4">
+        <div className="space-y-3 rounded-xl border border-border/70 bg-muted/20 p-4">
           <p className="text-sm font-medium text-foreground">Plantillas rápidas</p>
           <div className="flex flex-wrap gap-2">
             {QUICK_TEMPLATES.map((template) => (
@@ -356,6 +411,24 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
               </Button>
             ))}
           </div>
+          {manualTemplates.length > 0 ? (
+            <div className="space-y-2 border-t border-border pt-3">
+              <p className="text-xs font-medium uppercase text-muted-foreground">Guardadas</p>
+              <div className="flex flex-wrap gap-2">
+                {manualTemplates.map((template) => (
+                  <Button
+                    key={template.key}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => applyManualTemplate(template)}
+                  >
+                    {template.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
 
         {clientsLoadError ? (

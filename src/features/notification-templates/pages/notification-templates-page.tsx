@@ -1,16 +1,25 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { AlertTriangle, RefreshCcw, RotateCcw, Save } from 'lucide-react'
+import { AlertTriangle, Plus, RefreshCcw, RotateCcw, Save, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/use-auth'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import {
   getApiErrorMessage,
+  useCreateNotificationTemplate,
   useNotificationTemplates,
   useResetNotificationTemplate,
   useUpdateNotificationTemplate,
@@ -24,7 +33,23 @@ interface TemplateDraft {
   enabled: boolean
 }
 
+interface CreateTemplateDraft extends TemplateDraft {
+  name: string
+  description: string
+  category: string
+}
+
 const emptyDraft: TemplateDraft = {
+  title: '',
+  body: '',
+  route: '',
+  enabled: true,
+}
+
+const emptyCreateDraft: CreateTemplateDraft = {
+  name: '',
+  description: '',
+  category: 'Manual',
   title: '',
   body: '',
   route: '',
@@ -34,6 +59,18 @@ const emptyDraft: TemplateDraft = {
 function normalizeRoute(route: string) {
   const trimmed = route.trim()
   return trimmed ? trimmed : null
+}
+
+function validateTemplateFields(title: string, body: string, route: string | null) {
+  if (!title || !body) {
+    return 'Título y cuerpo son obligatorios'
+  }
+
+  if (route && !route.startsWith('/')) {
+    return 'La ruta debe empezar por / o quedar vacía'
+  }
+
+  return null
 }
 
 function formatUpdatedAt(value: string | null) {
@@ -63,18 +100,32 @@ function getTemplateSearchText(template: NotificationTemplate) {
     .toLowerCase()
 }
 
-function TemplateVariables({ variables }: { variables: string[] }) {
-  if (variables.length === 0) {
-    return <p className="text-sm text-muted-foreground">Sin variables disponibles.</p>
+function TemplateVariables({ template }: { template: NotificationTemplate }) {
+  if (template.variables.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
+        Esta plantilla no recibe datos dinámicos. El texto se enviará tal como está escrito.
+      </div>
+    )
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {variables.map((variable) => (
-        <Badge key={variable} variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
-          {`{${variable}}`}
-        </Badge>
-      ))}
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">
+        Las variables se reemplazan al enviar. Mantén las llaves si quieres conservar ese dato dinámico.
+      </p>
+      <div className="space-y-2">
+        {template.variables.map((variable) => (
+          <div key={variable} className="rounded-lg border border-border bg-muted/20 p-3">
+            <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+              {`{${variable}}`}
+            </Badge>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {template.variable_help[variable] ?? 'Dato dinámico que el sistema reemplaza al enviar.'}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -108,6 +159,175 @@ function LoadingState() {
   )
 }
 
+interface CreateTemplateDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onCreated: (template: NotificationTemplate) => void
+}
+
+function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTemplateDialogProps) {
+  const createTemplate = useCreateNotificationTemplate()
+  const [draft, setDraft] = useState<CreateTemplateDraft>(emptyCreateDraft)
+
+  useEffect(() => {
+    if (!open) {
+      setDraft(emptyCreateDraft)
+    }
+  }, [open])
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const name = draft.name.trim()
+    const title = draft.title.trim()
+    const body = draft.body.trim()
+    const route = normalizeRoute(draft.route)
+    const validationError = validateTemplateFields(title, body, route)
+
+    if (!name) {
+      toast.error('El nombre es obligatorio')
+      return
+    }
+
+    if (validationError) {
+      toast.error(validationError)
+      return
+    }
+
+    try {
+      const template = await createTemplate.mutateAsync({
+        name,
+        description: draft.description.trim() || undefined,
+        category: draft.category.trim() || 'Manual',
+        title,
+        body,
+        route,
+        enabled: draft.enabled,
+      })
+      toast.success('Plantilla creada')
+      onCreated(template)
+      onOpenChange(false)
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'No se ha podido crear la plantilla'))
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Nueva plantilla manual</DialogTitle>
+          <DialogDescription>
+            Crea un texto reutilizable para enviar notificaciones puntuales desde el panel.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
+            <div className="space-y-2">
+              <Label htmlFor="new-template-name">Nombre</Label>
+              <Input
+                id="new-template-name"
+                value={draft.name}
+                onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
+                maxLength={120}
+                disabled={createTemplate.isPending}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="new-template-category">Categoría</Label>
+              <Input
+                id="new-template-category"
+                value={draft.category}
+                onChange={(event) => setDraft((current) => ({ ...current, category: event.target.value }))}
+                maxLength={80}
+                disabled={createTemplate.isPending}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="new-template-description">Descripción</Label>
+            <Input
+              id="new-template-description"
+              value={draft.description}
+              onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
+              maxLength={240}
+              disabled={createTemplate.isPending}
+              placeholder="Uso recomendado de esta plantilla"
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_220px]">
+            <div className="space-y-2">
+              <Label htmlFor="new-template-title">Título</Label>
+              <Input
+                id="new-template-title"
+                value={draft.title}
+                onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
+                maxLength={120}
+                disabled={createTemplate.isPending}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="new-template-route">Ruta</Label>
+              <Input
+                id="new-template-route"
+                value={draft.route}
+                onChange={(event) => setDraft((current) => ({ ...current, route: event.target.value }))}
+                maxLength={160}
+                disabled={createTemplate.isPending}
+                placeholder="/recap"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="new-template-body">Cuerpo</Label>
+            <textarea
+              id="new-template-body"
+              value={draft.body}
+              onChange={(event) => setDraft((current) => ({ ...current, body: event.target.value }))}
+              maxLength={500}
+              rows={5}
+              disabled={createTemplate.isPending}
+              className="flex min-h-28 w-full resize-y rounded-lg border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+
+          <div className="flex items-start gap-3 rounded-lg border border-border p-3">
+            <input
+              id="new-template-enabled"
+              type="checkbox"
+              checked={draft.enabled}
+              onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))}
+              disabled={createTemplate.isPending}
+              className="mt-1 h-4 w-4 rounded border-input"
+            />
+            <div className="space-y-1">
+              <Label htmlFor="new-template-enabled">Disponible al enviar</Label>
+              <p className="text-sm text-muted-foreground">
+                Si está pausada, no aparecerá como plantilla rápida en envío manual.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={createTemplate.isPending}>
+              {createTemplate.isPending ? 'Creando...' : 'Crear plantilla'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function NotificationTemplatesPage() {
   const currentUserRole = useAuth((state) => state.user?.role)
   const canManageTemplates = currentUserRole === 'SUPER_ADMIN'
@@ -116,6 +336,7 @@ export function NotificationTemplatesPage() {
   const resetTemplate = useResetNotificationTemplate()
   const [selectedKey, setSelectedKey] = useState('')
   const [search, setSearch] = useState('')
+  const [createOpen, setCreateOpen] = useState(false)
   const [draft, setDraft] = useState<TemplateDraft>(emptyDraft)
 
   const templates = templatesQuery.data ?? []
@@ -184,14 +405,10 @@ export function NotificationTemplatesPage() {
     const title = draft.title.trim()
     const body = draft.body.trim()
     const route = normalizeRoute(draft.route)
+    const validationError = validateTemplateFields(title, body, route)
 
-    if (!title || !body) {
-      toast.error('Título y cuerpo son obligatorios')
-      return
-    }
-
-    if (route && !route.startsWith('/')) {
-      toast.error('La ruta debe empezar por / o quedar vacía')
+    if (validationError) {
+      toast.error(validationError)
       return
     }
 
@@ -211,21 +428,30 @@ export function NotificationTemplatesPage() {
     }
   }
 
-  const handleReset = async () => {
+  const handleResetOrDelete = async () => {
     if (!selectedTemplate) {
       return
     }
 
-    const confirmed = window.confirm(`¿Restaurar "${selectedTemplate.name}" a su texto por defecto?`)
+    const confirmed = selectedTemplate.is_system
+      ? window.confirm(`¿Restaurar "${selectedTemplate.name}" a su texto por defecto?`)
+      : window.confirm(`¿Eliminar la plantilla manual "${selectedTemplate.name}"?`)
+
     if (!confirmed) {
       return
     }
 
     try {
-      await resetTemplate.mutateAsync(selectedTemplate.key)
-      toast.success('Plantilla restaurada')
+      const result = await resetTemplate.mutateAsync(selectedTemplate.key)
+
+      if ('deleted' in result) {
+        toast.success('Plantilla eliminada')
+        setSelectedKey('')
+      } else {
+        toast.success('Plantilla restaurada')
+      }
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'No se ha podido restaurar la plantilla'))
+      toast.error(getApiErrorMessage(error, 'No se ha podido actualizar la plantilla'))
     }
   }
 
@@ -235,7 +461,7 @@ export function NotificationTemplatesPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold text-foreground">Plantillas de notificaciones</h1>
           <p className="text-sm text-muted-foreground">
-            Solo super admins pueden cambiar mensajes automáticos.
+            Solo super admins pueden cambiar plantillas.
           </p>
         </div>
 
@@ -255,17 +481,28 @@ export function NotificationTemplatesPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold text-foreground">Plantillas de notificaciones</h1>
           <p className="text-sm text-muted-foreground">
-            Ajusta textos automáticos sin desplegar cambios de código.
+            Edita automáticas existentes y crea plantillas manuales para envíos puntuales.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(categoryCounts).map(([category, count]) => (
-            <Badge key={category} variant="outline" className="border-border bg-muted text-muted-foreground">
-              {category}: {count}
-            </Badge>
-          ))}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(categoryCounts).map(([category, count]) => (
+              <Badge key={category} variant="outline" className="border-border bg-muted text-muted-foreground">
+                {category}: {count}
+              </Badge>
+            ))}
+          </div>
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Nueva plantilla
+          </Button>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-brand-primary/15 bg-brand-soft/10 p-4 text-sm text-muted-foreground">
+        Las plantillas automáticas dependen de un evento del sistema. Una plantilla nueva creada aquí es manual:
+        queda disponible al enviar una notificación desde el historial.
       </div>
 
       {templatesQuery.isLoading ? <LoadingState /> : null}
@@ -294,8 +531,8 @@ export function NotificationTemplatesPage() {
         <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Automáticas</CardTitle>
-              <CardDescription>{templates.length} plantillas configurables</CardDescription>
+              <CardTitle className="text-lg">Plantillas</CardTitle>
+              <CardDescription>{templates.length} configurables</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -330,6 +567,17 @@ export function NotificationTemplatesPage() {
                           <span className="block line-clamp-2 text-xs text-muted-foreground">{template.title}</span>
                         </span>
                         <span className="flex shrink-0 flex-col items-end gap-1">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              'text-[10px]',
+                              template.is_system
+                                ? 'border-brand-primary/20 bg-brand-soft/10 text-brand-primary'
+                                : 'border-border bg-muted text-muted-foreground',
+                            )}
+                          >
+                            {template.is_system ? 'Automática' : 'Manual'}
+                          </Badge>
                           <Badge variant="outline" className="border-border bg-muted text-[10px] text-muted-foreground">
                             {template.category}
                           </Badge>
@@ -367,6 +615,9 @@ export function NotificationTemplatesPage() {
                         {selectedTemplate.category}
                       </Badge>
                       <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
+                        {selectedTemplate.is_system ? 'Automática' : 'Manual'}
+                      </Badge>
+                      <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
                         {selectedTemplate.customized ? 'Editada' : 'Por defecto'}
                       </Badge>
                     </div>
@@ -389,7 +640,9 @@ export function NotificationTemplatesPage() {
                     <div className="space-y-1">
                       <Label htmlFor="template-enabled">Activa</Label>
                       <p className="text-sm text-muted-foreground">
-                        Al pausar, el evento automático no enviará nada.
+                        {selectedTemplate.is_system
+                          ? 'Al pausar, el evento automático no enviará nada.'
+                          : 'Al pausar, no aparecerá como plantilla rápida al enviar.'}
                       </p>
                     </div>
                   </div>
@@ -434,10 +687,7 @@ export function NotificationTemplatesPage() {
 
                   <div className="space-y-2 border-t border-border pt-4">
                     <Label>Variables</Label>
-                    <TemplateVariables variables={selectedTemplate.variables} />
-                    <p className="text-xs text-muted-foreground">
-                      Mantén las llaves para que el sistema reemplace cada dato al enviar.
-                    </p>
+                    <TemplateVariables template={selectedTemplate} />
                   </div>
 
                   <div className="space-y-2 border-t border-border pt-4">
@@ -453,11 +703,11 @@ export function NotificationTemplatesPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={handleReset}
-                      disabled={isBusy || !selectedTemplate.customized}
+                      onClick={handleResetOrDelete}
+                      disabled={isBusy || (selectedTemplate.is_system && !selectedTemplate.customized)}
                     >
-                      <RotateCcw className="h-4 w-4" />
-                      Restaurar defecto
+                      {selectedTemplate.is_system ? <RotateCcw className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                      {selectedTemplate.is_system ? 'Restaurar defecto' : 'Eliminar plantilla'}
                     </Button>
 
                     <Button type="submit" disabled={isBusy || !hasChanges}>
@@ -475,6 +725,12 @@ export function NotificationTemplatesPage() {
           </Card>
         </div>
       ) : null}
+
+      <CreateTemplateDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={(template) => setSelectedKey(template.key)}
+      />
     </div>
   )
 }

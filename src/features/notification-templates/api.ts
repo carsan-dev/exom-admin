@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
-import type { NotificationTemplate, UpdateNotificationTemplatePayload } from './types'
+import type {
+  CreateNotificationTemplatePayload,
+  DeletedNotificationTemplate,
+  NotificationTemplate,
+  UpdateNotificationTemplatePayload,
+} from './types'
 
 export { getApiErrorMessage }
 
@@ -18,6 +23,20 @@ export function useNotificationTemplates(enabled = true) {
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<NotificationTemplate[]>>('/notifications/templates')
       return unwrapResponse(response)
+    },
+  })
+}
+
+export function useCreateNotificationTemplate() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (values: CreateNotificationTemplatePayload) => {
+      const response = await api.post<ApiEnvelope<NotificationTemplate>>('/notifications/templates', values)
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: notificationTemplateKeys.all })
     },
   })
 }
@@ -44,7 +63,9 @@ export function useResetNotificationTemplate() {
 
   return useMutation({
     mutationFn: async (key: string) => {
-      const response = await api.delete<ApiEnvelope<NotificationTemplate>>(`/notifications/templates/${key}`)
+      const response = await api.delete<ApiEnvelope<NotificationTemplate | DeletedNotificationTemplate>>(
+        `/notifications/templates/${key}`,
+      )
       return unwrapResponse(response)
     },
     onSuccess: async () => {
