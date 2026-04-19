@@ -19,6 +19,7 @@ import { RecapDetailPage } from '@/features/recaps/pages/recap-detail-page'
 import { ChallengesPage } from '@/features/challenges/pages/challenges-page'
 import { AchievementsPage } from '@/features/achievements/pages/achievements-page'
 import { NotificationsPage } from '@/features/notifications/pages/notifications-page'
+import { NotificationTemplatesPage } from '@/features/notification-templates/pages/notification-templates-page'
 import { ClientDetailPage } from '@/features/clients/pages/client-detail-page'
 import { ApprovalRequestsPage } from '@/features/approval-requests/pages/approval-requests-page'
 import { OnboardingPage } from '@/features/auth/pages/onboarding-page'
@@ -58,6 +59,7 @@ const router = createBrowserRouter([
           { path: 'challenges', element: <ChallengesPage /> },
           { path: 'achievements', element: <AchievementsPage /> },
           { path: 'notifications', element: <NotificationsPage /> },
+          { path: 'notification-templates', element: <NotificationTemplatesPage /> },
           { path: 'approval-requests', element: <ApprovalRequestsPage /> },
         ],
       },
