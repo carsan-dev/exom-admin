@@ -95,6 +95,8 @@ function getTemplateSearchText(template: NotificationTemplate) {
     template.title,
     template.body,
     template.key,
+    template.delivery_info.label,
+    template.delivery_info.description,
   ]
     .join(' ')
     .toLowerCase()
@@ -126,6 +128,40 @@ function TemplateVariables({ template }: { template: NotificationTemplate }) {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function DeliveryInfo({ template }: { template: NotificationTemplate }) {
+  const delivery = template.delivery_info
+  const typeLabel =
+    delivery.type === 'schedule'
+      ? 'Programada'
+      : delivery.type === 'event'
+        ? 'Por evento'
+        : 'Manual'
+
+  return (
+    <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+          {typeLabel}
+        </Badge>
+        <p className="text-sm font-medium text-foreground">{delivery.label}</p>
+      </div>
+      <p className="text-sm text-muted-foreground">{delivery.description}</p>
+      {delivery.type === 'schedule' ? (
+        <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+          <p>
+            Huso horario: <span className="font-medium text-foreground">{delivery.timezone ?? 'Europe/Madrid'}</span>
+          </p>
+          {delivery.cron ? (
+            <p>
+              Cron: <span className="font-mono text-foreground">{delivery.cron}</span>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -683,6 +719,11 @@ export function NotificationTemplatesPage() {
                       className="flex min-h-28 w-full resize-y rounded-lg border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <p className="text-xs text-muted-foreground">{draft.body.length}/500 caracteres</p>
+                  </div>
+
+                  <div className="space-y-2 border-t border-border pt-4">
+                    <Label>Cuándo se envía</Label>
+                    <DeliveryInfo template={selectedTemplate} />
                   </div>
 
                   <div className="space-y-2 border-t border-border pt-4">

@@ -19,6 +19,8 @@ const baseRouteLabels: Record<string, string> = {
   challenges: 'Retos',
   achievements: 'Logros',
   notifications: 'Notificaciones',
+  'notification-templates': 'Plantillas',
+  'approval-requests': 'Solicitudes',
 }
 
 export function Breadcrumbs() {
