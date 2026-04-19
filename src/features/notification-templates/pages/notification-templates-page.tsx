@@ -23,6 +23,7 @@ import {
   useNotificationTemplates,
   useResetNotificationTemplate,
   useUpdateNotificationTemplate,
+  useUpdateNotificationTemplateSchedule,
 } from '../api'
 import type { NotificationTemplate } from '../types'
 
@@ -39,11 +40,25 @@ interface CreateTemplateDraft extends TemplateDraft {
   category: string
 }
 
+interface ScheduleDraft {
+  enabled: boolean
+  timezone: string
+  times: string[]
+  weekday: number
+}
+
 const emptyDraft: TemplateDraft = {
   title: '',
   body: '',
   route: '',
   enabled: true,
+}
+
+const defaultScheduleDraft: ScheduleDraft = {
+  enabled: true,
+  timezone: 'Europe/Madrid',
+  times: ['09:00'],
+  weekday: 0,
 }
 
 const emptyCreateDraft: CreateTemplateDraft = {
@@ -71,6 +86,61 @@ function validateTemplateFields(title: string, body: string, route: string | nul
   }
 
   return null
+}
+
+const weekdayOptions = [
+  { value: 0, label: 'Domingo' },
+  { value: 1, label: 'Lunes' },
+  { value: 2, label: 'Martes' },
+  { value: 3, label: 'Miércoles' },
+  { value: 4, label: 'Jueves' },
+  { value: 5, label: 'Viernes' },
+  { value: 6, label: 'Sábado' },
+]
+
+const mealTimeLabels = ['Desayuno', 'Comida', 'Snack', 'Cena']
+
+function getScheduleDraft(template: NotificationTemplate): ScheduleDraft {
+  const delivery = template.delivery_info
+
+  if (delivery.type !== 'schedule') {
+    return defaultScheduleDraft
+  }
+
+  const fallbackTimes =
+    delivery.schedule_kind === 'meal_daily'
+      ? ['08:00', '13:00', '17:00', '20:30']
+      : [delivery.times?.[0] ?? '09:00']
+
+  return {
+    enabled: delivery.schedule_enabled ?? true,
+    timezone: delivery.timezone ?? 'Europe/Madrid',
+    times: delivery.times && delivery.times.length > 0 ? delivery.times : fallbackTimes,
+    weekday: delivery.weekday ?? 0,
+  }
+}
+
+function normalizeScheduleDraft(template: NotificationTemplate, draft: ScheduleDraft): ScheduleDraft {
+  const kind = template.delivery_info.schedule_kind
+  const timeCount = kind === 'meal_daily' ? 4 : 1
+  const times = Array.from({ length: timeCount }, (_, index) => draft.times[index] ?? '')
+
+  return {
+    enabled: draft.enabled,
+    timezone: draft.timezone.trim(),
+    times,
+    weekday: kind === 'weekly' ? draft.weekday : 0,
+  }
+}
+
+function schedulesEqual(left: ScheduleDraft, right: ScheduleDraft) {
+  return (
+    left.enabled === right.enabled &&
+    left.timezone === right.timezone &&
+    left.weekday === right.weekday &&
+    left.times.length === right.times.length &&
+    left.times.every((time, index) => time === right.times[index])
+  )
 }
 
 function formatUpdatedAt(value: string | null) {
@@ -153,6 +223,12 @@ function DeliveryInfo({ template }: { template: NotificationTemplate }) {
       {delivery.type === 'schedule' ? (
         <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
           <p>
+            Estado horario:{' '}
+            <span className="font-medium text-foreground">
+              {delivery.schedule_enabled === false ? 'Pausado' : 'Activo'}
+            </span>
+          </p>
+          <p>
             Huso horario: <span className="font-medium text-foreground">{delivery.timezone ?? 'Europe/Madrid'}</span>
           </p>
           {delivery.cron ? (
@@ -162,6 +238,146 @@ function DeliveryInfo({ template }: { template: NotificationTemplate }) {
           ) : null}
         </div>
       ) : null}
+    </div>
+  )
+}
+
+function ScheduleEditor({ template }: { template: NotificationTemplate }) {
+  const updateSchedule = useUpdateNotificationTemplateSchedule()
+  const [draft, setDraft] = useState<ScheduleDraft>(() => getScheduleDraft(template))
+  const delivery = template.delivery_info
+  const kind = delivery.schedule_kind ?? 'daily'
+
+  useEffect(() => {
+    setDraft(getScheduleDraft(template))
+  }, [template])
+
+  const baseline = useMemo(
+    () => normalizeScheduleDraft(template, getScheduleDraft(template)),
+    [template],
+  )
+  const normalizedDraft = normalizeScheduleDraft(template, draft)
+  const hasChanges = !schedulesEqual(normalizedDraft, baseline)
+  const timeLabels = kind === 'meal_daily' ? mealTimeLabels : ['Hora']
+
+  if (delivery.type !== 'schedule') {
+    return null
+  }
+
+  const handleTimeChange = (index: number, value: string) => {
+    setDraft((current) => {
+      const nextTimes = [...current.times]
+      nextTimes[index] = value
+      return { ...current, times: nextTimes }
+    })
+  }
+
+  const handleSave = async () => {
+    const nextDraft = normalizeScheduleDraft(template, draft)
+
+    if (!nextDraft.timezone) {
+      toast.error('El huso horario es obligatorio')
+      return
+    }
+
+    if (nextDraft.times.some((time) => !time)) {
+      toast.error('Completa todas las horas')
+      return
+    }
+
+    try {
+      await updateSchedule.mutateAsync({
+        key: template.key,
+        values: {
+          enabled: nextDraft.enabled,
+          timezone: nextDraft.timezone,
+          times: nextDraft.times,
+          weekday: kind === 'weekly' ? nextDraft.weekday : null,
+        },
+      })
+      toast.success('Horario actualizado')
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'No se ha podido actualizar el horario'))
+    }
+  }
+
+  return (
+    <div className="space-y-4 rounded-lg border border-border bg-muted/20 p-4">
+      <div className="flex items-start gap-3">
+        <input
+          id={`schedule-enabled-${template.key}`}
+          type="checkbox"
+          checked={draft.enabled}
+          onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))}
+          disabled={updateSchedule.isPending}
+          className="mt-1 h-4 w-4 rounded border-input"
+        />
+        <div className="space-y-1">
+          <Label htmlFor={`schedule-enabled-${template.key}`}>Programación activa</Label>
+          <p className="text-sm text-muted-foreground">
+            Si está pausada, el horario no se ejecuta aunque el texto de la plantilla siga activo.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor={`schedule-timezone-${template.key}`}>Huso horario</Label>
+          <Input
+            id={`schedule-timezone-${template.key}`}
+            value={draft.timezone}
+            onChange={(event) => setDraft((current) => ({ ...current, timezone: event.target.value }))}
+            disabled={updateSchedule.isPending}
+            placeholder="Europe/Madrid"
+          />
+        </div>
+
+        {kind === 'weekly' ? (
+          <div className="space-y-2">
+            <Label htmlFor={`schedule-weekday-${template.key}`}>Día de la semana</Label>
+            <select
+              id={`schedule-weekday-${template.key}`}
+              value={draft.weekday}
+              onChange={(event) =>
+                setDraft((current) => ({ ...current, weekday: Number(event.target.value) }))
+              }
+              disabled={updateSchedule.isPending}
+              className="flex h-10 w-full rounded-lg border border-input bg-input px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {weekdayOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+      </div>
+
+      <div className={cn('grid gap-3', kind === 'meal_daily' ? 'sm:grid-cols-2' : 'sm:grid-cols-[220px]')}>
+        {timeLabels.map((label, index) => (
+          <div key={label} className="space-y-2">
+            <Label htmlFor={`schedule-time-${template.key}-${index}`}>{label}</Label>
+            <Input
+              id={`schedule-time-${template.key}-${index}`}
+              type="time"
+              value={draft.times[index] ?? ''}
+              onChange={(event) => handleTimeChange(index, event.target.value)}
+              disabled={updateSchedule.isPending}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs text-muted-foreground">
+          El cambio se aplica en la siguiente comprobación del programador.
+        </p>
+        <Button type="button" onClick={handleSave} disabled={updateSchedule.isPending || !hasChanges}>
+          <Save className="h-4 w-4" />
+          {updateSchedule.isPending ? 'Guardando...' : 'Guardar horario'}
+        </Button>
+      </div>
     </div>
   )
 }
@@ -724,6 +940,7 @@ export function NotificationTemplatesPage() {
                   <div className="space-y-2 border-t border-border pt-4">
                     <Label>Cuándo se envía</Label>
                     <DeliveryInfo template={selectedTemplate} />
+                    <ScheduleEditor template={selectedTemplate} />
                   </div>
 
                   <div className="space-y-2 border-t border-border pt-4">

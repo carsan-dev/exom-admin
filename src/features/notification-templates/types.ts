@@ -5,6 +5,9 @@ export interface NotificationTemplateDeliveryInfo {
   timezone?: string
   cron?: string
   times?: string[]
+  weekday?: number | null
+  schedule_enabled?: boolean
+  schedule_kind?: 'daily' | 'weekly' | 'meal_daily'
 }
 
 export interface NotificationTemplate {
@@ -42,6 +45,13 @@ export interface UpdateNotificationTemplatePayload {
   body?: string
   route?: string | null
   enabled?: boolean
+}
+
+export interface UpdateNotificationTemplateSchedulePayload {
+  enabled?: boolean
+  timezone?: string
+  times?: string[]
+  weekday?: number | null
 }
 
 export interface DeletedNotificationTemplate {

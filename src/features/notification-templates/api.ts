@@ -5,6 +5,7 @@ import type {
   CreateNotificationTemplatePayload,
   DeletedNotificationTemplate,
   NotificationTemplate,
+  UpdateNotificationTemplateSchedulePayload,
   UpdateNotificationTemplatePayload,
 } from './types'
 
@@ -48,6 +49,23 @@ export function useUpdateNotificationTemplate() {
     mutationFn: async ({ key, values }: { key: string; values: UpdateNotificationTemplatePayload }) => {
       const response = await api.patch<ApiEnvelope<NotificationTemplate>>(
         `/notifications/templates/${key}`,
+        values,
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: notificationTemplateKeys.all })
+    },
+  })
+}
+
+export function useUpdateNotificationTemplateSchedule() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ key, values }: { key: string; values: UpdateNotificationTemplateSchedulePayload }) => {
+      const response = await api.patch<ApiEnvelope<NotificationTemplate>>(
+        `/notifications/templates/${key}/schedule`,
         values,
       )
       return unwrapResponse(response)
