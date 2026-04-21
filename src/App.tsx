@@ -9,6 +9,7 @@ import { DashboardPage } from '@/features/dashboard/pages/dashboard-page'
 import { ClientsPage } from '@/features/clients/pages/clients-page'
 import { ExercisesPage } from '@/features/exercises/pages/exercises-page'
 import { TrainingsPage } from '@/features/trainings/pages/trainings-page'
+import { BadgesPage } from '@/features/badges/pages/badges-page'
 import { IngredientsPage } from '@/features/ingredients/pages/ingredients-page'
 import { DietsPage } from '@/features/diets/pages/diets-page'
 import { AssignmentsPage } from '@/features/assignments/pages/assignments-page'
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
           { path: 'users/:id', element: <ClientDetailPage /> },
           { path: 'exercises', element: <ExercisesPage /> },
           { path: 'trainings', element: <TrainingsPage /> },
+          { path: 'badges', element: <BadgesPage /> },
           { path: 'ingredients', element: <IngredientsPage /> },
           { path: 'diets', element: <DietsPage /> },
           { path: 'assignments', element: <AssignmentsPage /> },

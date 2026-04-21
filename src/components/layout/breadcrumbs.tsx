@@ -10,6 +10,7 @@ const baseRouteLabels: Record<string, string> = {
   users: 'Usuarios',
   exercises: 'Ejercicios',
   trainings: 'Entrenamientos',
+  badges: 'Badges',
   ingredients: 'Ingredientes',
   diets: 'Dietas',
   assignments: 'Asignaciones',

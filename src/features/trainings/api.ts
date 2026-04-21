@@ -1,12 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
-import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
+import {
+  invalidateAdminQueries,
+  invalidateAdminQueriesOnApprovalPending,
+} from '@/lib/admin-query-invalidations'
+import {
+  type ApiEnvelope,
+  getApiErrorMessage,
+  shouldRetryQuery,
+  unwrapResponse,
+} from '@/lib/api-utils'
 import { normalizeTrainingTags, type TrainingFormValues } from './schemas'
 import type { Training } from './types'
 import type { Exercise, PaginatedResponse } from '../exercises/types'
 
 export { getApiErrorMessage }
+
+interface RenameCatalogValuePayload {
+  from: string
+  to: string
+}
+
+interface CatalogMutationResponse {
+  value: string
+  affected_count: number
+}
 
 const trainingsQueryKeys = {
   all: ['trainings'] as const,
@@ -82,7 +100,10 @@ export function useCreateTraining() {
 
   return useMutation({
     mutationFn: async (values: TrainingFormValues) => {
-      const response = await api.post<ApiEnvelope<Training>>('/trainings', normalizeTrainingPayload(values))
+      const response = await api.post<ApiEnvelope<Training>>(
+        '/trainings',
+        normalizeTrainingPayload(values)
+      )
       return unwrapResponse(response)
     },
     onSuccess: async () => {
@@ -103,7 +124,10 @@ export function useUpdateTraining() {
 
   return useMutation({
     mutationFn: async ({ id, values }: { id: string; values: TrainingFormValues }) => {
-      const response = await api.put<ApiEnvelope<Training>>(`/trainings/${id}`, normalizeTrainingPayload(values))
+      const response = await api.put<ApiEnvelope<Training>>(
+        `/trainings/${id}`,
+        normalizeTrainingPayload(values)
+      )
       return unwrapResponse(response)
     },
     onSuccess: async () => {
@@ -134,6 +158,43 @@ export function useDeleteTraining() {
     },
     onError: async (error) => {
       await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+      })
+    },
+  })
+}
+
+export function useRenameTrainingTag() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (values: RenameCatalogValuePayload) => {
+      const response = await api.patch<ApiEnvelope<CatalogMutationResponse>>(
+        '/trainings/tags/rename',
+        values
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+      })
+    },
+  })
+}
+
+export function useDeleteTrainingTag() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (value: string) => {
+      const response = await api.delete<ApiEnvelope<CatalogMutationResponse>>(
+        `/trainings/tags/${encodeURIComponent(value)}`
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
         extraQueryKeys: [trainingsQueryKeys.all],
       })
     },

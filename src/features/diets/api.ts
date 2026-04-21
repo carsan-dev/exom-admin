@@ -16,12 +16,23 @@ import type { Ingredient, PaginatedResponse } from '../ingredients/types'
 
 export { getApiErrorMessage }
 
+interface RenameCatalogValuePayload {
+  from: string
+  to: string
+}
+
+interface CatalogMutationResponse {
+  value: string
+  affected_count: number
+}
+
 const dietsQueryKeys = {
   all: ['diets'] as const,
   list: (page: number, limit: number) => ['diets', page, limit] as const,
   detail: (id?: string) => ['diets', id] as const,
 }
 
+const dietNutritionalBadgesQueryKey = ['diets', 'nutritional-badges'] as const
 const ingredientsListQueryKey = ['ingredients', 'list-all'] as const
 
 function normalizeDietPayload(values: DietFormValues) {
@@ -73,6 +84,19 @@ export function useDiet(id?: string) {
       if (!id) throw new Error('Diet id is required')
       const response = await api.get<ApiEnvelope<Diet>>(`/diets/${id}`)
       return unwrapResponse(response)
+    },
+  })
+}
+
+export function useDietNutritionalBadges() {
+  return useQuery({
+    queryKey: dietNutritionalBadgesQueryKey,
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      const response = await api.get<ApiEnvelope<{ nutritional_badges: string[] }>>(
+        '/diets/nutritional-badges'
+      )
+      return unwrapResponse(response).nutritional_badges
     },
   })
 }
@@ -137,6 +161,43 @@ export function useDeleteDiet() {
     },
     onError: async (error) => {
       await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [dietsQueryKeys.all],
+      })
+    },
+  })
+}
+
+export function useRenameDietNutritionalBadge() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (values: RenameCatalogValuePayload) => {
+      const response = await api.patch<ApiEnvelope<CatalogMutationResponse>>(
+        '/diets/nutritional-badges/rename',
+        values
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [dietsQueryKeys.all],
+      })
+    },
+  })
+}
+
+export function useDeleteDietNutritionalBadge() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (value: string) => {
+      const response = await api.delete<ApiEnvelope<CatalogMutationResponse>>(
+        `/diets/nutritional-badges/${encodeURIComponent(value)}`
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
         extraQueryKeys: [dietsQueryKeys.all],
       })
     },

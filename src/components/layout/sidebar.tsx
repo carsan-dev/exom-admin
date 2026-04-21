@@ -16,6 +16,7 @@ import {
   Bell,
   Settings,
   ShieldCheck,
+  Tags,
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
@@ -37,6 +38,7 @@ const navItems: NavItem[] = [
   { to: '/clients', label: 'Clientes', icon: Users },
   { to: '/exercises', label: 'Ejercicios', icon: Dumbbell },
   { to: '/trainings', label: 'Entrenamientos', icon: ClipboardList },
+  { to: '/badges', label: 'Badges', icon: Tags },
   { to: '/ingredients', label: 'Ingredientes', icon: Apple },
   { to: '/diets', label: 'Dietas', icon: UtensilsCrossed },
   { to: '/assignments', label: 'Asignaciones', icon: CalendarDays },

@@ -1,12 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
-import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
+import {
+  invalidateAdminQueries,
+  invalidateAdminQueriesOnApprovalPending,
+} from '@/lib/admin-query-invalidations'
+import {
+  type ApiEnvelope,
+  getApiErrorMessage,
+  shouldRetryQuery,
+  unwrapResponse,
+} from '@/lib/api-utils'
 import type { ExerciseFormValues } from './schemas'
 import type { Exercise, PaginatedResponse } from './types'
 export { usePresignedUrl, useUploadFile } from '../uploads/api'
 
 export { getApiErrorMessage }
+
+interface RenameCatalogValuePayload {
+  from: string
+  to: string
+}
+
+interface CatalogMutationResponse {
+  value: string
+  affected_count: number
+}
 
 const exercisesQueryKeys = {
   all: ['exercises'] as const,
@@ -51,7 +69,9 @@ export function useExerciseMuscleGroups() {
     queryKey: exerciseMuscleGroupsQueryKey,
     retry: shouldRetryQuery,
     queryFn: async () => {
-      const response = await api.get<ApiEnvelope<{ muscle_groups: string[] }>>('/exercises/muscle-groups')
+      const response = await api.get<ApiEnvelope<{ muscle_groups: string[] }>>(
+        '/exercises/muscle-groups'
+      )
       return unwrapResponse(response).muscle_groups
     },
   })
@@ -87,7 +107,10 @@ export function useCreateExercise() {
 
   return useMutation({
     mutationFn: async (values: ExerciseFormValues) => {
-      const response = await api.post<ApiEnvelope<Exercise>>('/exercises', normalizeExercisePayload(values))
+      const response = await api.post<ApiEnvelope<Exercise>>(
+        '/exercises',
+        normalizeExercisePayload(values)
+      )
       return unwrapResponse(response)
     },
     onSuccess: async () => {
@@ -108,7 +131,10 @@ export function useUpdateExercise() {
 
   return useMutation({
     mutationFn: async ({ id, values }: { id: string; values: ExerciseFormValues }) => {
-      const response = await api.put<ApiEnvelope<Exercise>>(`/exercises/${id}`, normalizeExercisePayload(values))
+      const response = await api.put<ApiEnvelope<Exercise>>(
+        `/exercises/${id}`,
+        normalizeExercisePayload(values)
+      )
       return unwrapResponse(response)
     },
     onSuccess: async () => {
@@ -139,6 +165,80 @@ export function useDeleteExercise() {
     },
     onError: async (error) => {
       await invalidateAdminQueriesOnApprovalPending(queryClient, error, {
+        extraQueryKeys: [exercisesQueryKeys.all],
+      })
+    },
+  })
+}
+
+export function useRenameExerciseMuscleGroup() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (values: RenameCatalogValuePayload) => {
+      const response = await api.patch<ApiEnvelope<CatalogMutationResponse>>(
+        '/exercises/muscle-groups/rename',
+        values
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [exercisesQueryKeys.all],
+      })
+    },
+  })
+}
+
+export function useDeleteExerciseMuscleGroup() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (value: string) => {
+      const response = await api.delete<ApiEnvelope<CatalogMutationResponse>>(
+        `/exercises/muscle-groups/${encodeURIComponent(value)}`
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [exercisesQueryKeys.all],
+      })
+    },
+  })
+}
+
+export function useRenameExerciseEquipment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (values: RenameCatalogValuePayload) => {
+      const response = await api.patch<ApiEnvelope<CatalogMutationResponse>>(
+        '/exercises/equipment/rename',
+        values
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [exercisesQueryKeys.all],
+      })
+    },
+  })
+}
+
+export function useDeleteExerciseEquipment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (value: string) => {
+      const response = await api.delete<ApiEnvelope<CatalogMutationResponse>>(
+        `/exercises/equipment/${encodeURIComponent(value)}`
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
         extraQueryKeys: [exercisesQueryKeys.all],
       })
     },

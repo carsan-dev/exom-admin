@@ -38,7 +38,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { useIngredientsList, getApiErrorMessage, useCreateDiet, useUpdateDiet } from '../api'
+import {
+  getApiErrorMessage,
+  useCreateDiet,
+  useDietNutritionalBadges,
+  useIngredientsList,
+  useUpdateDiet,
+} from '../api'
 import { dietSchema, type DietFormValues } from '../schemas'
 import { MEAL_TYPE_LABELS, MEAL_TYPE_OPTIONS, type Diet } from '../types'
 import { IngredientPicker } from './ingredient-picker'
@@ -56,6 +62,8 @@ const NUTRITIONAL_BADGE_OPTIONS = [
 
 function BadgesField({ value, onChange }: { value: string[]; onChange: (val: string[]) => void }) {
   const [input, setInput] = useState('')
+  const badgesQuery = useDietNutritionalBadges()
+  const badgeOptions = mergeBadgeOptions(NUTRITIONAL_BADGE_OPTIONS, badgesQuery.data)
 
   const toggle = (badge: string) => {
     if (value.includes(badge)) {
@@ -101,7 +109,7 @@ function BadgesField({ value, onChange }: { value: string[]; onChange: (val: str
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="max-h-60 w-48 overflow-y-auto">
-            {NUTRITIONAL_BADGE_OPTIONS.map((badge) => (
+            {badgeOptions.map((badge) => (
               <DropdownMenuCheckboxItem
                 key={badge}
                 checked={value.includes(badge)}
@@ -136,6 +144,26 @@ function BadgesField({ value, onChange }: { value: string[]; onChange: (val: str
         </Button>
       </div>
     </div>
+  )
+}
+
+function mergeBadgeOptions(preset: readonly string[], fetched: string[] | undefined) {
+  const unique = new Map<string, string>()
+
+  for (const label of [...preset, ...(fetched ?? [])]) {
+    const normalized = label.trim().replace(/\s+/g, ' ')
+
+    if (!normalized) continue
+
+    const key = normalized.toLocaleLowerCase()
+
+    if (!unique.has(key)) {
+      unique.set(key, normalized)
+    }
+  }
+
+  return Array.from(unique.values()).sort((left, right) =>
+    left.localeCompare(right, 'es', { sensitivity: 'base' })
   )
 }
 
