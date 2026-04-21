@@ -1,5 +1,14 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from 'react'
-import { AlertTriangle, LoaderCircle, Pencil, Search, Tags, Trash2 } from 'lucide-react'
+import { useDeferredValue, useEffect, useMemo, useState, type KeyboardEvent } from 'react'
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  LoaderCircle,
+  Pencil,
+  Search,
+  Tags,
+  Trash2,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -44,6 +53,8 @@ import {
   useDietNutritionalBadges,
   useRenameDietNutritionalBadge,
 } from '@/features/diets/api'
+
+const PAGE_SIZE = 10
 
 type CatalogId = 'muscle-groups' | 'equipment' | 'training-tags' | 'diet-badges'
 
@@ -91,15 +102,30 @@ function BadgesTableSkeleton() {
 interface CatalogTableProps {
   catalog: CatalogView
   search: string
+  page: number
+  onPageChange: (page: number) => void
   onEdit: (item: CatalogItem) => void
   onDelete: (item: CatalogItem) => void
 }
 
-function CatalogTable({ catalog, search, onEdit, onDelete }: CatalogTableProps) {
+function CatalogTable({
+  catalog,
+  search,
+  page,
+  onPageChange,
+  onEdit,
+  onDelete,
+}: CatalogTableProps) {
   const normalizedSearch = normalizeSearchText(search)
   const filteredValues = normalizedSearch
     ? catalog.values.filter((value) => normalizeSearchText(value).includes(normalizedSearch))
     : catalog.values
+  const totalPages = Math.max(1, Math.ceil(filteredValues.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const paginatedValues = filteredValues.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  )
 
   if (catalog.isLoading) {
     return <BadgesTableSkeleton />
@@ -163,7 +189,7 @@ function CatalogTable({ catalog, search, onEdit, onDelete }: CatalogTableProps) 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredValues.map((value) => (
+                {paginatedValues.map((value) => (
                   <TableRow key={value}>
                     <TableCell>
                       <Badge
@@ -215,6 +241,32 @@ function CatalogTable({ catalog, search, onEdit, onDelete }: CatalogTableProps) 
             </Table>
           </TooltipProvider>
         )}
+
+        {filteredValues.length > 0 ? (
+          <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Pagina {currentPage} de {totalPages}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage >= totalPages}
+              >
+                Siguiente
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   )
@@ -222,10 +274,13 @@ function CatalogTable({ catalog, search, onEdit, onDelete }: CatalogTableProps) 
 
 export function BadgesPage() {
   const [activeCatalog, setActiveCatalog] = useState<CatalogId>('muscle-groups')
+  const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [editingItem, setEditingItem] = useState<CatalogItem | null>(null)
   const [deletingItem, setDeletingItem] = useState<CatalogItem | null>(null)
   const [draftValue, setDraftValue] = useState('')
+  const deferredSearch = useDeferredValue(search)
+  const activeSearch = deferredSearch.trim()
 
   const muscleGroupsQuery = useExerciseMuscleGroups()
   const equipmentQuery = useExerciseEquipment()
@@ -326,7 +381,12 @@ export function BadgesPage() {
 
   useEffect(() => {
     setSearch('')
+    setPage(1)
   }, [activeCatalog])
+
+  useEffect(() => {
+    setPage(1)
+  }, [activeSearch])
 
   useEffect(() => {
     setDraftValue(editingItem?.value ?? '')
@@ -438,7 +498,9 @@ export function BadgesPage() {
         <TabsContent value="muscle-groups" className="mt-4">
           <CatalogTable
             catalog={catalogs['muscle-groups']}
-            search={search.trim()}
+            search={activeSearch}
+            page={page}
+            onPageChange={setPage}
             onEdit={setEditingItem}
             onDelete={setDeletingItem}
           />
@@ -446,7 +508,9 @@ export function BadgesPage() {
         <TabsContent value="equipment" className="mt-4">
           <CatalogTable
             catalog={catalogs.equipment}
-            search={search.trim()}
+            search={activeSearch}
+            page={page}
+            onPageChange={setPage}
             onEdit={setEditingItem}
             onDelete={setDeletingItem}
           />
@@ -454,7 +518,9 @@ export function BadgesPage() {
         <TabsContent value="training-tags" className="mt-4">
           <CatalogTable
             catalog={catalogs['training-tags']}
-            search={search.trim()}
+            search={activeSearch}
+            page={page}
+            onPageChange={setPage}
             onEdit={setEditingItem}
             onDelete={setDeletingItem}
           />
@@ -462,7 +528,9 @@ export function BadgesPage() {
         <TabsContent value="diet-badges" className="mt-4">
           <CatalogTable
             catalog={catalogs['diet-badges']}
-            search={search.trim()}
+            search={activeSearch}
+            page={page}
+            onPageChange={setPage}
             onEdit={setEditingItem}
             onDelete={setDeletingItem}
           />
