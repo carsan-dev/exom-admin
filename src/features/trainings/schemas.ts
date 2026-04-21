@@ -7,7 +7,11 @@ export function normalizeTrainingTagLabel(tag: string) {
 }
 
 export function getTrainingTagKey(tag: string) {
-  return normalizeTrainingTagLabel(tag).toLocaleLowerCase()
+  return normalizeTrainingTagLabel(tag)
+    .toLocaleLowerCase('es-ES')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFC')
 }
 
 export function normalizeTrainingTags(tags: string[]) {

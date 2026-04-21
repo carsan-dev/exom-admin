@@ -187,7 +187,11 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
           <span className="text-sm text-muted-foreground self-center">Sin etiquetas</span>
         )}
         {value.map((tag) => (
-          <Badge key={tag} variant="outline" className="gap-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary pr-1">
+          <Badge
+            key={tag}
+            variant="outline"
+            className="gap-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary pr-1"
+          >
             {tag}
             <button
               type="button"
@@ -220,7 +224,9 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
                 {getApiErrorMessage(tagsQuery.error, 'No se han podido cargar las etiquetas')}
               </div>
             ) : availableTags.length === 0 ? (
-              <div className="px-2 py-2 text-xs text-muted-foreground">Aun no hay etiquetas guardadas.</div>
+              <div className="px-2 py-2 text-xs text-muted-foreground">
+                Aun no hay etiquetas guardadas.
+              </div>
             ) : (
               availableTags.map((tag) => (
                 <DropdownMenuCheckboxItem
@@ -249,7 +255,7 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
             variant="outline"
             size="sm"
             onClick={() => add()}
-            disabled={!normalizeTrainingTagLabel(input)}
+            disabled={!normalizeTrainingTagLabel(input) || hasTag(input)}
           >
             <Plus className="h-3 w-3" />
           </Button>
@@ -258,7 +264,13 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
 
       {tagsQuery.isError ? (
         <div className="flex items-center gap-2 text-xs text-status-error">
-          <span>{getApiErrorMessage(tagsQuery.error, 'No se han podido cargar las etiquetas existentes')}.</span>
+          <span>
+            {getApiErrorMessage(
+              tagsQuery.error,
+              'No se han podido cargar las etiquetas existentes'
+            )}
+            .
+          </span>
           <Button
             type="button"
             variant="ghost"
@@ -272,9 +284,13 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
       ) : tagsQuery.isLoading ? (
         <p className="text-xs text-muted-foreground">Cargando etiquetas existentes...</p>
       ) : availableTags.length === 0 ? (
-        <p className="text-xs text-muted-foreground">Aun no hay etiquetas guardadas. Puedes crear la primera.</p>
+        <p className="text-xs text-muted-foreground">
+          Aun no hay etiquetas guardadas. Puedes crear la primera.
+        </p>
       ) : (
-        <p className="text-xs text-muted-foreground">Selecciona etiquetas existentes o crea una nueva.</p>
+        <p className="text-xs text-muted-foreground">
+          Selecciona etiquetas existentes o crea una nueva.
+        </p>
       )}
 
       {error && <p className="text-xs text-status-error">{error}</p>}
@@ -297,7 +313,11 @@ export function TrainingFormDialog({
   const warmupSectionRef = useRef<HTMLDivElement | null>(null)
   const exercisesSectionRef = useRef<HTMLDivElement | null>(null)
 
-  const dialogTitle = isEditing ? 'Editar entrenamiento' : isDuplicate ? 'Duplicar entrenamiento' : 'Nuevo entrenamiento'
+  const dialogTitle = isEditing
+    ? 'Editar entrenamiento'
+    : isDuplicate
+      ? 'Duplicar entrenamiento'
+      : 'Nuevo entrenamiento'
   const dialogDescription = isEditing
     ? 'Modifica los campos y guarda los cambios.'
     : isDuplicate
@@ -335,7 +355,11 @@ export function TrainingFormDialog({
           toast.success('Entrenamiento actualizado correctamente')
         } else {
           await createTraining.mutateAsync(values)
-          toast.success(isDuplicate ? 'Entrenamiento duplicado correctamente' : 'Entrenamiento creado correctamente')
+          toast.success(
+            isDuplicate
+              ? 'Entrenamiento duplicado correctamente'
+              : 'Entrenamiento creado correctamente'
+          )
         }
 
         onSaved?.()
@@ -351,7 +375,9 @@ export function TrainingFormDialog({
       }
     },
     (errors) => {
-      toast.error(getFirstErrorMessage(errors) ?? 'Revisa los campos obligatorios antes de continuar')
+      toast.error(
+        getFirstErrorMessage(errors) ?? 'Revisa los campos obligatorios antes de continuar'
+      )
 
       if (errors.exercises) {
         scrollToSection(exercisesSectionRef.current)
@@ -368,7 +394,7 @@ export function TrainingFormDialog({
       if (errors.name) {
         form.setFocus('name')
       }
-    },
+    }
   )
 
   return (
@@ -383,7 +409,9 @@ export function TrainingFormDialog({
           <form onSubmit={handleSubmit} className="min-w-0 space-y-5">
             {/* Info general */}
             <div ref={generalSectionRef} className="space-y-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Información general</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Información general
+              </p>
 
               {/* Name */}
               <FormField
@@ -467,7 +495,9 @@ export function TrainingFormDialog({
                           min={0}
                           placeholder="45"
                           value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? null : parseInt(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === '' ? null : parseInt(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -487,7 +517,9 @@ export function TrainingFormDialog({
                           min={0}
                           placeholder="300"
                           value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? null : parseInt(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === '' ? null : parseInt(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -504,7 +536,11 @@ export function TrainingFormDialog({
                   <FormItem>
                     <FormLabel>Etiquetas</FormLabel>
                     <FormControl>
-                      <TagsField value={field.value} onChange={field.onChange} error={fieldState.error?.message} />
+                      <TagsField
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={fieldState.error?.message}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -515,7 +551,9 @@ export function TrainingFormDialog({
 
             {/* Warmup / Cooldown */}
             <div ref={warmupSectionRef} className="space-y-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Calentamiento y vuelta a la calma</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Calentamiento y vuelta a la calma
+              </p>
 
               <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
                 <FormField
@@ -549,7 +587,9 @@ export function TrainingFormDialog({
                           min={0}
                           placeholder="10"
                           value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? null : parseInt(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === '' ? null : parseInt(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -605,8 +645,16 @@ export function TrainingFormDialog({
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending
-                  ? isEditing ? 'Guardando...' : isDuplicate ? 'Creando copia...' : 'Creando...'
-                  : isEditing ? 'Guardar cambios' : isDuplicate ? 'Crear copia' : 'Crear entrenamiento'}
+                  ? isEditing
+                    ? 'Guardando...'
+                    : isDuplicate
+                      ? 'Creando copia...'
+                      : 'Creando...'
+                  : isEditing
+                    ? 'Guardar cambios'
+                    : isDuplicate
+                      ? 'Crear copia'
+                      : 'Crear entrenamiento'}
               </Button>
             </DialogFooter>
           </form>

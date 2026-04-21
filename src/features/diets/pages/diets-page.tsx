@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useDeferredValue, useEffect, useState } from 'react'
 import {
   AlertTriangle,
   ChevronLeft,
@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { normalizeSearchText } from '@/lib/search'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import { getApiErrorMessage, useDiets } from '../api'
@@ -48,21 +47,23 @@ export function DietsPage() {
   const [selectedDiet, setSelectedDiet] = useState<Diet | null>(null)
   const [editingDiet, setEditingDiet] = useState<Diet | null>(null)
   const [isDuplicate, setIsDuplicate] = useState(false)
+  const deferredSearch = useDeferredValue(search)
+  const activeSearch = deferredSearch.trim()
 
-  const dietsQuery = useDiets(page, PAGE_SIZE)
-  const allDiets = dietsQuery.data?.data ?? []
+  useEffect(() => {
+    setPage(1)
+  }, [activeSearch])
+
+  const dietsQuery = useDiets(page, PAGE_SIZE, activeSearch)
+  const diets = dietsQuery.data?.data ?? []
   const dietApprovalQuery = useResourceApprovalBatch(
     'diet',
-    allDiets.map((diet) => diet.id)
+    diets.map((diet) => diet.id)
   )
   const dietApprovalById = buildResourceApprovalMap(dietApprovalQuery.data ?? [])
   const total = dietsQuery.data?.total ?? 0
-  const totalPages = dietsQuery.data?.totalPages ?? 1
-  const normalizedSearch = normalizeSearchText(search.trim())
-
-  const diets = normalizedSearch
-    ? allDiets.filter((d) => normalizeSearchText(d.name).includes(normalizedSearch))
-    : allDiets
+  const totalPages = Math.max(1, dietsQuery.data?.totalPages ?? 1)
+  const isSearching = activeSearch.length > 0
 
   const handleCreate = () => {
     setEditingDiet(null)
@@ -157,7 +158,7 @@ export function DietsPage() {
             <Button onClick={() => dietsQuery.refetch()}>Reintentar</Button>
           </CardContent>
         </Card>
-      ) : allDiets.length === 0 ? (
+      ) : total === 0 && !isSearching ? (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
             <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
@@ -197,7 +198,7 @@ export function DietsPage() {
 
             {diets.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No se encontraron dietas con "{search}"
+                No se encontraron dietas con "{activeSearch}"
               </p>
             ) : (
               <DietsTable
@@ -211,31 +212,29 @@ export function DietsPage() {
             )}
 
             {/* Pagination */}
-            {!search && (
-              <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Página {page} de {totalPages}
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((current) => Math.max(1, current - 1))}
-                    disabled={page === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                    disabled={page >= totalPages}
-                  >
-                    Siguiente
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+            <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Página {page} de {totalPages}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
       )}

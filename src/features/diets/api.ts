@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import {
   invalidateAdminQueries,
@@ -28,7 +28,7 @@ interface CatalogMutationResponse {
 
 const dietsQueryKeys = {
   all: ['diets'] as const,
-  list: (page: number, limit: number) => ['diets', page, limit] as const,
+  list: (page: number, limit: number, search: string) => ['diets', page, limit, search] as const,
   detail: (id?: string) => ['diets', id] as const,
 }
 
@@ -62,13 +62,25 @@ function normalizeDietPayload(values: DietFormValues) {
   }
 }
 
-export function useDiets(page: number, limit: number) {
+function normalizeSearch(search?: string) {
+  const trimmed = search?.trim() ?? ''
+  return trimmed.length > 0 ? trimmed : ''
+}
+
+export function useDiets(page: number, limit: number, search?: string) {
+  const normalizedSearch = normalizeSearch(search)
+
   return useQuery({
-    queryKey: dietsQueryKeys.list(page, limit),
+    queryKey: dietsQueryKeys.list(page, limit, normalizedSearch),
+    placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedResponse<Diet>>>('/diets', {
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+          ...(normalizedSearch ? { search: normalizedSearch } : {}),
+        },
       })
       return unwrapResponse(response)
     },

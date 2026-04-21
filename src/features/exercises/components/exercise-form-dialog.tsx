@@ -100,25 +100,56 @@ interface MultiSelectFieldProps {
   error?: string
 }
 
-function MultiSelectField({ label, value, onChange, options, placeholder, error }: MultiSelectFieldProps) {
+function normalizeOptionLabel(option: string) {
+  return option.trim().replace(/\s+/g, ' ')
+}
+
+function getOptionKey(option: string) {
+  return normalizeOptionLabel(option)
+    .toLocaleLowerCase('es-ES')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFC')
+}
+
+function MultiSelectField({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  error,
+}: MultiSelectFieldProps) {
   const [customInput, setCustomInput] = useState('')
 
+  const hasOption = (option: string) => {
+    const optionKey = getOptionKey(option)
+    return value.some((current) => getOptionKey(current) === optionKey)
+  }
+
   const toggle = (option: string) => {
-    if (value.includes(option)) {
-      onChange(value.filter((v) => v !== option))
+    const normalizedOption = normalizeOptionLabel(option)
+
+    if (!normalizedOption) {
+      return
+    }
+
+    if (hasOption(normalizedOption)) {
+      remove(normalizedOption)
     } else {
-      onChange([...value, option])
+      onChange([...value, normalizedOption])
     }
   }
 
   const remove = (option: string) => {
-    onChange(value.filter((v) => v !== option))
+    const optionKey = getOptionKey(option)
+    onChange(value.filter((current) => getOptionKey(current) !== optionKey))
   }
 
   const addCustom = () => {
-    const trimmed = customInput.trim()
-    if (trimmed && !value.includes(trimmed)) {
-      onChange([...value, trimmed])
+    const normalizedInput = normalizeOptionLabel(customInput)
+    if (normalizedInput && !hasOption(normalizedInput)) {
+      onChange([...value, normalizedInput])
     }
     setCustomInput('')
   }
@@ -139,7 +170,11 @@ function MultiSelectField({ label, value, onChange, options, placeholder, error 
           <span className="text-sm text-muted-foreground self-center">{placeholder}</span>
         )}
         {value.map((item) => (
-          <Badge key={item} variant="outline" className="gap-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary pr-1">
+          <Badge
+            key={item}
+            variant="outline"
+            className="gap-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary pr-1"
+          >
             {item}
             <button
               type="button"
@@ -164,7 +199,7 @@ function MultiSelectField({ label, value, onChange, options, placeholder, error 
             {options.map((option) => (
               <DropdownMenuCheckboxItem
                 key={option}
-                checked={value.includes(option)}
+                checked={hasOption(option)}
                 onCheckedChange={() => toggle(option)}
               >
                 {option}
@@ -185,7 +220,7 @@ function MultiSelectField({ label, value, onChange, options, placeholder, error 
           variant="outline"
           size="sm"
           onClick={addCustom}
-          disabled={!customInput.trim()}
+          disabled={!normalizeOptionLabel(customInput) || hasOption(customInput)}
         >
           <Plus className="h-3 w-3" />
         </Button>
@@ -200,11 +235,11 @@ function mergeOptions(preset: readonly string[], fetched: string[] | undefined):
   const unique = new Map<string, string>()
 
   for (const label of [...preset, ...(fetched ?? [])]) {
-    const normalized = label.trim()
+    const normalized = normalizeOptionLabel(label)
 
     if (!normalized) continue
 
-    const key = normalized.toLocaleLowerCase()
+    const key = getOptionKey(normalized)
 
     if (!unique.has(key)) {
       unique.set(key, normalized)
@@ -212,11 +247,17 @@ function mergeOptions(preset: readonly string[], fetched: string[] | undefined):
   }
 
   return Array.from(unique.values()).sort((left, right) =>
-    left.localeCompare(right, 'es', { sensitivity: 'base' }),
+    left.localeCompare(right, 'es', { sensitivity: 'base' })
   )
 }
 
-export function ExerciseFormDialog({ open, onOpenChange, exercise, isDuplicate = false, onSaved }: ExerciseFormDialogProps) {
+export function ExerciseFormDialog({
+  open,
+  onOpenChange,
+  exercise,
+  isDuplicate = false,
+  onSaved,
+}: ExerciseFormDialogProps) {
   const isEditing = Boolean(exercise) && !isDuplicate
   const createExercise = useCreateExercise()
   const updateExercise = useUpdateExercise()
@@ -226,11 +267,11 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, isDuplicate =
 
   const muscleGroupOptions = useMemo(
     () => mergeOptions(MUSCLE_GROUPS, muscleGroupsQuery.data),
-    [muscleGroupsQuery.data],
+    [muscleGroupsQuery.data]
   )
   const equipmentOptions = useMemo(
     () => mergeOptions(EQUIPMENT_OPTIONS, equipmentQuery.data),
-    [equipmentQuery.data],
+    [equipmentQuery.data]
   )
 
   const form = useForm<ExerciseFormValues>({
@@ -253,7 +294,9 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, isDuplicate =
         toast.success('Ejercicio actualizado correctamente')
       } else {
         await createExercise.mutateAsync(values)
-        toast.success(isDuplicate ? 'Ejercicio duplicado correctamente' : 'Ejercicio creado correctamente')
+        toast.success(
+          isDuplicate ? 'Ejercicio duplicado correctamente' : 'Ejercicio creado correctamente'
+        )
       }
       onSaved?.()
       onOpenChange(false)
@@ -272,7 +315,13 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, isDuplicate =
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
         <DialogHeader className="pr-8">
-          <DialogTitle>{isEditing ? 'Editar ejercicio' : isDuplicate ? 'Duplicar ejercicio' : 'Nuevo ejercicio'}</DialogTitle>
+          <DialogTitle>
+            {isEditing
+              ? 'Editar ejercicio'
+              : isDuplicate
+                ? 'Duplicar ejercicio'
+                : 'Nuevo ejercicio'}
+          </DialogTitle>
           <DialogDescription>
             {isEditing
               ? 'Modifica los campos del ejercicio y guarda los cambios.'
@@ -471,8 +520,16 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, isDuplicate =
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending
-                  ? isEditing ? 'Guardando...' : isDuplicate ? 'Creando copia...' : 'Creando...'
-                  : isEditing ? 'Guardar cambios' : isDuplicate ? 'Crear copia' : 'Crear ejercicio'}
+                  ? isEditing
+                    ? 'Guardando...'
+                    : isDuplicate
+                      ? 'Creando copia...'
+                      : 'Creando...'
+                  : isEditing
+                    ? 'Guardar cambios'
+                    : isDuplicate
+                      ? 'Crear copia'
+                      : 'Crear ejercicio'}
               </Button>
             </DialogFooter>
           </form>

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import {
   invalidateAdminQueries,
@@ -28,7 +28,8 @@ interface CatalogMutationResponse {
 
 const exercisesQueryKeys = {
   all: ['exercises'] as const,
-  list: (page: number, limit: number) => ['exercises', page, limit] as const,
+  list: (page: number, limit: number, search: string) =>
+    ['exercises', page, limit, search] as const,
   detail: (id?: string) => ['exercises', id] as const,
 }
 
@@ -50,13 +51,25 @@ function normalizeExercisePayload(values: ExerciseFormValues) {
   }
 }
 
-export function useExercises(page: number, limit: number) {
+function normalizeSearch(search?: string) {
+  const trimmed = search?.trim() ?? ''
+  return trimmed.length > 0 ? trimmed : ''
+}
+
+export function useExercises(page: number, limit: number, search?: string) {
+  const normalizedSearch = normalizeSearch(search)
+
   return useQuery({
-    queryKey: exercisesQueryKeys.list(page, limit),
+    queryKey: exercisesQueryKeys.list(page, limit, normalizedSearch),
+    placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedResponse<Exercise>>>('/exercises', {
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+          ...(normalizedSearch ? { search: normalizedSearch } : {}),
+        },
       })
 
       return unwrapResponse(response)

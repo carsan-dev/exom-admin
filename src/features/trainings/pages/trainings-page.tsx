@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { useDeferredValue, useEffect, useState } from 'react'
 import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { normalizeSearchText } from '@/lib/search'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import { getApiErrorMessage, useTrainings } from '../api'
@@ -41,18 +40,23 @@ export function TrainingsPage() {
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null)
   const [editingTraining, setEditingTraining] = useState<Training | null>(null)
   const [isDuplicate, setIsDuplicate] = useState(false)
+  const deferredSearch = useDeferredValue(search)
+  const activeSearch = deferredSearch.trim()
 
-  const trainingsQuery = useTrainings(page, PAGE_SIZE)
-  const allTrainings = trainingsQuery.data?.data ?? []
-  const trainingApprovalQuery = useResourceApprovalBatch('training', allTrainings.map((training) => training.id))
+  useEffect(() => {
+    setPage(1)
+  }, [activeSearch])
+
+  const trainingsQuery = useTrainings(page, PAGE_SIZE, activeSearch)
+  const trainings = trainingsQuery.data?.data ?? []
+  const trainingApprovalQuery = useResourceApprovalBatch(
+    'training',
+    trainings.map((training) => training.id)
+  )
   const trainingApprovalById = buildResourceApprovalMap(trainingApprovalQuery.data ?? [])
   const total = trainingsQuery.data?.total ?? 0
-  const totalPages = trainingsQuery.data?.totalPages ?? 1
-  const normalizedSearch = normalizeSearchText(search.trim())
-
-  const trainings = normalizedSearch
-    ? allTrainings.filter((t) => normalizeSearchText(t.name).includes(normalizedSearch))
-    : allTrainings
+  const totalPages = Math.max(1, trainingsQuery.data?.totalPages ?? 1)
+  const isSearching = activeSearch.length > 0
 
   const handleCreate = () => {
     setEditingTraining(null)
@@ -112,15 +116,22 @@ export function TrainingsPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Catálogo</p>
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">
+            Catálogo
+          </p>
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Entrenamientos</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+              Entrenamientos
+            </h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Gestiona el catálogo de entrenamientos. Crea rutinas con ejercicios, series, reps y más.
+              Gestiona el catálogo de entrenamientos. Crea rutinas con ejercicios, series, reps y
+              más.
             </p>
           </div>
           <p className="text-sm text-muted-foreground">
-            {total > 0 ? `${total} entrenamientos en el catálogo` : 'Aún no hay entrenamientos en el catálogo'}
+            {total > 0
+              ? `${total} entrenamientos en el catálogo`
+              : 'Aún no hay entrenamientos en el catálogo'}
           </p>
         </div>
 
@@ -140,7 +151,9 @@ export function TrainingsPage() {
               <AlertTriangle className="h-8 w-8" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">No se ha podido cargar el catálogo</h2>
+              <h2 className="text-2xl font-semibold text-foreground">
+                No se ha podido cargar el catálogo
+              </h2>
               <p className="max-w-xl text-sm text-muted-foreground">
                 {getApiErrorMessage(trainingsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
               </p>
@@ -148,7 +161,7 @@ export function TrainingsPage() {
             <Button onClick={() => trainingsQuery.refetch()}>Reintentar</Button>
           </CardContent>
         </Card>
-      ) : allTrainings.length === 0 ? (
+      ) : total === 0 && !isSearching ? (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
             <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
@@ -170,7 +183,9 @@ export function TrainingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">Listado de entrenamientos</CardTitle>
-            <CardDescription>Vista paginada del catálogo con búsqueda y acciones por entrenamiento</CardDescription>
+            <CardDescription>
+              Vista paginada del catálogo con búsqueda y acciones por entrenamiento
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Search */}
@@ -186,7 +201,7 @@ export function TrainingsPage() {
 
             {trainings.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No se encontraron entrenamientos con "{search}"
+                No se encontraron entrenamientos con "{activeSearch}"
               </p>
             ) : (
               <TrainingsTable
@@ -200,31 +215,29 @@ export function TrainingsPage() {
             )}
 
             {/* Pagination */}
-            {!search && (
-              <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Página {page} de {totalPages}
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((current) => Math.max(1, current - 1))}
-                    disabled={page === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                    disabled={page >= totalPages}
-                  >
-                    Siguiente
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+            <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Página {page} de {totalPages}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
       )}

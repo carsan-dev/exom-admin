@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import {
   invalidateAdminQueries,
@@ -28,7 +28,8 @@ interface CatalogMutationResponse {
 
 const trainingsQueryKeys = {
   all: ['trainings'] as const,
-  list: (page: number, limit: number) => ['trainings', page, limit] as const,
+  list: (page: number, limit: number, search: string) =>
+    ['trainings', page, limit, search] as const,
   detail: (id?: string) => ['trainings', id] as const,
 }
 
@@ -56,13 +57,25 @@ function normalizeTrainingPayload(values: TrainingFormValues) {
   }
 }
 
-export function useTrainings(page: number, limit: number) {
+function normalizeSearch(search?: string) {
+  const trimmed = search?.trim() ?? ''
+  return trimmed.length > 0 ? trimmed : ''
+}
+
+export function useTrainings(page: number, limit: number, search?: string) {
+  const normalizedSearch = normalizeSearch(search)
+
   return useQuery({
-    queryKey: trainingsQueryKeys.list(page, limit),
+    queryKey: trainingsQueryKeys.list(page, limit, normalizedSearch),
+    placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedResponse<Training>>>('/trainings', {
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+          ...(normalizedSearch ? { search: normalizedSearch } : {}),
+        },
       })
 
       return unwrapResponse(response)

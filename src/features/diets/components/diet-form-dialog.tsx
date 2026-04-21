@@ -60,24 +60,52 @@ const NUTRITIONAL_BADGE_OPTIONS = [
   'Vegano',
 ] as const
 
+function normalizeBadgeLabel(badge: string) {
+  return badge.trim().replace(/\s+/g, ' ')
+}
+
+function getBadgeKey(badge: string) {
+  return normalizeBadgeLabel(badge)
+    .toLocaleLowerCase('es-ES')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFC')
+}
+
 function BadgesField({ value, onChange }: { value: string[]; onChange: (val: string[]) => void }) {
   const [input, setInput] = useState('')
   const badgesQuery = useDietNutritionalBadges()
   const badgeOptions = mergeBadgeOptions(NUTRITIONAL_BADGE_OPTIONS, badgesQuery.data)
 
+  const hasBadge = (badge: string) => {
+    const badgeKey = getBadgeKey(badge)
+    return value.some((current) => getBadgeKey(current) === badgeKey)
+  }
+
+  const remove = (badge: string) => {
+    const badgeKey = getBadgeKey(badge)
+    onChange(value.filter((current) => getBadgeKey(current) !== badgeKey))
+  }
+
   const toggle = (badge: string) => {
-    if (value.includes(badge)) {
-      onChange(value.filter((item) => item !== badge))
+    const normalizedBadge = normalizeBadgeLabel(badge)
+
+    if (!normalizedBadge) {
       return
     }
 
-    onChange([...value, badge])
+    if (hasBadge(normalizedBadge)) {
+      remove(normalizedBadge)
+      return
+    }
+
+    onChange([...value, normalizedBadge])
   }
 
   const add = () => {
-    const trimmed = input.trim()
-    if (trimmed && !value.includes(trimmed)) {
-      onChange([...value, trimmed])
+    const normalizedInput = normalizeBadgeLabel(input)
+    if (normalizedInput && !hasBadge(normalizedInput)) {
+      onChange([...value, normalizedInput])
     }
     setInput('')
   }
@@ -91,7 +119,7 @@ function BadgesField({ value, onChange }: { value: string[]; onChange: (val: str
               {badge}
               <button
                 type="button"
-                onClick={() => onChange(value.filter((b) => b !== badge))}
+                onClick={() => remove(badge)}
                 className="ml-0.5 rounded-full hover:text-status-error"
               >
                 <X className="h-2.5 w-2.5" />
@@ -112,7 +140,7 @@ function BadgesField({ value, onChange }: { value: string[]; onChange: (val: str
             {badgeOptions.map((badge) => (
               <DropdownMenuCheckboxItem
                 key={badge}
-                checked={value.includes(badge)}
+                checked={hasBadge(badge)}
                 onCheckedChange={() => toggle(badge)}
               >
                 {badge}
@@ -138,7 +166,7 @@ function BadgesField({ value, onChange }: { value: string[]; onChange: (val: str
           size="sm"
           className="h-7 text-xs flex-none"
           onClick={add}
-          disabled={!input.trim()}
+          disabled={!normalizeBadgeLabel(input) || hasBadge(input)}
         >
           <Plus className="h-3 w-3" />
         </Button>
@@ -151,11 +179,11 @@ function mergeBadgeOptions(preset: readonly string[], fetched: string[] | undefi
   const unique = new Map<string, string>()
 
   for (const label of [...preset, ...(fetched ?? [])]) {
-    const normalized = label.trim().replace(/\s+/g, ' ')
+    const normalized = normalizeBadgeLabel(label)
 
     if (!normalized) continue
 
-    const key = normalized.toLocaleLowerCase()
+    const key = getBadgeKey(normalized)
 
     if (!unique.has(key)) {
       unique.set(key, normalized)

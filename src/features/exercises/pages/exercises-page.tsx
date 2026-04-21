@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { useDeferredValue, useEffect, useState } from 'react'
 import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { normalizeSearchText } from '@/lib/search'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import { getApiErrorMessage, useExercises } from '../api'
@@ -41,21 +40,23 @@ export function ExercisesPage() {
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null)
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
   const [isDuplicate, setIsDuplicate] = useState(false)
+  const deferredSearch = useDeferredValue(search)
+  const activeSearch = deferredSearch.trim()
 
-  const exercisesQuery = useExercises(page, PAGE_SIZE)
-  const allExercises = exercisesQuery.data?.data ?? []
-  const exerciseApprovalQuery = useResourceApprovalBatch('exercise', allExercises.map((exercise) => exercise.id))
+  useEffect(() => {
+    setPage(1)
+  }, [activeSearch])
+
+  const exercisesQuery = useExercises(page, PAGE_SIZE, activeSearch)
+  const exercises = exercisesQuery.data?.data ?? []
+  const exerciseApprovalQuery = useResourceApprovalBatch(
+    'exercise',
+    exercises.map((exercise) => exercise.id)
+  )
   const exerciseApprovalById = buildResourceApprovalMap(exerciseApprovalQuery.data ?? [])
   const total = exercisesQuery.data?.total ?? 0
-  const totalPages = exercisesQuery.data?.totalPages ?? 1
-  const normalizedSearch = normalizeSearchText(search.trim())
-
-  // Client-side search filter on the current page
-  const exercises = normalizedSearch
-    ? allExercises.filter((e) =>
-        normalizeSearchText(e.name).includes(normalizedSearch)
-      )
-    : allExercises
+  const totalPages = Math.max(1, exercisesQuery.data?.totalPages ?? 1)
+  const isSearching = activeSearch.length > 0
 
   const handleCreate = () => {
     setEditingExercise(null)
@@ -99,15 +100,20 @@ export function ExercisesPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Catálogo</p>
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">
+            Catálogo
+          </p>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">Ejercicios</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Gestiona el catálogo completo de ejercicios. Crea, edita y adjunta videos instructivos para cada movimiento.
+              Gestiona el catálogo completo de ejercicios. Crea, edita y adjunta videos instructivos
+              para cada movimiento.
             </p>
           </div>
           <p className="text-sm text-muted-foreground">
-            {total > 0 ? `${total} ejercicios en el catálogo` : 'Aún no hay ejercicios en el catálogo'}
+            {total > 0
+              ? `${total} ejercicios en el catálogo`
+              : 'Aún no hay ejercicios en el catálogo'}
           </p>
         </div>
 
@@ -127,7 +133,9 @@ export function ExercisesPage() {
               <AlertTriangle className="h-8 w-8" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">No se ha podido cargar el catálogo</h2>
+              <h2 className="text-2xl font-semibold text-foreground">
+                No se ha podido cargar el catálogo
+              </h2>
               <p className="max-w-xl text-sm text-muted-foreground">
                 {getApiErrorMessage(exercisesQuery.error, 'Inténtalo de nuevo en unos segundos.')}
               </p>
@@ -135,7 +143,7 @@ export function ExercisesPage() {
             <Button onClick={() => exercisesQuery.refetch()}>Reintentar</Button>
           </CardContent>
         </Card>
-      ) : allExercises.length === 0 ? (
+      ) : total === 0 && !isSearching ? (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
             <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
@@ -144,7 +152,8 @@ export function ExercisesPage() {
             <div className="space-y-2">
               <h2 className="text-2xl font-semibold text-foreground">Aún no hay ejercicios</h2>
               <p className="max-w-xl text-sm text-muted-foreground">
-                Crea el primer ejercicio para empezar a construir el catálogo que usarán tus clientes.
+                Crea el primer ejercicio para empezar a construir el catálogo que usarán tus
+                clientes.
               </p>
             </div>
             <Button onClick={handleCreate}>
@@ -157,7 +166,9 @@ export function ExercisesPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">Listado de ejercicios</CardTitle>
-            <CardDescription>Vista paginada del catálogo con búsqueda y acciones por ejercicio</CardDescription>
+            <CardDescription>
+              Vista paginada del catálogo con búsqueda y acciones por ejercicio
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Search */}
@@ -173,7 +184,7 @@ export function ExercisesPage() {
 
             {exercises.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No se encontraron ejercicios con "{search}"
+                No se encontraron ejercicios con "{activeSearch}"
               </p>
             ) : (
               <ExercisesTable
@@ -187,31 +198,29 @@ export function ExercisesPage() {
             )}
 
             {/* Pagination */}
-            {!search && (
-              <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Página {page} de {totalPages}
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((current) => Math.max(1, current - 1))}
-                    disabled={page === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                    disabled={page >= totalPages}
-                  >
-                    Siguiente
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+            <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Página {page} de {totalPages}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
       )}
