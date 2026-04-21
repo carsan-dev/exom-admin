@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { X, Plus, ChevronDown } from 'lucide-react'
@@ -36,7 +36,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { isApprovalPendingError } from '@/lib/api-utils'
-import { getApiErrorMessage, useCreateExercise, useUpdateExercise } from '../api'
+import {
+  getApiErrorMessage,
+  useCreateExercise,
+  useExerciseEquipment,
+  useExerciseMuscleGroups,
+  useUpdateExercise,
+} from '../api'
 import { exerciseSchema, type ExerciseFormValues } from '../schemas'
 import {
   EQUIPMENT_OPTIONS,
@@ -190,11 +196,42 @@ function MultiSelectField({ label, value, onChange, options, placeholder, error 
   )
 }
 
+function mergeOptions(preset: readonly string[], fetched: string[] | undefined): string[] {
+  const unique = new Map<string, string>()
+
+  for (const label of [...preset, ...(fetched ?? [])]) {
+    const normalized = label.trim()
+
+    if (!normalized) continue
+
+    const key = normalized.toLocaleLowerCase()
+
+    if (!unique.has(key)) {
+      unique.set(key, normalized)
+    }
+  }
+
+  return Array.from(unique.values()).sort((left, right) =>
+    left.localeCompare(right, 'es', { sensitivity: 'base' }),
+  )
+}
+
 export function ExerciseFormDialog({ open, onOpenChange, exercise, isDuplicate = false, onSaved }: ExerciseFormDialogProps) {
   const isEditing = Boolean(exercise) && !isDuplicate
   const createExercise = useCreateExercise()
   const updateExercise = useUpdateExercise()
+  const muscleGroupsQuery = useExerciseMuscleGroups()
+  const equipmentQuery = useExerciseEquipment()
   const isPending = createExercise.isPending || updateExercise.isPending
+
+  const muscleGroupOptions = useMemo(
+    () => mergeOptions(MUSCLE_GROUPS, muscleGroupsQuery.data),
+    [muscleGroupsQuery.data],
+  )
+  const equipmentOptions = useMemo(
+    () => mergeOptions(EQUIPMENT_OPTIONS, equipmentQuery.data),
+    [equipmentQuery.data],
+  )
 
   const form = useForm<ExerciseFormValues>({
     resolver: zodResolver(exerciseSchema),
@@ -300,7 +337,7 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, isDuplicate =
                       label="Grupos musculares"
                       value={field.value}
                       onChange={field.onChange}
-                      options={MUSCLE_GROUPS}
+                      options={muscleGroupOptions}
                       placeholder="Selecciona grupos musculares..."
                       error={form.formState.errors.muscle_groups?.message}
                     />
@@ -320,7 +357,7 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, isDuplicate =
                       label="Equipamiento"
                       value={field.value}
                       onChange={field.onChange}
-                      options={EQUIPMENT_OPTIONS}
+                      options={equipmentOptions}
                       placeholder="Selecciona equipamiento..."
                     />
                   </FormControl>

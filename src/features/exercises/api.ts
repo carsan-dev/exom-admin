@@ -14,6 +14,9 @@ const exercisesQueryKeys = {
   detail: (id?: string) => ['exercises', id] as const,
 }
 
+const exerciseMuscleGroupsQueryKey = ['exercises', 'muscle-groups'] as const
+const exerciseEquipmentQueryKey = ['exercises', 'equipment'] as const
+
 function normalizeExercisePayload(values: ExerciseFormValues) {
   return {
     name: values.name.trim(),
@@ -39,6 +42,28 @@ export function useExercises(page: number, limit: number) {
       })
 
       return unwrapResponse(response)
+    },
+  })
+}
+
+export function useExerciseMuscleGroups() {
+  return useQuery({
+    queryKey: exerciseMuscleGroupsQueryKey,
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      const response = await api.get<ApiEnvelope<{ muscle_groups: string[] }>>('/exercises/muscle-groups')
+      return unwrapResponse(response).muscle_groups
+    },
+  })
+}
+
+export function useExerciseEquipment() {
+  return useQuery({
+    queryKey: exerciseEquipmentQueryKey,
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      const response = await api.get<ApiEnvelope<{ equipment: string[] }>>('/exercises/equipment')
+      return unwrapResponse(response).equipment
     },
   })
 }
