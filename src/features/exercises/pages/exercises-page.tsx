@@ -40,6 +40,7 @@ export function ExercisesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null)
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
+  const [isDuplicate, setIsDuplicate] = useState(false)
 
   const exercisesQuery = useExercises(page, PAGE_SIZE)
   const allExercises = exercisesQuery.data?.data ?? []
@@ -58,6 +59,7 @@ export function ExercisesPage() {
 
   const handleCreate = () => {
     setEditingExercise(null)
+    setIsDuplicate(false)
     setFormDialogOpen(true)
   }
 
@@ -68,12 +70,28 @@ export function ExercisesPage() {
 
   const handleEdit = (exercise: Exercise) => {
     setEditingExercise(exercise)
+    setIsDuplicate(false)
+    setFormDialogOpen(true)
+  }
+
+  const handleDuplicate = (exercise: Exercise) => {
+    setEditingExercise(exercise)
+    setIsDuplicate(true)
     setFormDialogOpen(true)
   }
 
   const handleDelete = (exercise: Exercise) => {
     setSelectedExercise(exercise)
     setDeleteDialogOpen(true)
+  }
+
+  const handleFormDialogOpenChange = (open: boolean) => {
+    setFormDialogOpen(open)
+
+    if (!open) {
+      setEditingExercise(null)
+      setIsDuplicate(false)
+    }
   }
 
   return (
@@ -163,6 +181,7 @@ export function ExercisesPage() {
                 approvalById={exerciseApprovalById}
                 onView={handleView}
                 onEdit={handleEdit}
+                onDuplicate={handleDuplicate}
                 onDelete={handleDelete}
               />
             )}
@@ -200,10 +219,11 @@ export function ExercisesPage() {
       {/* Dialogs */}
       <ExerciseFormDialog
         open={formDialogOpen}
-        onOpenChange={setFormDialogOpen}
+        onOpenChange={handleFormDialogOpenChange}
         exercise={editingExercise}
+        isDuplicate={isDuplicate}
         onSaved={() => {
-          if (!editingExercise) setPage(1)
+          if (!editingExercise || isDuplicate) setPage(1)
         }}
       />
 
@@ -212,6 +232,7 @@ export function ExercisesPage() {
         open={detailDialogOpen}
         onOpenChange={setDetailDialogOpen}
         onEdit={handleEdit}
+        onDuplicate={handleDuplicate}
       />
 
       <DeleteExerciseDialog

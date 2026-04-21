@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Edit, Video } from 'lucide-react'
+import { ChevronDown, ChevronUp, Copy, Edit, Video } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,6 +16,7 @@ interface ExerciseDetailDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onEdit?: (exercise: Exercise) => void
+  onDuplicate?: (exercise: Exercise) => void
 }
 
 interface CollapsibleSectionProps {
@@ -47,7 +48,7 @@ function CollapsibleSection({ title, content }: CollapsibleSectionProps) {
   )
 }
 
-export function ExerciseDetailDialog({ exercise, open, onOpenChange, onEdit }: ExerciseDetailDialogProps) {
+export function ExerciseDetailDialog({ exercise, open, onOpenChange, onEdit, onDuplicate }: ExerciseDetailDialogProps) {
   if (!exercise) return null
 
   return (
@@ -124,10 +125,22 @@ export function ExerciseDetailDialog({ exercise, open, onOpenChange, onEdit }: E
           </div>
 
           {/* Footer actions */}
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex flex-wrap justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cerrar
             </Button>
+            {onDuplicate && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  onOpenChange(false)
+                  onDuplicate(exercise)
+                }}
+              >
+                <Copy className="h-4 w-4" />
+                Duplicar
+              </Button>
+            )}
             {onEdit && (
               <Button
                 onClick={() => {

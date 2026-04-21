@@ -1,4 +1,4 @@
-import { Eye, Pencil, Trash2, Video, MoreHorizontal } from 'lucide-react'
+import { Copy, Eye, Pencil, Trash2, Video, MoreHorizontal } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -29,10 +29,11 @@ interface ExercisesTableProps {
   approvalById?: Record<string, ExerciseApprovalSummary>
   onView: (exercise: Exercise) => void
   onEdit: (exercise: Exercise) => void
+  onDuplicate: (exercise: Exercise) => void
   onDelete: (exercise: Exercise) => void
 }
 
-export function ExercisesTable({ exercises, approvalById = {}, onView, onEdit, onDelete }: ExercisesTableProps) {
+export function ExercisesTable({ exercises, approvalById = {}, onView, onEdit, onDuplicate, onDelete }: ExercisesTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -118,6 +119,10 @@ export function ExercisesTable({ exercises, approvalById = {}, onView, onEdit, o
                   <DropdownMenuItem onClick={() => onEdit(exercise)}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDuplicate(exercise)}>
+                    <Copy className="mr-2 h-4 w-4" />
+                    Duplicar
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem

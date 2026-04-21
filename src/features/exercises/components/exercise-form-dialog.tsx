@@ -52,6 +52,7 @@ interface ExerciseFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   exercise?: Exercise | null
+  isDuplicate?: boolean
   onSaved?: () => void
 }
 
@@ -68,9 +69,9 @@ const defaultValues: ExerciseFormValues = {
   explanation_text: '',
 }
 
-function toFormValues(exercise: Exercise): ExerciseFormValues {
+function toFormValues(exercise: Exercise, isDuplicate: boolean): ExerciseFormValues {
   return {
-    name: exercise.name,
+    name: isDuplicate ? `${exercise.name} (copia)` : exercise.name,
     muscle_groups: exercise.muscle_groups,
     equipment: exercise.equipment,
     level: exercise.level,
@@ -189,8 +190,8 @@ function MultiSelectField({ label, value, onChange, options, placeholder, error 
   )
 }
 
-export function ExerciseFormDialog({ open, onOpenChange, exercise, onSaved }: ExerciseFormDialogProps) {
-  const isEditing = Boolean(exercise)
+export function ExerciseFormDialog({ open, onOpenChange, exercise, isDuplicate = false, onSaved }: ExerciseFormDialogProps) {
+  const isEditing = Boolean(exercise) && !isDuplicate
   const createExercise = useCreateExercise()
   const updateExercise = useUpdateExercise()
   const isPending = createExercise.isPending || updateExercise.isPending
@@ -204,9 +205,9 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, onSaved }: Ex
     if (!open) {
       form.reset(defaultValues)
     } else if (exercise) {
-      form.reset(toFormValues(exercise))
+      form.reset(toFormValues(exercise, isDuplicate))
     }
-  }, [form, open, exercise])
+  }, [form, open, exercise, isDuplicate])
 
   const handleSubmit = form.handleSubmit(async (values) => {
     try {
@@ -215,7 +216,7 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, onSaved }: Ex
         toast.success('Ejercicio actualizado correctamente')
       } else {
         await createExercise.mutateAsync(values)
-        toast.success('Ejercicio creado correctamente')
+        toast.success(isDuplicate ? 'Ejercicio duplicado correctamente' : 'Ejercicio creado correctamente')
       }
       onSaved?.()
       onOpenChange(false)
@@ -234,11 +235,13 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, onSaved }: Ex
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
         <DialogHeader className="pr-8">
-          <DialogTitle>{isEditing ? 'Editar ejercicio' : 'Nuevo ejercicio'}</DialogTitle>
+          <DialogTitle>{isEditing ? 'Editar ejercicio' : isDuplicate ? 'Duplicar ejercicio' : 'Nuevo ejercicio'}</DialogTitle>
           <DialogDescription>
             {isEditing
               ? 'Modifica los campos del ejercicio y guarda los cambios.'
-              : 'Rellena los datos del nuevo ejercicio para añadirlo al catálogo.'}
+              : isDuplicate
+                ? 'Se creará una copia del ejercicio con el mismo contenido.'
+                : 'Rellena los datos del nuevo ejercicio para añadirlo al catálogo.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -431,8 +434,8 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise, onSaved }: Ex
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending
-                  ? isEditing ? 'Guardando...' : 'Creando...'
-                  : isEditing ? 'Guardar cambios' : 'Crear ejercicio'}
+                  ? isEditing ? 'Guardando...' : isDuplicate ? 'Creando copia...' : 'Creando...'
+                  : isEditing ? 'Guardar cambios' : isDuplicate ? 'Crear copia' : 'Crear ejercicio'}
               </Button>
             </DialogFooter>
           </form>
