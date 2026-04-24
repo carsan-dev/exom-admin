@@ -26,10 +26,31 @@ interface CatalogMutationResponse {
   affected_count: number
 }
 
+export interface TrainingsListParams {
+  page: number
+  limit: number
+  search?: string
+  type?: string[]
+  level?: string[]
+  tags?: string[]
+  duration_min?: number
+  duration_max?: number
+}
+
 const trainingsQueryKeys = {
   all: ['trainings'] as const,
-  list: (page: number, limit: number, search: string) =>
-    ['trainings', page, limit, search] as const,
+  list: (params: TrainingsListParams) =>
+    [
+      'trainings',
+      params.page,
+      params.limit,
+      params.search ?? '',
+      params.type ?? [],
+      params.level ?? [],
+      params.tags ?? [],
+      params.duration_min ?? null,
+      params.duration_max ?? null,
+    ] as const,
   detail: (id?: string) => ['trainings', id] as const,
 }
 
@@ -62,11 +83,24 @@ function normalizeSearch(search?: string) {
   return trimmed.length > 0 ? trimmed : ''
 }
 
-export function useTrainings(page: number, limit: number, search?: string) {
+export function useTrainings(params: TrainingsListParams) {
+  const { page, limit, search, type, level, tags, duration_min, duration_max } = params
   const normalizedSearch = normalizeSearch(search)
+  const normalizedType = type ?? []
+  const normalizedLevel = level ?? []
+  const normalizedTags = tags ?? []
 
   return useQuery({
-    queryKey: trainingsQueryKeys.list(page, limit, normalizedSearch),
+    queryKey: trainingsQueryKeys.list({
+      page,
+      limit,
+      search: normalizedSearch,
+      type: normalizedType,
+      level: normalizedLevel,
+      tags: normalizedTags,
+      duration_min,
+      duration_max,
+    }),
     placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
@@ -75,7 +109,13 @@ export function useTrainings(page: number, limit: number, search?: string) {
           page,
           limit,
           ...(normalizedSearch ? { search: normalizedSearch } : {}),
+          ...(normalizedType.length > 0 ? { type: normalizedType } : {}),
+          ...(normalizedLevel.length > 0 ? { level: normalizedLevel } : {}),
+          ...(normalizedTags.length > 0 ? { tags: normalizedTags } : {}),
+          ...(duration_min != null ? { duration_min } : {}),
+          ...(duration_max != null ? { duration_max } : {}),
         },
+        paramsSerializer: { indexes: null },
       })
 
       return unwrapResponse(response)

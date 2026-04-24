@@ -1,19 +1,29 @@
-import { useDeferredValue, useEffect, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
   Plus,
-  Search,
   UtensilsCrossed,
 } from 'lucide-react'
+import {
+  FilterToolbar,
+  filtersToApiParams,
+  type FilterOption,
+  type FilterSectionConfig,
+  useListFilters,
+} from '@/components/filters'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
-import { getApiErrorMessage, useDiets } from '../api'
+import {
+  getApiErrorMessage,
+  type DietsListParams,
+  useDietNutritionalBadges,
+  useDiets,
+} from '../api'
 import { DeleteDietDialog } from '../components/delete-diet-dialog'
 import { DietDetailDialog } from '../components/diet-detail-dialog'
 import { DietFormDialog } from '../components/diet-form-dialog'
@@ -21,6 +31,16 @@ import { DietsTable } from '../components/diets-table'
 import type { Diet } from '../types'
 
 const PAGE_SIZE = 10
+const MEAL_TYPE_OPTIONS: FilterOption[] = [
+  { value: 'BREAKFAST', label: 'Desayuno' },
+  { value: 'LUNCH', label: 'Comida' },
+  { value: 'SNACK', label: 'Snack' },
+  { value: 'DINNER', label: 'Cena' },
+]
+
+function toFilterOptions(values?: string[]): FilterOption[] {
+  return values?.map((value) => ({ value, label: value })) ?? []
+}
 
 function DietsTableSkeleton() {
   return (
@@ -49,12 +69,43 @@ export function DietsPage() {
   const [isDuplicate, setIsDuplicate] = useState(false)
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
+  const nutritionalBadgesQuery = useDietNutritionalBadges()
+  const sections = useMemo<FilterSectionConfig[]>(
+    () => [
+      {
+        type: 'multi',
+        key: 'meal_types',
+        label: 'Tipo de comida',
+        options: MEAL_TYPE_OPTIONS,
+      },
+      {
+        type: 'multi',
+        key: 'nutritional_badges',
+        label: 'Badges nutricionales',
+        options: toFilterOptions(nutritionalBadgesQuery.data),
+        isLoading: nutritionalBadgesQuery.isLoading,
+      },
+      {
+        type: 'date-range',
+        key: 'updated',
+        label: 'Actualizada',
+      },
+    ],
+    [nutritionalBadgesQuery.data, nutritionalBadgesQuery.isLoading]
+  )
+  const filters = useListFilters(sections)
+  const dietFilterParams = filtersToApiParams(filters.values, sections) as Partial<DietsListParams>
 
   useEffect(() => {
     setPage(1)
-  }, [activeSearch])
+  }, [activeSearch, filters.values])
 
-  const dietsQuery = useDiets(page, PAGE_SIZE, activeSearch)
+  const dietsQuery = useDiets({
+    page,
+    limit: PAGE_SIZE,
+    search: activeSearch,
+    ...dietFilterParams,
+  })
   const diets = dietsQuery.data?.data ?? []
   const dietApprovalQuery = useResourceApprovalBatch(
     'diet',
@@ -63,7 +114,8 @@ export function DietsPage() {
   const dietApprovalById = buildResourceApprovalMap(dietApprovalQuery.data ?? [])
   const total = dietsQuery.data?.total ?? 0
   const totalPages = Math.max(1, dietsQuery.data?.totalPages ?? 1)
-  const isSearching = activeSearch.length > 0
+  const hasActiveFilters = filters.activeCount > 0
+  const hasQuery = activeSearch.length > 0 || hasActiveFilters
 
   const handleCreate = () => {
     setEditingDiet(null)
@@ -158,7 +210,7 @@ export function DietsPage() {
             <Button onClick={() => dietsQuery.refetch()}>Reintentar</Button>
           </CardContent>
         </Card>
-      ) : total === 0 && !isSearching ? (
+      ) : total === 0 && !hasQuery ? (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
             <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
@@ -185,20 +237,17 @@ export function DietsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nombre..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
+            <FilterToolbar
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Buscar por nombre..."
+              sections={sections}
+              filters={filters}
+            />
 
             {diets.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No se encontraron dietas con "{activeSearch}"
+                No se encontraron dietas con la búsqueda y filtros actuales.
               </p>
             ) : (
               <DietsTable

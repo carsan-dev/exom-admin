@@ -1,12 +1,24 @@
-import { useDeferredValue, useEffect, useState } from 'react'
-import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus, Search } from 'lucide-react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus } from 'lucide-react'
+import {
+  FilterToolbar,
+  filtersToApiParams,
+  type FilterOption,
+  type FilterSectionConfig,
+  useListFilters,
+} from '@/components/filters'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
-import { getApiErrorMessage, useExercises } from '../api'
+import {
+  getApiErrorMessage,
+  type ExercisesListParams,
+  useExerciseEquipment,
+  useExerciseMuscleGroups,
+  useExercises,
+} from '../api'
 import { DeleteExerciseDialog } from '../components/delete-exercise-dialog'
 import { ExerciseDetailDialog } from '../components/exercise-detail-dialog'
 import { ExerciseFormDialog } from '../components/exercise-form-dialog'
@@ -14,6 +26,15 @@ import { ExercisesTable } from '../components/exercises-table'
 import type { Exercise } from '../types'
 
 const PAGE_SIZE = 10
+const LEVEL_OPTIONS: FilterOption[] = [
+  { value: 'PRINCIPIANTE', label: 'Principiante' },
+  { value: 'INTERMEDIO', label: 'Intermedio' },
+  { value: 'AVANZADO', label: 'Avanzado' },
+]
+
+function toFilterOptions(values?: string[]): FilterOption[] {
+  return values?.map((value) => ({ value, label: value })) ?? []
+}
 
 function ExercisesTableSkeleton() {
   return (
@@ -42,12 +63,51 @@ export function ExercisesPage() {
   const [isDuplicate, setIsDuplicate] = useState(false)
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
+  const muscleGroupsQuery = useExerciseMuscleGroups()
+  const equipmentQuery = useExerciseEquipment()
+  const sections = useMemo<FilterSectionConfig[]>(
+    () => [
+      {
+        type: 'multi',
+        key: 'muscle_groups',
+        label: 'Grupo muscular',
+        options: toFilterOptions(muscleGroupsQuery.data),
+        isLoading: muscleGroupsQuery.isLoading,
+      },
+      {
+        type: 'multi',
+        key: 'equipment',
+        label: 'Equipamiento',
+        options: toFilterOptions(equipmentQuery.data),
+        isLoading: equipmentQuery.isLoading,
+      },
+      {
+        type: 'multi',
+        key: 'level',
+        label: 'Nivel',
+        options: LEVEL_OPTIONS,
+      },
+    ],
+    [
+      muscleGroupsQuery.data,
+      muscleGroupsQuery.isLoading,
+      equipmentQuery.data,
+      equipmentQuery.isLoading,
+    ]
+  )
+  const filters = useListFilters(sections)
+  const exerciseFilterParams = filtersToApiParams(filters.values, sections) as Partial<ExercisesListParams>
 
   useEffect(() => {
     setPage(1)
-  }, [activeSearch])
+  }, [activeSearch, filters.values])
 
-  const exercisesQuery = useExercises(page, PAGE_SIZE, activeSearch)
+  const exercisesQuery = useExercises({
+    page,
+    limit: PAGE_SIZE,
+    search: activeSearch,
+    ...exerciseFilterParams,
+  })
   const exercises = exercisesQuery.data?.data ?? []
   const exerciseApprovalQuery = useResourceApprovalBatch(
     'exercise',
@@ -56,7 +116,8 @@ export function ExercisesPage() {
   const exerciseApprovalById = buildResourceApprovalMap(exerciseApprovalQuery.data ?? [])
   const total = exercisesQuery.data?.total ?? 0
   const totalPages = Math.max(1, exercisesQuery.data?.totalPages ?? 1)
-  const isSearching = activeSearch.length > 0
+  const hasActiveFilters = filters.activeCount > 0
+  const hasQuery = activeSearch.length > 0 || hasActiveFilters
 
   const handleCreate = () => {
     setEditingExercise(null)
@@ -143,7 +204,7 @@ export function ExercisesPage() {
             <Button onClick={() => exercisesQuery.refetch()}>Reintentar</Button>
           </CardContent>
         </Card>
-      ) : total === 0 && !isSearching ? (
+      ) : total === 0 && !hasQuery ? (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
             <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
@@ -171,20 +232,17 @@ export function ExercisesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nombre..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
+            <FilterToolbar
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Buscar por nombre..."
+              sections={sections}
+              filters={filters}
+            />
 
             {exercises.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No se encontraron ejercicios con "{activeSearch}"
+                No se encontraron ejercicios con la búsqueda y filtros actuales.
               </p>
             ) : (
               <ExercisesTable

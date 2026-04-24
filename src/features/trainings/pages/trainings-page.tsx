@@ -1,12 +1,23 @@
-import { useDeferredValue, useEffect, useState } from 'react'
-import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus, Search } from 'lucide-react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus } from 'lucide-react'
+import {
+  FilterToolbar,
+  filtersToApiParams,
+  type FilterOption,
+  type FilterSectionConfig,
+  useListFilters,
+} from '@/components/filters'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
-import { getApiErrorMessage, useTrainings } from '../api'
+import {
+  getApiErrorMessage,
+  type TrainingsListParams,
+  useTrainingTags,
+  useTrainings,
+} from '../api'
 import { DeleteTrainingDialog } from '../components/delete-training-dialog'
 import { TrainingDetailDialog } from '../components/training-detail-dialog'
 import { TrainingFormDialog } from '../components/training-form-dialog'
@@ -14,6 +25,21 @@ import { TrainingsTable } from '../components/trainings-table'
 import type { Training } from '../types'
 
 const PAGE_SIZE = 10
+const LEVEL_OPTIONS: FilterOption[] = [
+  { value: 'PRINCIPIANTE', label: 'Principiante' },
+  { value: 'INTERMEDIO', label: 'Intermedio' },
+  { value: 'AVANZADO', label: 'Avanzado' },
+]
+const TRAINING_TYPE_OPTIONS: FilterOption[] = [
+  { value: 'FUERZA', label: 'Fuerza' },
+  { value: 'CARDIO', label: 'Cardio' },
+  { value: 'HIIT', label: 'HIIT' },
+  { value: 'FLEXIBILIDAD', label: 'Flexibilidad' },
+]
+
+function toFilterOptions(values?: string[]): FilterOption[] {
+  return values?.map((value) => ({ value, label: value })) ?? []
+}
 
 function TrainingsTableSkeleton() {
   return (
@@ -42,12 +68,53 @@ export function TrainingsPage() {
   const [isDuplicate, setIsDuplicate] = useState(false)
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
+  const tagsQuery = useTrainingTags()
+  const sections = useMemo<FilterSectionConfig[]>(
+    () => [
+      {
+        type: 'multi',
+        key: 'type',
+        label: 'Tipo',
+        options: TRAINING_TYPE_OPTIONS,
+      },
+      {
+        type: 'multi',
+        key: 'level',
+        label: 'Nivel',
+        options: LEVEL_OPTIONS,
+      },
+      {
+        type: 'multi',
+        key: 'tags',
+        label: 'Tags',
+        options: toFilterOptions(tagsQuery.data),
+        isLoading: tagsQuery.isLoading,
+      },
+      {
+        type: 'range',
+        key: 'duration',
+        label: 'Duración',
+        min: 0,
+        max: 180,
+        step: 5,
+        unit: 'min',
+      },
+    ],
+    [tagsQuery.data, tagsQuery.isLoading]
+  )
+  const filters = useListFilters(sections)
+  const trainingFilterParams = filtersToApiParams(filters.values, sections) as Partial<TrainingsListParams>
 
   useEffect(() => {
     setPage(1)
-  }, [activeSearch])
+  }, [activeSearch, filters.values])
 
-  const trainingsQuery = useTrainings(page, PAGE_SIZE, activeSearch)
+  const trainingsQuery = useTrainings({
+    page,
+    limit: PAGE_SIZE,
+    search: activeSearch,
+    ...trainingFilterParams,
+  })
   const trainings = trainingsQuery.data?.data ?? []
   const trainingApprovalQuery = useResourceApprovalBatch(
     'training',
@@ -56,7 +123,8 @@ export function TrainingsPage() {
   const trainingApprovalById = buildResourceApprovalMap(trainingApprovalQuery.data ?? [])
   const total = trainingsQuery.data?.total ?? 0
   const totalPages = Math.max(1, trainingsQuery.data?.totalPages ?? 1)
-  const isSearching = activeSearch.length > 0
+  const hasActiveFilters = filters.activeCount > 0
+  const hasQuery = activeSearch.length > 0 || hasActiveFilters
 
   const handleCreate = () => {
     setEditingTraining(null)
@@ -161,7 +229,7 @@ export function TrainingsPage() {
             <Button onClick={() => trainingsQuery.refetch()}>Reintentar</Button>
           </CardContent>
         </Card>
-      ) : total === 0 && !isSearching ? (
+      ) : total === 0 && !hasQuery ? (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
             <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
@@ -188,20 +256,17 @@ export function TrainingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nombre..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
+            <FilterToolbar
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Buscar por nombre..."
+              sections={sections}
+              filters={filters}
+            />
 
             {trainings.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No se encontraron entrenamientos con "{activeSearch}"
+                No se encontraron entrenamientos con la búsqueda y filtros actuales.
               </p>
             ) : (
               <TrainingsTable

@@ -26,10 +26,27 @@ interface CatalogMutationResponse {
   affected_count: number
 }
 
+export interface ExercisesListParams {
+  page: number
+  limit: number
+  search?: string
+  muscle_groups?: string[]
+  equipment?: string[]
+  level?: string[]
+}
+
 const exercisesQueryKeys = {
   all: ['exercises'] as const,
-  list: (page: number, limit: number, search: string) =>
-    ['exercises', page, limit, search] as const,
+  list: (params: ExercisesListParams) =>
+    [
+      'exercises',
+      params.page,
+      params.limit,
+      params.search ?? '',
+      params.muscle_groups ?? [],
+      params.equipment ?? [],
+      params.level ?? [],
+    ] as const,
   detail: (id?: string) => ['exercises', id] as const,
 }
 
@@ -56,11 +73,22 @@ function normalizeSearch(search?: string) {
   return trimmed.length > 0 ? trimmed : ''
 }
 
-export function useExercises(page: number, limit: number, search?: string) {
+export function useExercises(params: ExercisesListParams) {
+  const { page, limit, search, muscle_groups, equipment, level } = params
   const normalizedSearch = normalizeSearch(search)
+  const normalizedMuscleGroups = muscle_groups ?? []
+  const normalizedEquipment = equipment ?? []
+  const normalizedLevel = level ?? []
 
   return useQuery({
-    queryKey: exercisesQueryKeys.list(page, limit, normalizedSearch),
+    queryKey: exercisesQueryKeys.list({
+      page,
+      limit,
+      search: normalizedSearch,
+      muscle_groups: normalizedMuscleGroups,
+      equipment: normalizedEquipment,
+      level: normalizedLevel,
+    }),
     placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
@@ -69,7 +97,11 @@ export function useExercises(page: number, limit: number, search?: string) {
           page,
           limit,
           ...(normalizedSearch ? { search: normalizedSearch } : {}),
+          ...(normalizedMuscleGroups.length > 0 ? { muscle_groups: normalizedMuscleGroups } : {}),
+          ...(normalizedEquipment.length > 0 ? { equipment: normalizedEquipment } : {}),
+          ...(normalizedLevel.length > 0 ? { level: normalizedLevel } : {}),
         },
+        paramsSerializer: { indexes: null },
       })
 
       return unwrapResponse(response)

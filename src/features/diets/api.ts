@@ -26,9 +26,29 @@ interface CatalogMutationResponse {
   affected_count: number
 }
 
+export interface DietsListParams {
+  page: number
+  limit: number
+  search?: string
+  meal_types?: string[]
+  nutritional_badges?: string[]
+  updated_from?: string
+  updated_to?: string
+}
+
 const dietsQueryKeys = {
   all: ['diets'] as const,
-  list: (page: number, limit: number, search: string) => ['diets', page, limit, search] as const,
+  list: (params: DietsListParams) =>
+    [
+      'diets',
+      params.page,
+      params.limit,
+      params.search ?? '',
+      params.meal_types ?? [],
+      params.nutritional_badges ?? [],
+      params.updated_from ?? null,
+      params.updated_to ?? null,
+    ] as const,
   detail: (id?: string) => ['diets', id] as const,
 }
 
@@ -67,11 +87,22 @@ function normalizeSearch(search?: string) {
   return trimmed.length > 0 ? trimmed : ''
 }
 
-export function useDiets(page: number, limit: number, search?: string) {
+export function useDiets(params: DietsListParams) {
+  const { page, limit, search, meal_types, nutritional_badges, updated_from, updated_to } = params
   const normalizedSearch = normalizeSearch(search)
+  const normalizedMealTypes = meal_types ?? []
+  const normalizedNutritionalBadges = nutritional_badges ?? []
 
   return useQuery({
-    queryKey: dietsQueryKeys.list(page, limit, normalizedSearch),
+    queryKey: dietsQueryKeys.list({
+      page,
+      limit,
+      search: normalizedSearch,
+      meal_types: normalizedMealTypes,
+      nutritional_badges: normalizedNutritionalBadges,
+      updated_from,
+      updated_to,
+    }),
     placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
@@ -80,7 +111,14 @@ export function useDiets(page: number, limit: number, search?: string) {
           page,
           limit,
           ...(normalizedSearch ? { search: normalizedSearch } : {}),
+          ...(normalizedMealTypes.length > 0 ? { meal_types: normalizedMealTypes } : {}),
+          ...(normalizedNutritionalBadges.length > 0
+            ? { nutritional_badges: normalizedNutritionalBadges }
+            : {}),
+          ...(updated_from ? { updated_from } : {}),
+          ...(updated_to ? { updated_to } : {}),
         },
+        paramsSerializer: { indexes: null },
       })
       return unwrapResponse(response)
     },
