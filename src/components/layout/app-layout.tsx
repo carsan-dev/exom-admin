@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { Outlet } from 'react-router'
 import { ArrowUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { TooltipProvider } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
+import { cn } from '@/lib/utils'
 import { Sidebar } from './sidebar'
 import { Header } from './header'
 
@@ -78,23 +79,30 @@ export function AppLayout() {
           />
           <main
             ref={mainRef}
-            className="min-w-0 flex-1 bg-background p-4 sm:p-6 lg:overflow-y-auto lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]"
+            className={cn(
+              'min-w-0 flex-1 bg-background p-4 sm:p-6 lg:overflow-y-auto lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]',
+              showScrollTop ? 'pb-24 sm:pb-28' : null,
+            )}
           >
             <Outlet />
           </main>
 
           {showScrollTop ? (
             <div className="fixed bottom-4 right-4 z-50 flex sm:bottom-6 sm:right-6">
-              <Button
-                type="button"
-                size="sm"
-                onClick={handleScrollToTop}
-                aria-label="Volver arriba"
-                className="h-11 w-11 rounded-full border border-black/10 bg-primary text-primary-foreground shadow-xl shadow-black/25 sm:h-12 sm:w-auto sm:px-5"
-              >
-                <ArrowUp className="h-4 w-4" />
-                <span className="sr-only sm:not-sr-only sm:ml-2">Volver arriba</span>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    size="icon"
+                    onClick={handleScrollToTop}
+                    aria-label="Volver arriba"
+                    className="h-11 w-11 rounded-full border border-black/10 bg-primary text-primary-foreground shadow-xl shadow-black/25 sm:h-12 sm:w-12"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">Volver arriba</TooltipContent>
+              </Tooltip>
             </div>
           ) : null}
         </div>
