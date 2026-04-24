@@ -55,6 +55,7 @@ const trainingsQueryKeys = {
 }
 
 const trainingTagsQueryKey = ['trainings', 'tags'] as const
+const trainingTypesQueryKey = ['trainings', 'types'] as const
 const exercisesListQueryKey = ['exercises', 'list-all'] as const
 
 function normalizeTrainingPayload(values: TrainingFormValues) {
@@ -144,6 +145,17 @@ export function useTrainingTags() {
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<{ tags: string[] }>>('/trainings/tags')
       return unwrapResponse(response).tags
+    },
+  })
+}
+
+export function useTrainingTypes() {
+  return useQuery({
+    queryKey: trainingTypesQueryKey,
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      const response = await api.get<ApiEnvelope<{ types: string[] }>>('/trainings/types')
+      return unwrapResponse(response).types
     },
   })
 }

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { LEVEL_OPTIONS } from '../exercises/types'
-import { TRAINING_TYPE_OPTIONS } from './types'
+import { normalizeTrainingTypeLabel } from './types'
 
 export function normalizeTrainingTagLabel(tag: string) {
   return tag.trim().replace(/\s+/g, ' ')
@@ -33,6 +33,11 @@ export function normalizeTrainingTags(tags: string[]) {
   return normalizedTags
 }
 
+const trainingTypeSchema = z
+  .string()
+  .transform(normalizeTrainingTypeLabel)
+  .refine((value) => value.length > 0, 'Selecciona o crea un tipo')
+
 const trainingTagSchema = z
   .string()
   .transform(normalizeTrainingTagLabel)
@@ -48,7 +53,7 @@ export const trainingExerciseSchema = z.object({
 
 export const trainingSchema = z.object({
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
-  type: z.enum(TRAINING_TYPE_OPTIONS),
+  type: trainingTypeSchema,
   level: z.enum(LEVEL_OPTIONS),
   estimated_duration_min: z.number().int().positive().optional().or(z.literal(0)).nullable(),
   estimated_calories: z.number().int().positive().optional().or(z.literal(0)).nullable(),

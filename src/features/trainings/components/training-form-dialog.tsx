@@ -40,7 +40,13 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { LEVEL_LABELS, LEVEL_OPTIONS } from '../../exercises/types'
 import { isApprovalPendingError } from '@/lib/api-utils'
-import { getApiErrorMessage, useCreateTraining, useTrainingTags, useUpdateTraining } from '../api'
+import {
+  getApiErrorMessage,
+  useCreateTraining,
+  useTrainingTags,
+  useTrainingTypes,
+  useUpdateTraining,
+} from '../api'
 import {
   getTrainingTagKey,
   normalizeTrainingTagLabel,
@@ -48,7 +54,14 @@ import {
   trainingSchema,
   type TrainingFormValues,
 } from '../schemas'
-import { TRAINING_TYPE_LABELS, TRAINING_TYPE_OPTIONS, type Training } from '../types'
+import {
+  DEFAULT_TRAINING_TYPE,
+  getTrainingTypeBadgeClass,
+  getTrainingTypeKey,
+  getTrainingTypeLabel,
+  normalizeTrainingTypeLabel,
+  type Training,
+} from '../types'
 import { ExercisePicker } from './exercise-picker'
 
 interface TrainingFormDialogProps {
@@ -61,7 +74,7 @@ interface TrainingFormDialogProps {
 
 const defaultValues: TrainingFormValues = {
   name: '',
-  type: 'FUERZA',
+  type: DEFAULT_TRAINING_TYPE,
   level: 'PRINCIPIANTE',
   estimated_duration_min: null,
   estimated_calories: null,
@@ -98,6 +111,12 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
 interface TagsFieldProps {
   value: string[]
   onChange: (value: string[]) => void
+  error?: string
+}
+
+interface TrainingTypeFieldProps {
+  value: string
+  onChange: (value: string) => void
   error?: string
 }
 
@@ -298,6 +317,148 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
   )
 }
 
+function TrainingTypeField({ value, onChange, error }: TrainingTypeFieldProps) {
+  const [input, setInput] = useState('')
+  const trainingTypesQuery = useTrainingTypes()
+  const currentType = normalizeTrainingTypeLabel(value)
+  const availableTypes = trainingTypesQuery.data ?? []
+  const resolvedTypes = currentType
+    ? availableTypes.some((type) => getTrainingTypeKey(type) === getTrainingTypeKey(currentType))
+      ? availableTypes
+      : [currentType, ...availableTypes]
+    : availableTypes
+
+  const isSelected = (type: string) => getTrainingTypeKey(type) === getTrainingTypeKey(currentType)
+
+  const selectType = (rawType = input) => {
+    const normalizedType = normalizeTrainingTypeLabel(rawType)
+
+    if (!normalizedType) {
+      return
+    }
+
+    const existingType = resolvedTypes.find(
+      (type) => getTrainingTypeKey(type) === getTrainingTypeKey(normalizedType)
+    )
+
+    onChange(existingType ?? normalizedType)
+    setInput('')
+  }
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      selectType()
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2 min-h-10">
+        {currentType ? (
+          <Badge variant="outline" className={getTrainingTypeBadgeClass(currentType)}>
+            {getTrainingTypeLabel(currentType)}
+          </Badge>
+        ) : (
+          <span className="text-sm text-muted-foreground self-center">Sin tipo</span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" variant="outline" size="sm" className="sm:w-auto">
+              Tipos existentes
+              <ChevronDown className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="max-h-72 w-60 overflow-y-auto">
+            <DropdownMenuLabel>Tipos guardados</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {trainingTypesQuery.isLoading ? (
+              <div className="flex items-center gap-2 px-2 py-2 text-xs text-muted-foreground">
+                <LoaderCircle className="h-3 w-3 animate-spin" />
+                Cargando tipos...
+              </div>
+            ) : trainingTypesQuery.isError ? (
+              <div className="px-2 py-2 text-xs text-status-error">
+                {getApiErrorMessage(trainingTypesQuery.error, 'No se han podido cargar los tipos')}
+              </div>
+            ) : resolvedTypes.length === 0 ? (
+              <div className="px-2 py-2 text-xs text-muted-foreground">
+                Aun no hay tipos guardados.
+              </div>
+            ) : (
+              resolvedTypes.map((type) => (
+                <DropdownMenuCheckboxItem
+                  key={type}
+                  checked={isSelected(type)}
+                  onCheckedChange={() => selectType(type)}
+                  onSelect={(event) => event.preventDefault()}
+                >
+                  {getTrainingTypeLabel(type)}
+                </DropdownMenuCheckboxItem>
+              ))
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="flex flex-1 gap-2">
+          <Input
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Nuevo tipo (Enter)"
+            className="h-8 text-sm"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => selectType()}
+            disabled={!normalizeTrainingTypeLabel(input) || isSelected(input)}
+          >
+            <Plus className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+
+      {trainingTypesQuery.isError ? (
+        <div className="flex items-center gap-2 text-xs text-status-error">
+          <span>
+            {getApiErrorMessage(
+              trainingTypesQuery.error,
+              'No se han podido cargar los tipos existentes'
+            )}
+            .
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-auto px-1 py-0 text-xs"
+            onClick={() => trainingTypesQuery.refetch()}
+          >
+            Reintentar
+          </Button>
+        </div>
+      ) : trainingTypesQuery.isLoading ? (
+        <p className="text-xs text-muted-foreground">Cargando tipos existentes...</p>
+      ) : resolvedTypes.length === 0 ? (
+        <p className="text-xs text-muted-foreground">
+          Aun no hay tipos guardados. Puedes crear el primero.
+        </p>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Selecciona un tipo existente o crea uno nuevo.
+        </p>
+      )}
+
+      {error && <p className="text-xs text-status-error">{error}</p>}
+    </div>
+  )
+}
+
 export function TrainingFormDialog({
   open,
   onOpenChange,
@@ -433,24 +594,16 @@ export function TrainingFormDialog({
                 <FormField
                   control={form.control}
                   name="type"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Tipo</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {TRAINING_TYPE_OPTIONS.map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {TRAINING_TYPE_LABELS[type]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
+                      <FormControl>
+                        <TrainingTypeField
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={fieldState.error?.message}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />
