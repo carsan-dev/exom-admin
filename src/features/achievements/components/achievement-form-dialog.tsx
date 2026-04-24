@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -29,6 +29,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useTrainingTypes } from '@/features/trainings/api'
+import {
+  getTrainingTypeKey,
+  getTrainingTypeLabel,
+  normalizeTrainingTypeLabel,
+} from '@/features/trainings/types'
 import { getApiErrorMessage, useCreateAchievement, useUpdateAchievement } from '../api'
 import { achievementFormSchema } from '../schemas'
 import {
@@ -40,8 +46,6 @@ import {
   getAchievementModeLabel,
   type AchievementFormValues,
   type AchievementListItem,
-  TRAINING_TYPE_LABELS,
-  TRAINING_TYPE_OPTIONS,
 } from '../types'
 
 interface AchievementFormDialogProps {
@@ -54,6 +58,7 @@ interface AchievementFormDialogProps {
 export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmitted }: AchievementFormDialogProps) {
   const createAchievement = useCreateAchievement()
   const updateAchievement = useUpdateAchievement()
+  const trainingTypesQuery = useTrainingTypes()
   const isEditing = Boolean(achievement)
 
   const form = useForm<AchievementFormValues>({
@@ -62,6 +67,25 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
   })
   const criteriaType = useWatch({ control: form.control, name: 'criteria_type' }) ?? CRITERIA_TYPE_OPTIONS[0]
   const ruleConfig = useWatch({ control: form.control, name: 'rule_config' })
+  const availableTrainingTypes = useMemo(() => {
+    const uniqueTrainingTypes = new Map<string, string>()
+
+    for (const rawType of [...(trainingTypesQuery.data ?? []), ruleConfig?.training_type ?? '']) {
+      const normalizedType = normalizeTrainingTypeLabel(rawType)
+
+      if (!normalizedType) {
+        continue
+      }
+
+      const typeKey = getTrainingTypeKey(normalizedType)
+
+      if (!uniqueTrainingTypes.has(typeKey)) {
+        uniqueTrainingTypes.set(typeKey, normalizedType)
+      }
+    }
+
+    return Array.from(uniqueTrainingTypes.values())
+  }, [ruleConfig?.training_type, trainingTypesQuery.data])
 
   const isPending = createAchievement.isPending || updateAchievement.isPending
 
@@ -234,9 +258,9 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="ANY">Cualquier entrenamiento</SelectItem>
-                        {TRAINING_TYPE_OPTIONS.map((trainingType) => (
+                        {availableTrainingTypes.map((trainingType) => (
                           <SelectItem key={trainingType} value={trainingType}>
-                            {TRAINING_TYPE_LABELS[trainingType]}
+                            {getTrainingTypeLabel(trainingType)}
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -1,11 +1,10 @@
+import { getTrainingTypeLabel } from '../trainings/types'
+
 export const CRITERIA_TYPE_OPTIONS = ['TRAINING_DAYS', 'STREAK_DAYS', 'CHALLENGES_COMPLETED', 'WEIGHT_LOGS', 'CUSTOM'] as const
 export type CriteriaType = (typeof CRITERIA_TYPE_OPTIONS)[number]
 
-export const TRAINING_TYPE_OPTIONS = ['FUERZA', 'CARDIO', 'HIIT', 'FLEXIBILIDAD'] as const
-export type TrainingType = (typeof TRAINING_TYPE_OPTIONS)[number]
-
 export interface AchievementRuleConfig {
-  training_type?: TrainingType
+  training_type?: string
 }
 
 export interface AchievementUserProfile {
@@ -118,13 +117,6 @@ export const CRITERIA_TYPE_LABELS: Record<string, string> = {
   CUSTOM: 'Personalizado',
 }
 
-export const TRAINING_TYPE_LABELS: Record<TrainingType, string> = {
-  FUERZA: 'Fuerza',
-  CARDIO: 'Cardio',
-  HIIT: 'HIIT',
-  FLEXIBILIDAD: 'Flexibilidad',
-}
-
 export function buildAchievementFormDefaults(achievement?: Partial<AchievementListItem>): AchievementFormValues {
   return {
     name: achievement?.name ?? '',
@@ -150,7 +142,7 @@ export function getAchievementRuleLabel(criteriaType: CriteriaType, ruleConfig?:
   const baseLabel = CRITERIA_TYPE_LABELS[criteriaType] ?? criteriaType
 
   if (criteriaType === 'TRAINING_DAYS' && ruleConfig?.training_type) {
-    return `${baseLabel} · ${TRAINING_TYPE_LABELS[ruleConfig.training_type]}`
+    return `${baseLabel} · ${getTrainingTypeLabel(ruleConfig.training_type)}`
   }
 
   return baseLabel
@@ -160,7 +152,7 @@ export function getAchievementCriteriaHelp(criteriaType: CriteriaType, ruleConfi
   switch (criteriaType) {
     case 'TRAINING_DAYS':
       return ruleConfig?.training_type
-        ? `Cuenta días con entrenamiento completado solo cuando el entrenamiento asignado es de tipo ${TRAINING_TYPE_LABELS[ruleConfig.training_type]}.`
+        ? `Cuenta días con entrenamiento completado solo cuando el entrenamiento asignado es de tipo ${getTrainingTypeLabel(ruleConfig.training_type)}.`
         : 'Cuenta días con entrenamiento completado en DayProgress.'
     case 'STREAK_DAYS':
       return 'Mide la racha actual del cliente usando Streak.current_days.'

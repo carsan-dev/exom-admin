@@ -1,8 +1,13 @@
 import { z } from 'zod'
-import { CRITERIA_TYPE_OPTIONS, TRAINING_TYPE_OPTIONS } from './types'
+import { normalizeTrainingTypeLabel } from '../trainings/types'
+import { CRITERIA_TYPE_OPTIONS } from './types'
 
 const achievementRuleConfigSchema = z.object({
-  training_type: z.enum(TRAINING_TYPE_OPTIONS).optional(),
+  training_type: z
+    .string()
+    .transform(normalizeTrainingTypeLabel)
+    .refine((value) => value.length > 0, 'Selecciona un tipo de entrenamiento')
+    .optional(),
 })
 
 export const achievementFormSchema = z.object({
