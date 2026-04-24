@@ -19,7 +19,7 @@ export function AppLayout() {
       const layoutScrollTop = scrollContainer?.scrollTop ?? 0
       const pageScrollTop = window.scrollY || document.documentElement.scrollTop || 0
 
-      setShowScrollTop(Math.max(layoutScrollTop, pageScrollTop) > 360)
+      setShowScrollTop(Math.max(layoutScrollTop, pageScrollTop) > 180)
     }
 
     handleScroll()
@@ -83,22 +83,20 @@ export function AppLayout() {
             <Outlet />
           </main>
 
-          <div
-            className={`pointer-events-none hidden transition-all duration-200 lg:fixed lg:bottom-6 lg:right-6 lg:z-50 lg:flex ${
-              showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
-            }`}
-          >
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleScrollToTop}
-              aria-label="Volver arriba"
-              className="pointer-events-auto h-11 w-11 rounded-full border border-black/10 bg-primary text-primary-foreground shadow-xl shadow-black/25 sm:h-12 sm:w-auto sm:px-5"
-            >
-              <ArrowUp className="h-4 w-4" />
-              <span className="sr-only sm:not-sr-only sm:ml-2">Volver arriba</span>
-            </Button>
-          </div>
+          {showScrollTop ? (
+            <div className="fixed bottom-4 right-4 z-50 flex sm:bottom-6 sm:right-6">
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleScrollToTop}
+                aria-label="Volver arriba"
+                className="h-11 w-11 rounded-full border border-black/10 bg-primary text-primary-foreground shadow-xl shadow-black/25 sm:h-12 sm:w-auto sm:px-5"
+              >
+                <ArrowUp className="h-4 w-4" />
+                <span className="sr-only sm:not-sr-only sm:ml-2">Volver arriba</span>
+              </Button>
+            </div>
+          ) : null}
         </div>
       </div>
     </TooltipProvider>
