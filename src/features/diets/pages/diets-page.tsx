@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertTriangle,
   ChevronLeft,
@@ -6,6 +6,7 @@ import {
   Plus,
   UtensilsCrossed,
 } from 'lucide-react'
+import { useSearchParams } from 'react-router'
 import {
   FilterToolbar,
   filtersToApiParams,
@@ -18,6 +19,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
+import {
+  getPageSearchParam,
+  replacePaginationSearchParams,
+} from '@/lib/pagination-search-params'
 import {
   getApiErrorMessage,
   type DietsListParams,
@@ -59,7 +64,7 @@ function DietsTableSkeleton() {
 }
 
 export function DietsPage() {
-  const [page, setPage] = useState(1)
+  const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [detailDialogOpen, setDetailDialogOpen] = useState(false)
@@ -67,6 +72,8 @@ export function DietsPage() {
   const [selectedDiet, setSelectedDiet] = useState<Diet | null>(null)
   const [editingDiet, setEditingDiet] = useState<Diet | null>(null)
   const [isDuplicate, setIsDuplicate] = useState(false)
+  const hasInitializedPageReset = useRef(false)
+  const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
   const nutritionalBadgesQuery = useDietNutritionalBadges()
@@ -97,8 +104,13 @@ export function DietsPage() {
   const dietFilterParams = filtersToApiParams(filters.values, sections) as Partial<DietsListParams>
 
   useEffect(() => {
-    setPage(1)
-  }, [activeSearch, filters.values])
+    if (!hasInitializedPageReset.current) {
+      hasInitializedPageReset.current = true
+      return
+    }
+
+    replacePaginationSearchParams(setSearchParams, { page: 1 })
+  }, [activeSearch, filters.values, setSearchParams])
 
   const dietsQuery = useDiets({
     page,
@@ -268,7 +280,11 @@ export function DietsPage() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() =>
+                    replacePaginationSearchParams(setSearchParams, {
+                      page: Math.max(1, page - 1),
+                    })
+                  }
                   disabled={page === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -276,7 +292,11 @@ export function DietsPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  onClick={() =>
+                    replacePaginationSearchParams(setSearchParams, {
+                      page: Math.min(totalPages, page + 1),
+                    })
+                  }
                   disabled={page >= totalPages}
                 >
                   Siguiente
@@ -296,7 +316,7 @@ export function DietsPage() {
         isDuplicate={isDuplicate}
         onSaved={() => {
           if (!editingDiet || isDuplicate) {
-            setPage(1)
+            replacePaginationSearchParams(setSearchParams, { page: 1 })
             setSearch('')
           }
         }}
@@ -314,7 +334,7 @@ export function DietsPage() {
         diet={selectedDiet}
         open={deleteDialogOpen}
         onOpenChange={handleDeleteDialogOpenChange}
-        onDeleted={() => setPage(1)}
+        onDeleted={() => replacePaginationSearchParams(setSearchParams, { page: 1 })}
       />
     </div>
   )

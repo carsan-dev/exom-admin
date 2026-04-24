@@ -1,5 +1,6 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus } from 'lucide-react'
+import { useSearchParams } from 'react-router'
 import {
   FilterToolbar,
   filtersToApiParams,
@@ -12,6 +13,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
+import {
+  getPageSearchParam,
+  replacePaginationSearchParams,
+} from '@/lib/pagination-search-params'
 import {
   getApiErrorMessage,
   type ExercisesListParams,
@@ -53,7 +58,7 @@ function ExercisesTableSkeleton() {
 }
 
 export function ExercisesPage() {
-  const [page, setPage] = useState(1)
+  const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [detailDialogOpen, setDetailDialogOpen] = useState(false)
@@ -61,6 +66,8 @@ export function ExercisesPage() {
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null)
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
   const [isDuplicate, setIsDuplicate] = useState(false)
+  const hasInitializedPageReset = useRef(false)
+  const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
   const muscleGroupsQuery = useExerciseMuscleGroups()
@@ -99,8 +106,13 @@ export function ExercisesPage() {
   const exerciseFilterParams = filtersToApiParams(filters.values, sections) as Partial<ExercisesListParams>
 
   useEffect(() => {
-    setPage(1)
-  }, [activeSearch, filters.values])
+    if (!hasInitializedPageReset.current) {
+      hasInitializedPageReset.current = true
+      return
+    }
+
+    replacePaginationSearchParams(setSearchParams, { page: 1 })
+  }, [activeSearch, filters.values, setSearchParams])
 
   const exercisesQuery = useExercises({
     page,
@@ -263,7 +275,11 @@ export function ExercisesPage() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() =>
+                    replacePaginationSearchParams(setSearchParams, {
+                      page: Math.max(1, page - 1),
+                    })
+                  }
                   disabled={page === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -271,7 +287,11 @@ export function ExercisesPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  onClick={() =>
+                    replacePaginationSearchParams(setSearchParams, {
+                      page: Math.min(totalPages, page + 1),
+                    })
+                  }
                   disabled={page >= totalPages}
                 >
                   Siguiente
@@ -290,7 +310,9 @@ export function ExercisesPage() {
         exercise={editingExercise}
         isDuplicate={isDuplicate}
         onSaved={() => {
-          if (!editingExercise || isDuplicate) setPage(1)
+          if (!editingExercise || isDuplicate) {
+            replacePaginationSearchParams(setSearchParams, { page: 1 })
+          }
         }}
       />
 
@@ -306,7 +328,7 @@ export function ExercisesPage() {
         exercise={selectedExercise}
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        onDeleted={() => setPage(1)}
+        onDeleted={() => replacePaginationSearchParams(setSearchParams, { page: 1 })}
       />
     </div>
   )

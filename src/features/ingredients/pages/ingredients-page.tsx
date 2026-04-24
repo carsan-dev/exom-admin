@@ -1,5 +1,6 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, Apple, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { useSearchParams } from 'react-router'
 import {
   FilterToolbar,
   filtersToApiParams,
@@ -12,6 +13,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
+import {
+  getPageSearchParam,
+  replacePaginationSearchParams,
+} from '@/lib/pagination-search-params'
 import { getApiErrorMessage, type IngredientsListParams, useIngredients } from '../api'
 import { DeleteIngredientDialog } from '../components/delete-ingredient-dialog'
 import { IngredientFormDialog } from '../components/ingredient-form-dialog'
@@ -41,12 +46,14 @@ function IngredientsTableSkeleton() {
 }
 
 export function IngredientsPage() {
-  const [page, setPage] = useState(1)
+  const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null)
   const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null)
+  const hasInitializedPageReset = useRef(false)
+  const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
   const filterSections = useMemo<FilterSectionConfig[]>(
@@ -102,8 +109,13 @@ export function IngredientsPage() {
   const filterParams = filtersToApiParams(filters.values, filterSections) as Partial<IngredientsListParams>
 
   useEffect(() => {
-    setPage(1)
-  }, [activeSearch, filters.values])
+    if (!hasInitializedPageReset.current) {
+      hasInitializedPageReset.current = true
+      return
+    }
+
+    replacePaginationSearchParams(setSearchParams, { page: 1 })
+  }, [activeSearch, filters.values, setSearchParams])
 
   const ingredientsQuery = useIngredients({
     page,
@@ -227,7 +239,11 @@ export function IngredientsPage() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() =>
+                    replacePaginationSearchParams(setSearchParams, {
+                      page: Math.max(1, page - 1),
+                    })
+                  }
                   disabled={page === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -235,7 +251,11 @@ export function IngredientsPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  onClick={() =>
+                    replacePaginationSearchParams(setSearchParams, {
+                      page: Math.min(totalPages, page + 1),
+                    })
+                  }
                   disabled={page >= totalPages}
                 >
                   Siguiente
@@ -252,7 +272,9 @@ export function IngredientsPage() {
         onOpenChange={setFormDialogOpen}
         ingredient={editingIngredient}
         onSaved={() => {
-          setPage(1)
+          if (!editingIngredient) {
+            replacePaginationSearchParams(setSearchParams, { page: 1 })
+          }
         }}
       />
 
@@ -261,7 +283,7 @@ export function IngredientsPage() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onDeleted={() => {
-          setPage(1)
+          replacePaginationSearchParams(setSearchParams, { page: 1 })
         }}
       />
     </div>

@@ -1,5 +1,6 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, ChevronLeft, ChevronRight, Plus, Users } from 'lucide-react'
+import { useSearchParams } from 'react-router'
 import {
   FilterToolbar,
   filtersToApiParams,
@@ -12,6 +13,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/hooks/use-auth'
+import {
+  buildPaginationSearchParams,
+  getPageSearchParam,
+  hasSearchParamsChanged,
+  replacePaginationSearchParams,
+} from '@/lib/pagination-search-params'
 import {
   getApiErrorMessage,
   type ClientsListParams,
@@ -120,6 +127,11 @@ function PaginationBar({ page, totalPages, onPrevious, onNext }: PaginationBarPr
 }
 
 type ManageableUser = Client | AdminUserListItem
+type ClientsTab = 'clients' | 'admins' | 'super-admins'
+
+function getClientsTab(value: string | null): ClientsTab {
+  return value === 'admins' || value === 'super-admins' ? value : 'clients'
+}
 
 export function ClientsPage() {
   const currentUser = useAuth((state) => state.user)
@@ -127,10 +139,7 @@ export function ClientsPage() {
   const currentUserId = currentUser?.id
   const isSuperAdmin = currentUserRole === 'SUPER_ADMIN'
 
-  const [activeTab, setActiveTab] = useState<'clients' | 'admins' | 'super-admins'>('clients')
-  const [clientPage, setClientPage] = useState(1)
-  const [adminPage, setAdminPage] = useState(1)
-  const [superAdminPage, setSuperAdminPage] = useState(1)
+  const [searchParams, setSearchParams] = useSearchParams()
   const [clientSearch, setClientSearch] = useState('')
   const [adminSearch, setAdminSearch] = useState('')
   const [superAdminSearch, setSuperAdminSearch] = useState('')
@@ -143,12 +152,20 @@ export function ClientsPage() {
   const [manageAssignmentsDialogOpen, setManageAssignmentsDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<ManageableUser | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const hasInitializedClientPageReset = useRef(false)
+  const hasInitializedAdminPageReset = useRef(false)
+  const hasInitializedSuperAdminPageReset = useRef(false)
   const deferredClientSearch = useDeferredValue(clientSearch)
   const deferredAdminSearch = useDeferredValue(adminSearch)
   const deferredSuperAdminSearch = useDeferredValue(superAdminSearch)
   const activeClientSearch = deferredClientSearch.trim()
   const activeAdminSearch = deferredAdminSearch.trim()
   const activeSuperAdminSearch = deferredSuperAdminSearch.trim()
+  const tabParam = getClientsTab(searchParams.get('tab'))
+  const activeTab = isSuperAdmin ? tabParam : 'clients'
+  const clientPage = getPageSearchParam(searchParams.get('clientsPage'))
+  const adminPage = getPageSearchParam(searchParams.get('adminsPage'))
+  const superAdminPage = getPageSearchParam(searchParams.get('superAdminsPage'))
   const clientSections = useMemo<FilterSectionConfig[]>(
     () => [
       {
@@ -207,17 +224,58 @@ export function ClientsPage() {
     userSections
   ) as Partial<UsersListParams>
 
-  useEffect(() => {
-    setClientPage(1)
-  }, [activeClientSearch, clientFilters.values])
+  const updateSearchParams = (updates: {
+    tab?: ClientsTab
+    clientsPage?: number
+    adminsPage?: number
+    superAdminsPage?: number
+  }) => {
+    setSearchParams(
+      (currentSearchParams) => {
+        const nextSearchParams = buildPaginationSearchParams(currentSearchParams, {
+          clientsPage: updates.clientsPage,
+          adminsPage: updates.adminsPage,
+          superAdminsPage: updates.superAdminsPage,
+        })
+
+        if (updates.tab !== undefined) {
+          nextSearchParams.set('tab', updates.tab)
+        }
+
+        return hasSearchParamsChanged(currentSearchParams, nextSearchParams)
+          ? nextSearchParams
+          : currentSearchParams
+      },
+      { replace: true },
+    )
+  }
 
   useEffect(() => {
-    setAdminPage(1)
-  }, [activeAdminSearch, adminFilters.values])
+    if (!hasInitializedClientPageReset.current) {
+      hasInitializedClientPageReset.current = true
+      return
+    }
+
+    replacePaginationSearchParams(setSearchParams, { clientsPage: 1 })
+  }, [activeClientSearch, clientFilters.values, setSearchParams])
 
   useEffect(() => {
-    setSuperAdminPage(1)
-  }, [activeSuperAdminSearch, superAdminFilters.values])
+    if (!hasInitializedAdminPageReset.current) {
+      hasInitializedAdminPageReset.current = true
+      return
+    }
+
+    replacePaginationSearchParams(setSearchParams, { adminsPage: 1 })
+  }, [activeAdminSearch, adminFilters.values, setSearchParams])
+
+  useEffect(() => {
+    if (!hasInitializedSuperAdminPageReset.current) {
+      hasInitializedSuperAdminPageReset.current = true
+      return
+    }
+
+    replacePaginationSearchParams(setSearchParams, { superAdminsPage: 1 })
+  }, [activeSuperAdminSearch, superAdminFilters.values, setSearchParams])
 
   const clientsQuery = useClients({
     page: clientPage,
@@ -390,8 +448,14 @@ export function ClientsPage() {
           <PaginationBar
             page={clientPage}
             totalPages={clientTotalPages}
-            onPrevious={() => setClientPage((current) => Math.max(1, current - 1))}
-            onNext={() => setClientPage((current) => Math.min(clientTotalPages, current + 1))}
+            onPrevious={() =>
+              updateSearchParams({ clientsPage: Math.max(1, clientPage - 1) })
+            }
+            onNext={() =>
+              updateSearchParams({
+                clientsPage: Math.min(clientTotalPages, clientPage + 1),
+              })
+            }
           />
         </CardContent>
       </Card>
@@ -481,8 +545,12 @@ export function ClientsPage() {
           <PaginationBar
             page={adminPage}
             totalPages={adminTotalPages}
-            onPrevious={() => setAdminPage((current) => Math.max(1, current - 1))}
-            onNext={() => setAdminPage((current) => Math.min(adminTotalPages, current + 1))}
+            onPrevious={() => updateSearchParams({ adminsPage: Math.max(1, adminPage - 1) })}
+            onNext={() =>
+              updateSearchParams({
+                adminsPage: Math.min(adminTotalPages, adminPage + 1),
+              })
+            }
           />
         </CardContent>
       </Card>
@@ -575,8 +643,14 @@ export function ClientsPage() {
           <PaginationBar
             page={superAdminPage}
             totalPages={superAdminTotalPages}
-            onPrevious={() => setSuperAdminPage((current) => Math.max(1, current - 1))}
-            onNext={() => setSuperAdminPage((current) => Math.min(superAdminTotalPages, current + 1))}
+            onPrevious={() =>
+              updateSearchParams({ superAdminsPage: Math.max(1, superAdminPage - 1) })
+            }
+            onNext={() =>
+              updateSearchParams({
+                superAdminsPage: Math.min(superAdminTotalPages, superAdminPage + 1),
+              })
+            }
           />
         </CardContent>
       </Card>
@@ -614,7 +688,7 @@ export function ClientsPage() {
       {isSuperAdmin ? (
         <Tabs
           value={activeTab}
-          onValueChange={(value) => setActiveTab(value as 'clients' | 'admins' | 'super-admins')}
+          onValueChange={(value) => updateSearchParams({ tab: value as ClientsTab })}
           className="space-y-4"
         >
           <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-3">
@@ -649,7 +723,7 @@ export function ClientsPage() {
       <CreateClientDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        onCreated={() => setClientPage(1)}
+        onCreated={() => replacePaginationSearchParams(setSearchParams, { clientsPage: 1 })}
       />
       <CreateAdminDialog open={createAdminDialogOpen} onOpenChange={setCreateAdminDialogOpen} />
       <UnlockDialog user={selectedUser} open={unlockDialogOpen} onOpenChange={setUnlockDialogOpen} />

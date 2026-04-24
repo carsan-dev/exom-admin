@@ -1,5 +1,6 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus } from 'lucide-react'
+import { useSearchParams } from 'react-router'
 import {
   FilterToolbar,
   filtersToApiParams,
@@ -12,6 +13,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
+import {
+  getPageSearchParam,
+  replacePaginationSearchParams,
+} from '@/lib/pagination-search-params'
 import {
   getApiErrorMessage,
   type TrainingsListParams,
@@ -58,7 +63,7 @@ function TrainingsTableSkeleton() {
 }
 
 export function TrainingsPage() {
-  const [page, setPage] = useState(1)
+  const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [detailDialogOpen, setDetailDialogOpen] = useState(false)
@@ -66,6 +71,8 @@ export function TrainingsPage() {
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null)
   const [editingTraining, setEditingTraining] = useState<Training | null>(null)
   const [isDuplicate, setIsDuplicate] = useState(false)
+  const hasInitializedPageReset = useRef(false)
+  const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
   const tagsQuery = useTrainingTags()
@@ -106,8 +113,13 @@ export function TrainingsPage() {
   const trainingFilterParams = filtersToApiParams(filters.values, sections) as Partial<TrainingsListParams>
 
   useEffect(() => {
-    setPage(1)
-  }, [activeSearch, filters.values])
+    if (!hasInitializedPageReset.current) {
+      hasInitializedPageReset.current = true
+      return
+    }
+
+    replacePaginationSearchParams(setSearchParams, { page: 1 })
+  }, [activeSearch, filters.values, setSearchParams])
 
   const trainingsQuery = useTrainings({
     page,
@@ -287,7 +299,11 @@ export function TrainingsPage() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() =>
+                    replacePaginationSearchParams(setSearchParams, {
+                      page: Math.max(1, page - 1),
+                    })
+                  }
                   disabled={page === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -295,7 +311,11 @@ export function TrainingsPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  onClick={() =>
+                    replacePaginationSearchParams(setSearchParams, {
+                      page: Math.min(totalPages, page + 1),
+                    })
+                  }
                   disabled={page >= totalPages}
                 >
                   Siguiente
@@ -315,7 +335,7 @@ export function TrainingsPage() {
         isDuplicate={isDuplicate}
         onSaved={() => {
           if (!editingTraining || isDuplicate) {
-            setPage(1)
+            replacePaginationSearchParams(setSearchParams, { page: 1 })
             setSearch('')
           }
         }}
@@ -333,7 +353,7 @@ export function TrainingsPage() {
         training={selectedTraining}
         open={deleteDialogOpen}
         onOpenChange={handleDeleteDialogOpenChange}
-        onDeleted={() => setPage(1)}
+        onDeleted={() => replacePaginationSearchParams(setSearchParams, { page: 1 })}
       />
     </div>
   )
