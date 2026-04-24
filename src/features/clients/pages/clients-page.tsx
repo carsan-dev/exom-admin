@@ -152,9 +152,6 @@ export function ClientsPage() {
   const [manageAssignmentsDialogOpen, setManageAssignmentsDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<ManageableUser | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
-  const hasInitializedClientPageReset = useRef(false)
-  const hasInitializedAdminPageReset = useRef(false)
-  const hasInitializedSuperAdminPageReset = useRef(false)
   const deferredClientSearch = useDeferredValue(clientSearch)
   const deferredAdminSearch = useDeferredValue(adminSearch)
   const deferredSuperAdminSearch = useDeferredValue(superAdminSearch)
@@ -223,6 +220,12 @@ export function ClientsPage() {
     superAdminFilters.values,
     userSections
   ) as Partial<UsersListParams>
+  const clientPageResetKey = `${activeClientSearch}::${JSON.stringify(clientFilterParams)}`
+  const adminPageResetKey = `${activeAdminSearch}::${JSON.stringify(adminFilterParams)}`
+  const superAdminPageResetKey = `${activeSuperAdminSearch}::${JSON.stringify(superAdminFilterParams)}`
+  const lastClientPageResetKeyRef = useRef(clientPageResetKey)
+  const lastAdminPageResetKeyRef = useRef(adminPageResetKey)
+  const lastSuperAdminPageResetKeyRef = useRef(superAdminPageResetKey)
 
   const updateSearchParams = (updates: {
     tab?: ClientsTab
@@ -251,31 +254,31 @@ export function ClientsPage() {
   }
 
   useEffect(() => {
-    if (!hasInitializedClientPageReset.current) {
-      hasInitializedClientPageReset.current = true
+    if (lastClientPageResetKeyRef.current === clientPageResetKey) {
       return
     }
 
+    lastClientPageResetKeyRef.current = clientPageResetKey
     replacePaginationSearchParams(setSearchParams, { clientsPage: 1 })
-  }, [activeClientSearch, clientFilters.values, setSearchParams])
+  }, [clientPageResetKey, setSearchParams])
 
   useEffect(() => {
-    if (!hasInitializedAdminPageReset.current) {
-      hasInitializedAdminPageReset.current = true
+    if (lastAdminPageResetKeyRef.current === adminPageResetKey) {
       return
     }
 
+    lastAdminPageResetKeyRef.current = adminPageResetKey
     replacePaginationSearchParams(setSearchParams, { adminsPage: 1 })
-  }, [activeAdminSearch, adminFilters.values, setSearchParams])
+  }, [adminPageResetKey, setSearchParams])
 
   useEffect(() => {
-    if (!hasInitializedSuperAdminPageReset.current) {
-      hasInitializedSuperAdminPageReset.current = true
+    if (lastSuperAdminPageResetKeyRef.current === superAdminPageResetKey) {
       return
     }
 
+    lastSuperAdminPageResetKeyRef.current = superAdminPageResetKey
     replacePaginationSearchParams(setSearchParams, { superAdminsPage: 1 })
-  }, [activeSuperAdminSearch, superAdminFilters.values, setSearchParams])
+  }, [superAdminPageResetKey, setSearchParams])
 
   const clientsQuery = useClients({
     page: clientPage,

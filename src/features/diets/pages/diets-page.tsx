@@ -72,7 +72,6 @@ export function DietsPage() {
   const [selectedDiet, setSelectedDiet] = useState<Diet | null>(null)
   const [editingDiet, setEditingDiet] = useState<Diet | null>(null)
   const [isDuplicate, setIsDuplicate] = useState(false)
-  const hasInitializedPageReset = useRef(false)
   const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
@@ -102,15 +101,17 @@ export function DietsPage() {
   )
   const filters = useListFilters(sections)
   const dietFilterParams = filtersToApiParams(filters.values, sections) as Partial<DietsListParams>
+  const pageResetKey = `${activeSearch}::${JSON.stringify(dietFilterParams)}`
+  const lastPageResetKeyRef = useRef(pageResetKey)
 
   useEffect(() => {
-    if (!hasInitializedPageReset.current) {
-      hasInitializedPageReset.current = true
+    if (lastPageResetKeyRef.current === pageResetKey) {
       return
     }
 
+    lastPageResetKeyRef.current = pageResetKey
     replacePaginationSearchParams(setSearchParams, { page: 1 })
-  }, [activeSearch, filters.values, setSearchParams])
+  }, [pageResetKey, setSearchParams])
 
   const dietsQuery = useDiets({
     page,

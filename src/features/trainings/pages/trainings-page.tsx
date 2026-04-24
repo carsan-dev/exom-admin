@@ -71,7 +71,6 @@ export function TrainingsPage() {
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null)
   const [editingTraining, setEditingTraining] = useState<Training | null>(null)
   const [isDuplicate, setIsDuplicate] = useState(false)
-  const hasInitializedPageReset = useRef(false)
   const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
@@ -111,15 +110,17 @@ export function TrainingsPage() {
   )
   const filters = useListFilters(sections)
   const trainingFilterParams = filtersToApiParams(filters.values, sections) as Partial<TrainingsListParams>
+  const pageResetKey = `${activeSearch}::${JSON.stringify(trainingFilterParams)}`
+  const lastPageResetKeyRef = useRef(pageResetKey)
 
   useEffect(() => {
-    if (!hasInitializedPageReset.current) {
-      hasInitializedPageReset.current = true
+    if (lastPageResetKeyRef.current === pageResetKey) {
       return
     }
 
+    lastPageResetKeyRef.current = pageResetKey
     replacePaginationSearchParams(setSearchParams, { page: 1 })
-  }, [activeSearch, filters.values, setSearchParams])
+  }, [pageResetKey, setSearchParams])
 
   const trainingsQuery = useTrainings({
     page,

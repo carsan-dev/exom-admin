@@ -52,7 +52,6 @@ export function IngredientsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null)
   const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null)
-  const hasInitializedPageReset = useRef(false)
   const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
@@ -107,15 +106,17 @@ export function IngredientsPage() {
   )
   const filters = useListFilters(filterSections)
   const filterParams = filtersToApiParams(filters.values, filterSections) as Partial<IngredientsListParams>
+  const pageResetKey = `${activeSearch}::${JSON.stringify(filterParams)}`
+  const lastPageResetKeyRef = useRef(pageResetKey)
 
   useEffect(() => {
-    if (!hasInitializedPageReset.current) {
-      hasInitializedPageReset.current = true
+    if (lastPageResetKeyRef.current === pageResetKey) {
       return
     }
 
+    lastPageResetKeyRef.current = pageResetKey
     replacePaginationSearchParams(setSearchParams, { page: 1 })
-  }, [activeSearch, filters.values, setSearchParams])
+  }, [pageResetKey, setSearchParams])
 
   const ingredientsQuery = useIngredients({
     page,
