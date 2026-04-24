@@ -84,7 +84,7 @@ export function AppLayout() {
           </main>
 
           <div
-            className={`pointer-events-none hidden transition-all duration-200 lg:absolute lg:bottom-6 lg:right-6 lg:flex ${
+            className={`pointer-events-none hidden transition-all duration-200 lg:fixed lg:bottom-6 lg:right-6 lg:z-50 lg:flex ${
               showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
             }`}
           >
@@ -93,7 +93,7 @@ export function AppLayout() {
               size="sm"
               onClick={handleScrollToTop}
               aria-label="Volver arriba"
-              className="pointer-events-auto h-11 w-11 rounded-full px-0 shadow-lg shadow-black/15 sm:h-12 sm:w-auto sm:px-5"
+              className="pointer-events-auto h-11 w-11 rounded-full border border-black/10 bg-primary text-primary-foreground shadow-xl shadow-black/25 sm:h-12 sm:w-auto sm:px-5"
             >
               <ArrowUp className="h-4 w-4" />
               <span className="sr-only sm:not-sr-only sm:ml-2">Volver arriba</span>
