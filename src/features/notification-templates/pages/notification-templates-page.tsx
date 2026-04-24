@@ -1,6 +1,12 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { AlertTriangle, Plus, RefreshCcw, RotateCcw, Save, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  FilterToolbar,
+  type FilterOption,
+  type FilterSectionConfig,
+  useListFilters,
+} from '@/components/filters'
 import { useAuth } from '@/hooks/use-auth'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -99,6 +105,19 @@ const weekdayOptions = [
 ]
 
 const mealTimeLabels = ['Desayuno', 'Comida', 'Snack', 'Cena']
+const DELIVERY_TYPE_OPTIONS: FilterOption[] = [
+  { value: 'manual', label: 'Manual' },
+  { value: 'event', label: 'Por evento' },
+  { value: 'schedule', label: 'Programada' },
+]
+const TEMPLATE_ORIGIN_OPTIONS: FilterOption[] = [
+  { value: 'SYSTEM', label: 'Automática' },
+  { value: 'MANUAL', label: 'Manual' },
+]
+const TEMPLATE_STATE_OPTIONS: FilterOption[] = [
+  { value: 'ENABLED', label: 'Activa' },
+  { value: 'PAUSED', label: 'Pausada' },
+]
 
 function getScheduleDraft(template: NotificationTemplate): ScheduleDraft {
   const delivery = template.delivery_info
@@ -170,6 +189,14 @@ function getTemplateSearchText(template: NotificationTemplate) {
   ]
     .join(' ')
     .toLowerCase()
+}
+
+function getTemplateOrigin(template: NotificationTemplate) {
+  return template.is_system ? 'SYSTEM' : 'MANUAL'
+}
+
+function getTemplateState(template: NotificationTemplate) {
+  return template.enabled ? 'ENABLED' : 'PAUSED'
 }
 
 function TemplateVariables({ template }: { template: NotificationTemplate }) {
@@ -590,20 +617,96 @@ export function NotificationTemplatesPage() {
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [draft, setDraft] = useState<TemplateDraft>(emptyDraft)
+  const deferredSearch = useDeferredValue(search)
 
   const templates = templatesQuery.data ?? []
-  const selectedTemplate = templates.find((template) => template.key === selectedKey) ?? null
+  const activeSearch = deferredSearch.trim().toLowerCase()
+  const categoryOptions = useMemo<FilterOption[]>(
+    () =>
+      Array.from(new Set(templates.map((template) => template.category)))
+        .sort((left, right) => left.localeCompare(right, 'es', { sensitivity: 'base' }))
+        .map((category) => ({ value: category, label: category })),
+    [templates]
+  )
+  const filterSections = useMemo<FilterSectionConfig[]>(
+    () => [
+      {
+        type: 'multi',
+        key: 'category',
+        label: 'Categoría',
+        options: categoryOptions,
+        searchable: true,
+      },
+      {
+        type: 'multi',
+        key: 'delivery_type',
+        label: 'Entrega',
+        options: DELIVERY_TYPE_OPTIONS,
+      },
+      {
+        type: 'multi',
+        key: 'origin',
+        label: 'Origen',
+        options: TEMPLATE_ORIGIN_OPTIONS,
+      },
+      {
+        type: 'multi',
+        key: 'state',
+        label: 'Estado',
+        options: TEMPLATE_STATE_OPTIONS,
+      },
+    ],
+    [categoryOptions]
+  )
+  const filters = useListFilters(filterSections)
+  const selectedCategories = Array.isArray(filters.values.category) ? (filters.values.category as string[]) : []
+  const selectedDeliveryTypes = Array.isArray(filters.values.delivery_type)
+    ? (filters.values.delivery_type as string[])
+    : []
+  const selectedOrigins = Array.isArray(filters.values.origin) ? (filters.values.origin as string[]) : []
+  const selectedStates = Array.isArray(filters.values.state) ? (filters.values.state as string[]) : []
+
+  const filteredTemplates = useMemo(() => {
+    return templates.filter((template) => {
+      const matchesSearch = !activeSearch || getTemplateSearchText(template).includes(activeSearch)
+      const matchesCategory =
+        selectedCategories.length === 0 || selectedCategories.includes(template.category)
+      const matchesDeliveryType =
+        selectedDeliveryTypes.length === 0 ||
+        selectedDeliveryTypes.includes(template.delivery_info.type)
+      const matchesOrigin =
+        selectedOrigins.length === 0 || selectedOrigins.includes(getTemplateOrigin(template))
+      const matchesState =
+        selectedStates.length === 0 || selectedStates.includes(getTemplateState(template))
+
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesDeliveryType &&
+        matchesOrigin &&
+        matchesState
+      )
+    })
+  }, [
+    activeSearch,
+    selectedCategories,
+    selectedDeliveryTypes,
+    selectedOrigins,
+    selectedStates,
+    templates,
+  ])
+  const selectedTemplate = filteredTemplates.find((template) => template.key === selectedKey) ?? null
 
   useEffect(() => {
-    if (templates.length === 0) {
+    if (filteredTemplates.length === 0) {
       setSelectedKey('')
       return
     }
 
-    if (!selectedKey || !templates.some((template) => template.key === selectedKey)) {
-      setSelectedKey(templates[0].key)
+    if (!selectedKey || !filteredTemplates.some((template) => template.key === selectedKey)) {
+      setSelectedKey(filteredTemplates[0].key)
     }
-  }, [selectedKey, templates])
+  }, [filteredTemplates, selectedKey])
 
   useEffect(() => {
     if (!selectedTemplate) {
@@ -618,16 +721,6 @@ export function NotificationTemplatesPage() {
       enabled: selectedTemplate.enabled,
     })
   }, [selectedTemplate])
-
-  const filteredTemplates = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase()
-
-    if (!normalizedSearch) {
-      return templates
-    }
-
-    return templates.filter((template) => getTemplateSearchText(template).includes(normalizedSearch))
-  }, [search, templates])
 
   const categoryCounts = useMemo(() => {
     return templates.reduce<Record<string, number>>((acc, template) => {
@@ -784,15 +877,18 @@ export function NotificationTemplatesPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Plantillas</CardTitle>
-              <CardDescription>{templates.length} configurables</CardDescription>
+              <CardDescription>
+                {filteredTemplates.length} visibles de {templates.length}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="template-search">Buscar</Label>
-                <Input
-                  id="template-search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                <FilterToolbar
+                onSearchChange={setSearch}
+                searchPlaceholder="Nombre, categoría o texto"
+                sections={filterSections}
+                filters={filters}
+                search={search}
                   placeholder="Nombre, categoría o texto"
                 />
               </div>
