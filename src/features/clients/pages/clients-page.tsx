@@ -1,11 +1,24 @@
-import { useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, ChevronLeft, ChevronRight, Plus, Users } from 'lucide-react'
+import {
+  FilterToolbar,
+  filtersToApiParams,
+  type FilterOption,
+  type FilterSectionConfig,
+  useListFilters,
+} from '@/components/filters'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/hooks/use-auth'
-import { getApiErrorMessage, useAllUsers, useClients } from '../api'
+import {
+  getApiErrorMessage,
+  type ClientsListParams,
+  type UsersListParams,
+  useAllUsers,
+  useClients,
+} from '../api'
 import { AdminsTable } from '../components/admins-table'
 import { ChangeRoleDialog } from '../components/change-role-dialog'
 import { ClientsTable } from '../components/clients-table'
@@ -18,6 +31,20 @@ import { UnlockDialog } from '../components/unlock-dialog'
 import type { AdminUserListItem, Client } from '../types'
 
 const PAGE_SIZE = 10
+const USER_STATUS_OPTIONS: FilterOption[] = [
+  { value: 'ACTIVE', label: 'Activa' },
+  { value: 'LOCKED', label: 'Bloqueada' },
+  { value: 'INACTIVE', label: 'Inactiva' },
+]
+const CLIENT_LEVEL_OPTIONS: FilterOption[] = [
+  { value: 'PRINCIPIANTE', label: 'Principiante' },
+  { value: 'INTERMEDIO', label: 'Intermedio' },
+  { value: 'AVANZADO', label: 'Avanzado' },
+]
+const ASSIGNMENT_STATE_OPTIONS: FilterOption[] = [
+  { value: 'ASSIGNED', label: 'Con admins' },
+  { value: 'UNASSIGNED', label: 'Sin admins' },
+]
 
 function ClientsTableSkeleton() {
   return (
@@ -104,6 +131,9 @@ export function ClientsPage() {
   const [clientPage, setClientPage] = useState(1)
   const [adminPage, setAdminPage] = useState(1)
   const [superAdminPage, setSuperAdminPage] = useState(1)
+  const [clientSearch, setClientSearch] = useState('')
+  const [adminSearch, setAdminSearch] = useState('')
+  const [superAdminSearch, setSuperAdminSearch] = useState('')
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [createAdminDialogOpen, setCreateAdminDialogOpen] = useState(false)
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false)
@@ -113,10 +143,108 @@ export function ClientsPage() {
   const [manageAssignmentsDialogOpen, setManageAssignmentsDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<ManageableUser | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const deferredClientSearch = useDeferredValue(clientSearch)
+  const deferredAdminSearch = useDeferredValue(adminSearch)
+  const deferredSuperAdminSearch = useDeferredValue(superAdminSearch)
+  const activeClientSearch = deferredClientSearch.trim()
+  const activeAdminSearch = deferredAdminSearch.trim()
+  const activeSuperAdminSearch = deferredSuperAdminSearch.trim()
+  const clientSections = useMemo<FilterSectionConfig[]>(
+    () => [
+      {
+        type: 'multi',
+        key: 'status',
+        label: 'Estado',
+        options: USER_STATUS_OPTIONS,
+      },
+      {
+        type: 'multi',
+        key: 'level',
+        label: 'Nivel',
+        options: CLIENT_LEVEL_OPTIONS,
+      },
+      ...(isSuperAdmin
+        ? [
+            {
+              type: 'multi',
+              key: 'assignment_state',
+              label: 'Asignación',
+              options: ASSIGNMENT_STATE_OPTIONS,
+            } satisfies FilterSectionConfig,
+          ]
+        : []),
+      {
+        type: 'date-range',
+        key: 'created',
+        label: 'Fecha registro',
+      },
+    ],
+    [isSuperAdmin]
+  )
+  const userSections = useMemo<FilterSectionConfig[]>(
+    () => [
+      {
+        type: 'multi',
+        key: 'status',
+        label: 'Estado',
+        options: USER_STATUS_OPTIONS,
+      },
+      {
+        type: 'date-range',
+        key: 'created',
+        label: 'Fecha registro',
+      },
+    ],
+    []
+  )
+  const clientFilters = useListFilters(clientSections)
+  const adminFilters = useListFilters(userSections)
+  const superAdminFilters = useListFilters(userSections)
+  const clientFilterParams = filtersToApiParams(clientFilters.values, clientSections) as Partial<ClientsListParams>
+  const adminFilterParams = filtersToApiParams(adminFilters.values, userSections) as Partial<UsersListParams>
+  const superAdminFilterParams = filtersToApiParams(
+    superAdminFilters.values,
+    userSections
+  ) as Partial<UsersListParams>
 
-  const clientsQuery = useClients(clientPage, PAGE_SIZE)
-  const adminsQuery = useAllUsers('ADMIN', adminPage, PAGE_SIZE, isSuperAdmin && activeTab === 'admins')
-  const superAdminsQuery = useAllUsers('SUPER_ADMIN', superAdminPage, PAGE_SIZE, isSuperAdmin && activeTab === 'super-admins')
+  useEffect(() => {
+    setClientPage(1)
+  }, [activeClientSearch, clientFilters.values])
+
+  useEffect(() => {
+    setAdminPage(1)
+  }, [activeAdminSearch, adminFilters.values])
+
+  useEffect(() => {
+    setSuperAdminPage(1)
+  }, [activeSuperAdminSearch, superAdminFilters.values])
+
+  const clientsQuery = useClients({
+    page: clientPage,
+    limit: PAGE_SIZE,
+    search: activeClientSearch,
+    ...clientFilterParams,
+  })
+  const adminsQuery = useAllUsers(
+    {
+      role: 'ADMIN',
+      page: adminPage,
+      limit: PAGE_SIZE,
+      search: activeAdminSearch,
+      ...adminFilterParams,
+    },
+    isSuperAdmin && activeTab === 'admins'
+  )
+  const superAdminsQuery = useAllUsers(
+    {
+      role: 'SUPER_ADMIN',
+      page: superAdminPage,
+      limit: PAGE_SIZE,
+      search: activeSuperAdminSearch,
+      ...superAdminFilterParams,
+    },
+    isSuperAdmin && activeTab === 'super-admins'
+  )
 
   const clients = clientsQuery.data?.data ?? []
   const totalClients = clientsQuery.data?.total ?? 0
@@ -144,9 +272,9 @@ export function ClientsPage() {
         ? totalSuperAdmins > 0
           ? `${totalSuperAdmins} super admins registrados`
           : 'Todavía no hay super admins registrados'
-      : totalClients > 0
-        ? `${totalClients} clientes registrados`
-        : 'Todavía no hay clientes registrados'
+        : totalClients > 0
+          ? `${totalClients} clientes registrados`
+          : 'Todavía no hay clientes registrados'
     : totalClients > 0
       ? `${totalClients} clientes asignados a tu cuenta`
       : 'Todavía no hay clientes asignados a tu cuenta'
@@ -184,6 +312,7 @@ export function ClientsPage() {
     const tableDescription = isSuperAdmin
       ? 'Vista paginada de clientes con reasignación, desbloqueo, cambio de rol y alta/baja de cuenta.'
       : 'Vista paginada de clientes asignados al admin actual.'
+    const hasClientQuery = activeClientSearch.length > 0 || clientFilters.activeCount > 0
 
     if (clientsQuery.isLoading) {
       return <ClientsTableSkeleton />
@@ -208,7 +337,7 @@ export function ClientsPage() {
       )
     }
 
-    if (clients.length === 0) {
+    if (clients.length === 0 && !hasClientQuery) {
       return (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
@@ -235,14 +364,28 @@ export function ClientsPage() {
           <CardDescription>{tableDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <ClientsTable
-            clients={clients}
-            currentUserRole={currentUserRole}
-            onUnlock={handleUnlock}
-            onChangeRole={handleChangeRole}
-            onManageAssignments={handleManageAssignments}
-            onToggleStatus={handleToggleStatus}
+          <FilterToolbar
+            search={clientSearch}
+            onSearchChange={setClientSearch}
+            searchPlaceholder="Buscar por nombre o email..."
+            sections={clientSections}
+            filters={clientFilters}
           />
+
+          {clients.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              No se encontraron clientes con la búsqueda y filtros actuales.
+            </p>
+          ) : (
+            <ClientsTable
+              clients={clients}
+              currentUserRole={currentUserRole}
+              onUnlock={handleUnlock}
+              onChangeRole={handleChangeRole}
+              onManageAssignments={handleManageAssignments}
+              onToggleStatus={handleToggleStatus}
+            />
+          )}
 
           <PaginationBar
             page={clientPage}
@@ -256,6 +399,8 @@ export function ClientsPage() {
   }
 
   const renderAdminsPanel = () => {
+    const hasAdminQuery = activeAdminSearch.length > 0 || adminFilters.activeCount > 0
+
     if (adminsQuery.isLoading) {
       return <AdminsTableSkeleton />
     }
@@ -279,7 +424,7 @@ export function ClientsPage() {
       )
     }
 
-    if (admins.length === 0) {
+    if (admins.length === 0 && !hasAdminQuery) {
       return (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
@@ -310,14 +455,28 @@ export function ClientsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <AdminsTable
-            admins={admins}
-            currentUserId={currentUserId}
-            onEdit={handleEditUser}
-            onUnlock={handleUnlock}
-            onChangeRole={handleChangeRole}
-            onToggleStatus={handleToggleStatus}
+          <FilterToolbar
+            search={adminSearch}
+            onSearchChange={setAdminSearch}
+            searchPlaceholder="Buscar por nombre o email..."
+            sections={userSections}
+            filters={adminFilters}
           />
+
+          {admins.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              No se encontraron admins con la búsqueda y filtros actuales.
+            </p>
+          ) : (
+            <AdminsTable
+              admins={admins}
+              currentUserId={currentUserId}
+              onEdit={handleEditUser}
+              onUnlock={handleUnlock}
+              onChangeRole={handleChangeRole}
+              onToggleStatus={handleToggleStatus}
+            />
+          )}
 
           <PaginationBar
             page={adminPage}
@@ -331,6 +490,9 @@ export function ClientsPage() {
   }
 
   const renderSuperAdminsPanel = () => {
+    const hasSuperAdminQuery =
+      activeSuperAdminSearch.length > 0 || superAdminFilters.activeCount > 0
+
     if (superAdminsQuery.isLoading) {
       return <AdminsTableSkeleton />
     }
@@ -343,7 +505,9 @@ export function ClientsPage() {
               <AlertTriangle className="h-8 w-8" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">No se ha podido cargar el listado de super admins</h2>
+              <h2 className="text-2xl font-semibold text-foreground">
+                No se ha podido cargar el listado de super admins
+              </h2>
               <p className="max-w-xl text-sm text-muted-foreground">
                 {getApiErrorMessage(superAdminsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
               </p>
@@ -354,7 +518,7 @@ export function ClientsPage() {
       )
     }
 
-    if (superAdmins.length === 0) {
+    if (superAdmins.length === 0 && !hasSuperAdminQuery) {
       return (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
@@ -385,14 +549,28 @@ export function ClientsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <AdminsTable
-            admins={superAdmins}
-            currentUserId={currentUserId}
-            onEdit={handleEditUser}
-            onUnlock={handleUnlock}
-            onChangeRole={handleChangeRole}
-            onToggleStatus={handleToggleStatus}
+          <FilterToolbar
+            search={superAdminSearch}
+            onSearchChange={setSuperAdminSearch}
+            searchPlaceholder="Buscar por nombre o email..."
+            sections={userSections}
+            filters={superAdminFilters}
           />
+
+          {superAdmins.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              No se encontraron super admins con la búsqueda y filtros actuales.
+            </p>
+          ) : (
+            <AdminsTable
+              admins={superAdmins}
+              currentUserId={currentUserId}
+              onEdit={handleEditUser}
+              onUnlock={handleUnlock}
+              onChangeRole={handleChangeRole}
+              onToggleStatus={handleToggleStatus}
+            />
+          )}
 
           <PaginationBar
             page={superAdminPage}

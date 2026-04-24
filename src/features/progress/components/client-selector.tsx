@@ -33,7 +33,7 @@ function getInitials(name: string) {
 
 export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorProps) {
   const [open, setOpen] = useState(false)
-  const { data, isLoading } = useClients(1, ALL_CLIENTS_LIMIT)
+  const { data, isLoading } = useClients({ page: 1, limit: ALL_CLIENTS_LIMIT })
 
   const clients = data?.data ?? []
   const selected = clients.find((c) => c.id === selectedClientId)

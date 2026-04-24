@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { invalidateAdminQueries } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, getApiErrorMessage, getApiErrorStatus, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
@@ -41,7 +41,18 @@ interface UpdateUserStatusPayload {
 
 export const clientsQueryKeys = {
   all: ['clients'] as const,
-  list: (page: number, limit: number) => ['clients', page, limit] as const,
+  list: (params: ClientsListParams) =>
+    [
+      'clients',
+      params.page,
+      params.limit,
+      params.search ?? '',
+      params.level ?? [],
+      params.status ?? [],
+      params.assignment_state ?? [],
+      params.created_from ?? null,
+      params.created_to ?? null,
+    ] as const,
   detail: (id?: string) => ['clients', id] as const,
 }
 
@@ -52,11 +63,42 @@ const clientAssignmentsQueryKeys = {
 
 const usersQueryKeys = {
   all: ['users'] as const,
-  list: (role: Role | undefined, page: number, limit: number) => ['users', role, page, limit] as const,
+  list: (params: UsersListParams) =>
+    [
+      'users',
+      params.role,
+      params.page,
+      params.limit,
+      params.search ?? '',
+      params.status ?? [],
+      params.created_from ?? null,
+      params.created_to ?? null,
+    ] as const,
   admins: ['users', 'ADMIN', 'all'] as const,
 }
 
 const ALL_ADMINS_PAGE_SIZE = 100
+
+export interface ClientsListParams {
+  page: number
+  limit: number
+  search?: string
+  level?: string[]
+  status?: string[]
+  assignment_state?: string[]
+  created_from?: string
+  created_to?: string
+}
+
+export interface UsersListParams {
+  role?: Role
+  page: number
+  limit: number
+  search?: string
+  status?: string[]
+  created_from?: string
+  created_to?: string
+}
 
 function normalizeCreateClientPayload(payload: CreateClientFormValues) {
   return {
@@ -86,13 +128,42 @@ function normalizeUpdateUserPayload(payload: UpdateUserFormValues) {
   }
 }
 
-export function useClients(page: number, limit: number) {
+function normalizeSearch(search?: string) {
+  const trimmed = search?.trim() ?? ''
+  return trimmed.length > 0 ? trimmed : ''
+}
+
+export function useClients(params: ClientsListParams) {
+  const normalizedSearch = normalizeSearch(params.search)
+  const normalizedLevel = params.level ?? []
+  const normalizedStatus = params.status ?? []
+  const normalizedAssignmentState = params.assignment_state ?? []
+
   return useQuery({
-    queryKey: clientsQueryKeys.list(page, limit),
+    queryKey: clientsQueryKeys.list({
+      ...params,
+      search: normalizedSearch,
+      level: normalizedLevel,
+      status: normalizedStatus,
+      assignment_state: normalizedAssignmentState,
+    }),
+    placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedResponse<Client>>>('/admin/clients', {
-        params: { page, limit },
+        params: {
+          page: params.page,
+          limit: params.limit,
+          ...(normalizedSearch ? { search: normalizedSearch } : {}),
+          ...(normalizedLevel.length > 0 ? { level: normalizedLevel } : {}),
+          ...(normalizedStatus.length > 0 ? { status: normalizedStatus } : {}),
+          ...(normalizedAssignmentState.length > 0
+            ? { assignment_state: normalizedAssignmentState }
+            : {}),
+          ...(params.created_from ? { created_from: params.created_from } : {}),
+          ...(params.created_to ? { created_to: params.created_to } : {}),
+        },
+        paramsSerializer: { indexes: null },
       })
 
       return unwrapResponse(response)
@@ -132,14 +203,31 @@ export function useClientAssignments(clientId?: string, enabled = true) {
   })
 }
 
-export function useAllUsers(role?: Role, page = 1, limit = 20, enabled = true) {
+export function useAllUsers(params: UsersListParams, enabled = true) {
+  const normalizedSearch = normalizeSearch(params.search)
+  const normalizedStatus = params.status ?? []
+
   return useQuery({
-    queryKey: usersQueryKeys.list(role, page, limit),
+    queryKey: usersQueryKeys.list({
+      ...params,
+      search: normalizedSearch,
+      status: normalizedStatus,
+    }),
     enabled,
+    placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedResponse<AdminUserListItem>>>('/admin/users', {
-        params: { role, page, limit },
+        params: {
+          role: params.role,
+          page: params.page,
+          limit: params.limit,
+          ...(normalizedSearch ? { search: normalizedSearch } : {}),
+          ...(normalizedStatus.length > 0 ? { status: normalizedStatus } : {}),
+          ...(params.created_from ? { created_from: params.created_from } : {}),
+          ...(params.created_to ? { created_to: params.created_to } : {}),
+        },
+        paramsSerializer: { indexes: null },
       })
 
       return unwrapResponse(response)

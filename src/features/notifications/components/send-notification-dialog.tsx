@@ -288,7 +288,7 @@ interface SendNotificationDialogProps {
 export function SendNotificationDialog({ open, onOpenChange }: SendNotificationDialogProps) {
   const sendNotification = useSendNotification()
   const sendToAllClients = useSendToAllClients()
-  const clientsQuery = useClients(1, ALL_CLIENTS_LIMIT)
+  const clientsQuery = useClients({ page: 1, limit: ALL_CLIENTS_LIMIT })
   const templatesQuery = useNotificationTemplates(open)
 
   const form = useForm<SendNotificationFormValues>({
