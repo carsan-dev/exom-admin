@@ -1,18 +1,28 @@
-import { useDeferredValue, useEffect, useState } from 'react'
-import { AlertTriangle, Apple, ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, Apple, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import {
+  FilterToolbar,
+  filtersToApiParams,
+  type FilterOption,
+  type FilterSectionConfig,
+  useListFilters,
+} from '@/components/filters'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
-import { getApiErrorMessage, useIngredients } from '../api'
+import { getApiErrorMessage, type IngredientsListParams, useIngredients } from '../api'
 import { DeleteIngredientDialog } from '../components/delete-ingredient-dialog'
 import { IngredientFormDialog } from '../components/ingredient-form-dialog'
 import { IngredientsTable } from '../components/ingredients-table'
 import type { Ingredient } from '../types'
 
 const PAGE_SIZE = 10
+const ICON_STATE_OPTIONS: FilterOption[] = [
+  { value: 'WITH_ICON', label: 'Con icono' },
+  { value: 'WITHOUT_ICON', label: 'Sin icono' },
+]
 
 function IngredientsTableSkeleton() {
   return (
@@ -39,18 +49,74 @@ export function IngredientsPage() {
   const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null)
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
+  const filterSections = useMemo<FilterSectionConfig[]>(
+    () => [
+      {
+        type: 'multi',
+        key: 'has_icon',
+        label: 'Icono',
+        options: ICON_STATE_OPTIONS,
+      },
+      {
+        type: 'range',
+        key: 'calories_per_100g',
+        label: 'Calorías',
+        min: 0,
+        max: 900,
+        step: 5,
+        unit: 'kcal',
+      },
+      {
+        type: 'range',
+        key: 'protein_per_100g',
+        label: 'Proteína',
+        min: 0,
+        max: 100,
+        unit: 'g',
+      },
+      {
+        type: 'range',
+        key: 'carbs_per_100g',
+        label: 'Carbohidratos',
+        min: 0,
+        max: 100,
+        unit: 'g',
+      },
+      {
+        type: 'range',
+        key: 'fat_per_100g',
+        label: 'Grasas',
+        min: 0,
+        max: 100,
+        unit: 'g',
+      },
+      {
+        type: 'date-range',
+        key: 'updated',
+        label: 'Última edición',
+      },
+    ],
+    []
+  )
+  const filters = useListFilters(filterSections)
+  const filterParams = filtersToApiParams(filters.values, filterSections) as Partial<IngredientsListParams>
 
   useEffect(() => {
     setPage(1)
-  }, [activeSearch])
+  }, [activeSearch, filters.values])
 
-  const ingredientsQuery = useIngredients(page, PAGE_SIZE, activeSearch)
+  const ingredientsQuery = useIngredients({
+    page,
+    limit: PAGE_SIZE,
+    search: activeSearch,
+    ...filterParams,
+  })
   const ingredients = ingredientsQuery.data?.data ?? []
   const ingredientApprovalQuery = useResourceApprovalBatch('ingredient', ingredients.map((ingredient) => ingredient.id))
   const ingredientApprovalById = buildResourceApprovalMap(ingredientApprovalQuery.data ?? [])
   const total = ingredientsQuery.data?.total ?? 0
   const totalPages = Math.max(1, ingredientsQuery.data?.totalPages ?? 1)
-  const isSearching = activeSearch.length > 0
+  const hasActiveQuery = activeSearch.length > 0 || filters.activeCount > 0
 
   const handleCreate = () => {
     setEditingIngredient(null)
@@ -106,7 +172,7 @@ export function IngredientsPage() {
             <Button onClick={() => ingredientsQuery.refetch()}>Reintentar</Button>
           </CardContent>
         </Card>
-      ) : total === 0 && !isSearching ? (
+      ) : total === 0 && !hasActiveQuery ? (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
             <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
@@ -129,23 +195,21 @@ export function IngredientsPage() {
           <CardHeader>
             <CardTitle className="text-xl">Listado de ingredientes</CardTitle>
             <CardDescription>
-              Vista paginada del catálogo con búsqueda por nombre y acciones de administración.
+              Vista paginada del catálogo con búsqueda, filtros de macros y acciones de administración.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nombre..."
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                className="pl-9"
-              />
-            </div>
+          <CardContent className="space-y-6">
+            <FilterToolbar
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Buscar por nombre..."
+              sections={filterSections}
+              filters={filters}
+            />
 
             {ingredients.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No se encontraron ingredientes con "{activeSearch}"
+                No se encontraron ingredientes con la búsqueda y filtros actuales.
               </p>
             ) : (
               <IngredientsTable
