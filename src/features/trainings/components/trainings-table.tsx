@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils'
 import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
 import {
   getTrainingTypeBadgeClass,
-  TRAINING_TYPE_LABELS,
+  getTrainingTypeLabel,
   type Training,
 } from '../types'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
@@ -68,7 +68,7 @@ export function TrainingsTable({ trainings, approvalById = {}, onView, onEdit, o
                 variant="outline"
                 className={cn('font-medium', getTrainingTypeBadgeClass(training.type))}
               >
-                {TRAINING_TYPE_LABELS[training.type]}
+                {getTrainingTypeLabel(training.type)}
               </Badge>
             </TableCell>
 

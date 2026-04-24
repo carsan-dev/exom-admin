@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { LEVEL_LABELS } from '../../clients/types'
-import { TRAINING_TYPE_LABELS } from '../../trainings/types'
+import { getTrainingTypeLabel } from '../../trainings/types'
 import type { AssignmentPreview } from '../types'
 
 interface AssignmentPreviewDialogProps {
@@ -117,7 +117,7 @@ export function AssignmentPreviewDialog({
 
                       <div className="mt-4 flex flex-wrap gap-2">
                         <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-status-info">
-                          {TRAINING_TYPE_LABELS[day.training.type]}
+                          {getTrainingTypeLabel(day.training.type)}
                         </Badge>
                         <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
                           {LEVEL_LABELS[day.training.level]}

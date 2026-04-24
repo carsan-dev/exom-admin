@@ -21,13 +21,14 @@ import {
   getApiErrorMessage,
   type TrainingsListParams,
   useTrainingTags,
+  useTrainingTypes,
   useTrainings,
 } from '../api'
 import { DeleteTrainingDialog } from '../components/delete-training-dialog'
 import { TrainingDetailDialog } from '../components/training-detail-dialog'
 import { TrainingFormDialog } from '../components/training-form-dialog'
 import { TrainingsTable } from '../components/trainings-table'
-import type { Training } from '../types'
+import { getTrainingTypeLabel, type Training } from '../types'
 
 const PAGE_SIZE = 10
 const LEVEL_OPTIONS: FilterOption[] = [
@@ -35,15 +36,9 @@ const LEVEL_OPTIONS: FilterOption[] = [
   { value: 'INTERMEDIO', label: 'Intermedio' },
   { value: 'AVANZADO', label: 'Avanzado' },
 ]
-const TRAINING_TYPE_OPTIONS: FilterOption[] = [
-  { value: 'FUERZA', label: 'Fuerza' },
-  { value: 'CARDIO', label: 'Cardio' },
-  { value: 'HIIT', label: 'HIIT' },
-  { value: 'FLEXIBILIDAD', label: 'Flexibilidad' },
-]
 
-function toFilterOptions(values?: string[]): FilterOption[] {
-  return values?.map((value) => ({ value, label: value })) ?? []
+function toFilterOptions(values: string[] | undefined, getLabel?: (value: string) => string): FilterOption[] {
+  return values?.map((value) => ({ value, label: getLabel ? getLabel(value) : value })) ?? []
 }
 
 function TrainingsTableSkeleton() {
@@ -75,13 +70,15 @@ export function TrainingsPage() {
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
   const tagsQuery = useTrainingTags()
+  const trainingTypesQuery = useTrainingTypes()
   const sections = useMemo<FilterSectionConfig[]>(
     () => [
       {
         type: 'multi',
         key: 'type',
         label: 'Tipo',
-        options: TRAINING_TYPE_OPTIONS,
+        options: toFilterOptions(trainingTypesQuery.data, getTrainingTypeLabel),
+        isLoading: trainingTypesQuery.isLoading,
       },
       {
         type: 'multi',
@@ -106,7 +103,7 @@ export function TrainingsPage() {
         unit: 'min',
       },
     ],
-    [tagsQuery.data, tagsQuery.isLoading]
+    [tagsQuery.data, tagsQuery.isLoading, trainingTypesQuery.data, trainingTypesQuery.isLoading]
   )
   const filters = useListFilters(sections)
   const trainingFilterParams = filtersToApiParams(filters.values, sections) as Partial<TrainingsListParams>

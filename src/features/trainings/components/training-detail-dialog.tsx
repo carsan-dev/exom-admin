@@ -10,7 +10,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
-import { getTrainingTypeBadgeClass, TRAINING_TYPE_LABELS, type Training } from '../types'
+import { getTrainingTypeBadgeClass, getTrainingTypeLabel, type Training } from '../types'
 
 interface TrainingDetailDialogProps {
   training: Training | null
@@ -45,7 +45,7 @@ export function TrainingDetailDialog({
               variant="outline"
               className={cn('font-medium', getTrainingTypeBadgeClass(training.type))}
             >
-              {TRAINING_TYPE_LABELS[training.type]}
+              {getTrainingTypeLabel(training.type)}
             </Badge>
             <Badge
               variant="outline"
