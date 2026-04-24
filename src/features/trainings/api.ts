@@ -248,6 +248,25 @@ export function useRenameTrainingTag() {
   })
 }
 
+export function useRenameTrainingType() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (values: RenameCatalogValuePayload) => {
+      const response = await api.patch<ApiEnvelope<CatalogMutationResponse>>(
+        '/trainings/types/rename',
+        values
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+      })
+    },
+  })
+}
+
 export function useDeleteTrainingTag() {
   const queryClient = useQueryClient()
 

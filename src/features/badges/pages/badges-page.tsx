@@ -45,7 +45,9 @@ import {
 } from '@/features/exercises/api'
 import {
   useDeleteTrainingTag,
+  useRenameTrainingType,
   useRenameTrainingTag,
+  useTrainingTypes,
   useTrainingTags,
 } from '@/features/trainings/api'
 import {
@@ -56,7 +58,12 @@ import {
 
 const PAGE_SIZE = 10
 
-type CatalogId = 'muscle-groups' | 'equipment' | 'training-tags' | 'diet-badges'
+type CatalogId =
+  | 'muscle-groups'
+  | 'equipment'
+  | 'training-types'
+  | 'training-tags'
+  | 'diet-badges'
 
 interface CatalogItem {
   catalogId: CatalogId
@@ -68,6 +75,7 @@ interface CatalogView {
   title: string
   description: string
   badgeLabel: string
+  canDelete: boolean
   values: string[]
   isLoading: boolean
   isError: boolean
@@ -174,7 +182,7 @@ function CatalogTable({
             <Tags className="h-8 w-8 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
               {catalog.values.length === 0
-                ? 'Sin badges guardados.'
+                ? 'Sin valores guardados.'
                 : `Sin resultados para "${search}".`}
             </p>
           </div>
@@ -183,7 +191,7 @@ function CatalogTable({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Badge</TableHead>
+                  <TableHead>Valor</TableHead>
                   <TableHead className="hidden w-48 sm:table-cell">Origen</TableHead>
                   <TableHead className="w-28 text-right">Acciones</TableHead>
                 </TableRow>
@@ -218,21 +226,23 @@ function CatalogTable({
                           </TooltipTrigger>
                           <TooltipContent>Editar</TooltipContent>
                         </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              aria-label={`Borrar ${value}`}
-                              className="text-status-error hover:text-status-error"
-                              onClick={() => onDelete({ catalogId: catalog.id, value })}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Borrar</TooltipContent>
-                        </Tooltip>
+                        {catalog.canDelete ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                aria-label={`Borrar ${value}`}
+                                className="text-status-error hover:text-status-error"
+                                onClick={() => onDelete({ catalogId: catalog.id, value })}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Borrar</TooltipContent>
+                          </Tooltip>
+                        ) : null}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -284,6 +294,7 @@ export function BadgesPage() {
 
   const muscleGroupsQuery = useExerciseMuscleGroups()
   const equipmentQuery = useExerciseEquipment()
+  const trainingTypesQuery = useTrainingTypes()
   const trainingTagsQuery = useTrainingTags()
   const dietBadgesQuery = useDietNutritionalBadges()
 
@@ -291,6 +302,7 @@ export function BadgesPage() {
   const deleteMuscleGroup = useDeleteExerciseMuscleGroup()
   const renameEquipment = useRenameExerciseEquipment()
   const deleteEquipment = useDeleteExerciseEquipment()
+  const renameTrainingType = useRenameTrainingType()
   const renameTrainingTag = useRenameTrainingTag()
   const deleteTrainingTag = useDeleteTrainingTag()
   const renameDietBadge = useRenameDietNutritionalBadge()
@@ -303,6 +315,7 @@ export function BadgesPage() {
         title: 'Grupos musculares',
         description: 'Badges usados en ejercicios.',
         badgeLabel: 'Ejercicios',
+        canDelete: true,
         values: muscleGroupsQuery.data ?? [],
         isLoading: muscleGroupsQuery.isLoading,
         isError: muscleGroupsQuery.isError,
@@ -314,17 +327,32 @@ export function BadgesPage() {
         title: 'Equipamiento',
         description: 'Badges de material usados en ejercicios.',
         badgeLabel: 'Ejercicios',
+        canDelete: true,
         values: equipmentQuery.data ?? [],
         isLoading: equipmentQuery.isLoading,
         isError: equipmentQuery.isError,
         error: equipmentQuery.error,
         refetch: () => void equipmentQuery.refetch(),
       },
+      'training-types': {
+        id: 'training-types',
+        title: 'Tipos de entrenamientos',
+        description:
+          'Valores reutilizables en entrenamientos y en reglas de logros por tipo.',
+        badgeLabel: 'Entrenamientos',
+        canDelete: false,
+        values: trainingTypesQuery.data ?? [],
+        isLoading: trainingTypesQuery.isLoading,
+        isError: trainingTypesQuery.isError,
+        error: trainingTypesQuery.error,
+        refetch: () => void trainingTypesQuery.refetch(),
+      },
       'training-tags': {
         id: 'training-tags',
         title: 'Tags de entrenamientos',
         description: 'Badges usados en entrenamientos.',
         badgeLabel: 'Entrenamientos',
+        canDelete: true,
         values: trainingTagsQuery.data ?? [],
         isLoading: trainingTagsQuery.isLoading,
         isError: trainingTagsQuery.isError,
@@ -336,6 +364,7 @@ export function BadgesPage() {
         title: 'Badges nutricionales',
         description: 'Badges usados en comidas de dietas.',
         badgeLabel: 'Dietas',
+        canDelete: true,
         values: dietBadgesQuery.data ?? [],
         isLoading: dietBadgesQuery.isLoading,
         isError: dietBadgesQuery.isError,
@@ -359,6 +388,11 @@ export function BadgesPage() {
       muscleGroupsQuery.isError,
       muscleGroupsQuery.isLoading,
       muscleGroupsQuery.refetch,
+      trainingTypesQuery.data,
+      trainingTypesQuery.error,
+      trainingTypesQuery.isError,
+      trainingTypesQuery.isLoading,
+      trainingTypesQuery.refetch,
       trainingTagsQuery.data,
       trainingTagsQuery.error,
       trainingTagsQuery.isError,
@@ -371,6 +405,7 @@ export function BadgesPage() {
   const isRenamePending =
     renameMuscleGroup.isPending ||
     renameEquipment.isPending ||
+    renameTrainingType.isPending ||
     renameTrainingTag.isPending ||
     renameDietBadge.isPending
   const isDeletePending =
@@ -410,6 +445,8 @@ export function BadgesPage() {
           ? await renameMuscleGroup.mutateAsync({ from: editingItem.value, to: nextValue })
           : editingItem.catalogId === 'equipment'
             ? await renameEquipment.mutateAsync({ from: editingItem.value, to: nextValue })
+            : editingItem.catalogId === 'training-types'
+              ? await renameTrainingType.mutateAsync({ from: editingItem.value, to: nextValue })
             : editingItem.catalogId === 'training-tags'
               ? await renameTrainingTag.mutateAsync({ from: editingItem.value, to: nextValue })
               : await renameDietBadge.mutateAsync({ from: editingItem.value, to: nextValue })
@@ -419,7 +456,7 @@ export function BadgesPage() {
       )
       setEditingItem(null)
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'No se ha podido renombrar el badge'))
+      toast.error(getApiErrorMessage(error, 'No se ha podido renombrar el valor'))
     }
   }
 
@@ -432,14 +469,20 @@ export function BadgesPage() {
           ? await deleteMuscleGroup.mutateAsync(deletingItem.value)
           : deletingItem.catalogId === 'equipment'
             ? await deleteEquipment.mutateAsync(deletingItem.value)
+            : deletingItem.catalogId === 'training-types'
+              ? null
             : deletingItem.catalogId === 'training-tags'
               ? await deleteTrainingTag.mutateAsync(deletingItem.value)
               : await deleteDietBadge.mutateAsync(deletingItem.value)
 
+      if (!result) {
+        return
+      }
+
       toast.success(`"${result.value}" borrado. ${formatAffectedRecords(result.affected_count)}.`)
       setDeletingItem(null)
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'No se ha podido borrar el badge'))
+      toast.error(getApiErrorMessage(error, 'No se ha podido borrar el valor'))
     }
   }
 
@@ -460,7 +503,7 @@ export function BadgesPage() {
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">Badges</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Gestiona grupos musculares, equipamiento, tags de entrenamientos y badges
+              Gestiona grupos musculares, equipamiento, tipos y tags de entrenamientos y badges
               nutricionales.
             </p>
           </div>
@@ -469,12 +512,15 @@ export function BadgesPage() {
 
       <Tabs value={activeCatalog} onValueChange={(value) => setActiveCatalog(value as CatalogId)}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <TabsList className="grid h-auto w-full grid-cols-1 gap-1 sm:grid-cols-4 lg:w-auto">
+          <TabsList className="grid h-auto w-full grid-cols-1 gap-1 sm:grid-cols-5 lg:w-auto">
             <TabsTrigger value="muscle-groups" className="min-h-10 whitespace-normal">
               Grupos musculares
             </TabsTrigger>
             <TabsTrigger value="equipment" className="min-h-10 whitespace-normal">
               Equipamiento
+            </TabsTrigger>
+            <TabsTrigger value="training-types" className="min-h-10 whitespace-normal">
+              Tipos entrenos
             </TabsTrigger>
             <TabsTrigger value="training-tags" className="min-h-10 whitespace-normal">
               Tags entrenos
@@ -515,6 +561,16 @@ export function BadgesPage() {
             onDelete={setDeletingItem}
           />
         </TabsContent>
+        <TabsContent value="training-types" className="mt-4">
+          <CatalogTable
+            catalog={catalogs['training-types']}
+            search={activeSearch}
+            page={page}
+            onPageChange={setPage}
+            onEdit={setEditingItem}
+            onDelete={setDeletingItem}
+          />
+        </TabsContent>
         <TabsContent value="training-tags" className="mt-4">
           <CatalogTable
             catalog={catalogs['training-tags']}
@@ -540,7 +596,7 @@ export function BadgesPage() {
       <Dialog open={Boolean(editingItem)} onOpenChange={(open) => !open && setEditingItem(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar badge</DialogTitle>
+            <DialogTitle>Editar valor</DialogTitle>
             <DialogDescription>
               Renombrar "{editingItem?.value}" en{' '}
               {editingItem ? catalogs[editingItem.catalogId].badgeLabel.toLocaleLowerCase() : ''}.
@@ -580,10 +636,10 @@ export function BadgesPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(deletingItem)} onOpenChange={(open) => !open && setDeletingItem(null)}>
+    <Dialog open={Boolean(deletingItem)} onOpenChange={(open) => !open && setDeletingItem(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Borrar badge</DialogTitle>
+            <DialogTitle>Borrar valor</DialogTitle>
             <DialogDescription>
               Borrar "{deletingItem?.value}" de{' '}
               {deletingItem ? catalogs[deletingItem.catalogId].badgeLabel.toLocaleLowerCase() : ''}.
