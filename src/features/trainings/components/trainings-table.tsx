@@ -56,8 +56,8 @@ export function TrainingsTable({
           <TableHead>Tipos</TableHead>
           <TableHead>Nivel</TableHead>
           <TableHead className="text-center">Ejercicios</TableHead>
-          <TableHead className="hidden md:table-cell">DuraciÃ³n</TableHead>
-          <TableHead className="hidden md:table-cell">CalorÃ­as</TableHead>
+          <TableHead className="hidden md:table-cell">Duración</TableHead>
+          <TableHead className="hidden md:table-cell">Calorí­as</TableHead>
           <TableHead className="hidden lg:table-cell">Etiquetas</TableHead>
           <TableHead className="text-right">Acciones</TableHead>
         </TableRow>
@@ -92,10 +92,7 @@ export function TrainingsTable({
                     <Badge
                       key={type}
                       variant="outline"
-                      className={cn(
-                        'font-medium',
-                        !accentStyle && getTrainingTypeBadgeClass(type)
-                      )}
+                      className={cn('font-medium', !accentStyle && getTrainingTypeBadgeClass(type))}
                       style={accentStyle}
                     >
                       {getTrainingTypeLabel(type)}
@@ -166,7 +163,7 @@ export function TrainingsTable({
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                       <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Abrir menÃº</span>
+                      <span className="sr-only">Abrir menú</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
