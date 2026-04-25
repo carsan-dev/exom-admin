@@ -10,7 +10,11 @@ import {
   shouldRetryQuery,
   unwrapResponse,
 } from '@/lib/api-utils'
-import { normalizeTrainingTags, type TrainingFormValues } from './schemas'
+import {
+  normalizeTrainingTags,
+  type TrainingFormValues,
+} from './schemas'
+import { normalizeTrainingTypes } from './types'
 import type { Training } from './types'
 import type { Exercise, PaginatedResponse } from '../exercises/types'
 
@@ -59,9 +63,13 @@ const trainingTypesQueryKey = ['trainings', 'types'] as const
 const exercisesListQueryKey = ['exercises', 'list-all'] as const
 
 function normalizeTrainingPayload(values: TrainingFormValues) {
+  const normalizedTypes = normalizeTrainingTypes(values.types)
+
   return {
     name: values.name.trim(),
-    type: values.type,
+    type: normalizedTypes[0],
+    types: normalizedTypes,
+    accentColor: values.accentColor ?? null,
     level: values.level,
     estimated_duration_min: values.estimated_duration_min ?? undefined,
     estimated_calories: values.estimated_calories ?? undefined,
