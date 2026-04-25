@@ -186,7 +186,7 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">Descanso (s)</label>
+                    <label className="text-xs text-muted-foreground">Descanso entre series (s)</label>
                     <Input
                       type="number"
                       min={0}
@@ -194,6 +194,9 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                       onChange={(e) => updateField(index, 'rest_seconds', parseInt(e.target.value) || 0)}
                       className="h-8 text-sm"
                     />
+                    <p className="text-[11px] leading-tight text-muted-foreground">
+                      Tiempo de descanso entre cada serie del ejercicio
+                    </p>
                   </div>
                 </div>
               </div>

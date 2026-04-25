@@ -136,7 +136,7 @@ export function TrainingDetailDialog({
                       <p className="font-medium text-foreground">
                         {te.sets}×{te.reps_or_duration}
                       </p>
-                      <p>{te.rest_seconds}s descanso</p>
+                      <p>{te.rest_seconds}s entre series</p>
                     </div>
                   </div>
                 ))}
