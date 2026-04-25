@@ -76,7 +76,7 @@ export function TrainingsPage() {
       {
         type: 'multi',
         key: 'type',
-        label: 'Tipo',
+        label: 'Tipos',
         options: toFilterOptions(trainingTypesQuery.data, getTrainingTypeLabel),
         isLoading: trainingTypesQuery.isLoading,
       },

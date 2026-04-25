@@ -10,7 +10,13 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
-import { getTrainingTypeBadgeClass, getTrainingTypeLabel, type Training } from '../types'
+import {
+  getTrainingAccentStyle,
+  getTrainingTypeBadgeClass,
+  getTrainingTypeLabel,
+  resolveTrainingTypes,
+  type Training,
+} from '../types'
 
 interface TrainingDetailDialogProps {
   training: Training | null
@@ -30,6 +36,8 @@ export function TrainingDetailDialog({
   if (!training) return null
 
   const sortedExercises = [...training.exercises].sort((a, b) => a.order - b.order)
+  const trainingTypes = resolveTrainingTypes(training)
+  const accentStyle = getTrainingAccentStyle(training.accentColor)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -41,12 +49,22 @@ export function TrainingDetailDialog({
         <div className="min-w-0 space-y-4">
           {/* Type + level badges */}
           <div className="flex flex-wrap items-center gap-2">
-            <Badge
-              variant="outline"
-              className={cn('font-medium', getTrainingTypeBadgeClass(training.type))}
-            >
-              {getTrainingTypeLabel(training.type)}
-            </Badge>
+            {training.accentColor ? (
+              <span
+                className="h-3 w-3 rounded-full border border-white/20"
+                style={{ backgroundColor: training.accentColor }}
+              />
+            ) : null}
+            {trainingTypes.map((type) => (
+              <Badge
+                key={type}
+                variant="outline"
+                className={cn('font-medium', !accentStyle && getTrainingTypeBadgeClass(type))}
+                style={accentStyle}
+              >
+                {getTrainingTypeLabel(type)}
+              </Badge>
+            ))}
             <Badge
               variant="outline"
               className={cn('font-medium', getLevelBadgeClass(training.level))}

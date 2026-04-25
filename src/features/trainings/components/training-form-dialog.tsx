@@ -49,17 +49,22 @@ import {
 } from '../api'
 import {
   getTrainingTagKey,
-  normalizeTrainingTagLabel,
   normalizeTrainingTags,
+  normalizeTrainingTagLabel,
   trainingSchema,
   type TrainingFormValues,
 } from '../schemas'
 import {
   DEFAULT_TRAINING_TYPE,
+  TRAINING_ACCENT_SWATCHES,
+  getTrainingAccentStyle,
   getTrainingTypeBadgeClass,
   getTrainingTypeKey,
   getTrainingTypeLabel,
+  normalizeTrainingAccentColor,
   normalizeTrainingTypeLabel,
+  normalizeTrainingTypes,
+  resolveTrainingTypes,
   type Training,
 } from '../types'
 import { ExercisePicker } from './exercise-picker'
@@ -74,7 +79,8 @@ interface TrainingFormDialogProps {
 
 const defaultValues: TrainingFormValues = {
   name: '',
-  type: DEFAULT_TRAINING_TYPE,
+  types: [DEFAULT_TRAINING_TYPE],
+  accentColor: null,
   level: 'PRINCIPIANTE',
   estimated_duration_min: null,
   estimated_calories: null,
@@ -88,7 +94,8 @@ const defaultValues: TrainingFormValues = {
 function toFormValues(training: Training, isDuplicate: boolean): TrainingFormValues {
   return {
     name: isDuplicate ? `${training.name} (copia)` : training.name,
-    type: training.type,
+    types: resolveTrainingTypes(training),
+    accentColor: training.accentColor ?? null,
     level: training.level,
     estimated_duration_min: training.estimated_duration_min,
     estimated_calories: training.estimated_calories,
@@ -114,9 +121,15 @@ interface TagsFieldProps {
   error?: string
 }
 
-interface TrainingTypeFieldProps {
-  value: string
-  onChange: (value: string) => void
+interface TrainingTypesFieldProps {
+  value: string[]
+  onChange: (value: string[]) => void
+  error?: string
+}
+
+interface AccentColorFieldProps {
+  value: string | null | undefined
+  onChange: (value: string | null) => void
   error?: string
 }
 
@@ -192,30 +205,30 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
     onChange(normalizeTrainingTags([...value, normalizedTag]))
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
       add()
     }
   }
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2 min-h-10">
+      <div className="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
         {value.length === 0 && (
-          <span className="text-sm text-muted-foreground self-center">Sin etiquetas</span>
+          <span className="self-center text-sm text-muted-foreground">Sin etiquetas</span>
         )}
         {value.map((tag) => (
           <Badge
             key={tag}
             variant="outline"
-            className="gap-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary pr-1"
+            className="gap-1 border-brand-soft/40 bg-brand-soft/10 pr-1 text-brand-primary"
           >
             {tag}
             <button
               type="button"
               onClick={() => remove(tag)}
-              className="ml-0.5 rounded-full hover:bg-brand-soft/20 p-0.5"
+              className="ml-0.5 rounded-full p-0.5 hover:bg-brand-soft/20"
             >
               <X className="h-2.5 w-2.5" />
             </button>
@@ -252,7 +265,7 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
                   key={tag}
                   checked={hasTag(tag)}
                   onCheckedChange={() => toggle(tag)}
-                  onSelect={(event) => event.preventDefault()}
+                  onSelect={(selectEvent) => selectEvent.preventDefault()}
                 >
                   {tag}
                 </DropdownMenuCheckboxItem>
@@ -264,7 +277,7 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
         <div className="flex flex-1 gap-2">
           <Input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Nueva etiqueta (Enter)"
             className="h-8 text-sm"
@@ -284,10 +297,7 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
       {tagsQuery.isError ? (
         <div className="flex items-center gap-2 text-xs text-status-error">
           <span>
-            {getApiErrorMessage(
-              tagsQuery.error,
-              'No se han podido cargar las etiquetas existentes'
-            )}
+            {getApiErrorMessage(tagsQuery.error, 'No se han podido cargar las etiquetas existentes')}
             .
           </span>
           <Button
@@ -317,50 +327,78 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
   )
 }
 
-function TrainingTypeField({ value, onChange, error }: TrainingTypeFieldProps) {
+function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps) {
   const [input, setInput] = useState('')
   const trainingTypesQuery = useTrainingTypes()
-  const currentType = normalizeTrainingTypeLabel(value)
   const availableTypes = trainingTypesQuery.data ?? []
-  const resolvedTypes = currentType
-    ? availableTypes.some((type) => getTrainingTypeKey(type) === getTrainingTypeKey(currentType))
-      ? availableTypes
-      : [currentType, ...availableTypes]
-    : availableTypes
+  const resolvedTypes = normalizeTrainingTypes([...value, ...availableTypes])
 
-  const isSelected = (type: string) => getTrainingTypeKey(type) === getTrainingTypeKey(currentType)
+  const hasType = (type: string) => {
+    const typeKey = getTrainingTypeKey(type)
+    return value.some((currentType) => getTrainingTypeKey(currentType) === typeKey)
+  }
 
-  const selectType = (rawType = input) => {
+  const add = (rawType = input) => {
     const normalizedType = normalizeTrainingTypeLabel(rawType)
+
+    if (!normalizedType || hasType(normalizedType)) {
+      setInput('')
+      return
+    }
+
+    onChange(normalizeTrainingTypes([...value, normalizedType]))
+    setInput('')
+  }
+
+  const remove = (type: string) => {
+    const typeKey = getTrainingTypeKey(type)
+    onChange(value.filter((currentType) => getTrainingTypeKey(currentType) !== typeKey))
+  }
+
+  const toggle = (type: string) => {
+    const normalizedType = normalizeTrainingTypeLabel(type)
 
     if (!normalizedType) {
       return
     }
 
-    const existingType = resolvedTypes.find(
-      (type) => getTrainingTypeKey(type) === getTrainingTypeKey(normalizedType)
-    )
+    if (hasType(normalizedType)) {
+      remove(normalizedType)
+      return
+    }
 
-    onChange(existingType ?? normalizedType)
-    setInput('')
+    onChange(normalizeTrainingTypes([...value, normalizedType]))
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       event.preventDefault()
-      selectType()
+      add()
     }
   }
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2 min-h-10">
-        {currentType ? (
-          <Badge variant="outline" className={getTrainingTypeBadgeClass(currentType)}>
-            {getTrainingTypeLabel(currentType)}
-          </Badge>
+      <div className="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
+        {value.length === 0 ? (
+          <span className="self-center text-sm text-muted-foreground">Sin tipos</span>
         ) : (
-          <span className="text-sm text-muted-foreground self-center">Sin tipo</span>
+          value.map((type) => (
+            <Badge
+              key={type}
+              variant="outline"
+              className={getTrainingTypeBadgeClass(type)}
+            >
+              {getTrainingTypeLabel(type)}
+              <button
+                type="button"
+                onClick={() => remove(type)}
+                className="ml-1 rounded-full p-0.5 hover:bg-foreground/10"
+              >
+                <X className="h-2.5 w-2.5" />
+              </button>
+            </Badge>
+          ))
         )}
       </div>
 
@@ -392,9 +430,9 @@ function TrainingTypeField({ value, onChange, error }: TrainingTypeFieldProps) {
               resolvedTypes.map((type) => (
                 <DropdownMenuCheckboxItem
                   key={type}
-                  checked={isSelected(type)}
-                  onCheckedChange={() => selectType(type)}
-                  onSelect={(event) => event.preventDefault()}
+                  checked={hasType(type)}
+                  onCheckedChange={() => toggle(type)}
+                  onSelect={(selectEvent) => selectEvent.preventDefault()}
                 >
                   {getTrainingTypeLabel(type)}
                 </DropdownMenuCheckboxItem>
@@ -415,8 +453,8 @@ function TrainingTypeField({ value, onChange, error }: TrainingTypeFieldProps) {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => selectType()}
-            disabled={!normalizeTrainingTypeLabel(input) || isSelected(input)}
+            onClick={() => add()}
+            disabled={!normalizeTrainingTypeLabel(input) || hasType(input)}
           >
             <Plus className="h-3 w-3" />
           </Button>
@@ -426,10 +464,7 @@ function TrainingTypeField({ value, onChange, error }: TrainingTypeFieldProps) {
       {trainingTypesQuery.isError ? (
         <div className="flex items-center gap-2 text-xs text-status-error">
           <span>
-            {getApiErrorMessage(
-              trainingTypesQuery.error,
-              'No se han podido cargar los tipos existentes'
-            )}
+            {getApiErrorMessage(trainingTypesQuery.error, 'No se han podido cargar los tipos existentes')}
             .
           </span>
           <Button
@@ -450,9 +485,100 @@ function TrainingTypeField({ value, onChange, error }: TrainingTypeFieldProps) {
         </p>
       ) : (
         <p className="text-xs text-muted-foreground">
-          Selecciona un tipo existente o crea uno nuevo.
+          Selecciona varios tipos existentes o crea nuevos.
         </p>
       )}
+
+      {error && <p className="text-xs text-status-error">{error}</p>}
+    </div>
+  )
+}
+
+function AccentColorField({ value, onChange, error }: AccentColorFieldProps) {
+  const normalizedColor = normalizeTrainingAccentColor(value)
+  const previewStyle = getTrainingAccentStyle(normalizedColor, 'solid')
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-xl border border-border/70 bg-muted/20 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-foreground">Preview del color</p>
+            <p className="text-xs text-muted-foreground">
+              {normalizedColor ?? 'Se usara fallback temporal por tipo en datos legacy.'}
+            </p>
+          </div>
+          <div
+            className="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold"
+            style={
+              previewStyle ?? {
+                borderColor: 'rgba(197, 227, 132, 0.24)',
+                backgroundColor: 'rgba(197, 227, 132, 0.08)',
+                color: '#C5E384',
+              }
+            }
+          >
+            Vista previa
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+        {TRAINING_ACCENT_SWATCHES.map((swatch) => {
+          const isSelected = normalizedColor === swatch
+
+          return (
+            <button
+              key={swatch}
+              type="button"
+              onClick={() => onChange(swatch)}
+              className="group flex flex-col items-center gap-2 rounded-xl border border-border/70 bg-card px-2 py-3 transition-colors hover:border-brand-primary/50"
+            >
+              <span
+                className="h-8 w-8 rounded-full border border-white/20 shadow-sm"
+                style={{ backgroundColor: swatch }}
+              />
+              <span
+                className={`text-[10px] font-medium ${
+                  isSelected ? 'text-foreground' : 'text-muted-foreground'
+                }`}
+              >
+                {swatch.replace('#', '')}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)_auto]">
+        <label className="flex items-center justify-center rounded-md border border-input bg-input p-1">
+          <input
+            type="color"
+            value={normalizedColor ?? '#C5E384'}
+            onChange={(event) => onChange(event.target.value)}
+            className="h-9 w-full cursor-pointer rounded border-0 bg-transparent"
+          />
+        </label>
+
+        <Input
+          value={value ?? ''}
+          onChange={(event) => onChange(event.target.value || null)}
+          placeholder="#C5E384"
+        />
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onChange(null)}
+          disabled={!value}
+        >
+          Limpiar
+        </Button>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        Usa swatches, picker o hex. El preview ajusta contraste del texto automaticamente.
+      </p>
 
       {error && <p className="text-xs text-status-error">{error}</p>}
     </div>
@@ -482,7 +608,7 @@ export function TrainingFormDialog({
   const dialogDescription = isEditing
     ? 'Modifica los campos y guarda los cambios.'
     : isDuplicate
-      ? 'Se creará una copia del entrenamiento con el mismo contenido.'
+      ? 'Se creara una copia del entrenamiento con el mismo contenido.'
       : 'Rellena los datos del nuevo entrenamiento.'
 
   const form = useForm<TrainingFormValues>({
@@ -568,13 +694,11 @@ export function TrainingFormDialog({
 
         <Form {...form}>
           <form onSubmit={handleSubmit} className="min-w-0 space-y-5">
-            {/* Info general */}
             <div ref={generalSectionRef} className="space-y-4">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Información general
+                Informacion general
               </p>
 
-              {/* Name */}
               <FormField
                 control={form.control}
                 name="name"
@@ -582,23 +706,22 @@ export function TrainingFormDialog({
                   <FormItem>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej. Full Body Fuerza A" {...field} />
+                      <Input placeholder="Ej. Full Body Fuerza + Cardio" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Type + Level */}
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
                 <FormField
                   control={form.control}
-                  name="type"
+                  name="types"
                   render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel>Tipo</FormLabel>
+                      <FormLabel>Tipos</FormLabel>
                       <FormControl>
-                        <TrainingTypeField
+                        <TrainingTypesField
                           value={field.value}
                           onChange={field.onChange}
                           error={fieldState.error?.message}
@@ -634,22 +757,40 @@ export function TrainingFormDialog({
                 />
               </div>
 
-              {/* Duration + Calories */}
+              <FormField
+                control={form.control}
+                name="accentColor"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel>Color visual</FormLabel>
+                    <FormControl>
+                      <AccentColorField
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={fieldState.error?.message}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="estimated_duration_min"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Duración estimada (min)</FormLabel>
+                      <FormLabel>Duracion estimada (min)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           min={0}
                           placeholder="45"
                           value={field.value ?? ''}
-                          onChange={(e) =>
-                            field.onChange(e.target.value === '' ? null : parseInt(e.target.value))
+                          onChange={(event) =>
+                            field.onChange(
+                              event.target.value === '' ? null : parseInt(event.target.value, 10)
+                            )
                           }
                         />
                       </FormControl>
@@ -663,15 +804,17 @@ export function TrainingFormDialog({
                   name="estimated_calories"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Calorías estimadas (kcal)</FormLabel>
+                      <FormLabel>Calorias estimadas (kcal)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           min={0}
                           placeholder="300"
                           value={field.value ?? ''}
-                          onChange={(e) =>
-                            field.onChange(e.target.value === '' ? null : parseInt(e.target.value))
+                          onChange={(event) =>
+                            field.onChange(
+                              event.target.value === '' ? null : parseInt(event.target.value, 10)
+                            )
                           }
                         />
                       </FormControl>
@@ -681,7 +824,6 @@ export function TrainingFormDialog({
                 />
               </div>
 
-              {/* Tags */}
               <FormField
                 control={form.control}
                 name="tags"
@@ -702,7 +844,6 @@ export function TrainingFormDialog({
 
             <Separator />
 
-            {/* Warmup / Cooldown */}
             <div ref={warmupSectionRef} className="space-y-4">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Calentamiento y vuelta a la calma
@@ -714,13 +855,13 @@ export function TrainingFormDialog({
                   name="warmup_description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Descripción calentamiento</FormLabel>
+                      <FormLabel>Descripcion calentamiento</FormLabel>
                       <FormControl>
                         <textarea
                           {...field}
                           rows={2}
                           placeholder="Describe el calentamiento..."
-                          className="flex w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                          className="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         />
                       </FormControl>
                       <FormMessage />
@@ -733,15 +874,17 @@ export function TrainingFormDialog({
                   name="warmup_duration_min"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Duración (min)</FormLabel>
+                      <FormLabel>Duracion (min)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           min={0}
                           placeholder="10"
                           value={field.value ?? ''}
-                          onChange={(e) =>
-                            field.onChange(e.target.value === '' ? null : parseInt(e.target.value))
+                          onChange={(event) =>
+                            field.onChange(
+                              event.target.value === '' ? null : parseInt(event.target.value, 10)
+                            )
                           }
                         />
                       </FormControl>
@@ -756,13 +899,13 @@ export function TrainingFormDialog({
                 name="cooldown_description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descripción vuelta a la calma</FormLabel>
+                    <FormLabel>Descripcion vuelta a la calma</FormLabel>
                     <FormControl>
                       <textarea
                         {...field}
                         rows={2}
                         placeholder="Describe la vuelta a la calma..."
-                        className="flex w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                        className="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       />
                     </FormControl>
                     <FormMessage />
@@ -773,7 +916,6 @@ export function TrainingFormDialog({
 
             <Separator />
 
-            {/* Exercises */}
             <div ref={exercisesSectionRef}>
               <FormField
                 control={form.control}
