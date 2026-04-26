@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { ChevronDown, LoaderCircle, Plus, X } from 'lucide-react'
+import { Check, ChevronDown, LoaderCircle, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -131,6 +131,7 @@ interface AccentColorFieldProps {
   value: string | null | undefined
   onChange: (value: string | null) => void
   error?: string
+  inputInstanceKey?: number
 }
 
 function getFirstErrorMessage(error: unknown): string | undefined {
@@ -236,14 +237,18 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
         ))}
       </div>
       <div className="flex flex-col gap-2 sm:flex-row">
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline" size="sm" className="sm:w-auto">
               Etiquetas existentes
               <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="max-h-72 w-60 overflow-y-auto">
+          <DropdownMenuContent
+            align="start"
+            className="max-h-72 w-60 overflow-y-auto"
+            onCloseAutoFocus={(event) => event.preventDefault()}
+          >
             <DropdownMenuLabel>Etiquetas guardadas</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {tagsQuery.isLoading ? (
@@ -402,66 +407,31 @@ function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps)
         )}
       </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline" size="sm" className="sm:w-auto">
-              Tipos existentes
-              <ChevronDown className="h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="max-h-72 w-60 overflow-y-auto">
-            <DropdownMenuLabel>Tipos guardados</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {trainingTypesQuery.isLoading ? (
-              <div className="flex items-center gap-2 px-2 py-2 text-xs text-muted-foreground">
-                <LoaderCircle className="h-3 w-3 animate-spin" />
-                Cargando tipos...
-              </div>
-            ) : trainingTypesQuery.isError ? (
-              <div className="px-2 py-2 text-xs text-status-error">
-                {getApiErrorMessage(trainingTypesQuery.error, 'No se han podido cargar los tipos')}
-              </div>
-            ) : resolvedTypes.length === 0 ? (
-              <div className="px-2 py-2 text-xs text-muted-foreground">
-                Aun no hay tipos guardados.
-              </div>
-            ) : (
-              resolvedTypes.map((type) => (
-                <DropdownMenuCheckboxItem
-                  key={type}
-                  checked={hasType(type)}
-                  onCheckedChange={() => toggle(type)}
-                  onSelect={(selectEvent) => selectEvent.preventDefault()}
-                >
-                  {getTrainingTypeLabel(type)}
-                </DropdownMenuCheckboxItem>
-              ))
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <div className="flex flex-1 gap-2">
-          <Input
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Nuevo tipo (Enter)"
-            className="h-8 text-sm"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => add()}
-            disabled={!normalizeTrainingTypeLabel(input) || hasType(input)}
-          >
-            <Plus className="h-3 w-3" />
-          </Button>
-        </div>
+      <div className="flex gap-2">
+        <Input
+          value={input}
+          onChange={(event) => setInput(event.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Nuevo tipo (Enter)"
+          className="h-8 text-sm"
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => add()}
+          disabled={!normalizeTrainingTypeLabel(input) || hasType(input)}
+        >
+          <Plus className="h-3 w-3" />
+        </Button>
       </div>
 
-      {trainingTypesQuery.isError ? (
+      {trainingTypesQuery.isLoading ? (
+        <div className="flex items-center gap-2 rounded-md border border-dashed border-border/70 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+          <LoaderCircle className="h-3 w-3 animate-spin" />
+          Cargando tipos existentes...
+        </div>
+      ) : trainingTypesQuery.isError ? (
         <div className="flex items-center gap-2 text-xs text-status-error">
           <span>
             {getApiErrorMessage(trainingTypesQuery.error, 'No se han podido cargar los tipos existentes')}
@@ -477,8 +447,34 @@ function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps)
             Reintentar
           </Button>
         </div>
-      ) : trainingTypesQuery.isLoading ? (
-        <p className="text-xs text-muted-foreground">Cargando tipos existentes...</p>
+      ) : resolvedTypes.length > 0 ? (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            Tipos guardados. Pulsa para activar o quitar varios.
+          </p>
+          <div className="flex flex-wrap gap-2 rounded-md border border-dashed border-border/70 bg-muted/20 p-2">
+            {resolvedTypes.map((type) => {
+              const isSelected = hasType(type)
+
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => toggle(type)}
+                  aria-pressed={isSelected}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                    isSelected
+                      ? getTrainingTypeBadgeClass(type)
+                      : 'border-border bg-background text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  {isSelected && <Check className="h-3 w-3" />}
+                  {getTrainingTypeLabel(type)}
+                </button>
+              )
+            })}
+          </div>
+        </div>
       ) : resolvedTypes.length === 0 ? (
         <p className="text-xs text-muted-foreground">
           Aun no hay tipos guardados. Puedes crear el primero.
@@ -494,7 +490,12 @@ function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps)
   )
 }
 
-function AccentColorField({ value, onChange, error }: AccentColorFieldProps) {
+function AccentColorField({
+  value,
+  onChange,
+  error,
+  inputInstanceKey,
+}: AccentColorFieldProps) {
   const normalizedColor = normalizeTrainingAccentColor(value)
   const previewStyle = getTrainingAccentStyle(normalizedColor, 'solid')
 
@@ -550,13 +551,14 @@ function AccentColorField({ value, onChange, error }: AccentColorFieldProps) {
         })}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)_auto]">
-        <label className="flex items-center justify-center rounded-md border border-input bg-input p-1">
-          <input
-            type="color"
-            value={normalizedColor ?? '#C5E384'}
-            onChange={(event) => onChange(event.target.value)}
-            className="h-9 w-full cursor-pointer rounded border-0 bg-transparent"
+        <div className="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)_auto]">
+          <label className="flex items-center justify-center rounded-md border border-input bg-input p-1">
+            <input
+              key={inputInstanceKey}
+              type="color"
+              value={normalizedColor ?? '#C5E384'}
+              onChange={(event) => onChange(event.target.value)}
+              className="h-9 w-full cursor-pointer rounded border-0 bg-transparent"
           />
         </label>
 
@@ -599,6 +601,8 @@ export function TrainingFormDialog({
   const generalSectionRef = useRef<HTMLDivElement | null>(null)
   const warmupSectionRef = useRef<HTMLDivElement | null>(null)
   const exercisesSectionRef = useRef<HTMLDivElement | null>(null)
+  const dialogContentRef = useRef<HTMLDivElement | null>(null)
+  const [colorInputInstanceKey, setColorInputInstanceKey] = useState(0)
 
   const dialogTitle = isEditing
     ? 'Editar entrenamiento'
@@ -621,6 +625,11 @@ export function TrainingFormDialog({
       form.reset(defaultValues)
       return
     }
+
+    setColorInputInstanceKey((current) => current + 1)
+    requestAnimationFrame(() => {
+      dialogContentRef.current?.scrollTo({ top: 0, behavior: 'auto' })
+    })
 
     if (training) {
       form.reset(toFormValues(training, isDuplicate))
@@ -686,7 +695,10 @@ export function TrainingFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
+      <DialogContent
+        ref={dialogContentRef}
+        className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6"
+      >
         <DialogHeader className="pr-8">
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>
@@ -768,6 +780,7 @@ export function TrainingFormDialog({
                         value={field.value}
                         onChange={field.onChange}
                         error={fieldState.error?.message}
+                        inputInstanceKey={colorInputInstanceKey}
                       />
                     </FormControl>
                   </FormItem>
