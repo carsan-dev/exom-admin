@@ -29,7 +29,7 @@ export function FilterPopover({ sections, filters }: FilterPopoverProps) {
           ) : null}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[min(28rem,calc(100vw-2rem))] p-0">
+      <PopoverContent align="end" className="w-[min(36rem,calc(100vw-2rem))] p-0">
         <div className="border-b border-border/70 px-4 py-3">
           <p className="text-sm font-semibold text-foreground">Filtros del listado</p>
           <p className="text-xs text-muted-foreground">Selecciona uno o varios criterios.</p>
