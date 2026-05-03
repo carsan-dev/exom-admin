@@ -31,6 +31,7 @@ export interface DietsListParams {
   page: number
   limit: number
   search?: string
+  tags?: string[]
   meal_types?: string[]
   nutritional_badges?: string[]
   updated_from?: string
@@ -45,6 +46,7 @@ const dietsQueryKeys = {
       params.page,
       params.limit,
       params.search ?? '',
+      params.tags ?? [],
       params.meal_types ?? [],
       params.nutritional_badges ?? [],
       params.updated_from ?? null,
@@ -91,8 +93,9 @@ function normalizeSearch(search?: string) {
 }
 
 export function useDiets(params: DietsListParams) {
-  const { page, limit, search, meal_types, nutritional_badges, updated_from, updated_to } = params
+  const { page, limit, search, tags, meal_types, nutritional_badges, updated_from, updated_to } = params
   const normalizedSearch = normalizeSearch(search)
+  const normalizedTags = tags ?? []
   const normalizedMealTypes = meal_types ?? []
   const normalizedNutritionalBadges = nutritional_badges ?? []
 
@@ -101,6 +104,7 @@ export function useDiets(params: DietsListParams) {
       page,
       limit,
       search: normalizedSearch,
+      tags: normalizedTags,
       meal_types: normalizedMealTypes,
       nutritional_badges: normalizedNutritionalBadges,
       updated_from,
@@ -114,6 +118,7 @@ export function useDiets(params: DietsListParams) {
           page,
           limit,
           ...(normalizedSearch ? { search: normalizedSearch } : {}),
+          ...(normalizedTags.length > 0 ? { tags: normalizedTags } : {}),
           ...(normalizedMealTypes.length > 0 ? { meal_types: normalizedMealTypes } : {}),
           ...(normalizedNutritionalBadges.length > 0
             ? { nutritional_badges: normalizedNutritionalBadges }

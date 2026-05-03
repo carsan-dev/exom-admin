@@ -27,6 +27,7 @@ import {
   getApiErrorMessage,
   type DietsListParams,
   useDietNutritionalBadges,
+  useDietTags,
   useDiets,
 } from '../api'
 import { DeleteDietDialog } from '../components/delete-diet-dialog'
@@ -75,6 +76,7 @@ export function DietsPage() {
   const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
+  const tagsQuery = useDietTags()
   const nutritionalBadgesQuery = useDietNutritionalBadges()
   const sections = useMemo<FilterSectionConfig[]>(
     () => [
@@ -83,6 +85,13 @@ export function DietsPage() {
         key: 'meal_types',
         label: 'Tipo de comida',
         options: MEAL_TYPE_OPTIONS,
+      },
+      {
+        type: 'multi',
+        key: 'tags',
+        label: 'Etiquetas',
+        options: toFilterOptions(tagsQuery.data),
+        isLoading: tagsQuery.isLoading,
       },
       {
         type: 'multi',
@@ -97,7 +106,7 @@ export function DietsPage() {
         label: 'Actualizada',
       },
     ],
-    [nutritionalBadgesQuery.data, nutritionalBadgesQuery.isLoading]
+    [nutritionalBadgesQuery.data, nutritionalBadgesQuery.isLoading, tagsQuery.data, tagsQuery.isLoading]
   )
   const filters = useListFilters(sections)
   const dietFilterParams = filtersToApiParams(filters.values, sections) as Partial<DietsListParams>
