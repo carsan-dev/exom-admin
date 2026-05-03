@@ -29,13 +29,16 @@ export function FilterPopover({ sections, filters }: FilterPopoverProps) {
           ) : null}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[min(36rem,calc(100vw-2rem))] p-0">
+      <PopoverContent
+        align="end"
+        className="flex max-h-[var(--radix-popover-content-available-height)] w-[min(36rem,calc(100vw-2rem))] flex-col overflow-hidden p-0"
+      >
         <div className="border-b border-border/70 px-4 py-3">
           <p className="text-sm font-semibold text-foreground">Filtros del listado</p>
           <p className="text-xs text-muted-foreground">Selecciona uno o varios criterios.</p>
         </div>
 
-        <div className="max-h-[65vh] space-y-4 overflow-y-auto p-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
           {sections.map((section) => (
             <section key={section.key} className="space-y-3">
               <div className="space-y-1">
