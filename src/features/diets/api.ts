@@ -11,6 +11,7 @@ import {
   unwrapResponse,
 } from '@/lib/api-utils'
 import type { DietFormValues } from './schemas'
+import { normalizeDietTags } from './schemas'
 import type { Diet } from './types'
 import type { Ingredient, PaginatedResponse } from '../ingredients/types'
 
@@ -53,11 +54,13 @@ const dietsQueryKeys = {
 }
 
 const dietNutritionalBadgesQueryKey = ['diets', 'nutritional-badges'] as const
+const dietTagsQueryKey = ['diets', 'tags'] as const
 const ingredientsListQueryKey = ['ingredients', 'list-all'] as const
 
 function normalizeDietPayload(values: DietFormValues) {
   return {
     name: values.name.trim(),
+    tags: normalizeDietTags(values.tags),
     total_calories: values.total_calories ?? undefined,
     total_protein_g: values.total_protein_g ?? undefined,
     total_carbs_g: values.total_carbs_g ?? undefined,
@@ -147,6 +150,17 @@ export function useDietNutritionalBadges() {
         '/diets/nutritional-badges'
       )
       return unwrapResponse(response).nutritional_badges
+    },
+  })
+}
+
+export function useDietTags() {
+  return useQuery({
+    queryKey: dietTagsQueryKey,
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      const response = await api.get<ApiEnvelope<{ tags: string[] }>>('/diets/tags')
+      return unwrapResponse(response).tags
     },
   })
 }

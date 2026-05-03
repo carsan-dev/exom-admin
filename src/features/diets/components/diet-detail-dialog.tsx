@@ -127,6 +127,20 @@ export function DietDetailDialog({
         </DialogHeader>
 
         <div className="min-w-0 space-y-4">
+          {(diet.tags ?? []).length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {diet.tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="border-brand-soft/40 bg-brand-soft/10 text-brand-primary text-xs"
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+
           {/* Macros totales */}
           {(diet.total_calories != null ||
             diet.total_protein_g != null ||

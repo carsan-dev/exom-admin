@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm } from 'react-hook-form'
-import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, LoaderCircle, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { ImageUploadField } from '@/components/uploads/image-upload-field'
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +19,8 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -42,10 +44,17 @@ import {
   getApiErrorMessage,
   useCreateDiet,
   useDietNutritionalBadges,
+  useDietTags,
   useIngredientsList,
   useUpdateDiet,
 } from '../api'
-import { dietSchema, type DietFormValues } from '../schemas'
+import {
+  dietSchema,
+  getDietTagKey,
+  normalizeDietTagLabel,
+  normalizeDietTags,
+  type DietFormValues,
+} from '../schemas'
 import { MEAL_TYPE_LABELS, MEAL_TYPE_OPTIONS, type Diet } from '../types'
 import { IngredientPicker } from './ingredient-picker'
 
@@ -175,6 +184,171 @@ function BadgesField({ value, onChange }: { value: string[]; onChange: (val: str
   )
 }
 
+function DietTagsField({
+  value,
+  onChange,
+  error,
+}: {
+  value: string[]
+  onChange: (value: string[]) => void
+  error?: string
+}) {
+  const [input, setInput] = useState('')
+  const tagsQuery = useDietTags()
+  const availableTags = tagsQuery.data ?? []
+
+  const hasTag = (tag: string) => {
+    const tagKey = getDietTagKey(tag)
+    return value.some((currentTag) => getDietTagKey(currentTag) === tagKey)
+  }
+
+  const add = (rawTag = input) => {
+    const normalizedTag = normalizeDietTagLabel(rawTag)
+
+    if (normalizedTag && !hasTag(normalizedTag)) {
+      onChange(normalizeDietTags([...value, normalizedTag]))
+    }
+
+    setInput('')
+  }
+
+  const remove = (tag: string) => {
+    const tagKey = getDietTagKey(tag)
+    onChange(value.filter((currentTag) => getDietTagKey(currentTag) !== tagKey))
+  }
+
+  const toggle = (tag: string) => {
+    const normalizedTag = normalizeDietTagLabel(tag)
+
+    if (!normalizedTag) {
+      return
+    }
+
+    if (hasTag(normalizedTag)) {
+      remove(normalizedTag)
+      return
+    }
+
+    onChange(normalizeDietTags([...value, normalizedTag]))
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
+        {value.length === 0 && (
+          <span className="self-center text-sm text-muted-foreground">Sin etiquetas internas</span>
+        )}
+        {value.map((tag) => (
+          <Badge
+            key={tag}
+            variant="outline"
+            className="gap-1 border-brand-soft/40 bg-brand-soft/10 pr-1 text-brand-primary"
+          >
+            {tag}
+            <button
+              type="button"
+              onClick={() => remove(tag)}
+              className="ml-0.5 rounded-full p-0.5 hover:bg-brand-soft/20"
+            >
+              <X className="h-2.5 w-2.5" />
+            </button>
+          </Badge>
+        ))}
+      </div>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" variant="outline" size="sm" className="sm:w-auto">
+              Etiquetas existentes
+              <ChevronDown className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            className="max-h-72 w-60 overflow-y-auto"
+            onCloseAutoFocus={(event) => event.preventDefault()}
+          >
+            <DropdownMenuLabel>Etiquetas guardadas</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {tagsQuery.isLoading ? (
+              <div className="flex items-center gap-2 px-2 py-2 text-xs text-muted-foreground">
+                <LoaderCircle className="h-3 w-3 animate-spin" />
+                Cargando etiquetas...
+              </div>
+            ) : tagsQuery.isError ? (
+              <div className="px-2 py-2 text-xs text-status-error">
+                {getApiErrorMessage(tagsQuery.error, 'No se han podido cargar las etiquetas')}
+              </div>
+            ) : availableTags.length === 0 ? (
+              <div className="px-2 py-2 text-xs text-muted-foreground">
+                Aun no hay etiquetas guardadas.
+              </div>
+            ) : (
+              availableTags.map((tag) => (
+                <DropdownMenuCheckboxItem
+                  key={tag}
+                  checked={hasTag(tag)}
+                  onCheckedChange={() => toggle(tag)}
+                  onSelect={(selectEvent) => selectEvent.preventDefault()}
+                >
+                  {tag}
+                </DropdownMenuCheckboxItem>
+              ))
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="flex flex-1 gap-2">
+          <Input
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                add()
+              }
+            }}
+            placeholder="Nueva etiqueta interna (Enter)"
+            className="h-8 text-sm"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => add()}
+            disabled={!normalizeDietTagLabel(input) || hasTag(input)}
+          >
+            <Plus className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+
+      {tagsQuery.isError ? (
+        <div className="flex items-center gap-2 text-xs text-status-error">
+          <span>{getApiErrorMessage(tagsQuery.error, 'No se han podido cargar las etiquetas existentes')}.</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-auto px-1 py-0 text-xs"
+            onClick={() => tagsQuery.refetch()}
+          >
+            Reintentar
+          </Button>
+        </div>
+      ) : tagsQuery.isLoading ? (
+        <p className="text-xs text-muted-foreground">Cargando etiquetas existentes...</p>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Solo se usan en admin para identificar dietas por cliente, objetivo o etapa.
+        </p>
+      )}
+
+      {error && <p className="text-xs text-status-error">{error}</p>}
+    </div>
+  )
+}
+
 function mergeBadgeOptions(preset: readonly string[], fetched: string[] | undefined) {
   const unique = new Map<string, string>()
 
@@ -218,6 +392,7 @@ const defaultMeal: DietFormValues['meals'][number] = {
 
 const defaultValues: DietFormValues = {
   name: '',
+  tags: [],
   total_calories: null,
   total_protein_g: null,
   total_carbs_g: null,
@@ -228,6 +403,7 @@ const defaultValues: DietFormValues = {
 function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
   return {
     name: isDuplicate ? `${diet.name} (copia)` : diet.name,
+    tags: normalizeDietTags(diet.tags ?? []),
     total_calories: diet.total_calories,
     total_protein_g: diet.total_protein_g,
     total_carbs_g: diet.total_carbs_g,
@@ -541,11 +717,28 @@ export function DietFormDialog({
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nombre</FormLabel>
+                      <FormLabel>Nombre visible para el cliente</FormLabel>
                       <FormControl>
                         <Input placeholder="Ej. Dieta de definición" {...field} />
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel>Etiquetas internas</FormLabel>
+                      <FormControl>
+                        <DietTagsField
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={fieldState.error?.message}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />

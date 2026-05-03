@@ -58,6 +58,7 @@ export interface Meal {
 export interface Diet {
   id: string
   name: string
+  tags: string[]
   total_calories: number | null
   total_protein_g: number | null
   total_carbs_g: number | null

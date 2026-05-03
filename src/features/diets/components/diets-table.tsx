@@ -41,6 +41,7 @@ export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplica
         <TableRow>
           <TableHead>Nombre</TableHead>
           <TableHead className="text-center">Comidas</TableHead>
+          <TableHead className="hidden lg:table-cell">Etiquetas</TableHead>
           <TableHead className="hidden md:table-cell">Kcal totales</TableHead>
           <TableHead className="hidden lg:table-cell">Macros (P/C/G)</TableHead>
           <TableHead className="hidden md:table-cell">Actualizado</TableHead>
@@ -77,6 +78,28 @@ export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplica
                   )}
                   {diet.meals.length === 0 && (
                     <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </div>
+              </TableCell>
+
+              <TableCell className="hidden lg:table-cell">
+                <div className="flex flex-wrap gap-1">
+                  {(diet.tags ?? []).slice(0, 2).map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="border-brand-soft/40 bg-brand-soft/10 text-brand-primary text-xs"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                  {(diet.tags ?? []).length > 2 && (
+                    <Badge variant="outline" className="border-border bg-muted text-muted-foreground text-xs">
+                      +{diet.tags.length - 2}
+                    </Badge>
+                  )}
+                  {(diet.tags ?? []).length === 0 && (
+                    <span className="text-xs text-muted-foreground">â€”</span>
                   )}
                 </div>
               </TableCell>

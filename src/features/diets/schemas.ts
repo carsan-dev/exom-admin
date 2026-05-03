@@ -1,6 +1,42 @@
 import { z } from 'zod'
 import { MEAL_TYPE_OPTIONS, MEASURE_UNIT_OPTIONS } from './types'
 
+export function normalizeDietTagLabel(tag: string) {
+  return tag.trim().replace(/\s+/g, ' ')
+}
+
+export function getDietTagKey(tag: string) {
+  return normalizeDietTagLabel(tag)
+    .toLocaleLowerCase('es-ES')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFC')
+}
+
+export function normalizeDietTags(tags: string[]) {
+  const seen = new Set<string>()
+  const normalizedTags: string[] = []
+
+  for (const tag of tags) {
+    const normalizedTag = normalizeDietTagLabel(tag)
+    const tagKey = getDietTagKey(normalizedTag)
+
+    if (!normalizedTag || seen.has(tagKey)) {
+      continue
+    }
+
+    seen.add(tagKey)
+    normalizedTags.push(normalizedTag)
+  }
+
+  return normalizedTags
+}
+
+const dietTagSchema = z
+  .string()
+  .transform(normalizeDietTagLabel)
+  .refine((value) => value.length > 0, 'Las etiquetas no pueden estar vacias')
+
 export const mealIngredientSchema = z.object({
   ingredient_id: z.string().trim().min(1, 'Selecciona un ingrediente'),
   quantity: z.number().positive('Cantidad debe ser mayor que 0'),
@@ -22,6 +58,14 @@ export const mealSchema = z.object({
 
 export const dietSchema = z.object({
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
+  tags: z.array(dietTagSchema).superRefine((tags, context) => {
+    if (new Set(tags.map(getDietTagKey)).size !== tags.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'No repitas etiquetas',
+      })
+    }
+  }),
   total_calories: z.number().int().min(0).optional().nullable(),
   total_protein_g: z.number().min(0).optional().nullable(),
   total_carbs_g: z.number().min(0).optional().nullable(),

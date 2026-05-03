@@ -423,7 +423,14 @@ export function AssignmentEditorDialog({
                                     <SelectItem value={CLEAR_SELECTION_VALUE}>Sin dieta</SelectItem>
                                     {availableDiets.map((diet) => (
                                       <SelectItem key={diet.id} value={diet.id}>
-                                        {diet.name}
+                                        <span className="flex min-w-0 flex-col gap-0.5">
+                                          <span className="truncate">{diet.name}</span>
+                                          {(diet.tags ?? []).length > 0 && (
+                                            <span className="truncate text-xs text-muted-foreground">
+                                              {(diet.tags ?? []).join(' Â· ')}
+                                            </span>
+                                          )}
+                                        </span>
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
