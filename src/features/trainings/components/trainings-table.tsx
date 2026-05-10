@@ -1,4 +1,4 @@
-import { Copy, Eye, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+﻿import { Copy, Eye, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -57,7 +57,7 @@ export function TrainingsTable({
           <TableHead>Nivel</TableHead>
           <TableHead className="text-center">Ejercicios</TableHead>
           <TableHead className="hidden md:table-cell">Duración</TableHead>
-          <TableHead className="hidden md:table-cell">Calorí­as</TableHead>
+          <TableHead className="hidden md:table-cell">Calorías</TableHead>
           <TableHead className="hidden lg:table-cell">Etiquetas</TableHead>
           <TableHead className="text-right">Acciones</TableHead>
         </TableRow>
@@ -107,7 +107,7 @@ export function TrainingsTable({
                     </Badge>
                   )}
                   {trainingTypes.length === 0 && (
-                    <span className="text-xs text-muted-foreground">â€”</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </div>
               </TableCell>
@@ -126,11 +126,11 @@ export function TrainingsTable({
               </TableCell>
 
               <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
-                {training.estimated_duration_min ? `${training.estimated_duration_min} min` : 'â€”'}
+                {training.estimated_duration_min ? `${training.estimated_duration_min} min` : '—'}
               </TableCell>
 
               <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
-                {training.estimated_calories ? `${training.estimated_calories} kcal` : 'â€”'}
+                {training.estimated_calories ? `${training.estimated_calories} kcal` : '—'}
               </TableCell>
 
               <TableCell className="hidden lg:table-cell">
@@ -153,7 +153,7 @@ export function TrainingsTable({
                     </Badge>
                   )}
                   {training.tags.length === 0 && (
-                    <span className="text-xs text-muted-foreground">â€”</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </div>
               </TableCell>

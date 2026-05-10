@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { AlertTriangle, Eye, RefreshCw } from 'lucide-react'
@@ -427,7 +427,7 @@ export function AssignmentEditorDialog({
                                           <span className="truncate">{diet.name}</span>
                                           {(diet.tags ?? []).length > 0 && (
                                             <span className="truncate text-xs text-muted-foreground">
-                                              {(diet.tags ?? []).join(' Â· ')}
+                                              {(diet.tags ?? []).join(' · ')}
                                             </span>
                                           )}
                                         </span>

@@ -1,4 +1,4 @@
-import { Copy, Eye, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+﻿import { Copy, Eye, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -99,7 +99,7 @@ export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplica
                     </Badge>
                   )}
                   {(diet.tags ?? []).length === 0 && (
-                    <span className="text-xs text-muted-foreground">â€”</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </div>
               </TableCell>
