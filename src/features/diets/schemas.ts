@@ -1,4 +1,4 @@
-import { z } from 'zod'
+﻿import { z } from 'zod'
 import { MEAL_TYPE_OPTIONS, MEASURE_UNIT_OPTIONS } from './types'
 
 export function normalizeDietTagLabel(tag: string) {
@@ -37,11 +37,22 @@ const dietTagSchema = z
   .transform(normalizeDietTagLabel)
   .refine((value) => value.length > 0, 'Las etiquetas no pueden estar vacias')
 
-export const mealIngredientSchema = z.object({
-  ingredient_id: z.string().trim().min(1, 'Selecciona un ingrediente'),
-  quantity: z.number().positive('Cantidad debe ser mayor que 0'),
-  unit: z.enum(MEASURE_UNIT_OPTIONS),
-})
+export const mealIngredientSchema = z
+  .object({
+    ingredient_id: z.string().trim().min(1, 'Selecciona un ingrediente'),
+    quantity: z.number().positive('Cantidad debe ser mayor que 0'),
+    unit: z.enum(MEASURE_UNIT_OPTIONS),
+    grams_equivalent: z.number().positive('Indica el equivalente en gramos').optional().nullable(),
+  })
+  .superRefine((ingredient, context) => {
+    if (ingredient.unit !== 'g' && !ingredient.grams_equivalent) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['grams_equivalent'],
+        message: 'Indica el equivalente en gramos',
+      })
+    }
+  })
 
 const mealBaseSchema = z.object({
   type: z.enum(MEAL_TYPE_OPTIONS),

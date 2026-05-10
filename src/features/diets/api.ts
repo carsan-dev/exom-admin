@@ -72,11 +72,12 @@ function normalizeDietPayload(values: DietFormValues) {
     nutritional_badges:
       meal.nutritional_badges?.map((badge) => badge.trim()).filter(Boolean) ?? [],
     order: meal.order,
-    ingredients: meal.ingredients.map((ing) => ({
-      ingredient_id: ing.ingredient_id,
-      quantity: ing.quantity,
-      unit: ing.unit,
-    })),
+      ingredients: meal.ingredients.map((ing) => ({
+        ingredient_id: ing.ingredient_id,
+        quantity: ing.quantity,
+        unit: ing.unit,
+        grams_equivalent: ing.unit === 'g' ? ing.quantity : (ing.grams_equivalent ?? undefined),
+      })),
   })
 
   return {

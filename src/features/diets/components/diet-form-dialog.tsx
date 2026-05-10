@@ -438,6 +438,7 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
           ingredient_id: mi.ingredient.id,
           quantity: mi.quantity,
           unit: mi.unit,
+          grams_equivalent: mi.grams_equivalent ?? (mi.unit === 'g' ? mi.quantity : null),
         })),
         variants: (meal.variants ?? [])
           .sort((a, b) => a.order - b.order)
@@ -455,6 +456,7 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
               ingredient_id: mi.ingredient.id,
               quantity: mi.quantity,
               unit: mi.unit,
+              grams_equivalent: mi.grams_equivalent ?? (mi.unit === 'g' ? mi.quantity : null),
             })),
           })),
       })),
@@ -843,12 +845,13 @@ export function DietFormDialog({
         missingItems += 1
         continue
       }
-      if (item.unit !== 'g') {
+      const grams = item.unit === 'g' ? item.quantity : item.grams_equivalent
+      if (!grams || grams <= 0) {
         omittedItems += 1
         continue
       }
 
-      const factor = item.quantity / 100
+      const factor = grams / 100
       calories += ing.calories_per_100g * factor
       protein_g += ing.protein_per_100g * factor
       carbs_g += ing.carbs_per_100g * factor
@@ -865,7 +868,7 @@ export function DietFormDialog({
       }
 
       toast.info(
-        'El autocálculo solo funciona con ingredientes en gramos. Completa los macros manualmente si usas ml o unidades.'
+        'El autocálculo necesita gramos o equivalentes en gramos para calcular los macros.'
       )
       return
     }
@@ -885,13 +888,13 @@ export function DietFormDialog({
 
     if (omittedItems > 0) {
       warnings.push(
-        `${omittedItems} ingrediente${omittedItems === 1 ? '' : 's'} con unidades no compatibles quedó${omittedItems === 1 ? '' : 'ron'} fuera`
+        `${omittedItems} ingrediente${omittedItems === 1 ? '' : 's'} sin equivalente en gramos quedó${omittedItems === 1 ? '' : 'ron'} fuera`
       )
     }
 
     if (warnings.length > 0) {
       toast.info(
-        `Se calcularon solo los ingredientes en gramos. ${warnings.join('. ')}. Completa esos macros manualmente.`
+        `Se calcularon solo los ingredientes con gramos o equivalente. ${warnings.join('. ')}. Completa esos equivalentes o los macros manualmente.`
       )
     }
   }

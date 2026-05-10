@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Plus, Search, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,6 +46,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
       ingredient_id: ingredientId,
       quantity: 100,
       unit: 'g',
+      grams_equivalent: 100,
     }
     onChange([...value, newItem])
     setSearch('')
@@ -75,7 +76,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
         )}
       </div>
       <p className="text-xs text-muted-foreground">
-        El autocálculo usa solo ingredientes en gramos. Para ml o unidades, completa los macros manualmente.
+        Para medidas caseras, añade el equivalente en gramos para calcular macros correctamente.
       </p>
 
       {value.length > 0 && (
@@ -111,7 +112,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Cantidad</label>
                     <Input
@@ -127,7 +128,13 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                     <label className="text-xs text-muted-foreground">Unidad</label>
                     <Select
                       value={item.unit}
-                      onValueChange={(val) => updateField(index, 'unit', val as MealIngredientFormValues['unit'])}
+                      onValueChange={(val) => {
+                        const unit = val as MealIngredientFormValues['unit']
+                        updateField(index, 'unit', unit)
+                        if (unit === 'g') {
+                          updateField(index, 'grams_equivalent', item.quantity)
+                        }
+                      }}
                     >
                       <SelectTrigger className="h-7 text-xs">
                         <SelectValue />
@@ -140,6 +147,24 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">Equiv. gramos</label>
+                    <Input
+                      type="number"
+                      min={0.1}
+                      step={0.1}
+                      value={item.unit === 'g' ? item.quantity : item.grams_equivalent ?? ''}
+                      disabled={item.unit === 'g'}
+                      onChange={(e) =>
+                        updateField(
+                          index,
+                          'grams_equivalent',
+                          e.target.value === '' ? null : parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      className="h-7 text-xs"
+                    />
                   </div>
                 </div>
               </div>

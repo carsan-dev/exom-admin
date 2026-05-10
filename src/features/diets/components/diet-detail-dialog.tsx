@@ -28,6 +28,16 @@ function MealRow({ meal }: { meal: Meal }) {
   )
   const sortedVariants = [...(meal.variants ?? [])].sort((a, b) => a.order - b.order)
 
+  const formatIngredientAmount = (mi: Meal['ingredients'][number]) => {
+    const base = `${formatMacroValue(mi.quantity)} ${mi.unit}`
+
+    if (mi.unit === 'g' || !mi.grams_equivalent || mi.grams_equivalent <= 0) {
+      return base
+    }
+
+    return `${base} (${formatMacroValue(mi.grams_equivalent)} g)`
+  }
+
   return (
     <div className="rounded-lg border border-border/60 bg-muted/20">
       <button
@@ -102,7 +112,7 @@ function MealRow({ meal }: { meal: Meal }) {
                 <div key={mi.id} className="flex items-center justify-between text-xs">
                   <span className="text-foreground">{mi.ingredient.name}</span>
                   <span className="text-muted-foreground">
-                    {formatMacroValue(mi.quantity)} {mi.unit}
+                    {formatIngredientAmount(mi)}
                   </span>
                 </div>
               ))}
@@ -128,7 +138,7 @@ function MealRow({ meal }: { meal: Meal }) {
                         <div key={mi.id} className="flex items-center justify-between text-xs">
                           <span className="text-foreground">{mi.ingredient.name}</span>
                           <span className="text-muted-foreground">
-                            {formatMacroValue(mi.quantity)} {mi.unit}
+                            {formatIngredientAmount(mi)}
                           </span>
                         </div>
                       ))}

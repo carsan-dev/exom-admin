@@ -58,6 +58,7 @@ export interface MealIngredient {
   id: string
   quantity: number
   unit: MeasureUnit
+  grams_equivalent: number | null
   ingredient: Ingredient
 }
 
