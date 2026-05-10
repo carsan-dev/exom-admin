@@ -60,6 +60,25 @@ const dietTagsQueryKey = ['diets', 'tags'] as const
 const ingredientsListQueryKey = ['ingredients', 'list-all'] as const
 
 function normalizeDietPayload(values: DietFormValues) {
+  type MealPayloadSource = Omit<DietFormValues['meals'][number], 'variants'>
+  const normalizeMeal = (meal: MealPayloadSource) => ({
+    type: meal.type,
+    name: meal.name.trim(),
+    image_url: meal.image_url?.trim() ? meal.image_url.trim() : undefined,
+    calories: meal.calories ?? undefined,
+    protein_g: meal.protein_g ?? undefined,
+    carbs_g: meal.carbs_g ?? undefined,
+    fat_g: meal.fat_g ?? undefined,
+    nutritional_badges:
+      meal.nutritional_badges?.map((badge) => badge.trim()).filter(Boolean) ?? [],
+    order: meal.order,
+    ingredients: meal.ingredients.map((ing) => ({
+      ingredient_id: ing.ingredient_id,
+      quantity: ing.quantity,
+      unit: ing.unit,
+    })),
+  })
+
   return {
     name: values.name.trim(),
     tags: normalizeDietTags(values.tags),
@@ -68,21 +87,8 @@ function normalizeDietPayload(values: DietFormValues) {
     total_carbs_g: values.total_carbs_g ?? undefined,
     total_fat_g: values.total_fat_g ?? undefined,
     meals: values.meals.map((meal) => ({
-      type: meal.type,
-      name: meal.name.trim(),
-      image_url: meal.image_url?.trim() ? meal.image_url.trim() : undefined,
-      calories: meal.calories ?? undefined,
-      protein_g: meal.protein_g ?? undefined,
-      carbs_g: meal.carbs_g ?? undefined,
-      fat_g: meal.fat_g ?? undefined,
-      nutritional_badges:
-        meal.nutritional_badges?.map((badge) => badge.trim()).filter(Boolean) ?? [],
-      order: meal.order,
-      ingredients: meal.ingredients.map((ing) => ({
-        ingredient_id: ing.ingredient_id,
-        quantity: ing.quantity,
-        unit: ing.unit,
-      })),
+      ...normalizeMeal(meal),
+      variants: (meal.variants ?? []).map(normalizeMeal),
     })),
   }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form'
 import { ChevronDown, ChevronUp, LoaderCircle, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { ImageUploadField } from '@/components/uploads/image-upload-field'
@@ -388,6 +388,20 @@ const defaultMeal: DietFormValues['meals'][number] = {
   nutritional_badges: [],
   order: 0,
   ingredients: [],
+  variants: [],
+}
+
+const defaultVariant: NonNullable<DietFormValues['meals'][number]['variants']>[number] = {
+  type: 'BREAKFAST',
+  name: '',
+  image_url: null,
+  calories: null,
+  protein_g: null,
+  carbs_g: null,
+  fat_g: null,
+  nutritional_badges: [],
+  order: 0,
+  ingredients: [],
 }
 
 const defaultValues: DietFormValues = {
@@ -425,6 +439,24 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
           quantity: mi.quantity,
           unit: mi.unit,
         })),
+        variants: (meal.variants ?? [])
+          .sort((a, b) => a.order - b.order)
+          .map((variant) => ({
+            type: variant.type,
+            name: variant.name,
+            image_url: variant.image_url,
+            calories: variant.calories,
+            protein_g: variant.protein_g,
+            carbs_g: variant.carbs_g,
+            fat_g: variant.fat_g,
+            nutritional_badges: variant.nutritional_badges,
+            order: variant.order,
+            ingredients: variant.ingredients.map((mi) => ({
+              ingredient_id: mi.ingredient.id,
+              quantity: mi.quantity,
+              unit: mi.unit,
+            })),
+          })),
       })),
   }
 }
@@ -444,6 +476,251 @@ function getFirstErrorMessage(error: unknown): string | undefined {
     if (msg) return msg
   }
   return undefined
+}
+
+function MealVariantsEditor({
+  form,
+  mealIndex,
+  mealFieldId,
+  isBusy,
+  onUploadingChange,
+  onCalculateMacros,
+}: {
+  form: UseFormReturn<DietFormValues>
+  mealIndex: number
+  mealFieldId: string
+  isBusy: boolean
+  onUploadingChange: (fieldId: string, uploading: boolean) => void
+  onCalculateMacros: (path: `meals.${number}.variants.${number}`) => void
+}) {
+  const variants = form.watch(`meals.${mealIndex}.variants`) ?? []
+  const mealType = form.watch(`meals.${mealIndex}.type`)
+
+  const setVariants = (nextVariants: typeof variants) => {
+    form.setValue(`meals.${mealIndex}.variants`, nextVariants, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
+  }
+
+  const addVariant = () => {
+    setVariants([
+      ...variants,
+      {
+        ...defaultVariant,
+        type: mealType,
+        order: variants.length,
+      },
+    ])
+  }
+
+  const removeVariant = (variantIndex: number) => {
+    setVariants(variants.filter((_, index) => index !== variantIndex))
+  }
+
+  return (
+    <div className="space-y-3 rounded-md border border-dashed border-border/70 bg-background/60 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <p className="text-xs font-medium text-foreground">Variantes</p>
+          <p className="text-xs text-muted-foreground">
+            Alternativas completas que el cliente podrá elegir en la app.
+          </p>
+        </div>
+        <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={addVariant}>
+          <Plus className="h-3 w-3" />
+          Añadir variante
+        </Button>
+      </div>
+
+      {variants.map((_, variantIndex) => (
+        <div
+          key={`${mealFieldId}-variant-${variantIndex}`}
+          className="space-y-3 rounded-md border border-border/60 bg-muted/10 p-3"
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-5 flex-none text-center text-xs font-medium text-muted-foreground">
+              {variantIndex + 1}
+            </span>
+            <FormField
+              control={form.control}
+              name={`meals.${mealIndex}.variants.${variantIndex}.name`}
+              render={({ field }) => (
+                <FormItem className="min-w-0 flex-1">
+                  <FormControl>
+                    <Input placeholder="Nombre de la variante" className="h-8 text-sm" {...field} />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 flex-none p-0 text-muted-foreground hover:text-status-error"
+              onClick={() => removeVariant(variantIndex)}
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">Macros de la variante</p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-xs text-muted-foreground"
+                onClick={() => onCalculateMacros(`meals.${mealIndex}.variants.${variantIndex}`)}
+              >
+                Calcular desde ingredientes
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <FormField
+                control={form.control}
+                name={`meals.${mealIndex}.variants.${variantIndex}.calories`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">Kcal</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? null : parseInt(e.target.value))
+                        }
+                        className="h-7 text-xs"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`meals.${mealIndex}.variants.${variantIndex}.protein_g`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">Proteína (g)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.1}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))
+                        }
+                        className="h-7 text-xs"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`meals.${mealIndex}.variants.${variantIndex}.carbs_g`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">Carbos (g)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.1}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))
+                        }
+                        className="h-7 text-xs"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`meals.${mealIndex}.variants.${variantIndex}.fat_g`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">Grasa (g)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.1}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))
+                        }
+                        className="h-7 text-xs"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <FormField
+            control={form.control}
+            name={`meals.${mealIndex}.variants.${variantIndex}.image_url`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <ImageUploadField
+                    label="Imagen de la variante"
+                    value={field.value ?? ''}
+                    onChange={(url) => field.onChange(url || null)}
+                    fileKeyPrefix="diets/meals"
+                    disabled={isBusy}
+                    onUploadingChange={(uploading) =>
+                      onUploadingChange(`${mealFieldId}-variant-${variantIndex}`, uploading)
+                    }
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name={`meals.${mealIndex}.variants.${variantIndex}.nutritional_badges`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs">Badges nutricionales (opcional)</FormLabel>
+                <FormControl>
+                  <BadgesField value={field.value ?? []} onChange={field.onChange} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name={`meals.${mealIndex}.variants.${variantIndex}.ingredients`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <IngredientPicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={getFirstErrorMessage(
+                      form.formState.errors.meals?.[mealIndex]?.variants?.[variantIndex]?.ingredients,
+                    )}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export function DietFormDialog({
@@ -521,8 +798,8 @@ export function DietFormDialog({
     form.setValue('total_fat_g', Math.round(totals.fat_g * 10) / 10)
   }
 
-  const calculateMealMacros = (mealIndex: number) => {
-    const items = form.getValues(`meals.${mealIndex}.ingredients`)
+  const calculateMealMacrosAtPath = (path: `meals.${number}` | `meals.${number}.variants.${number}`) => {
+    const items = form.getValues(`${path}.ingredients` as 'meals.0.ingredients')
 
     if (items.length === 0) {
       toast.info('Agrega ingredientes a la comida para calcular sus macros.')
@@ -593,10 +870,10 @@ export function DietFormDialog({
       return
     }
 
-    form.setValue(`meals.${mealIndex}.calories`, Math.round(calories))
-    form.setValue(`meals.${mealIndex}.protein_g`, Math.round(protein_g * 10) / 10)
-    form.setValue(`meals.${mealIndex}.carbs_g`, Math.round(carbs_g * 10) / 10)
-    form.setValue(`meals.${mealIndex}.fat_g`, Math.round(fat_g * 10) / 10)
+    form.setValue(`${path}.calories` as 'meals.0.calories', Math.round(calories))
+    form.setValue(`${path}.protein_g` as 'meals.0.protein_g', Math.round(protein_g * 10) / 10)
+    form.setValue(`${path}.carbs_g` as 'meals.0.carbs_g', Math.round(carbs_g * 10) / 10)
+    form.setValue(`${path}.fat_g` as 'meals.0.fat_g', Math.round(fat_g * 10) / 10)
 
     const warnings: string[] = []
 
@@ -617,6 +894,10 @@ export function DietFormDialog({
         `Se calcularon solo los ingredientes en gramos. ${warnings.join('. ')}. Completa esos macros manualmente.`
       )
     }
+  }
+
+  const calculateMealMacros = (mealIndex: number) => {
+    calculateMealMacrosAtPath(`meals.${mealIndex}`)
   }
 
   const addMeal = () => {
@@ -660,7 +941,15 @@ export function DietFormDialog({
       // Update order fields
       const normalizedValues: DietFormValues = {
         ...values,
-        meals: values.meals.map((meal, i) => ({ ...meal, order: i })),
+        meals: values.meals.map((meal, i) => ({
+          ...meal,
+          order: i,
+          variants: (meal.variants ?? []).map((variant, variantIndex) => ({
+            ...variant,
+            type: variant.type || meal.type,
+            order: variantIndex,
+          })),
+        })),
       }
 
       try {
@@ -1134,6 +1423,15 @@ export function DietFormDialog({
                           </FormControl>
                         </FormItem>
                       )}
+                    />
+
+                    <MealVariantsEditor
+                      form={form}
+                      mealIndex={mealIndex}
+                      mealFieldId={mealField.id}
+                      isBusy={isBusy}
+                      onUploadingChange={handleMealUploadChange}
+                      onCalculateMacros={calculateMealMacrosAtPath}
                     />
                   </div>
                 ))}

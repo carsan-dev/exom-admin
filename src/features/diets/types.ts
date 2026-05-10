@@ -10,13 +10,33 @@ export const MEAL_TYPE_LABELS: Record<MealType, string> = {
   DINNER: 'Cena',
 }
 
-export const MEASURE_UNIT_OPTIONS = ['g', 'ml', 'piece'] as const
+export const MEASURE_UNIT_OPTIONS = [
+  'g',
+  'ml',
+  'piece',
+  'tablespoon',
+  'teaspoon',
+  'handful',
+  'glass',
+  'cup',
+  'pinch',
+  'serving',
+  'to_taste',
+] as const
 export type MeasureUnit = (typeof MEASURE_UNIT_OPTIONS)[number]
 
 export const MEASURE_UNIT_LABELS: Record<MeasureUnit, string> = {
   g: 'gramos',
   ml: 'mililitros',
   piece: 'unidades',
+  tablespoon: 'cucharada',
+  teaspoon: 'cucharadita',
+  handful: 'puñado',
+  glass: 'vaso',
+  cup: 'taza',
+  pinch: 'pizca',
+  serving: 'ración',
+  to_taste: 'al gusto',
 }
 
 export function getMealTypeBadgeClass(type: string) {
@@ -53,6 +73,7 @@ export interface Meal {
   nutritional_badges: string[]
   order: number
   ingredients: MealIngredient[]
+  variants: Meal[]
 }
 
 export interface Diet {

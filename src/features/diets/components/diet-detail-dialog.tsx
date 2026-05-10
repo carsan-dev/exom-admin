@@ -26,6 +26,7 @@ function MealRow({ meal }: { meal: Meal }) {
   const sortedIngredients = [...meal.ingredients].sort((a, b) =>
     a.ingredient.name.localeCompare(b.ingredient.name),
   )
+  const sortedVariants = [...(meal.variants ?? [])].sort((a, b) => a.order - b.order)
 
   return (
     <div className="rounded-lg border border-border/60 bg-muted/20">
@@ -52,6 +53,11 @@ function MealRow({ meal }: { meal: Meal }) {
 
         {meal.calories != null && (
           <span className="text-xs text-muted-foreground flex-none">{meal.calories} kcal</span>
+        )}
+        {sortedVariants.length > 0 && (
+          <Badge variant="outline" className="flex-none text-xs">
+            {sortedVariants.length} variantes
+          </Badge>
         )}
       </button>
 
@@ -98,6 +104,36 @@ function MealRow({ meal }: { meal: Meal }) {
                   <span className="text-muted-foreground">
                     {formatMacroValue(mi.quantity)} {mi.unit}
                   </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {sortedVariants.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Variantes
+              </p>
+              {sortedVariants.map((variant) => (
+                <div key={variant.id} className="rounded-md border border-border/50 bg-background/70 p-2">
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span className="font-medium text-foreground">{variant.name}</span>
+                    {variant.calories != null && (
+                      <span className="text-muted-foreground">{variant.calories} kcal</span>
+                    )}
+                  </div>
+                  {variant.ingredients.length > 0 && (
+                    <div className="mt-1 space-y-1">
+                      {variant.ingredients.map((mi) => (
+                        <div key={mi.id} className="flex items-center justify-between text-xs">
+                          <span className="text-foreground">{mi.ingredient.name}</span>
+                          <span className="text-muted-foreground">
+                            {formatMacroValue(mi.quantity)} {mi.unit}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -43,7 +43,7 @@ export const mealIngredientSchema = z.object({
   unit: z.enum(MEASURE_UNIT_OPTIONS),
 })
 
-export const mealSchema = z.object({
+const mealBaseSchema = z.object({
   type: z.enum(MEAL_TYPE_OPTIONS),
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
   image_url: z.string().trim().url('URL inválida').optional().or(z.literal('')).nullable(),
@@ -54,6 +54,12 @@ export const mealSchema = z.object({
   nutritional_badges: z.array(z.string()).optional(),
   order: z.number().int().min(0).default(0),
   ingredients: z.array(mealIngredientSchema).min(1, 'Agrega al menos un ingrediente'),
+})
+
+export const mealVariantSchema = mealBaseSchema
+
+export const mealSchema = mealBaseSchema.extend({
+  variants: z.array(mealVariantSchema).optional().default([]),
 })
 
 export const dietSchema = z.object({
