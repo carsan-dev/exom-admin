@@ -33,7 +33,7 @@ const DEFAULT_UNIT_VALUES: Partial<
   handful: { quantity: 1, gramsEquivalent: 30 },
   glass: { quantity: 1, gramsEquivalent: 250 },
   cup: { quantity: 1, gramsEquivalent: 240 },
-  pinch: { quantity: 1, gramsEquivalent: 1 },
+  pinch: { quantity: 1, gramsEquivalent: 0.5 },
   serving: { quantity: 1, gramsEquivalent: 100 },
   to_taste: { quantity: 1, gramsEquivalent: 1 },
 }
@@ -46,7 +46,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
 
   const ingredientsById = useMemo(
     () => new Map(allIngredients.map((ing) => [ing.id, ing])),
-    [allIngredients],
+    [allIngredients]
   )
 
   const selectedIds = new Set(value.map((item) => item.ingredient_id))
@@ -76,7 +76,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
   const updateField = <K extends keyof MealIngredientFormValues>(
     index: number,
     field: K,
-    fieldValue: MealIngredientFormValues[K],
+    fieldValue: MealIngredientFormValues[K]
   ) => {
     onChange(value.map((item, i) => (i === index ? { ...item, [field]: fieldValue } : item)))
   }
@@ -97,8 +97,8 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                   }
                 : {}),
             }
-          : item,
-      ),
+          : item
+      )
     )
   }
 
@@ -129,13 +129,19 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                   <div className="flex-1 min-w-0">
                     {ingredient ? (
                       <>
-                        <p className="text-xs font-medium text-foreground truncate">{ingredient.name}</p>
+                        <p className="text-xs font-medium text-foreground truncate">
+                          {ingredient.name}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          P {formatMacroValue(ingredient.protein_per_100g)}g · C {formatMacroValue(ingredient.carbs_per_100g)}g · G {formatMacroValue(ingredient.fat_per_100g)}g por 100g
+                          P {formatMacroValue(ingredient.protein_per_100g)}g · C{' '}
+                          {formatMacroValue(ingredient.carbs_per_100g)}g · G{' '}
+                          {formatMacroValue(ingredient.fat_per_100g)}g por 100g
                         </p>
                       </>
                     ) : (
-                      <p className="text-xs text-muted-foreground italic">Ingrediente no encontrado</p>
+                      <p className="text-xs text-muted-foreground italic">
+                        Ingrediente no encontrado
+                      </p>
                     )}
                   </div>
                   <Button
@@ -171,7 +177,9 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                     <label className="text-xs text-muted-foreground">Unidad</label>
                     <Select
                       value={item.unit}
-                      onValueChange={(val) => updateUnit(index, val as MealIngredientFormValues['unit'])}
+                      onValueChange={(val) =>
+                        updateUnit(index, val as MealIngredientFormValues['unit'])
+                      }
                     >
                       <SelectTrigger className="h-7 text-xs">
                         <SelectValue />
@@ -191,13 +199,13 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                       type="number"
                       min={0.1}
                       step={0.1}
-                      value={item.unit === 'g' ? item.quantity : item.grams_equivalent ?? ''}
+                      value={item.unit === 'g' ? item.quantity : (item.grams_equivalent ?? '')}
                       disabled={item.unit === 'g'}
                       onChange={(e) =>
                         updateField(
                           index,
                           'grams_equivalent',
-                          e.target.value === '' ? null : parseFloat(e.target.value) || 0,
+                          e.target.value === '' ? null : parseFloat(e.target.value) || 0
                         )
                       }
                       className="h-7 text-xs"
@@ -224,7 +232,9 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
           </div>
 
           {ingredientsQuery.isLoading ? (
-            <p className="text-xs text-muted-foreground py-1 text-center">Cargando ingredientes...</p>
+            <p className="text-xs text-muted-foreground py-1 text-center">
+              Cargando ingredientes...
+            </p>
           ) : filteredIngredients.length === 0 ? (
             <p className="text-xs text-muted-foreground py-1 text-center">
               {search ? `Sin resultados para "${search}"` : 'No hay ingredientes disponibles'}
@@ -241,15 +251,16 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                     onClick={() => addIngredient(ingredient.id)}
                     className={cn(
                       'w-full flex items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors',
-                      isSelected
-                        ? 'opacity-40 cursor-not-allowed'
-                        : 'hover:bg-muted cursor-pointer',
+                      isSelected ? 'opacity-40 cursor-not-allowed' : 'hover:bg-muted cursor-pointer'
                     )}
                   >
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate text-foreground">{ingredient.name}</p>
                       <p className="text-muted-foreground">
-                        {ingredient.calories_per_100g} kcal · P {formatMacroValue(ingredient.protein_per_100g)}g · C {formatMacroValue(ingredient.carbs_per_100g)}g · G {formatMacroValue(ingredient.fat_per_100g)}g
+                        {ingredient.calories_per_100g} kcal · P{' '}
+                        {formatMacroValue(ingredient.protein_per_100g)}g · C{' '}
+                        {formatMacroValue(ingredient.carbs_per_100g)}g · G{' '}
+                        {formatMacroValue(ingredient.fat_per_100g)}g
                       </p>
                     </div>
                     {isSelected && (
