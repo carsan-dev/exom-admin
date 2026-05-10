@@ -22,6 +22,22 @@ interface IngredientPickerProps {
   error?: string
 }
 
+const DEFAULT_UNIT_VALUES: Partial<
+  Record<MealIngredientFormValues['unit'], { quantity: number; gramsEquivalent: number }>
+> = {
+  g: { quantity: 100, gramsEquivalent: 100 },
+  ml: { quantity: 100, gramsEquivalent: 100 },
+  piece: { quantity: 1, gramsEquivalent: 100 },
+  tablespoon: { quantity: 1, gramsEquivalent: 15 },
+  teaspoon: { quantity: 1, gramsEquivalent: 5 },
+  handful: { quantity: 1, gramsEquivalent: 30 },
+  glass: { quantity: 1, gramsEquivalent: 250 },
+  cup: { quantity: 1, gramsEquivalent: 240 },
+  pinch: { quantity: 1, gramsEquivalent: 1 },
+  serving: { quantity: 1, gramsEquivalent: 100 },
+  to_taste: { quantity: 1, gramsEquivalent: 1 },
+}
+
 export function IngredientPicker({ value, onChange, error }: IngredientPickerProps) {
   const [search, setSearch] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -63,6 +79,27 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
     fieldValue: MealIngredientFormValues[K],
   ) => {
     onChange(value.map((item, i) => (i === index ? { ...item, [field]: fieldValue } : item)))
+  }
+
+  const updateUnit = (index: number, unit: MealIngredientFormValues['unit']) => {
+    const defaults = DEFAULT_UNIT_VALUES[unit]
+
+    onChange(
+      value.map((item, i) =>
+        i === index
+          ? {
+              ...item,
+              unit,
+              ...(defaults
+                ? {
+                    quantity: defaults.quantity,
+                    grams_equivalent: defaults.gramsEquivalent,
+                  }
+                : {}),
+            }
+          : item,
+      ),
+    )
   }
 
   return (
@@ -120,7 +157,13 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                       min={0.1}
                       step={0.1}
                       value={item.quantity}
-                      onChange={(e) => updateField(index, 'quantity', parseFloat(e.target.value) || 0)}
+                      onChange={(e) => {
+                        const nextQuantity = parseFloat(e.target.value) || 0
+                        updateField(index, 'quantity', nextQuantity)
+                        if (item.unit === 'g') {
+                          updateField(index, 'grams_equivalent', nextQuantity)
+                        }
+                      }}
                       className="h-7 text-xs"
                     />
                   </div>
@@ -128,13 +171,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                     <label className="text-xs text-muted-foreground">Unidad</label>
                     <Select
                       value={item.unit}
-                      onValueChange={(val) => {
-                        const unit = val as MealIngredientFormValues['unit']
-                        updateField(index, 'unit', unit)
-                        if (unit === 'g') {
-                          updateField(index, 'grams_equivalent', item.quantity)
-                        }
-                      }}
+                      onValueChange={(val) => updateUnit(index, val as MealIngredientFormValues['unit'])}
                     >
                       <SelectTrigger className="h-7 text-xs">
                         <SelectValue />
