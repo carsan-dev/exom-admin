@@ -29,6 +29,7 @@ export function VideoUploadField({
   const [phase, setPhase] = useState<UploadPhase>('idle')
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const uploadFile = useUploadFile()
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,13 +66,14 @@ export function VideoUploadField({
       const uuid = crypto.randomUUID()
       const videoKey = `exercises/videos/${uuid}.mp4`
 
-      const { file_url } = await uploadFile.mutateAsync({
+      const { file_url, signed_read_url } = await uploadFile.mutateAsync({
         file: compressed,
         file_key: videoKey,
         content_type: 'video/mp4',
         onProgress: setProgress,
       })
 
+      setPreviewUrl(signed_read_url ?? URL.createObjectURL(compressed))
       onChange(file_url)
 
       // Upload thumbnail
@@ -100,6 +102,7 @@ export function VideoUploadField({
     setError(null)
     setPhase('idle')
     setProgress(0)
+    setPreviewUrl(null)
   }
 
   const isUploading = phase !== 'idle'
@@ -112,7 +115,7 @@ export function VideoUploadField({
         <div className="min-w-0 space-y-2">
           <div className="relative min-w-0 overflow-hidden rounded-lg border border-border/60 bg-muted">
             <video
-              src={value}
+              src={previewUrl ?? value}
               controls
               className="block aspect-video max-h-56 w-full max-w-full bg-black object-contain"
               preload="metadata"

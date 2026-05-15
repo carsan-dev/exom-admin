@@ -5,10 +5,12 @@ import { type ApiEnvelope, getApiErrorMessage, unwrapResponse } from '@/lib/api-
 interface PresignedUrlResponse {
   upload_url: string
   file_url: string
+  signed_read_url?: string
 }
 
 interface UploadFileResponse {
   file_url: string
+  signed_read_url?: string
 }
 
 export { getApiErrorMessage }

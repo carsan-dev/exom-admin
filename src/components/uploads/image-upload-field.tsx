@@ -39,6 +39,7 @@ export function ImageUploadField({
   const uploadingChangeRef = useRef(onUploadingChange)
   const [progress, setProgress] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const uploadFile = useUploadFile()
 
   const isUploading = progress !== null || uploadFile.isPending
@@ -54,8 +55,11 @@ export function ImageUploadField({
   useEffect(() => {
     return () => {
       uploadingChangeRef.current?.(false)
+      if (previewUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl)
+      }
     }
-  }, [])
+  }, [previewUrl])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -82,13 +86,14 @@ export function ImageUploadField({
       const uuid = crypto.randomUUID()
       const fileKey = `${fileKeyPrefix}/${uuid}.${ext}`
 
-      const { file_url } = await uploadFile.mutateAsync({
+      const { file_url, signed_read_url } = await uploadFile.mutateAsync({
         file: compressed,
         file_key: fileKey,
         content_type: compressed.type,
         onProgress: setProgress,
       })
 
+      setPreviewUrl(signed_read_url ?? URL.createObjectURL(compressed))
       onChange(file_url)
       setProgress(null)
     } catch (err) {
@@ -101,6 +106,7 @@ export function ImageUploadField({
     onChange('')
     setError(null)
     setProgress(null)
+    setPreviewUrl(null)
   }
 
   return (
@@ -111,7 +117,7 @@ export function ImageUploadField({
         <div className="min-w-0 space-y-2">
           <div className="relative min-w-0 overflow-hidden rounded-lg border border-border/60 bg-muted">
             <img
-              src={value}
+              src={previewUrl ?? value}
               alt={label}
               className="aspect-video max-h-56 w-full object-cover"
             />
