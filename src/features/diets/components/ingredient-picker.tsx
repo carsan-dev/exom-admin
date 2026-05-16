@@ -81,6 +81,10 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
     onChange(value.map((item, i) => (i === index ? { ...item, [field]: fieldValue } : item)))
   }
 
+  const updateItem = (index: number, patch: Partial<MealIngredientFormValues>) => {
+    onChange(value.map((item, i) => (i === index ? { ...item, ...patch } : item)))
+  }
+
   const updateUnit = (index: number, unit: MealIngredientFormValues['unit']) => {
     const defaults = DEFAULT_UNIT_VALUES[unit]
 
@@ -165,10 +169,10 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
                       value={item.quantity}
                       onChange={(e) => {
                         const nextQuantity = parseFloat(e.target.value) || 0
-                        updateField(index, 'quantity', nextQuantity)
-                        if (item.unit === 'g') {
-                          updateField(index, 'grams_equivalent', nextQuantity)
-                        }
+                        updateItem(index, {
+                          quantity: nextQuantity,
+                          ...(item.unit === 'g' ? { grams_equivalent: nextQuantity } : {}),
+                        })
                       }}
                       className="h-7 text-xs"
                     />
