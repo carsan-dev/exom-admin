@@ -264,6 +264,7 @@ export function ExerciseFormDialog({
   const muscleGroupsQuery = useExerciseMuscleGroups()
   const equipmentQuery = useExerciseEquipment()
   const isPending = createExercise.isPending || updateExercise.isPending
+  const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null)
 
   const muscleGroupOptions = useMemo(
     () => mergeOptions(MUSCLE_GROUPS, muscleGroupsQuery.data),
@@ -280,6 +281,8 @@ export function ExerciseFormDialog({
   })
 
   useEffect(() => {
+    setThumbnailPreviewUrl(null)
+
     if (!open) {
       form.reset(defaultValues)
     } else if (exercise) {
@@ -425,12 +428,13 @@ export function ExerciseFormDialog({
                       label="Video"
                       value={field.value ?? ''}
                       onChange={field.onChange}
-                      onThumbnailChange={(url) =>
+                      onThumbnailChange={(url, previewUrl) => {
+                        setThumbnailPreviewUrl(previewUrl ?? null)
                         form.setValue('thumbnail_url', url, {
                           shouldDirty: true,
                           shouldValidate: true,
                         })
-                      }
+                      }}
                       disabled={isPending}
                     />
                   </FormControl>
@@ -452,6 +456,7 @@ export function ExerciseFormDialog({
                       onChange={field.onChange}
                       fileKeyPrefix="exercises/thumbnails"
                       disabled={isPending}
+                      previewOverrideUrl={thumbnailPreviewUrl}
                     />
                   </FormControl>
                   <FormMessage />

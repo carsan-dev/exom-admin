@@ -7,7 +7,7 @@ import { getApiErrorMessage, useDirectUploadFile, useUploadFile } from '../api'
 interface VideoUploadFieldProps {
   value: string
   onChange: (url: string) => void
-  onThumbnailChange?: (url: string) => void
+  onThumbnailChange?: (url: string, previewUrl?: string | null) => void
   label?: string
   disabled?: boolean
 }
@@ -131,12 +131,12 @@ export function VideoUploadField({
       // Upload thumbnail
       if (onThumbnailChange) {
         const thumbKey = `exercises/thumbnails/${uuid}.jpg`
-        const { file_url: thumbUrl } = await uploadFile.mutateAsync({
+        const { file_url: thumbUrl, signed_read_url: signedThumbUrl } = await uploadFile.mutateAsync({
           file: thumbnail,
           file_key: thumbKey,
           content_type: 'image/jpeg',
         })
-        onThumbnailChange(thumbUrl)
+        onThumbnailChange(thumbUrl, signedThumbUrl ?? URL.createObjectURL(thumbnail))
       }
 
       setPhase('idle')

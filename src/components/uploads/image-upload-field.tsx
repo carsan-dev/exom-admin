@@ -11,6 +11,7 @@ interface ImageUploadFieldProps {
   label?: string
   disabled?: boolean
   onUploadingChange?: (isUploading: boolean) => void
+  previewOverrideUrl?: string | null
 }
 
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -34,6 +35,7 @@ export function ImageUploadField({
   label = 'Imagen',
   disabled = false,
   onUploadingChange,
+  previewOverrideUrl,
 }: ImageUploadFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const uploadingChangeRef = useRef(onUploadingChange)
@@ -117,7 +119,7 @@ export function ImageUploadField({
         <div className="min-w-0 space-y-2">
           <div className="relative min-w-0 overflow-hidden rounded-lg border border-border/60 bg-muted">
             <img
-              src={previewUrl ?? value}
+              src={previewUrl ?? previewOverrideUrl ?? value}
               alt={label}
               className="aspect-video max-h-56 w-full object-cover"
             />
