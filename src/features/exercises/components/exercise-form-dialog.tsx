@@ -425,7 +425,12 @@ export function ExerciseFormDialog({
                       label="Video"
                       value={field.value ?? ''}
                       onChange={field.onChange}
-                      onThumbnailChange={(url) => form.setValue('thumbnail_url', url)}
+                      onThumbnailChange={(url) =>
+                        form.setValue('thumbnail_url', url, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
                       disabled={isPending}
                     />
                   </FormControl>
