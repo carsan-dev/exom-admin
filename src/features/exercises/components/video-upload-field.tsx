@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { Upload, X, Play, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { compressVideo } from '@/lib/video-compressor'
-import { getApiErrorMessage, useUploadFile } from '../api'
+import { getApiErrorMessage, useDirectUploadFile, useUploadFile } from '../api'
 
 interface VideoUploadFieldProps {
   value: string
@@ -13,10 +13,26 @@ interface VideoUploadFieldProps {
 }
 
 const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
-const MAX_SIZE_BYTES = 200 * 1024 * 1024 // 200 MB pre-compression
+const MAX_SOURCE_SIZE_BYTES = 1024 * 1024 * 1024 // 1 GB pre-compression
+const TARGET_COMPRESSED_SIZE_BYTES = 100 * 1024 * 1024
+const MAX_COMPRESSED_SIZE_BYTES = 250 * 1024 * 1024
 
 
 type UploadPhase = 'idle' | 'compressing' | 'uploading'
+
+function formatFileSize(bytes: number) {
+  const megabytes = bytes / (1024 * 1024)
+  if (megabytes < 1024) return `${megabytes.toFixed(megabytes >= 10 ? 0 : 1)} MB`
+
+  return `${(megabytes / 1024).toFixed(2)} GB`
+}
+
+function getCompressionSummary(originalSize: number, compressedSize: number) {
+  const savedRatio = Math.max(0, 1 - compressedSize / originalSize)
+  const savedPercent = Math.round(savedRatio * 100)
+
+  return `${formatFileSize(originalSize)} -> ${formatFileSize(compressedSize)} (${savedPercent}% menos)`
+}
 
 export function VideoUploadField({
   value,
@@ -29,7 +45,9 @@ export function VideoUploadField({
   const [phase, setPhase] = useState<UploadPhase>('idle')
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [uploadSummary, setUploadSummary] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const directUploadFile = useDirectUploadFile()
   const uploadFile = useUploadFile()
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,12 +62,13 @@ export function VideoUploadField({
       return
     }
 
-    if (file.size > MAX_SIZE_BYTES) {
-      setError('El archivo supera el límite de 200 MB')
+    if (file.size > MAX_SOURCE_SIZE_BYTES) {
+      setError('El archivo supera el límite de 1 GB')
       return
     }
 
     setError(null)
+    setUploadSummary(null)
     setPhase('compressing')
     setProgress(0)
 
@@ -58,6 +77,22 @@ export function VideoUploadField({
       const { video: compressed, thumbnail } = await compressVideo(file, (ratio) => {
         setProgress(Math.round(ratio * 100))
       })
+      const summary = getCompressionSummary(file.size, compressed.size)
+
+      if (compressed.size > MAX_COMPRESSED_SIZE_BYTES) {
+        setError(
+          `El video comprimido pesa ${formatFileSize(compressed.size)}. Máximo permitido: ${formatFileSize(MAX_COMPRESSED_SIZE_BYTES)}.`
+        )
+        setPhase('idle')
+        setProgress(0)
+        return
+      }
+
+      setUploadSummary(
+        compressed.size > TARGET_COMPRESSED_SIZE_BYTES
+          ? `${summary}. Aviso: supera el objetivo de ${formatFileSize(TARGET_COMPRESSED_SIZE_BYTES)}.`
+          : summary
+      )
 
       // Upload compressed video
       setPhase('uploading')
@@ -66,7 +101,7 @@ export function VideoUploadField({
       const uuid = crypto.randomUUID()
       const videoKey = `exercises/videos/${uuid}.mp4`
 
-      const { file_url, signed_read_url } = await uploadFile.mutateAsync({
+      const { file_url, signed_read_url } = await directUploadFile.mutateAsync({
         file: compressed,
         file_key: videoKey,
         content_type: 'video/mp4',
@@ -100,6 +135,7 @@ export function VideoUploadField({
     onChange('')
     onThumbnailChange?.('')
     setError(null)
+    setUploadSummary(null)
     setPhase('idle')
     setProgress(0)
     setPreviewUrl(null)
@@ -150,6 +186,9 @@ export function VideoUploadField({
                 : `Subiendo video... ${progress}%`}
             </span>
           </div>
+          {uploadSummary && (
+            <p className="text-xs text-muted-foreground">{uploadSummary}</p>
+          )}
           <div className="h-2 w-full overflow-hidden rounded-full bg-border">
             <div
               className="h-full bg-brand-primary transition-all duration-200"
@@ -161,15 +200,19 @@ export function VideoUploadField({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={disabled || uploadFile.isPending}
+          disabled={disabled || directUploadFile.isPending || uploadFile.isPending}
           className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border/70 bg-muted/30 px-4 py-6 text-center transition-colors hover:border-brand-primary/50 hover:bg-brand-soft/5 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Upload className="h-8 w-8 text-muted-foreground" />
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">Seleccionar video</p>
-            <p className="text-xs text-muted-foreground">MP4, MOV o WebM · Máx. 200 MB (se comprime automáticamente)</p>
+            <p className="text-xs text-muted-foreground">MP4, MOV o WebM · Máx. 1 GB (se comprime antes de subir)</p>
           </div>
         </button>
+      )}
+
+      {uploadSummary && phase === 'idle' && (
+        <p className="text-xs text-muted-foreground">{uploadSummary}</p>
       )}
 
       {error && (
