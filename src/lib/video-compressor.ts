@@ -289,7 +289,7 @@ export async function compressVideo(
       '-c:v',
       'libx264',
       '-preset',
-      'medium',
+      'fast',
       '-profile:v',
       'high',
       '-level:v',
