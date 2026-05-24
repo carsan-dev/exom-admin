@@ -16,6 +16,7 @@ const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
 const MAX_SOURCE_SIZE_BYTES = 1024 * 1024 * 1024 // 1 GB pre-compression
 const TARGET_COMPRESSED_SIZE_BYTES = 100 * 1024 * 1024
 const MAX_COMPRESSED_SIZE_BYTES = 250 * 1024 * 1024
+const MAX_PROXY_UPLOAD_SIZE_BYTES = 95 * 1024 * 1024
 
 
 type UploadPhase = 'idle' | 'compressing' | 'uploading'
@@ -101,15 +102,31 @@ export function VideoUploadField({
       const uuid = crypto.randomUUID()
       const videoKey = `exercises/videos/${uuid}.mp4`
 
-      const { file_url, signed_read_url } = await directUploadFile.mutateAsync({
-        file: compressed,
-        file_key: videoKey,
-        content_type: 'video/mp4',
-        onProgress: setProgress,
-      })
+      let uploadedVideo: { file_url: string; signed_read_url?: string | null }
 
-      setPreviewUrl(signed_read_url ?? URL.createObjectURL(compressed))
-      onChange(file_url)
+      try {
+        uploadedVideo = await directUploadFile.mutateAsync({
+          file: compressed,
+          file_key: videoKey,
+          content_type: 'video/mp4',
+          onProgress: setProgress,
+        })
+      } catch (directUploadError) {
+        if (compressed.size > MAX_PROXY_UPLOAD_SIZE_BYTES) {
+          throw directUploadError
+        }
+
+        setProgress(0)
+        uploadedVideo = await uploadFile.mutateAsync({
+          file: compressed,
+          file_key: videoKey,
+          content_type: 'video/mp4',
+          onProgress: setProgress,
+        })
+      }
+
+      setPreviewUrl(uploadedVideo.signed_read_url ?? URL.createObjectURL(compressed))
+      onChange(uploadedVideo.file_url)
 
       // Upload thumbnail
       if (onThumbnailChange) {
