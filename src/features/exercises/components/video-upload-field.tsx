@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Upload, X, Play, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { DIRECT_VIDEO_UPLOAD_MAX_BYTES, compressVideo } from '@/lib/video-compressor'
+import { canBypassVideoCompression, compressVideo } from '@/lib/video-compressor'
 import { getApiErrorMessage, useDirectUploadFile, useUploadFile } from '../api'
 
 interface VideoUploadFieldProps {
@@ -83,7 +83,7 @@ export function VideoUploadField({
 
     setError(null)
     setUploadSummary(null)
-    const shouldCompress = file.size > DIRECT_VIDEO_UPLOAD_MAX_BYTES
+    const shouldCompress = !canBypassVideoCompression(file)
     setPhase(shouldCompress ? 'compressing' : 'preparing')
     setProgress(0)
 

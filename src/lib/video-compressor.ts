@@ -72,6 +72,14 @@ function isMp4File(file: File) {
   return file.type === 'video/mp4' || getExtension(file.name) === '.mp4'
 }
 
+function isWebmFile(file: File) {
+  return file.type === 'video/webm' || getExtension(file.name) === '.webm'
+}
+
+export function canBypassVideoCompression(file: File) {
+  return file.size <= DIRECT_VIDEO_UPLOAD_MAX_BYTES && (isMp4File(file) || isWebmFile(file))
+}
+
 function getTargetDimensions(width: number, height: number) {
   const shortSide = Math.min(width, height)
   if (shortSide <= MAX_SHORT_SIDE) {
@@ -105,7 +113,7 @@ function getThumbnailDimensions(width: number, height: number) {
 }
 
 function shouldBypassCompression(file: File, metadata: VideoMetadata) {
-  if (file.size <= DIRECT_VIDEO_UPLOAD_MAX_BYTES) {
+  if (canBypassVideoCompression(file)) {
     return true
   }
 
@@ -118,6 +126,68 @@ function shouldBypassCompression(file: File, metadata: VideoMetadata) {
     Math.max(metadata.width, metadata.height) <= PASSTHROUGH_MAX_LONG_SIDE &&
     sourceBitrate <= PASSTHROUGH_TOTAL_BITRATE_BPS
   )
+}
+
+function getSdrScaleFilter(targetSize: { width: number; height: number }) {
+  return `scale=${targetSize.width}:${targetSize.height}:flags=lanczos:out_color_matrix=bt709:out_range=tv,format=yuv420p`
+}
+
+function getHdrToneMapFilter(targetSize: { width: number; height: number }) {
+  return [
+    'zscale=t=linear:npl=100',
+    'format=gbrpf32le',
+    'zscale=p=bt709',
+    'tonemap=tonemap=hable:desat=0',
+    'zscale=t=bt709:m=bt709:r=tv',
+    `scale=${targetSize.width}:${targetSize.height}:flags=lanczos`,
+    'format=yuv420p',
+  ].join(',')
+}
+
+async function encodeVideo(params: {
+  ff: FFmpeg
+  inputName: string
+  outputName: string
+  videoFilter: string
+  targetBitrates: ReturnType<typeof getEncodingBitrates>
+}) {
+  const { ff, inputName, outputName, videoFilter, targetBitrates } = params
+
+  await ff.exec([
+    '-i',
+    inputName,
+    '-vf',
+    videoFilter,
+    '-c:v',
+    'libx264',
+    '-preset',
+    'fast',
+    '-profile:v',
+    'high',
+    '-level:v',
+    '4.1',
+    '-colorspace',
+    'bt709',
+    '-color_primaries',
+    'bt709',
+    '-color_trc',
+    'bt709',
+    '-color_range',
+    'tv',
+    '-b:v',
+    targetBitrates.video,
+    '-maxrate',
+    targetBitrates.maxRate,
+    '-bufsize',
+    targetBitrates.buffer,
+    '-c:a',
+    'aac',
+    '-b:a',
+    targetBitrates.audio,
+    '-movflags',
+    '+faststart',
+    outputName,
+  ])
 }
 
 function getEncodingBitrates(file: File, metadata: VideoMetadata) {
@@ -284,41 +354,24 @@ export async function compressVideo(
   onProgress?.(0.3)
 
   try {
-    await ff.exec([
-      '-i',
-      inputName,
-      '-vf',
-      `scale=${targetSize.width}:${targetSize.height}:flags=lanczos:out_color_matrix=bt709:out_range=tv,format=yuv420p`,
-      '-c:v',
-      'libx264',
-      '-preset',
-      'fast',
-      '-profile:v',
-      'high',
-      '-level:v',
-      '4.1',
-      '-colorspace',
-      'bt709',
-      '-color_primaries',
-      'bt709',
-      '-color_trc',
-      'bt709',
-      '-color_range',
-      'tv',
-      '-b:v',
-      targetBitrates.video,
-      '-maxrate',
-      targetBitrates.maxRate,
-      '-bufsize',
-      targetBitrates.buffer,
-      '-c:a',
-      'aac',
-      '-b:a',
-      targetBitrates.audio,
-      '-movflags',
-      '+faststart',
-      outputName,
-    ])
+    try {
+      await encodeVideo({
+        ff,
+        inputName,
+        outputName,
+        videoFilter: getHdrToneMapFilter(targetSize),
+        targetBitrates,
+      })
+    } catch {
+      await safeDeleteFile(ff, outputName)
+      await encodeVideo({
+        ff,
+        inputName,
+        outputName,
+        videoFilter: getSdrScaleFilter(targetSize),
+        targetBitrates,
+      })
+    }
 
     const videoData = await ff.readFile(outputName)
 
