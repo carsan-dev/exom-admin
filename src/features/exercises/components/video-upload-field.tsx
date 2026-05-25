@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Upload, X, Play, Loader2, Copy } from 'lucide-react'
+import { Upload, X, Play, Loader2, Copy, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { canBypassVideoCompression, compressVideo } from '@/lib/video-compressor'
 import { getApiErrorMessage, useDirectUploadFile, useUploadFile } from '../api'
@@ -66,6 +66,8 @@ export function VideoUploadField({
   const [error, setError] = useState<string | null>(null)
   const [uploadSummary, setUploadSummary] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [showLocalCommand, setShowLocalCommand] = useState(false)
+  const [copiedCommand, setCopiedCommand] = useState(false)
   const directUploadFile = useDirectUploadFile()
   const uploadFile = useUploadFile()
 
@@ -182,6 +184,12 @@ export function VideoUploadField({
 
   const isUploading = phase !== 'idle'
 
+  const handleCopyCommand = async () => {
+    await navigator.clipboard?.writeText(LOCAL_FFMPEG_COMMAND)
+    setCopiedCommand(true)
+    window.setTimeout(() => setCopiedCommand(false), 1800)
+  }
+
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium leading-none">{label}</p>
@@ -254,24 +262,42 @@ export function VideoUploadField({
 
       {!value && !isUploading && (
         <div className="space-y-2 rounded-lg border border-status-warning/40 bg-status-warning/10 p-3 text-left">
-          <p className="text-xs text-muted-foreground">
-            Aviso MOV: al comprimir en la web el video puede quedar palido. Si pasa, conviertelo en local y sube el MP4.
-          </p>
-          <div className="flex min-w-0 items-start gap-2 rounded-md bg-background/60 p-2">
-            <code className="min-w-0 flex-1 break-all text-[11px] leading-5 text-muted-foreground">
-              {LOCAL_FFMPEG_COMMAND}
-            </code>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 shrink-0"
-              onClick={() => navigator.clipboard?.writeText(LOCAL_FFMPEG_COMMAND)}
-              aria-label="Copiar comando ffmpeg"
-            >
-              <Copy className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between gap-3 text-left text-xs text-muted-foreground"
+            onClick={() => setShowLocalCommand((current) => !current)}
+          >
+            <span>Aviso MOV: puede quedar palido al comprimir en web. Usa ffmpeg local si pasa.</span>
+            {showLocalCommand ? (
+              <ChevronUp className="h-4 w-4 shrink-0" />
+            ) : (
+              <ChevronDown className="h-4 w-4 shrink-0" />
+            )}
+          </button>
+          {showLocalCommand && (
+            <div className="flex min-w-0 items-start gap-2 rounded-md bg-background/60 p-2">
+              <code className="min-w-0 flex-1 break-all text-[11px] leading-5 text-muted-foreground">
+                {LOCAL_FFMPEG_COMMAND}
+              </code>
+              <div className="relative shrink-0">
+                {copiedCommand && (
+                  <span className="absolute bottom-full right-0 mb-1 whitespace-nowrap rounded bg-foreground px-2 py-1 text-[11px] font-medium text-background shadow">
+                    Copiado al portapapeles!
+                  </span>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={handleCopyCommand}
+                  aria-label="Copiar comando ffmpeg"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
