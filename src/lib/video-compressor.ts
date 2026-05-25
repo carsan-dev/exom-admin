@@ -389,6 +389,17 @@ export async function compressVideo(
   }
 }
 
+export async function createVideoThumbnail(
+  file: File,
+  onProgress?: (ratio: number) => void,
+): Promise<File> {
+  const metadata = await getVideoMetadata(file)
+  onProgress?.(0.4)
+  const thumbnail = await generateThumbnail(file, metadata)
+  onProgress?.(1)
+  return thumbnail
+}
+
 function getExtension(filename: string) {
   const ext = filename.split('.').pop()?.toLowerCase()
   return ext ? `.${ext}` : '.mp4'

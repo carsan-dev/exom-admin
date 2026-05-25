@@ -12,7 +12,7 @@ import {
 } from '@/lib/api-utils'
 import type { ExerciseFormValues } from './schemas'
 import type { Exercise, PaginatedResponse } from './types'
-export { useDirectUploadFile, usePresignedUrl, useUploadFile } from '../uploads/api'
+export { useDirectUploadFile, usePresignedUrl, useUploadExerciseVideo, useUploadFile } from '../uploads/api'
 
 export { getApiErrorMessage }
 
