@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Upload, X, Play, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { compressVideo } from '@/lib/video-compressor'
+import { DIRECT_VIDEO_UPLOAD_MAX_BYTES, compressVideo } from '@/lib/video-compressor'
 import { getApiErrorMessage, useDirectUploadFile, useUploadFile } from '../api'
 
 interface VideoUploadFieldProps {
@@ -19,7 +19,7 @@ const MAX_COMPRESSED_SIZE_BYTES = 250 * 1024 * 1024
 const MAX_PROXY_UPLOAD_SIZE_BYTES = 95 * 1024 * 1024
 
 
-type UploadPhase = 'idle' | 'compressing' | 'uploading'
+type UploadPhase = 'idle' | 'preparing' | 'compressing' | 'uploading'
 
 function formatFileSize(bytes: number) {
   const megabytes = bytes / (1024 * 1024)
@@ -29,10 +29,23 @@ function formatFileSize(bytes: number) {
 }
 
 function getCompressionSummary(originalSize: number, compressedSize: number) {
+  if (originalSize === compressedSize) {
+    return `${formatFileSize(originalSize)} subido sin comprimir`
+  }
+
   const savedRatio = Math.max(0, 1 - compressedSize / originalSize)
   const savedPercent = Math.round(savedRatio * 100)
 
   return `${formatFileSize(originalSize)} -> ${formatFileSize(compressedSize)} (${savedPercent}% menos)`
+}
+
+function getExtension(filename: string, contentType: string) {
+  const ext = filename.split('.').pop()?.toLowerCase()
+
+  if (ext) return ext
+  if (contentType === 'video/quicktime') return 'mov'
+  if (contentType === 'video/webm') return 'webm'
+  return 'mp4'
 }
 
 export function VideoUploadField({
@@ -70,19 +83,19 @@ export function VideoUploadField({
 
     setError(null)
     setUploadSummary(null)
-    setPhase('compressing')
+    const shouldCompress = file.size > DIRECT_VIDEO_UPLOAD_MAX_BYTES
+    setPhase(shouldCompress ? 'compressing' : 'preparing')
     setProgress(0)
 
     try {
-      // Compress video + generate thumbnail
-      const { video: compressed, thumbnail } = await compressVideo(file, (ratio) => {
+      const { video: processedVideo, thumbnail } = await compressVideo(file, (ratio) => {
         setProgress(Math.round(ratio * 100))
       })
-      const summary = getCompressionSummary(file.size, compressed.size)
+      const summary = getCompressionSummary(file.size, processedVideo.size)
 
-      if (compressed.size > MAX_COMPRESSED_SIZE_BYTES) {
+      if (processedVideo.size > MAX_COMPRESSED_SIZE_BYTES) {
         setError(
-          `El video comprimido pesa ${formatFileSize(compressed.size)}. Máximo permitido: ${formatFileSize(MAX_COMPRESSED_SIZE_BYTES)}.`
+          `El video pesa ${formatFileSize(processedVideo.size)}. Máximo permitido: ${formatFileSize(MAX_COMPRESSED_SIZE_BYTES)}.`
         )
         setPhase('idle')
         setProgress(0)
@@ -90,42 +103,43 @@ export function VideoUploadField({
       }
 
       setUploadSummary(
-        compressed.size > TARGET_COMPRESSED_SIZE_BYTES
+        processedVideo.size > TARGET_COMPRESSED_SIZE_BYTES
           ? `${summary}. Aviso: supera el objetivo de ${formatFileSize(TARGET_COMPRESSED_SIZE_BYTES)}.`
           : summary
       )
 
-      // Upload compressed video
       setPhase('uploading')
       setProgress(0)
 
       const uuid = crypto.randomUUID()
-      const videoKey = `exercises/videos/${uuid}.mp4`
+      const videoExtension = getExtension(processedVideo.name, processedVideo.type)
+      const videoKey = `exercises/videos/${uuid}.${videoExtension}`
+      const videoContentType = processedVideo.type || 'video/mp4'
 
       let uploadedVideo: { file_url: string; signed_read_url?: string | null }
 
       try {
         uploadedVideo = await directUploadFile.mutateAsync({
-          file: compressed,
+          file: processedVideo,
           file_key: videoKey,
-          content_type: 'video/mp4',
+          content_type: videoContentType,
           onProgress: setProgress,
         })
       } catch (directUploadError) {
-        if (compressed.size > MAX_PROXY_UPLOAD_SIZE_BYTES) {
+        if (processedVideo.size > MAX_PROXY_UPLOAD_SIZE_BYTES) {
           throw directUploadError
         }
 
         setProgress(0)
         uploadedVideo = await uploadFile.mutateAsync({
-          file: compressed,
+          file: processedVideo,
           file_key: videoKey,
-          content_type: 'video/mp4',
+          content_type: videoContentType,
           onProgress: setProgress,
         })
       }
 
-      setPreviewUrl(uploadedVideo.signed_read_url ?? URL.createObjectURL(compressed))
+      setPreviewUrl(uploadedVideo.signed_read_url ?? URL.createObjectURL(processedVideo))
       onChange(uploadedVideo.file_url)
 
       // Upload thumbnail
@@ -192,7 +206,7 @@ export function VideoUploadField({
       ) : isUploading ? (
         <div className="space-y-2 rounded-lg border border-border/60 bg-muted/50 p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            {phase === 'compressing' ? (
+            {phase !== 'uploading' ? (
               <Loader2 className="h-4 w-4 animate-spin text-brand-primary" />
             ) : (
               <Play className="h-4 w-4 animate-pulse text-brand-primary" />
@@ -200,6 +214,8 @@ export function VideoUploadField({
             <span>
               {phase === 'compressing'
                 ? `Comprimiendo video... ${progress}%`
+                : phase === 'preparing'
+                  ? `Preparando video... ${progress}%`
                 : `Subiendo video... ${progress}%`}
             </span>
           </div>
@@ -223,7 +239,7 @@ export function VideoUploadField({
           <Upload className="h-8 w-8 text-muted-foreground" />
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">Seleccionar video</p>
-            <p className="text-xs text-muted-foreground">MP4, MOV o WebM · Máx. 1 GB (se comprime antes de subir)</p>
+            <p className="text-xs text-muted-foreground">MP4, MOV o WebM · Máx. 1 GB. Directo hasta 100 MB.</p>
           </div>
         </button>
       )}
@@ -247,3 +263,4 @@ export function VideoUploadField({
     </div>
   )
 }
+

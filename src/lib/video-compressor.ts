@@ -10,7 +10,7 @@ const MAX_VIDEO_BITRATE_BPS = 3_500_000
 const PASSTHROUGH_TOTAL_BITRATE_BPS = 4_000_000
 const PASSTHROUGH_MAX_DURATION_SECONDS = 60
 const PASSTHROUGH_MAX_LONG_SIDE = 1920
-const MAX_DIRECT_UPLOAD_BYTES = 95 * 1024 * 1024
+export const DIRECT_VIDEO_UPLOAD_MAX_BYTES = 100 * 1024 * 1024
 
 interface VideoMetadata {
   width: number
@@ -105,11 +105,14 @@ function getThumbnailDimensions(width: number, height: number) {
 }
 
 function shouldBypassCompression(file: File, metadata: VideoMetadata) {
+  if (file.size <= DIRECT_VIDEO_UPLOAD_MAX_BYTES) {
+    return true
+  }
+
   const sourceBitrate = getSourceBitrate(file.size, metadata.duration)
   if (sourceBitrate === null) return false
 
   return (
-    file.size <= MAX_DIRECT_UPLOAD_BYTES &&
     isMp4File(file) &&
     metadata.duration <= PASSTHROUGH_MAX_DURATION_SECONDS &&
     Math.max(metadata.width, metadata.height) <= PASSTHROUGH_MAX_LONG_SIDE &&
