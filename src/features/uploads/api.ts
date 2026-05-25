@@ -116,31 +116,3 @@ export function useUploadFile() {
     },
   })
 }
-
-export function useUploadExerciseVideo() {
-  return useMutation({
-    mutationFn: async (payload: {
-      file: File
-      file_key: string
-      onProgress?: (percent: number) => void
-    }) => {
-      const formData = new FormData()
-      formData.append('file', payload.file)
-      formData.append('file_key', payload.file_key)
-
-      const response = await api.post<ApiEnvelope<UploadFileResponse>>(
-        '/uploads/exercise-video',
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-          onUploadProgress: (event) => {
-            if (event.total) {
-              payload.onProgress?.(Math.round((event.loaded / event.total) * 100))
-            }
-          },
-        },
-      )
-      return unwrapResponse(response)
-    },
-  })
-}

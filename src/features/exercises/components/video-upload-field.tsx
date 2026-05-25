@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
-import { Upload, X, Play, Loader2 } from 'lucide-react'
+import { Upload, X, Play, Loader2, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { canBypassVideoCompression, compressVideo, createVideoThumbnail } from '@/lib/video-compressor'
-import { getApiErrorMessage, useDirectUploadFile, useUploadExerciseVideo, useUploadFile } from '../api'
+import { canBypassVideoCompression, compressVideo } from '@/lib/video-compressor'
+import { getApiErrorMessage, useDirectUploadFile, useUploadFile } from '../api'
 
 interface VideoUploadFieldProps {
   value: string
@@ -17,9 +17,10 @@ const MAX_SOURCE_SIZE_BYTES = 1024 * 1024 * 1024 // 1 GB pre-compression
 const TARGET_COMPRESSED_SIZE_BYTES = 100 * 1024 * 1024
 const MAX_COMPRESSED_SIZE_BYTES = 250 * 1024 * 1024
 const MAX_PROXY_UPLOAD_SIZE_BYTES = 95 * 1024 * 1024
+const LOCAL_FFMPEG_COMMAND =
+  'ffmpeg -i input.mov -vf "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,scale=\'if(gt(iw,ih),-2,1080)\':\'if(gt(iw,ih),1080,-2)\':flags=lanczos,format=yuv420p" -c:v libx264 -preset fast -profile:v high -level 4.1 -color_primaries bt709 -color_trc bt709 -colorspace bt709 -color_range tv -b:v 3500k -maxrate 4400k -bufsize 8750k -c:a aac -b:a 96k -movflags +faststart output.mp4'
 
-
-type UploadPhase = 'idle' | 'preparing' | 'compressing' | 'processing' | 'uploading'
+type UploadPhase = 'idle' | 'preparing' | 'compressing' | 'uploading'
 
 function formatFileSize(bytes: number) {
   const megabytes = bytes / (1024 * 1024)
@@ -48,6 +49,10 @@ function getExtension(filename: string, contentType: string) {
   return 'mp4'
 }
 
+function isMovFile(file: File) {
+  return file.type === 'video/quicktime' || getExtension(file.name, file.type) === 'mov'
+}
+
 export function VideoUploadField({
   value,
   onChange,
@@ -62,7 +67,6 @@ export function VideoUploadField({
   const [uploadSummary, setUploadSummary] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const directUploadFile = useDirectUploadFile()
-  const uploadExerciseVideo = useUploadExerciseVideo()
   const uploadFile = useUploadFile()
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,21 +88,15 @@ export function VideoUploadField({
 
     setError(null)
     setUploadSummary(null)
+    const isMov = isMovFile(file)
     const shouldCompress = !canBypassVideoCompression(file)
     setPhase(shouldCompress ? 'compressing' : 'preparing')
     setProgress(0)
 
     try {
-      const { video: processedVideo, thumbnail } = shouldCompress
-        ? {
-            video: file,
-            thumbnail: await createVideoThumbnail(file, (ratio) => {
-              setProgress(Math.round(ratio * 100))
-            }),
-          }
-        : await compressVideo(file, (ratio) => {
-            setProgress(Math.round(ratio * 100))
-          })
+      const { video: processedVideo, thumbnail } = await compressVideo(file, (ratio) => {
+        setProgress(Math.round(ratio * 100))
+      })
       const summary = getCompressionSummary(file.size, processedVideo.size)
 
       if (processedVideo.size > MAX_COMPRESSED_SIZE_BYTES) {
@@ -111,8 +109,8 @@ export function VideoUploadField({
       }
 
       setUploadSummary(
-        shouldCompress
-          ? `${formatFileSize(file.size)} enviado a procesamiento de color en servidor`
+        isMov
+          ? `${summary}. Aviso: los MOV pueden quedar palidos al comprimirlos en la web. Si ocurre, convierte en local con ffmpeg y sube el MP4.`
           : processedVideo.size > TARGET_COMPRESSED_SIZE_BYTES
           ? `${summary}. Aviso: supera el objetivo de ${formatFileSize(TARGET_COMPRESSED_SIZE_BYTES)}.`
           : summary
@@ -122,41 +120,31 @@ export function VideoUploadField({
       setProgress(0)
 
       const uuid = crypto.randomUUID()
-      const videoExtension = shouldCompress ? 'mp4' : getExtension(processedVideo.name, processedVideo.type)
+      const videoExtension = getExtension(processedVideo.name, processedVideo.type)
       const videoKey = `exercises/videos/${uuid}.${videoExtension}`
-      const videoContentType = shouldCompress ? 'video/mp4' : processedVideo.type || 'video/mp4'
+      const videoContentType = processedVideo.type || 'video/mp4'
 
       let uploadedVideo: { file_url: string; signed_read_url?: string | null }
 
-      if (shouldCompress) {
-        setPhase('processing')
-        setProgress(0)
-        uploadedVideo = await uploadExerciseVideo.mutateAsync({
+      try {
+        uploadedVideo = await directUploadFile.mutateAsync({
           file: processedVideo,
           file_key: videoKey,
+          content_type: videoContentType,
           onProgress: setProgress,
         })
-      } else {
-        try {
-          uploadedVideo = await directUploadFile.mutateAsync({
-            file: processedVideo,
-            file_key: videoKey,
-            content_type: videoContentType,
-            onProgress: setProgress,
-          })
-        } catch (directUploadError) {
-          if (processedVideo.size > MAX_PROXY_UPLOAD_SIZE_BYTES) {
-            throw directUploadError
-          }
-
-          setProgress(0)
-          uploadedVideo = await uploadFile.mutateAsync({
-            file: processedVideo,
-            file_key: videoKey,
-            content_type: videoContentType,
-            onProgress: setProgress,
-          })
+      } catch (directUploadError) {
+        if (processedVideo.size > MAX_PROXY_UPLOAD_SIZE_BYTES) {
+          throw directUploadError
         }
+
+        setProgress(0)
+        uploadedVideo = await uploadFile.mutateAsync({
+          file: processedVideo,
+          file_key: videoKey,
+          content_type: videoContentType,
+          onProgress: setProgress,
+        })
       }
 
       setPreviewUrl(uploadedVideo.signed_read_url ?? URL.createObjectURL(processedVideo))
@@ -234,8 +222,6 @@ export function VideoUploadField({
             <span>
               {phase === 'compressing'
                 ? `Comprimiendo video... ${progress}%`
-                : phase === 'processing'
-                  ? `Procesando color en servidor... ${progress}%`
                 : phase === 'preparing'
                   ? `Preparando video... ${progress}%`
                 : `Subiendo video... ${progress}%`}
@@ -255,7 +241,7 @@ export function VideoUploadField({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={disabled || directUploadFile.isPending || uploadExerciseVideo.isPending || uploadFile.isPending}
+          disabled={disabled || directUploadFile.isPending || uploadFile.isPending}
           className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border/70 bg-muted/30 px-4 py-6 text-center transition-colors hover:border-brand-primary/50 hover:bg-brand-soft/5 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Upload className="h-8 w-8 text-muted-foreground" />
@@ -264,6 +250,29 @@ export function VideoUploadField({
             <p className="text-xs text-muted-foreground">MP4, MOV o WebM · Máx. 1 GB. Directo hasta 100 MB.</p>
           </div>
         </button>
+      )}
+
+      {!value && !isUploading && (
+        <div className="space-y-2 rounded-lg border border-status-warning/40 bg-status-warning/10 p-3 text-left">
+          <p className="text-xs text-muted-foreground">
+            Aviso MOV: al comprimir en la web el video puede quedar palido. Si pasa, conviertelo en local y sube el MP4.
+          </p>
+          <div className="flex min-w-0 items-start gap-2 rounded-md bg-background/60 p-2">
+            <code className="min-w-0 flex-1 break-all text-[11px] leading-5 text-muted-foreground">
+              {LOCAL_FFMPEG_COMMAND}
+            </code>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 shrink-0"
+              onClick={() => navigator.clipboard?.writeText(LOCAL_FFMPEG_COMMAND)}
+              aria-label="Copiar comando ffmpeg"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
       )}
 
       {uploadSummary && phase === 'idle' && (
