@@ -18,7 +18,7 @@ const TARGET_COMPRESSED_SIZE_BYTES = 100 * 1024 * 1024
 const MAX_COMPRESSED_SIZE_BYTES = 250 * 1024 * 1024
 const MAX_PROXY_UPLOAD_SIZE_BYTES = 95 * 1024 * 1024
 const LOCAL_FFMPEG_COMMAND =
-  'ffmpeg -i input.mov -vf "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,scale=\'if(gt(iw,ih),-2,1080)\':\'if(gt(iw,ih),1080,-2)\':flags=lanczos,format=yuv420p" -c:v libx264 -preset fast -profile:v high -level 4.1 -color_primaries bt709 -color_trc bt709 -colorspace bt709 -color_range tv -b:v 3500k -maxrate 4400k -bufsize 8750k -c:a aac -b:a 96k -movflags +faststart output.mp4'
+  'ffmpeg -i input.mov -vf "scale=\'if(gt(iw,ih),-2,1080)\':\'if(gt(iw,ih),1080,-2)\':flags=lanczos,format=yuv420p" -c:v libx264 -preset fast -profile:v high -level 4.1 -b:v 3500k -maxrate 4400k -bufsize 8750k -c:a aac -b:a 96k -movflags +faststart output.mp4'
 
 type UploadPhase = 'idle' | 'preparing' | 'compressing' | 'uploading'
 
@@ -112,7 +112,7 @@ export function VideoUploadField({
 
       setUploadSummary(
         isMov
-          ? `${summary}. Aviso: los MOV pueden quedar palidos al comprimirlos en la web. Si ocurre, convierte en local con ffmpeg y sube el MP4.`
+          ? `${summary}. Color conservado: no se aplica tonemapping ni conversion BT.709 forzada.`
           : processedVideo.size > TARGET_COMPRESSED_SIZE_BYTES
           ? `${summary}. Aviso: supera el objetivo de ${formatFileSize(TARGET_COMPRESSED_SIZE_BYTES)}.`
           : summary
@@ -267,7 +267,7 @@ export function VideoUploadField({
             className="flex w-full items-center justify-between gap-3 text-left text-xs text-muted-foreground"
             onClick={() => setShowLocalCommand((current) => !current)}
           >
-            <span>Aviso MOV: puede quedar palido al comprimir en web. Usa ffmpeg local si pasa.</span>
+            <span>Comando local equivalente para comprimir conservando color.</span>
             {showLocalCommand ? (
               <ChevronUp className="h-4 w-4 shrink-0" />
             ) : (
