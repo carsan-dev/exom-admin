@@ -86,7 +86,7 @@ const SelectContent = React.forwardRef<
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
         className={cn(
-          "max-h-[calc(min(var(--radix-select-content-available-height),18rem)-2rem)] overflow-y-auto p-1",
+          "max-h-[calc(min(var(--radix-select-content-available-height),18rem)-2rem)] overflow-y-auto overscroll-y-contain p-1",
           position === "popper" &&
             "w-full min-w-[var(--radix-select-trigger-width)]"
         )}
