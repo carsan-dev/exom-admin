@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { isApprovalPendingError } from '@/lib/api-utils'
 import { Button } from '@/components/ui/button'
@@ -62,6 +63,7 @@ export function IngredientFormDialog({ open, onOpenChange, ingredient, onSaved }
     resolver: zodResolver(ingredientSchema),
     defaultValues,
   })
+  useUnsavedChanges('ingredient-form', open && (form.formState.isDirty || isPending))
 
   useEffect(() => {
     if (!open) {

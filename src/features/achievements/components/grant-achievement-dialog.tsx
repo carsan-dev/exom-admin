@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { AlertTriangle, Check, Search, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { isApprovalPendingError } from '@/lib/api-utils'
@@ -36,6 +37,7 @@ export function GrantAchievementDialog({ achievement, open, onOpenChange, onGran
   const [selectedClientIds, setSelectedClientIds] = useState<string[]>([])
   const [search, setSearch] = useState('')
   const [submitError, setSubmitError] = useState<string | null>(null)
+  useUnsavedChanges('grant-achievement', open && (selectedClientIds.length > 0 || grantAchievement.isPending))
 
   useEffect(() => {
     if (!open) {

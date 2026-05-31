@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -55,6 +56,7 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
     resolver: zodResolver(createClientSchema),
     defaultValues,
   })
+  useUnsavedChanges('create-client-form', open && (form.formState.isDirty || createClient.isPending))
 
   useEffect(() => {
     if (!open) {

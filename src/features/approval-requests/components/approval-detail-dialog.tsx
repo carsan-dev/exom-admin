@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useAuth } from '@/hooks/use-auth'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { getApiErrorMessage } from '@/lib/api-utils'
 import { useApprovalRequest, useCancelApprovalRequest, useResolveApprovalRequest } from '../api'
 import { resolveApprovalRequestSchema } from '../schemas'
@@ -81,6 +82,10 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
 
   const [rejectionReason, setRejectionReason] = useState('')
   const [showRejectForm, setShowRejectForm] = useState(false)
+  useUnsavedChanges(
+    'approval-rejection',
+    open && Boolean(rejectionReason.trim() || resolveRequest.isPending || cancelRequest.isPending),
+  )
 
   useEffect(() => {
     if (!open) {

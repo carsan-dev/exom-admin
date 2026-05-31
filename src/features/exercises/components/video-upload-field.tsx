@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Upload, X, Play, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { canBypassVideoCompression, compressVideo } from '@/lib/video-compressor'
@@ -10,6 +10,7 @@ interface VideoUploadFieldProps {
   onThumbnailChange?: (url: string, previewUrl?: string | null) => void
   label?: string
   disabled?: boolean
+  onUploadingChange?: (uploading: boolean) => void
 }
 
 const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
@@ -53,6 +54,7 @@ export function VideoUploadField({
   onThumbnailChange,
   label = 'Video',
   disabled = false,
+  onUploadingChange,
 }: VideoUploadFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [phase, setPhase] = useState<UploadPhase>('idle')
@@ -172,6 +174,11 @@ export function VideoUploadField({
   }
 
   const isUploading = phase !== 'idle'
+
+  useEffect(() => {
+    onUploadingChange?.(isUploading)
+    return () => onUploadingChange?.(false)
+  }, [isUploading, onUploadingChange])
 
   return (
     <div className="space-y-2">

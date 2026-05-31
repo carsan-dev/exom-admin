@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { Check, ChevronDown, LoaderCircle, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -619,6 +620,7 @@ export function TrainingFormDialog({
     resolver: zodResolver(trainingSchema),
     defaultValues,
   })
+  useUnsavedChanges('training-form', open && (form.formState.isDirty || isPending))
 
   useEffect(() => {
     if (!open) {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { ChevronDown, ChevronUp, LoaderCircle, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { ImageUploadField } from '@/components/uploads/image-upload-field'
@@ -756,6 +757,7 @@ export function DietFormDialog({
     resolver: zodResolver(dietSchema),
     defaultValues,
   })
+  useUnsavedChanges('diet-form', open && (form.formState.isDirty || isBusy))
 
   const {
     fields: mealFields,

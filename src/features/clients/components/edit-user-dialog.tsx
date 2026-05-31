@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -50,6 +51,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
       last_name: user?.profile?.last_name ?? '',
     },
   })
+  useUnsavedChanges('edit-user-form', open && (form.formState.isDirty || updateUser.isPending))
 
   useEffect(() => {
     if (user) {

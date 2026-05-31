@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -56,6 +57,7 @@ export function ChangeRoleDialog({ user, open, onOpenChange }: ChangeRoleDialogP
       role: user?.role ?? 'CLIENT',
     },
   })
+  useUnsavedChanges('change-role-form', open && (form.formState.isDirty || updateRole.isPending))
 
   const selectedRole = form.watch('role')
   const isOwnAccount = user?.id === currentUserId

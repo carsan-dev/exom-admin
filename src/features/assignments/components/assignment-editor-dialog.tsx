@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { AlertTriangle, Eye, RefreshCw } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -120,6 +121,7 @@ export function AssignmentEditorDialog({
       days: [],
     },
   })
+  useUnsavedChanges('assignment-editor', open && (form.formState.isDirty || isSubmitting))
   const { fields } = useFieldArray({
     control: form.control,
     name: 'days',

@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useWatch } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { isApprovalPendingError } from '@/lib/api-utils'
 import { Button } from '@/components/ui/button'
@@ -88,6 +89,7 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
   }, [ruleConfig?.training_type, trainingTypesQuery.data])
 
   const isPending = createAchievement.isPending || updateAchievement.isPending
+  useUnsavedChanges('achievement-form', open && (form.formState.isDirty || isPending))
 
   useEffect(() => {
     if (open) {

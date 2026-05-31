@@ -26,6 +26,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getApiErrorMessage } from '@/lib/api-utils'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { useArchiveRecap, useRecapDetail, useReviewRecap } from '../api'
 import { RecapSectionCard } from '../components/recap-section-card'
@@ -100,6 +101,16 @@ export function RecapDetailPage() {
   const recap = recapQuery.data
   const existingInternalNote = recap?.admin_comments ?? ''
   const existingClientFeedback = recap?.client_feedback_text ?? ''
+  useUnsavedChanges(
+    'recap-review',
+    Boolean(
+      recap &&
+        (internalNote !== existingInternalNote ||
+          clientFeedback !== existingClientFeedback ||
+          reviewMutation.isPending ||
+          archiveMutation.isPending),
+    ),
+  )
   const canReviewSubmittedRecap = Boolean(
     recap && recap.status === 'SUBMITTED' && !recap.archived_at,
   )

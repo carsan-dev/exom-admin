@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { getApiErrorMessage } from '@/lib/api-utils'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { useRespondFeedback } from '../api'
 import type { FeedbackItem } from '../types'
@@ -41,6 +42,7 @@ interface FeedbackDetailDialogProps {
 export function FeedbackDetailDialog({ item, open, onOpenChange }: FeedbackDetailDialogProps) {
   const [response, setResponse] = useState('')
   const { mutate: respond, isPending } = useRespondFeedback()
+  useUnsavedChanges('feedback-response', open && Boolean(response.trim() || isPending))
 
   useEffect(() => {
     setResponse('')

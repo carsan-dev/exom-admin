@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -44,6 +45,7 @@ export function CopyWeekDialog({
       target_week_start: sourceWeekStart,
     },
   })
+  useUnsavedChanges('copy-week-form', open && (form.formState.isDirty || isSubmitting))
 
   useEffect(() => {
     if (!open) {

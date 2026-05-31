@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { AlertTriangle, Check, Search, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { isApprovalPendingError } from '@/lib/api-utils'
@@ -52,6 +53,10 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
   const [selectedClientIds, setSelectedClientIds] = useState<string[]>([])
   const [search, setSearch] = useState('')
   const [submitError, setSubmitError] = useState<string | null>(null)
+  useUnsavedChanges(
+    'assign-challenge',
+    open && (mode !== 'specific' || selectedClientIds.length > 0 || assignChallenge.isPending),
+  )
 
   useEffect(() => {
     if (!open) {

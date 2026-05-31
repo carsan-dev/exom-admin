@@ -35,6 +35,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { getApiErrorMessage } from '@/lib/api-utils'
 import { normalizeSearchText } from '@/lib/search'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import {
   useDeleteExerciseEquipment,
   useDeleteExerciseMuscleGroup,
@@ -413,6 +414,13 @@ export function BadgesPage() {
     deleteEquipment.isPending ||
     deleteTrainingTag.isPending ||
     deleteDietBadge.isPending
+  useUnsavedChanges(
+    'badge-rename',
+    Boolean(
+      editingItem &&
+        (normalizeCatalogLabel(draftValue) !== normalizeCatalogLabel(editingItem.value) || isRenamePending),
+    ),
+  )
 
   useEffect(() => {
     setSearch('')

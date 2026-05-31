@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { isApprovalPendingError } from '@/lib/api-utils'
 import { Button } from '@/components/ui/button'
@@ -63,6 +64,7 @@ export function ChallengeFormDialog({ open, onOpenChange, challenge, onSubmitted
   const selectedRuleKey = form.watch('rule_key')
   const selectedRule = selectedRuleKey ? CHALLENGE_RULE_METADATA[selectedRuleKey] : null
   const isPending = createChallenge.isPending || updateChallenge.isPending
+  useUnsavedChanges('challenge-form', open && (form.formState.isDirty || isPending))
   const todayDateInputValue = getTodayDateInputValue()
 
   useEffect(() => {

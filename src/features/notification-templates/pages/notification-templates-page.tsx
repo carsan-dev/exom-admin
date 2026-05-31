@@ -8,6 +8,7 @@ import {
   useListFilters,
 } from '@/components/filters'
 import { useAuth } from '@/hooks/use-auth'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -285,6 +286,7 @@ function ScheduleEditor({ template }: { template: NotificationTemplate }) {
   )
   const normalizedDraft = normalizeScheduleDraft(template, draft)
   const hasChanges = !schedulesEqual(normalizedDraft, baseline)
+  useUnsavedChanges(`notification-schedule-${template.key}`, hasChanges || updateSchedule.isPending)
   const timeLabels = kind === 'meal_daily' ? mealTimeLabels : ['Hora']
 
   if (delivery.type !== 'schedule') {
@@ -447,6 +449,10 @@ interface CreateTemplateDialogProps {
 function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTemplateDialogProps) {
   const createTemplate = useCreateNotificationTemplate()
   const [draft, setDraft] = useState<CreateTemplateDraft>(emptyCreateDraft)
+  useUnsavedChanges(
+    'create-notification-template',
+    open && (JSON.stringify(draft) !== JSON.stringify(emptyCreateDraft) || createTemplate.isPending),
+  )
 
   useEffect(() => {
     if (!open) {
@@ -739,6 +745,7 @@ export function NotificationTemplatesPage() {
   const isSaving = updateTemplate.isPending
   const isResetting = resetTemplate.isPending
   const isBusy = isSaving || isResetting
+  useUnsavedChanges('notification-template', Boolean(selectedTemplate && (hasChanges || isBusy)))
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

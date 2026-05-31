@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -41,6 +42,7 @@ export function EditMainGoalDialog({
     resolver: zodResolver(updateClientProfileSchema),
     defaultValues: { main_goal: currentMainGoal ?? '' },
   })
+  useUnsavedChanges('edit-main-goal-form', open && (form.formState.isDirty || updateProfile.isPending))
 
   useEffect(() => {
     if (open) {

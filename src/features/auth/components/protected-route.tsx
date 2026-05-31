@@ -1,6 +1,8 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { useAuth } from '@/hooks/use-auth'
 import { Skeleton } from '@/components/ui/skeleton'
+import { UnsavedChangesGuard } from '@/components/layout/unsaved-changes-guard'
+import { VersionUpdateBanner } from '@/components/layout/version-update-banner'
 
 export function ProtectedRoute() {
   const { user, isAuthenticated, isLoading } = useAuth()
@@ -27,5 +29,11 @@ export function ProtectedRoute() {
     return <Navigate to="/onboarding" replace />
   }
 
-  return <Outlet />
+  return (
+    <>
+      <UnsavedChangesGuard />
+      <VersionUpdateBanner />
+      <Outlet />
+    </>
+  )
 }

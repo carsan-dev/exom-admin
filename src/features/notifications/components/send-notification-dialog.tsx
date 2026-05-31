@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertTriangle, Check, ChevronsUpDown, SendHorizonal, X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { isApprovalPendingError } from '@/lib/api-utils'
@@ -299,6 +300,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
   const sendToAll = form.watch('sendToAll')
   const clients = clientsQuery.data?.data ?? []
   const isSubmitting = sendNotification.isPending || sendToAllClients.isPending
+  useUnsavedChanges('send-notification-form', open && (form.formState.isDirty || isSubmitting))
   const clientsLoadError = clientsQuery.isError
     ? getApiErrorMessage(clientsQuery.error, 'No se ha podido cargar la cartera de clientes')
     : null

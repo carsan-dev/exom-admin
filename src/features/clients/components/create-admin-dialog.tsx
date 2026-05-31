@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -49,6 +50,7 @@ export function CreateAdminDialog({ open, onOpenChange }: CreateAdminDialogProps
     resolver: zodResolver(createAdminSchema),
     defaultValues,
   })
+  useUnsavedChanges('create-admin-form', open && (form.formState.isDirty || createAdmin.isPending))
 
   useEffect(() => {
     if (!open) {

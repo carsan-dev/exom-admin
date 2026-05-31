@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { X, Plus, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -265,6 +266,7 @@ export function ExerciseFormDialog({
   const equipmentQuery = useExerciseEquipment()
   const isPending = createExercise.isPending || updateExercise.isPending
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null)
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false)
 
   const muscleGroupOptions = useMemo(
     () => mergeOptions(MUSCLE_GROUPS, muscleGroupsQuery.data),
@@ -279,6 +281,7 @@ export function ExerciseFormDialog({
     resolver: zodResolver(exerciseSchema),
     defaultValues,
   })
+  useUnsavedChanges('exercise-form', open && (form.formState.isDirty || isPending || isUploadingVideo))
 
   useEffect(() => {
     setThumbnailPreviewUrl(null)
@@ -436,6 +439,7 @@ export function ExerciseFormDialog({
                         })
                       }}
                       disabled={isPending}
+                      onUploadingChange={setIsUploadingVideo}
                     />
                   </FormControl>
                   <FormMessage />

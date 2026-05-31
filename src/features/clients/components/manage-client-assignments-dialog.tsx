@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import {
   getApiErrorMessage,
   useAllAdminsList,
@@ -140,6 +141,7 @@ export function ManageClientAssignmentsDialog({
   const activeAdminIdSet = new Set(activeAdmins.map((admin) => admin.id))
   const diff = getClientAssignmentDiff(activeAdmins, adminOptions, selectedAdminIds)
   const hasChanges = hasClientAssignmentChanges(activeAdmins, selectedAdminIds)
+  useUnsavedChanges('manage-client-assignments', open && (hasChanges || updateClientAssignments.isPending))
   const isLoading = assignmentsQuery.isLoading || adminsQuery.isLoading
   const isError = assignmentsQuery.isError || adminsQuery.isError
   const hasNoAdminsAvailable = !isLoading && !isError && adminOptions.length === 0
