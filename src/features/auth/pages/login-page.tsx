@@ -84,7 +84,7 @@ export function LoginPage() {
           <div className="flex items-center gap-2">
             <span className="text-4xl font-black tracking-widest text-brand-primary">EXOM</span>
           </div>
-          <p className="text-sm text-muted-foreground">Panel de administración</p>
+          <p className="text-sm text-muted-foreground">Panel de administración EXOM</p>
         </div>
 
         {/* Blocked state */}
