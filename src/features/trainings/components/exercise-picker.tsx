@@ -26,8 +26,6 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
     [allExercises],
   )
 
-  const selectedIds = new Set(value.map((ex) => ex.exercise_id))
-
   const normalizedSearch = normalizeSearchText(search.trim())
   const filteredExercises = normalizedSearch
     ? allExercises.filter(
@@ -38,7 +36,6 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
     : allExercises
 
   const addExercise = (exerciseId: string) => {
-    if (selectedIds.has(exerciseId)) return
     const newItem: TrainingExerciseFormValues = {
       exercise_id: exerciseId,
       order: value.length,
@@ -228,18 +225,15 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
           ) : (
             <div className="max-h-48 overflow-y-auto space-y-1">
               {filteredExercises.map((exercise) => {
-                const isSelected = selectedIds.has(exercise.id)
+                const selectedCount = value.filter((item) => item.exercise_id === exercise.id).length
+
                 return (
                   <button
                     key={exercise.id}
                     type="button"
-                    disabled={isSelected}
                     onClick={() => addExercise(exercise.id)}
                     className={cn(
-                      'w-full flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors',
-                      isSelected
-                        ? 'opacity-40 cursor-not-allowed'
-                        : 'hover:bg-muted cursor-pointer',
+                      'w-full flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-muted cursor-pointer',
                     )}
                   >
                     <div className="flex-1 min-w-0">
@@ -262,8 +256,10 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                         ))}
                       </div>
                     </div>
-                    {isSelected && (
-                      <span className="text-xs text-muted-foreground flex-none">Ya añadido</span>
+                    {selectedCount > 0 && (
+                      <span className="text-xs text-muted-foreground flex-none">
+                        Añadido {selectedCount} vez{selectedCount !== 1 ? 'es' : ''}
+                      </span>
                     )}
                   </button>
                 )
