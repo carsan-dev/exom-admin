@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
 import { addMonths, addWeeks, format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { AlertTriangle, CalendarDays, Users } from 'lucide-react'
+import { AlertTriangle, CalendarDays, Repeat2, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/hooks/use-auth'
 import { useSearchParams } from 'react-router'
@@ -131,6 +139,7 @@ export function AssignmentsPage() {
   const [editorOpen, setEditorOpen] = useState(false)
   const [copyWeekOpen, setCopyWeekOpen] = useState(false)
   const [copyPreviewOpen, setCopyPreviewOpen] = useState(false)
+  const [deactivateAutoRuleOpen, setDeactivateAutoRuleOpen] = useState(false)
   const [pendingCopyValues, setPendingCopyValues] = useState<CopyWeekValues | null>(null)
 
   const selectedClientIdParam = searchParams.get('clientId')
@@ -238,6 +247,7 @@ export function AssignmentsPage() {
     setEditorOpen(false)
     setCopyWeekOpen(false)
     setCopyPreviewOpen(false)
+    setDeactivateAutoRuleOpen(false)
     setPendingCopyValues(null)
   }, [selectedClientId, viewMode, anchorDate])
 
@@ -378,13 +388,10 @@ export function AssignmentsPage() {
       return
     }
 
-    if (!window.confirm('¿Desactivar la autoasignación semanal? Las asignaciones ya generadas se mantendrán.')) {
-      return
-    }
-
     try {
       await deactivateAutoRule.mutateAsync(ruleId)
       toast.success('Autoasignación desactivada')
+      setDeactivateAutoRuleOpen(false)
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'No se ha podido desactivar la autoasignación.'))
     }
@@ -446,7 +453,7 @@ export function AssignmentsPage() {
         canDeleteSelectedDay={Boolean(selectedExistingDay)}
         activeAutoRule={activeAutoRuleQuery.data ?? null}
         isAutoRuleLoading={activeAutoRuleQuery.isLoading}
-        onDeactivateAutoRule={() => void handleDeactivateAutoRule()}
+        onDeactivateAutoRule={() => setDeactivateAutoRuleOpen(true)}
         onClientChange={handleClientChange}
         onChangeView={handleViewChange}
         onPreviousPeriod={() => changeVisiblePeriod(-1)}
@@ -530,6 +537,50 @@ export function AssignmentsPage() {
 
       {selectedClientId && (
         <>
+          <Dialog open={deactivateAutoRuleOpen} onOpenChange={setDeactivateAutoRuleOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Desactivar autoasignación semanal</DialogTitle>
+                <DialogDescription>
+                  La regla dejará de generar nuevos entrenamientos, dietas o descansos para próximas semanas.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-foreground">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-full bg-status-warning/10 p-2 text-status-warning">
+                    <Repeat2 className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-medium">Las asignaciones ya generadas se mantendrán.</p>
+                    <p className="text-muted-foreground">
+                      Podrás activar otra autoasignación seleccionando días y guardando un nuevo patrón semanal.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDeactivateAutoRuleOpen(false)}
+                  disabled={deactivateAutoRule.isPending}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => void handleDeactivateAutoRule()}
+                  disabled={deactivateAutoRule.isPending || !activeAutoRuleQuery.data}
+                >
+                  {deactivateAutoRule.isPending ? 'Desactivando...' : 'Desactivar autoasignación'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <AssignmentEditorDialog
             open={editorOpen}
             clientId={selectedClientId}
