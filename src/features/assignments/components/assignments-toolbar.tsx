@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Copy, Layers3, Plus, Trash2, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Copy, Layers3, Plus, Repeat2, Trash2, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getUserDisplayName } from '../../clients/types'
-import type { AssignmentSummary, AssignmentsViewMode, ClientOption } from '../types'
+import type { AssignmentSummary, AssignmentsViewMode, AutoAssignmentRule, ClientOption } from '../types'
 
 interface AssignmentsToolbarProps {
   clients: ClientOption[]
@@ -25,6 +25,9 @@ interface AssignmentsToolbarProps {
   canSelectAll: boolean
   assignActionLabel: string
   canDeleteSelectedDay: boolean
+  activeAutoRule: AutoAssignmentRule | null
+  isAutoRuleLoading: boolean
+  onDeactivateAutoRule: () => void
   onClientChange: (clientId: string) => void
   onChangeView: (viewMode: AssignmentsViewMode) => void
   onPreviousPeriod: () => void
@@ -49,6 +52,9 @@ export function AssignmentsToolbar({
   canSelectAll,
   assignActionLabel,
   canDeleteSelectedDay,
+  activeAutoRule,
+  isAutoRuleLoading,
+  onDeactivateAutoRule,
   onClientChange,
   onChangeView,
   onPreviousPeriod,
@@ -147,6 +153,16 @@ export function AssignmentsToolbar({
             </div>
 
             <div className="flex flex-wrap gap-2">
+              {isAutoRuleLoading ? (
+                <Badge variant="outline" className="border-border/70 bg-background text-muted-foreground">
+                  Cargando autoasignación
+                </Badge>
+              ) : activeAutoRule ? (
+                <Badge variant="outline" className="border-status-success/30 bg-status-success/10 text-status-success">
+                  Autoasignación activa desde {activeAutoRule.starts_on}
+                  {activeAutoRule.ends_on ? ` hasta ${activeAutoRule.ends_on}` : ' · indefinida'}
+                </Badge>
+              ) : null}
               <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-status-info">
                 {summary.training_days} días con entreno
               </Badge>
@@ -163,6 +179,10 @@ export function AssignmentsToolbar({
           </div>
 
           <div className="flex flex-wrap gap-2 xl:justify-end">
+            <Button variant="outline" onClick={onDeactivateAutoRule} disabled={!activeAutoRule || isBusy}>
+              <Repeat2 className="h-4 w-4" />
+              Desactivar autoasignación
+            </Button>
             <Button variant="outline" onClick={onClearSelection} disabled={selectionCount === 0 || isBusy}>
               <X className="h-4 w-4" />
               Limpiar selección

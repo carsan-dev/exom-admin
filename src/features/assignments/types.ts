@@ -91,6 +91,7 @@ export interface AssignmentEditorDayValues {
 export interface AssignmentEditorValues {
   client_id: string
   days: AssignmentEditorDayValues[]
+  auto_assignment?: AutoAssignmentEditorValues
 }
 
 export interface AssignmentUpdateValues {
@@ -142,6 +143,50 @@ export interface AssignmentPreviewDay {
 
 export interface AssignmentPreview {
   days: AssignmentPreviewDay[]
+}
+
+export type AutoAssignmentEndMode = 'indefinite' | 'date'
+
+export interface AutoAssignmentEditorValues {
+  enabled: boolean
+  source_week_start: string
+  starts_on: string
+  ends_on?: string | null
+}
+
+export interface AutoAssignmentRuleDay {
+  id: string
+  weekday: number
+  training_id: string | null
+  diet_id: string | null
+  is_rest_day: boolean
+  training: AssignmentDayTraining | null
+  diet: AssignmentDayDiet | null
+}
+
+export interface AutoAssignmentRule {
+  id: string
+  client_id: string
+  admin_id: string | null
+  source_week_start: string
+  starts_on: string
+  ends_on: string | null
+  is_active: boolean
+  deactivated_at: string | null
+  days: AutoAssignmentRuleDay[]
+}
+
+export interface CreateAutoAssignmentRuleValues {
+  client_id: string
+  source_week_start: string
+  starts_on: string
+  ends_on?: string | null
+  days: Array<{
+    weekday: number
+    training_id?: string | null
+    diet_id?: string | null
+    is_rest_day: boolean
+  }>
 }
 
 export interface CatalogLoadState {

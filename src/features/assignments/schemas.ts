@@ -15,6 +15,20 @@ function isMondayDate(value: string) {
   return date.getUTCDay() === 1
 }
 
+function isoWeekday(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+
+  if (!match) {
+    return null
+  }
+
+  const [, year, month, day] = match
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)))
+  const weekday = date.getUTCDay()
+
+  return weekday === 0 ? 7 : weekday
+}
+
 const nullableSelectionSchema = z
   .string()
   .trim()
@@ -42,9 +56,46 @@ export const assignmentEditorDaySchema = z
     }
   })
 
-export const assignmentEditorSchema = z.object({
-  days: z.array(assignmentEditorDaySchema).min(1, 'Selecciona al menos un día'),
-})
+export const assignmentEditorSchema = z
+  .object({
+    days: z.array(assignmentEditorDaySchema).min(1, 'Selecciona al menos un día'),
+    auto_assignment_enabled: z.boolean().default(false),
+    auto_assignment_end_mode: z.enum(['indefinite', 'date']).default('indefinite'),
+    auto_assignment_ends_on: z.string().regex(isoDateRegex, 'Selecciona una fecha válida').nullable().optional(),
+  })
+  .superRefine((value, context) => {
+    if (!value.auto_assignment_enabled) {
+      return
+    }
+
+    if (value.auto_assignment_end_mode === 'date' && !value.auto_assignment_ends_on) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Selecciona una fecha fin',
+        path: ['auto_assignment_ends_on'],
+      })
+    }
+
+    const seenWeekdays = new Set<number>()
+
+    value.days.forEach((day, index) => {
+      const weekday = isoWeekday(day.date)
+
+      if (!weekday) {
+        return
+      }
+
+      if (seenWeekdays.has(weekday)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'La autoasignación no puede repetir el mismo día de la semana',
+          path: ['days', index, 'date'],
+        })
+      }
+
+      seenWeekdays.add(weekday)
+    })
+  })
 
 export const copyWeekSchema = z
   .object({

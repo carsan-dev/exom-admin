@@ -11,10 +11,12 @@ import type {
   AssignmentMonthResponse,
   AssignmentUpdateValues,
   AssignmentWeekResponse,
+  AutoAssignmentRule,
   CatalogAvailability,
   CatalogKey,
   CatalogLoadState,
   ClientOption,
+  CreateAutoAssignmentRuleValues,
   CopyWeekValues,
 } from './types'
 
@@ -48,6 +50,7 @@ const assignmentsQueryKeys = {
   clients: ['assignments', 'clients'] as const,
   trainings: ['assignments', 'trainings'] as const,
   diets: ['assignments', 'diets'] as const,
+  autoRule: (clientId?: string) => ['assignments', 'auto-rule', clientId] as const,
 }
 
 function normalizeOptionalId(value: string | null | undefined) {
@@ -98,6 +101,21 @@ function normalizeUpdatePayload(values: AssignmentUpdateValues) {
     training_id: values.is_rest_day ? null : normalizeOptionalId(values.training_id),
     diet_id: values.is_rest_day ? null : normalizeOptionalId(values.diet_id),
     is_rest_day: values.is_rest_day,
+  }
+}
+
+function normalizeAutoRulePayload(values: CreateAutoAssignmentRuleValues) {
+  return {
+    client_id: values.client_id,
+    source_week_start: values.source_week_start,
+    starts_on: values.starts_on,
+    ends_on: values.ends_on || null,
+    days: values.days.map((day) => ({
+      weekday: day.weekday,
+      training_id: day.is_rest_day ? null : normalizeOptionalId(day.training_id),
+      diet_id: day.is_rest_day ? null : normalizeOptionalId(day.diet_id),
+      is_rest_day: day.is_rest_day,
+    })),
   }
 }
 
@@ -275,6 +293,64 @@ export function useAssignmentDietsCatalog() {
     queryKey: assignmentsQueryKeys.diets,
     retry: shouldRetryQuery,
     queryFn: () => fetchAllPaginatedData<Diet>('/diets'),
+  })
+}
+
+export function useActiveAutoAssignmentRule(clientId?: string) {
+  return useQuery({
+    queryKey: assignmentsQueryKeys.autoRule(clientId),
+    enabled: Boolean(clientId),
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      if (!clientId) {
+        throw new Error('Client id is required')
+      }
+
+      const response = await api.get<ApiEnvelope<AutoAssignmentRule | null>>('/assignments/auto-rules/active', {
+        params: { client_id: clientId },
+      })
+
+      return unwrapResponse(response)
+    },
+  })
+}
+
+export function useCreateAutoAssignmentRule() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (values: CreateAutoAssignmentRuleValues) => {
+      const response = await api.post<ApiEnvelope<AutoAssignmentRule>>(
+        '/assignments/auto-rules',
+        normalizeAutoRulePayload(values),
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async (_rule, values) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.autoRule(values.client_id) }),
+      ])
+    },
+  })
+}
+
+export function useDeactivateAutoAssignmentRule() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (ruleId: string) => {
+      const response = await api.put<ApiEnvelope<AutoAssignmentRule>>(`/assignments/auto-rules/${ruleId}/deactivate`)
+      return unwrapResponse(response)
+    },
+    onSuccess: async (rule) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.autoRule(rule.client_id) }),
+      ])
+    },
   })
 }
 

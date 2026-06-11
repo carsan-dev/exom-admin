@@ -45,6 +45,33 @@ import { AssignmentPreviewDialog } from './assignment-preview-dialog'
 
 const CLEAR_SELECTION_VALUE = '__none__'
 
+function parseUtcDate(value: string) {
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day))
+}
+
+function formatUtcDate(date: Date) {
+  return date.toISOString().split('T')[0]
+}
+
+function addUtcDays(date: Date, days: number) {
+  const nextDate = new Date(date)
+  nextDate.setUTCDate(nextDate.getUTCDate() + days)
+  return nextDate
+}
+
+function getIsoWeekday(value: string) {
+  const weekday = parseUtcDate(value).getUTCDay()
+  return weekday === 0 ? 7 : weekday
+}
+
+function getWeekStart(value: string) {
+  const date = parseUtcDate(value)
+  const weekday = getIsoWeekday(value)
+  date.setUTCDate(date.getUTCDate() - (weekday - 1))
+  return date
+}
+
 interface AssignmentEditorDialogProps {
   open: boolean
   clientId: string
@@ -119,6 +146,9 @@ export function AssignmentEditorDialog({
     resolver: zodResolver(assignmentEditorSchema),
     defaultValues: {
       days: [],
+      auto_assignment_enabled: false,
+      auto_assignment_end_mode: 'indefinite',
+      auto_assignment_ends_on: null,
     },
   })
   useUnsavedChanges('assignment-editor', open && (form.formState.isDirty || isSubmitting))
@@ -143,19 +173,32 @@ export function AssignmentEditorDialog({
     [sortedSelectedDays],
   )
   const watchedDays = form.watch('days') ?? []
+  const autoAssignmentEnabled = form.watch('auto_assignment_enabled')
+  const autoAssignmentEndMode = form.watch('auto_assignment_end_mode')
   const isRestOnlyMode = catalogAvailability.is_rest_only
   const canUseTrainingCatalog = catalogAvailability.can_use_training_catalog
   const canUseDietCatalog = catalogAvailability.can_use_diet_catalog
   const canEditSingleDate = fields.length === 1 && Boolean(fields[0]?.assignment_id)
+  const firstSelectedDate = sortedSelectedDays[0]?.date
+  const sourceWeekStart = firstSelectedDate ? formatUtcDate(getWeekStart(firstSelectedDate)) : null
+  const startsOn = sourceWeekStart ? formatUtcDate(addUtcDays(parseUtcDate(sourceWeekStart), 7)) : null
 
   useEffect(() => {
     if (!open) {
       setPreviewOpen(false)
-      form.reset({ days: [] })
+      form.reset({
+        days: [],
+        auto_assignment_enabled: false,
+        auto_assignment_end_mode: 'indefinite',
+        auto_assignment_ends_on: null,
+      })
       return
     }
 
     form.reset({
+      auto_assignment_enabled: false,
+      auto_assignment_end_mode: 'indefinite',
+      auto_assignment_ends_on: null,
       days: sortedSelectedDays.map((day) => ({
         assignment_id: day.id,
         original_date: day.date,
@@ -196,6 +239,18 @@ export function AssignmentEditorDialog({
         diet_id: day.diet_id ?? null,
         is_rest_day: day.is_rest_day,
       })),
+      auto_assignment:
+        values.auto_assignment_enabled && sourceWeekStart && startsOn
+          ? {
+              enabled: true,
+              source_week_start: sourceWeekStart,
+              starts_on: startsOn,
+              ends_on:
+                values.auto_assignment_end_mode === 'date'
+                  ? (values.auto_assignment_ends_on ?? null)
+                  : null,
+            }
+          : undefined,
     })
 
     setPreviewOpen(false)
@@ -458,6 +513,101 @@ export function AssignmentEditorDialog({
                     </div>
                   )
                 })}
+              </div>
+
+              <div className="space-y-4 rounded-2xl border border-border/70 bg-muted/20 p-5">
+                <FormField
+                  control={form.control}
+                  name="auto_assignment_enabled"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="space-y-1">
+                          <FormLabel>Autoasignar semanalmente</FormLabel>
+                          <FormDescription>
+                            Repite este patrón desde la semana siguiente. No sobrescribe días que ya estén planificados.
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <label className="flex items-center gap-2 rounded-full border border-border/70 bg-background px-3 py-2 text-sm font-medium text-foreground">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 accent-current"
+                              checked={field.value}
+                              onChange={(event) => field.onChange(event.target.checked)}
+                            />
+                            Activar
+                          </label>
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {autoAssignmentEnabled && (
+                  <div className="space-y-4">
+                    <div className="rounded-xl border border-border/60 bg-background/70 px-4 py-3 text-sm text-muted-foreground">
+                      Patrón origen: <span className="font-medium text-foreground">{sourceWeekStart ?? '—'}</span>
+                      {' · '}
+                      Empieza: <span className="font-medium text-foreground">{startsOn ?? '—'}</span>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="auto_assignment_end_mode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Duración</FormLabel>
+                          <FormControl>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <Button
+                                type="button"
+                                variant={field.value === 'indefinite' ? 'default' : 'outline'}
+                                onClick={() => {
+                                  field.onChange('indefinite')
+                                  form.setValue('auto_assignment_ends_on', null, { shouldDirty: true, shouldValidate: true })
+                                }}
+                              >
+                                Indefinida
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={field.value === 'date' ? 'default' : 'outline'}
+                                onClick={() => field.onChange('date')}
+                              >
+                                Hasta una fecha
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {autoAssignmentEndMode === 'date' && (
+                      <FormField
+                        control={form.control}
+                        name="auto_assignment_ends_on"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fecha fin</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                min={startsOn ?? undefined}
+                                value={field.value ?? ''}
+                                onChange={(event) => field.onChange(event.target.value || null)}
+                              />
+                            </FormControl>
+                            <FormDescription>La regla no generará asignaciones después de esta fecha.</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
 
               <DialogFooter>

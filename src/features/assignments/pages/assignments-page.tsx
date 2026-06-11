@@ -12,6 +12,7 @@ import {
   buildCatalogAvailability,
   getApiErrorMessage,
   hasClientId,
+  useActiveAutoAssignmentRule,
   useAssignmentClients,
   useAssignmentDietsCatalog,
   useAssignmentsMonth,
@@ -19,6 +20,8 @@ import {
   useAssignmentTrainingsCatalog,
   useBatchAssign,
   useCopyWeek,
+  useCreateAutoAssignmentRule,
+  useDeactivateAutoAssignmentRule,
   useDeleteAssignment,
   useUpdateAssignment,
 } from '../api'
@@ -72,6 +75,12 @@ function formatPeriodLabel(viewMode: AssignmentsViewMode, anchorDate: string) {
   weekEnd.setDate(weekEnd.getDate() - 1)
 
   return `${format(start, "d 'de' MMMM", { locale: es })} - ${format(weekEnd, "d 'de' MMMM", { locale: es })}`
+}
+
+function getIsoWeekday(date: string) {
+  const [year, month, day] = date.split('-').map(Number)
+  const value = new Date(Date.UTC(year, month - 1, day)).getUTCDay()
+  return value === 0 ? 7 : value
 }
 
 function AssignmentsPageSkeleton({ viewMode }: { viewMode: AssignmentsViewMode }) {
@@ -134,6 +143,7 @@ export function AssignmentsPage() {
   const clientsQuery = useAssignmentClients(currentUserRole)
   const trainingsQuery = useAssignmentTrainingsCatalog()
   const dietsQuery = useAssignmentDietsCatalog()
+  const activeAutoRuleQuery = useActiveAutoAssignmentRule(selectedClientId || undefined)
   const weekAssignmentsQuery = useAssignmentsWeek(
     viewMode === 'week' ? (selectedClientId || undefined) : undefined,
     viewMode === 'week' ? weekStart : undefined,
@@ -146,6 +156,8 @@ export function AssignmentsPage() {
 
   const batchAssign = useBatchAssign()
   const copyWeek = useCopyWeek()
+  const createAutoRule = useCreateAutoAssignmentRule()
+  const deactivateAutoRule = useDeactivateAutoAssignmentRule()
   const updateAssignment = useUpdateAssignment()
   const deleteAssignment = useDeleteAssignment()
 
@@ -171,7 +183,13 @@ export function AssignmentsPage() {
   const selectedExistingDay = selectedDays.length === 1 && selectedDays[0]?.id ? selectedDays[0] : null
   const summary = buildAssignmentSummary(days)
   const hasAssignmentsInPeriod = summary.training_days > 0 || summary.diet_days > 0 || summary.rest_days > 0
-  const isMutating = batchAssign.isPending || copyWeek.isPending || updateAssignment.isPending || deleteAssignment.isPending
+  const isMutating =
+    batchAssign.isPending ||
+    copyWeek.isPending ||
+    createAutoRule.isPending ||
+    deactivateAutoRule.isPending ||
+    updateAssignment.isPending ||
+    deleteAssignment.isPending
   const canOpenEditor = selectedDates.length > 0 && (catalogAvailability.can_use_any_plan_catalog || catalogAvailability.is_rest_only)
   const canCopyWeek = viewMode === 'week' && Boolean(selectedClientId) && !weekAssignmentsQuery.isLoading && !weekAssignmentsQuery.isError
   const canSelectAll = Boolean(selectedClientId) && days.length > 0 && !isMutating
@@ -330,10 +348,45 @@ export function AssignmentsPage() {
         toast.success(values.days.length > 1 ? 'Asignaciones actualizadas correctamente' : 'Asignación guardada correctamente')
       }
 
+      if (values.auto_assignment?.enabled) {
+        await createAutoRule.mutateAsync({
+          client_id: values.client_id,
+          source_week_start: values.auto_assignment.source_week_start,
+          starts_on: values.auto_assignment.starts_on,
+          ends_on: values.auto_assignment.ends_on ?? null,
+          days: values.days.map((day) => ({
+            weekday: getIsoWeekday(day.date),
+            training_id: day.is_rest_day ? null : (day.training_id ?? null),
+            diet_id: day.is_rest_day ? null : (day.diet_id ?? null),
+            is_rest_day: day.is_rest_day,
+          })),
+        })
+        toast.success('Autoasignación semanal activada')
+      }
+
       handleClearSelection()
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'No se han podido guardar los cambios.'))
       throw error
+    }
+  }
+
+  const handleDeactivateAutoRule = async () => {
+    const ruleId = activeAutoRuleQuery.data?.id
+
+    if (!ruleId) {
+      return
+    }
+
+    if (!window.confirm('¿Desactivar la autoasignación semanal? Las asignaciones ya generadas se mantendrán.')) {
+      return
+    }
+
+    try {
+      await deactivateAutoRule.mutateAsync(ruleId)
+      toast.success('Autoasignación desactivada')
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'No se ha podido desactivar la autoasignación.'))
     }
   }
 
@@ -391,6 +444,9 @@ export function AssignmentsPage() {
         canSelectAll={canSelectAll}
         assignActionLabel={assignActionLabel}
         canDeleteSelectedDay={Boolean(selectedExistingDay)}
+        activeAutoRule={activeAutoRuleQuery.data ?? null}
+        isAutoRuleLoading={activeAutoRuleQuery.isLoading}
+        onDeactivateAutoRule={() => void handleDeactivateAutoRule()}
         onClientChange={handleClientChange}
         onChangeView={handleViewChange}
         onPreviousPeriod={() => changeVisiblePeriod(-1)}
