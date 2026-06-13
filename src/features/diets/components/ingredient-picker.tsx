@@ -38,6 +38,8 @@ const DEFAULT_UNIT_VALUES: Partial<
   cold_cut_slice: { quantity: 1, gramsEquivalent: 20 },
   glass: { quantity: 1, gramsEquivalent: 250 },
   cup: { quantity: 1, gramsEquivalent: 240 },
+  bowl: { quantity: 1, gramsEquivalent: 250 },
+  finger: { quantity: 1, gramsEquivalent: 60 },
   pinch: { quantity: 1, gramsEquivalent: 0.5 },
   serving: { quantity: 1, gramsEquivalent: 100 },
   to_taste: { quantity: 1, gramsEquivalent: 1 },
