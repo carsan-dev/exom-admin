@@ -71,6 +71,9 @@ IMPORTANTE:
 - Cada ejercicio suelto debe tener kind "EXERCISE".
 - Cada circuito debe tener kind "CIRCUIT" y una lista exercises.
 - En circuitos, cada ejercicio representa 1 serie por ronda.
+- Si NO hay circuito, no incluyas ningun objeto kind "CIRCUIT".
+- Si hay varios ejercicios sueltos, repite el bloque kind "EXERCISE" dentro de items.
+- Si hay varios circuitos, repite el bloque kind "CIRCUIT" dentro de items.
 - level solo puede ser: "PRINCIPIANTE", "INTERMEDIO" o "AVANZADO".
 
 Catalogo de ejercicios disponible:
@@ -101,8 +104,15 @@ Devuelve exactamente este JSON:
       "rest_seconds": [MODIFICAR: descanso entre series en segundos]
     },
     {
+      "kind": "EXERCISE",
+      "exercise_name": "[MODIFICAR: nombre exacto del ejercicio 2; duplica este bloque para mas ejercicios]",
+      "sets": [MODIFICAR: numero de series],
+      "reps_or_duration": "[MODIFICAR: reps o duracion]",
+      "rest_seconds": [MODIFICAR: descanso entre series en segundos]
+    },
+    {
       "kind": "CIRCUIT",
-      "name": "[MODIFICAR: nombre del circuito]",
+      "name": "[MODIFICAR: nombre del circuito; elimina este bloque completo si no hay circuito]",
       "rounds": [MODIFICAR: numero de rondas],
       "rest_between_rounds_seconds": [MODIFICAR: descanso entre rondas en segundos],
       "exercises": [
@@ -115,6 +125,76 @@ Devuelve exactamente este JSON:
           "exercise_name": "[MODIFICAR: nombre exacto del ejercicio del circuito 2]",
           "reps_or_duration": "[MODIFICAR: reps o duracion de 1 serie]",
           "rest_seconds": [MODIFICAR: descanso tras este ejercicio dentro de la ronda]
+        }
+      ]
+    }
+  ]
+}
+
+CASO SIN CIRCUITO:
+- items debe contener solo objetos kind "EXERCISE".
+- elimina por completo el bloque kind "CIRCUIT".
+
+CASO CON VARIOS EJERCICIOS:
+- anade un objeto kind "EXERCISE" por cada ejercicio suelto.
+- no metas varios nombres dentro del mismo exercise_name.
+
+CASO CON CIRCUITO:
+- dentro del circuito, anade un objeto en exercises por cada ejercicio del circuito.
+- rounds indica cuantas veces se repite la lista completa.
+- cada ejercicio del circuito es 1 serie por ronda.`
+
+const AI_IMPORT_GUIDE_STEPS = [
+  {
+    title: 'Varios ejercicios sueltos',
+    text: 'Repite un bloque kind "EXERCISE" dentro de items por cada ejercicio. No juntes varios nombres en exercise_name.',
+  },
+  {
+    title: 'Sin circuito',
+    text: 'Elimina por completo el bloque kind "CIRCUIT". El array items queda solo con ejercicios sueltos.',
+  },
+  {
+    title: 'Con circuito',
+    text: 'Incluye un bloque kind "CIRCUIT". Dentro de exercises pon cada ejercicio del circuito; rounds marca cuantas rondas se repite la lista.',
+  },
+]
+
+const AI_IMPORT_NO_CIRCUIT_EXAMPLE = `{
+  "items": [
+    {
+      "kind": "EXERCISE",
+      "exercise_name": "Sentadilla goblet",
+      "sets": 3,
+      "reps_or_duration": "10",
+      "rest_seconds": 60
+    },
+    {
+      "kind": "EXERCISE",
+      "exercise_name": "Press banca",
+      "sets": 4,
+      "reps_or_duration": "8",
+      "rest_seconds": 90
+    }
+  ]
+}`
+
+const AI_IMPORT_CIRCUIT_EXAMPLE = `{
+  "items": [
+    {
+      "kind": "CIRCUIT",
+      "name": "Circuito final",
+      "rounds": 3,
+      "rest_between_rounds_seconds": 60,
+      "exercises": [
+        {
+          "exercise_name": "Jumping jacks",
+          "reps_or_duration": "30s",
+          "rest_seconds": 15
+        },
+        {
+          "exercise_name": "Mountain climbers",
+          "reps_or_duration": "20",
+          "rest_seconds": 15
         }
       ]
     }
@@ -542,7 +622,32 @@ export function TrainingsPage() {
 
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
             Las partes entre <span className="font-semibold">[MODIFICAR]</span> son obligatorias.
-            En cada ejercicio usa el nombre exacto del catálogo para que EXOM pueda enlazarlo.
+            Si no hay circuito, elimina el bloque <span className="font-semibold">CIRCUIT</span>.
+            Si hay varios ejercicios, duplica bloques <span className="font-semibold">EXERCISE</span>.
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            {AI_IMPORT_GUIDE_STEPS.map((step) => (
+              <div key={step.title} className="rounded-lg border border-border bg-muted/20 p-3">
+                <p className="text-sm font-semibold text-foreground">{step.title}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{step.text}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-2">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-foreground">Ejemplo sin circuito</p>
+              <pre className="max-h-64 overflow-auto rounded-lg border border-border bg-muted/40 p-3 text-xs leading-relaxed text-foreground">
+                <code>{AI_IMPORT_NO_CIRCUIT_EXAMPLE}</code>
+              </pre>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-foreground">Ejemplo con circuito</p>
+              <pre className="max-h-64 overflow-auto rounded-lg border border-border bg-muted/40 p-3 text-xs leading-relaxed text-foreground">
+                <code>{AI_IMPORT_CIRCUIT_EXAMPLE}</code>
+              </pre>
+            </div>
           </div>
 
           <div className="flex justify-end">
