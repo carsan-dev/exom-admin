@@ -201,6 +201,17 @@ const AI_IMPORT_CIRCUIT_EXAMPLE = `{
   ]
 }`
 
+function buildImportPromptWithExerciseCatalog(exerciseNames: string[]) {
+  const catalog = exerciseNames.length > 0
+    ? exerciseNames.map((name) => `- ${name}`).join('\n')
+    : '[MODIFICAR: pega aqui los nombres exactos de ejercicios del catalogo EXOM, uno por linea]'
+
+  return AI_IMPORT_PROMPT.replace(
+    '[MODIFICAR: pega aqui los nombres exactos de ejercicios del catalogo EXOM, uno por linea]',
+    catalog
+  )
+}
+
 function toFilterOptions(values: string[] | undefined, getLabel?: (value: string) => string): FilterOption[] {
   return values?.map((value) => ({ value, label: getLabel ? getLabel(value) : value })) ?? []
 }
@@ -320,7 +331,25 @@ export function TrainingsPage() {
   const handleCopyImportPrompt = async () => {
     try {
       await navigator.clipboard.writeText(AI_IMPORT_PROMPT)
-      toast.success('Prompt copiado')
+      toast.success('Plantilla copiada')
+    } catch {
+      toast.error('No se ha podido copiar el prompt')
+    }
+  }
+
+  const handleCopyImportPromptWithCatalog = async () => {
+    const exerciseNames = (exercisesQuery.data?.data ?? [])
+      .map((exercise) => exercise.name.trim())
+      .filter(Boolean)
+
+    if (exerciseNames.length === 0) {
+      toast.error('No hay ejercicios cargados para incluir en el prompt')
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(buildImportPromptWithExerciseCatalog(exerciseNames))
+      toast.success(`Prompt copiado con ${exerciseNames.length} ejercicios`)
     } catch {
       toast.error('No se ha podido copiar el prompt')
     }
@@ -626,6 +655,14 @@ export function TrainingsPage() {
             Si hay varios ejercicios, duplica bloques <span className="font-semibold">EXERCISE</span>.
           </div>
 
+          <div className="rounded-lg border border-border bg-muted/20 p-3 text-sm text-muted-foreground">
+            {exercisesQuery.isLoading
+              ? 'Cargando catálogo de ejercicios para poder incluirlo automáticamente...'
+              : exercisesQuery.isError
+                ? 'No se ha podido cargar el catálogo. Puedes copiar la plantilla y pegar los nombres manualmente.'
+                : `El botón "Copiar con catálogo" incluirá ${exercisesQuery.data?.data.length ?? 0} ejercicios cargados.`}
+          </div>
+
           <div className="grid gap-3 md:grid-cols-3">
             {AI_IMPORT_GUIDE_STEPS.map((step) => (
               <div key={step.title} className="rounded-lg border border-border bg-muted/20 p-3">
@@ -650,10 +687,19 @@ export function TrainingsPage() {
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button type="button" variant="outline" size="sm" onClick={handleCopyImportPrompt}>
               <Copy className="h-4 w-4" />
-              Copiar prompt
+              Copiar plantilla
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleCopyImportPromptWithCatalog}
+              disabled={exercisesQuery.isLoading || (exercisesQuery.data?.data.length ?? 0) === 0}
+            >
+              <Copy className="h-4 w-4" />
+              Copiar con catálogo
             </Button>
           </div>
 
