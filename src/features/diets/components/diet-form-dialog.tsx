@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form'
 import { clearUnsavedChanges, useUnsavedChanges } from '@/hooks/use-unsaved-changes'
-import { ChevronDown, ChevronUp, LoaderCircle, Plus, X } from 'lucide-react'
+import { AlertTriangle, ChevronDown, ChevronUp, LoaderCircle, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { ImageUploadField } from '@/components/uploads/image-upload-field'
 import { Badge } from '@/components/ui/badge'
@@ -375,6 +375,8 @@ interface DietFormDialogProps {
   onOpenChange: (open: boolean) => void
   diet?: Diet | null
   isDuplicate?: boolean
+  importedValues?: DietFormValues | null
+  importIssues?: string[]
   onSaved?: () => void
 }
 
@@ -731,6 +733,8 @@ export function DietFormDialog({
   onOpenChange,
   diet,
   isDuplicate = false,
+  importedValues,
+  importIssues = [],
   onSaved,
 }: DietFormDialogProps) {
   const isEditing = Boolean(diet) && !isDuplicate
@@ -746,12 +750,20 @@ export function DietFormDialog({
   const ingredientsQuery = useIngredientsList()
   const ingredientsData = ingredientsQuery.data
 
-  const dialogTitle = isEditing ? 'Editar dieta' : isDuplicate ? 'Duplicar dieta' : 'Nueva dieta'
+  const dialogTitle = isEditing
+    ? 'Editar dieta'
+    : isDuplicate
+      ? 'Duplicar dieta'
+      : importedValues
+        ? 'Importar dieta'
+        : 'Nueva dieta'
   const dialogDescription = isEditing
     ? 'Modifica los campos y guarda los cambios.'
     : isDuplicate
       ? 'Se creará una copia de la dieta con el mismo contenido.'
-      : 'Rellena los datos de la nueva dieta.'
+      : importedValues
+        ? 'Revisa los datos importados antes de crear la dieta.'
+        : 'Rellena los datos de la nueva dieta.'
 
   const form = useForm<DietFormValues>({
     resolver: zodResolver(dietSchema),
@@ -782,8 +794,14 @@ export function DietFormDialog({
       form.reset(toFormValues(diet, isDuplicate))
       return
     }
+
+    if (importedValues) {
+      form.reset(importedValues)
+      return
+    }
+
     form.reset(defaultValues)
-  }, [form, open, diet, isDuplicate])
+  }, [form, open, diet, isDuplicate, importedValues])
 
   const calculateDietMacros = () => {
     const meals = form.getValues('meals')
@@ -998,6 +1016,25 @@ export function DietFormDialog({
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
+
+        {importIssues.length > 0 && (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
+              <div className="space-y-1">
+                <p className="font-medium">Revisa ingredientes no enlazados</p>
+                <p className="text-xs">
+                  Puedes corregirlos manualmente con el selector de ingredientes antes de guardar.
+                </p>
+                <ul className="list-disc space-y-1 pl-4 text-xs">
+                  {importIssues.map((issue, index) => (
+                    <li key={`${issue}-${index}`}>{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
         <Form {...form}>
           <form onSubmit={handleSubmit} className="min-w-0 space-y-5">
