@@ -685,8 +685,8 @@ export function TrainingFormDialog({
 
         form.reset(values)
         clearUnsavedChanges('training-form')
-        onSaved?.()
         onOpenChange(false)
+        window.setTimeout(() => onSaved?.(), 0)
       } catch (error) {
         if (isApprovalPendingError(error)) {
           onOpenChange(false)
