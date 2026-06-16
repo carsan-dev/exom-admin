@@ -105,7 +105,7 @@ export function GrantAchievementDialog({ achievement, open, onOpenChange, onGran
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Otorgar logro</DialogTitle>
           <DialogDescription>

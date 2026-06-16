@@ -100,7 +100,7 @@ export function IngredientFormDialog({ open, onOpenChange, ingredient, onSaved }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Editar ingrediente' : 'Nuevo ingrediente'}</DialogTitle>
           <DialogDescription>

@@ -602,7 +602,7 @@ export function BadgesPage() {
       </Tabs>
 
       <Dialog open={Boolean(editingItem)} onOpenChange={(open) => !open && setEditingItem(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent disableOutsideClose className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Editar valor</DialogTitle>
             <DialogDescription>

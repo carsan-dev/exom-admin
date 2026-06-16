@@ -499,7 +499,7 @@ function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTemplateD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Nueva plantilla manual</DialogTitle>
           <DialogDescription>

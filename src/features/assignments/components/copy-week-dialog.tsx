@@ -64,7 +64,7 @@ export function CopyWeekDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent disableOutsideClose>
         <DialogHeader>
           <DialogTitle>Copiar semana</DialogTitle>
           <DialogDescription>

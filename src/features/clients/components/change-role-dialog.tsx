@@ -84,7 +84,7 @@ export function ChangeRoleDialog({ user, open, onOpenChange }: ChangeRoleDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent disableOutsideClose className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Cambiar rol</DialogTitle>
           <DialogDescription>

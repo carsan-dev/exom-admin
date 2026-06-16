@@ -76,7 +76,7 @@ export function CreateAdminDialog({ open, onOpenChange }: CreateAdminDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent disableOutsideClose className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Nuevo admin</DialogTitle>
           <DialogDescription>

@@ -736,6 +736,7 @@ export function TrainingFormDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        disableOutsideClose
         ref={dialogContentRef}
         className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6"
       >

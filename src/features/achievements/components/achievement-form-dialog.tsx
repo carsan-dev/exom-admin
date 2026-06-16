@@ -135,7 +135,7 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Editar logro' : 'Nuevo logro'}</DialogTitle>
           <DialogDescription>

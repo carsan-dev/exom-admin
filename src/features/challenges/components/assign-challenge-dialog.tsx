@@ -134,7 +134,7 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Asignar reto</DialogTitle>
           <DialogDescription>
