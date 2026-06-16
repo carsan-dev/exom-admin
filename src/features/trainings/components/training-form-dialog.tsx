@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { clearUnsavedChanges, useUnsavedChanges } from '@/hooks/use-unsaved-changes'
-import { Check, ChevronDown, LoaderCircle, Plus, X } from 'lucide-react'
+import { AlertTriangle, Check, ChevronDown, LoaderCircle, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -75,6 +75,8 @@ interface TrainingFormDialogProps {
   onOpenChange: (open: boolean) => void
   training?: Training | null
   isDuplicate?: boolean
+  importedValues?: TrainingFormValues | null
+  importIssues?: string[]
   onSaved?: () => void
 }
 
@@ -616,6 +618,8 @@ export function TrainingFormDialog({
   onOpenChange,
   training,
   isDuplicate = false,
+  importedValues,
+  importIssues = [],
   onSaved,
 }: TrainingFormDialogProps) {
   const isEditing = Boolean(training) && !isDuplicate
@@ -632,11 +636,15 @@ export function TrainingFormDialog({
     ? 'Editar entrenamiento'
     : isDuplicate
       ? 'Duplicar entrenamiento'
+      : importedValues
+        ? 'Importar entrenamiento'
       : 'Nuevo entrenamiento'
   const dialogDescription = isEditing
     ? 'Modifica los campos y guarda los cambios.'
     : isDuplicate
       ? 'Se creara una copia del entrenamiento con el mismo contenido.'
+      : importedValues
+        ? 'Revisa los datos importados antes de crear el entrenamiento.'
       : 'Rellena los datos del nuevo entrenamiento.'
 
   const form = useForm<TrainingFormValues>({
@@ -661,8 +669,13 @@ export function TrainingFormDialog({
       return
     }
 
+    if (importedValues) {
+      form.reset(importedValues)
+      return
+    }
+
     form.reset(defaultValues)
-  }, [form, open, training, isDuplicate])
+  }, [form, open, training, isDuplicate, importedValues])
 
   const scrollToSection = (section: HTMLDivElement | null) => {
     section?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -730,6 +743,22 @@ export function TrainingFormDialog({
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
+
+        {importIssues.length > 0 && (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
+              <div className="space-y-1">
+                <p className="font-medium">Revisa ejercicios no enlazados</p>
+                <ul className="list-disc space-y-1 pl-4 text-xs">
+                  {importIssues.map((issue, index) => (
+                    <li key={`${issue}-${index}`}>{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
         <Form {...form}>
           <form onSubmit={handleSubmit} className="min-w-0 space-y-5">

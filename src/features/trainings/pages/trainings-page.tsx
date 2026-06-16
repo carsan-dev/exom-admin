@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus } from 'lucide-react'
+import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus, Upload } from 'lucide-react'
 import { useSearchParams } from 'react-router'
+import { toast } from 'sonner'
 import {
   FilterToolbar,
   filtersToApiParams,
@@ -23,12 +24,15 @@ import {
   useTrainingTags,
   useTrainingTypes,
   useTrainings,
+  useExercisesList,
 } from '../api'
 import { DeleteTrainingDialog } from '../components/delete-training-dialog'
 import { TrainingDetailDialog } from '../components/training-detail-dialog'
 import { TrainingFormDialog } from '../components/training-form-dialog'
 import { TrainingsTable } from '../components/trainings-table'
+import { parseTrainingImport } from '../import-training'
 import { getTrainingTypeLabel, type Training } from '../types'
+import type { TrainingFormValues } from '../schemas'
 
 const PAGE_SIZE = 10
 const LEVEL_OPTIONS: FilterOption[] = [
@@ -66,11 +70,15 @@ export function TrainingsPage() {
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null)
   const [editingTraining, setEditingTraining] = useState<Training | null>(null)
   const [isDuplicate, setIsDuplicate] = useState(false)
+  const [importedValues, setImportedValues] = useState<TrainingFormValues | null>(null)
+  const [importIssues, setImportIssues] = useState<string[]>([])
+  const importInputRef = useRef<HTMLInputElement | null>(null)
   const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
   const tagsQuery = useTrainingTags()
   const trainingTypesQuery = useTrainingTypes()
+  const exercisesQuery = useExercisesList()
   const sections = useMemo<FilterSectionConfig[]>(
     () => [
       {
@@ -139,7 +147,47 @@ export function TrainingsPage() {
   const handleCreate = () => {
     setEditingTraining(null)
     setIsDuplicate(false)
+    setImportedValues(null)
+    setImportIssues([])
     setFormDialogOpen(true)
+  }
+
+  const handleImportClick = () => {
+    importInputRef.current?.click()
+  }
+
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+
+    if (!file) {
+      return
+    }
+
+    if (!file.name.toLowerCase().endsWith('.json') && !file.name.toLowerCase().endsWith('.csv')) {
+      toast.error('Selecciona un archivo .json o .csv')
+      return
+    }
+
+    try {
+      const text = await file.text()
+      const result = parseTrainingImport(file.name, text, exercisesQuery.data?.data ?? [])
+
+      setEditingTraining(null)
+      setIsDuplicate(false)
+      setImportedValues(result.values)
+      setImportIssues(result.issues)
+      setFormDialogOpen(true)
+
+      if (result.issues.length > 0) {
+        toast.warning('Entrenamiento importado con avisos. Revisa ejercicios no enlazados.')
+        return
+      }
+
+      toast.success('Entrenamiento importado. Revisa y guarda para crear.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'No se ha podido importar el archivo')
+    }
   }
 
   const handleView = (training: Training) => {
@@ -170,6 +218,8 @@ export function TrainingsPage() {
     if (!open) {
       setEditingTraining(null)
       setIsDuplicate(false)
+      setImportedValues(null)
+      setImportIssues([])
     }
   }
 
@@ -213,10 +263,28 @@ export function TrainingsPage() {
           </p>
         </div>
 
-        <Button onClick={handleCreate} className="lg:self-start">
-          <Plus className="h-4 w-4" />
-          Nuevo entrenamiento
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row lg:self-start">
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".json,.csv,application/json,text/csv"
+            className="hidden"
+            onChange={handleImportFile}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleImportClick}
+            disabled={exercisesQuery.isLoading}
+          >
+            <Upload className="h-4 w-4" />
+            Importar
+          </Button>
+          <Button onClick={handleCreate}>
+            <Plus className="h-4 w-4" />
+            Nuevo entrenamiento
+          </Button>
+        </div>
       </div>
 
       {/* Content */}
@@ -331,6 +399,8 @@ export function TrainingsPage() {
         onOpenChange={handleFormDialogOpenChange}
         training={editingTraining}
         isDuplicate={isDuplicate}
+        importedValues={importedValues}
+        importIssues={importIssues}
         onSaved={() => {
           if (!editingTraining || isDuplicate) {
             replacePaginationSearchParams(setSearchParams, { page: 1 })
