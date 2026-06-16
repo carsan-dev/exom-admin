@@ -66,7 +66,7 @@ const trainingAccentColorSchema = z
     if (!normalizedColor) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Selecciona un color valido',
+        message: 'Selecciona un color válido',
       })
 
       return z.NEVER
@@ -79,14 +79,14 @@ export const trainingExerciseSchema = z.object({
   kind: z.literal('EXERCISE').default('EXERCISE'),
   exercise_id: z.string().trim().min(1, 'Selecciona un ejercicio'),
   order: z.number().int().min(0),
-  sets: z.number().int().min(1, 'Minimo 1 serie'),
-  reps_or_duration: z.string().trim().min(1, 'Especifica reps o duracion'),
+  sets: z.number().int().min(1, 'Mínimo 1 serie'),
+  reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),
   rest_seconds: z.number().int().min(0).default(60),
 })
 
 export const trainingCircuitExerciseSchema = z.object({
   exercise_id: z.string().trim().min(1, 'Selecciona un ejercicio'),
-  reps_or_duration: z.string().trim().min(1, 'Especifica reps o duracion'),
+  reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),
   rest_seconds: z.number().int().min(0).default(15),
 })
 
@@ -94,7 +94,7 @@ export const trainingCircuitSchema = z.object({
   kind: z.literal('CIRCUIT'),
   order: z.number().int().min(0),
   name: z.string().trim().min(1, 'Nombra el circuito').default('Circuito'),
-  rounds: z.number().int().min(1, 'Minimo 1 ronda').default(3),
+  rounds: z.number().int().min(1, 'Mínimo 1 ronda').default(3),
   rest_between_rounds_seconds: z.number().int().min(0).default(60),
   exercises: z.array(trainingCircuitExerciseSchema).min(1, 'Agrega ejercicios al circuito'),
 })

@@ -64,22 +64,22 @@ const MEAL_TYPE_OPTIONS: FilterOption[] = [
   { value: 'DINNER', label: 'Cena' },
 ]
 
-const AI_IMPORT_PROMPT = `Genera una dieta para EXOM en JSON valido, sin markdown y sin texto adicional.
+const AI_IMPORT_PROMPT = `Genera una dieta para EXOM en JSON válido, sin markdown y sin texto adicional.
 
 IMPORTANTE:
 - Sustituye solo el bloque "Objetivo de la dieta".
-- Usa solo nombres exactos de ingredientes del catalogo EXOM incluido.
+- Usa solo nombres exactos de ingredientes del catálogo EXOM incluido.
 - Si quieres 4 comidas, dilo en el objetivo.
 - Si quieres variantes, dilo por comida.
 - Si no quieres variantes, cada comida debe devolver "variants": [].
 - type solo puede ser: "BREAKFAST", "LUNCH", "SNACK" o "DINNER".
 - grams_equivalent es obligatorio cuando unit no es "g".
 
-Catalogo de ingredientes disponible:
+Catálogo de ingredientes disponible:
 [CATALOGO_INGREDIENTES]
 
 Objetivo de la dieta:
-[MODIFICAR: indica numero de comidas, tipos de comida, si quieres variantes por comida, calorias objetivo, macros objetivo, preferencias, restricciones, alergias y alimentos prohibidos]
+[MODIFICAR: indica número de comidas, tipos de comida, si quieres variantes por comida, calorías objetivo, macros objetivo, preferencias, restricciones, alergias y alimentos prohibidos]
 
 Devuelve exactamente este JSON:
 
@@ -98,10 +98,10 @@ Devuelve exactamente este JSON:
       "protein_g": 35,
       "carbs_g": 55,
       "fat_g": 12,
-      "nutritional_badges": ["Alto en proteina"],
+      "nutritional_badges": ["Alto en proteína"],
       "ingredients": [
         {
-          "ingredient_name": "[nombre exacto del catalogo]",
+          "ingredient_name": "[nombre exacto del catálogo]",
           "quantity": 80,
           "unit": "g",
           "grams_equivalent": 80
@@ -117,16 +117,16 @@ g, ml, piece, tablespoon, teaspoon, handful, slice, palm, fist, ladle, cold_cut_
 
 const AI_IMPORT_GUIDE_STEPS = [
   {
-    title: 'Numero de comidas',
-    text: 'Indica en el objetivo si quieres 3, 4, 5 o mas comidas y los tipos esperados.',
+    title: 'Número de comidas',
+    text: 'Indica en el objetivo si quieres 3, 4, 5 o más comidas y los tipos esperados.',
   },
   {
     title: 'Variantes',
     text: 'Pide variantes por comida si las necesitas. Si no, ChatGPT debe devolver variants: [] en cada comida.',
   },
   {
-    title: 'Catalogo',
-    text: 'La IA debe usar solo ingredientes del catalogo incluido para que el formulario los enlace automaticamente.',
+    title: 'Catálogo',
+    text: 'La IA debe usar solo ingredientes del catálogo incluido para que el formulario los enlace automáticamente.',
   },
 ]
 
@@ -139,7 +139,7 @@ const AI_IMPORT_NO_VARIANTS_EXAMPLE = `{
       "protein_g": 48,
       "carbs_g": 70,
       "fat_g": 16,
-      "nutritional_badges": ["Alto en proteina"],
+      "nutritional_badges": ["Alto en proteína"],
       "ingredients": [
         { "ingredient_name": "Pechuga de pollo", "quantity": 180, "unit": "g", "grams_equivalent": 180 },
         { "ingredient_name": "Arroz", "quantity": 90, "unit": "g", "grams_equivalent": 90 }
@@ -156,7 +156,7 @@ const AI_IMPORT_VARIANTS_EXAMPLE = `{
   "protein_g": 22,
   "carbs_g": 30,
   "fat_g": 6,
-  "nutritional_badges": ["Proteina"],
+  "nutritional_badges": ["Proteína"],
   "ingredients": [
     { "ingredient_name": "Yogur griego", "quantity": 200, "unit": "g", "grams_equivalent": 200 }
   ],
@@ -168,7 +168,7 @@ const AI_IMPORT_VARIANTS_EXAMPLE = `{
       "protein_g": 20,
       "carbs_g": 28,
       "fat_g": 9,
-      "nutritional_badges": ["Proteina"],
+      "nutritional_badges": ["Proteína"],
       "ingredients": [
         { "ingredient_name": "Pan integral", "quantity": 2, "unit": "slice", "grams_equivalent": 60 }
       ]
@@ -187,7 +187,7 @@ function buildImportPromptWithIngredientCatalog(ingredientNames: string[]) {
   const catalog =
     ingredientNames.length > 0
       ? ingredientNames.map((name) => `- ${name}`).join('\n')
-      : '[pega aqui los nombres exactos de ingredientes del catalogo EXOM, uno por linea]'
+      : '[pega aquí los nombres exactos de ingredientes del catálogo EXOM, uno por línea]'
 
   return AI_IMPORT_PROMPT.replace('[CATALOGO_INGREDIENTES]', catalog)
 }
@@ -451,7 +451,7 @@ export function DietsPage() {
                   type="button"
                   variant="outline"
                   size="icon"
-                  aria-label="Ver instrucciones de importacion"
+                  aria-label="Ver instrucciones de importación"
                   onClick={() => setImportPromptOpen(true)}
                 >
                   <Info className="h-4 w-4" />
@@ -609,7 +609,7 @@ export function DietsPage() {
           <DialogHeader className="pr-8">
             <DialogTitle>Prompt para generar JSON compatible</DialogTitle>
             <DialogDescription>
-              Copia esta plantilla en tu IA. Solo cambia el objetivo de la dieta y usa el catalogo
+              Copia esta plantilla en tu IA. Solo cambia el objetivo de la dieta y usa el catálogo
               incluido para enlazar ingredientes.
             </DialogDescription>
           </DialogHeader>
@@ -617,15 +617,15 @@ export function DietsPage() {
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
             Si quieres 4 comidas, dilo en el objetivo. Si quieres variantes, dilo por comida. Si
             no quieres variantes, ChatGPT debe devolver <span className="font-semibold">variants: []</span>.
-            Usa solo ingredientes del catalogo incluido.
+            Usa solo ingredientes del catálogo incluido.
           </div>
 
           <div className="rounded-lg border border-border bg-muted/20 p-3 text-sm text-muted-foreground">
             {ingredientsQuery.isLoading
-              ? 'Cargando catalogo de ingredientes para poder incluirlo automaticamente...'
+              ? 'Cargando catálogo de ingredientes para poder incluirlo automáticamente...'
               : ingredientsQuery.isError
-                ? 'No se ha podido cargar el catalogo. Puedes copiar la plantilla y pegar los nombres manualmente.'
-                : `El boton "Copiar con catalogo" incluira ${ingredientsQuery.data?.data.length ?? 0} ingredientes cargados.`}
+                ? 'No se ha podido cargar el catálogo. Puedes copiar la plantilla y pegar los nombres manualmente.'
+                : `El botón "Copiar con catálogo" incluirá ${ingredientsQuery.data?.data.length ?? 0} ingredientes cargados.`}
           </div>
 
           <div className="grid gap-3 md:grid-cols-3">
@@ -670,7 +670,7 @@ export function DietsPage() {
               disabled={ingredientsQuery.isLoading || (ingredientsQuery.data?.data.length ?? 0) === 0}
             >
               <Copy className="h-4 w-4" />
-              Copiar con catalogo
+              Copiar con catálogo
             </Button>
           </div>
 

@@ -37,7 +37,7 @@ export function ChallengesStatsCards({ summary, isLoading, isError, isFetching, 
           <div className="space-y-1">
             <CardTitle className="text-base">No se pudo cargar el resumen</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Reintenta para recuperar el total, los retos semanales, los automaticos y el alcance global.
+              Reintenta para recuperar el total, los retos semanales, los automáticos y el alcance global.
             </p>
           </div>
           <AlertTriangle className="h-5 w-5 text-status-error" />

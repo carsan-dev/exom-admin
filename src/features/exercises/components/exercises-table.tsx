@@ -42,7 +42,7 @@ export function ExercisesTable({ exercises, approvalById = {}, onView, onEdit, o
           <TableHead>Grupos musculares</TableHead>
           <TableHead className="hidden lg:table-cell">Equipamiento</TableHead>
           <TableHead>Nivel</TableHead>
-          <TableHead className="text-center">Video</TableHead>
+          <TableHead className="text-center">Vídeo</TableHead>
           <TableHead className="text-right">Acciones</TableHead>
         </TableRow>
       </TableHeader>

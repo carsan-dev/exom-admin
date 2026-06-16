@@ -17,7 +17,7 @@ const optionalNumber = z
     const parsed = typeof value === 'number' ? value : Number(value)
     return Number.isFinite(parsed) ? parsed : Number.NaN
   })
-  .refine((value) => value == null || Number.isFinite(value), 'Numero invalido')
+  .refine((value) => value == null || Number.isFinite(value), 'Número inválido')
 
 const optionalInteger = optionalNumber.transform((value) => (value == null ? null : Math.trunc(value)))
 

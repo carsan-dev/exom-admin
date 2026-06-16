@@ -58,7 +58,7 @@ const ALL_CLIENTS_LIMIT = 200
 const sendNotificationSchema = z
   .object({
     sendToAll: z.boolean(),
-    user_ids: z.array(z.string().uuid('Selecciona destinatarios validos')),
+    user_ids: z.array(z.string().uuid('Selecciona destinatarios válidos')),
     title: z
       .string()
       .trim()

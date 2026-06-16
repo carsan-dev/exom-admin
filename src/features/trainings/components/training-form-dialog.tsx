@@ -605,7 +605,7 @@ function AccentColorField({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Usa swatches, picker o hex. El preview ajusta contraste del texto automaticamente.
+        Usa swatches, picker o hex. El preview ajusta contraste del texto automáticamente.
       </p>
 
       {error && <p className="text-xs text-status-error">{error}</p>}
@@ -642,7 +642,7 @@ export function TrainingFormDialog({
   const dialogDescription = isEditing
     ? 'Modifica los campos y guarda los cambios.'
     : isDuplicate
-      ? 'Se creara una copia del entrenamiento con el mismo contenido.'
+      ? 'Se creará una copia del entrenamiento con el mismo contenido.'
       : importedValues
         ? 'Revisa los datos importados antes de crear el entrenamiento.'
       : 'Rellena los datos del nuevo entrenamiento.'
@@ -764,7 +764,7 @@ export function TrainingFormDialog({
           <form onSubmit={handleSubmit} className="min-w-0 space-y-5">
             <div ref={generalSectionRef} className="space-y-4">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Informacion general
+                Información general
               </p>
 
               <FormField
@@ -849,7 +849,7 @@ export function TrainingFormDialog({
                   name="estimated_duration_min"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Duracion estimada (min)</FormLabel>
+                      <FormLabel>Duración estimada (min)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -873,7 +873,7 @@ export function TrainingFormDialog({
                   name="estimated_calories"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Calorias estimadas (kcal)</FormLabel>
+                      <FormLabel>Calorías estimadas (kcal)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -924,7 +924,7 @@ export function TrainingFormDialog({
                   name="warmup_description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Descripcion calentamiento</FormLabel>
+                      <FormLabel>Descripción calentamiento</FormLabel>
                       <FormControl>
                         <textarea
                           {...field}
@@ -943,7 +943,7 @@ export function TrainingFormDialog({
                   name="warmup_duration_min"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Duracion (min)</FormLabel>
+                      <FormLabel>Duración (min)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -968,7 +968,7 @@ export function TrainingFormDialog({
                 name="cooldown_description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descripcion vuelta a la calma</FormLabel>
+                    <FormLabel>Descripción vuelta a la calma</FormLabel>
                     <FormControl>
                       <textarea
                         {...field}

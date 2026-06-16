@@ -63,24 +63,24 @@ const LEVEL_OPTIONS: FilterOption[] = [
   { value: 'AVANZADO', label: 'Avanzado' },
 ]
 
-const AI_IMPORT_PROMPT = `Genera un entrenamiento para EXOM en JSON valido, sin markdown y sin texto adicional.
+const AI_IMPORT_PROMPT = `Genera un entrenamiento para EXOM en JSON válido, sin markdown y sin texto adicional.
 
 IMPORTANTE:
 - Sustituye todas las partes marcadas como [MODIFICAR].
-- Usa solo nombres exactos de ejercicios del catalogo EXOM.
+- Usa solo nombres exactos de ejercicios del catálogo EXOM.
 - Cada ejercicio suelto debe tener kind "EXERCISE".
 - Cada circuito debe tener kind "CIRCUIT" y una lista exercises.
 - En circuitos, cada ejercicio representa 1 serie por ronda.
-- Si NO hay circuito, no incluyas ningun objeto kind "CIRCUIT".
+- Si NO hay circuito, no incluyas ningún objeto kind "CIRCUIT".
 - Si hay varios ejercicios sueltos, repite el bloque kind "EXERCISE" dentro de items.
 - Si hay varios circuitos, repite el bloque kind "CIRCUIT" dentro de items.
 - level solo puede ser: "PRINCIPIANTE", "INTERMEDIO" o "AVANZADO".
 
-Catalogo de ejercicios disponible:
-[MODIFICAR: pega aqui los nombres exactos de ejercicios del catalogo EXOM, uno por linea]
+Catálogo de ejercicios disponible:
+[MODIFICAR: pega aquí los nombres exactos de ejercicios del catálogo EXOM, uno por línea]
 
 Objetivo del entrenamiento:
-[MODIFICAR: describe objetivo, nivel, duracion, material disponible, lesiones, foco muscular y restricciones]
+[MODIFICAR: describe objetivo, nivel, duración, material disponible, lesiones, foco muscular y restricciones]
 
 Devuelve exactamente este JSON:
 
@@ -89,7 +89,7 @@ Devuelve exactamente este JSON:
   "types": ["[MODIFICAR: tipo principal, ej. Fuerza]"],
   "accentColor": "[MODIFICAR: color hex, ej. #C5E384, o null]",
   "level": "[MODIFICAR: PRINCIPIANTE | INTERMEDIO | AVANZADO]",
-  "estimated_duration_min": [MODIFICAR: numero de minutos o null],
+  "estimated_duration_min": [MODIFICAR: número de minutos o null],
   "estimated_calories": [MODIFICAR: kcal estimadas o null],
   "warmup_description": "[MODIFICAR: calentamiento breve o cadena vacia]",
   "warmup_duration_min": [MODIFICAR: minutos de calentamiento o null],
@@ -99,31 +99,31 @@ Devuelve exactamente este JSON:
     {
       "kind": "EXERCISE",
       "exercise_name": "[MODIFICAR: nombre exacto del ejercicio 1]",
-      "sets": [MODIFICAR: numero de series],
-      "reps_or_duration": "[MODIFICAR: reps o duracion, ej. 10, 12-15, 30s]",
+      "sets": [MODIFICAR: número de series],
+      "reps_or_duration": "[MODIFICAR: reps o duración, ej. 10, 12-15, 30s]",
       "rest_seconds": [MODIFICAR: descanso entre series en segundos]
     },
     {
       "kind": "EXERCISE",
-      "exercise_name": "[MODIFICAR: nombre exacto del ejercicio 2; duplica este bloque para mas ejercicios]",
-      "sets": [MODIFICAR: numero de series],
-      "reps_or_duration": "[MODIFICAR: reps o duracion]",
+      "exercise_name": "[MODIFICAR: nombre exacto del ejercicio 2; duplica este bloque para más ejercicios]",
+      "sets": [MODIFICAR: número de series],
+      "reps_or_duration": "[MODIFICAR: reps o duración]",
       "rest_seconds": [MODIFICAR: descanso entre series en segundos]
     },
     {
       "kind": "CIRCUIT",
       "name": "[MODIFICAR: nombre del circuito; elimina este bloque completo si no hay circuito]",
-      "rounds": [MODIFICAR: numero de rondas],
+      "rounds": [MODIFICAR: número de rondas],
       "rest_between_rounds_seconds": [MODIFICAR: descanso entre rondas en segundos],
       "exercises": [
         {
           "exercise_name": "[MODIFICAR: nombre exacto del ejercicio del circuito 1]",
-          "reps_or_duration": "[MODIFICAR: reps o duracion de 1 serie]",
+          "reps_or_duration": "[MODIFICAR: reps o duración de 1 serie]",
           "rest_seconds": [MODIFICAR: descanso tras este ejercicio dentro de la ronda]
         },
         {
           "exercise_name": "[MODIFICAR: nombre exacto del ejercicio del circuito 2]",
-          "reps_or_duration": "[MODIFICAR: reps o duracion de 1 serie]",
+          "reps_or_duration": "[MODIFICAR: reps o duración de 1 serie]",
           "rest_seconds": [MODIFICAR: descanso tras este ejercicio dentro de la ronda]
         }
       ]
@@ -136,12 +136,12 @@ CASO SIN CIRCUITO:
 - elimina por completo el bloque kind "CIRCUIT".
 
 CASO CON VARIOS EJERCICIOS:
-- anade un objeto kind "EXERCISE" por cada ejercicio suelto.
+- añade un objeto kind "EXERCISE" por cada ejercicio suelto.
 - no metas varios nombres dentro del mismo exercise_name.
 
 CASO CON CIRCUITO:
-- dentro del circuito, anade un objeto en exercises por cada ejercicio del circuito.
-- rounds indica cuantas veces se repite la lista completa.
+- dentro del circuito, añade un objeto en exercises por cada ejercicio del circuito.
+- rounds indica cuántas veces se repite la lista completa.
 - cada ejercicio del circuito es 1 serie por ronda.`
 
 const AI_IMPORT_GUIDE_STEPS = [
@@ -155,7 +155,7 @@ const AI_IMPORT_GUIDE_STEPS = [
   },
   {
     title: 'Con circuito',
-    text: 'Incluye un bloque kind "CIRCUIT". Dentro de exercises pon cada ejercicio del circuito; rounds marca cuantas rondas se repite la lista.',
+    text: 'Incluye un bloque kind "CIRCUIT". Dentro de exercises pon cada ejercicio del circuito; rounds marca cuántas rondas se repite la lista.',
   },
 ]
 
@@ -204,10 +204,10 @@ const AI_IMPORT_CIRCUIT_EXAMPLE = `{
 function buildImportPromptWithExerciseCatalog(exerciseNames: string[]) {
   const catalog = exerciseNames.length > 0
     ? exerciseNames.map((name) => `- ${name}`).join('\n')
-    : '[MODIFICAR: pega aqui los nombres exactos de ejercicios del catalogo EXOM, uno por linea]'
+    : '[MODIFICAR: pega aquí los nombres exactos de ejercicios del catálogo EXOM, uno por línea]'
 
   return AI_IMPORT_PROMPT.replace(
-    '[MODIFICAR: pega aqui los nombres exactos de ejercicios del catalogo EXOM, uno por linea]',
+    '[MODIFICAR: pega aquí los nombres exactos de ejercicios del catálogo EXOM, uno por línea]',
     catalog
   )
 }

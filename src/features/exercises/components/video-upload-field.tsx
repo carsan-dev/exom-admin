@@ -52,7 +52,7 @@ export function VideoUploadField({
   value,
   onChange,
   onThumbnailChange,
-  label = 'Video',
+  label = 'Vídeo',
   disabled = false,
   onUploadingChange,
 }: VideoUploadFieldProps) {
@@ -96,7 +96,7 @@ export function VideoUploadField({
 
       if (processedVideo.size > MAX_COMPRESSED_SIZE_BYTES) {
         setError(
-          `El video pesa ${formatFileSize(processedVideo.size)}. Máximo permitido: ${formatFileSize(MAX_COMPRESSED_SIZE_BYTES)}.`
+          `El vídeo pesa ${formatFileSize(processedVideo.size)}. Máximo permitido: ${formatFileSize(MAX_COMPRESSED_SIZE_BYTES)}.`
         )
         setPhase('idle')
         setProgress(0)
@@ -157,7 +157,7 @@ export function VideoUploadField({
       setPhase('idle')
       setProgress(0)
     } catch (err) {
-      setError(getApiErrorMessage(err, 'No se ha podido subir el video'))
+      setError(getApiErrorMessage(err, 'No se ha podido subir el vídeo'))
       setPhase('idle')
       setProgress(0)
     }
@@ -219,10 +219,10 @@ export function VideoUploadField({
             )}
             <span>
               {phase === 'compressing'
-                ? `Comprimiendo video... ${progress}%`
+                ? `Comprimiendo vídeo... ${progress}%`
                 : phase === 'preparing'
-                  ? `Preparando video... ${progress}%`
-                : `Subiendo video... ${progress}%`}
+                  ? `Preparando vídeo... ${progress}%`
+                : `Subiendo vídeo... ${progress}%`}
             </span>
           </div>
           {uploadSummary && (
@@ -244,7 +244,7 @@ export function VideoUploadField({
         >
           <Upload className="h-8 w-8 text-muted-foreground" />
           <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">Seleccionar video</p>
+            <p className="text-sm font-medium text-foreground">Seleccionar vídeo</p>
             <p className="text-xs text-muted-foreground">MP4, MOV o WebM · Máx. 1 GB. Directo hasta 100 MB.</p>
           </div>
         </button>

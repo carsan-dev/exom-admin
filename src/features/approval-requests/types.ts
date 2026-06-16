@@ -255,7 +255,7 @@ export function buildApprovalBusinessSummary(request: ApprovalRequestLike) {
 
 export function buildAdminApprovalDetailView(request: ApprovalRequestLike): AdminApprovalDetailView {
   const facts: ApprovalDetailFact[] = [
-    { label: 'Accion', value: getApprovalActionLabel(request.action_type) },
+    { label: 'Acción', value: getApprovalActionLabel(request.action_type) },
     { label: 'Recurso', value: getApprovalResourceName(request) },
     { label: 'Tipo', value: getApprovalResourceLabel(request.resource_type) },
     { label: 'Solicitante', value: getApprovalActorName(request.requester) },

@@ -30,7 +30,7 @@ function formatDate(dateStr: string) {
 }
 
 function getExpiredMediaLabel(item: FeedbackItem) {
-  return item.media_type === 'VIDEO' ? 'El video ya no está disponible' : 'La imagen ya no está disponible'
+  return item.media_type === 'VIDEO' ? 'El vídeo ya no está disponible' : 'La imagen ya no está disponible'
 }
 
 interface FeedbackDetailDialogProps {

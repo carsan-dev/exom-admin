@@ -96,10 +96,10 @@ export function ExerciseDetailDialog({ exercise, open, onOpenChange, onEdit, onD
             </div>
           )}
 
-          {/* Video */}
+          {/* Vídeo */}
           {exercise.video_url ? (
             <div className="space-y-1.5">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Video</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Vídeo</p>
               <div className="min-w-0 overflow-hidden rounded-lg border border-border/60 bg-muted">
                 <video
                   src={exercise.video_url}
@@ -113,7 +113,7 @@ export function ExerciseDetailDialog({ exercise, open, onOpenChange, onEdit, onD
           ) : (
             <div className="flex items-center gap-2 rounded-lg border border-dashed border-border/60 px-4 py-3 text-sm text-muted-foreground">
               <Video className="h-4 w-4" />
-              Sin video adjunto
+              Sin vídeo adjunto
             </div>
           )}
 

@@ -204,7 +204,7 @@ async function getVideoMetadata(file: File): Promise<VideoMetadata> {
       cleanup()
 
       if (!width || !height || !duration) {
-        reject(new Error('No se pudieron leer los metadatos del video'))
+        reject(new Error('No se pudieron leer los metadatos del vídeo'))
         return
       }
 
@@ -213,7 +213,7 @@ async function getVideoMetadata(file: File): Promise<VideoMetadata> {
 
     video.onerror = () => {
       cleanup()
-      reject(new Error('No se pudieron leer los metadatos del video'))
+      reject(new Error('No se pudieron leer los metadatos del vídeo'))
     }
 
     video.src = objectUrl
@@ -250,7 +250,7 @@ async function generateThumbnail(file: File, metadata: VideoMetadata): Promise<F
 
         const context = canvas.getContext('2d')
         if (!context) {
-          fail('No se pudo generar la miniatura del video')
+          fail('No se pudo generar la miniatura del vídeo')
           return
         }
 
@@ -259,7 +259,7 @@ async function generateThumbnail(file: File, metadata: VideoMetadata): Promise<F
           (blob) => {
             if (settled) return
             if (!blob) {
-              fail('No se pudo generar la miniatura del video')
+              fail('No se pudo generar la miniatura del vídeo')
               return
             }
 
@@ -272,7 +272,7 @@ async function generateThumbnail(file: File, metadata: VideoMetadata): Promise<F
           0.84,
         )
       } catch {
-        fail('No se pudo generar la miniatura del video')
+        fail('No se pudo generar la miniatura del vídeo')
       }
     }
 
@@ -297,7 +297,7 @@ async function generateThumbnail(file: File, metadata: VideoMetadata): Promise<F
     }
 
     video.onerror = () => {
-      fail('No se pudo generar la miniatura del video')
+      fail('No se pudo generar la miniatura del vídeo')
     }
 
     video.src = objectUrl

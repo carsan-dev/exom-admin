@@ -422,7 +422,7 @@ export function ExerciseFormDialog({
               )}
             />
 
-            {/* Video */}
+            {/* Vídeo */}
             <FormField
               control={form.control}
               name="video_url"
@@ -430,7 +430,7 @@ export function ExerciseFormDialog({
                 <FormItem>
                   <FormControl>
                     <VideoUploadField
-                      label="Video"
+                      label="Vídeo"
                       value={field.value ?? ''}
                       onChange={field.onChange}
                       onThumbnailChange={(url, previewUrl) => {

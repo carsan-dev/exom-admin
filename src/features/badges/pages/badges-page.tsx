@@ -149,7 +149,7 @@ function CatalogTable({
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-foreground">
-              No se ha podido cargar el catalogo
+              No se ha podido cargar el catálogo
             </h2>
             <p className="max-w-xl text-sm text-muted-foreground">
               {getApiErrorMessage(catalog.error, 'Intentalo de nuevo en unos segundos.')}
@@ -256,7 +256,7 @@ function CatalogTable({
         {filteredValues.length > 0 ? (
           <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
-              Pagina {currentPage} de {totalPages}
+              Página {currentPage} de {totalPages}
             </p>
             <div className="flex gap-2">
               <Button
@@ -506,7 +506,7 @@ export function BadgesPage() {
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
           <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">
-            Catalogo
+            Catálogo
           </p>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">Badges</h1>
