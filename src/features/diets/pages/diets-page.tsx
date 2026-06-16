@@ -444,19 +444,6 @@ export function DietsPage() {
             <Upload className="h-4 w-4" />
             Importar
           </Button>
-          <Button type="button" variant="outline" onClick={handleCopyImportPrompt}>
-            <Copy className="h-4 w-4" />
-            Copiar plantilla
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCopyImportPromptWithCatalog}
-            disabled={ingredientsQuery.isLoading || (ingredientsQuery.data?.data.length ?? 0) === 0}
-          >
-            <Copy className="h-4 w-4" />
-            Copiar con catalogo
-          </Button>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
