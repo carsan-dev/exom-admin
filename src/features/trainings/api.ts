@@ -77,13 +77,42 @@ function normalizeTrainingPayload(values: TrainingFormValues) {
     warmup_duration_min: values.warmup_duration_min ?? undefined,
     cooldown_description: values.cooldown_description?.trim() || null,
     tags: normalizeTrainingTags(values.tags),
-    exercises: values.exercises.map((ex) => ({
-      exercise_id: ex.exercise_id,
-      order: ex.order,
-      sets: ex.sets,
-      reps_or_duration: ex.reps_or_duration,
-      rest_seconds: ex.rest_seconds,
-    })),
+    items: values.items.map((item, order) =>
+      item.kind === 'CIRCUIT'
+        ? {
+            kind: 'CIRCUIT',
+            order,
+            name: item.name.trim() || 'Circuito',
+            rounds: item.rounds,
+            rest_between_rounds_seconds: item.rest_between_rounds_seconds,
+            exercises: item.exercises.map((ex) => ({
+              exercise_id: ex.exercise_id,
+              reps_or_duration: ex.reps_or_duration,
+              rest_seconds: ex.rest_seconds,
+            })),
+          }
+        : {
+            kind: 'EXERCISE',
+            exercise_id: item.exercise_id,
+            order,
+            sets: item.sets,
+            reps_or_duration: item.reps_or_duration,
+            rest_seconds: item.rest_seconds,
+          },
+    ),
+    exercises: values.items.flatMap((item, order) =>
+      item.kind === 'EXERCISE'
+        ? [
+            {
+              exercise_id: item.exercise_id,
+              order,
+              sets: item.sets,
+              reps_or_duration: item.reps_or_duration,
+              rest_seconds: item.rest_seconds,
+            },
+          ]
+        : [],
+    ),
   }
 }
 

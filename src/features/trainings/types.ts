@@ -187,8 +187,37 @@ export interface TrainingExercise {
   sets: number
   reps_or_duration: string
   rest_seconds: number
+  block_id?: string | null
+  position_in_block?: number | null
+  block?: TrainingBlockMeta | null
   exercise: Exercise
 }
+
+export interface TrainingBlockMeta {
+  id: string
+  order: number
+  type: 'CIRCUIT'
+  name: string | null
+  rounds: number
+  rest_between_rounds_seconds: number
+}
+
+export interface TrainingExerciseItem extends TrainingExercise {
+  kind: 'EXERCISE'
+}
+
+export interface TrainingCircuitItem {
+  kind: 'CIRCUIT'
+  id: string
+  order: number
+  type: 'CIRCUIT'
+  name: string | null
+  rounds: number
+  rest_between_rounds_seconds: number
+  exercises: TrainingExercise[]
+}
+
+export type TrainingItem = TrainingExerciseItem | TrainingCircuitItem
 
 export interface Training {
   id: string
@@ -209,4 +238,5 @@ export interface Training {
   created_at: string
   updated_at: string
   exercises: TrainingExercise[]
+  items?: TrainingItem[]
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, ChevronUp, Plus, Search, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, Plus, Repeat, Search, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,17 +7,21 @@ import { cn } from '@/lib/utils'
 import { normalizeSearchText } from '@/lib/search'
 import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
 import { useExercisesList } from '../api'
-import type { TrainingExerciseFormValues } from '../schemas'
+import type {
+  TrainingCircuitExerciseFormValues,
+  TrainingItemFormValues,
+} from '../schemas'
 
 interface ExercisePickerProps {
-  value: TrainingExerciseFormValues[]
-  onChange: (value: TrainingExerciseFormValues[]) => void
+  value: TrainingItemFormValues[]
+  onChange: (value: TrainingItemFormValues[]) => void
   error?: string
 }
 
 export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) {
   const [search, setSearch] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [targetCircuitIndex, setTargetCircuitIndex] = useState<number | null>(null)
   const exercisesQuery = useExercisesList()
   const allExercises = exercisesQuery.data?.data ?? []
 
@@ -36,7 +40,25 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
     : allExercises
 
   const addExercise = (exerciseId: string) => {
-    const newItem: TrainingExerciseFormValues = {
+    if (targetCircuitIndex != null) {
+      const updated = value.map((item, index) => {
+        if (index !== targetCircuitIndex || item.kind !== 'CIRCUIT') return item
+        const newExercise: TrainingCircuitExerciseFormValues = {
+          exercise_id: exerciseId,
+          reps_or_duration: '10',
+          rest_seconds: 15,
+        }
+        return { ...item, exercises: [...item.exercises, newExercise] }
+      })
+      onChange(updated)
+      setSearch('')
+      setPickerOpen(false)
+      setTargetCircuitIndex(null)
+      return
+    }
+
+    const newItem: TrainingItemFormValues = {
+      kind: 'EXERCISE',
       exercise_id: exerciseId,
       order: value.length,
       sets: 3,
@@ -46,6 +68,20 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
     onChange([...value, newItem])
     setSearch('')
     setPickerOpen(false)
+  }
+
+  const addCircuit = () => {
+    onChange([
+      ...value,
+      {
+        kind: 'CIRCUIT',
+        order: value.length,
+        name: 'Circuito',
+        rounds: 3,
+        rest_between_rounds_seconds: 60,
+        exercises: [],
+      },
+    ])
   }
 
   const removeExercise = (index: number) => {
@@ -69,13 +105,47 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
     onChange(updated.map((ex, i) => ({ ...ex, order: i })))
   }
 
-  const updateField = <K extends keyof TrainingExerciseFormValues>(
-    index: number,
-    field: K,
-    fieldValue: TrainingExerciseFormValues[K],
-  ) => {
+  const updateField = (index: number, field: string, fieldValue: unknown) => {
     const updated = value.map((ex, i) => (i === index ? { ...ex, [field]: fieldValue } : ex))
-    onChange(updated)
+    onChange(updated as TrainingItemFormValues[])
+  }
+
+  const updateCircuitExercise = <K extends keyof TrainingCircuitExerciseFormValues>(
+    circuitIndex: number,
+    exerciseIndex: number,
+    field: K,
+    fieldValue: TrainingCircuitExerciseFormValues[K],
+  ) => {
+    onChange(value.map((item, index) => {
+      if (index !== circuitIndex || item.kind !== 'CIRCUIT') return item
+      return {
+        ...item,
+        exercises: item.exercises.map((exercise, nestedIndex) =>
+          nestedIndex === exerciseIndex ? { ...exercise, [field]: fieldValue } : exercise,
+        ),
+      }
+    }))
+  }
+
+  const removeCircuitExercise = (circuitIndex: number, exerciseIndex: number) => {
+    onChange(value.map((item, index) => {
+      if (index !== circuitIndex || item.kind !== 'CIRCUIT') return item
+      return {
+        ...item,
+        exercises: item.exercises.filter((_, nestedIndex) => nestedIndex !== exerciseIndex),
+      }
+    }))
+  }
+
+  const moveCircuitExercise = (circuitIndex: number, exerciseIndex: number, direction: -1 | 1) => {
+    onChange(value.map((item, index) => {
+      if (index !== circuitIndex || item.kind !== 'CIRCUIT') return item
+      const nextIndex = exerciseIndex + direction
+      if (nextIndex < 0 || nextIndex >= item.exercises.length) return item
+      const exercises = [...item.exercises]
+      ;[exercises[exerciseIndex], exercises[nextIndex]] = [exercises[nextIndex], exercises[exerciseIndex]]
+      return { ...item, exercises }
+    }))
   }
 
   return (
@@ -91,6 +161,88 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
       {value.length > 0 && (
         <div className="space-y-2">
           {value.map((item, index) => {
+            if (item.kind === 'CIRCUIT') {
+              return (
+                <div
+                  key={`circuit-${index}`}
+                  className="rounded-lg border border-brand-soft/40 bg-brand-soft/10 p-3 space-y-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-0.5">
+                      <Button type="button" variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => moveUp(index)} disabled={index === 0}>
+                        <ChevronUp className="h-3 w-3" />
+                      </Button>
+                      <Button type="button" variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => moveDown(index)} disabled={index === value.length - 1}>
+                        <ChevronDown className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <Repeat className="h-4 w-4 text-brand-primary" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground">Circuito · {item.rounds} rondas</p>
+                      <p className="text-xs text-muted-foreground">{item.exercises.length} ejercicio{item.exercises.length !== 1 ? 's' : ''}</p>
+                    </div>
+                    <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-status-error" onClick={() => removeExercise(index)}>
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Nombre</label>
+                      <Input value={item.name} onChange={(e) => updateField(index, 'name', e.target.value)} className="h-8 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Rondas</label>
+                      <Input type="number" min={1} value={item.rounds} onChange={(e) => updateField(index, 'rounds', parseInt(e.target.value) || 1)} className="h-8 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Descanso entre rondas (s)</label>
+                      <Input type="number" min={0} value={item.rest_between_rounds_seconds} onChange={(e) => updateField(index, 'rest_between_rounds_seconds', parseInt(e.target.value) || 0)} className="h-8 text-sm" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 rounded-md border border-border/60 bg-background/60 p-2">
+                    {item.exercises.map((nested, nestedIndex) => {
+                      const exercise = exercisesById.get(nested.exercise_id)
+                      return (
+                        <div key={`${nested.exercise_id}-${nestedIndex}`} className="space-y-2 rounded-md border border-border/60 bg-muted/20 p-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-0.5">
+                              <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => moveCircuitExercise(index, nestedIndex, -1)} disabled={nestedIndex === 0}>
+                                <ChevronUp className="h-3 w-3" />
+                              </Button>
+                              <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => moveCircuitExercise(index, nestedIndex, 1)} disabled={nestedIndex === item.exercises.length - 1}>
+                                <ChevronDown className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <span className="text-xs font-medium text-muted-foreground">{nestedIndex + 1}</span>
+                            <p className="flex-1 truncate text-sm font-medium text-foreground">{exercise?.name ?? 'Ejercicio no encontrado'}</p>
+                            <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-status-error" onClick={() => removeCircuitExercise(index, nestedIndex)}>
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-1">
+                              <label className="text-xs text-muted-foreground">Reps / duración</label>
+                              <Input value={nested.reps_or_duration} onChange={(e) => updateCircuitExercise(index, nestedIndex, 'reps_or_duration', e.target.value)} className="h-8 text-sm" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-xs text-muted-foreground">Descanso tras ejercicio (s)</label>
+                              <Input type="number" min={0} value={nested.rest_seconds} onChange={(e) => updateCircuitExercise(index, nestedIndex, 'rest_seconds', parseInt(e.target.value) || 0)} className="h-8 text-sm" />
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                    <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => { setTargetCircuitIndex(index); setPickerOpen(true) }}>
+                      <Plus className="h-4 w-4" />
+                      Agregar ejercicio al circuito
+                    </Button>
+                  </div>
+                </div>
+              )
+            }
+
             const exercise = exercisesById.get(item.exercise_id)
 
             return (
@@ -225,7 +377,13 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
           ) : (
             <div className="max-h-48 overflow-y-auto space-y-1">
               {filteredExercises.map((exercise) => {
-                const selectedCount = value.filter((item) => item.exercise_id === exercise.id).length
+                const selectedCount = value.reduce((count, item) => {
+                  if (item.kind === 'EXERCISE') {
+                    return count + (item.exercise_id === exercise.id ? 1 : 0)
+                  }
+
+                  return count + item.exercises.filter((nested) => nested.exercise_id === exercise.id).length
+                }, 0)
 
                 return (
                   <button
@@ -275,22 +433,32 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
             onClick={() => {
               setPickerOpen(false)
               setSearch('')
+              setTargetCircuitIndex(null)
             }}
           >
             Cancelar
           </Button>
         </div>
       ) : (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={() => setPickerOpen(true)}
-        >
-          <Plus className="h-4 w-4" />
-          Agregar ejercicio
-        </Button>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => {
+              setTargetCircuitIndex(null)
+              setPickerOpen(true)
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            Agregar ejercicio
+          </Button>
+          <Button type="button" variant="outline" size="sm" className="w-full" onClick={addCircuit}>
+            <Repeat className="h-4 w-4" />
+            Agregar circuito
+          </Button>
+        </div>
       )}
 
       {error && <p className="text-xs text-status-error">{error}</p>}

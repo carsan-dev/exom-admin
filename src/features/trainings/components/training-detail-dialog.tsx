@@ -1,4 +1,4 @@
-import { Edit, Copy, Clock, Flame, Layers } from 'lucide-react'
+import { Edit, Copy, Clock, Flame, Layers, Repeat } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,6 +36,9 @@ export function TrainingDetailDialog({
   if (!training) return null
 
   const sortedExercises = [...training.exercises].sort((a, b) => a.order - b.order)
+  const items = training.items?.length
+    ? training.items
+    : sortedExercises.map((exercise) => ({ kind: 'EXERCISE' as const, ...exercise }))
   const trainingTypes = resolveTrainingTypes(training)
   const accentStyle = getTrainingAccentStyle(training.accentColor)
 
@@ -128,7 +131,32 @@ export function TrainingDetailDialog({
                 Ejercicios ({sortedExercises.length})
               </p>
               <div className="space-y-2">
-                {sortedExercises.map((te, index) => (
+                {items.map((item, index) => {
+                  if (item.kind === 'CIRCUIT') {
+                    return (
+                      <div key={item.id} className="space-y-2 rounded-lg border border-brand-soft/40 bg-brand-soft/10 p-3">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                          <Repeat className="h-4 w-4 text-brand-primary" />
+                          <span>{item.name ?? 'Circuito'} · {item.rounds} rondas</span>
+                          <span className="ml-auto text-xs font-normal text-muted-foreground">
+                            {item.rest_between_rounds_seconds}s entre rondas
+                          </span>
+                        </div>
+                        {item.exercises.map((te, nestedIndex) => (
+                          <div key={te.id} className="flex items-start gap-3 rounded-md border border-border/60 bg-background/60 px-3 py-2">
+                            <span className="w-4 flex-none pt-0.5 text-xs font-medium text-muted-foreground">{nestedIndex + 1}</span>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-foreground">{te.exercise.name}</p>
+                              <p className="text-xs text-muted-foreground">{te.reps_or_duration} · {te.rest_seconds}s tras ejercicio</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  }
+
+                  const te = item
+                  return (
                   <div
                     key={te.id}
                     className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5"
@@ -157,7 +185,8 @@ export function TrainingDetailDialog({
                       <p>{te.rest_seconds}s entre series</p>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}

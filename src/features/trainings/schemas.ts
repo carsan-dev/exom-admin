@@ -76,12 +76,33 @@ const trainingAccentColorSchema = z
   })
 
 export const trainingExerciseSchema = z.object({
+  kind: z.literal('EXERCISE').default('EXERCISE'),
   exercise_id: z.string().trim().min(1, 'Selecciona un ejercicio'),
   order: z.number().int().min(0),
   sets: z.number().int().min(1, 'Minimo 1 serie'),
   reps_or_duration: z.string().trim().min(1, 'Especifica reps o duracion'),
   rest_seconds: z.number().int().min(0).default(60),
 })
+
+export const trainingCircuitExerciseSchema = z.object({
+  exercise_id: z.string().trim().min(1, 'Selecciona un ejercicio'),
+  reps_or_duration: z.string().trim().min(1, 'Especifica reps o duracion'),
+  rest_seconds: z.number().int().min(0).default(15),
+})
+
+export const trainingCircuitSchema = z.object({
+  kind: z.literal('CIRCUIT'),
+  order: z.number().int().min(0),
+  name: z.string().trim().min(1, 'Nombra el circuito').default('Circuito'),
+  rounds: z.number().int().min(1, 'Minimo 1 ronda').default(3),
+  rest_between_rounds_seconds: z.number().int().min(0).default(60),
+  exercises: z.array(trainingCircuitExerciseSchema).min(1, 'Agrega ejercicios al circuito'),
+})
+
+export const trainingItemSchema = z.discriminatedUnion('kind', [
+  trainingExerciseSchema,
+  trainingCircuitSchema,
+])
 
 export const trainingSchema = z.object({
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
@@ -117,8 +138,11 @@ export const trainingSchema = z.object({
       })
     }
   }),
-  exercises: z.array(trainingExerciseSchema).min(1, 'Agrega al menos un ejercicio'),
+  items: z.array(trainingItemSchema).min(1, 'Agrega al menos un ejercicio o circuito'),
 })
 
 export type TrainingFormValues = z.infer<typeof trainingSchema>
 export type TrainingExerciseFormValues = z.infer<typeof trainingExerciseSchema>
+export type TrainingCircuitExerciseFormValues = z.infer<typeof trainingCircuitExerciseSchema>
+export type TrainingCircuitFormValues = z.infer<typeof trainingCircuitSchema>
+export type TrainingItemFormValues = z.infer<typeof trainingItemSchema>

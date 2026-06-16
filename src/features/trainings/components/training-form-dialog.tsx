@@ -89,10 +89,14 @@ const defaultValues: TrainingFormValues = {
   warmup_duration_min: null,
   cooldown_description: '',
   tags: [],
-  exercises: [],
+  items: [],
 }
 
 function toFormValues(training: Training, isDuplicate: boolean): TrainingFormValues {
+  const sourceItems = training.items?.length
+    ? training.items
+    : [...training.exercises].sort((a, b) => a.order - b.order).map((te) => ({ kind: 'EXERCISE' as const, ...te }))
+
   return {
     name: isDuplicate ? `${training.name} (copia)` : training.name,
     types: resolveTrainingTypes(training),
@@ -104,15 +108,34 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
     warmup_duration_min: training.warmup_duration_min,
     cooldown_description: training.cooldown_description ?? '',
     tags: normalizeTrainingTags(training.tags),
-    exercises: [...training.exercises]
-      .sort((a, b) => a.order - b.order)
-      .map((te) => ({
+    items: sourceItems.map((item, order) => {
+      if (item.kind === 'CIRCUIT') {
+        return {
+          kind: 'CIRCUIT',
+          order,
+          name: item.name ?? 'Circuito',
+          rounds: item.rounds,
+          rest_between_rounds_seconds: item.rest_between_rounds_seconds,
+          exercises: [...item.exercises]
+            .sort((a, b) => (a.position_in_block ?? 0) - (b.position_in_block ?? 0))
+            .map((te) => ({
+              exercise_id: te.exercise.id,
+              reps_or_duration: te.reps_or_duration,
+              rest_seconds: te.rest_seconds,
+            })),
+        }
+      }
+
+      const te = item
+      return {
+        kind: 'EXERCISE',
         exercise_id: te.exercise.id,
-        order: te.order,
+        order,
         sets: te.sets,
         reps_or_duration: te.reps_or_duration,
         rest_seconds: te.rest_seconds,
-      })),
+      }
+    }),
   }
 }
 
@@ -679,7 +702,7 @@ export function TrainingFormDialog({
         getFirstErrorMessage(errors) ?? 'Revisa los campos obligatorios antes de continuar'
       )
 
-      if (errors.exercises) {
+      if (errors.items) {
         scrollToSection(exercisesSectionRef.current)
         return
       }
@@ -936,14 +959,14 @@ export function TrainingFormDialog({
             <div ref={exercisesSectionRef}>
               <FormField
                 control={form.control}
-                name="exercises"
+                name="items"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
                       <ExercisePicker
                         value={field.value}
                         onChange={field.onChange}
-                        error={getFirstErrorMessage(form.formState.errors.exercises)}
+                        error={getFirstErrorMessage(form.formState.errors.items)}
                       />
                     </FormControl>
                   </FormItem>
