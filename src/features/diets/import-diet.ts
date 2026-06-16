@@ -81,7 +81,9 @@ const importMealBaseSchema = z.object({
   ingredients: z.array(importIngredientSchema).min(1, 'Cada comida necesita ingredientes'),
 })
 
-const importMealVariantSchema = importMealBaseSchema
+const importMealVariantSchema = importMealBaseSchema.extend({
+  type: z.enum(MEAL_TYPE_OPTIONS).optional(),
+})
 
 const importMealSchema = importMealBaseSchema.extend({
   variants: z.array(importMealVariantSchema).optional().default([]),
@@ -101,6 +103,37 @@ type ImportIngredient = z.infer<typeof importIngredientSchema>
 type ImportMeal = z.infer<typeof importMealSchema>
 type ImportMealVariant = z.infer<typeof importMealVariantSchema>
 type ImportDiet = z.infer<typeof importDietSchema>
+
+function repairMojibakeText(value: string) {
+  if (!/[ÃÂ]/.test(value)) {
+    return value
+  }
+
+  try {
+    const bytes = Uint8Array.from([...value], (char) => char.charCodeAt(0) & 0xff)
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  } catch {
+    return value
+  }
+}
+
+function repairMojibake(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return repairMojibakeText(value)
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(repairMojibake)
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, repairMojibake(entry)])
+    )
+  }
+
+  return value
+}
 
 function buildIngredientIndexes(ingredients: Ingredient[]) {
   const byName = new Map<string, Ingredient[]>()
@@ -160,10 +193,11 @@ function toMealFormValues(
   meal: ImportMeal | ImportMealVariant,
   order: number,
   indexes: ReturnType<typeof buildIngredientIndexes>,
-  issues: string[]
+  issues: string[],
+  fallbackType?: MealType
 ) {
   return {
-    type: meal.type as MealType,
+    type: (meal.type ?? fallbackType ?? 'BREAKFAST') as MealType,
     name: meal.name,
     image_url: meal.image_url,
     calories: meal.calories,
@@ -191,7 +225,7 @@ function toFormValues(diet: ImportDiet, ingredients: Ingredient[]): DietImportRe
       meals: diet.meals.map((meal, order) => ({
         ...toMealFormValues(meal, order, indexes, issues),
         variants: (meal.variants ?? []).map((variant, variantOrder) =>
-          toMealFormValues(variant, variantOrder, indexes, issues)
+          toMealFormValues(variant, variantOrder, indexes, issues, meal.type)
         ),
       })),
     },
@@ -201,7 +235,12 @@ function toFormValues(diet: ImportDiet, ingredients: Ingredient[]): DietImportRe
 
 function getParseError(error: unknown) {
   if (error instanceof z.ZodError) {
-    return error.issues.map((issue) => issue.message).join('. ')
+    return error.issues
+      .map((issue) => {
+        const path = issue.path.length > 0 ? issue.path.join('.') : 'JSON'
+        return `${path}: ${issue.message}`
+      })
+      .join('. ')
   }
 
   return error instanceof Error ? error.message : 'No se ha podido leer el archivo'
@@ -213,7 +252,7 @@ export function parseDietImport(fileName: string, text: string, ingredients: Ing
   }
 
   try {
-    const parsed = importDietSchema.parse(JSON.parse(text))
+    const parsed = importDietSchema.parse(repairMojibake(JSON.parse(text)))
     return toFormValues(parsed, ingredients)
   } catch (error) {
     throw new Error(getParseError(error))
