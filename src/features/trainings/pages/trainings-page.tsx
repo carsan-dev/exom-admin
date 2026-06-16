@@ -1,5 +1,14 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus, Upload } from 'lucide-react'
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Dumbbell,
+  Info,
+  Plus,
+  Upload,
+} from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import {
@@ -11,7 +20,20 @@ import {
 } from '@/components/filters'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import {
@@ -40,6 +62,64 @@ const LEVEL_OPTIONS: FilterOption[] = [
   { value: 'INTERMEDIO', label: 'Intermedio' },
   { value: 'AVANZADO', label: 'Avanzado' },
 ]
+
+const AI_IMPORT_PROMPT = `Genera un entrenamiento para EXOM en JSON valido, sin markdown y sin texto adicional.
+
+IMPORTANTE:
+- Sustituye todas las partes marcadas como [MODIFICAR].
+- Usa solo nombres exactos de ejercicios del catalogo EXOM.
+- Cada ejercicio suelto debe tener kind "EXERCISE".
+- Cada circuito debe tener kind "CIRCUIT" y una lista exercises.
+- En circuitos, cada ejercicio representa 1 serie por ronda.
+- level solo puede ser: "PRINCIPIANTE", "INTERMEDIO" o "AVANZADO".
+
+Catalogo de ejercicios disponible:
+[MODIFICAR: pega aqui los nombres exactos de ejercicios del catalogo EXOM, uno por linea]
+
+Objetivo del entrenamiento:
+[MODIFICAR: describe objetivo, nivel, duracion, material disponible, lesiones, foco muscular y restricciones]
+
+Devuelve exactamente este JSON:
+
+{
+  "name": "[MODIFICAR: nombre del entrenamiento]",
+  "types": ["[MODIFICAR: tipo principal, ej. Fuerza]"],
+  "accentColor": "[MODIFICAR: color hex, ej. #C5E384, o null]",
+  "level": "[MODIFICAR: PRINCIPIANTE | INTERMEDIO | AVANZADO]",
+  "estimated_duration_min": [MODIFICAR: numero de minutos o null],
+  "estimated_calories": [MODIFICAR: kcal estimadas o null],
+  "warmup_description": "[MODIFICAR: calentamiento breve o cadena vacia]",
+  "warmup_duration_min": [MODIFICAR: minutos de calentamiento o null],
+  "cooldown_description": "[MODIFICAR: vuelta a la calma o cadena vacia]",
+  "tags": ["[MODIFICAR: etiqueta 1]", "[MODIFICAR: etiqueta 2]"],
+  "items": [
+    {
+      "kind": "EXERCISE",
+      "exercise_name": "[MODIFICAR: nombre exacto del ejercicio 1]",
+      "sets": [MODIFICAR: numero de series],
+      "reps_or_duration": "[MODIFICAR: reps o duracion, ej. 10, 12-15, 30s]",
+      "rest_seconds": [MODIFICAR: descanso entre series en segundos]
+    },
+    {
+      "kind": "CIRCUIT",
+      "name": "[MODIFICAR: nombre del circuito]",
+      "rounds": [MODIFICAR: numero de rondas],
+      "rest_between_rounds_seconds": [MODIFICAR: descanso entre rondas en segundos],
+      "exercises": [
+        {
+          "exercise_name": "[MODIFICAR: nombre exacto del ejercicio del circuito 1]",
+          "reps_or_duration": "[MODIFICAR: reps o duracion de 1 serie]",
+          "rest_seconds": [MODIFICAR: descanso tras este ejercicio dentro de la ronda]
+        },
+        {
+          "exercise_name": "[MODIFICAR: nombre exacto del ejercicio del circuito 2]",
+          "reps_or_duration": "[MODIFICAR: reps o duracion de 1 serie]",
+          "rest_seconds": [MODIFICAR: descanso tras este ejercicio dentro de la ronda]
+        }
+      ]
+    }
+  ]
+}`
 
 function toFilterOptions(values: string[] | undefined, getLabel?: (value: string) => string): FilterOption[] {
   return values?.map((value) => ({ value, label: getLabel ? getLabel(value) : value })) ?? []
@@ -72,6 +152,7 @@ export function TrainingsPage() {
   const [isDuplicate, setIsDuplicate] = useState(false)
   const [importedValues, setImportedValues] = useState<TrainingFormValues | null>(null)
   const [importIssues, setImportIssues] = useState<string[]>([])
+  const [importPromptOpen, setImportPromptOpen] = useState(false)
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
@@ -154,6 +235,15 @@ export function TrainingsPage() {
 
   const handleImportClick = () => {
     importInputRef.current?.click()
+  }
+
+  const handleCopyImportPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(AI_IMPORT_PROMPT)
+      toast.success('Prompt copiado')
+    } catch {
+      toast.error('No se ha podido copiar el prompt')
+    }
   }
 
   const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -280,6 +370,22 @@ export function TrainingsPage() {
             <Upload className="h-4 w-4" />
             Importar
           </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setImportPromptOpen(true)}
+                  aria-label="Ver prompt para generar entrenamientos importables"
+                >
+                  <Info className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Prompt para IA</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Button onClick={handleCreate}>
             <Plus className="h-4 w-4" />
             Nuevo entrenamiento
@@ -423,6 +529,34 @@ export function TrainingsPage() {
         onOpenChange={handleDeleteDialogOpenChange}
         onDeleted={() => replacePaginationSearchParams(setSearchParams, { page: 1 })}
       />
+
+      <Dialog open={importPromptOpen} onOpenChange={setImportPromptOpen}>
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-y-auto sm:max-w-3xl">
+          <DialogHeader className="pr-8">
+            <DialogTitle>Prompt para generar JSON compatible</DialogTitle>
+            <DialogDescription>
+              Copia esta plantilla en tu IA. Cambia cada bloque [MODIFICAR] antes de generar el
+              archivo para importar.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
+            Las partes entre <span className="font-semibold">[MODIFICAR]</span> son obligatorias.
+            En cada ejercicio usa el nombre exacto del catálogo para que EXOM pueda enlazarlo.
+          </div>
+
+          <div className="flex justify-end">
+            <Button type="button" variant="outline" size="sm" onClick={handleCopyImportPrompt}>
+              <Copy className="h-4 w-4" />
+              Copiar prompt
+            </Button>
+          </div>
+
+          <pre className="max-h-[56vh] overflow-auto rounded-lg border border-border bg-muted/40 p-4 text-xs leading-relaxed text-foreground">
+            <code>{AI_IMPORT_PROMPT}</code>
+          </pre>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
