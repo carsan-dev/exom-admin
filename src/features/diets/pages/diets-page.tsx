@@ -72,6 +72,7 @@ IMPORTANTE:
 - Si quieres 4 comidas, dilo en el objetivo.
 - Si quieres variantes, dilo por comida.
 - Si no quieres variantes, cada comida debe devolver "variants": [].
+- Si hay variantes, cada variante debe incluir type, name, calories, protein_g, carbs_g, fat_g, nutritional_badges e ingredients.
 - type solo puede ser: "BREAKFAST", "LUNCH", "SNACK" o "DINNER".
 - grams_equivalent es obligatorio cuando unit no es "g".
 
@@ -107,12 +108,30 @@ Devuelve exactamente este JSON:
           "grams_equivalent": 80
         }
       ],
-      "variants": []
+      "variants": [
+        {
+          "type": "BREAKFAST",
+          "name": "[nombre de la variante]",
+          "calories": 430,
+          "protein_g": 32,
+          "carbs_g": 50,
+          "fat_g": 11,
+          "nutritional_badges": ["Alto en proteína"],
+          "ingredients": [
+            {
+              "ingredient_name": "[nombre exacto del catálogo]",
+              "quantity": 2,
+              "unit": "piece",
+              "grams_equivalent": 120
+            }
+          ]
+        }
+      ]
     }
   ]
 }
 
-Unidades validas:
+Unidades válidas:
 g, ml, piece, tablespoon, teaspoon, handful, slice, palm, fist, ladle, cold_cut_slice, glass, cup, bowl, finger, pinch, serving, to_taste.`
 
 const AI_IMPORT_GUIDE_STEPS = [

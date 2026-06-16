@@ -137,13 +137,15 @@ function repairMojibake(value: unknown): unknown {
 
 function buildIngredientIndexes(ingredients: Ingredient[]) {
   const byName = new Map<string, Ingredient[]>()
+  const byId = new Map<string, Ingredient>()
 
   for (const ingredient of ingredients) {
     const key = normalizeSearchText(ingredient.name.trim())
     byName.set(key, [...(byName.get(key) ?? []), ingredient])
+    byId.set(ingredient.id, ingredient)
   }
 
-  return { byName }
+  return { byName, byId }
 }
 
 function resolveIngredientId(
@@ -189,6 +191,38 @@ function toIngredientFormValues(
   }))
 }
 
+function calculateMealMacros(
+  ingredients: MealIngredientFormValues[],
+  indexes: ReturnType<typeof buildIngredientIndexes>
+) {
+  let calories = 0
+  let protein_g = 0
+  let carbs_g = 0
+  let fat_g = 0
+
+  for (const item of ingredients) {
+    const ingredient = indexes.byId.get(item.ingredient_id)
+    const grams = item.unit === 'g' ? item.quantity : item.grams_equivalent
+
+    if (!ingredient || !grams || grams <= 0) {
+      return null
+    }
+
+    const factor = grams / 100
+    calories += ingredient.calories_per_100g * factor
+    protein_g += ingredient.protein_per_100g * factor
+    carbs_g += ingredient.carbs_per_100g * factor
+    fat_g += ingredient.fat_per_100g * factor
+  }
+
+  return {
+    calories: Math.round(calories),
+    protein_g: Math.round(protein_g * 10) / 10,
+    carbs_g: Math.round(carbs_g * 10) / 10,
+    fat_g: Math.round(fat_g * 10) / 10,
+  }
+}
+
 function toMealFormValues(
   meal: ImportMeal | ImportMealVariant,
   order: number,
@@ -196,17 +230,20 @@ function toMealFormValues(
   issues: string[],
   fallbackType?: MealType
 ) {
+  const ingredients = toIngredientFormValues(meal.ingredients, indexes, issues)
+  const calculatedMacros = calculateMealMacros(ingredients, indexes)
+
   return {
     type: (meal.type ?? fallbackType ?? 'BREAKFAST') as MealType,
     name: meal.name,
     image_url: meal.image_url,
-    calories: meal.calories,
-    protein_g: meal.protein_g,
-    carbs_g: meal.carbs_g,
-    fat_g: meal.fat_g,
+    calories: meal.calories ?? calculatedMacros?.calories ?? null,
+    protein_g: meal.protein_g ?? calculatedMacros?.protein_g ?? null,
+    carbs_g: meal.carbs_g ?? calculatedMacros?.carbs_g ?? null,
+    fat_g: meal.fat_g ?? calculatedMacros?.fat_g ?? null,
     nutritional_badges: meal.nutritional_badges,
     order,
-    ingredients: toIngredientFormValues(meal.ingredients, indexes, issues),
+    ingredients,
   }
 }
 
