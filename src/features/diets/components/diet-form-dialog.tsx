@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form'
-import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
+import { clearUnsavedChanges, useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { ChevronDown, ChevronUp, LoaderCircle, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { ImageUploadField } from '@/components/uploads/image-upload-field'
@@ -967,6 +967,8 @@ export function DietFormDialog({
             isDuplicate ? 'Dieta duplicada correctamente' : 'Dieta creada correctamente'
           )
         }
+        form.reset(values)
+        clearUnsavedChanges('diet-form')
         onSaved?.()
         onOpenChange(false)
       } catch (error) {

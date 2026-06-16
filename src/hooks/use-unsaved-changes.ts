@@ -31,3 +31,7 @@ export function useUnsavedChanges(id: string, dirty: boolean) {
     return () => setEditorDirty(id, false)
   }, [dirty, id, setEditorDirty])
 }
+
+export function clearUnsavedChanges(id: string) {
+  useUnsavedChangesStore.getState().setEditorDirty(id, false)
+}

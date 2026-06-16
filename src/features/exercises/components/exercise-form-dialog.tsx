@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
+import { clearUnsavedChanges, useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { X, Plus, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -304,6 +304,8 @@ export function ExerciseFormDialog({
           isDuplicate ? 'Ejercicio duplicado correctamente' : 'Ejercicio creado correctamente'
         )
       }
+      form.reset(values)
+      clearUnsavedChanges('exercise-form')
       onSaved?.()
       onOpenChange(false)
     } catch (error) {
