@@ -64,6 +64,7 @@ import type { Diet } from '../types'
 import type { CatalogGroup, CatalogGroupFilter } from '../../catalog-groups/types'
 import { CatalogGroupStrip } from '../../catalog-groups/components/catalog-group-strip'
 import { CatalogGroupDialog, DeleteCatalogGroupDialog, MoveToGroupDialog } from '../../catalog-groups/components/catalog-group-dialogs'
+import { resolveDraggedCatalogIds } from '../../catalog-groups/drag-selection'
 
 const PAGE_SIZE = 10
 const MEAL_TYPE_OPTIONS: FilterOption[] = [
@@ -385,7 +386,9 @@ export function DietsPage() {
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || !String(over.id).startsWith('group:')) return
     const destination = String(over.id).slice(6)
-    handleMove([String(active.id)], destination === 'ungrouped' ? null : destination)
+    const activeId = String(active.id)
+    const ids = resolveDraggedCatalogIds(activeId, selectedIds)
+    handleMove(ids, destination === 'ungrouped' ? null : destination)
   }
 
   const handleCreate = () => {
