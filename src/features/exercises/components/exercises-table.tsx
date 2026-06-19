@@ -1,4 +1,5 @@
-import { Copy, Eye, Pencil, Trash2, Video, MoreHorizontal } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Copy, Eye, Info, Loader2, Pencil, Trash2, Video, MoreHorizontal, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,7 +18,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
+import { useExerciseTrainingUsage } from '../api'
 import { getLevelBadgeClass, LEVEL_LABELS, type Exercise } from '../types'
 
 interface ExerciseApprovalSummary {
@@ -33,6 +36,41 @@ interface ExercisesTableProps {
   onDelete: (exercise: Exercise) => void
 }
 
+function TrainingUsageCell({ exercise }: { exercise: Exercise }) {
+  const [open, setOpen] = useState(false)
+  const usage = useExerciseTrainingUsage(exercise.id, open && exercise.training_usage_count > 0)
+
+  if (!exercise.is_used_in_training) {
+    return <span className="inline-flex items-center gap-1 text-xs text-status-error"><X className="h-4 w-4" />Sin asignar</span>
+  }
+
+  return (
+    <div className="inline-flex items-center gap-1.5">
+      <Check className="h-4 w-4 text-status-success" aria-hidden="true" />
+      <span className="text-sm font-medium">{exercise.training_usage_count}</span>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" aria-label={`Ver entrenamientos que usan ${exercise.name}`}>
+            <Info className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-72">
+          <p className="mb-2 font-medium">Usado en entrenamientos</p>
+          {usage.isLoading ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Cargando...</div>
+          ) : usage.isError ? (
+            <p className="text-sm text-status-error">No se pudo cargar el uso.</p>
+          ) : usage.data?.trainings.length ? (
+            <ul className="max-h-56 space-y-1 overflow-auto text-sm">
+              {usage.data.trainings.map((training) => <li key={training.id}>{training.name}</li>)}
+            </ul>
+          ) : <p className="text-sm text-muted-foreground">Sin entrenamientos activos.</p>}
+        </PopoverContent>
+      </Popover>
+    </div>
+  )
+}
+
 export function ExercisesTable({ exercises, approvalById = {}, onView, onEdit, onDuplicate, onDelete }: ExercisesTableProps) {
   return (
     <Table>
@@ -43,6 +81,7 @@ export function ExercisesTable({ exercises, approvalById = {}, onView, onEdit, o
           <TableHead className="hidden lg:table-cell">Equipamiento</TableHead>
           <TableHead>Nivel</TableHead>
           <TableHead className="text-center">Vídeo</TableHead>
+          <TableHead className="text-center">En entrenamientos</TableHead>
           <TableHead className="text-right">Acciones</TableHead>
         </TableRow>
       </TableHeader>
@@ -102,6 +141,8 @@ export function ExercisesTable({ exercises, approvalById = {}, onView, onEdit, o
                 <span className="text-xs text-muted-foreground">—</span>
               )}
             </TableCell>
+
+            <TableCell className="text-center"><TrainingUsageCell exercise={exercise} /></TableCell>
 
             <TableCell className="text-right">
               <DropdownMenu>

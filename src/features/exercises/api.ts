@@ -11,7 +11,7 @@ import {
   unwrapResponse,
 } from '@/lib/api-utils'
 import type { ExerciseFormValues } from './schemas'
-import type { Exercise, PaginatedResponse } from './types'
+import type { Exercise, ExerciseTrainingUsage, PaginatedResponse } from './types'
 export { useDirectUploadFile, usePresignedUrl, useUploadFile } from '../uploads/api'
 
 export { getApiErrorMessage }
@@ -48,6 +48,19 @@ const exercisesQueryKeys = {
       params.level ?? [],
     ] as const,
   detail: (id?: string) => ['exercises', id] as const,
+  trainingUsage: (id?: string) => ['exercises', id, 'training-usage'] as const,
+}
+
+export function useExerciseTrainingUsage(id?: string, enabled = false) {
+  return useQuery({
+    queryKey: exercisesQueryKeys.trainingUsage(id),
+    enabled: Boolean(id) && enabled,
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      if (!id) throw new Error('Exercise id is required')
+      return unwrapResponse(await api.get<ApiEnvelope<ExerciseTrainingUsage>>(`/exercises/${id}/training-usage`))
+    },
+  })
 }
 
 const exerciseMuscleGroupsQueryKey = ['exercises', 'muscle-groups'] as const

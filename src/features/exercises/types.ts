@@ -34,6 +34,14 @@ export interface Exercise {
   is_active: boolean
   created_at: string
   updated_at: string
+  training_usage_count: number
+  is_used_in_training: boolean
+}
+
+export interface ExerciseTrainingUsage {
+  exercise_id: string
+  training_count: number
+  trainings: Array<{ id: string; name: string }>
 }
 
 export function getLevelBadgeClass(level: string) {
