@@ -23,4 +23,17 @@ describe('TrainingsTable', () => {
     fireEvent.click(screen.getByLabelText('Seleccionar página'))
     expect(onSelectionChange).toHaveBeenLastCalledWith(new Set())
   })
+
+  it('preserves selections from other pages when toggling the visible page', () => {
+    const onSelectionChange = vi.fn()
+    const props = { trainings: [training], onView: vi.fn(), onEdit: vi.fn(), onDuplicate: vi.fn(), onDelete: vi.fn(), onSelectionChange }
+    const { rerender } = render(<DndContext><TrainingsTable {...props} selectedIds={new Set(['training-other-page'])} /></DndContext>)
+
+    fireEvent.click(screen.getByLabelText('Seleccionar página'))
+    expect(onSelectionChange).toHaveBeenLastCalledWith(new Set(['training-other-page', 'training-1']))
+
+    rerender(<DndContext><TrainingsTable {...props} selectedIds={new Set(['training-other-page', 'training-1'])} /></DndContext>)
+    fireEvent.click(screen.getByLabelText('Seleccionar página'))
+    expect(onSelectionChange).toHaveBeenLastCalledWith(new Set(['training-other-page']))
+  })
 })

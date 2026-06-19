@@ -56,7 +56,14 @@ export function TrainingsTable({
   movementDisabled,
 }: TrainingsTableProps) {
   const allSelected = trainings.length > 0 && trainings.every((item) => selectedIds.has(item.id))
-  const toggleAll = () => onSelectionChange?.(allSelected ? new Set() : new Set(trainings.map((item) => item.id)))
+  const toggleAll = () => {
+    const next = new Set(selectedIds)
+    for (const training of trainings) {
+      if (allSelected) next.delete(training.id)
+      else next.add(training.id)
+    }
+    onSelectionChange?.(next)
+  }
   const toggle = (id: string) => {
     const next = new Set(selectedIds)
     if (next.has(id)) next.delete(id); else next.add(id)

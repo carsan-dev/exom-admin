@@ -40,7 +40,14 @@ interface DietsTableProps {
 
 export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplicate, onDelete, selectedIds = new Set(), onSelectionChange, movementDisabled }: DietsTableProps) {
   const allSelected = diets.length > 0 && diets.every((item) => selectedIds.has(item.id))
-  const toggleAll = () => onSelectionChange?.(allSelected ? new Set() : new Set(diets.map((item) => item.id)))
+  const toggleAll = () => {
+    const next = new Set(selectedIds)
+    for (const diet of diets) {
+      if (allSelected) next.delete(diet.id)
+      else next.add(diet.id)
+    }
+    onSelectionChange?.(next)
+  }
   const toggle = (id: string) => {
     const next = new Set(selectedIds)
     if (next.has(id)) next.delete(id); else next.add(id)

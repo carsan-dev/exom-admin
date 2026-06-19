@@ -342,7 +342,7 @@ export function TrainingsPage() {
   const activeGroupName = groupFilter === 'all' ? null : groupFilter === 'ungrouped' ? 'Sin grupo' : groups.find((group) => group.id === groupFilter)?.name ?? null
   const organizationPending = createGroup.isPending || updateGroup.isPending || deleteGroup.isPending || moveMembership.isPending
 
-  useEffect(() => { setSelectedIds(new Set()) }, [page, pageResetKey])
+  useEffect(() => { setSelectedIds(new Set()) }, [pageResetKey])
 
   const handleGroupSubmit = (name: string) => {
     const mutation = groupToEdit ? updateGroup.mutateAsync({ id: groupToEdit.id, name }) : createGroup.mutateAsync(name)
