@@ -1,4 +1,5 @@
 import type { Ingredient } from '../ingredients/types'
+import type { CatalogGroupSummary } from '../catalog-groups/types'
 
 export const MEAL_TYPE_OPTIONS = ['BREAKFAST', 'LUNCH', 'SNACK', 'DINNER'] as const
 export type MealType = (typeof MEAL_TYPE_OPTIONS)[number]
@@ -103,5 +104,7 @@ export interface Diet {
   created_by: string | null
   created_at: string
   updated_at: string
+  group_id: string | null
+  group: CatalogGroupSummary | null
   meals: Meal[]
 }

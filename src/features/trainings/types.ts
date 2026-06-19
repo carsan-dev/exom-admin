@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import type { Exercise, Level } from '../exercises/types'
+import type { CatalogGroupSummary } from '../catalog-groups/types'
 
 export const DEFAULT_TRAINING_TYPE = 'FUERZA'
 
@@ -237,6 +238,8 @@ export interface Training {
   created_by: string | null
   created_at: string
   updated_at: string
+  group_id: string | null
+  group: CatalogGroupSummary | null
   exercises: TrainingExercise[]
   items?: TrainingItem[]
 }

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
+import { DndContext, type DragEndEvent } from '@dnd-kit/core'
 import {
   FilterToolbar,
   filtersToApiParams,
@@ -47,6 +48,11 @@ import {
   useDietTags,
   useDiets,
   useIngredientsList,
+  useDietGroups,
+  useCreateDietGroup,
+  useUpdateDietGroup,
+  useDeleteDietGroup,
+  useUpdateDietGroupMembership,
 } from '../api'
 import { DeleteDietDialog } from '../components/delete-diet-dialog'
 import { DietDetailDialog } from '../components/diet-detail-dialog'
@@ -55,6 +61,10 @@ import { DietsTable } from '../components/diets-table'
 import { parseDietImport } from '../import-diet'
 import type { DietFormValues } from '../schemas'
 import type { Diet } from '../types'
+import type { CatalogGroup } from '../../catalog-groups/types'
+import { CatalogGroupStrip } from '../../catalog-groups/components/catalog-group-strip'
+import { CatalogGroupDialog, DeleteCatalogGroupDialog, MoveToGroupDialog } from '../../catalog-groups/components/catalog-group-dialogs'
+import { CatalogGroupSheet } from '../../catalog-groups/components/catalog-group-sheet'
 
 const PAGE_SIZE = 10
 const MEAL_TYPE_OPTIONS: FilterOption[] = [
@@ -275,6 +285,14 @@ export function DietsPage() {
   const [importedValues, setImportedValues] = useState<DietFormValues | null>(null)
   const [importIssues, setImportIssues] = useState<string[]>([])
   const [importPromptOpen, setImportPromptOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [groupDialogOpen, setGroupDialogOpen] = useState(false)
+  const [groupToEdit, setGroupToEdit] = useState<CatalogGroup | null>(null)
+  const [groupToDelete, setGroupToDelete] = useState<CatalogGroup | null>(null)
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false)
+  const [sheetGroup, setSheetGroup] = useState<CatalogGroup | null>(null)
+  const [sheetPage, setSheetPage] = useState(1)
+  const [sheetSearch, setSheetSearch] = useState('')
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
@@ -282,6 +300,11 @@ export function DietsPage() {
   const tagsQuery = useDietTags()
   const nutritionalBadgesQuery = useDietNutritionalBadges()
   const ingredientsQuery = useIngredientsList()
+  const groupsQuery = useDietGroups()
+  const createGroup = useCreateDietGroup()
+  const updateGroup = useUpdateDietGroup()
+  const deleteGroup = useDeleteDietGroup()
+  const moveMembership = useUpdateDietGroupMembership()
   const sections = useMemo<FilterSectionConfig[]>(
     () => [
       {
@@ -333,6 +356,7 @@ export function DietsPage() {
     ...dietFilterParams,
   })
   const diets = dietsQuery.data?.data ?? []
+  const sheetMembersQuery = useDiets({ page: sheetPage, limit: PAGE_SIZE, search: sheetSearch, group_id: sheetGroup?.id, enabled: Boolean(sheetGroup) })
   const dietApprovalQuery = useResourceApprovalBatch(
     'diet',
     diets.map((diet) => diet.id)
@@ -342,6 +366,28 @@ export function DietsPage() {
   const totalPages = Math.max(1, dietsQuery.data?.totalPages ?? 1)
   const hasActiveFilters = filters.activeCount > 0
   const hasQuery = activeSearch.length > 0 || hasActiveFilters
+  const groups = groupsQuery.data ?? []
+  const organizationPending = createGroup.isPending || updateGroup.isPending || deleteGroup.isPending || moveMembership.isPending
+
+  useEffect(() => { setSelectedIds(new Set()) }, [page, pageResetKey])
+
+  const handleGroupSubmit = (name: string) => {
+    const mutation = groupToEdit ? updateGroup.mutateAsync({ id: groupToEdit.id, name }) : createGroup.mutateAsync(name)
+    mutation.then(() => { setGroupDialogOpen(false); setGroupToEdit(null); toast.success('Grupo guardado') }).catch((error) => toast.error(getApiErrorMessage(error, 'No se pudo guardar el grupo')))
+  }
+
+  const handleMove = (ids: string[], groupId: string | null) => {
+    moveMembership.mutate({ ids, groupId }, {
+      onSuccess: (result) => { setSelectedIds(new Set()); setMoveDialogOpen(false); toast.success(`${result.affected_count} elementos movidos`) },
+      onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudieron mover los elementos')),
+    })
+  }
+
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || !String(over.id).startsWith('group:')) return
+    const destination = String(over.id).slice(6)
+    handleMove([String(active.id)], destination === 'ungrouped' ? null : destination)
+  }
 
   const handleCreate = () => {
     setEditingDiet(null)
@@ -463,6 +509,7 @@ export function DietsPage() {
   }
 
   return (
+    <DndContext onDragEnd={handleDragEnd}>
     <div className="space-y-6">
       {/* Page header */}
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
@@ -517,6 +564,8 @@ export function DietsPage() {
           </Button>
         </div>
       </div>
+
+      <CatalogGroupStrip groups={groups} disabled={organizationPending} onCreate={() => { setGroupToEdit(null); setGroupDialogOpen(true) }} onOpen={(group) => { setSheetGroup(group); setSheetPage(1); setSheetSearch('') }} onEdit={(group) => { setGroupToEdit(group); setGroupDialogOpen(true) }} onDelete={setGroupToDelete} />
 
       {/* Content */}
       {dietsQuery.isLoading ? (
@@ -585,6 +634,9 @@ export function DietsPage() {
                 onEdit={handleEdit}
                 onDuplicate={handleDuplicate}
                 onDelete={handleDelete}
+                selectedIds={selectedIds}
+                onSelectionChange={setSelectedIds}
+                movementDisabled={organizationPending}
               />
             )}
 
@@ -625,6 +677,12 @@ export function DietsPage() {
       )}
 
       {/* Dialogs */}
+      {selectedIds.size > 0 && <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 rounded-full border bg-card p-2 shadow-lg"><Button disabled={organizationPending} onClick={() => setMoveDialogOpen(true)}>Mover a grupo ({selectedIds.size})</Button></div>}
+      <CatalogGroupDialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen} group={groupToEdit} pending={organizationPending} onSubmit={handleGroupSubmit} />
+      <DeleteCatalogGroupDialog open={Boolean(groupToDelete)} onOpenChange={(open) => !open && setGroupToDelete(null)} group={groupToDelete} pending={organizationPending} onConfirm={() => groupToDelete && deleteGroup.mutate(groupToDelete.id, { onSuccess: () => { setGroupToDelete(null); toast.success('Grupo eliminado') }, onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudo eliminar el grupo')) })} />
+      <MoveToGroupDialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen} groups={groups} count={selectedIds.size} pending={organizationPending} onConfirm={(groupId) => handleMove([...selectedIds], groupId)} />
+      <CatalogGroupSheet open={Boolean(sheetGroup)} onOpenChange={(open) => !open && setSheetGroup(null)} group={sheetGroup} items={sheetMembersQuery.data?.data ?? []} search={sheetSearch} onSearchChange={(value) => { setSheetSearch(value); setSheetPage(1) }} page={sheetPage} totalPages={Math.max(1, sheetMembersQuery.data?.totalPages ?? 1)} loading={sheetMembersQuery.isLoading} pending={organizationPending} onPageChange={setSheetPage} onRemove={(id) => handleMove([id], null)} />
+
       <DietFormDialog
         open={formDialogOpen}
         onOpenChange={handleFormDialogOpenChange}
@@ -731,5 +789,6 @@ export function DietsPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </DndContext>
   )
 }

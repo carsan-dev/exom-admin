@@ -17,6 +17,7 @@ import {
 import { normalizeTrainingTypes } from './types'
 import type { Training } from './types'
 import type { Exercise, PaginatedResponse } from '../exercises/types'
+import type { CatalogGroup, GroupMembershipResult } from '../catalog-groups/types'
 
 export { getApiErrorMessage }
 
@@ -39,6 +40,8 @@ export interface TrainingsListParams {
   tags?: string[]
   duration_min?: number
   duration_max?: number
+  group_id?: string
+  enabled?: boolean
 }
 
 const trainingsQueryKeys = {
@@ -54,6 +57,7 @@ const trainingsQueryKeys = {
       params.tags ?? [],
       params.duration_min ?? null,
       params.duration_max ?? null,
+      params.group_id ?? null,
     ] as const,
   detail: (id?: string) => ['trainings', id] as const,
 }
@@ -61,6 +65,7 @@ const trainingsQueryKeys = {
 const trainingTagsQueryKey = ['trainings', 'tags'] as const
 const trainingTypesQueryKey = ['trainings', 'types'] as const
 const exercisesListQueryKey = ['exercises', 'list-all'] as const
+const trainingGroupsQueryKey = ['training-groups'] as const
 
 function normalizeTrainingPayload(values: TrainingFormValues) {
   const normalizedTypes = normalizeTrainingTypes(values.types)
@@ -122,13 +127,14 @@ function normalizeSearch(search?: string) {
 }
 
 export function useTrainings(params: TrainingsListParams) {
-  const { page, limit, search, type, level, tags, duration_min, duration_max } = params
+  const { page, limit, search, type, level, tags, duration_min, duration_max, group_id } = params
   const normalizedSearch = normalizeSearch(search)
   const normalizedType = type ?? []
   const normalizedLevel = level ?? []
   const normalizedTags = tags ?? []
 
   return useQuery({
+    enabled: params.enabled ?? true,
     queryKey: trainingsQueryKeys.list({
       page,
       limit,
@@ -138,6 +144,7 @@ export function useTrainings(params: TrainingsListParams) {
       tags: normalizedTags,
       duration_min,
       duration_max,
+      group_id,
     }),
     placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
@@ -152,12 +159,59 @@ export function useTrainings(params: TrainingsListParams) {
           ...(normalizedTags.length > 0 ? { tags: normalizedTags } : {}),
           ...(duration_min != null ? { duration_min } : {}),
           ...(duration_max != null ? { duration_max } : {}),
+          ...(group_id ? { group_id } : {}),
         },
         paramsSerializer: { indexes: null },
       })
 
       return unwrapResponse(response)
     },
+  })
+}
+
+export function useTrainingGroups() {
+  return useQuery({
+    queryKey: trainingGroupsQueryKey,
+    retry: shouldRetryQuery,
+    queryFn: async () => unwrapResponse(await api.get<ApiEnvelope<CatalogGroup[]>>('/training-groups')),
+  })
+}
+
+function useInvalidateTrainingGroups() {
+  const queryClient = useQueryClient()
+  return () => Promise.all([
+    queryClient.invalidateQueries({ queryKey: trainingGroupsQueryKey }),
+    queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all }),
+  ])
+}
+
+export function useCreateTrainingGroup() {
+  const invalidate = useInvalidateTrainingGroups()
+  return useMutation({
+    mutationFn: async (name: string) => unwrapResponse(await api.post<ApiEnvelope<CatalogGroup>>('/training-groups', { name })),
+    onSuccess: invalidate,
+  })
+}
+
+export function useUpdateTrainingGroup() {
+  const invalidate = useInvalidateTrainingGroups()
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => unwrapResponse(await api.patch<ApiEnvelope<CatalogGroup>>(`/training-groups/${id}`, { name })),
+    onSuccess: invalidate,
+  })
+}
+
+export function useDeleteTrainingGroup() {
+  const invalidate = useInvalidateTrainingGroups()
+  return useMutation({ mutationFn: (id: string) => api.delete(`/training-groups/${id}`), onSuccess: invalidate })
+}
+
+export function useUpdateTrainingGroupMembership() {
+  const invalidate = useInvalidateTrainingGroups()
+  return useMutation({
+    mutationFn: async ({ ids, groupId }: { ids: string[]; groupId: string | null }) =>
+      unwrapResponse(await api.patch<ApiEnvelope<GroupMembershipResult>>('/trainings/group-membership', { training_ids: ids, group_id: groupId })),
+    onSuccess: invalidate,
   })
 }
 

@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { formatUpdatedAt } from '../../ingredients/types'
 import { getMealTypeBadgeClass, type Diet } from '../types'
+import { CatalogDragHandle } from '../../catalog-groups/components/catalog-drag-handle'
 
 interface DietApprovalSummary {
   pending_approval_actions: string[]
@@ -32,14 +33,26 @@ interface DietsTableProps {
   onEdit: (diet: Diet) => void
   onDuplicate: (diet: Diet) => void
   onDelete: (diet: Diet) => void
+  selectedIds?: Set<string>
+  onSelectionChange?: (ids: Set<string>) => void
+  movementDisabled?: boolean
 }
 
-export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplicate, onDelete }: DietsTableProps) {
+export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplicate, onDelete, selectedIds = new Set(), onSelectionChange, movementDisabled }: DietsTableProps) {
+  const allSelected = diets.length > 0 && diets.every((item) => selectedIds.has(item.id))
+  const toggleAll = () => onSelectionChange?.(allSelected ? new Set() : new Set(diets.map((item) => item.id)))
+  const toggle = (id: string) => {
+    const next = new Set(selectedIds)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    onSelectionChange?.(next)
+  }
   return (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-20"><input type="checkbox" aria-label="Seleccionar página" checked={allSelected} onChange={toggleAll} /></TableHead>
           <TableHead>Nombre</TableHead>
+          <TableHead>Grupo</TableHead>
           <TableHead className="text-center">Comidas</TableHead>
           <TableHead className="hidden lg:table-cell">Etiquetas</TableHead>
           <TableHead className="hidden md:table-cell">Kcal totales</TableHead>
@@ -53,12 +66,15 @@ export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplica
           const mealTypes = diet.meals.map((m) => m.type)
           return (
             <TableRow key={diet.id}>
+              <TableCell><div className="flex items-center gap-1"><input type="checkbox" aria-label={`Seleccionar ${diet.name}`} checked={selectedIds.has(diet.id)} onChange={() => toggle(diet.id)} /><CatalogDragHandle id={diet.id} label={diet.name} disabled={movementDisabled} /></div></TableCell>
               <TableCell className="font-medium text-foreground max-w-[200px] truncate">
                 <div className="space-y-2">
                   <p className="truncate">{diet.name}</p>
                   <ResourceApprovalIndicator pendingActions={approvalById[diet.id]?.pending_approval_actions ?? []} />
                 </div>
               </TableCell>
+
+              <TableCell>{diet.group ? <Badge variant="outline">{diet.group.name}</Badge> : <span className="text-xs text-muted-foreground">Sin grupo</span>}</TableCell>
 
               <TableCell className="text-center">
                 <div className="flex flex-wrap justify-center gap-1">

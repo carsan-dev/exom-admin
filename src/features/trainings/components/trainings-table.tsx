@@ -26,6 +26,7 @@ import {
   type Training,
 } from '../types'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
+import { CatalogDragHandle } from '../../catalog-groups/components/catalog-drag-handle'
 
 interface TrainingApprovalSummary {
   pending_approval_actions: string[]
@@ -38,6 +39,9 @@ interface TrainingsTableProps {
   onEdit: (training: Training) => void
   onDuplicate: (training: Training) => void
   onDelete: (training: Training) => void
+  selectedIds?: Set<string>
+  onSelectionChange?: (ids: Set<string>) => void
+  movementDisabled?: boolean
 }
 
 export function TrainingsTable({
@@ -47,12 +51,24 @@ export function TrainingsTable({
   onEdit,
   onDuplicate,
   onDelete,
+  selectedIds = new Set(),
+  onSelectionChange,
+  movementDisabled,
 }: TrainingsTableProps) {
+  const allSelected = trainings.length > 0 && trainings.every((item) => selectedIds.has(item.id))
+  const toggleAll = () => onSelectionChange?.(allSelected ? new Set() : new Set(trainings.map((item) => item.id)))
+  const toggle = (id: string) => {
+    const next = new Set(selectedIds)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    onSelectionChange?.(next)
+  }
   return (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-20"><div className="flex items-center"><input type="checkbox" aria-label="Seleccionar página" checked={allSelected} onChange={toggleAll} /><span className="sr-only">Mover</span></div></TableHead>
           <TableHead>Nombre</TableHead>
+          <TableHead>Grupo</TableHead>
           <TableHead>Tipos</TableHead>
           <TableHead>Nivel</TableHead>
           <TableHead className="text-center">Ejercicios</TableHead>
@@ -69,6 +85,7 @@ export function TrainingsTable({
 
           return (
             <TableRow key={training.id}>
+              <TableCell><div className="flex items-center gap-1"><input type="checkbox" aria-label={`Seleccionar ${training.name}`} checked={selectedIds.has(training.id)} onChange={() => toggle(training.id)} /><CatalogDragHandle id={training.id} label={training.name} disabled={movementDisabled} /></div></TableCell>
               <TableCell className="max-w-[200px] font-medium text-foreground truncate">
                 <div className="flex items-start gap-2">
                   {training.accentColor ? (
@@ -85,6 +102,8 @@ export function TrainingsTable({
                   </div>
                 </div>
               </TableCell>
+
+              <TableCell>{training.group ? <Badge variant="outline">{training.group.name}</Badge> : <span className="text-xs text-muted-foreground">Sin grupo</span>}</TableCell>
 
               <TableCell>
                 <div className="flex flex-wrap gap-1">

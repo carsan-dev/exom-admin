@@ -14,6 +14,7 @@ import type { DietFormValues } from './schemas'
 import { normalizeDietTags } from './schemas'
 import type { Diet } from './types'
 import type { Ingredient, PaginatedResponse } from '../ingredients/types'
+import type { CatalogGroup, GroupMembershipResult } from '../catalog-groups/types'
 
 export { getApiErrorMessage }
 
@@ -36,6 +37,8 @@ export interface DietsListParams {
   nutritional_badges?: string[]
   updated_from?: string
   updated_to?: string
+  group_id?: string
+  enabled?: boolean
 }
 
 const dietsQueryKeys = {
@@ -51,6 +54,7 @@ const dietsQueryKeys = {
       params.nutritional_badges ?? [],
       params.updated_from ?? null,
       params.updated_to ?? null,
+      params.group_id ?? null,
     ] as const,
   detail: (id?: string) => ['diets', id] as const,
 }
@@ -58,6 +62,7 @@ const dietsQueryKeys = {
 const dietNutritionalBadgesQueryKey = ['diets', 'nutritional-badges'] as const
 const dietTagsQueryKey = ['diets', 'tags'] as const
 const ingredientsListQueryKey = ['ingredients', 'list-all'] as const
+const dietGroupsQueryKey = ['diet-groups'] as const
 
 function normalizeDietPayload(values: DietFormValues) {
   type MealPayloadSource = Omit<DietFormValues['meals'][number], 'variants'>
@@ -100,13 +105,14 @@ function normalizeSearch(search?: string) {
 }
 
 export function useDiets(params: DietsListParams) {
-  const { page, limit, search, tags, meal_types, nutritional_badges, updated_from, updated_to } = params
+  const { page, limit, search, tags, meal_types, nutritional_badges, updated_from, updated_to, group_id } = params
   const normalizedSearch = normalizeSearch(search)
   const normalizedTags = tags ?? []
   const normalizedMealTypes = meal_types ?? []
   const normalizedNutritionalBadges = nutritional_badges ?? []
 
   return useQuery({
+    enabled: params.enabled ?? true,
     queryKey: dietsQueryKeys.list({
       page,
       limit,
@@ -116,6 +122,7 @@ export function useDiets(params: DietsListParams) {
       nutritional_badges: normalizedNutritionalBadges,
       updated_from,
       updated_to,
+      group_id,
     }),
     placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
@@ -132,12 +139,45 @@ export function useDiets(params: DietsListParams) {
             : {}),
           ...(updated_from ? { updated_from } : {}),
           ...(updated_to ? { updated_to } : {}),
+          ...(group_id ? { group_id } : {}),
         },
         paramsSerializer: { indexes: null },
       })
       return unwrapResponse(response)
     },
   })
+}
+
+export function useDietGroups() {
+  return useQuery({ queryKey: dietGroupsQueryKey, retry: shouldRetryQuery, queryFn: async () => unwrapResponse(await api.get<ApiEnvelope<CatalogGroup[]>>('/diet-groups')) })
+}
+
+function useInvalidateDietGroups() {
+  const queryClient = useQueryClient()
+  return () => Promise.all([
+    queryClient.invalidateQueries({ queryKey: dietGroupsQueryKey }),
+    queryClient.invalidateQueries({ queryKey: dietsQueryKeys.all }),
+  ])
+}
+
+export function useCreateDietGroup() {
+  const invalidate = useInvalidateDietGroups()
+  return useMutation({ mutationFn: async (name: string) => unwrapResponse(await api.post<ApiEnvelope<CatalogGroup>>('/diet-groups', { name })), onSuccess: invalidate })
+}
+
+export function useUpdateDietGroup() {
+  const invalidate = useInvalidateDietGroups()
+  return useMutation({ mutationFn: async ({ id, name }: { id: string; name: string }) => unwrapResponse(await api.patch<ApiEnvelope<CatalogGroup>>(`/diet-groups/${id}`, { name })), onSuccess: invalidate })
+}
+
+export function useDeleteDietGroup() {
+  const invalidate = useInvalidateDietGroups()
+  return useMutation({ mutationFn: (id: string) => api.delete(`/diet-groups/${id}`), onSuccess: invalidate })
+}
+
+export function useUpdateDietGroupMembership() {
+  const invalidate = useInvalidateDietGroups()
+  return useMutation({ mutationFn: async ({ ids, groupId }: { ids: string[]; groupId: string | null }) => unwrapResponse(await api.patch<ApiEnvelope<GroupMembershipResult>>('/diets/group-membership', { diet_ids: ids, group_id: groupId })), onSuccess: invalidate })
 }
 
 export function useDiet(id?: string) {
