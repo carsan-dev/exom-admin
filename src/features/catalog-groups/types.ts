@@ -12,3 +12,5 @@ export interface CatalogGroup extends CatalogGroupSummary {
 export interface GroupMembershipResult {
   affected_count: number
 }
+
+export type CatalogGroupFilter = 'all' | 'ungrouped' | string

@@ -41,6 +41,7 @@ export interface TrainingsListParams {
   duration_min?: number
   duration_max?: number
   group_id?: string
+  ungrouped?: boolean
   enabled?: boolean
 }
 
@@ -58,6 +59,7 @@ const trainingsQueryKeys = {
       params.duration_min ?? null,
       params.duration_max ?? null,
       params.group_id ?? null,
+      params.ungrouped ?? false,
     ] as const,
   detail: (id?: string) => ['trainings', id] as const,
 }
@@ -127,7 +129,7 @@ function normalizeSearch(search?: string) {
 }
 
 export function useTrainings(params: TrainingsListParams) {
-  const { page, limit, search, type, level, tags, duration_min, duration_max, group_id } = params
+  const { page, limit, search, type, level, tags, duration_min, duration_max, group_id, ungrouped } = params
   const normalizedSearch = normalizeSearch(search)
   const normalizedType = type ?? []
   const normalizedLevel = level ?? []
@@ -145,6 +147,7 @@ export function useTrainings(params: TrainingsListParams) {
       duration_min,
       duration_max,
       group_id,
+      ungrouped,
     }),
     placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
@@ -160,6 +163,7 @@ export function useTrainings(params: TrainingsListParams) {
           ...(duration_min != null ? { duration_min } : {}),
           ...(duration_max != null ? { duration_max } : {}),
           ...(group_id ? { group_id } : {}),
+          ...(ungrouped ? { ungrouped: true } : {}),
         },
         paramsSerializer: { indexes: null },
       })
@@ -179,31 +183,52 @@ export function useTrainingGroups() {
 
 function useInvalidateTrainingGroups() {
   const queryClient = useQueryClient()
-  return () => Promise.all([
-    queryClient.invalidateQueries({ queryKey: trainingGroupsQueryKey }),
-    queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all }),
-  ])
+  return () => {
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: trainingGroupsQueryKey }),
+      queryClient.invalidateQueries({ queryKey: trainingsQueryKeys.all }),
+    ]).catch(() => undefined)
+  }
 }
 
 export function useCreateTrainingGroup() {
+  const queryClient = useQueryClient()
   const invalidate = useInvalidateTrainingGroups()
   return useMutation({
     mutationFn: async (name: string) => unwrapResponse(await api.post<ApiEnvelope<CatalogGroup>>('/training-groups', { name })),
-    onSuccess: invalidate,
+    onSuccess: (group) => {
+      queryClient.setQueryData<CatalogGroup[]>(trainingGroupsQueryKey, (current = []) =>
+        [...current, group].sort((left, right) => left.name.localeCompare(right.name, 'es'))
+      )
+      invalidate()
+    },
   })
 }
 
 export function useUpdateTrainingGroup() {
+  const queryClient = useQueryClient()
   const invalidate = useInvalidateTrainingGroups()
   return useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => unwrapResponse(await api.patch<ApiEnvelope<CatalogGroup>>(`/training-groups/${id}`, { name })),
-    onSuccess: invalidate,
+    onSuccess: (group) => {
+      queryClient.setQueryData<CatalogGroup[]>(trainingGroupsQueryKey, (current = []) =>
+        current.map((item) => item.id === group.id ? group : item).sort((left, right) => left.name.localeCompare(right.name, 'es'))
+      )
+      invalidate()
+    },
   })
 }
 
 export function useDeleteTrainingGroup() {
+  const queryClient = useQueryClient()
   const invalidate = useInvalidateTrainingGroups()
-  return useMutation({ mutationFn: (id: string) => api.delete(`/training-groups/${id}`), onSuccess: invalidate })
+  return useMutation({
+    mutationFn: async (id: string) => { await api.delete(`/training-groups/${id}`); return id },
+    onSuccess: (id) => {
+      queryClient.setQueryData<CatalogGroup[]>(trainingGroupsQueryKey, (current = []) => current.filter((group) => group.id !== id))
+      invalidate()
+    },
+  })
 }
 
 export function useUpdateTrainingGroupMembership() {

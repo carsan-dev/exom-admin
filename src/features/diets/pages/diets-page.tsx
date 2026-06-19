@@ -61,10 +61,9 @@ import { DietsTable } from '../components/diets-table'
 import { parseDietImport } from '../import-diet'
 import type { DietFormValues } from '../schemas'
 import type { Diet } from '../types'
-import type { CatalogGroup } from '../../catalog-groups/types'
+import type { CatalogGroup, CatalogGroupFilter } from '../../catalog-groups/types'
 import { CatalogGroupStrip } from '../../catalog-groups/components/catalog-group-strip'
 import { CatalogGroupDialog, DeleteCatalogGroupDialog, MoveToGroupDialog } from '../../catalog-groups/components/catalog-group-dialogs'
-import { CatalogGroupSheet } from '../../catalog-groups/components/catalog-group-sheet'
 
 const PAGE_SIZE = 10
 const MEAL_TYPE_OPTIONS: FilterOption[] = [
@@ -290,9 +289,7 @@ export function DietsPage() {
   const [groupToEdit, setGroupToEdit] = useState<CatalogGroup | null>(null)
   const [groupToDelete, setGroupToDelete] = useState<CatalogGroup | null>(null)
   const [moveDialogOpen, setMoveDialogOpen] = useState(false)
-  const [sheetGroup, setSheetGroup] = useState<CatalogGroup | null>(null)
-  const [sheetPage, setSheetPage] = useState(1)
-  const [sheetSearch, setSheetSearch] = useState('')
+  const [groupFilter, setGroupFilter] = useState<CatalogGroupFilter>('all')
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
@@ -337,7 +334,7 @@ export function DietsPage() {
   )
   const filters = useListFilters(sections)
   const dietFilterParams = filtersToApiParams(filters.values, sections) as Partial<DietsListParams>
-  const pageResetKey = `${activeSearch}::${JSON.stringify(dietFilterParams)}`
+  const pageResetKey = `${activeSearch}::${JSON.stringify(dietFilterParams)}::${groupFilter}`
   const lastPageResetKeyRef = useRef(pageResetKey)
 
   useEffect(() => {
@@ -353,10 +350,11 @@ export function DietsPage() {
     page,
     limit: PAGE_SIZE,
     search: activeSearch,
+    group_id: groupFilter !== 'all' && groupFilter !== 'ungrouped' ? groupFilter : undefined,
+    ungrouped: groupFilter === 'ungrouped',
     ...dietFilterParams,
   })
   const diets = dietsQuery.data?.data ?? []
-  const sheetMembersQuery = useDiets({ page: sheetPage, limit: PAGE_SIZE, search: sheetSearch, group_id: sheetGroup?.id, enabled: Boolean(sheetGroup) })
   const dietApprovalQuery = useResourceApprovalBatch(
     'diet',
     diets.map((diet) => diet.id)
@@ -367,6 +365,7 @@ export function DietsPage() {
   const hasActiveFilters = filters.activeCount > 0
   const hasQuery = activeSearch.length > 0 || hasActiveFilters
   const groups = groupsQuery.data ?? []
+  const activeGroupName = groupFilter === 'all' ? null : groupFilter === 'ungrouped' ? 'Sin grupo' : groups.find((group) => group.id === groupFilter)?.name ?? null
   const organizationPending = createGroup.isPending || updateGroup.isPending || deleteGroup.isPending || moveMembership.isPending
 
   useEffect(() => { setSelectedIds(new Set()) }, [page, pageResetKey])
@@ -565,7 +564,7 @@ export function DietsPage() {
         </div>
       </div>
 
-      <CatalogGroupStrip groups={groups} disabled={organizationPending} onCreate={() => { setGroupToEdit(null); setGroupDialogOpen(true) }} onOpen={(group) => { setSheetGroup(group); setSheetPage(1); setSheetSearch('') }} onEdit={(group) => { setGroupToEdit(group); setGroupDialogOpen(true) }} onDelete={setGroupToDelete} />
+      <CatalogGroupStrip groups={groups} activeFilter={groupFilter} onFilterChange={setGroupFilter} disabled={organizationPending} onCreate={() => { setGroupToEdit(null); setGroupDialogOpen(true) }} onEdit={(group) => { setGroupToEdit(group); setGroupDialogOpen(true) }} onDelete={setGroupToDelete} />
 
       {/* Content */}
       {dietsQuery.isLoading ? (
@@ -608,7 +607,7 @@ export function DietsPage() {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Listado de dietas</CardTitle>
+            <CardTitle className="text-xl">{activeGroupName ? `Dietas · ${activeGroupName}` : 'Listado de dietas'}</CardTitle>
             <CardDescription>
               Vista paginada del catálogo con búsqueda y acciones por dieta
             </CardDescription>
@@ -679,10 +678,8 @@ export function DietsPage() {
       {/* Dialogs */}
       {selectedIds.size > 0 && <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 rounded-full border bg-card p-2 shadow-lg"><Button disabled={organizationPending} onClick={() => setMoveDialogOpen(true)}>Mover a grupo ({selectedIds.size})</Button></div>}
       <CatalogGroupDialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen} group={groupToEdit} pending={organizationPending} onSubmit={handleGroupSubmit} />
-      <DeleteCatalogGroupDialog open={Boolean(groupToDelete)} onOpenChange={(open) => !open && setGroupToDelete(null)} group={groupToDelete} pending={organizationPending} onConfirm={() => groupToDelete && deleteGroup.mutate(groupToDelete.id, { onSuccess: () => { setGroupToDelete(null); toast.success('Grupo eliminado') }, onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudo eliminar el grupo')) })} />
+      <DeleteCatalogGroupDialog open={Boolean(groupToDelete)} onOpenChange={(open) => !open && setGroupToDelete(null)} group={groupToDelete} pending={organizationPending} onConfirm={() => groupToDelete && deleteGroup.mutate(groupToDelete.id, { onSuccess: () => { if (groupFilter === groupToDelete.id) setGroupFilter('all'); setGroupToDelete(null); toast.success('Grupo eliminado') }, onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudo eliminar el grupo')) })} />
       <MoveToGroupDialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen} groups={groups} count={selectedIds.size} pending={organizationPending} onConfirm={(groupId) => handleMove([...selectedIds], groupId)} />
-      <CatalogGroupSheet open={Boolean(sheetGroup)} onOpenChange={(open) => !open && setSheetGroup(null)} group={sheetGroup} items={sheetMembersQuery.data?.data ?? []} search={sheetSearch} onSearchChange={(value) => { setSheetSearch(value); setSheetPage(1) }} page={sheetPage} totalPages={Math.max(1, sheetMembersQuery.data?.totalPages ?? 1)} loading={sheetMembersQuery.isLoading} pending={organizationPending} onPageChange={setSheetPage} onRemove={(id) => handleMove([id], null)} />
-
       <DietFormDialog
         open={formDialogOpen}
         onOpenChange={handleFormDialogOpenChange}

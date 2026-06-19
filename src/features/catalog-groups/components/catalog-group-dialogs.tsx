@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -11,7 +11,11 @@ export function CatalogGroupDialog({ open, onOpenChange, group, pending, onSubmi
 }) {
   const [name, setName] = useState('')
   useEffect(() => { if (open) setName(group?.name ?? '') }, [open, group])
-  return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent><DialogHeader><DialogTitle>{group ? 'Renombrar grupo' : 'Crear grupo'}</DialogTitle><DialogDescription>Nombre único, entre 1 y 100 caracteres.</DialogDescription></DialogHeader><div className="space-y-2"><Label htmlFor="group-name">Nombre</Label><Input id="group-name" value={name} maxLength={100} onChange={(event) => setName(event.target.value)} /></div><DialogFooter><Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button><Button disabled={pending || !name.trim()} onClick={() => onSubmit(name)}>Guardar</Button></DialogFooter></DialogContent></Dialog>
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault()
+    if (!pending && name.trim()) onSubmit(name)
+  }
+  return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent><form onSubmit={handleSubmit} className="space-y-4"><DialogHeader><DialogTitle>{group ? 'Renombrar grupo' : 'Crear grupo'}</DialogTitle><DialogDescription>Nombre único, entre 1 y 100 caracteres.</DialogDescription></DialogHeader><div className="space-y-2"><Label htmlFor="group-name">Nombre</Label><Input id="group-name" autoFocus value={name} maxLength={100} onChange={(event) => setName(event.target.value)} /></div><DialogFooter><Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button><Button type="submit" disabled={pending || !name.trim()}>{pending ? 'Guardando...' : group ? 'Guardar' : 'Crear'}</Button></DialogFooter></form></DialogContent></Dialog>
 }
 
 export function DeleteCatalogGroupDialog({ open, onOpenChange, group, pending, onConfirm }: {

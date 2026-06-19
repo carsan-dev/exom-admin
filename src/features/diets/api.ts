@@ -38,6 +38,7 @@ export interface DietsListParams {
   updated_from?: string
   updated_to?: string
   group_id?: string
+  ungrouped?: boolean
   enabled?: boolean
 }
 
@@ -55,6 +56,7 @@ const dietsQueryKeys = {
       params.updated_from ?? null,
       params.updated_to ?? null,
       params.group_id ?? null,
+      params.ungrouped ?? false,
     ] as const,
   detail: (id?: string) => ['diets', id] as const,
 }
@@ -105,7 +107,7 @@ function normalizeSearch(search?: string) {
 }
 
 export function useDiets(params: DietsListParams) {
-  const { page, limit, search, tags, meal_types, nutritional_badges, updated_from, updated_to, group_id } = params
+  const { page, limit, search, tags, meal_types, nutritional_badges, updated_from, updated_to, group_id, ungrouped } = params
   const normalizedSearch = normalizeSearch(search)
   const normalizedTags = tags ?? []
   const normalizedMealTypes = meal_types ?? []
@@ -123,6 +125,7 @@ export function useDiets(params: DietsListParams) {
       updated_from,
       updated_to,
       group_id,
+      ungrouped,
     }),
     placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
@@ -140,6 +143,7 @@ export function useDiets(params: DietsListParams) {
           ...(updated_from ? { updated_from } : {}),
           ...(updated_to ? { updated_to } : {}),
           ...(group_id ? { group_id } : {}),
+          ...(ungrouped ? { ungrouped: true } : {}),
         },
         paramsSerializer: { indexes: null },
       })
@@ -154,25 +158,48 @@ export function useDietGroups() {
 
 function useInvalidateDietGroups() {
   const queryClient = useQueryClient()
-  return () => Promise.all([
-    queryClient.invalidateQueries({ queryKey: dietGroupsQueryKey }),
-    queryClient.invalidateQueries({ queryKey: dietsQueryKeys.all }),
-  ])
+  return () => {
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: dietGroupsQueryKey }),
+      queryClient.invalidateQueries({ queryKey: dietsQueryKeys.all }),
+    ]).catch(() => undefined)
+  }
 }
 
 export function useCreateDietGroup() {
+  const queryClient = useQueryClient()
   const invalidate = useInvalidateDietGroups()
-  return useMutation({ mutationFn: async (name: string) => unwrapResponse(await api.post<ApiEnvelope<CatalogGroup>>('/diet-groups', { name })), onSuccess: invalidate })
+  return useMutation({
+    mutationFn: async (name: string) => unwrapResponse(await api.post<ApiEnvelope<CatalogGroup>>('/diet-groups', { name })),
+    onSuccess: (group) => {
+      queryClient.setQueryData<CatalogGroup[]>(dietGroupsQueryKey, (current = []) => [...current, group].sort((left, right) => left.name.localeCompare(right.name, 'es')))
+      invalidate()
+    },
+  })
 }
 
 export function useUpdateDietGroup() {
+  const queryClient = useQueryClient()
   const invalidate = useInvalidateDietGroups()
-  return useMutation({ mutationFn: async ({ id, name }: { id: string; name: string }) => unwrapResponse(await api.patch<ApiEnvelope<CatalogGroup>>(`/diet-groups/${id}`, { name })), onSuccess: invalidate })
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => unwrapResponse(await api.patch<ApiEnvelope<CatalogGroup>>(`/diet-groups/${id}`, { name })),
+    onSuccess: (group) => {
+      queryClient.setQueryData<CatalogGroup[]>(dietGroupsQueryKey, (current = []) => current.map((item) => item.id === group.id ? group : item).sort((left, right) => left.name.localeCompare(right.name, 'es')))
+      invalidate()
+    },
+  })
 }
 
 export function useDeleteDietGroup() {
+  const queryClient = useQueryClient()
   const invalidate = useInvalidateDietGroups()
-  return useMutation({ mutationFn: (id: string) => api.delete(`/diet-groups/${id}`), onSuccess: invalidate })
+  return useMutation({
+    mutationFn: async (id: string) => { await api.delete(`/diet-groups/${id}`); return id },
+    onSuccess: (id) => {
+      queryClient.setQueryData<CatalogGroup[]>(dietGroupsQueryKey, (current = []) => current.filter((group) => group.id !== id))
+      invalidate()
+    },
+  })
 }
 
 export function useUpdateDietGroupMembership() {

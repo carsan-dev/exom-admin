@@ -61,10 +61,9 @@ import { TrainingsTable } from '../components/trainings-table'
 import { parseTrainingImport } from '../import-training'
 import { getTrainingTypeLabel, type Training } from '../types'
 import type { TrainingFormValues } from '../schemas'
-import type { CatalogGroup } from '../../catalog-groups/types'
+import type { CatalogGroup, CatalogGroupFilter } from '../../catalog-groups/types'
 import { CatalogGroupStrip } from '../../catalog-groups/components/catalog-group-strip'
 import { CatalogGroupDialog, DeleteCatalogGroupDialog, MoveToGroupDialog } from '../../catalog-groups/components/catalog-group-dialogs'
-import { CatalogGroupSheet } from '../../catalog-groups/components/catalog-group-sheet'
 
 const PAGE_SIZE = 10
 const LEVEL_OPTIONS: FilterOption[] = [
@@ -259,9 +258,7 @@ export function TrainingsPage() {
   const [groupToEdit, setGroupToEdit] = useState<CatalogGroup | null>(null)
   const [groupToDelete, setGroupToDelete] = useState<CatalogGroup | null>(null)
   const [moveDialogOpen, setMoveDialogOpen] = useState(false)
-  const [sheetGroup, setSheetGroup] = useState<CatalogGroup | null>(null)
-  const [sheetPage, setSheetPage] = useState(1)
-  const [sheetSearch, setSheetSearch] = useState('')
+  const [groupFilter, setGroupFilter] = useState<CatalogGroupFilter>('all')
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const page = getPageSearchParam(searchParams.get('page'))
   const deferredSearch = useDeferredValue(search)
@@ -310,7 +307,7 @@ export function TrainingsPage() {
   )
   const filters = useListFilters(sections)
   const trainingFilterParams = filtersToApiParams(filters.values, sections) as Partial<TrainingsListParams>
-  const pageResetKey = `${activeSearch}::${JSON.stringify(trainingFilterParams)}`
+  const pageResetKey = `${activeSearch}::${JSON.stringify(trainingFilterParams)}::${groupFilter}`
   const lastPageResetKeyRef = useRef(pageResetKey)
 
   useEffect(() => {
@@ -326,10 +323,11 @@ export function TrainingsPage() {
     page,
     limit: PAGE_SIZE,
     search: activeSearch,
+    group_id: groupFilter !== 'all' && groupFilter !== 'ungrouped' ? groupFilter : undefined,
+    ungrouped: groupFilter === 'ungrouped',
     ...trainingFilterParams,
   })
   const trainings = trainingsQuery.data?.data ?? []
-  const sheetMembersQuery = useTrainings({ page: sheetPage, limit: PAGE_SIZE, search: sheetSearch, group_id: sheetGroup?.id, enabled: Boolean(sheetGroup) })
   const trainingApprovalQuery = useResourceApprovalBatch(
     'training',
     trainings.map((training) => training.id)
@@ -340,6 +338,7 @@ export function TrainingsPage() {
   const hasActiveFilters = filters.activeCount > 0
   const hasQuery = activeSearch.length > 0 || hasActiveFilters
   const groups = groupsQuery.data ?? []
+  const activeGroupName = groupFilter === 'all' ? null : groupFilter === 'ungrouped' ? 'Sin grupo' : groups.find((group) => group.id === groupFilter)?.name ?? null
   const organizationPending = createGroup.isPending || updateGroup.isPending || deleteGroup.isPending || moveMembership.isPending
 
   useEffect(() => { setSelectedIds(new Set()) }, [page, pageResetKey])
@@ -549,7 +548,7 @@ export function TrainingsPage() {
         </div>
       </div>
 
-      <CatalogGroupStrip groups={groups} disabled={organizationPending} onCreate={() => { setGroupToEdit(null); setGroupDialogOpen(true) }} onOpen={(group) => { setSheetGroup(group); setSheetPage(1); setSheetSearch('') }} onEdit={(group) => { setGroupToEdit(group); setGroupDialogOpen(true) }} onDelete={setGroupToDelete} />
+      <CatalogGroupStrip groups={groups} activeFilter={groupFilter} onFilterChange={setGroupFilter} disabled={organizationPending} onCreate={() => { setGroupToEdit(null); setGroupDialogOpen(true) }} onEdit={(group) => { setGroupToEdit(group); setGroupDialogOpen(true) }} onDelete={setGroupToDelete} />
 
       {/* Content */}
       {trainingsQuery.isLoading ? (
@@ -592,7 +591,7 @@ export function TrainingsPage() {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Listado de entrenamientos</CardTitle>
+            <CardTitle className="text-xl">{activeGroupName ? `Entrenamientos · ${activeGroupName}` : 'Listado de entrenamientos'}</CardTitle>
             <CardDescription>
               Vista paginada del catálogo con búsqueda y acciones por entrenamiento
             </CardDescription>
@@ -663,10 +662,8 @@ export function TrainingsPage() {
       {/* Dialogs */}
       {selectedIds.size > 0 && <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 rounded-full border bg-card p-2 shadow-lg"><Button disabled={organizationPending} onClick={() => setMoveDialogOpen(true)}>Mover a grupo ({selectedIds.size})</Button></div>}
       <CatalogGroupDialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen} group={groupToEdit} pending={organizationPending} onSubmit={handleGroupSubmit} />
-      <DeleteCatalogGroupDialog open={Boolean(groupToDelete)} onOpenChange={(open) => !open && setGroupToDelete(null)} group={groupToDelete} pending={organizationPending} onConfirm={() => groupToDelete && deleteGroup.mutate(groupToDelete.id, { onSuccess: () => { setGroupToDelete(null); toast.success('Grupo eliminado') }, onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudo eliminar el grupo')) })} />
+      <DeleteCatalogGroupDialog open={Boolean(groupToDelete)} onOpenChange={(open) => !open && setGroupToDelete(null)} group={groupToDelete} pending={organizationPending} onConfirm={() => groupToDelete && deleteGroup.mutate(groupToDelete.id, { onSuccess: () => { if (groupFilter === groupToDelete.id) setGroupFilter('all'); setGroupToDelete(null); toast.success('Grupo eliminado') }, onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudo eliminar el grupo')) })} />
       <MoveToGroupDialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen} groups={groups} count={selectedIds.size} pending={organizationPending} onConfirm={(groupId) => handleMove([...selectedIds], groupId)} />
-      <CatalogGroupSheet open={Boolean(sheetGroup)} onOpenChange={(open) => !open && setSheetGroup(null)} group={sheetGroup} items={sheetMembersQuery.data?.data ?? []} search={sheetSearch} onSearchChange={(value) => { setSheetSearch(value); setSheetPage(1) }} page={sheetPage} totalPages={Math.max(1, sheetMembersQuery.data?.totalPages ?? 1)} loading={sheetMembersQuery.isLoading} pending={organizationPending} onPageChange={setSheetPage} onRemove={(id) => handleMove([id], null)} />
-
       <TrainingFormDialog
         open={formDialogOpen}
         onOpenChange={handleFormDialogOpenChange}
