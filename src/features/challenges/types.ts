@@ -143,7 +143,7 @@ export const CHALLENGE_RULE_METADATA: Record<ChallengeRuleKey, { label: string; 
   },
   STREAK_DAYS: {
     label: 'Racha activa',
-    description: 'Usa la racha actual del cliente como valor del reto automático.',
+    description: 'Usa los días activos planificados consecutivos del cliente; descansos y días sin asignación no rompen la racha.',
     defaultUnit: 'días',
   },
 }
