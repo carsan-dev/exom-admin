@@ -22,10 +22,9 @@ import {
   hasClientId,
   useActiveAutoAssignmentRule,
   useAssignmentClients,
-  useAssignmentDietsCatalog,
+  useAssignmentCatalogOptions,
   useAssignmentsMonth,
   useAssignmentsWeek,
-  useAssignmentTrainingsCatalog,
   useBatchAssign,
   useCopyWeek,
   useCreateAutoAssignmentRule,
@@ -150,8 +149,7 @@ export function AssignmentsPage() {
   const weekStart = formatIsoDate(getWeekStartDate(anchorDateObject))
 
   const clientsQuery = useAssignmentClients(currentUserRole)
-  const trainingsQuery = useAssignmentTrainingsCatalog()
-  const dietsQuery = useAssignmentDietsCatalog()
+  const catalogQuery = useAssignmentCatalogOptions(editorOpen)
   const activeAutoRuleQuery = useActiveAutoAssignmentRule(selectedClientId || undefined)
   const weekAssignmentsQuery = useAssignmentsWeek(
     viewMode === 'week' ? (selectedClientId || undefined) : undefined,
@@ -171,17 +169,17 @@ export function AssignmentsPage() {
   const deleteAssignment = useDeleteAssignment()
 
   const clients = clientsQuery.data ?? []
-  const trainings = trainingsQuery.data ?? []
-  const diets = dietsQuery.data ?? []
+  const trainings = catalogQuery.data?.trainings ?? []
+  const diets = catalogQuery.data?.diets ?? []
   const catalogAvailability = buildCatalogAvailability({
     trainingsCount: trainings.length,
-    trainingsLoading: trainingsQuery.isLoading,
-    trainingsError: trainingsQuery.isError,
-    trainingsErrorReason: trainingsQuery.error,
+    trainingsLoading: catalogQuery.isLoading,
+    trainingsError: catalogQuery.isError,
+    trainingsErrorReason: catalogQuery.error,
     dietsCount: diets.length,
-    dietsLoading: dietsQuery.isLoading,
-    dietsError: dietsQuery.isError,
-    dietsErrorReason: dietsQuery.error,
+    dietsLoading: catalogQuery.isLoading,
+    dietsError: catalogQuery.isError,
+    dietsErrorReason: catalogQuery.error,
   })
 
   const activeAssignmentsQuery = viewMode === 'week' ? weekAssignmentsQuery : monthAssignmentsQuery
@@ -199,10 +197,10 @@ export function AssignmentsPage() {
     deactivateAutoRule.isPending ||
     updateAssignment.isPending ||
     deleteAssignment.isPending
-  const canOpenEditor = selectedDates.length > 0 && (catalogAvailability.can_use_any_plan_catalog || catalogAvailability.is_rest_only)
+  const canOpenEditor = selectedDates.length > 0
   const canCopyWeek = viewMode === 'week' && Boolean(selectedClientId) && !weekAssignmentsQuery.isLoading && !weekAssignmentsQuery.isError
   const canSelectAll = Boolean(selectedClientId) && days.length > 0 && !isMutating
-  const assignActionLabel = catalogAvailability.is_rest_only
+  const assignActionLabel = catalogQuery.isFetched && catalogAvailability.is_rest_only
     ? 'Marcar descanso'
     : selectedDates.length > 1
       ? 'Editar selección'
@@ -494,11 +492,11 @@ export function AssignmentsPage() {
         </Card>
       ) : (
         <>
-          {(catalogAvailability.is_loading || catalogAvailability.has_error || catalogAvailability.has_empty_catalogs) && (
+          {catalogQuery.isFetched && (catalogAvailability.has_error || catalogAvailability.has_empty_catalogs) && (
             <AssignmentsCatalogErrorState
               availability={catalogAvailability}
-              onRetryTrainings={() => void trainingsQuery.refetch()}
-              onRetryDiets={() => void dietsQuery.refetch()}
+              onRetryTrainings={() => void catalogQuery.refetch()}
+              onRetryDiets={() => void catalogQuery.refetch()}
             />
           )}
 
@@ -590,8 +588,8 @@ export function AssignmentsPage() {
             catalogAvailability={catalogAvailability}
             isSubmitting={isMutating}
             onOpenChange={setEditorOpen}
-            onRetryTrainings={() => void trainingsQuery.refetch()}
-            onRetryDiets={() => void dietsQuery.refetch()}
+            onRetryTrainings={() => void catalogQuery.refetch()}
+            onRetryDiets={() => void catalogQuery.refetch()}
             onSubmit={handleEditorSubmit}
           />
 

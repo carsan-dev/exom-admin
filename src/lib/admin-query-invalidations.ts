@@ -1,5 +1,6 @@
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 import { isApprovalPendingError } from './api-utils'
+import { assignmentOptionQueryKeys } from './assignment-query-keys'
 
 interface InvalidateAdminQueriesOptions {
   extraQueryKeys?: ReadonlyArray<QueryKey>
@@ -36,6 +37,14 @@ export async function invalidateAdminQueries(
 
   if (options.extraQueryKeys?.length) {
     queryKeys.push(...options.extraQueryKeys)
+
+    const roots = new Set(options.extraQueryKeys.map((queryKey) => queryKey[0]))
+    if (roots.has('clients') || roots.has('users') || roots.has('client-assignments')) {
+      queryKeys.push(assignmentOptionQueryKeys.clients)
+    }
+    if (roots.has('trainings') || roots.has('diets')) {
+      queryKeys.push(assignmentOptionQueryKeys.catalogs)
+    }
   }
 
   if (queryKeys.length === 0) {

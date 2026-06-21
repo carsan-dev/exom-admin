@@ -1,6 +1,5 @@
 import { addDays, endOfMonth, format, parseISO, startOfMonth, startOfWeek } from 'date-fns'
-import type { AdminUserListItem, Client } from '../clients/types'
-import type { Diet } from '../diets/types'
+import type { Client } from '../clients/types'
 import type { Training } from '../trainings/types'
 
 export interface ClientOption {
@@ -9,22 +8,20 @@ export interface ClientOption {
   profile: Pick<NonNullable<Client['profile']>, 'first_name' | 'last_name' | 'avatar_url'> | null
 }
 
-export function toClientOption(client: Pick<Client, 'id' | 'email' | 'profile'>): ClientOption
-export function toClientOption(client: Pick<AdminUserListItem, 'id' | 'email' | 'profile'>): ClientOption
-export function toClientOption(
-  client: Pick<Client, 'id' | 'email' | 'profile'> | Pick<AdminUserListItem, 'id' | 'email' | 'profile'>,
-): ClientOption {
-  return {
-    id: client.id,
-    email: client.email,
-    profile: client.profile
-      ? {
-          first_name: client.profile.first_name,
-          last_name: client.profile.last_name,
-          avatar_url: client.profile.avatar_url,
-        }
-      : null,
-  }
+export interface AssignmentTrainingOption extends AssignmentDayTraining {
+  types: string[]
+  accentColor: string | null
+  exercises_count: number
+}
+
+export interface AssignmentDietOption extends AssignmentDayDiet {
+  tags: string[]
+  meals_count: number
+}
+
+export interface AssignmentCatalogOptions {
+  trainings: AssignmentTrainingOption[]
+  diets: AssignmentDietOption[]
 }
 
 export type CatalogKey = 'trainings' | 'diets'
@@ -271,7 +268,7 @@ export function buildPlaceholderDays(
   }))
 }
 
-export function createAssignmentPreviewTraining(training: Training): AssignmentPreviewTraining {
+export function createAssignmentPreviewTraining(training: Training | AssignmentTrainingOption): AssignmentPreviewTraining {
   return {
     id: training.id,
     name: training.name,
@@ -279,11 +276,11 @@ export function createAssignmentPreviewTraining(training: Training): AssignmentP
     level: training.level,
     estimated_duration_min: training.estimated_duration_min,
     estimated_calories: training.estimated_calories,
-    exercises_count: training.exercises.length,
+    exercises_count: 'exercises_count' in training ? training.exercises_count : training.exercises.length,
   }
 }
 
-export function createAssignmentPreviewDiet(diet: Diet): AssignmentPreviewDiet {
+export function createAssignmentPreviewDiet(diet: AssignmentDietOption): AssignmentPreviewDiet {
   return {
     id: diet.id,
     name: diet.name,
@@ -291,7 +288,7 @@ export function createAssignmentPreviewDiet(diet: Diet): AssignmentPreviewDiet {
     total_protein_g: diet.total_protein_g,
     total_carbs_g: diet.total_carbs_g,
     total_fat_g: diet.total_fat_g,
-    meals_count: diet.meals.length,
+    meals_count: diet.meals_count,
   }
 }
 

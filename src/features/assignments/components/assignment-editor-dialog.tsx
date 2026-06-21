@@ -30,15 +30,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { Diet } from '../../diets/types'
-import type { Training } from '../../trainings/types'
 import { assignmentEditorSchema, type AssignmentEditorFormValues } from '../schemas'
 import {
   createAssignmentPreviewDiet,
   createAssignmentPreviewTraining,
   type AssignmentDay,
+  type AssignmentDietOption,
   type AssignmentEditorValues,
   type AssignmentPreview,
+  type AssignmentTrainingOption,
   type CatalogAvailability,
 } from '../types'
 import { AssignmentPreviewDialog } from './assignment-preview-dialog'
@@ -76,8 +76,8 @@ interface AssignmentEditorDialogProps {
   open: boolean
   clientId: string
   selectedDays: AssignmentDay[]
-  availableTrainings: Training[]
-  availableDiets: Diet[]
+  availableTrainings: AssignmentTrainingOption[]
+  availableDiets: AssignmentDietOption[]
   catalogAvailability: CatalogAvailability
   isSubmitting?: boolean
   onOpenChange: (open: boolean) => void
@@ -86,7 +86,7 @@ interface AssignmentEditorDialogProps {
   onSubmit: (values: AssignmentEditorValues) => Promise<void>
 }
 
-function buildPreviewTraining(trainingId: string | null, availableTrainings: Training[], sourceDay?: AssignmentDay) {
+function buildPreviewTraining(trainingId: string | null, availableTrainings: AssignmentTrainingOption[], sourceDay?: AssignmentDay) {
   if (!trainingId) {
     return null
   }
@@ -107,7 +107,7 @@ function buildPreviewTraining(trainingId: string | null, availableTrainings: Tra
   return null
 }
 
-function buildPreviewDiet(dietId: string | null, availableDiets: Diet[], sourceDay?: AssignmentDay) {
+function buildPreviewDiet(dietId: string | null, availableDiets: AssignmentDietOption[], sourceDay?: AssignmentDay) {
   if (!dietId) {
     return null
   }

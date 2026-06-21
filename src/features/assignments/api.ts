@@ -1,11 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { assignmentOptionQueryKeys } from '@/lib/assignment-query-keys'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
-import type { AdminUserListItem, Client, PaginatedResponse, Role } from '../clients/types'
-import type { Diet } from '../diets/types'
-import type { Training } from '../trainings/types'
-import { toClientOption } from './types'
+import type { Role } from '../clients/types'
 import type {
+  AssignmentCatalogOptions,
   AssignmentDay,
   AssignmentEditorValues,
   AssignmentMonthResponse,
@@ -40,16 +39,13 @@ interface CatalogLoadStateInput {
   error: unknown
 }
 
-type QueryParams = Record<string, string | number | boolean | undefined>
-
-const assignmentsQueryKeys = {
+export const assignmentsQueryKeys = {
   weeks: ['assignments', 'week'] as const,
   week: (clientId?: string, weekStart?: string) => ['assignments', 'week', clientId, weekStart] as const,
   months: ['assignments', 'month'] as const,
   month: (clientId?: string, year?: number, month?: number) => ['assignments', 'month', clientId, year, month] as const,
-  clients: ['assignments', 'clients'] as const,
-  trainings: ['assignments', 'trainings'] as const,
-  diets: ['assignments', 'diets'] as const,
+  clients: assignmentOptionQueryKeys.clients,
+  catalogs: assignmentOptionQueryKeys.catalogs,
   autoRule: (clientId?: string) => ['assignments', 'auto-rule', clientId] as const,
 }
 
@@ -65,22 +61,6 @@ function normalizeOptionalId(value: string | null | undefined) {
   }
 
   return normalizedValue
-}
-
-function normalizeClientOptions<T extends Pick<Client, 'id' | 'email' | 'profile'> | Pick<AdminUserListItem, 'id' | 'email' | 'profile'>>(
-  clients: T[],
-) {
-  return clients.filter((client) => hasClientId(client.id)).map((client): ClientOption => toClientOption(client))
-}
-
-function mergeClientOptions(...groups: ClientOption[][]) {
-  const clientsById = new Map<string, ClientOption>()
-
-  groups.flat().forEach((client) => {
-    clientsById.set(client.id, client)
-  })
-
-  return Array.from(clientsById.values())
 }
 
 function normalizeBatchPayload(values: AssignmentEditorValues) {
@@ -117,30 +97,6 @@ function normalizeAutoRulePayload(values: CreateAutoAssignmentRuleValues) {
       is_rest_day: day.is_rest_day,
     })),
   }
-}
-
-async function fetchAllPaginatedData<T>(path: string, baseParams: QueryParams = {}) {
-  const limit = 200
-  const items: T[] = []
-  let page = 1
-  let totalPages = 1
-
-  do {
-    const response = await api.get<ApiEnvelope<PaginatedResponse<T>>>(path, {
-      params: {
-        ...baseParams,
-        page,
-        limit,
-      },
-    })
-
-    const result = unwrapResponse(response)
-    items.push(...result.data)
-    totalPages = Math.max(result.totalPages, 1)
-    page += 1
-  } while (page <= totalPages)
-
-  return items
 }
 
 export function hasClientId(value: string | null | undefined): value is string {
@@ -254,45 +210,29 @@ export function useAssignmentsMonth(clientId?: string, year?: number, month?: nu
 
 export function useAssignmentClients(currentUserRole?: Role) {
   return useQuery({
-    queryKey: [...assignmentsQueryKeys.clients, currentUserRole],
+    queryKey: assignmentsQueryKeys.clients,
     enabled: Boolean(currentUserRole),
     retry: shouldRetryQuery,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     queryFn: async () => {
-      if (currentUserRole === 'SUPER_ADMIN') {
-        const [visibleClients, filteredUsers, allUsers] = await Promise.all([
-          fetchAllPaginatedData<Client>('/admin/clients'),
-          fetchAllPaginatedData<AdminUserListItem>('/admin/users', {
-            role: 'CLIENT',
-          }),
-          fetchAllPaginatedData<AdminUserListItem>('/admin/users'),
-        ])
-
-        return mergeClientOptions(
-          normalizeClientOptions(visibleClients),
-          normalizeClientOptions(filteredUsers.filter((user) => user.role === 'CLIENT')),
-          normalizeClientOptions(allUsers.filter((user) => user.role === 'CLIENT')),
-        )
-      }
-
-      const clients = await fetchAllPaginatedData<Client>('/admin/clients')
-      return normalizeClientOptions(clients)
+      const response = await api.get<ApiEnvelope<ClientOption[]>>('/assignments/client-options')
+      return unwrapResponse(response)
     },
   })
 }
 
-export function useAssignmentTrainingsCatalog() {
+export function useAssignmentCatalogOptions(enabled: boolean) {
   return useQuery({
-    queryKey: assignmentsQueryKeys.trainings,
+    queryKey: assignmentsQueryKeys.catalogs,
+    enabled,
     retry: shouldRetryQuery,
-    queryFn: () => fetchAllPaginatedData<Training>('/trainings'),
-  })
-}
-
-export function useAssignmentDietsCatalog() {
-  return useQuery({
-    queryKey: assignmentsQueryKeys.diets,
-    retry: shouldRetryQuery,
-    queryFn: () => fetchAllPaginatedData<Diet>('/diets'),
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    queryFn: async () => {
+      const response = await api.get<ApiEnvelope<AssignmentCatalogOptions>>('/assignments/catalog-options')
+      return unwrapResponse(response)
+    },
   })
 }
 
