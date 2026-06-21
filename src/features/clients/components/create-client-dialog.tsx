@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
+import { clearUnsavedChanges, useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -74,6 +74,7 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
           ? 'Cliente creado. Email de invitación enviado.'
           : 'Cliente creado correctamente',
       )
+      clearUnsavedChanges('create-client-form')
       onCreated?.()
       onOpenChange(false)
     } catch (error) {
