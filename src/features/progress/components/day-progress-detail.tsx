@@ -49,11 +49,23 @@ export function DayProgressDetail({ date, progress, isLoading }: DayProgressDeta
               {progress.exercises_completed.length > 0 ? (
                 <ul className="space-y-1 pl-6">
                   {progress.exercises_completed.map((ex, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-status-success shrink-0" />
-                      <span className="font-mono text-xs">{ex.exercise_id}</span>
-                      {ex.weight_used != null && (
-                        <span className="text-xs">— {ex.weight_used} kg</span>
+                    <li key={i} className="space-y-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-status-success shrink-0" />
+                        <span className="font-mono text-xs">{ex.exercise_id}</span>
+                        {(!ex.sets || ex.sets.length === 0) && ex.weight_used != null && (
+                          <span className="text-xs">— {ex.weight_used} kg</span>
+                        )}
+                      </div>
+                      {ex.sets && ex.sets.length > 0 && (
+                        <div className="ml-6 grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+                          {ex.sets.map((set) => (
+                            <span key={set.set_number} className="rounded-md bg-muted px-2 py-1 text-xs">
+                              Serie {set.set_number} · {set.reps} reps
+                              {set.weight_kg != null ? ` · ${set.weight_kg} kg` : ''}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </li>
                   ))}

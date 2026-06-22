@@ -95,6 +95,7 @@ function normalizeTrainingPayload(values: TrainingFormValues) {
             exercises: item.exercises.map((ex) => ({
               exercise_id: ex.exercise_id,
               reps_or_duration: ex.reps_or_duration,
+              request_set_tracking: ex.request_set_tracking,
               rest_seconds: ex.rest_seconds,
             })),
           }
@@ -104,6 +105,7 @@ function normalizeTrainingPayload(values: TrainingFormValues) {
             order,
             sets: item.sets,
             reps_or_duration: item.reps_or_duration,
+            request_set_tracking: item.request_set_tracking,
             rest_seconds: item.rest_seconds,
           },
     ),
@@ -115,6 +117,7 @@ function normalizeTrainingPayload(values: TrainingFormValues) {
               order,
               sets: item.sets,
               reps_or_duration: item.reps_or_duration,
+              request_set_tracking: item.request_set_tracking,
               rest_seconds: item.rest_seconds,
             },
           ]

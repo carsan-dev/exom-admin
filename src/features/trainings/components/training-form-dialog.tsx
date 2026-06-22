@@ -123,6 +123,7 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
             .map((te) => ({
               exercise_id: te.exercise.id,
               reps_or_duration: te.reps_or_duration,
+              request_set_tracking: te.request_set_tracking,
               rest_seconds: te.rest_seconds,
             })),
         }
@@ -135,6 +136,7 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
         order,
         sets: te.sets,
         reps_or_duration: te.reps_or_duration,
+        request_set_tracking: te.request_set_tracking,
         rest_seconds: te.rest_seconds,
       }
     }),

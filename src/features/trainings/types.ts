@@ -187,6 +187,7 @@ export interface TrainingExercise {
   order: number
   sets: number
   reps_or_duration: string
+  request_set_tracking: boolean
   rest_seconds: number
   block_id?: string | null
   position_in_block?: number | null

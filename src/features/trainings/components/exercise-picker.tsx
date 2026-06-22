@@ -24,6 +24,23 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
   const [targetCircuitIndex, setTargetCircuitIndex] = useState<number | null>(null)
   const exercisesQuery = useExercisesList()
   const allExercises = exercisesQuery.data?.data ?? []
+  const trackedCount = value.reduce(
+    (count, item) => count + (item.kind === 'CIRCUIT'
+      ? item.exercises.filter((exercise) => exercise.request_set_tracking).length
+      : (item.request_set_tracking ? 1 : 0)),
+    0,
+  )
+  const exerciseCount = value.reduce(
+    (count, item) => count + (item.kind === 'CIRCUIT' ? item.exercises.length : 1),
+    0,
+  )
+  const allTracked = exerciseCount > 0 && trackedCount === exerciseCount
+
+  const setAllTracking = (enabled: boolean) => {
+    onChange(value.map((item) => item.kind === 'CIRCUIT'
+      ? { ...item, exercises: item.exercises.map((exercise) => ({ ...exercise, request_set_tracking: enabled })) }
+      : { ...item, request_set_tracking: enabled }))
+  }
 
   const exercisesById = useMemo(
     () => new Map(allExercises.map((ex) => [ex.id, ex])),
@@ -46,6 +63,7 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
         const newExercise: TrainingCircuitExerciseFormValues = {
           exercise_id: exerciseId,
           reps_or_duration: '10',
+          request_set_tracking: allTracked,
           rest_seconds: 15,
         }
         return { ...item, exercises: [...item.exercises, newExercise] }
@@ -63,6 +81,7 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
       order: value.length,
       sets: 3,
       reps_or_duration: '10',
+      request_set_tracking: allTracked,
       rest_seconds: 60,
     }
     onChange([...value, newItem])
@@ -152,9 +171,16 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium leading-none">Ejercicios</p>
-        {value.length > 0 && (
-          <span className="text-xs text-muted-foreground">{value.length} ejercicio{value.length !== 1 ? 's' : ''}</span>
-        )}
+        {exerciseCount > 0 && <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={allTracked}
+            ref={(node) => { if (node) node.indeterminate = trackedCount > 0 && !allTracked }}
+            onChange={(event) => setAllTracking(event.target.checked)}
+            className="h-4 w-4 rounded border-border accent-brand-primary"
+          />
+          Solicitar registro en todos
+        </label>}
       </div>
 
       {/* Exercise list */}
@@ -231,6 +257,10 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                               <Input type="number" min={0} value={nested.rest_seconds} onChange={(e) => updateCircuitExercise(index, nestedIndex, 'rest_seconds', parseInt(e.target.value) || 0)} className="h-8 text-sm" />
                             </div>
                           </div>
+                          <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                            <input type="checkbox" checked={nested.request_set_tracking} onChange={(event) => updateCircuitExercise(index, nestedIndex, 'request_set_tracking', event.target.checked)} className="h-4 w-4 accent-brand-primary" />
+                            Solicitar reps y peso reales en cada ronda
+                          </label>
                         </div>
                       )
                     })}
@@ -348,6 +378,10 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                     </p>
                   </div>
                 </div>
+                <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                  <input type="checkbox" checked={item.request_set_tracking} onChange={(event) => updateField(index, 'request_set_tracking', event.target.checked)} className="h-4 w-4 accent-brand-primary" />
+                  Solicitar reps y peso reales en cada serie
+                </label>
               </div>
             )
           })}

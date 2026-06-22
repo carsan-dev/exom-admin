@@ -41,6 +41,7 @@ const importExerciseSchema = z
     exercise_name: optionalText,
     sets: optionalInteger.transform((value) => value ?? 3),
     reps_or_duration: z.string().trim().min(1, 'reps_or_duration es obligatorio'),
+    request_set_tracking: z.boolean().default(false),
     rest_seconds: optionalInteger.transform((value) => value ?? 60),
   })
   .superRefine((value, context) => {
@@ -57,6 +58,7 @@ const importCircuitExerciseSchema = z
     exercise_id: optionalText,
     exercise_name: optionalText,
     reps_or_duration: z.string().trim().min(1, 'reps_or_duration es obligatorio'),
+    request_set_tracking: z.boolean().default(false),
     rest_seconds: optionalInteger.transform((value) => value ?? 15),
   })
   .superRefine((value, context) => {
@@ -150,6 +152,7 @@ function toFormValues(training: ImportTraining, exercises: Exercise[]): Training
         exercises: item.exercises.map((exercise) => ({
           exercise_id: resolveExerciseId(exercise, indexes, issues),
           reps_or_duration: exercise.reps_or_duration,
+          request_set_tracking: exercise.request_set_tracking,
           rest_seconds: exercise.rest_seconds,
         })),
       }
@@ -161,6 +164,7 @@ function toFormValues(training: ImportTraining, exercises: Exercise[]): Training
       order,
       sets: item.sets,
       reps_or_duration: item.reps_or_duration,
+      request_set_tracking: item.request_set_tracking,
       rest_seconds: item.rest_seconds,
     }
   })
@@ -276,6 +280,7 @@ function csvToJson(text: string) {
         exercise_id: record.exercise_id,
         exercise_name: record.exercise_name,
         reps_or_duration: record.reps_or_duration,
+        request_set_tracking: false,
         rest_seconds: record.rest_seconds,
       })
       continue
@@ -287,6 +292,7 @@ function csvToJson(text: string) {
       exercise_name: record.exercise_name,
       sets: record.sets,
       reps_or_duration: record.reps_or_duration,
+      request_set_tracking: false,
       rest_seconds: record.rest_seconds,
     })
   }

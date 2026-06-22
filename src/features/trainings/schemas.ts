@@ -81,12 +81,14 @@ export const trainingExerciseSchema = z.object({
   order: z.number().int().min(0),
   sets: z.number().int().min(1, 'Mínimo 1 serie'),
   reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),
+  request_set_tracking: z.boolean().default(false),
   rest_seconds: z.number().int().min(0).default(60),
 })
 
 export const trainingCircuitExerciseSchema = z.object({
   exercise_id: z.string().trim().min(1, 'Selecciona un ejercicio'),
   reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),
+  request_set_tracking: z.boolean().default(false),
   rest_seconds: z.number().int().min(0).default(15),
 })
 
