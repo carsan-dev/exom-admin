@@ -1,7 +1,7 @@
 export interface ExerciseCompleted {
   exercise_id: string
   weight_used?: number | null
-  sets?: Array<{ set_number: number; reps: number; weight_kg?: number | null }>
+  sets?: Array<{ set_number: number; reps?: number | null; weight_kg?: number | null }>
   completed_at: string
 }
 

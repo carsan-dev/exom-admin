@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import type { DayProgress } from '../types'
+import { formatCompletedSet } from '../format-completed-set'
 
 interface DayProgressDetailProps {
   date: string
@@ -61,8 +62,7 @@ export function DayProgressDetail({ date, progress, isLoading }: DayProgressDeta
                         <div className="ml-6 grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
                           {ex.sets.map((set) => (
                             <span key={set.set_number} className="rounded-md bg-muted px-2 py-1 text-xs">
-                              Serie {set.set_number} · {set.reps} reps
-                              {set.weight_kg != null ? ` · ${set.weight_kg} kg` : ''}
+                              {formatCompletedSet(set)}
                             </span>
                           ))}
                         </div>
