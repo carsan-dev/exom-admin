@@ -43,6 +43,8 @@ export interface TrainingsListParams {
   group_id?: string
   ungrouped?: boolean
   enabled?: boolean
+  sort_by?: string
+  sort_dir?: 'asc' | 'desc'
 }
 
 const trainingsQueryKeys = {
@@ -60,6 +62,8 @@ const trainingsQueryKeys = {
       params.duration_max ?? null,
       params.group_id ?? null,
       params.ungrouped ?? false,
+      params.sort_by ?? '',
+      params.sort_dir ?? 'asc',
     ] as const,
   detail: (id?: string) => ['trainings', id] as const,
 }
@@ -132,7 +136,7 @@ function normalizeSearch(search?: string) {
 }
 
 export function useTrainings(params: TrainingsListParams) {
-  const { page, limit, search, type, level, tags, duration_min, duration_max, group_id, ungrouped } = params
+  const { page, limit, search, type, level, tags, duration_min, duration_max, group_id, ungrouped, sort_by, sort_dir } = params
   const normalizedSearch = normalizeSearch(search)
   const normalizedType = type ?? []
   const normalizedLevel = level ?? []
@@ -151,6 +155,8 @@ export function useTrainings(params: TrainingsListParams) {
       duration_max,
       group_id,
       ungrouped,
+      sort_by,
+      sort_dir: sort_dir ?? 'asc',
     }),
     placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
@@ -167,6 +173,7 @@ export function useTrainings(params: TrainingsListParams) {
           ...(duration_max != null ? { duration_max } : {}),
           ...(group_id ? { group_id } : {}),
           ...(ungrouped ? { ungrouped: true } : {}),
+          ...(sort_by ? { sort_by, sort_dir: sort_dir ?? 'asc' } : {}),
         },
         paramsSerializer: { indexes: null },
       })

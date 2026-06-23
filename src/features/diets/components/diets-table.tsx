@@ -1,4 +1,5 @@
 ﻿import { Copy, Eye, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { SortableTableHead } from '@/components/sortable-table-head'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,6 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import type { SortDir } from '@/lib/sort-search-params'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { formatUpdatedAt } from '../../ingredients/types'
 import { getMealTypeBadgeClass, type Diet } from '../types'
@@ -36,9 +38,12 @@ interface DietsTableProps {
   selectedIds?: Set<string>
   onSelectionChange?: (ids: Set<string>) => void
   movementDisabled?: boolean
+  sortBy?: string
+  sortDir?: SortDir
+  onSortChange?: (field: string) => void
 }
 
-export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplicate, onDelete, selectedIds = new Set(), onSelectionChange, movementDisabled }: DietsTableProps) {
+export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplicate, onDelete, selectedIds = new Set(), onSelectionChange, movementDisabled, sortBy, sortDir = 'asc', onSortChange = () => {} }: DietsTableProps) {
   const allSelected = diets.length > 0 && diets.every((item) => selectedIds.has(item.id))
   const toggleAll = () => {
     const next = new Set(selectedIds)
@@ -58,13 +63,13 @@ export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplica
       <TableHeader>
         <TableRow>
           <TableHead className="w-20"><input type="checkbox" aria-label="Seleccionar página" checked={allSelected} onChange={toggleAll} /></TableHead>
-          <TableHead>Nombre</TableHead>
+          <SortableTableHead field="name" label="Nombre" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
           <TableHead>Grupo</TableHead>
           <TableHead className="text-center">Comidas</TableHead>
           <TableHead className="hidden lg:table-cell">Etiquetas</TableHead>
           <TableHead className="hidden md:table-cell">Kcal totales</TableHead>
           <TableHead className="hidden lg:table-cell">Macros (P/C/G)</TableHead>
-          <TableHead className="hidden md:table-cell">Actualizado</TableHead>
+          <SortableTableHead field="updated_at" label="Actualizado" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden md:table-cell" />
           <TableHead className="text-right">Acciones</TableHead>
         </TableRow>
       </TableHeader>

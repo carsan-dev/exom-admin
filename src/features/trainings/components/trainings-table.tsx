@@ -1,4 +1,5 @@
 ﻿import { Copy, Eye, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { SortableTableHead } from '@/components/sortable-table-head'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,6 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import type { SortDir } from '@/lib/sort-search-params'
 import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
 import {
   getTrainingAccentStyle,
@@ -42,6 +44,9 @@ interface TrainingsTableProps {
   selectedIds?: Set<string>
   onSelectionChange?: (ids: Set<string>) => void
   movementDisabled?: boolean
+  sortBy?: string
+  sortDir?: SortDir
+  onSortChange?: (field: string) => void
 }
 
 export function TrainingsTable({
@@ -54,6 +59,9 @@ export function TrainingsTable({
   selectedIds = new Set(),
   onSelectionChange,
   movementDisabled,
+  sortBy,
+  sortDir = 'asc',
+  onSortChange = () => {},
 }: TrainingsTableProps) {
   const allSelected = trainings.length > 0 && trainings.every((item) => selectedIds.has(item.id))
   const toggleAll = () => {
@@ -74,13 +82,13 @@ export function TrainingsTable({
       <TableHeader>
         <TableRow>
           <TableHead className="w-20"><div className="flex items-center"><input type="checkbox" aria-label="Seleccionar página" checked={allSelected} onChange={toggleAll} /><span className="sr-only">Mover</span></div></TableHead>
-          <TableHead>Nombre</TableHead>
+          <SortableTableHead field="name" label="Nombre" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
           <TableHead>Grupo</TableHead>
           <TableHead>Tipos</TableHead>
-          <TableHead>Nivel</TableHead>
+          <SortableTableHead field="level" label="Nivel" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
           <TableHead className="text-center">Ejercicios</TableHead>
-          <TableHead className="hidden md:table-cell">Duración</TableHead>
-          <TableHead className="hidden md:table-cell">Calorías</TableHead>
+          <SortableTableHead field="estimated_duration_min" label="Duración" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden md:table-cell" />
+          <SortableTableHead field="estimated_calories" label="Calorías" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden md:table-cell" />
           <TableHead className="hidden lg:table-cell">Etiquetas</TableHead>
           <TableHead className="text-right">Acciones</TableHead>
         </TableRow>

@@ -17,6 +17,7 @@ import {
   getPageSearchParam,
   replacePaginationSearchParams,
 } from '@/lib/pagination-search-params'
+import { getSortSearchParams, toggleSortSearchParams } from '@/lib/sort-search-params'
 import { getApiErrorMessage, type IngredientsListParams, useIngredients } from '../api'
 import { DeleteIngredientDialog } from '../components/delete-ingredient-dialog'
 import { IngredientFormDialog } from '../components/ingredient-form-dialog'
@@ -53,6 +54,7 @@ export function IngredientsPage() {
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null)
   const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null)
   const page = getPageSearchParam(searchParams.get('page'))
+  const sort = getSortSearchParams(searchParams)
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
   const filterSections = useMemo<FilterSectionConfig[]>(
@@ -122,6 +124,8 @@ export function IngredientsPage() {
     page,
     limit: PAGE_SIZE,
     search: activeSearch,
+    sort_by: sort.sort_by,
+    sort_dir: sort.sort_dir,
     ...filterParams,
   })
   const ingredients = ingredientsQuery.data?.data ?? []
@@ -230,6 +234,9 @@ export function IngredientsPage() {
                 approvalById={ingredientApprovalById}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                sortBy={sort.sort_by}
+                sortDir={sort.sort_dir}
+                onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
               />
             )}
 

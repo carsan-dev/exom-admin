@@ -1,4 +1,5 @@
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { SortableTableHead } from '@/components/sortable-table-head'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import {
 } from '@/components/ui/table'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { formatMacroValue, formatUpdatedAt, type Ingredient } from '../types'
+import type { SortDir } from '@/lib/sort-search-params'
 
 interface IngredientApprovalSummary {
   pending_approval_actions: string[]
@@ -27,20 +29,23 @@ interface IngredientsTableProps {
   approvalById?: Record<string, IngredientApprovalSummary>
   onEdit: (ingredient: Ingredient) => void
   onDelete: (ingredient: Ingredient) => void
+  sortBy?: string
+  sortDir?: SortDir
+  onSortChange?: (field: string) => void
 }
 
-export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDelete }: IngredientsTableProps) {
+export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDelete, sortBy, sortDir = 'asc', onSortChange = () => {} }: IngredientsTableProps) {
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Nombre</TableHead>
-          <TableHead className="text-center">Icono</TableHead>
-          <TableHead className="text-right">kcal/100g</TableHead>
-          <TableHead className="hidden md:table-cell text-right">Proteína/100g</TableHead>
-          <TableHead className="hidden lg:table-cell text-right">Carbohidratos/100g</TableHead>
-          <TableHead className="hidden lg:table-cell text-right">Grasas/100g</TableHead>
-          <TableHead className="hidden xl:table-cell">Actualizado</TableHead>
+          <SortableTableHead field="name" label="Nombre" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
+          <SortableTableHead field="icon" label="Icono" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="text-center" />
+          <SortableTableHead field="calories_per_100g" label="kcal/100g" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="text-right" />
+          <SortableTableHead field="protein_per_100g" label="Proteína/100g" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden md:table-cell text-right" />
+          <SortableTableHead field="carbs_per_100g" label="Carbohidratos/100g" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden lg:table-cell text-right" />
+          <SortableTableHead field="fat_per_100g" label="Grasas/100g" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden lg:table-cell text-right" />
+          <SortableTableHead field="updated_at" label="Actualizado" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden xl:table-cell" />
           <TableHead className="text-right">Acciones</TableHead>
         </TableRow>
       </TableHeader>

@@ -41,6 +41,7 @@ import {
   getPageSearchParam,
   replacePaginationSearchParams,
 } from '@/lib/pagination-search-params'
+import { getSortSearchParams, toggleSortSearchParams } from '@/lib/sort-search-params'
 import {
   getApiErrorMessage,
   type DietsListParams,
@@ -293,6 +294,7 @@ export function DietsPage() {
   const [groupFilter, setGroupFilter] = useState<CatalogGroupFilter>('all')
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const page = getPageSearchParam(searchParams.get('page'))
+  const sort = getSortSearchParams(searchParams)
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
   const tagsQuery = useDietTags()
@@ -353,6 +355,8 @@ export function DietsPage() {
     search: activeSearch,
     group_id: groupFilter !== 'all' && groupFilter !== 'ungrouped' ? groupFilter : undefined,
     ungrouped: groupFilter === 'ungrouped',
+    sort_by: sort.sort_by,
+    sort_dir: sort.sort_dir,
     ...dietFilterParams,
   })
   const diets = dietsQuery.data?.data ?? []
@@ -638,6 +642,9 @@ export function DietsPage() {
                 onDelete={handleDelete}
                 selectedIds={selectedIds}
                 onSelectionChange={setSelectedIds}
+                sortBy={sort.sort_by}
+                sortDir={sort.sort_dir}
+                onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
                 movementDisabled={organizationPending}
               />
             )}

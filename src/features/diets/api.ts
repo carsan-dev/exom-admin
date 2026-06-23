@@ -40,6 +40,8 @@ export interface DietsListParams {
   group_id?: string
   ungrouped?: boolean
   enabled?: boolean
+  sort_by?: string
+  sort_dir?: 'asc' | 'desc'
 }
 
 const dietsQueryKeys = {
@@ -57,6 +59,8 @@ const dietsQueryKeys = {
       params.updated_to ?? null,
       params.group_id ?? null,
       params.ungrouped ?? false,
+      params.sort_by ?? '',
+      params.sort_dir ?? 'asc',
     ] as const,
   detail: (id?: string) => ['diets', id] as const,
 }
@@ -107,7 +111,7 @@ function normalizeSearch(search?: string) {
 }
 
 export function useDiets(params: DietsListParams) {
-  const { page, limit, search, tags, meal_types, nutritional_badges, updated_from, updated_to, group_id, ungrouped } = params
+  const { page, limit, search, tags, meal_types, nutritional_badges, updated_from, updated_to, group_id, ungrouped, sort_by, sort_dir } = params
   const normalizedSearch = normalizeSearch(search)
   const normalizedTags = tags ?? []
   const normalizedMealTypes = meal_types ?? []
@@ -126,6 +130,8 @@ export function useDiets(params: DietsListParams) {
       updated_to,
       group_id,
       ungrouped,
+      sort_by,
+      sort_dir: sort_dir ?? 'asc',
     }),
     placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
@@ -144,6 +150,7 @@ export function useDiets(params: DietsListParams) {
           ...(updated_to ? { updated_to } : {}),
           ...(group_id ? { group_id } : {}),
           ...(ungrouped ? { ungrouped: true } : {}),
+          ...(sort_by ? { sort_by, sort_dir: sort_dir ?? 'asc' } : {}),
         },
         paramsSerializer: { indexes: null },
       })

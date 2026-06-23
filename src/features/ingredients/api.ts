@@ -26,6 +26,8 @@ const ingredientsQueryKeys = {
       params.fat_per_100g_max ?? null,
       params.updated_from ?? null,
       params.updated_to ?? null,
+      params.sort_by ?? '',
+      params.sort_dir ?? 'asc',
     ] as const,
 }
 
@@ -44,6 +46,8 @@ export interface IngredientsListParams {
   fat_per_100g_max?: number
   updated_from?: string
   updated_to?: string
+  sort_by?: string
+  sort_dir?: 'asc' | 'desc'
 }
 
 function normalizeSearch(search?: string) {
@@ -116,6 +120,7 @@ export function useIngredients(params: IngredientsListParams) {
           ...(params.fat_per_100g_max != null ? { fat_per_100g_max: params.fat_per_100g_max } : {}),
           ...(params.updated_from ? { updated_from: params.updated_from } : {}),
           ...(params.updated_to ? { updated_to: params.updated_to } : {}),
+          ...(params.sort_by ? { sort_by: params.sort_by, sort_dir: params.sort_dir ?? 'asc' } : {}),
         },
         paramsSerializer: { indexes: null },
       })

@@ -41,6 +41,7 @@ import {
   getPageSearchParam,
   replacePaginationSearchParams,
 } from '@/lib/pagination-search-params'
+import { getSortSearchParams, toggleSortSearchParams } from '@/lib/sort-search-params'
 import {
   getApiErrorMessage,
   type TrainingsListParams,
@@ -262,6 +263,7 @@ export function TrainingsPage() {
   const [groupFilter, setGroupFilter] = useState<CatalogGroupFilter>('all')
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const page = getPageSearchParam(searchParams.get('page'))
+  const sort = getSortSearchParams(searchParams)
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
   const tagsQuery = useTrainingTags()
@@ -326,6 +328,8 @@ export function TrainingsPage() {
     search: activeSearch,
     group_id: groupFilter !== 'all' && groupFilter !== 'ungrouped' ? groupFilter : undefined,
     ungrouped: groupFilter === 'ungrouped',
+    sort_by: sort.sort_by,
+    sort_dir: sort.sort_dir,
     ...trainingFilterParams,
   })
   const trainings = trainingsQuery.data?.data ?? []
@@ -622,6 +626,9 @@ export function TrainingsPage() {
                 onDelete={handleDelete}
                 selectedIds={selectedIds}
                 onSelectionChange={setSelectedIds}
+                sortBy={sort.sort_by}
+                sortDir={sort.sort_dir}
+                onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
                 movementDisabled={organizationPending}
               />
             )}
