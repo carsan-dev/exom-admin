@@ -10,6 +10,7 @@ import {
 } from '@/components/filters'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
@@ -17,6 +18,7 @@ import {
   getPageSearchParam,
   replacePaginationSearchParams,
 } from '@/lib/pagination-search-params'
+import { getSortSearchParams, toggleSortSearchParams } from '@/lib/sort-search-params'
 import {
   getApiErrorMessage,
   type ExercisesListParams,
@@ -36,6 +38,14 @@ const LEVEL_OPTIONS: FilterOption[] = [
   { value: 'INTERMEDIO', label: 'Intermedio' },
   { value: 'AVANZADO', label: 'Avanzado' },
 ]
+const TRAINING_USAGE_OPTIONS = ['all', 'used', 'unused'] as const
+type TrainingUsageFilter = (typeof TRAINING_USAGE_OPTIONS)[number]
+
+function getTrainingUsageFilter(value: string | null): TrainingUsageFilter {
+  return TRAINING_USAGE_OPTIONS.includes(value as TrainingUsageFilter)
+    ? (value as TrainingUsageFilter)
+    : 'all'
+}
 
 function toFilterOptions(values?: string[]): FilterOption[] {
   return values?.map((value) => ({ value, label: value })) ?? []
@@ -67,6 +77,8 @@ export function ExercisesPage() {
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
   const [isDuplicate, setIsDuplicate] = useState(false)
   const page = getPageSearchParam(searchParams.get('page'))
+  const trainingUsage = getTrainingUsageFilter(searchParams.get('training_usage'))
+  const sort = getSortSearchParams(searchParams)
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
   const muscleGroupsQuery = useExerciseMuscleGroups()
@@ -103,7 +115,7 @@ export function ExercisesPage() {
   )
   const filters = useListFilters(sections)
   const exerciseFilterParams = filtersToApiParams(filters.values, sections) as Partial<ExercisesListParams>
-  const pageResetKey = `${activeSearch}::${JSON.stringify(exerciseFilterParams)}`
+  const pageResetKey = `${activeSearch}::${JSON.stringify(exerciseFilterParams)}::${trainingUsage}`
   const lastPageResetKeyRef = useRef(pageResetKey)
 
   useEffect(() => {
@@ -119,6 +131,9 @@ export function ExercisesPage() {
     page,
     limit: PAGE_SIZE,
     search: activeSearch,
+    training_usage: trainingUsage,
+    sort_by: sort.sort_by,
+    sort_dir: sort.sort_dir,
     ...exerciseFilterParams,
   })
   const exercises = exercisesQuery.data?.data ?? []
@@ -252,6 +267,31 @@ export function ExercisesPage() {
               sections={sections}
               filters={filters}
             />
+            <div className="flex flex-col gap-2 sm:w-64">
+              <span className="text-xs font-medium text-muted-foreground">Uso en entrenamientos</span>
+              <Select
+                value={trainingUsage}
+                onValueChange={(value) => {
+                  const nextSearchParams = new URLSearchParams(searchParams)
+                  if (value === 'all') {
+                    nextSearchParams.delete('training_usage')
+                  } else {
+                    nextSearchParams.set('training_usage', value)
+                  }
+                  nextSearchParams.delete('page')
+                  setSearchParams(nextSearchParams)
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="used">Usados en entrenamientos</SelectItem>
+                  <SelectItem value="unused">Sin entrenamientos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             {exercises.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
@@ -265,6 +305,9 @@ export function ExercisesPage() {
                 onEdit={handleEdit}
                 onDuplicate={handleDuplicate}
                 onDelete={handleDelete}
+                sortBy={sort.sort_by}
+                sortDir={sort.sort_dir}
+                onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
               />
             )}
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Check, Copy, Eye, Info, Loader2, Pencil, Trash2, Video, MoreHorizontal, X } from 'lucide-react'
+import { SortableTableHead } from '@/components/sortable-table-head'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,6 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import type { SortDir } from '@/lib/sort-search-params'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { useExerciseTrainingUsage } from '../api'
@@ -34,6 +36,9 @@ interface ExercisesTableProps {
   onEdit: (exercise: Exercise) => void
   onDuplicate: (exercise: Exercise) => void
   onDelete: (exercise: Exercise) => void
+  sortBy?: string
+  sortDir?: SortDir
+  onSortChange?: (field: string) => void
 }
 
 function TrainingUsageCell({ exercise }: { exercise: Exercise }) {
@@ -71,17 +76,27 @@ function TrainingUsageCell({ exercise }: { exercise: Exercise }) {
   )
 }
 
-export function ExercisesTable({ exercises, approvalById = {}, onView, onEdit, onDuplicate, onDelete }: ExercisesTableProps) {
+export function ExercisesTable({
+  exercises,
+  approvalById = {},
+  onView,
+  onEdit,
+  onDuplicate,
+  onDelete,
+  sortBy,
+  sortDir = 'asc',
+  onSortChange = () => {},
+}: ExercisesTableProps) {
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Nombre</TableHead>
+          <SortableTableHead field="name" label="Nombre" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
           <TableHead>Grupos musculares</TableHead>
           <TableHead className="hidden lg:table-cell">Equipamiento</TableHead>
-          <TableHead>Nivel</TableHead>
-          <TableHead className="text-center">Vídeo</TableHead>
-          <TableHead className="text-center">En entrenamientos</TableHead>
+          <SortableTableHead field="level" label="Nivel" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
+          <SortableTableHead field="video" label="Vídeo" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="text-center" />
+          <SortableTableHead field="training_usage_count" label="En entrenamientos" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="text-center" />
           <TableHead className="text-right">Acciones</TableHead>
         </TableRow>
       </TableHeader>

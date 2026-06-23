@@ -33,6 +33,9 @@ export interface ExercisesListParams {
   muscle_groups?: string[]
   equipment?: string[]
   level?: string[]
+  training_usage?: 'all' | 'used' | 'unused'
+  sort_by?: string
+  sort_dir?: 'asc' | 'desc'
 }
 
 const exercisesQueryKeys = {
@@ -46,6 +49,9 @@ const exercisesQueryKeys = {
       params.muscle_groups ?? [],
       params.equipment ?? [],
       params.level ?? [],
+      params.training_usage ?? 'all',
+      params.sort_by ?? '',
+      params.sort_dir ?? 'asc',
     ] as const,
   detail: (id?: string) => ['exercises', id] as const,
   trainingUsage: (id?: string) => ['exercises', id, 'training-usage'] as const,
@@ -87,7 +93,7 @@ function normalizeSearch(search?: string) {
 }
 
 export function useExercises(params: ExercisesListParams) {
-  const { page, limit, search, muscle_groups, equipment, level } = params
+  const { page, limit, search, muscle_groups, equipment, level, training_usage, sort_by, sort_dir } = params
   const normalizedSearch = normalizeSearch(search)
   const normalizedMuscleGroups = muscle_groups ?? []
   const normalizedEquipment = equipment ?? []
@@ -101,6 +107,9 @@ export function useExercises(params: ExercisesListParams) {
       muscle_groups: normalizedMuscleGroups,
       equipment: normalizedEquipment,
       level: normalizedLevel,
+      training_usage: training_usage ?? 'all',
+      sort_by,
+      sort_dir: sort_dir ?? 'asc',
     }),
     placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
@@ -113,6 +122,8 @@ export function useExercises(params: ExercisesListParams) {
           ...(normalizedMuscleGroups.length > 0 ? { muscle_groups: normalizedMuscleGroups } : {}),
           ...(normalizedEquipment.length > 0 ? { equipment: normalizedEquipment } : {}),
           ...(normalizedLevel.length > 0 ? { level: normalizedLevel } : {}),
+          ...(training_usage && training_usage !== 'all' ? { training_usage } : {}),
+          ...(sort_by ? { sort_by, sort_dir: sort_dir ?? 'asc' } : {}),
         },
         paramsSerializer: { indexes: null },
       })
