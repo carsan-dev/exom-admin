@@ -48,13 +48,18 @@ import {
   useDeleteTrainingTag,
   useRenameTrainingType,
   useRenameTrainingTag,
+  useTrainingTypeCatalogColors,
   useTrainingTypes,
   useTrainingTags,
+  useUpdateTrainingTypeColor,
 } from '@/features/trainings/api'
+import { getTrainingAccentStyle, type CatalogValueWithColor } from '@/features/trainings/types'
 import {
   useDeleteDietNutritionalBadge,
+  useDietNutritionalBadgeCatalogColors,
   useDietNutritionalBadges,
   useRenameDietNutritionalBadge,
+  useUpdateDietNutritionalBadgeColor,
 } from '@/features/diets/api'
 
 const PAGE_SIZE = 10
@@ -69,6 +74,7 @@ type CatalogId =
 interface CatalogItem {
   catalogId: CatalogId
   value: string
+  color?: string
 }
 
 interface CatalogView {
@@ -77,7 +83,8 @@ interface CatalogView {
   description: string
   badgeLabel: string
   canDelete: boolean
-  values: string[]
+  supportsColor: boolean
+  values: CatalogValueWithColor[]
   isLoading: boolean
   isError: boolean
   error: unknown
@@ -90,6 +97,14 @@ function normalizeCatalogLabel(value: string) {
 
 function formatAffectedRecords(count: number) {
   return count === 1 ? '1 registro actualizado' : `${count} registros actualizados`
+}
+
+function toCatalogValues(values: string[] | undefined): CatalogValueWithColor[] {
+  return (values ?? []).map((value) => ({ value, color: '#6B7280' }))
+}
+
+function isValidCatalogColor(value: string) {
+  return /^#[0-9A-Fa-f]{6}$/.test(value)
 }
 
 function BadgesTableSkeleton() {
@@ -127,7 +142,7 @@ function CatalogTable({
 }: CatalogTableProps) {
   const normalizedSearch = normalizeSearchText(search)
   const filteredValues = normalizedSearch
-    ? catalog.values.filter((value) => normalizeSearchText(value).includes(normalizedSearch))
+    ? catalog.values.filter((item) => normalizeSearchText(item.value).includes(normalizedSearch))
     : catalog.values
   const totalPages = Math.max(1, Math.ceil(filteredValues.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -193,21 +208,36 @@ function CatalogTable({
               <TableHeader>
                 <TableRow>
                   <TableHead>Valor</TableHead>
+                  {catalog.supportsColor ? (
+                    <TableHead className="hidden w-52 sm:table-cell">Color</TableHead>
+                  ) : null}
                   <TableHead className="hidden w-48 sm:table-cell">Origen</TableHead>
                   <TableHead className="w-28 text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedValues.map((value) => (
-                  <TableRow key={value}>
+                {paginatedValues.map((item) => (
+                  <TableRow key={item.value}>
                     <TableCell>
                       <Badge
                         variant="outline"
                         className="max-w-full border-border bg-muted text-foreground"
+                        style={catalog.supportsColor ? getTrainingAccentStyle(item.color) : undefined}
                       >
-                        <span className="min-w-0 break-words">{value}</span>
+                        <span className="min-w-0 break-words">{item.value}</span>
                       </Badge>
                     </TableCell>
+                    {catalog.supportsColor ? (
+                      <TableCell className="hidden sm:table-cell">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <span
+                            className="h-5 w-5 rounded-full border border-border"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <span className="font-mono text-xs">{item.color}</span>
+                        </div>
+                      </TableCell>
+                    ) : null}
                     <TableCell className="hidden text-sm text-muted-foreground sm:table-cell">
                       {catalog.badgeLabel}
                     </TableCell>
@@ -219,8 +249,8 @@ function CatalogTable({
                               type="button"
                               variant="ghost"
                               size="icon"
-                              aria-label={`Editar ${value}`}
-                              onClick={() => onEdit({ catalogId: catalog.id, value })}
+                              aria-label={`Editar ${item.value}`}
+                              onClick={() => onEdit({ catalogId: catalog.id, value: item.value, color: item.color })}
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -234,9 +264,9 @@ function CatalogTable({
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                aria-label={`Borrar ${value}`}
+                                aria-label={`Borrar ${item.value}`}
                                 className="text-status-error hover:text-status-error"
-                                onClick={() => onDelete({ catalogId: catalog.id, value })}
+                                onClick={() => onDelete({ catalogId: catalog.id, value: item.value, color: item.color })}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -290,23 +320,28 @@ export function BadgesPage() {
   const [editingItem, setEditingItem] = useState<CatalogItem | null>(null)
   const [deletingItem, setDeletingItem] = useState<CatalogItem | null>(null)
   const [draftValue, setDraftValue] = useState('')
+  const [draftColor, setDraftColor] = useState('#6B7280')
   const deferredSearch = useDeferredValue(search)
   const activeSearch = deferredSearch.trim()
 
   const muscleGroupsQuery = useExerciseMuscleGroups()
   const equipmentQuery = useExerciseEquipment()
   const trainingTypesQuery = useTrainingTypes()
+  const trainingTypeColorsQuery = useTrainingTypeCatalogColors()
   const trainingTagsQuery = useTrainingTags()
   const dietBadgesQuery = useDietNutritionalBadges()
+  const dietBadgeColorsQuery = useDietNutritionalBadgeCatalogColors()
 
   const renameMuscleGroup = useRenameExerciseMuscleGroup()
   const deleteMuscleGroup = useDeleteExerciseMuscleGroup()
   const renameEquipment = useRenameExerciseEquipment()
   const deleteEquipment = useDeleteExerciseEquipment()
   const renameTrainingType = useRenameTrainingType()
+  const updateTrainingTypeColor = useUpdateTrainingTypeColor()
   const renameTrainingTag = useRenameTrainingTag()
   const deleteTrainingTag = useDeleteTrainingTag()
   const renameDietBadge = useRenameDietNutritionalBadge()
+  const updateDietBadgeColor = useUpdateDietNutritionalBadgeColor()
   const deleteDietBadge = useDeleteDietNutritionalBadge()
 
   const catalogs = useMemo<Record<CatalogId, CatalogView>>(
@@ -317,7 +352,8 @@ export function BadgesPage() {
         description: 'Badges usados en ejercicios.',
         badgeLabel: 'Ejercicios',
         canDelete: true,
-        values: muscleGroupsQuery.data ?? [],
+        supportsColor: false,
+        values: toCatalogValues(muscleGroupsQuery.data),
         isLoading: muscleGroupsQuery.isLoading,
         isError: muscleGroupsQuery.isError,
         error: muscleGroupsQuery.error,
@@ -329,7 +365,8 @@ export function BadgesPage() {
         description: 'Badges de material usados en ejercicios.',
         badgeLabel: 'Ejercicios',
         canDelete: true,
-        values: equipmentQuery.data ?? [],
+        supportsColor: false,
+        values: toCatalogValues(equipmentQuery.data),
         isLoading: equipmentQuery.isLoading,
         isError: equipmentQuery.isError,
         error: equipmentQuery.error,
@@ -342,11 +379,15 @@ export function BadgesPage() {
           'Valores reutilizables en entrenamientos y en reglas de logros por tipo.',
         badgeLabel: 'Entrenamientos',
         canDelete: false,
-        values: trainingTypesQuery.data ?? [],
-        isLoading: trainingTypesQuery.isLoading,
-        isError: trainingTypesQuery.isError,
-        error: trainingTypesQuery.error,
-        refetch: () => void trainingTypesQuery.refetch(),
+        supportsColor: true,
+        values: trainingTypeColorsQuery.data ?? toCatalogValues(trainingTypesQuery.data),
+        isLoading: trainingTypesQuery.isLoading || trainingTypeColorsQuery.isLoading,
+        isError: trainingTypesQuery.isError || trainingTypeColorsQuery.isError,
+        error: trainingTypeColorsQuery.error ?? trainingTypesQuery.error,
+        refetch: () => {
+          void trainingTypesQuery.refetch()
+          void trainingTypeColorsQuery.refetch()
+        },
       },
       'training-tags': {
         id: 'training-tags',
@@ -354,7 +395,8 @@ export function BadgesPage() {
         description: 'Badges usados en entrenamientos.',
         badgeLabel: 'Entrenamientos',
         canDelete: true,
-        values: trainingTagsQuery.data ?? [],
+        supportsColor: false,
+        values: toCatalogValues(trainingTagsQuery.data),
         isLoading: trainingTagsQuery.isLoading,
         isError: trainingTagsQuery.isError,
         error: trainingTagsQuery.error,
@@ -366,11 +408,15 @@ export function BadgesPage() {
         description: 'Badges usados en comidas de dietas.',
         badgeLabel: 'Dietas',
         canDelete: true,
-        values: dietBadgesQuery.data ?? [],
-        isLoading: dietBadgesQuery.isLoading,
-        isError: dietBadgesQuery.isError,
-        error: dietBadgesQuery.error,
-        refetch: () => void dietBadgesQuery.refetch(),
+        supportsColor: true,
+        values: dietBadgeColorsQuery.data ?? toCatalogValues(dietBadgesQuery.data),
+        isLoading: dietBadgesQuery.isLoading || dietBadgeColorsQuery.isLoading,
+        isError: dietBadgesQuery.isError || dietBadgeColorsQuery.isError,
+        error: dietBadgeColorsQuery.error ?? dietBadgesQuery.error,
+        refetch: () => {
+          void dietBadgesQuery.refetch()
+          void dietBadgeColorsQuery.refetch()
+        },
       },
     }),
     [
@@ -379,6 +425,11 @@ export function BadgesPage() {
       dietBadgesQuery.isError,
       dietBadgesQuery.isLoading,
       dietBadgesQuery.refetch,
+      dietBadgeColorsQuery.data,
+      dietBadgeColorsQuery.error,
+      dietBadgeColorsQuery.isError,
+      dietBadgeColorsQuery.isLoading,
+      dietBadgeColorsQuery.refetch,
       equipmentQuery.data,
       equipmentQuery.error,
       equipmentQuery.isError,
@@ -394,6 +445,11 @@ export function BadgesPage() {
       trainingTypesQuery.isError,
       trainingTypesQuery.isLoading,
       trainingTypesQuery.refetch,
+      trainingTypeColorsQuery.data,
+      trainingTypeColorsQuery.error,
+      trainingTypeColorsQuery.isError,
+      trainingTypeColorsQuery.isLoading,
+      trainingTypeColorsQuery.refetch,
       trainingTagsQuery.data,
       trainingTagsQuery.error,
       trainingTagsQuery.isError,
@@ -407,8 +463,10 @@ export function BadgesPage() {
     renameMuscleGroup.isPending ||
     renameEquipment.isPending ||
     renameTrainingType.isPending ||
+    updateTrainingTypeColor.isPending ||
     renameTrainingTag.isPending ||
-    renameDietBadge.isPending
+    renameDietBadge.isPending ||
+    updateDietBadgeColor.isPending
   const isDeletePending =
     deleteMuscleGroup.isPending ||
     deleteEquipment.isPending ||
@@ -418,7 +476,9 @@ export function BadgesPage() {
     'badge-rename',
     Boolean(
       editingItem &&
-        (normalizeCatalogLabel(draftValue) !== normalizeCatalogLabel(editingItem.value) || isRenamePending),
+        (normalizeCatalogLabel(draftValue) !== normalizeCatalogLabel(editingItem.value) ||
+          draftColor !== (editingItem.color ?? '#6B7280') ||
+          isRenamePending),
     ),
   )
 
@@ -433,34 +493,48 @@ export function BadgesPage() {
 
   useEffect(() => {
     setDraftValue(editingItem?.value ?? '')
+    setDraftColor(editingItem?.color ?? '#6B7280')
   }, [editingItem])
 
   const handleRename = async () => {
     if (!editingItem) return
 
     const nextValue = normalizeCatalogLabel(draftValue)
+    const nextColor = draftColor.toUpperCase()
+    const supportsColor = catalogs[editingItem.catalogId].supportsColor
+    const renamed =
+      normalizeCatalogLabel(editingItem.value).toLocaleLowerCase() !== nextValue.toLocaleLowerCase()
+    const colorChanged = supportsColor && nextColor !== (editingItem.color ?? '#6B7280').toUpperCase()
 
-    if (
-      !nextValue ||
-      normalizeCatalogLabel(editingItem.value).toLocaleLowerCase() === nextValue.toLocaleLowerCase()
-    ) {
+    if (!nextValue || (supportsColor && !isValidCatalogColor(nextColor)) || (!renamed && !colorChanged)) {
       return
     }
 
     try {
-      const result =
-        editingItem.catalogId === 'muscle-groups'
+      const result = renamed
+        ? editingItem.catalogId === 'muscle-groups'
           ? await renameMuscleGroup.mutateAsync({ from: editingItem.value, to: nextValue })
           : editingItem.catalogId === 'equipment'
             ? await renameEquipment.mutateAsync({ from: editingItem.value, to: nextValue })
             : editingItem.catalogId === 'training-types'
               ? await renameTrainingType.mutateAsync({ from: editingItem.value, to: nextValue })
-            : editingItem.catalogId === 'training-tags'
-              ? await renameTrainingTag.mutateAsync({ from: editingItem.value, to: nextValue })
-              : await renameDietBadge.mutateAsync({ from: editingItem.value, to: nextValue })
+              : editingItem.catalogId === 'training-tags'
+                ? await renameTrainingTag.mutateAsync({ from: editingItem.value, to: nextValue })
+                : await renameDietBadge.mutateAsync({ from: editingItem.value, to: nextValue })
+        : { value: nextValue, affected_count: 0 }
+
+      if (colorChanged) {
+        if (editingItem.catalogId === 'training-types') {
+          await updateTrainingTypeColor.mutateAsync({ value: nextValue, color: nextColor })
+        } else if (editingItem.catalogId === 'diet-badges') {
+          await updateDietBadgeColor.mutateAsync({ value: nextValue, color: nextColor })
+        }
+      }
 
       toast.success(
-        `"${editingItem.value}" renombrado a "${result.value}". ${formatAffectedRecords(result.affected_count)}.`
+        renamed
+          ? `"${editingItem.value}" renombrado a "${result.value}". ${formatAffectedRecords(result.affected_count)}.`
+          : `Color de "${result.value}" actualizado.`
       )
       setEditingItem(null)
     } catch (error) {
@@ -618,6 +692,28 @@ export function BadgesPage() {
             autoFocus
           />
 
+          {editingItem && catalogs[editingItem.catalogId].supportsColor ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Input
+                  type="color"
+                  value={isValidCatalogColor(draftColor) ? draftColor : '#6B7280'}
+                  onChange={(event) => setDraftColor(event.target.value.toUpperCase())}
+                  className="h-10 w-14 cursor-pointer p-1"
+                  aria-label="Color"
+                />
+                <Input
+                  value={draftColor}
+                  onChange={(event) => setDraftColor(event.target.value.toUpperCase())}
+                  className="font-mono"
+                />
+              </div>
+              <Badge variant="outline" className="w-fit" style={getTrainingAccentStyle(draftColor)}>
+                {normalizeCatalogLabel(draftValue) || editingItem.value}
+              </Badge>
+            </div>
+          ) : null}
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingItem(null)}>
               Cancelar
@@ -627,8 +723,11 @@ export function BadgesPage() {
               disabled={
                 isRenamePending ||
                 !normalizeCatalogLabel(draftValue) ||
-                normalizeCatalogLabel(editingItem?.value ?? '').toLocaleLowerCase() ===
-                  normalizeCatalogLabel(draftValue).toLocaleLowerCase()
+                (Boolean(editingItem && catalogs[editingItem.catalogId].supportsColor) &&
+                  !isValidCatalogColor(draftColor)) ||
+                (normalizeCatalogLabel(editingItem?.value ?? '').toLocaleLowerCase() ===
+                  normalizeCatalogLabel(draftValue).toLocaleLowerCase() &&
+                  draftColor === (editingItem?.color ?? '#6B7280'))
               }
             >
               {isRenamePending ? (
