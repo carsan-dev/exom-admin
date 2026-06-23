@@ -44,6 +44,7 @@ import { Separator } from '@/components/ui/separator'
 import {
   getApiErrorMessage,
   useCreateDiet,
+  useDietNutritionalBadgeCatalogColors,
   useDietNutritionalBadges,
   useDietTags,
   useIngredientsList,
@@ -56,7 +57,13 @@ import {
   normalizeDietTags,
   type DietFormValues,
 } from '../schemas'
-import { MEAL_TYPE_LABELS, MEAL_TYPE_OPTIONS, type Diet } from '../types'
+import {
+  getDietBadgeColorMap,
+  getDietNutritionalBadgeStyle,
+  MEAL_TYPE_LABELS,
+  MEAL_TYPE_OPTIONS,
+  type Diet,
+} from '../types'
 import { IngredientPicker } from './ingredient-picker'
 
 const NUTRITIONAL_BADGE_OPTIONS = [
@@ -85,6 +92,8 @@ function getBadgeKey(badge: string) {
 function BadgesField({ value, onChange }: { value: string[]; onChange: (val: string[]) => void }) {
   const [input, setInput] = useState('')
   const badgesQuery = useDietNutritionalBadges()
+  const badgeColorsQuery = useDietNutritionalBadgeCatalogColors()
+  const badgeColorMap = getDietBadgeColorMap(badgeColorsQuery.data)
   const badgeOptions = mergeBadgeOptions(NUTRITIONAL_BADGE_OPTIONS, badgesQuery.data)
 
   const hasBadge = (badge: string) => {
@@ -125,7 +134,12 @@ function BadgesField({ value, onChange }: { value: string[]; onChange: (val: str
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {value.map((badge) => (
-            <Badge key={badge} variant="outline" className="gap-1 pr-1 text-xs">
+            <Badge
+              key={badge}
+              variant="outline"
+              className="gap-1 pr-1 text-xs"
+              style={getDietNutritionalBadgeStyle(badge, badgeColorMap)}
+            >
               {badge}
               <button
                 type="button"

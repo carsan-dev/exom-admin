@@ -45,6 +45,7 @@ import {
   getApiErrorMessage,
   useCreateTraining,
   useTrainingTags,
+  useTrainingTypeCatalogColors,
   useTrainingTypes,
   useUpdateTraining,
 } from '../api'
@@ -58,7 +59,9 @@ import {
 import {
   DEFAULT_TRAINING_TYPE,
   TRAINING_ACCENT_SWATCHES,
+  getCatalogColorMap,
   getTrainingAccentStyle,
+  getTrainingTypeCatalogStyle,
   getTrainingTypeBadgeClass,
   getTrainingTypeKey,
   getTrainingTypeLabel,
@@ -363,6 +366,8 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
 function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps) {
   const [input, setInput] = useState('')
   const trainingTypesQuery = useTrainingTypes()
+  const trainingTypeColorsQuery = useTrainingTypeCatalogColors()
+  const trainingTypeColorMap = getCatalogColorMap(trainingTypeColorsQuery.data)
   const availableTypes = trainingTypesQuery.data ?? []
   const resolvedTypes = normalizeTrainingTypes([...value, ...availableTypes])
 
@@ -420,7 +425,8 @@ function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps)
             <Badge
               key={type}
               variant="outline"
-              className={getTrainingTypeBadgeClass(type)}
+              className={!getTrainingTypeCatalogStyle(type, trainingTypeColorMap) ? getTrainingTypeBadgeClass(type) : undefined}
+              style={getTrainingTypeCatalogStyle(type, trainingTypeColorMap)}
             >
               {getTrainingTypeLabel(type)}
               <button
@@ -483,6 +489,7 @@ function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps)
           <div className="flex flex-wrap gap-2 rounded-md border border-dashed border-border/70 bg-muted/20 p-2">
             {resolvedTypes.map((type) => {
               const isSelected = hasType(type)
+              const catalogStyle = getTrainingTypeCatalogStyle(type, trainingTypeColorMap)
 
               return (
                 <button
@@ -491,10 +498,13 @@ function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps)
                   onClick={() => toggle(type)}
                   aria-pressed={isSelected}
                   className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-                    isSelected
+                    isSelected && !catalogStyle
                       ? getTrainingTypeBadgeClass(type)
-                      : 'border-border bg-background text-muted-foreground hover:bg-muted'
+                      : !isSelected
+                        ? 'border-border bg-background text-muted-foreground hover:bg-muted'
+                        : ''
                   }`}
+                  style={isSelected ? catalogStyle : undefined}
                 >
                   {isSelected && <Check className="h-3 w-3" />}
                   {getTrainingTypeLabel(type)}

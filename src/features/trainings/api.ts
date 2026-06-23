@@ -15,7 +15,7 @@ import {
   type TrainingFormValues,
 } from './schemas'
 import { normalizeTrainingTypes } from './types'
-import type { Training } from './types'
+import type { CatalogValueWithColor, Training } from './types'
 import type { Exercise, PaginatedResponse } from '../exercises/types'
 import type { CatalogGroup, GroupMembershipResult } from '../catalog-groups/types'
 
@@ -29,6 +29,11 @@ interface RenameCatalogValuePayload {
 interface CatalogMutationResponse {
   value: string
   affected_count: number
+}
+
+interface CatalogColorMutationResponse {
+  value: string
+  color: string
 }
 
 export interface TrainingsListParams {
@@ -280,7 +285,18 @@ export function useTrainingTypes() {
     queryKey: trainingTypesQueryKey,
     retry: shouldRetryQuery,
     queryFn: async () => {
-      const response = await api.get<ApiEnvelope<{ types: string[] }>>('/trainings/types')
+      const response = await api.get<ApiEnvelope<{ types: Array<string | CatalogValueWithColor> }>>('/trainings/types')
+      return unwrapResponse(response).types.map((type) => typeof type === 'string' ? type : type.value)
+    },
+  })
+}
+
+export function useTrainingTypeCatalogColors() {
+  return useQuery({
+    queryKey: [...trainingTypesQueryKey, 'colors'] as const,
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      const response = await api.get<ApiEnvelope<{ types: CatalogValueWithColor[] }>>('/trainings/types')
       return unwrapResponse(response).types
     },
   })
@@ -389,6 +405,26 @@ export function useRenameTrainingType() {
       await invalidateAdminQueries(queryClient, {
         extraQueryKeys: [trainingsQueryKeys.all],
       })
+    },
+  })
+}
+
+export function useUpdateTrainingTypeColor() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ value, color }: { value: string; color: string }) => {
+      const response = await api.patch<ApiEnvelope<CatalogColorMutationResponse>>(
+        `/trainings/types/${encodeURIComponent(value)}/color`,
+        { color }
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+      })
+      await queryClient.invalidateQueries({ queryKey: trainingTypesQueryKey })
     },
   })
 }

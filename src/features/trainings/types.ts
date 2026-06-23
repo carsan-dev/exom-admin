@@ -21,6 +21,11 @@ export const TRAINING_ACCENT_SWATCHES = [
 
 export type TrainingType = string
 
+export interface CatalogValueWithColor {
+  value: string
+  color: string
+}
+
 const TRAINING_ACCENT_COLOR_REGEX = /^#?(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/
 const DARK_PREVIEW_TEXT = '#231208'
 const LIGHT_PREVIEW_TEXT = '#F7F9EF'
@@ -180,6 +185,17 @@ export function getTrainingTypeBadgeClass(type: string) {
     default:
       return 'border-border bg-muted text-muted-foreground'
   }
+}
+
+export function getCatalogColorMap(items: CatalogValueWithColor[] | undefined) {
+  return new Map((items ?? []).map((item) => [getTrainingTypeKey(item.value), item.color]))
+}
+
+export function getTrainingTypeCatalogStyle(
+  type: string,
+  colorMap: Map<string, string> | undefined,
+) {
+  return getTrainingAccentStyle(colorMap?.get(getTrainingTypeKey(type)))
 }
 
 export interface TrainingExercise {

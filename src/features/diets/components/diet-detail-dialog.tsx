@@ -11,7 +11,15 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { formatMacroValue } from '../../ingredients/types'
-import { getMealTypeBadgeClass, MEAL_TYPE_LABELS, type Diet, type Meal } from '../types'
+import {
+  getDietBadgeColorMap,
+  getDietNutritionalBadgeStyle,
+  getMealTypeBadgeClass,
+  MEAL_TYPE_LABELS,
+  type Diet,
+  type Meal,
+} from '../types'
+import { useDietNutritionalBadgeCatalogColors } from '../api'
 
 interface DietDetailDialogProps {
   diet: Diet | null
@@ -21,7 +29,7 @@ interface DietDetailDialogProps {
   onDuplicate?: (diet: Diet) => void
 }
 
-function MealRow({ meal }: { meal: Meal }) {
+function MealRow({ meal, badgeColorMap }: { meal: Meal; badgeColorMap: Map<string, string> }) {
   const [expanded, setExpanded] = useState(false)
   const sortedIngredients = [...meal.ingredients].sort((a, b) =>
     a.ingredient.name.localeCompare(b.ingredient.name),
@@ -95,7 +103,12 @@ function MealRow({ meal }: { meal: Meal }) {
           {meal.nutritional_badges.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {meal.nutritional_badges.map((badge) => (
-                <Badge key={badge} variant="outline" className="text-xs border-border bg-muted text-muted-foreground">
+                <Badge
+                  key={badge}
+                  variant="outline"
+                  className="text-xs border-border bg-muted text-muted-foreground"
+                  style={getDietNutritionalBadgeStyle(badge, badgeColorMap)}
+                >
                   {badge}
                 </Badge>
               ))}
@@ -161,6 +174,8 @@ export function DietDetailDialog({
   onEdit,
   onDuplicate,
 }: DietDetailDialogProps) {
+  const badgeColorsQuery = useDietNutritionalBadgeCatalogColors()
+  const badgeColorMap = getDietBadgeColorMap(badgeColorsQuery.data)
   if (!diet) return null
 
   const sortedMeals = [...diet.meals].sort((a, b) => a.order - b.order)
@@ -229,7 +244,7 @@ export function DietDetailDialog({
                 Comidas ({sortedMeals.length})
               </p>
               {sortedMeals.map((meal) => (
-                <MealRow key={meal.id} meal={meal} />
+                <MealRow key={meal.id} meal={meal} badgeColorMap={badgeColorMap} />
               ))}
             </div>
           )}

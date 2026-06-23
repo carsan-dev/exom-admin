@@ -21,7 +21,13 @@ import { cn } from '@/lib/utils'
 import type { SortDir } from '@/lib/sort-search-params'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { formatUpdatedAt } from '../../ingredients/types'
-import { getMealTypeBadgeClass, type Diet } from '../types'
+import {
+  getDietBadgeColorMap,
+  getDietNutritionalBadgeStyle,
+  getMealTypeBadgeClass,
+  type DietCatalogValueWithColor,
+  type Diet,
+} from '../types'
 import { CatalogDragHandle } from '../../catalog-groups/components/catalog-drag-handle'
 
 interface DietApprovalSummary {
@@ -41,9 +47,11 @@ interface DietsTableProps {
   sortBy?: string
   sortDir?: SortDir
   onSortChange?: (field: string) => void
+  nutritionalBadgeColors?: DietCatalogValueWithColor[]
 }
 
-export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplicate, onDelete, selectedIds = new Set(), onSelectionChange, movementDisabled, sortBy, sortDir = 'asc', onSortChange = () => {} }: DietsTableProps) {
+export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplicate, onDelete, selectedIds = new Set(), onSelectionChange, movementDisabled, sortBy, sortDir = 'asc', onSortChange = () => {}, nutritionalBadgeColors }: DietsTableProps) {
+  const badgeColorMap = getDietBadgeColorMap(nutritionalBadgeColors)
   const allSelected = diets.length > 0 && diets.every((item) => selectedIds.has(item.id))
   const toggleAll = () => {
     const next = new Set(selectedIds)
@@ -76,6 +84,7 @@ export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplica
       <TableBody>
         {diets.map((diet) => {
           const mealTypes = diet.meals.map((m) => m.type)
+          const nutritionalBadges = Array.from(new Set(diet.meals.flatMap((meal) => meal.nutritional_badges ?? [])))
           const mealsCount = diet.meals_count ?? diet.meals.length
           return (
             <TableRow key={diet.id}>
@@ -108,6 +117,16 @@ export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplica
                   {mealsCount === 0 && (
                     <span className="text-xs text-muted-foreground">—</span>
                   )}
+                  {nutritionalBadges.slice(0, 2).map((badge) => (
+                    <Badge
+                      key={badge}
+                      variant="outline"
+                      className="text-xs px-1.5 py-0 border-border bg-muted text-muted-foreground"
+                      style={getDietNutritionalBadgeStyle(badge, badgeColorMap)}
+                    >
+                      {badge}
+                    </Badge>
+                  ))}
                 </div>
               </TableCell>
 

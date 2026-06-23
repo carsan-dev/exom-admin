@@ -1,5 +1,6 @@
 import type { Ingredient } from '../ingredients/types'
 import type { CatalogGroupSummary } from '../catalog-groups/types'
+import { getTrainingAccentStyle, getTrainingTypeKey, type CatalogValueWithColor } from '../trainings/types'
 
 export const MEAL_TYPE_OPTIONS = ['BREAKFAST', 'LUNCH', 'SNACK', 'DINNER'] as const
 export type MealType = (typeof MEAL_TYPE_OPTIONS)[number]
@@ -67,6 +68,19 @@ export function getMealTypeBadgeClass(type: string) {
     default:
       return 'border-border bg-muted text-muted-foreground'
   }
+}
+
+export type DietCatalogValueWithColor = CatalogValueWithColor
+
+export function getDietBadgeColorMap(items: DietCatalogValueWithColor[] | undefined) {
+  return new Map((items ?? []).map((item) => [getTrainingTypeKey(item.value), item.color]))
+}
+
+export function getDietNutritionalBadgeStyle(
+  badge: string,
+  colorMap: Map<string, string> | undefined,
+) {
+  return getTrainingAccentStyle(colorMap?.get(getTrainingTypeKey(badge)))
 }
 
 export interface MealIngredient {

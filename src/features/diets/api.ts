@@ -12,7 +12,7 @@ import {
 } from '@/lib/api-utils'
 import type { DietFormValues } from './schemas'
 import { normalizeDietTags } from './schemas'
-import type { Diet } from './types'
+import type { Diet, DietCatalogValueWithColor } from './types'
 import type { Ingredient, PaginatedResponse } from '../ingredients/types'
 import type { CatalogGroup, GroupMembershipResult } from '../catalog-groups/types'
 
@@ -26,6 +26,11 @@ interface RenameCatalogValuePayload {
 interface CatalogMutationResponse {
   value: string
   affected_count: number
+}
+
+interface CatalogColorMutationResponse {
+  value: string
+  color: string
 }
 
 export interface DietsListParams {
@@ -232,7 +237,20 @@ export function useDietNutritionalBadges() {
     queryKey: dietNutritionalBadgesQueryKey,
     retry: shouldRetryQuery,
     queryFn: async () => {
-      const response = await api.get<ApiEnvelope<{ nutritional_badges: string[] }>>(
+      const response = await api.get<ApiEnvelope<{ nutritional_badges: Array<string | DietCatalogValueWithColor> }>>(
+        '/diets/nutritional-badges'
+      )
+      return unwrapResponse(response).nutritional_badges.map((badge) => typeof badge === 'string' ? badge : badge.value)
+    },
+  })
+}
+
+export function useDietNutritionalBadgeCatalogColors() {
+  return useQuery({
+    queryKey: [...dietNutritionalBadgesQueryKey, 'colors'] as const,
+    retry: shouldRetryQuery,
+    queryFn: async () => {
+      const response = await api.get<ApiEnvelope<{ nutritional_badges: DietCatalogValueWithColor[] }>>(
         '/diets/nutritional-badges'
       )
       return unwrapResponse(response).nutritional_badges
@@ -332,6 +350,26 @@ export function useRenameDietNutritionalBadge() {
       await invalidateAdminQueries(queryClient, {
         extraQueryKeys: [dietsQueryKeys.all],
       })
+    },
+  })
+}
+
+export function useUpdateDietNutritionalBadgeColor() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ value, color }: { value: string; color: string }) => {
+      const response = await api.patch<ApiEnvelope<CatalogColorMutationResponse>>(
+        `/diets/nutritional-badges/${encodeURIComponent(value)}/color`,
+        { color }
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [dietsQueryKeys.all],
+      })
+      await queryClient.invalidateQueries({ queryKey: dietNutritionalBadgesQueryKey })
     },
   })
 }

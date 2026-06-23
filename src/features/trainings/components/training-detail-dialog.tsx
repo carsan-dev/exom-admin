@@ -11,12 +11,15 @@ import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
 import {
+  getCatalogColorMap,
   getTrainingAccentStyle,
+  getTrainingTypeCatalogStyle,
   getTrainingTypeBadgeClass,
   getTrainingTypeLabel,
   resolveTrainingTypes,
   type Training,
 } from '../types'
+import { useTrainingTypeCatalogColors } from '../api'
 
 interface TrainingDetailDialogProps {
   training: Training | null
@@ -33,6 +36,8 @@ export function TrainingDetailDialog({
   onEdit,
   onDuplicate,
 }: TrainingDetailDialogProps) {
+  const trainingTypeColorsQuery = useTrainingTypeCatalogColors()
+  const trainingTypeColorMap = getCatalogColorMap(trainingTypeColorsQuery.data)
   if (!training) return null
 
   const sortedExercises = [...training.exercises].sort((a, b) => a.order - b.order)
@@ -59,14 +64,21 @@ export function TrainingDetailDialog({
               />
             ) : null}
             {trainingTypes.map((type) => (
-              <Badge
-                key={type}
-                variant="outline"
-                className={cn('font-medium', !accentStyle && getTrainingTypeBadgeClass(type))}
-                style={accentStyle}
-              >
-                {getTrainingTypeLabel(type)}
-              </Badge>
+              (() => {
+                const catalogStyle = getTrainingTypeCatalogStyle(type, trainingTypeColorMap)
+                const badgeStyle = accentStyle ?? catalogStyle
+
+                return (
+                  <Badge
+                    key={type}
+                    variant="outline"
+                    className={cn('font-medium', !badgeStyle && getTrainingTypeBadgeClass(type))}
+                    style={badgeStyle}
+                  >
+                    {getTrainingTypeLabel(type)}
+                  </Badge>
+                )
+              })()
             ))}
             <Badge
               variant="outline"

@@ -21,10 +21,13 @@ import { cn } from '@/lib/utils'
 import type { SortDir } from '@/lib/sort-search-params'
 import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
 import {
+  getCatalogColorMap,
   getTrainingAccentStyle,
+  getTrainingTypeCatalogStyle,
   getTrainingTypeBadgeClass,
   getTrainingTypeLabel,
   resolveTrainingTypes,
+  type CatalogValueWithColor,
   type Training,
 } from '../types'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
@@ -47,6 +50,7 @@ interface TrainingsTableProps {
   sortBy?: string
   sortDir?: SortDir
   onSortChange?: (field: string) => void
+  trainingTypeColors?: CatalogValueWithColor[]
 }
 
 export function TrainingsTable({
@@ -62,7 +66,9 @@ export function TrainingsTable({
   sortBy,
   sortDir = 'asc',
   onSortChange = () => {},
+  trainingTypeColors,
 }: TrainingsTableProps) {
+  const trainingTypeColorMap = getCatalogColorMap(trainingTypeColors)
   const allSelected = trainings.length > 0 && trainings.every((item) => selectedIds.has(item.id))
   const toggleAll = () => {
     const next = new Set(selectedIds)
@@ -123,14 +129,21 @@ export function TrainingsTable({
               <TableCell>
                 <div className="flex flex-wrap gap-1">
                   {trainingTypes.slice(0, 2).map((type) => (
-                    <Badge
-                      key={type}
-                      variant="outline"
-                      className={cn('font-medium', !accentStyle && getTrainingTypeBadgeClass(type))}
-                      style={accentStyle}
-                    >
-                      {getTrainingTypeLabel(type)}
-                    </Badge>
+                    (() => {
+                      const catalogStyle = getTrainingTypeCatalogStyle(type, trainingTypeColorMap)
+                      const badgeStyle = accentStyle ?? catalogStyle
+
+                      return (
+                        <Badge
+                          key={type}
+                          variant="outline"
+                          className={cn('font-medium', !badgeStyle && getTrainingTypeBadgeClass(type))}
+                          style={badgeStyle}
+                        >
+                          {getTrainingTypeLabel(type)}
+                        </Badge>
+                      )
+                    })()
                   ))}
                   {trainingTypes.length > 2 && (
                     <Badge

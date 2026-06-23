@@ -46,6 +46,7 @@ import {
   getApiErrorMessage,
   type DietsListParams,
   useDiet,
+  useDietNutritionalBadgeCatalogColors,
   useDietNutritionalBadges,
   useDietTags,
   useDiets,
@@ -301,6 +302,7 @@ export function DietsPage() {
   const activeSearch = deferredSearch.trim()
   const tagsQuery = useDietTags()
   const nutritionalBadgesQuery = useDietNutritionalBadges()
+  const nutritionalBadgeColorsQuery = useDietNutritionalBadgeCatalogColors()
   const ingredientsQuery = useIngredientsList({ enabled: importPromptOpen || ingredientCatalogRequested })
   const groupsQuery = useDietGroups()
   const createGroup = useCreateDietGroup()
@@ -655,6 +657,7 @@ export function DietsPage() {
                 sortDir={sort.sort_dir}
                 onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
                 movementDisabled={organizationPending}
+                nutritionalBadgeColors={nutritionalBadgeColorsQuery.data}
               />
             )}
 

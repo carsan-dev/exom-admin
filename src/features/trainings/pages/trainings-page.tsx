@@ -46,6 +46,7 @@ import {
   getApiErrorMessage,
   type TrainingsListParams,
   useTraining,
+  useTrainingTypeCatalogColors,
   useTrainingTags,
   useTrainingTypes,
   useTrainings,
@@ -270,6 +271,7 @@ export function TrainingsPage() {
   const activeSearch = deferredSearch.trim()
   const tagsQuery = useTrainingTags()
   const trainingTypesQuery = useTrainingTypes()
+  const trainingTypeColorsQuery = useTrainingTypeCatalogColors()
   const exercisesQuery = useExercisesList({ enabled: importPromptOpen || exerciseCatalogRequested })
   const groupsQuery = useTrainingGroups()
   const createGroup = useCreateTrainingGroup()
@@ -639,6 +641,7 @@ export function TrainingsPage() {
                 sortDir={sort.sort_dir}
                 onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
                 movementDisabled={organizationPending}
+                trainingTypeColors={trainingTypeColorsQuery.data}
               />
             )}
 
