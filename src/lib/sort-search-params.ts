@@ -22,7 +22,7 @@ export function toggleSortSearchParams(
     const nextSearchParams = new URLSearchParams(currentSearchParams)
     const currentField = nextSearchParams.get('sort_by')
     const currentDir = nextSearchParams.get('sort_dir') === 'desc' ? 'desc' : 'asc'
-    const nextDir: SortDir = currentField === field && currentDir === 'asc' ? 'desc' : 'asc'
+    const nextDir: SortDir = currentField === field && currentDir === 'desc' ? 'asc' : 'desc'
 
     nextSearchParams.set('sort_by', field)
     nextSearchParams.set('sort_dir', nextDir)
