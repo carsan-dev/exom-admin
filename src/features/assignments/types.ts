@@ -276,7 +276,10 @@ export function createAssignmentPreviewTraining(training: Training | AssignmentT
     level: training.level,
     estimated_duration_min: training.estimated_duration_min,
     estimated_calories: training.estimated_calories,
-    exercises_count: 'exercises_count' in training ? training.exercises_count : training.exercises.length,
+    exercises_count:
+      'exercises_count' in training
+        ? (training.exercises_count ?? null)
+        : training.exercises.length,
   }
 }
 
