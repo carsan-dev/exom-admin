@@ -241,6 +241,7 @@ export interface Training {
   updated_at: string
   group_id: string | null
   group: CatalogGroupSummary | null
+  exercises_count?: number
   exercises: TrainingExercise[]
   items?: TrainingItem[]
 }

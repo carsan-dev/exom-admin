@@ -156,7 +156,7 @@ export function TrainingsTable({
               </TableCell>
 
               <TableCell className="text-center text-sm text-muted-foreground">
-                {training.exercises.length}
+                {training.exercises_count ?? training.exercises.length}
               </TableCell>
 
               <TableCell className="hidden text-sm text-muted-foreground md:table-cell">

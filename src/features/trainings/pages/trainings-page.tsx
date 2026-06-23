@@ -45,6 +45,7 @@ import { getSortSearchParams, toggleSortSearchParams } from '@/lib/sort-search-p
 import {
   getApiErrorMessage,
   type TrainingsListParams,
+  useTraining,
   useTrainingTags,
   useTrainingTypes,
   useTrainings,
@@ -255,6 +256,7 @@ export function TrainingsPage() {
   const [importedValues, setImportedValues] = useState<TrainingFormValues | null>(null)
   const [importIssues, setImportIssues] = useState<string[]>([])
   const [importPromptOpen, setImportPromptOpen] = useState(false)
+  const [exerciseCatalogRequested, setExerciseCatalogRequested] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [groupDialogOpen, setGroupDialogOpen] = useState(false)
   const [groupToEdit, setGroupToEdit] = useState<CatalogGroup | null>(null)
@@ -268,7 +270,7 @@ export function TrainingsPage() {
   const activeSearch = deferredSearch.trim()
   const tagsQuery = useTrainingTags()
   const trainingTypesQuery = useTrainingTypes()
-  const exercisesQuery = useExercisesList()
+  const exercisesQuery = useExercisesList({ enabled: importPromptOpen || exerciseCatalogRequested })
   const groupsQuery = useTrainingGroups()
   const createGroup = useCreateTrainingGroup()
   const updateGroup = useUpdateTrainingGroup()
@@ -333,6 +335,12 @@ export function TrainingsPage() {
     ...trainingFilterParams,
   })
   const trainings = trainingsQuery.data?.data ?? []
+  const selectedTrainingDetailQuery = useTraining(
+    detailDialogOpen ? selectedTraining?.id : undefined
+  )
+  const editingTrainingDetailQuery = useTraining(
+    formDialogOpen && editingTraining ? editingTraining.id : undefined
+  )
   const trainingApprovalQuery = useResourceApprovalBatch(
     'training',
     trainings.map((training) => training.id)
@@ -377,6 +385,7 @@ export function TrainingsPage() {
   }
 
   const handleImportClick = () => {
+    setExerciseCatalogRequested(true)
     importInputRef.current?.click()
   }
 
@@ -675,9 +684,9 @@ export function TrainingsPage() {
       <DeleteCatalogGroupDialog open={Boolean(groupToDelete)} onOpenChange={(open) => !open && setGroupToDelete(null)} group={groupToDelete} pending={organizationPending} onConfirm={() => groupToDelete && deleteGroup.mutate(groupToDelete.id, { onSuccess: () => { if (groupFilter === groupToDelete.id) setGroupFilter('all'); setGroupToDelete(null); toast.success('Grupo eliminado') }, onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudo eliminar el grupo')) })} />
       <MoveToGroupDialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen} groups={groups} count={selectedIds.size} pending={organizationPending} onConfirm={(groupId) => handleMove([...selectedIds], groupId)} />
       <TrainingFormDialog
-        open={formDialogOpen}
+        open={formDialogOpen && (!editingTraining || Boolean(editingTrainingDetailQuery.data))}
         onOpenChange={handleFormDialogOpenChange}
-        training={editingTraining}
+        training={editingTraining ? editingTrainingDetailQuery.data : null}
         isDuplicate={isDuplicate}
         importedValues={importedValues}
         importIssues={importIssues}
@@ -690,7 +699,7 @@ export function TrainingsPage() {
       />
 
       <TrainingDetailDialog
-        training={selectedTraining}
+        training={selectedTrainingDetailQuery.data ?? null}
         open={detailDialogOpen}
         onOpenChange={handleDetailDialogOpenChange}
         onEdit={handleEdit}

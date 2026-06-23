@@ -411,9 +411,10 @@ export function useDeleteTrainingTag() {
   })
 }
 
-export function useExercisesList() {
+export function useExercisesList(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: exercisesListQueryKey,
+    enabled: options.enabled ?? true,
     retry: shouldRetryQuery,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedResponse<Exercise>>>('/exercises', {
