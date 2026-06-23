@@ -76,6 +76,7 @@ export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplica
       <TableBody>
         {diets.map((diet) => {
           const mealTypes = diet.meals.map((m) => m.type)
+          const mealsCount = diet.meals_count ?? diet.meals.length
           return (
             <TableRow key={diet.id}>
               <TableCell><div className="flex items-center gap-1"><input type="checkbox" aria-label={`Seleccionar ${diet.name}`} checked={selectedIds.has(diet.id)} onChange={() => toggle(diet.id)} /><CatalogDragHandle id={diet.id} label={diet.name} disabled={movementDisabled} /></div></TableCell>
@@ -99,12 +100,12 @@ export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplica
                       {diet.meals[i].name.length > 10 ? diet.meals[i].name.slice(0, 10) + '…' : diet.meals[i].name}
                     </Badge>
                   ))}
-                  {diet.meals.length > 3 && (
+                  {mealsCount > 3 && (
                     <Badge variant="outline" className="text-xs px-1.5 py-0 border-border bg-muted text-muted-foreground">
-                      +{diet.meals.length - 3}
+                      +{mealsCount - 3}
                     </Badge>
                   )}
-                  {diet.meals.length === 0 && (
+                  {mealsCount === 0 && (
                     <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </div>

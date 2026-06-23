@@ -747,7 +747,7 @@ export function DietFormDialog({
   const mealsSectionRef = useRef<HTMLDivElement | null>(null)
 
   // Pre-fetch ingredients list so it's ready when picker opens
-  const ingredientsQuery = useIngredientsList()
+  const ingredientsQuery = useIngredientsList({ enabled: open })
   const ingredientsData = ingredientsQuery.data
 
   const dialogTitle = isEditing

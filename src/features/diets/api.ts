@@ -354,9 +354,10 @@ export function useDeleteDietNutritionalBadge() {
   })
 }
 
-export function useIngredientsList() {
+export function useIngredientsList(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ingredientsListQueryKey,
+    enabled: options.enabled ?? true,
     retry: shouldRetryQuery,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedResponse<Ingredient>>>('/ingredients', {

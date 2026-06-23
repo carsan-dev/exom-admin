@@ -45,6 +45,7 @@ import { getSortSearchParams, toggleSortSearchParams } from '@/lib/sort-search-p
 import {
   getApiErrorMessage,
   type DietsListParams,
+  useDiet,
   useDietNutritionalBadges,
   useDietTags,
   useDiets,
@@ -286,6 +287,7 @@ export function DietsPage() {
   const [importedValues, setImportedValues] = useState<DietFormValues | null>(null)
   const [importIssues, setImportIssues] = useState<string[]>([])
   const [importPromptOpen, setImportPromptOpen] = useState(false)
+  const [ingredientCatalogRequested, setIngredientCatalogRequested] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [groupDialogOpen, setGroupDialogOpen] = useState(false)
   const [groupToEdit, setGroupToEdit] = useState<CatalogGroup | null>(null)
@@ -299,7 +301,7 @@ export function DietsPage() {
   const activeSearch = deferredSearch.trim()
   const tagsQuery = useDietTags()
   const nutritionalBadgesQuery = useDietNutritionalBadges()
-  const ingredientsQuery = useIngredientsList()
+  const ingredientsQuery = useIngredientsList({ enabled: importPromptOpen || ingredientCatalogRequested })
   const groupsQuery = useDietGroups()
   const createGroup = useCreateDietGroup()
   const updateGroup = useUpdateDietGroup()
@@ -360,6 +362,12 @@ export function DietsPage() {
     ...dietFilterParams,
   })
   const diets = dietsQuery.data?.data ?? []
+  const selectedDietDetailQuery = useDiet(
+    detailDialogOpen ? selectedDiet?.id : undefined
+  )
+  const editingDietDetailQuery = useDiet(
+    formDialogOpen && editingDiet ? editingDiet.id : undefined
+  )
   const dietApprovalQuery = useResourceApprovalBatch(
     'diet',
     diets.map((diet) => diet.id)
@@ -404,6 +412,7 @@ export function DietsPage() {
   }
 
   const handleImportClick = () => {
+    setIngredientCatalogRequested(true)
     importInputRef.current?.click()
   }
 
@@ -691,9 +700,9 @@ export function DietsPage() {
       <DeleteCatalogGroupDialog open={Boolean(groupToDelete)} onOpenChange={(open) => !open && setGroupToDelete(null)} group={groupToDelete} pending={organizationPending} onConfirm={() => groupToDelete && deleteGroup.mutate(groupToDelete.id, { onSuccess: () => { if (groupFilter === groupToDelete.id) setGroupFilter('all'); setGroupToDelete(null); toast.success('Grupo eliminado') }, onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudo eliminar el grupo')) })} />
       <MoveToGroupDialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen} groups={groups} count={selectedIds.size} pending={organizationPending} onConfirm={(groupId) => handleMove([...selectedIds], groupId)} />
       <DietFormDialog
-        open={formDialogOpen}
+        open={formDialogOpen && (!editingDiet || Boolean(editingDietDetailQuery.data))}
         onOpenChange={handleFormDialogOpenChange}
-        diet={editingDiet}
+        diet={editingDiet ? editingDietDetailQuery.data : null}
         isDuplicate={isDuplicate}
         importedValues={importedValues}
         importIssues={importIssues}
@@ -706,7 +715,7 @@ export function DietsPage() {
       />
 
       <DietDetailDialog
-        diet={selectedDiet}
+        diet={selectedDietDetailQuery.data ?? null}
         open={detailDialogOpen}
         onOpenChange={handleDetailDialogOpenChange}
         onEdit={handleEdit}

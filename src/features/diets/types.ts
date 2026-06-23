@@ -106,5 +106,6 @@ export interface Diet {
   updated_at: string
   group_id: string | null
   group: CatalogGroupSummary | null
+  meals_count?: number
   meals: Meal[]
 }
