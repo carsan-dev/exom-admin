@@ -76,6 +76,7 @@ const trainingAccentColorSchema = z
   })
 
 export const trainingExerciseSchema = z.object({
+  id: z.string().optional(),
   kind: z.literal('EXERCISE').default('EXERCISE'),
   exercise_id: z.string().trim().min(1, 'Selecciona un ejercicio'),
   order: z.number().int().min(0),
@@ -86,6 +87,7 @@ export const trainingExerciseSchema = z.object({
 })
 
 export const trainingCircuitExerciseSchema = z.object({
+  id: z.string().optional(),
   exercise_id: z.string().trim().min(1, 'Selecciona un ejercicio'),
   reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),
   request_set_tracking: z.boolean().default(false),
@@ -94,6 +96,7 @@ export const trainingCircuitExerciseSchema = z.object({
 
 export const trainingCircuitSchema = z.object({
   kind: z.literal('CIRCUIT'),
+  id: z.string().optional(),
   order: z.number().int().min(0),
   name: z.string().trim().min(1, 'Nombra el circuito').default('Circuito'),
   rounds: z.number().int().min(1, 'Mínimo 1 ronda').default(3),

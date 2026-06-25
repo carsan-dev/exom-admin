@@ -117,6 +117,7 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
       if (item.kind === 'CIRCUIT') {
         return {
           kind: 'CIRCUIT',
+          ...(isDuplicate ? {} : { id: item.id }),
           order,
           name: item.name ?? 'Circuito',
           rounds: item.rounds,
@@ -124,6 +125,7 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
           exercises: [...item.exercises]
             .sort((a, b) => (a.position_in_block ?? 0) - (b.position_in_block ?? 0))
             .map((te) => ({
+              ...(isDuplicate ? {} : { id: te.id }),
               exercise_id: te.exercise.id,
               reps_or_duration: te.reps_or_duration,
               request_set_tracking: te.request_set_tracking,
@@ -135,6 +137,7 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
       const te = item
       return {
         kind: 'EXERCISE',
+        ...(isDuplicate ? {} : { id: te.id }),
         exercise_id: te.exercise.id,
         order,
         sets: te.sets,

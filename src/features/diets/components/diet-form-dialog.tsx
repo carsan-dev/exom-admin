@@ -442,6 +442,7 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
     meals: [...diet.meals]
       .sort((a, b) => a.order - b.order)
       .map((meal) => ({
+        ...(isDuplicate ? {} : { id: meal.id }),
         type: meal.type,
         name: meal.name,
         image_url: meal.image_url,
@@ -460,6 +461,7 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
         variants: (meal.variants ?? [])
           .sort((a, b) => a.order - b.order)
           .map((variant) => ({
+            ...(isDuplicate ? {} : { id: variant.id }),
             type: variant.type,
             name: variant.name,
             image_url: variant.image_url,

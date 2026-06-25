@@ -55,6 +55,7 @@ export const mealIngredientSchema = z
   })
 
 const mealBaseSchema = z.object({
+  id: z.string().optional(),
   type: z.enum(MEAL_TYPE_OPTIONS),
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
   image_url: z.string().trim().url('URL inválida').optional().or(z.literal('')).nullable(),
