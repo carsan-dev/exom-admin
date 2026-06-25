@@ -187,7 +187,7 @@ export const useAuth = create<AuthStore>()((set) => ({
         provider: 'google',
       })
 
-      const { user } = res.data.data
+      const { access_token, user } = res.data.data
 
       if (!validateRole(user.role)) {
         await signOut(auth)
@@ -199,6 +199,8 @@ export const useAuth = create<AuthStore>()((set) => ({
         })
         return
       }
+
+      await signInWithCustomToken(auth, access_token)
 
       set({
         user: {
