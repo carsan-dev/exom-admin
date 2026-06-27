@@ -12,9 +12,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
+function shouldBlockNavigation() {
+  return useUnsavedChangesStore.getState().hasUnsavedChanges
+}
+
 export function UnsavedChangesGuard() {
   const hasUnsavedChanges = useUnsavedChangesStore((state) => state.hasUnsavedChanges)
-  const blocker = useBlocker(hasUnsavedChanges)
+  const blocker = useBlocker(shouldBlockNavigation)
 
   useEffect(() => {
     if (!hasUnsavedChanges) return
