@@ -75,9 +75,10 @@ const dietTagsQueryKey = ['diets', 'tags'] as const
 const ingredientsListQueryKey = ['ingredients', 'list-all'] as const
 const dietGroupsQueryKey = ['diet-groups'] as const
 
-function normalizeDietPayload(values: DietFormValues) {
+export function normalizeDietPayload(values: DietFormValues) {
   type MealPayloadSource = Omit<DietFormValues['meals'][number], 'variants'>
   const normalizeMeal = (meal: MealPayloadSource) => ({
+    ...(meal.id ? { id: meal.id } : {}),
     type: meal.type,
     name: meal.name.trim(),
     image_url: meal.image_url?.trim() ? meal.image_url.trim() : undefined,
