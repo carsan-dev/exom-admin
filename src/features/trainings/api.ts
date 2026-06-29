@@ -78,7 +78,7 @@ const trainingTypesQueryKey = ['trainings', 'types'] as const
 const exercisesListQueryKey = ['exercises', 'list-all'] as const
 const trainingGroupsQueryKey = ['training-groups'] as const
 
-function normalizeTrainingPayload(values: TrainingFormValues) {
+export function normalizeTrainingPayload(values: TrainingFormValues) {
   const normalizedTypes = normalizeTrainingTypes(values.types)
 
   return {
@@ -97,11 +97,13 @@ function normalizeTrainingPayload(values: TrainingFormValues) {
       item.kind === 'CIRCUIT'
         ? {
             kind: 'CIRCUIT',
+            ...(item.id ? { id: item.id } : {}),
             order,
             name: item.name.trim() || 'Circuito',
             rounds: item.rounds,
             rest_between_rounds_seconds: item.rest_between_rounds_seconds,
             exercises: item.exercises.map((ex) => ({
+              ...(ex.id ? { id: ex.id } : {}),
               exercise_id: ex.exercise_id,
               reps_or_duration: ex.reps_or_duration,
               request_set_tracking: ex.request_set_tracking,
@@ -110,6 +112,7 @@ function normalizeTrainingPayload(values: TrainingFormValues) {
           }
         : {
             kind: 'EXERCISE',
+            ...(item.id ? { id: item.id } : {}),
             exercise_id: item.exercise_id,
             order,
             sets: item.sets,
@@ -122,6 +125,7 @@ function normalizeTrainingPayload(values: TrainingFormValues) {
       item.kind === 'EXERCISE'
         ? [
             {
+              ...(item.id ? { id: item.id } : {}),
               exercise_id: item.exercise_id,
               order,
               sets: item.sets,
