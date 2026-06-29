@@ -50,10 +50,12 @@ export function DayProgressDetail({ date, progress, isLoading }: DayProgressDeta
               {progress.exercises_completed.length > 0 ? (
                 <ul className="space-y-1 pl-6">
                   {progress.exercises_completed.map((ex, i) => (
-                    <li key={i} className="space-y-1 text-sm text-muted-foreground">
+                    <li key={i} className="space-y-1 text-sm">
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-status-success shrink-0" />
-                        <span className="font-mono text-xs">{ex.exercise_id}</span>
+                        <span title={ex.exercise_id}>
+                          {ex.exercise_name ?? 'Ejercicio eliminado'}
+                        </span>
                         {(!ex.sets || ex.sets.length === 0) && ex.weight_used != null && (
                           <span className="text-xs">— {ex.weight_used} kg</span>
                         )}
@@ -86,12 +88,12 @@ export function DayProgressDetail({ date, progress, isLoading }: DayProgressDeta
                     : 'Sin comidas'}
                 </Badge>
               </div>
-              {progress.meals_completed.length > 0 ? (
+              {progress.meals_completed_details.length > 0 ? (
                 <ul className="space-y-1 pl-6">
-                  {progress.meals_completed.map((mealId, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  {progress.meals_completed_details.map((meal, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
                       <CheckCircle2 className="h-3.5 w-3.5 text-status-success shrink-0" />
-                      <span className="font-mono text-xs">{mealId}</span>
+                      <span title={meal.meal_id}>{meal.meal_name ?? 'Comida eliminada'}</span>
                     </li>
                   ))}
                 </ul>

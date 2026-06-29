@@ -1,8 +1,14 @@
 export interface ExerciseCompleted {
   exercise_id: string
+  exercise_name: string | null
   weight_used?: number | null
   sets?: Array<{ set_number: number; reps?: number | null; seconds?: number | null; weight_kg?: number | null }>
   completed_at: string
+}
+
+export interface MealCompletedDetail {
+  meal_id: string
+  meal_name: string | null
 }
 
 export interface DayProgress {
@@ -12,6 +18,7 @@ export interface DayProgress {
   training_completed: boolean
   exercises_completed: ExerciseCompleted[]
   meals_completed: string[]
+  meals_completed_details: MealCompletedDetail[]
   notes: string | null
 }
 
