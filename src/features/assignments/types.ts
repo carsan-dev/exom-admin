@@ -146,6 +146,7 @@ export type AutoAssignmentEndMode = 'indefinite' | 'date'
 
 export interface AutoAssignmentEditorValues {
   enabled: boolean
+  rule_id?: string
   source_week_start: string
   starts_on: string
   ends_on?: string | null

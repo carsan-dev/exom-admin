@@ -276,6 +276,26 @@ export function useCreateAutoAssignmentRule() {
   })
 }
 
+export function useUpdateAutoAssignmentRule() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ ruleId, values }: { ruleId: string; values: CreateAutoAssignmentRuleValues }) => {
+      const response = await api.put<ApiEnvelope<AutoAssignmentRule>>(
+        `/assignments/auto-rules/${ruleId}`,
+        normalizeAutoRulePayload(values),
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async (rule) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.autoRule(rule.client_id) }),
+      ])
+    },
+  })
+}
+
 export function useDeactivateAutoAssignmentRule() {
   const queryClient = useQueryClient()
 

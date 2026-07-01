@@ -39,6 +39,7 @@ import {
   type AssignmentEditorValues,
   type AssignmentPreview,
   type AssignmentTrainingOption,
+  type AutoAssignmentRule,
   type CatalogAvailability,
 } from '../types'
 import { AssignmentPreviewDialog } from './assignment-preview-dialog'
@@ -84,6 +85,7 @@ interface AssignmentEditorDialogProps {
   onRetryTrainings: () => void
   onRetryDiets: () => void
   onSubmit: (values: AssignmentEditorValues) => Promise<void>
+  activeAutoRule?: AutoAssignmentRule | null
 }
 
 function buildPreviewTraining(trainingId: string | null, availableTrainings: AssignmentTrainingOption[], sourceDay?: AssignmentDay) {
@@ -140,6 +142,7 @@ export function AssignmentEditorDialog({
   onRetryTrainings,
   onRetryDiets,
   onSubmit,
+  activeAutoRule = null,
 }: AssignmentEditorDialogProps) {
   const [previewOpen, setPreviewOpen] = useState(false)
   const form = useForm<AssignmentEditorFormValues>({
@@ -180,8 +183,10 @@ export function AssignmentEditorDialog({
   const canUseDietCatalog = catalogAvailability.can_use_diet_catalog
   const canEditSingleDate = fields.length === 1 && Boolean(fields[0]?.assignment_id)
   const firstSelectedDate = sortedSelectedDays[0]?.date
-  const sourceWeekStart = firstSelectedDate ? formatUtcDate(getWeekStart(firstSelectedDate)) : null
-  const startsOn = sourceWeekStart ? formatUtcDate(addUtcDays(parseUtcDate(sourceWeekStart), 7)) : null
+  const sourceWeekStart = activeAutoRule?.source_week_start
+    ?? (firstSelectedDate ? formatUtcDate(getWeekStart(firstSelectedDate)) : null)
+  const startsOn = activeAutoRule?.starts_on
+    ?? (sourceWeekStart ? formatUtcDate(addUtcDays(parseUtcDate(sourceWeekStart), 7)) : null)
 
   useEffect(() => {
     if (!open) {
@@ -195,20 +200,33 @@ export function AssignmentEditorDialog({
       return
     }
 
-    form.reset({
-      auto_assignment_enabled: false,
-      auto_assignment_end_mode: 'indefinite',
-      auto_assignment_ends_on: null,
-      days: sortedSelectedDays.map((day) => ({
+    const editorDays = activeAutoRule
+      ? activeAutoRule.days.map((day) => {
+          const date = formatUtcDate(addUtcDays(parseUtcDate(activeAutoRule.source_week_start), day.weekday - 1))
+          return {
+            assignment_id: null,
+            original_date: date,
+            date,
+            training_id: day.training_id,
+            diet_id: day.diet_id,
+            is_rest_day: day.is_rest_day,
+          }
+        })
+      : sortedSelectedDays.map((day) => ({
         assignment_id: day.id,
         original_date: day.date,
         date: day.date,
         training_id: day.training?.id ?? null,
         diet_id: day.diet?.id ?? null,
         is_rest_day: day.is_rest_day,
-      })),
+      }))
+    form.reset({
+      auto_assignment_enabled: Boolean(activeAutoRule),
+      auto_assignment_end_mode: activeAutoRule?.ends_on ? 'date' : 'indefinite',
+      auto_assignment_ends_on: activeAutoRule?.ends_on ?? null,
+      days: editorDays,
     })
-  }, [form, open, selectedDaysKey])
+  }, [form, open, selectedDaysKey, activeAutoRule])
 
   const preview: AssignmentPreview = {
     days: watchedDays.map((day) => ({
@@ -229,6 +247,17 @@ export function AssignmentEditorDialog({
     : 'Ajusta la planificación del día seleccionado y cambia descanso, entreno o dieta sin salir del modal.'
 
   async function handleSave(values: AssignmentEditorFormValues) {
+    if (activeAutoRule) {
+      const nextWeekdays = new Set(values.days.map((day) => getIsoWeekday(day.date)))
+      const removedWeekdays = activeAutoRule.days
+        .map((day) => day.weekday)
+        .filter((weekday) => !nextWeekdays.has(weekday))
+      if (removedWeekdays.length > 0 && !window.confirm(
+        `El nuevo patrón elimina los días ${removedWeekdays.join(', ')}. ¿Confirmas la actualización?`,
+      )) {
+        return
+      }
+    }
     await onSubmit({
       client_id: clientId,
       days: values.days.map((day) => ({
@@ -243,6 +272,7 @@ export function AssignmentEditorDialog({
         values.auto_assignment_enabled && sourceWeekStart && startsOn
           ? {
               enabled: true,
+              rule_id: activeAutoRule?.id,
               source_week_start: sourceWeekStart,
               starts_on: startsOn,
               ends_on:
@@ -273,6 +303,18 @@ export function AssignmentEditorDialog({
                 await handleSave(values)
               })}
             >
+              {activeAutoRule && (
+                <div className="rounded-2xl border border-status-warning/30 bg-status-warning/5 p-4 text-sm">
+                  <p className="font-medium">Actualizando patrón activo</p>
+                  <p className="mt-1 text-muted-foreground">
+                    Patrón actual: {activeAutoRule.days.map((day) => day.weekday).join(', ')}.
+                  </p>
+                  <p className="mt-1 text-muted-foreground">
+                    Patrón nuevo: {watchedDays.map((day) => getIsoWeekday(day.date)).join(', ') || 'sin días'}.
+                  </p>
+                </div>
+              )}
+
               <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
                 <p className="text-sm font-medium text-foreground">
                   {sortedSelectedDays.length > 1

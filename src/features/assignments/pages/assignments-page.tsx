@@ -31,6 +31,7 @@ import {
   useDeactivateAutoAssignmentRule,
   useDeleteAssignment,
   useUpdateAssignment,
+  useUpdateAutoAssignmentRule,
 } from '../api'
 import { AssignmentEditorDialog } from '../components/assignment-editor-dialog'
 import { AssignmentsCatalogErrorState } from '../components/assignments-catalog-error-state'
@@ -166,6 +167,7 @@ export function AssignmentsPage() {
   const createAutoRule = useCreateAutoAssignmentRule()
   const deactivateAutoRule = useDeactivateAutoAssignmentRule()
   const updateAssignment = useUpdateAssignment()
+  const updateAutoRule = useUpdateAutoAssignmentRule()
   const deleteAssignment = useDeleteAssignment()
 
   const clients = clientsQuery.data ?? []
@@ -194,6 +196,7 @@ export function AssignmentsPage() {
     batchAssign.isPending ||
     copyWeek.isPending ||
     createAutoRule.isPending ||
+    updateAutoRule.isPending ||
     deactivateAutoRule.isPending ||
     updateAssignment.isPending ||
     deleteAssignment.isPending
@@ -333,12 +336,15 @@ export function AssignmentsPage() {
 
   const handleEditorSubmit = async (values: AssignmentEditorValues) => {
     try {
+      const updatingRule = Boolean(values.auto_assignment?.rule_id)
       const singleDay = values.days[0]
       const movedSingleExistingDay = values.days.length === 1
         && Boolean(singleDay?.assignment_id)
         && singleDay.original_date !== singleDay.date
 
-      if (movedSingleExistingDay && singleDay?.assignment_id) {
+      if (updatingRule) {
+        // Pattern updates intentionally leave materialized and manual dates untouched.
+      } else if (movedSingleExistingDay && singleDay?.assignment_id) {
         const updateValues: AssignmentUpdateValues = {
           date: singleDay.date,
           training_id: singleDay.is_rest_day ? null : (singleDay.training_id ?? null),
@@ -357,7 +363,7 @@ export function AssignmentsPage() {
       }
 
       if (values.auto_assignment?.enabled) {
-        await createAutoRule.mutateAsync({
+        const ruleValues = {
           client_id: values.client_id,
           source_week_start: values.auto_assignment.source_week_start,
           starts_on: values.auto_assignment.starts_on,
@@ -368,8 +374,14 @@ export function AssignmentsPage() {
             diet_id: day.is_rest_day ? null : (day.diet_id ?? null),
             is_rest_day: day.is_rest_day,
           })),
-        })
-        toast.success('Autoasignación semanal activada')
+        }
+        if (values.auto_assignment.rule_id) {
+          await updateAutoRule.mutateAsync({ ruleId: values.auto_assignment.rule_id, values: ruleValues })
+          toast.success('Patrón semanal actualizado')
+        } else {
+          await createAutoRule.mutateAsync(ruleValues)
+          toast.success('Autoasignación semanal activada')
+        }
       }
 
       handleClearSelection()
@@ -587,6 +599,7 @@ export function AssignmentsPage() {
             availableDiets={diets}
             catalogAvailability={catalogAvailability}
             isSubmitting={isMutating}
+            activeAutoRule={activeAutoRuleQuery.data ?? null}
             onOpenChange={setEditorOpen}
             onRetryTrainings={() => void catalogQuery.refetch()}
             onRetryDiets={() => void catalogQuery.refetch()}
