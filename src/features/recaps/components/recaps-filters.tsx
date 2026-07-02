@@ -35,7 +35,7 @@ export function RecapsFilters({
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-muted-foreground">Estado:</span>
         <Select value={status} onValueChange={(value) => onStatusChange(value as RecapStatusFilter)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

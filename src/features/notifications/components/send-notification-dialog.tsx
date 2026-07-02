@@ -217,7 +217,7 @@ function RecipientsMultiSelect({
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-[360px] p-0" align="start">
+        <PopoverContent className="w-[calc(100vw-2rem)] max-w-[360px] p-0" align="start">
           <Command>
             <CommandInput placeholder="Buscar por nombre o email..." />
             <CommandList>

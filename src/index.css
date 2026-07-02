@@ -173,6 +173,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+#root {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
 a,
 button {
   touch-action: manipulation;

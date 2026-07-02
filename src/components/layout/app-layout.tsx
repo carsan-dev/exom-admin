@@ -80,7 +80,7 @@ export function AppLayout() {
           <main
             ref={mainRef}
             className={cn(
-              'min-w-0 flex-1 bg-background p-4 sm:p-6 lg:overflow-y-auto lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]',
+              'min-w-0 max-w-full flex-1 bg-background p-3 sm:p-5 lg:overflow-y-auto lg:p-6 lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]',
               showScrollTop ? 'pb-24 sm:pb-28' : null,
             )}
           >

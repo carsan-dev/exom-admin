@@ -34,7 +34,7 @@ export function NotificationsFilters({
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-muted-foreground">Estado:</span>
         <Select value={status} onValueChange={(value) => onStatusChange(value as NotificationStatusFilter)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -45,7 +45,7 @@ export function NotificationsFilters({
         </Select>
       </div>
 
-      <div className="relative min-w-[260px] flex-1 max-w-md">
+      <div className="relative min-w-0 flex-1 sm:min-w-[260px] sm:max-w-md">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}

@@ -30,7 +30,7 @@ export function FeedbackFilters({
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-muted-foreground">Estado:</span>
         <Select value={status} onValueChange={(v) => onStatusChange(v as FeedbackStatusFilter)}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-full sm:w-[160px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

@@ -46,7 +46,7 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[280px] justify-between"
+          className="w-full justify-between sm:w-[280px]"
         >
           {selectedClientId && selected ? (
             <div className="flex items-center gap-2 truncate">
@@ -62,7 +62,7 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-0">
+      <PopoverContent className="w-[calc(100vw-2rem)] max-w-[280px] p-0">
         <Command>
           <CommandInput placeholder="Buscar por nombre o email..." />
           <CommandList>

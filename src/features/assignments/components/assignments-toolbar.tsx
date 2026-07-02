@@ -24,7 +24,7 @@ interface AssignmentsToolbarProps {
   canAssign: boolean
   canSelectAll: boolean
   assignActionLabel: string
-  canDeleteSelectedDay: boolean
+  canDeleteSelectedDays: boolean
   activeAutoRule: AutoAssignmentRule | null
   isAutoRuleLoading: boolean
   onDeactivateAutoRule: () => void
@@ -35,7 +35,7 @@ interface AssignmentsToolbarProps {
   onOpenEditor: () => void
   onOpenCopyWeek: () => void
   onSelectAllVisible: () => void
-  onDeleteSelectedDay: () => void
+  onDeleteSelectedDays: () => void
   onClearSelection: () => void
 }
 
@@ -51,7 +51,7 @@ export function AssignmentsToolbar({
   canAssign,
   canSelectAll,
   assignActionLabel,
-  canDeleteSelectedDay,
+  canDeleteSelectedDays,
   activeAutoRule,
   isAutoRuleLoading,
   onDeactivateAutoRule,
@@ -62,12 +62,12 @@ export function AssignmentsToolbar({
   onOpenEditor,
   onOpenCopyWeek,
   onSelectAllVisible,
-  onDeleteSelectedDay,
+  onDeleteSelectedDays,
   onClearSelection,
 }: AssignmentsToolbarProps) {
   return (
     <Card>
-      <CardContent className="space-y-5 p-6">
+      <CardContent className="min-w-0 space-y-5 p-4 sm:p-6">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div className="space-y-2">
             <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Planificación de asignaciones</p>
@@ -79,7 +79,7 @@ export function AssignmentsToolbar({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2 sm:flex sm:flex-wrap">
             <Button variant="outline" onClick={onSelectAllVisible} disabled={!canSelectAll || isBusy}>
               <Layers3 className="h-4 w-4" />
               Seleccionar todos
@@ -95,7 +95,7 @@ export function AssignmentsToolbar({
           </div>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,320px)_minmax(0,220px)_minmax(0,1fr)_auto] xl:items-end">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2 2xl:grid-cols-[minmax(240px,320px)_minmax(180px,220px)_minmax(360px,1fr)] 2xl:items-end">
           <div className="space-y-2">
             <p className="text-sm font-medium text-foreground">Cliente</p>
             <Select value={selectedClientId || ''} onValueChange={onClientChange}>
@@ -134,13 +134,13 @@ export function AssignmentsToolbar({
             </div>
           </div>
 
-          <div className="space-y-3 rounded-2xl border border-border/70 bg-background/50 p-4">
+          <div className="min-w-0 space-y-3 rounded-2xl border border-border/70 bg-background/50 p-4 md:col-span-2 2xl:col-span-1">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground">Periodo visible</p>
                 <p className="text-sm text-muted-foreground">{periodLabel}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex">
                 <Button variant="outline" onClick={onPreviousPeriod} disabled={!selectedClientId || isBusy}>
                   <ChevronLeft className="h-4 w-4" />
                   Anterior
@@ -178,7 +178,7 @@ export function AssignmentsToolbar({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 xl:justify-end">
+          <div className="grid gap-2 sm:flex sm:flex-wrap md:col-span-2 2xl:col-span-3 2xl:justify-end">
             <Button variant="outline" onClick={onDeactivateAutoRule} disabled={!activeAutoRule || isBusy}>
               <Repeat2 className="h-4 w-4" />
               Desactivar autoasignación
@@ -187,9 +187,9 @@ export function AssignmentsToolbar({
               <X className="h-4 w-4" />
               Limpiar selección
             </Button>
-            <Button variant="outline" onClick={onDeleteSelectedDay} disabled={!canDeleteSelectedDay || isBusy}>
+            <Button variant="outline" onClick={onDeleteSelectedDays} disabled={!canDeleteSelectedDays || isBusy}>
               <Trash2 className="h-4 w-4" />
-              Limpiar día
+              {selectionCount > 1 ? 'Limpiar días' : 'Limpiar día'}
             </Button>
           </div>
         </div>
