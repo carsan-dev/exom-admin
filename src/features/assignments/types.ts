@@ -111,6 +111,18 @@ export interface CopyWeekValues {
   target_week_start: string
 }
 
+export interface CopySelectionValues {
+  client_id: string
+  source_dates: string[]
+  target_start_date: string
+}
+
+export interface CopySelectionResult {
+  copied_count: number
+  cleared_count: number
+  target_dates: string[]
+}
+
 export interface AssignmentPreviewTraining {
   id: string
   name: string

@@ -21,6 +21,7 @@ interface AssignmentsToolbarProps {
   summary: AssignmentSummary
   isBusy?: boolean
   canCopyWeek: boolean
+  canCopySelection: boolean
   canAssign: boolean
   canSelectAll: boolean
   assignActionLabel: string
@@ -34,6 +35,7 @@ interface AssignmentsToolbarProps {
   onNextPeriod: () => void
   onOpenEditor: () => void
   onOpenCopyWeek: () => void
+  onOpenCopySelection: () => void
   onSelectAllVisible: () => void
   onDeleteSelectedDays: () => void
   onClearSelection: () => void
@@ -48,6 +50,7 @@ export function AssignmentsToolbar({
   summary,
   isBusy = false,
   canCopyWeek,
+  canCopySelection,
   canAssign,
   canSelectAll,
   assignActionLabel,
@@ -61,6 +64,7 @@ export function AssignmentsToolbar({
   onNextPeriod,
   onOpenEditor,
   onOpenCopyWeek,
+  onOpenCopySelection,
   onSelectAllVisible,
   onDeleteSelectedDays,
   onClearSelection,
@@ -87,6 +91,10 @@ export function AssignmentsToolbar({
             <Button variant="outline" onClick={onOpenCopyWeek} disabled={!canCopyWeek || isBusy}>
               <Copy className="h-4 w-4" />
               Copiar semana
+            </Button>
+            <Button variant="outline" onClick={onOpenCopySelection} disabled={!canCopySelection || isBusy}>
+              <Copy className="h-4 w-4" />
+              Copiar selección
             </Button>
             <Button onClick={onOpenEditor} disabled={!canAssign || isBusy}>
               <Plus className="h-4 w-4" />

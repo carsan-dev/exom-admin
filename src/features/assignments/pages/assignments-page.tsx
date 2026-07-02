@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
-import { addMonths, addWeeks, format, parseISO } from 'date-fns'
+import { useCallback, useEffect, useState } from 'react'
+import { addDays, addMonths, addWeeks, differenceInCalendarDays, format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { AlertTriangle, CalendarDays, Repeat2, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ import {
   useAssignmentsWeek,
   useBatchAssign,
   useCopyWeek,
+  useCopySelection,
   useCreateAutoAssignmentRule,
   useDeactivateAutoAssignmentRule,
   useDeleteAssignments,
@@ -138,6 +140,9 @@ export function AssignmentsPage() {
   const [selectedDates, setSelectedDates] = useState<string[]>([])
   const [editorOpen, setEditorOpen] = useState(false)
   const [copyWeekOpen, setCopyWeekOpen] = useState(false)
+  const [copySelectionOpen, setCopySelectionOpen] = useState(false)
+  const [deleteSelectionOpen, setDeleteSelectionOpen] = useState(false)
+  const [copyTargetDate, setCopyTargetDate] = useState('')
   const [copyPreviewOpen, setCopyPreviewOpen] = useState(false)
   const [deactivateAutoRuleOpen, setDeactivateAutoRuleOpen] = useState(false)
   const [pendingCopyValues, setPendingCopyValues] = useState<CopyWeekValues | null>(null)
@@ -164,6 +169,7 @@ export function AssignmentsPage() {
 
   const batchAssign = useBatchAssign()
   const copyWeek = useCopyWeek()
+  const copySelection = useCopySelection()
   const createAutoRule = useCreateAutoAssignmentRule()
   const deactivateAutoRule = useDeactivateAutoAssignmentRule()
   const updateAssignment = useUpdateAssignment()
@@ -195,6 +201,7 @@ export function AssignmentsPage() {
   const isMutating =
     batchAssign.isPending ||
     copyWeek.isPending ||
+    copySelection.isPending ||
     createAutoRule.isPending ||
     updateAutoRule.isPending ||
     deactivateAutoRule.isPending ||
@@ -218,7 +225,7 @@ export function AssignmentsPage() {
       )
     : null
 
-  const updateSearchParam = (updates: {
+  const updateSearchParam = useCallback((updates: {
     clientId?: string | null
     view?: AssignmentsViewMode
     date?: string
@@ -242,11 +249,13 @@ export function AssignmentsPage() {
     }
 
     setSearchParams(nextSearchParams, { replace: true })
-  }
+  }, [searchParams, setSearchParams])
 
   useEffect(() => {
     setEditorOpen(false)
     setCopyWeekOpen(false)
+    setCopySelectionOpen(false)
+    setDeleteSelectionOpen(false)
     setCopyPreviewOpen(false)
     setDeactivateAutoRuleOpen(false)
     setPendingCopyValues(null)
@@ -272,7 +281,7 @@ export function AssignmentsPage() {
     }
 
     updateSearchParam({ clientId: null })
-  }, [selectedClientIdParam])
+  }, [selectedClientIdParam, updateSearchParam])
 
   const handleClientChange = (clientId: string) => {
     updateSearchParam({ clientId })
@@ -318,6 +327,36 @@ export function AssignmentsPage() {
     }
 
     setEditorOpen(true)
+  }
+
+  const handleOpenCopySelection = () => {
+    if (selectedDays.length === 0) return
+    const firstDate = parseISO(selectedDays[0].date)
+    setCopyTargetDate(formatIsoDate(viewMode === 'week' ? addWeeks(firstDate, 1) : addMonths(firstDate, 1)))
+    setCopySelectionOpen(true)
+  }
+
+  const copySelectionPreview = selectedDays.map((day) => {
+    const offset = differenceInCalendarDays(parseISO(day.date), parseISO(selectedDays[0]?.date ?? day.date))
+    const targetDate = copyTargetDate ? formatIsoDate(addDays(parseISO(copyTargetDate), offset)) : ''
+    const existingTarget = days.find((candidate) => candidate.date === targetDate)
+    return { day, targetDate, existingTarget }
+  })
+
+  const handleCopySelection = async () => {
+    if (!selectedClientId || selectedDays.length === 0 || !copyTargetDate) return
+    try {
+      const result = await copySelection.mutateAsync({
+        client_id: selectedClientId,
+        source_dates: selectedDays.map((day) => day.date),
+        target_start_date: copyTargetDate,
+      })
+      toast.success(`${result.copied_count} días copiados${result.cleared_count ? ` y ${result.cleared_count} limpiados` : ''}`)
+      setCopySelectionOpen(false)
+      handleClearSelection()
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'No se ha podido copiar la selección.'))
+    }
   }
 
   const handleDeleteSelectedDays = async () => {
@@ -473,7 +512,9 @@ export function AssignmentsPage() {
         onOpenEditor={handleOpenEditor}
         onOpenCopyWeek={() => setCopyWeekOpen(true)}
         onSelectAllVisible={handleSelectAllVisible}
-        onDeleteSelectedDays={() => void handleDeleteSelectedDays()}
+        canCopySelection={selectedDates.length > 0}
+        onOpenCopySelection={handleOpenCopySelection}
+        onDeleteSelectedDays={() => setDeleteSelectionOpen(true)}
         onClearSelection={handleClearSelection}
       />
 
@@ -551,6 +592,60 @@ export function AssignmentsPage() {
 
       {selectedClientId && (
         <>
+          <Dialog open={deleteSelectionOpen} onOpenChange={setDeleteSelectionOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Limpiar días seleccionados</DialogTitle>
+                <DialogDescription>
+                  Se eliminarán las asignaciones de {selectedAssignmentIds.length} días. Esta acción no se puede deshacer.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setDeleteSelectionOpen(false)} disabled={deleteAssignments.isPending}>Cancelar</Button>
+                <Button variant="destructive" onClick={async () => { await handleDeleteSelectedDays(); setDeleteSelectionOpen(false) }} disabled={deleteAssignments.isPending}>
+                  {deleteAssignments.isPending ? 'Limpiando...' : 'Limpiar días'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={copySelectionOpen} onOpenChange={setCopySelectionOpen}>
+            <DialogContent disableOutsideClose className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Copiar selección</DialogTitle>
+                <DialogDescription>
+                  Primer día seleccionado irá a fecha destino. Resto conservará distancia entre fechas. Destinos existentes serán sobrescritos.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="copy-selection-target" className="text-sm font-medium">Fecha destino inicial</label>
+                  <Input id="copy-selection-target" type="date" value={copyTargetDate} onChange={(event) => setCopyTargetDate(event.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  {copySelectionPreview.map(({ day, targetDate, existingTarget }) => {
+                    const sourceLabel = day.is_rest_day ? 'Descanso' : [day.training?.name, day.diet?.name].filter(Boolean).join(' + ') || 'Vacío (limpiará destino)'
+                    const targetBusy = Boolean(existingTarget && (existingTarget.training || existingTarget.diet || existingTarget.is_rest_day))
+                    return (
+                      <div key={day.date} className="rounded-lg border border-border/70 p-3 text-sm">
+                        <p className="font-medium">{day.date} → {targetDate}</p>
+                        <p className="text-muted-foreground">{sourceLabel}</p>
+                        <p className={targetBusy ? 'text-status-warning' : 'text-muted-foreground'}>
+                          {targetBusy ? 'Destino ocupado: será sobrescrito' : existingTarget ? 'Destino vacío' : 'Destino fuera del período visible; se sobrescribirá si está ocupado'}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setCopySelectionOpen(false)} disabled={copySelection.isPending}>Cancelar</Button>
+                <Button onClick={() => void handleCopySelection()} disabled={!copyTargetDate || copySelection.isPending}>
+                  {copySelection.isPending ? 'Copiando...' : `Copiar ${selectedDays.length} días`}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <Dialog open={deactivateAutoRuleOpen} onOpenChange={setDeactivateAutoRuleOpen}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>

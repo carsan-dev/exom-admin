@@ -17,6 +17,8 @@ import type {
   ClientOption,
   CreateAutoAssignmentRuleValues,
   CopyWeekValues,
+  CopySelectionResult,
+  CopySelectionValues,
 } from './types'
 
 export { getApiErrorMessage }
@@ -343,6 +345,21 @@ export function useCopyWeek() {
       const response = await api.post<ApiEnvelope<AssignmentWeekResponse>>('/assignments/copy-week', values)
       return unwrapResponse(response)
     },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+      ])
+    },
+  })
+}
+
+export function useCopySelection() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (values: CopySelectionValues) => unwrapResponse(
+      await api.post<ApiEnvelope<CopySelectionResult>>('/assignments/copy-selection', values)
+    ),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),

@@ -226,6 +226,8 @@ export function AssignmentEditorDialog({
       auto_assignment_ends_on: activeAutoRule?.ends_on ?? null,
       days: editorDays,
     })
+    // selectedDaysKey is semantic dependency; sortedSelectedDays may get a new array identity each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, open, selectedDaysKey, activeAutoRule])
 
   const preview: AssignmentPreview = {
