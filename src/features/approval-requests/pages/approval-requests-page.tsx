@@ -81,9 +81,11 @@ export function ApprovalRequestsPage() {
     limit: PAGE_SIZE,
   }
 
+  const superAdminRequestsQuery = useApprovalRequests(filters, currentUserRole === 'SUPER_ADMIN')
+  const adminRequestsQuery = useMyApprovalRequests(filters, currentUserRole !== 'SUPER_ADMIN')
   const approvalRequestsQuery = currentUserRole === 'SUPER_ADMIN'
-    ? useApprovalRequests(filters)
-    : useMyApprovalRequests(filters)
+    ? superAdminRequestsQuery
+    : adminRequestsQuery
   const data = approvalRequestsQuery.data
   const items = data?.data ?? []
   const totalPages = data?.totalPages ?? 1

@@ -47,7 +47,7 @@ export function GrantAchievementDialog({ achievement, open, onOpenChange, onGran
     }
   }, [open])
 
-  const clients = clientsQuery.data ?? []
+  const clients = useMemo(() => clientsQuery.data ?? [], [clientsQuery.data])
   const filteredClients = useMemo(() => {
     const normalizedQuery = search.trim().toLowerCase()
 

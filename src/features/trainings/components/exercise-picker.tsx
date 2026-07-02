@@ -23,7 +23,7 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
   const [pickerOpen, setPickerOpen] = useState(false)
   const [targetCircuitIndex, setTargetCircuitIndex] = useState<number | null>(null)
   const exercisesQuery = useExercisesList()
-  const allExercises = exercisesQuery.data?.data ?? []
+  const allExercises = useMemo(() => exercisesQuery.data?.data ?? [], [exercisesQuery.data?.data])
   const trackedCount = value.reduce(
     (count, item) => count + (item.kind === 'CIRCUIT'
       ? item.exercises.filter((exercise) => exercise.request_set_tracking).length

@@ -49,7 +49,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
   const [search, setSearch] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)
   const ingredientsQuery = useIngredientsList()
-  const allIngredients = ingredientsQuery.data?.data ?? []
+  const allIngredients = useMemo(() => ingredientsQuery.data?.data ?? [], [ingredientsQuery.data?.data])
 
   const ingredientsById = useMemo(
     () => new Map(allIngredients.map((ing) => [ing.id, ing])),

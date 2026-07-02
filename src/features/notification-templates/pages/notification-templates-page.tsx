@@ -625,7 +625,7 @@ export function NotificationTemplatesPage() {
   const [draft, setDraft] = useState<TemplateDraft>(emptyDraft)
   const deferredSearch = useDeferredValue(search)
 
-  const templates = templatesQuery.data ?? []
+  const templates = useMemo(() => templatesQuery.data ?? [], [templatesQuery.data])
   const activeSearch = deferredSearch.trim().toLowerCase()
   const categoryOptions = useMemo<FilterOption[]>(
     () =>
@@ -665,12 +665,22 @@ export function NotificationTemplatesPage() {
     [categoryOptions]
   )
   const filters = useListFilters(filterSections)
-  const selectedCategories = Array.isArray(filters.values.category) ? (filters.values.category as string[]) : []
-  const selectedDeliveryTypes = Array.isArray(filters.values.delivery_type)
-    ? (filters.values.delivery_type as string[])
-    : []
-  const selectedOrigins = Array.isArray(filters.values.origin) ? (filters.values.origin as string[]) : []
-  const selectedStates = Array.isArray(filters.values.state) ? (filters.values.state as string[]) : []
+  const selectedCategories = useMemo(
+    () => Array.isArray(filters.values.category) ? (filters.values.category as string[]) : [],
+    [filters.values.category],
+  )
+  const selectedDeliveryTypes = useMemo(
+    () => Array.isArray(filters.values.delivery_type) ? (filters.values.delivery_type as string[]) : [],
+    [filters.values.delivery_type],
+  )
+  const selectedOrigins = useMemo(
+    () => Array.isArray(filters.values.origin) ? (filters.values.origin as string[]) : [],
+    [filters.values.origin],
+  )
+  const selectedStates = useMemo(
+    () => Array.isArray(filters.values.state) ? (filters.values.state as string[]) : [],
+    [filters.values.state],
+  )
 
   const filteredTemplates = useMemo(() => {
     return templates.filter((template) => {

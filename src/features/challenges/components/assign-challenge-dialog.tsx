@@ -67,7 +67,7 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
     }
   }, [open])
 
-  const clients = clientsQuery.data ?? []
+  const clients = useMemo(() => clientsQuery.data ?? [], [clientsQuery.data])
   const filteredClients = useMemo(() => {
     const normalizedQuery = search.trim().toLowerCase()
 

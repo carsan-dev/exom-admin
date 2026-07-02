@@ -56,7 +56,7 @@ interface ApprovalRequestDetailBase extends ApprovalRequestBase {
   resource_deleted: boolean
 }
 
-export interface AdminApprovalRequestDetail extends ApprovalRequestDetailBase {}
+export type AdminApprovalRequestDetail = ApprovalRequestDetailBase
 
 export interface SuperAdminApprovalRequestDetail extends ApprovalRequestDetailBase {
   payload: Record<string, unknown>

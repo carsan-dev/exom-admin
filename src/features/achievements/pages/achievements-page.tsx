@@ -214,7 +214,7 @@ export function AchievementsPage() {
         onEdit={setEditingAchievement}
         onGrant={setGrantingAchievement}
         onViewUsers={setUsersAchievement}
-        onDelete={canDeleteAchievements ? setDeletingAchievement : (_achievement) => undefined}
+        onDelete={canDeleteAchievements ? setDeletingAchievement : () => undefined}
         canDelete={canDeleteAchievements}
       />
 
