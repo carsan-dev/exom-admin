@@ -25,6 +25,10 @@ interface MutationMessage {
   message: string
 }
 
+interface DeleteAssignmentsResult {
+  deleted_count: number
+}
+
 interface UpdateAssignmentPayload {
   assignmentId: string
   values: AssignmentUpdateValues
@@ -371,6 +375,25 @@ export function useDeleteAssignment() {
   return useMutation({
     mutationFn: async (assignmentId: string) => {
       const response = await api.delete<ApiEnvelope<MutationMessage>>(`/assignments/${assignmentId}`)
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+      ])
+    },
+  })
+}
+
+export function useDeleteAssignments() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (assignmentIds: string[]) => {
+      const response = await api.post<ApiEnvelope<DeleteAssignmentsResult>>('/assignments/delete-batch', {
+        assignment_ids: assignmentIds,
+      })
       return unwrapResponse(response)
     },
     onSuccess: async () => {

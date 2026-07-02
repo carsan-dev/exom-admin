@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
-import { useAssignmentCatalogOptions, useAssignmentClients, useUpdateAutoAssignmentRule } from './api'
+import { useAssignmentCatalogOptions, useAssignmentClients, useDeleteAssignments, useUpdateAutoAssignmentRule } from './api'
 
 vi.mock('@/lib/api', () => ({
   api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
@@ -11,6 +11,7 @@ vi.mock('@/lib/api', () => ({
 
 const mockedGet = vi.mocked(api.get)
 const mockedPut = vi.mocked(api.put)
+const mockedPost = vi.mocked(api.post)
 
 function createWrapper(queryClient: QueryClient) {
   return function Wrapper({ children }: PropsWithChildren) {
@@ -26,6 +27,7 @@ describe('assignment option queries', () => {
   beforeEach(() => {
     mockedGet.mockReset()
     mockedPut.mockReset()
+    mockedPost.mockReset()
   })
 
   it('uses one client-options request and reuses fresh cache after remount', async () => {
@@ -83,5 +85,18 @@ describe('assignment option queries', () => {
       ends_on: null,
       days: [expect.objectContaining({ weekday: 4 })],
     }))
+  })
+
+  it('posts selected assignment ids for batch deletion', async () => {
+    mockedPost.mockResolvedValue(envelope({ deleted_count: 2 }) as never)
+    const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
+    const wrapper = createWrapper(queryClient)
+    const hook = renderHook(() => useDeleteAssignments(), { wrapper })
+
+    await hook.result.current.mutateAsync(['assignment-1', 'assignment-2'])
+
+    expect(mockedPost).toHaveBeenCalledWith('/assignments/delete-batch', {
+      assignment_ids: ['assignment-1', 'assignment-2'],
+    })
   })
 })

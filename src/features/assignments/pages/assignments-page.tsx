@@ -29,7 +29,7 @@ import {
   useCopyWeek,
   useCreateAutoAssignmentRule,
   useDeactivateAutoAssignmentRule,
-  useDeleteAssignment,
+  useDeleteAssignments,
   useUpdateAssignment,
   useUpdateAutoAssignmentRule,
 } from '../api'
@@ -168,7 +168,7 @@ export function AssignmentsPage() {
   const deactivateAutoRule = useDeactivateAutoAssignmentRule()
   const updateAssignment = useUpdateAssignment()
   const updateAutoRule = useUpdateAutoAssignmentRule()
-  const deleteAssignment = useDeleteAssignment()
+  const deleteAssignments = useDeleteAssignments()
 
   const clients = clientsQuery.data ?? []
   const trainings = catalogQuery.data?.trainings ?? []
@@ -189,7 +189,7 @@ export function AssignmentsPage() {
   const selectedDays = days
     .filter((day) => selectedDates.includes(day.date))
     .sort((left, right) => left.date.localeCompare(right.date))
-  const selectedExistingDay = selectedDays.length === 1 && selectedDays[0]?.id ? selectedDays[0] : null
+  const selectedAssignmentIds = selectedDays.flatMap((day) => day.id ? [day.id] : [])
   const summary = buildAssignmentSummary(days)
   const hasAssignmentsInPeriod = summary.training_days > 0 || summary.diet_days > 0 || summary.rest_days > 0
   const isMutating =
@@ -199,7 +199,7 @@ export function AssignmentsPage() {
     updateAutoRule.isPending ||
     deactivateAutoRule.isPending ||
     updateAssignment.isPending ||
-    deleteAssignment.isPending
+    deleteAssignments.isPending
   const canOpenEditor = selectedDates.length > 0
   const canCopyWeek = viewMode === 'week' && Boolean(selectedClientId) && !weekAssignmentsQuery.isLoading && !weekAssignmentsQuery.isError
   const canSelectAll = Boolean(selectedClientId) && days.length > 0 && !isMutating
@@ -320,17 +320,19 @@ export function AssignmentsPage() {
     setEditorOpen(true)
   }
 
-  const handleDeleteSelectedDay = async () => {
-    if (!selectedExistingDay?.id) {
+  const handleDeleteSelectedDays = async () => {
+    if (selectedAssignmentIds.length === 0) {
       return
     }
 
     try {
-      await deleteAssignment.mutateAsync(selectedExistingDay.id)
-      toast.success('Día limpiado correctamente')
+      const result = await deleteAssignments.mutateAsync(selectedAssignmentIds)
+      toast.success(result.deleted_count === 1
+        ? 'Día limpiado correctamente'
+        : `${result.deleted_count} días limpiados correctamente`)
       handleClearSelection()
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'No se ha podido limpiar el día seleccionado.'))
+      toast.error(getApiErrorMessage(error, 'No se han podido limpiar los días seleccionados.'))
     }
   }
 
@@ -460,7 +462,7 @@ export function AssignmentsPage() {
         canAssign={canOpenEditor}
         canSelectAll={canSelectAll}
         assignActionLabel={assignActionLabel}
-        canDeleteSelectedDay={Boolean(selectedExistingDay)}
+        canDeleteSelectedDays={selectedAssignmentIds.length > 0}
         activeAutoRule={activeAutoRuleQuery.data ?? null}
         isAutoRuleLoading={activeAutoRuleQuery.isLoading}
         onDeactivateAutoRule={() => setDeactivateAutoRuleOpen(true)}
@@ -471,7 +473,7 @@ export function AssignmentsPage() {
         onOpenEditor={handleOpenEditor}
         onOpenCopyWeek={() => setCopyWeekOpen(true)}
         onSelectAllVisible={handleSelectAllVisible}
-        onDeleteSelectedDay={() => void handleDeleteSelectedDay()}
+        onDeleteSelectedDays={() => void handleDeleteSelectedDays()}
         onClearSelection={handleClearSelection}
       />
 
