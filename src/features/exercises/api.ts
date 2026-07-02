@@ -26,6 +26,11 @@ interface CatalogMutationResponse {
   affected_count: number
 }
 
+interface CatalogBatchMutationResponse {
+  values: string[]
+  affected_count: number
+}
+
 export interface ExercisesListParams {
   page: number
   limit: number
@@ -277,6 +282,16 @@ export function useDeleteExerciseMuscleGroup() {
   })
 }
 
+export function useDeleteExerciseMuscleGroups() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (values: string[]) => unwrapResponse(await api.post<ApiEnvelope<CatalogBatchMutationResponse>>(
+      '/exercises/muscle-groups/delete-batch', { values }
+    )),
+    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [exercisesQueryKeys.all] }),
+  })
+}
+
 export function useRenameExerciseEquipment() {
   const queryClient = useQueryClient()
 
@@ -311,5 +326,15 @@ export function useDeleteExerciseEquipment() {
         extraQueryKeys: [exercisesQueryKeys.all],
       })
     },
+  })
+}
+
+export function useDeleteExerciseEquipmentValues() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (values: string[]) => unwrapResponse(await api.post<ApiEnvelope<CatalogBatchMutationResponse>>(
+      '/exercises/equipment/delete-batch', { values }
+    )),
+    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [exercisesQueryKeys.all] }),
   })
 }

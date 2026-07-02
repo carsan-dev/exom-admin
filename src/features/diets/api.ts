@@ -393,6 +393,16 @@ export function useDeleteDietNutritionalBadge() {
   })
 }
 
+export function useDeleteDietNutritionalBadges() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (values: string[]) => unwrapResponse(await api.post<ApiEnvelope<{ values: string[]; affected_count: number }>>(
+      '/diets/nutritional-badges/delete-batch', { values }
+    )),
+    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [dietsQueryKeys.all] }),
+  })
+}
+
 export function useIngredientsList(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ingredientsListQueryKey,

@@ -451,6 +451,16 @@ export function useDeleteTrainingTag() {
   })
 }
 
+export function useDeleteTrainingTags() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (values: string[]) => unwrapResponse(await api.post<ApiEnvelope<{ values: string[]; affected_count: number }>>(
+      '/trainings/tags/delete-batch', { values }
+    )),
+    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [trainingsQueryKeys.all] }),
+  })
+}
+
 export function useExercisesList(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: exercisesListQueryKey,

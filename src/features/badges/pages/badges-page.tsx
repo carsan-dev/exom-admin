@@ -38,7 +38,9 @@ import { normalizeSearchText } from '@/lib/search'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import {
   useDeleteExerciseEquipment,
+  useDeleteExerciseEquipmentValues,
   useDeleteExerciseMuscleGroup,
+  useDeleteExerciseMuscleGroups,
   useExerciseEquipment,
   useExerciseMuscleGroups,
   useRenameExerciseEquipment,
@@ -46,6 +48,7 @@ import {
 } from '@/features/exercises/api'
 import {
   useDeleteTrainingTag,
+  useDeleteTrainingTags,
   useRenameTrainingType,
   useRenameTrainingTag,
   useTrainingTypeCatalogColors,
@@ -56,6 +59,7 @@ import {
 import { getTrainingAccentStyle, type CatalogValueWithColor } from '@/features/trainings/types'
 import {
   useDeleteDietNutritionalBadge,
+  useDeleteDietNutritionalBadges,
   useDietNutritionalBadgeCatalogColors,
   useDietNutritionalBadges,
   useRenameDietNutritionalBadge,
@@ -130,6 +134,9 @@ interface CatalogTableProps {
   onPageChange: (page: number) => void
   onEdit: (item: CatalogItem) => void
   onDelete: (item: CatalogItem) => void
+  selectedValues: Set<string>
+  onSelectionChange: (values: Set<string>) => void
+  onDeleteSelected: () => void
 }
 
 function CatalogTable({
@@ -139,6 +146,9 @@ function CatalogTable({
   onPageChange,
   onEdit,
   onDelete,
+  selectedValues,
+  onSelectionChange,
+  onDeleteSelected,
 }: CatalogTableProps) {
   const normalizedSearch = normalizeSearchText(search)
   const filteredValues = normalizedSearch
@@ -150,6 +160,9 @@ function CatalogTable({
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   )
+  const filteredKeys = filteredValues.map((item) => item.value)
+  const allFilteredSelected = filteredKeys.length > 0 && filteredKeys.every((value) => selectedValues.has(value))
+  const someFilteredSelected = filteredKeys.some((value) => selectedValues.has(value))
 
   if (catalog.isLoading) {
     return <BadgesTableSkeleton />
@@ -193,6 +206,15 @@ function CatalogTable({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {catalog.canDelete ? (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">{selectedValues.size} seleccionados</p>
+            <Button variant="destructive" onClick={onDeleteSelected} disabled={selectedValues.size === 0}>
+              <Trash2 className="h-4 w-4" />
+              Eliminar seleccionados ({selectedValues.size})
+            </Button>
+          </div>
+        ) : null}
         {filteredValues.length === 0 ? (
           <div className="flex min-h-36 flex-col items-center justify-center gap-3 rounded-md border border-dashed border-border/70 p-6 text-center">
             <Tags className="h-8 w-8 text-muted-foreground" />
@@ -207,6 +229,22 @@ function CatalogTable({
             <Table>
               <TableHeader>
                 <TableRow>
+                  {catalog.canDelete ? (
+                    <TableHead className="w-12">
+                      <input
+                        type="checkbox"
+                        aria-label="Seleccionar todos los resultados filtrados"
+                        checked={allFilteredSelected}
+                        ref={(node) => { if (node) node.indeterminate = someFilteredSelected && !allFilteredSelected }}
+                        onChange={(event) => {
+                          const next = new Set(selectedValues)
+                          filteredKeys.forEach((value) => event.target.checked ? next.add(value) : next.delete(value))
+                          onSelectionChange(next)
+                        }}
+                        className="h-4 w-4 accent-brand-primary"
+                      />
+                    </TableHead>
+                  ) : null}
                   <TableHead>Valor</TableHead>
                   {catalog.supportsColor ? (
                     <TableHead className="hidden w-52 sm:table-cell">Color</TableHead>
@@ -218,6 +256,22 @@ function CatalogTable({
               <TableBody>
                 {paginatedValues.map((item) => (
                   <TableRow key={item.value}>
+                    {catalog.canDelete ? (
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          aria-label={`Seleccionar ${item.value}`}
+                          checked={selectedValues.has(item.value)}
+                          onChange={() => {
+                            const next = new Set(selectedValues)
+                            if (next.has(item.value)) next.delete(item.value)
+                            else next.add(item.value)
+                            onSelectionChange(next)
+                          }}
+                          className="h-4 w-4 accent-brand-primary"
+                        />
+                      </TableCell>
+                    ) : null}
                     <TableCell>
                       <Badge
                         variant="outline"
@@ -319,6 +373,8 @@ export function BadgesPage() {
   const [search, setSearch] = useState('')
   const [editingItem, setEditingItem] = useState<CatalogItem | null>(null)
   const [deletingItem, setDeletingItem] = useState<CatalogItem | null>(null)
+  const [selectedValues, setSelectedValues] = useState<Set<string>>(new Set())
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [draftValue, setDraftValue] = useState('')
   const [draftColor, setDraftColor] = useState('#6B7280')
   const deferredSearch = useDeferredValue(search)
@@ -334,15 +390,19 @@ export function BadgesPage() {
 
   const renameMuscleGroup = useRenameExerciseMuscleGroup()
   const deleteMuscleGroup = useDeleteExerciseMuscleGroup()
+  const deleteMuscleGroups = useDeleteExerciseMuscleGroups()
   const renameEquipment = useRenameExerciseEquipment()
   const deleteEquipment = useDeleteExerciseEquipment()
+  const deleteEquipmentValues = useDeleteExerciseEquipmentValues()
   const renameTrainingType = useRenameTrainingType()
   const updateTrainingTypeColor = useUpdateTrainingTypeColor()
   const renameTrainingTag = useRenameTrainingTag()
   const deleteTrainingTag = useDeleteTrainingTag()
+  const deleteTrainingTags = useDeleteTrainingTags()
   const renameDietBadge = useRenameDietNutritionalBadge()
   const updateDietBadgeColor = useUpdateDietNutritionalBadgeColor()
   const deleteDietBadge = useDeleteDietNutritionalBadge()
+  const deleteDietBadges = useDeleteDietNutritionalBadges()
 
   const catalogs = useMemo<Record<CatalogId, CatalogView>>(
     () => ({
@@ -420,41 +480,13 @@ export function BadgesPage() {
       },
     }),
     [
-      dietBadgesQuery.data,
-      dietBadgesQuery.error,
-      dietBadgesQuery.isError,
-      dietBadgesQuery.isLoading,
-      dietBadgesQuery.refetch,
-      dietBadgeColorsQuery.data,
-      dietBadgeColorsQuery.error,
-      dietBadgeColorsQuery.isError,
-      dietBadgeColorsQuery.isLoading,
-      dietBadgeColorsQuery.refetch,
-      equipmentQuery.data,
-      equipmentQuery.error,
-      equipmentQuery.isError,
-      equipmentQuery.isLoading,
-      equipmentQuery.refetch,
-      muscleGroupsQuery.data,
-      muscleGroupsQuery.error,
-      muscleGroupsQuery.isError,
-      muscleGroupsQuery.isLoading,
-      muscleGroupsQuery.refetch,
-      trainingTypesQuery.data,
-      trainingTypesQuery.error,
-      trainingTypesQuery.isError,
-      trainingTypesQuery.isLoading,
-      trainingTypesQuery.refetch,
-      trainingTypeColorsQuery.data,
-      trainingTypeColorsQuery.error,
-      trainingTypeColorsQuery.isError,
-      trainingTypeColorsQuery.isLoading,
-      trainingTypeColorsQuery.refetch,
-      trainingTagsQuery.data,
-      trainingTagsQuery.error,
-      trainingTagsQuery.isError,
-      trainingTagsQuery.isLoading,
-      trainingTagsQuery.refetch,
+      dietBadgesQuery,
+      dietBadgeColorsQuery,
+      equipmentQuery,
+      muscleGroupsQuery,
+      trainingTypesQuery,
+      trainingTypeColorsQuery,
+      trainingTagsQuery,
     ]
   )
 
@@ -472,6 +504,8 @@ export function BadgesPage() {
     deleteEquipment.isPending ||
     deleteTrainingTag.isPending ||
     deleteDietBadge.isPending
+  const isBulkDeletePending = deleteMuscleGroups.isPending || deleteEquipmentValues.isPending ||
+    deleteTrainingTags.isPending || deleteDietBadges.isPending
   useUnsavedChanges(
     'badge-rename',
     Boolean(
@@ -485,11 +519,32 @@ export function BadgesPage() {
   useEffect(() => {
     setSearch('')
     setPage(1)
+    setSelectedValues(new Set())
   }, [activeCatalog])
 
   useEffect(() => {
     setPage(1)
+    setSelectedValues(new Set())
   }, [activeSearch])
+
+  const handleBulkDelete = async () => {
+    const values = Array.from(selectedValues)
+    if (values.length === 0) return
+    try {
+      const result = activeCatalog === 'muscle-groups'
+        ? await deleteMuscleGroups.mutateAsync(values)
+        : activeCatalog === 'equipment'
+          ? await deleteEquipmentValues.mutateAsync(values)
+          : activeCatalog === 'training-tags'
+            ? await deleteTrainingTags.mutateAsync(values)
+            : await deleteDietBadges.mutateAsync(values)
+      toast.success(`${result.values.length} valores borrados. ${formatAffectedRecords(result.affected_count)}.`)
+      setSelectedValues(new Set())
+      setBulkDeleteOpen(false)
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'No se han podido borrar los valores'))
+    }
+  }
 
   useEffect(() => {
     setDraftValue(editingItem?.value ?? '')
@@ -631,6 +686,9 @@ export function BadgesPage() {
             onPageChange={setPage}
             onEdit={setEditingItem}
             onDelete={setDeletingItem}
+            selectedValues={selectedValues}
+            onSelectionChange={setSelectedValues}
+            onDeleteSelected={() => setBulkDeleteOpen(true)}
           />
         </TabsContent>
         <TabsContent value="equipment" className="mt-4">
@@ -641,6 +699,9 @@ export function BadgesPage() {
             onPageChange={setPage}
             onEdit={setEditingItem}
             onDelete={setDeletingItem}
+            selectedValues={selectedValues}
+            onSelectionChange={setSelectedValues}
+            onDeleteSelected={() => setBulkDeleteOpen(true)}
           />
         </TabsContent>
         <TabsContent value="training-types" className="mt-4">
@@ -651,6 +712,9 @@ export function BadgesPage() {
             onPageChange={setPage}
             onEdit={setEditingItem}
             onDelete={setDeletingItem}
+            selectedValues={selectedValues}
+            onSelectionChange={setSelectedValues}
+            onDeleteSelected={() => setBulkDeleteOpen(true)}
           />
         </TabsContent>
         <TabsContent value="training-tags" className="mt-4">
@@ -661,6 +725,9 @@ export function BadgesPage() {
             onPageChange={setPage}
             onEdit={setEditingItem}
             onDelete={setDeletingItem}
+            selectedValues={selectedValues}
+            onSelectionChange={setSelectedValues}
+            onDeleteSelected={() => setBulkDeleteOpen(true)}
           />
         </TabsContent>
         <TabsContent value="diet-badges" className="mt-4">
@@ -671,6 +738,9 @@ export function BadgesPage() {
             onPageChange={setPage}
             onEdit={setEditingItem}
             onDelete={setDeletingItem}
+            selectedValues={selectedValues}
+            onSelectionChange={setSelectedValues}
+            onDeleteSelected={() => setBulkDeleteOpen(true)}
           />
         </TabsContent>
       </Tabs>
@@ -766,6 +836,24 @@ export function BadgesPage() {
               ) : (
                 'Borrar'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={bulkDeleteOpen} onOpenChange={(open) => !isBulkDeletePending && setBulkDeleteOpen(open)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Eliminar {selectedValues.size} valores</DialogTitle>
+            <DialogDescription>
+              Se quitarán de todos los {currentCatalog.badgeLabel.toLocaleLowerCase()} activos donde estén asignados.
+              Los recursos no se eliminarán. Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkDeleteOpen(false)} disabled={isBulkDeletePending}>Cancelar</Button>
+            <Button variant="destructive" onClick={() => void handleBulkDelete()} disabled={isBulkDeletePending}>
+              {isBulkDeletePending ? <><LoaderCircle className="h-4 w-4 animate-spin" />Eliminando...</> : 'Eliminar selección'}
             </Button>
           </DialogFooter>
         </DialogContent>
