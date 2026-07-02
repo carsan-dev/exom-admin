@@ -28,6 +28,32 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 650,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router', '@tanstack/react-query'],
+          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/messaging'],
+          'vendor-ffmpeg': ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
+          'vendor-charts': ['recharts'],
+          'vendor-ui': [
+            '@radix-ui/react-alert-dialog', '@radix-ui/react-avatar',
+            '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-label', '@radix-ui/react-popover',
+            '@radix-ui/react-select', '@radix-ui/react-separator',
+            '@radix-ui/react-slot', '@radix-ui/react-tabs',
+            '@radix-ui/react-tooltip', 'cmdk', 'lucide-react',
+          ],
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'vendor-utils': [
+            'axios', 'date-fns', 'sonner', 'zustand', 'next-themes',
+            'class-variance-authority', 'clsx', 'tailwind-merge', '@dnd-kit/core',
+          ],
+        },
+      },
+    },
+  },
   server: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',

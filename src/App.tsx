@@ -5,25 +5,6 @@ import { queryClient } from '@/lib/query-client'
 import { ProtectedRoute } from '@/features/auth/components/protected-route'
 import { AppLayout } from '@/components/layout/app-layout'
 import { LoginPage } from '@/features/auth/pages/login-page'
-import { DashboardPage } from '@/features/dashboard/pages/dashboard-page'
-import { ClientsPage } from '@/features/clients/pages/clients-page'
-import { ExercisesPage } from '@/features/exercises/pages/exercises-page'
-import { TrainingsPage } from '@/features/trainings/pages/trainings-page'
-import { BadgesPage } from '@/features/badges/pages/badges-page'
-import { IngredientsPage } from '@/features/ingredients/pages/ingredients-page'
-import { DietsPage } from '@/features/diets/pages/diets-page'
-import { AssignmentsPage } from '@/features/assignments/pages/assignments-page'
-import { ProgressPage } from '@/features/progress/pages/progress-page'
-import { FeedbackPage } from '@/features/feedback/pages/feedback-page'
-import { RecapsPage } from '@/features/recaps/pages/recaps-page'
-import { RecapDetailPage } from '@/features/recaps/pages/recap-detail-page'
-import { ChallengesPage } from '@/features/challenges/pages/challenges-page'
-import { AchievementsPage } from '@/features/achievements/pages/achievements-page'
-import { NotificationsPage } from '@/features/notifications/pages/notifications-page'
-import { NotificationTemplatesPage } from '@/features/notification-templates/pages/notification-templates-page'
-import { ClientDetailPage } from '@/features/clients/pages/client-detail-page'
-import { ApprovalRequestsPage } from '@/features/approval-requests/pages/approval-requests-page'
-import { OnboardingPage } from '@/features/auth/pages/onboarding-page'
 import { Toaster } from '@/components/ui/sonner'
 
 const router = createBrowserRouter([
@@ -37,32 +18,32 @@ const router = createBrowserRouter([
     children: [
       {
         path: 'onboarding',
-        element: <OnboardingPage />,
+        lazy: async () => ({ Component: (await import('@/features/auth/pages/onboarding-page')).OnboardingPage }),
       },
       {
         element: <AppLayout />,
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
-          { path: 'dashboard', element: <DashboardPage /> },
-          { path: 'clients', element: <ClientsPage /> },
-          { path: 'clients/:id', element: <ClientDetailPage /> },
-          { path: 'users', element: <ClientsPage /> },
-          { path: 'users/:id', element: <ClientDetailPage /> },
-          { path: 'exercises', element: <ExercisesPage /> },
-          { path: 'trainings', element: <TrainingsPage /> },
-          { path: 'badges', element: <BadgesPage /> },
-          { path: 'ingredients', element: <IngredientsPage /> },
-          { path: 'diets', element: <DietsPage /> },
-          { path: 'assignments', element: <AssignmentsPage /> },
-          { path: 'progress', element: <ProgressPage /> },
-          { path: 'feedback', element: <FeedbackPage /> },
-          { path: 'recaps', element: <RecapsPage /> },
-          { path: 'recaps/:id', element: <RecapDetailPage /> },
-          { path: 'challenges', element: <ChallengesPage /> },
-          { path: 'achievements', element: <AchievementsPage /> },
-          { path: 'notifications', element: <NotificationsPage /> },
-          { path: 'notification-templates', element: <NotificationTemplatesPage /> },
-          { path: 'approval-requests', element: <ApprovalRequestsPage /> },
+          { path: 'dashboard', lazy: async () => ({ Component: (await import('@/features/dashboard/pages/dashboard-page')).DashboardPage }) },
+          { path: 'clients', lazy: async () => ({ Component: (await import('@/features/clients/pages/clients-page')).ClientsPage }) },
+          { path: 'clients/:id', lazy: async () => ({ Component: (await import('@/features/clients/pages/client-detail-page')).ClientDetailPage }) },
+          { path: 'users', lazy: async () => ({ Component: (await import('@/features/clients/pages/clients-page')).ClientsPage }) },
+          { path: 'users/:id', lazy: async () => ({ Component: (await import('@/features/clients/pages/client-detail-page')).ClientDetailPage }) },
+          { path: 'exercises', lazy: async () => ({ Component: (await import('@/features/exercises/pages/exercises-page')).ExercisesPage }) },
+          { path: 'trainings', lazy: async () => ({ Component: (await import('@/features/trainings/pages/trainings-page')).TrainingsPage }) },
+          { path: 'badges', lazy: async () => ({ Component: (await import('@/features/badges/pages/badges-page')).BadgesPage }) },
+          { path: 'ingredients', lazy: async () => ({ Component: (await import('@/features/ingredients/pages/ingredients-page')).IngredientsPage }) },
+          { path: 'diets', lazy: async () => ({ Component: (await import('@/features/diets/pages/diets-page')).DietsPage }) },
+          { path: 'assignments', lazy: async () => ({ Component: (await import('@/features/assignments/pages/assignments-page')).AssignmentsPage }) },
+          { path: 'progress', lazy: async () => ({ Component: (await import('@/features/progress/pages/progress-page')).ProgressPage }) },
+          { path: 'feedback', lazy: async () => ({ Component: (await import('@/features/feedback/pages/feedback-page')).FeedbackPage }) },
+          { path: 'recaps', lazy: async () => ({ Component: (await import('@/features/recaps/pages/recaps-page')).RecapsPage }) },
+          { path: 'recaps/:id', lazy: async () => ({ Component: (await import('@/features/recaps/pages/recap-detail-page')).RecapDetailPage }) },
+          { path: 'challenges', lazy: async () => ({ Component: (await import('@/features/challenges/pages/challenges-page')).ChallengesPage }) },
+          { path: 'achievements', lazy: async () => ({ Component: (await import('@/features/achievements/pages/achievements-page')).AchievementsPage }) },
+          { path: 'notifications', lazy: async () => ({ Component: (await import('@/features/notifications/pages/notifications-page')).NotificationsPage }) },
+          { path: 'notification-templates', lazy: async () => ({ Component: (await import('@/features/notification-templates/pages/notification-templates-page')).NotificationTemplatesPage }) },
+          { path: 'approval-requests', lazy: async () => ({ Component: (await import('@/features/approval-requests/pages/approval-requests-page')).ApprovalRequestsPage }) },
         ],
       },
     ],
