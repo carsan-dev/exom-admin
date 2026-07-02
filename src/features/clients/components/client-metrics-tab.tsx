@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Activity, Scale } from 'lucide-react'
 import {
   CartesianGrid,
@@ -9,6 +10,10 @@ import {
   YAxis,
 } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  ChartScaleSelect,
+} from '@/components/charts/chart-scale'
+import { calculateYAxisScale, type ChartScale } from '@/components/charts/chart-scale-utils'
 import {
   Table,
   TableBody,
@@ -43,6 +48,8 @@ function formatValue(value: number | null, unit: string) {
 }
 
 export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
+  const [weightScale, setWeightScale] = useState<ChartScale>('auto')
+
   if (metrics.length === 0) {
     return (
       <Card>
@@ -60,15 +67,19 @@ export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
       date: chartDateFormatter.format(new Date(metric.date)),
       weight: metric.weight_kg,
     }))
+  const weightYAxis = calculateYAxisScale(chartData.map((point) => point.weight), weightScale, 1)
 
   return (
     <div className="space-y-4">
       {chartData.length > 0 && (
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2">
-              <Scale className="h-5 w-5 text-brand-primary" />
-              <CardTitle className="text-xl">Evolución del peso</CardTitle>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Scale className="h-5 w-5 text-brand-primary" />
+                <CardTitle className="text-xl">Evolución del peso</CardTitle>
+              </div>
+              <ChartScaleSelect value={weightScale} onValueChange={setWeightScale} />
             </div>
             <CardDescription>Últimas mediciones con peso registrado</CardDescription>
           </CardHeader>
@@ -78,7 +89,11 @@ export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
                 <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
                   <XAxis dataKey="date" tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
-                  <YAxis tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
+                  <YAxis
+                    domain={weightYAxis?.domain}
+                    ticks={weightYAxis?.ticks}
+                    tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }}
+                  />
                   <RechartsTooltip
                     contentStyle={{
                       backgroundColor: 'var(--card)',

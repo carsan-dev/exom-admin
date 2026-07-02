@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Scale, TrendingUp } from 'lucide-react'
 import {
   CartesianGrid,
@@ -9,6 +10,10 @@ import {
   YAxis,
 } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  ChartScaleSelect,
+} from '@/components/charts/chart-scale'
+import { calculateYAxisScale, type ChartScale } from '@/components/charts/chart-scale-utils'
 import {
   Select,
   SelectContent,
@@ -36,6 +41,11 @@ interface MetricsChartsProps {
 }
 
 export function MetricsCharts({ clientId, selectedField, onFieldChange }: MetricsChartsProps) {
+  const [weightScale, setWeightScale] = useState<ChartScale>('auto')
+  const [bodyScaleState, setBodyScaleState] = useState<{
+    field: BodyField
+    scale: ChartScale
+  }>({ field: selectedField, scale: 'auto' })
   const { data: weightData, isLoading: weightLoading } = useClientWeightHistory(clientId)
   const { data: bodyData, isLoading: bodyLoading } = useClientBodyHistory(clientId, selectedField)
 
@@ -50,15 +60,25 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
   }))
 
   const bodyFields = Object.keys(BODY_FIELD_LABELS) as BodyField[]
+  const bodyScale = bodyScaleState.field === selectedField ? bodyScaleState.scale : 'auto'
+  const weightYAxis = calculateYAxisScale(weightChartData.map((point) => point.value), weightScale, 1)
+  const bodyYAxis = calculateYAxisScale(
+    bodyChartData.map((point) => point.value),
+    bodyScale,
+    selectedField === 'sleep_hours' ? 0.5 : 1,
+  )
 
   return (
     <div className="space-y-4">
       {/* Weight Chart */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <Scale className="h-5 w-5 text-brand-primary" />
-            <CardTitle className="text-xl">Evolución del peso</CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Scale className="h-5 w-5 text-brand-primary" />
+              <CardTitle className="text-xl">Evolución del peso</CardTitle>
+            </div>
+            <ChartScaleSelect value={weightScale} onValueChange={setWeightScale} />
           </div>
           <CardDescription>Historial completo de peso registrado</CardDescription>
         </CardHeader>
@@ -73,7 +93,11 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
                 <LineChart data={weightChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
                   <XAxis dataKey="date" tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
-                  <YAxis tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
+                  <YAxis
+                    domain={weightYAxis?.domain}
+                    ticks={weightYAxis?.ticks}
+                    tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }}
+                  />
                   <RechartsTooltip
                     contentStyle={{
                       backgroundColor: 'var(--card)',
@@ -101,26 +125,32 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
       {/* Body Metric Chart */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-brand-primary" />
               <CardTitle className="text-xl">Evolución corporal</CardTitle>
             </div>
-            <Select
-              value={selectedField}
-              onValueChange={(v) => onFieldChange(v as BodyField)}
-            >
-              <SelectTrigger className="w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {bodyFields.map((field) => (
-                  <SelectItem key={field} value={field}>
-                    {BODY_FIELD_LABELS[field]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-wrap items-center gap-2">
+              <Select
+                value={selectedField}
+                onValueChange={(v) => onFieldChange(v as BodyField)}
+              >
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {bodyFields.map((field) => (
+                    <SelectItem key={field} value={field}>
+                      {BODY_FIELD_LABELS[field]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <ChartScaleSelect
+                value={bodyScale}
+                onValueChange={(scale) => setBodyScaleState({ field: selectedField, scale })}
+              />
+            </div>
           </div>
           <CardDescription>Historial de {BODY_FIELD_LABELS[selectedField].toLowerCase()}</CardDescription>
         </CardHeader>
@@ -137,7 +167,11 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
                 <LineChart data={bodyChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
                   <XAxis dataKey="date" tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
-                  <YAxis tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
+                  <YAxis
+                    domain={bodyYAxis?.domain}
+                    ticks={bodyYAxis?.ticks}
+                    tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }}
+                  />
                   <RechartsTooltip
                     contentStyle={{
                       backgroundColor: 'var(--card)',
