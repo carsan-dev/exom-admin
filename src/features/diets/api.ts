@@ -270,6 +270,36 @@ export function useDietTags() {
   })
 }
 
+export function useRenameDietTag() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (values: RenameCatalogValuePayload) => unwrapResponse(
+      await api.patch<ApiEnvelope<CatalogMutationResponse>>('/diets/tags/rename', values)
+    ),
+    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [dietsQueryKeys.all] }),
+  })
+}
+
+export function useDeleteDietTag() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (value: string) => unwrapResponse(
+      await api.delete<ApiEnvelope<CatalogMutationResponse>>(`/diets/tags/${encodeURIComponent(value)}`)
+    ),
+    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [dietsQueryKeys.all] }),
+  })
+}
+
+export function useDeleteDietTags() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (values: string[]) => unwrapResponse(
+      await api.post<ApiEnvelope<{ values: string[]; affected_count: number }>>('/diets/tags/delete-batch', { values })
+    ),
+    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [dietsQueryKeys.all] }),
+  })
+}
+
 export function useCreateDiet() {
   const queryClient = useQueryClient()
 

@@ -49,6 +49,8 @@ import {
 import {
   useDeleteTrainingTag,
   useDeleteTrainingTags,
+  useDeleteTrainingType,
+  useDeleteTrainingTypes,
   useRenameTrainingType,
   useRenameTrainingTag,
   useTrainingTypeCatalogColors,
@@ -60,9 +62,13 @@ import { getTrainingAccentStyle, type CatalogValueWithColor } from '@/features/t
 import {
   useDeleteDietNutritionalBadge,
   useDeleteDietNutritionalBadges,
+  useDeleteDietTag,
+  useDeleteDietTags,
   useDietNutritionalBadgeCatalogColors,
   useDietNutritionalBadges,
+  useDietTags,
   useRenameDietNutritionalBadge,
+  useRenameDietTag,
   useUpdateDietNutritionalBadgeColor,
 } from '@/features/diets/api'
 
@@ -73,6 +79,7 @@ type CatalogId =
   | 'equipment'
   | 'training-types'
   | 'training-tags'
+  | 'diet-tags'
   | 'diet-badges'
 
 interface CatalogItem {
@@ -385,6 +392,7 @@ export function BadgesPage() {
   const trainingTypesQuery = useTrainingTypes()
   const trainingTypeColorsQuery = useTrainingTypeCatalogColors()
   const trainingTagsQuery = useTrainingTags()
+  const dietTagsQuery = useDietTags()
   const dietBadgesQuery = useDietNutritionalBadges()
   const dietBadgeColorsQuery = useDietNutritionalBadgeCatalogColors()
 
@@ -395,10 +403,15 @@ export function BadgesPage() {
   const deleteEquipment = useDeleteExerciseEquipment()
   const deleteEquipmentValues = useDeleteExerciseEquipmentValues()
   const renameTrainingType = useRenameTrainingType()
+  const deleteTrainingType = useDeleteTrainingType()
+  const deleteTrainingTypes = useDeleteTrainingTypes()
   const updateTrainingTypeColor = useUpdateTrainingTypeColor()
   const renameTrainingTag = useRenameTrainingTag()
   const deleteTrainingTag = useDeleteTrainingTag()
   const deleteTrainingTags = useDeleteTrainingTags()
+  const renameDietTag = useRenameDietTag()
+  const deleteDietTag = useDeleteDietTag()
+  const deleteDietTags = useDeleteDietTags()
   const renameDietBadge = useRenameDietNutritionalBadge()
   const updateDietBadgeColor = useUpdateDietNutritionalBadgeColor()
   const deleteDietBadge = useDeleteDietNutritionalBadge()
@@ -438,7 +451,7 @@ export function BadgesPage() {
         description:
           'Valores reutilizables en entrenamientos y en reglas de logros por tipo.',
         badgeLabel: 'Entrenamientos',
-        canDelete: false,
+        canDelete: true,
         supportsColor: true,
         values: trainingTypeColorsQuery.data ?? toCatalogValues(trainingTypesQuery.data),
         isLoading: trainingTypesQuery.isLoading || trainingTypeColorsQuery.isLoading,
@@ -478,6 +491,19 @@ export function BadgesPage() {
           void dietBadgeColorsQuery.refetch()
         },
       },
+      'diet-tags': {
+        id: 'diet-tags',
+        title: 'Tags de dietas',
+        description: 'Tags usados para organizar dietas.',
+        badgeLabel: 'Dietas',
+        canDelete: true,
+        supportsColor: false,
+        values: toCatalogValues(dietTagsQuery.data),
+        isLoading: dietTagsQuery.isLoading,
+        isError: dietTagsQuery.isError,
+        error: dietTagsQuery.error,
+        refetch: () => void dietTagsQuery.refetch(),
+      },
     }),
     [
       dietBadgesQuery,
@@ -487,6 +513,7 @@ export function BadgesPage() {
       trainingTypesQuery,
       trainingTypeColorsQuery,
       trainingTagsQuery,
+      dietTagsQuery,
     ]
   )
 
@@ -497,15 +524,19 @@ export function BadgesPage() {
     renameTrainingType.isPending ||
     updateTrainingTypeColor.isPending ||
     renameTrainingTag.isPending ||
+    renameDietTag.isPending ||
     renameDietBadge.isPending ||
     updateDietBadgeColor.isPending
   const isDeletePending =
     deleteMuscleGroup.isPending ||
     deleteEquipment.isPending ||
+    deleteTrainingType.isPending ||
     deleteTrainingTag.isPending ||
+    deleteDietTag.isPending ||
     deleteDietBadge.isPending
   const isBulkDeletePending = deleteMuscleGroups.isPending || deleteEquipmentValues.isPending ||
-    deleteTrainingTags.isPending || deleteDietBadges.isPending
+    deleteTrainingTypes.isPending || deleteTrainingTags.isPending || deleteDietTags.isPending ||
+    deleteDietBadges.isPending
   useUnsavedChanges(
     'badge-rename',
     Boolean(
@@ -535,8 +566,12 @@ export function BadgesPage() {
         ? await deleteMuscleGroups.mutateAsync(values)
         : activeCatalog === 'equipment'
           ? await deleteEquipmentValues.mutateAsync(values)
+          : activeCatalog === 'training-types'
+            ? await deleteTrainingTypes.mutateAsync(values)
           : activeCatalog === 'training-tags'
             ? await deleteTrainingTags.mutateAsync(values)
+            : activeCatalog === 'diet-tags'
+              ? await deleteDietTags.mutateAsync(values)
             : await deleteDietBadges.mutateAsync(values)
       toast.success(`${result.values.length} valores borrados. ${formatAffectedRecords(result.affected_count)}.`)
       setSelectedValues(new Set())
@@ -575,7 +610,9 @@ export function BadgesPage() {
               ? await renameTrainingType.mutateAsync({ from: editingItem.value, to: nextValue })
               : editingItem.catalogId === 'training-tags'
                 ? await renameTrainingTag.mutateAsync({ from: editingItem.value, to: nextValue })
-                : await renameDietBadge.mutateAsync({ from: editingItem.value, to: nextValue })
+                : editingItem.catalogId === 'diet-tags'
+                  ? await renameDietTag.mutateAsync({ from: editingItem.value, to: nextValue })
+                  : await renameDietBadge.mutateAsync({ from: editingItem.value, to: nextValue })
         : { value: nextValue, affected_count: 0 }
 
       if (colorChanged) {
@@ -606,11 +643,13 @@ export function BadgesPage() {
           ? await deleteMuscleGroup.mutateAsync(deletingItem.value)
           : deletingItem.catalogId === 'equipment'
             ? await deleteEquipment.mutateAsync(deletingItem.value)
-            : deletingItem.catalogId === 'training-types'
-              ? null
+          : deletingItem.catalogId === 'training-types'
+              ? await deleteTrainingType.mutateAsync(deletingItem.value)
             : deletingItem.catalogId === 'training-tags'
               ? await deleteTrainingTag.mutateAsync(deletingItem.value)
-              : await deleteDietBadge.mutateAsync(deletingItem.value)
+              : deletingItem.catalogId === 'diet-tags'
+                ? await deleteDietTag.mutateAsync(deletingItem.value)
+                : await deleteDietBadge.mutateAsync(deletingItem.value)
 
       if (!result) {
         return
@@ -649,7 +688,7 @@ export function BadgesPage() {
 
       <Tabs value={activeCatalog} onValueChange={(value) => setActiveCatalog(value as CatalogId)}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <TabsList className="grid h-auto w-full grid-cols-1 gap-1 sm:grid-cols-5 lg:w-auto">
+          <TabsList className="grid h-auto w-full grid-cols-1 gap-1 sm:grid-cols-3 lg:grid-cols-6 lg:w-auto">
             <TabsTrigger value="muscle-groups" className="min-h-10 whitespace-normal">
               Grupos musculares
             </TabsTrigger>
@@ -664,6 +703,9 @@ export function BadgesPage() {
             </TabsTrigger>
             <TabsTrigger value="diet-badges" className="min-h-10 whitespace-normal">
               Badges dieta
+            </TabsTrigger>
+            <TabsTrigger value="diet-tags" className="min-h-10 whitespace-normal">
+              Tags dieta
             </TabsTrigger>
           </TabsList>
 
@@ -733,6 +775,19 @@ export function BadgesPage() {
         <TabsContent value="diet-badges" className="mt-4">
           <CatalogTable
             catalog={catalogs['diet-badges']}
+            search={activeSearch}
+            page={page}
+            onPageChange={setPage}
+            onEdit={setEditingItem}
+            onDelete={setDeletingItem}
+            selectedValues={selectedValues}
+            onSelectionChange={setSelectedValues}
+            onDeleteSelected={() => setBulkDeleteOpen(true)}
+          />
+        </TabsContent>
+        <TabsContent value="diet-tags" className="mt-4">
+          <CatalogTable
+            catalog={catalogs['diet-tags']}
             search={activeSearch}
             page={page}
             onPageChange={setPage}

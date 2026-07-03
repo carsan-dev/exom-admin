@@ -413,6 +413,26 @@ export function useRenameTrainingType() {
   })
 }
 
+export function useDeleteTrainingType() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (value: string) => unwrapResponse(await api.delete<ApiEnvelope<CatalogMutationResponse>>(
+      `/trainings/types/${encodeURIComponent(value)}`
+    )),
+    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [trainingsQueryKeys.all] }),
+  })
+}
+
+export function useDeleteTrainingTypes() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (values: string[]) => unwrapResponse(await api.post<ApiEnvelope<{ values: string[]; affected_count: number }>>(
+      '/trainings/types/delete-batch', { values }
+    )),
+    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [trainingsQueryKeys.all] }),
+  })
+}
+
 export function useUpdateTrainingTypeColor() {
   const queryClient = useQueryClient()
 
