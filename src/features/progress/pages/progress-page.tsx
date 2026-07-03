@@ -89,7 +89,7 @@ export function ProgressPage() {
           </TabsList>
 
           {/* Resumen Tab */}
-          <TabsContent value="resumen" className="space-y-4">
+          <TabsContent value="resumen" className="space-y-4 pt-2 sm:pt-3">
             <ProgressOverviewCards
               streak={clientData?.streak}
               weekSummary={weekSummary}
