@@ -36,6 +36,7 @@ import {
   useUpdateAutoAssignmentRule,
 } from '../api'
 import { AssignmentEditorDialog } from '../components/assignment-editor-dialog'
+import type { AssignmentEditorMode } from '../components/assignment-editor-state'
 import { AssignmentsCatalogErrorState } from '../components/assignments-catalog-error-state'
 import { AssignmentsEmptyState } from '../components/assignments-empty-state'
 import { AssignmentsMonthGrid } from '../components/assignments-month-grid'
@@ -139,6 +140,7 @@ export function AssignmentsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedDates, setSelectedDates] = useState<string[]>([])
   const [editorOpen, setEditorOpen] = useState(false)
+  const [editorMode, setEditorMode] = useState<AssignmentEditorMode>('selection')
   const [copyWeekOpen, setCopyWeekOpen] = useState(false)
   const [copySelectionOpen, setCopySelectionOpen] = useState(false)
   const [deleteSelectionOpen, setDeleteSelectionOpen] = useState(false)
@@ -326,6 +328,16 @@ export function AssignmentsPage() {
       return
     }
 
+    setEditorMode('selection')
+    setEditorOpen(true)
+  }
+
+  const handleOpenAutoRuleEditor = () => {
+    if (!activeAutoRuleQuery.data) {
+      return
+    }
+
+    setEditorMode('auto-rule')
     setEditorOpen(true)
   }
 
@@ -504,6 +516,7 @@ export function AssignmentsPage() {
         canDeleteSelectedDays={selectedAssignmentIds.length > 0}
         activeAutoRule={activeAutoRuleQuery.data ?? null}
         isAutoRuleLoading={activeAutoRuleQuery.isLoading}
+        onEditAutoRule={handleOpenAutoRuleEditor}
         onDeactivateAutoRule={() => setDeactivateAutoRuleOpen(true)}
         onClientChange={handleClientChange}
         onChangeView={handleViewChange}
@@ -692,6 +705,7 @@ export function AssignmentsPage() {
 
           <AssignmentEditorDialog
             open={editorOpen}
+            mode={editorMode}
             clientId={selectedClientId}
             selectedDays={selectedDays}
             availableTrainings={trainings}

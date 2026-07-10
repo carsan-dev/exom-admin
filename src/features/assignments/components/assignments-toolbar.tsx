@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Copy, Layers3, Plus, Repeat2, Trash2, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Copy, Layers3, Pencil, Plus, Repeat2, Trash2, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -28,6 +28,7 @@ interface AssignmentsToolbarProps {
   canDeleteSelectedDays: boolean
   activeAutoRule: AutoAssignmentRule | null
   isAutoRuleLoading: boolean
+  onEditAutoRule: () => void
   onDeactivateAutoRule: () => void
   onClientChange: (clientId: string) => void
   onChangeView: (viewMode: AssignmentsViewMode) => void
@@ -57,6 +58,7 @@ export function AssignmentsToolbar({
   canDeleteSelectedDays,
   activeAutoRule,
   isAutoRuleLoading,
+  onEditAutoRule,
   onDeactivateAutoRule,
   onClientChange,
   onChangeView,
@@ -187,6 +189,10 @@ export function AssignmentsToolbar({
           </div>
 
           <div className="grid gap-2 sm:flex sm:flex-wrap md:col-span-2 2xl:col-span-3 2xl:justify-end">
+            <Button variant="outline" onClick={onEditAutoRule} disabled={!activeAutoRule || isBusy}>
+              <Pencil className="h-4 w-4" />
+              Editar autoasignación
+            </Button>
             <Button variant="outline" onClick={onDeactivateAutoRule} disabled={!activeAutoRule || isBusy}>
               <Repeat2 className="h-4 w-4" />
               Desactivar autoasignación

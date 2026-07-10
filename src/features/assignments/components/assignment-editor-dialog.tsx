@@ -42,6 +42,7 @@ import {
   type AutoAssignmentRule,
   type CatalogAvailability,
 } from '../types'
+import { buildAssignmentEditorDefaults, type AssignmentEditorMode } from './assignment-editor-state'
 import { AssignmentPreviewDialog } from './assignment-preview-dialog'
 
 const CLEAR_SELECTION_VALUE = '__none__'
@@ -75,6 +76,7 @@ function getWeekStart(value: string) {
 
 interface AssignmentEditorDialogProps {
   open: boolean
+  mode: AssignmentEditorMode
   clientId: string
   selectedDays: AssignmentDay[]
   availableTrainings: AssignmentTrainingOption[]
@@ -132,6 +134,7 @@ function buildPreviewDiet(dietId: string | null, availableDiets: AssignmentDietO
 
 export function AssignmentEditorDialog({
   open,
+  mode,
   clientId,
   selectedDays,
   availableTrainings,
@@ -171,21 +174,35 @@ export function AssignmentEditorDialog({
         .join('|'),
     [sortedSelectedDays],
   )
-  const sourceDayMap = useMemo(
-    () => new Map(sortedSelectedDays.map((day) => [day.date, day])),
-    [sortedSelectedDays],
-  )
+  const editingAutoRule = mode === 'auto-rule' ? activeAutoRule : null
+  const sourceDayMap = useMemo(() => {
+    if (editingAutoRule) {
+      return new Map(editingAutoRule.days.map((day) => {
+        const date = formatUtcDate(addUtcDays(parseUtcDate(editingAutoRule.source_week_start), day.weekday - 1))
+        return [date, {
+          id: null,
+          client_id: clientId,
+          date,
+          is_rest_day: day.is_rest_day,
+          training: day.training,
+          diet: day.diet,
+        } satisfies AssignmentDay] as const
+      }))
+    }
+
+    return new Map(sortedSelectedDays.map((day) => [day.date, day]))
+  }, [clientId, editingAutoRule, sortedSelectedDays])
   const watchedDays = form.watch('days') ?? []
   const autoAssignmentEnabled = form.watch('auto_assignment_enabled')
   const autoAssignmentEndMode = form.watch('auto_assignment_end_mode')
   const isRestOnlyMode = catalogAvailability.is_rest_only
   const canUseTrainingCatalog = catalogAvailability.can_use_training_catalog
   const canUseDietCatalog = catalogAvailability.can_use_diet_catalog
-  const canEditSingleDate = fields.length === 1 && Boolean(fields[0]?.assignment_id)
+  const canEditSingleDate = mode === 'selection' && fields.length === 1 && Boolean(fields[0]?.assignment_id)
   const firstSelectedDate = sortedSelectedDays[0]?.date
-  const sourceWeekStart = activeAutoRule?.source_week_start
+  const sourceWeekStart = editingAutoRule?.source_week_start
     ?? (firstSelectedDate ? formatUtcDate(getWeekStart(firstSelectedDate)) : null)
-  const startsOn = activeAutoRule?.starts_on
+  const startsOn = editingAutoRule?.starts_on
     ?? (sourceWeekStart ? formatUtcDate(addUtcDays(parseUtcDate(sourceWeekStart), 7)) : null)
 
   useEffect(() => {
@@ -200,35 +217,10 @@ export function AssignmentEditorDialog({
       return
     }
 
-    const editorDays = activeAutoRule
-      ? activeAutoRule.days.map((day) => {
-          const date = formatUtcDate(addUtcDays(parseUtcDate(activeAutoRule.source_week_start), day.weekday - 1))
-          return {
-            assignment_id: null,
-            original_date: date,
-            date,
-            training_id: day.training_id,
-            diet_id: day.diet_id,
-            is_rest_day: day.is_rest_day,
-          }
-        })
-      : sortedSelectedDays.map((day) => ({
-        assignment_id: day.id,
-        original_date: day.date,
-        date: day.date,
-        training_id: day.training?.id ?? null,
-        diet_id: day.diet?.id ?? null,
-        is_rest_day: day.is_rest_day,
-      }))
-    form.reset({
-      auto_assignment_enabled: Boolean(activeAutoRule),
-      auto_assignment_end_mode: activeAutoRule?.ends_on ? 'date' : 'indefinite',
-      auto_assignment_ends_on: activeAutoRule?.ends_on ?? null,
-      days: editorDays,
-    })
+    form.reset(buildAssignmentEditorDefaults(mode, sortedSelectedDays, activeAutoRule))
     // selectedDaysKey is semantic dependency; sortedSelectedDays may get a new array identity each render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, open, selectedDaysKey, activeAutoRule])
+  }, [form, open, selectedDaysKey, editingAutoRule, mode, activeAutoRule])
 
   const preview: AssignmentPreview = {
     days: watchedDays.map((day) => ({
@@ -243,15 +235,19 @@ export function AssignmentEditorDialog({
     })),
   }
 
-  const dialogTitle = sortedSelectedDays.length > 1 ? 'Editar selección' : 'Editar día'
-  const dialogDescription = sortedSelectedDays.length > 1
+  const dialogTitle = editingAutoRule
+    ? 'Editar autoasignación'
+    : sortedSelectedDays.length > 1 ? 'Editar selección' : 'Editar día'
+  const dialogDescription = editingAutoRule
+    ? 'Actualiza el patrón semanal que se aplicará a futuras asignaciones.'
+    : sortedSelectedDays.length > 1
     ? 'Configura el contenido de cada fecha desde el mismo modal. Cada fila se guarda con su propia combinación.'
     : 'Ajusta la planificación del día seleccionado y cambia descanso, entreno o dieta sin salir del modal.'
 
   async function handleSave(values: AssignmentEditorFormValues) {
-    if (activeAutoRule) {
+    if (editingAutoRule) {
       const nextWeekdays = new Set(values.days.map((day) => getIsoWeekday(day.date)))
-      const removedWeekdays = activeAutoRule.days
+      const removedWeekdays = editingAutoRule.days
         .map((day) => day.weekday)
         .filter((weekday) => !nextWeekdays.has(weekday))
       if (removedWeekdays.length > 0 && !window.confirm(
@@ -274,7 +270,7 @@ export function AssignmentEditorDialog({
         values.auto_assignment_enabled && sourceWeekStart && startsOn
           ? {
               enabled: true,
-              rule_id: activeAutoRule?.id,
+              rule_id: editingAutoRule?.id,
               source_week_start: sourceWeekStart,
               starts_on: startsOn,
               ends_on:
@@ -305,11 +301,11 @@ export function AssignmentEditorDialog({
                 await handleSave(values)
               })}
             >
-              {activeAutoRule && (
+              {editingAutoRule && (
                 <div className="rounded-2xl border border-status-warning/30 bg-status-warning/5 p-4 text-sm">
                   <p className="font-medium">Actualizando patrón activo</p>
                   <p className="mt-1 text-muted-foreground">
-                    Patrón actual: {activeAutoRule.days.map((day) => day.weekday).join(', ')}.
+                    Patrón actual: {editingAutoRule.days.map((day) => day.weekday).join(', ')}.
                   </p>
                   <p className="mt-1 text-muted-foreground">
                     Patrón nuevo: {watchedDays.map((day) => getIsoWeekday(day.date)).join(', ') || 'sin días'}.
@@ -319,12 +315,14 @@ export function AssignmentEditorDialog({
 
               <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
                 <p className="text-sm font-medium text-foreground">
-                  {sortedSelectedDays.length > 1
+                  {editingAutoRule
+                    ? `${fields.length} días en el patrón semanal`
+                    : sortedSelectedDays.length > 1
                     ? `${sortedSelectedDays.length} días seleccionados`
                     : '1 día seleccionado'}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {sortedSelectedDays.map((day) => (
+                  {(editingAutoRule ? watchedDays : sortedSelectedDays).map((day) => (
                     <span key={day.date} className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs text-muted-foreground">
                       {day.date}
                     </span>
@@ -559,6 +557,14 @@ export function AssignmentEditorDialog({
                 })}
               </div>
 
+              {!editingAutoRule && activeAutoRule ? (
+                <div className="rounded-2xl border border-status-info/30 bg-status-info/5 p-5 text-sm">
+                  <p className="font-medium text-foreground">Edición puntual</p>
+                  <p className="mt-1 text-muted-foreground">
+                    Este cambio solo afecta a las fechas seleccionadas. La autoasignación activa no se modificará.
+                  </p>
+                </div>
+              ) : (
               <div className="space-y-4 rounded-2xl border border-border/70 bg-muted/20 p-5">
                 <FormField
                   control={form.control}
@@ -578,9 +584,10 @@ export function AssignmentEditorDialog({
                               type="checkbox"
                               className="h-4 w-4 accent-current"
                               checked={field.value}
+                              disabled={Boolean(editingAutoRule)}
                               onChange={(event) => field.onChange(event.target.checked)}
                             />
-                            Activar
+                            {editingAutoRule ? 'Activa' : 'Activar'}
                           </label>
                         </FormControl>
                       </div>
@@ -653,6 +660,7 @@ export function AssignmentEditorDialog({
                   </div>
                 )}
               </div>
+              )}
 
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
@@ -674,7 +682,7 @@ export function AssignmentEditorDialog({
                   Vista previa
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  Guardar planificación
+                  {editingAutoRule ? 'Guardar patrón' : 'Guardar planificación'}
                 </Button>
               </DialogFooter>
             </form>
@@ -685,7 +693,7 @@ export function AssignmentEditorDialog({
       <AssignmentPreviewDialog
         open={previewOpen}
         preview={preview}
-        mode={sortedSelectedDays.some((day) => day.id) ? 'edit' : 'create'}
+        mode={editingAutoRule || sortedSelectedDays.some((day) => day.id) ? 'edit' : 'create'}
         isSubmitting={isSubmitting}
         onOpenChange={setPreviewOpen}
         onConfirm={form.handleSubmit(async (values) => {
