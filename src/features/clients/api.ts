@@ -391,7 +391,15 @@ export function useUpdateClientProfile() {
   return useMutation({
     mutationFn: async ({ clientId, values }: { clientId: string; values: UpdateClientProfileFormValues }) => {
       const payload = {
-        main_goal: values.main_goal?.trim() ? values.main_goal.trim() : null,
+        first_name: values.first_name.trim(),
+        last_name: values.last_name.trim(),
+        level: values.level,
+        main_goal: values.main_goal.trim() || null,
+        muscle_mass_goal: values.muscle_mass_goal === '' ? null : Number(values.muscle_mass_goal),
+        target_calories: values.target_calories === '' ? null : Number(values.target_calories),
+        current_weight: values.current_weight === '' ? null : Number(values.current_weight),
+        height: values.height === '' ? null : Number(values.height),
+        birth_date: values.birth_date === '' ? null : values.birth_date,
       }
       const response = await api.patch<ApiEnvelope<ClientDetail>>(`/admin/clients/${clientId}/profile`, payload)
       return unwrapResponse(response)

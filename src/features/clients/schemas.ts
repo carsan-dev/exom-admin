@@ -50,7 +50,52 @@ export const updateUserSchema = z.object({
 })
 
 export const updateClientProfileSchema = z.object({
-  main_goal: z.string().trim().max(160, 'El objetivo no puede superar 160 caracteres').optional(),
+  first_name: z.string().trim().min(1, 'El nombre es obligatorio').max(100),
+  last_name: z.string().trim().min(1, 'El apellido es obligatorio').max(100),
+  level: z.enum(LEVEL_OPTIONS),
+  main_goal: z.string().trim().max(160, 'El objetivo no puede superar 160 caracteres'),
+  muscle_mass_goal: z
+    .string()
+    .trim()
+    .refine(
+      (value) =>
+        value === '' ||
+        (!Number.isNaN(Number(value)) && Number(value) >= 0 && Number(value) <= 500),
+      'Introduce un valor entre 0 y 500'
+    ),
+  target_calories: z
+    .string()
+    .trim()
+    .refine(
+      (value) =>
+        value === '' ||
+        (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 20000),
+      'Introduce un valor entero entre 0 y 20.000'
+    ),
+  current_weight: z
+    .string()
+    .trim()
+    .refine(
+      (value) =>
+        value === '' ||
+        (!Number.isNaN(Number(value)) && Number(value) >= 0 && Number(value) <= 500),
+      'Introduce un valor entre 0 y 500'
+    ),
+  height: z
+    .string()
+    .trim()
+    .refine(
+      (value) =>
+        value === '' ||
+        (!Number.isNaN(Number(value)) && Number(value) >= 0 && Number(value) <= 300),
+      'Introduce un valor entre 0 y 300'
+    ),
+  birth_date: z
+    .string()
+    .refine(
+      (value) => value === '' || new Date(`${value}T00:00:00`).getTime() <= Date.now(),
+      'La fecha de nacimiento no puede ser futura'
+    ),
 })
 
 export const updateRoleSchema = z.object({

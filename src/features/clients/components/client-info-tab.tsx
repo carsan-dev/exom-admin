@@ -3,7 +3,7 @@ import { Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LEVEL_LABELS, type ClientProfile } from '../types'
-import { EditMainGoalDialog } from './edit-main-goal-dialog'
+import { EditClientProfileDialog } from './edit-client-profile-dialog'
 
 interface ClientInfoTabProps {
   profile: ClientProfile | null
@@ -33,15 +33,29 @@ function formatDate(value: string | null) {
 }
 
 export function ClientInfoTab({ profile, clientId }: ClientInfoTabProps) {
-  const [editGoalOpen, setEditGoalOpen] = useState(false)
+  const [editProfileOpen, setEditProfileOpen] = useState(false)
 
   if (!profile) {
     return (
-      <Card>
-        <CardContent className="pt-6 text-sm text-muted-foreground">
-          Este cliente todavía no tiene datos de perfil ampliados.
-        </CardContent>
-      </Card>
+      <>
+        <Card>
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
+            <p className="text-sm text-muted-foreground">
+              Este cliente todavía no tiene datos de perfil ampliados.
+            </p>
+            <Button size="sm" variant="outline" onClick={() => setEditProfileOpen(true)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Añadir datos
+            </Button>
+          </CardContent>
+        </Card>
+        <EditClientProfileDialog
+          open={editProfileOpen}
+          onOpenChange={setEditProfileOpen}
+          clientId={clientId}
+          profile={null}
+        />
+      </>
     )
   }
 
@@ -49,7 +63,10 @@ export function ClientInfoTab({ profile, clientId }: ClientInfoTabProps) {
     { label: 'Nivel', value: LEVEL_LABELS[profile.level] },
     { label: 'Peso actual', value: formatMetric(profile.current_weight, 'kg') },
     { label: 'Altura', value: formatMetric(profile.height, 'cm') },
-    { label: 'Calorías objetivo', value: profile.target_calories ? `${profile.target_calories} kcal` : 'Sin registrar' },
+    {
+      label: 'Calorías objetivo',
+      value: profile.target_calories ? `${profile.target_calories} kcal` : 'Sin registrar',
+    },
     { label: 'Objetivo de masa muscular', value: formatMetric(profile.muscle_mass_goal, 'kg') },
     { label: 'Fecha de nacimiento', value: formatDate(profile.birth_date) },
     { label: 'Creado', value: formatDate(profile.created_at) },
@@ -64,9 +81,9 @@ export function ClientInfoTab({ profile, clientId }: ClientInfoTabProps) {
             <CardTitle className="text-xl">Objetivo principal</CardTitle>
             <CardDescription>Motivación y foco actual del cliente</CardDescription>
           </div>
-          <Button size="sm" variant="outline" onClick={() => setEditGoalOpen(true)}>
+          <Button size="sm" variant="outline" onClick={() => setEditProfileOpen(true)}>
             <Pencil className="mr-2 h-4 w-4" />
-            Editar
+            Editar datos
           </Button>
         </CardHeader>
         <CardContent>
@@ -89,11 +106,11 @@ export function ClientInfoTab({ profile, clientId }: ClientInfoTabProps) {
         ))}
       </div>
 
-      <EditMainGoalDialog
-        open={editGoalOpen}
-        onOpenChange={setEditGoalOpen}
+      <EditClientProfileDialog
+        open={editProfileOpen}
+        onOpenChange={setEditProfileOpen}
         clientId={clientId}
-        currentMainGoal={profile.main_goal}
+        profile={profile}
       />
     </div>
   )
