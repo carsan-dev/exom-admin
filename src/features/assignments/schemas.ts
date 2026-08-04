@@ -43,15 +43,19 @@ export const assignmentEditorDaySchema = z
     original_date: z.string().regex(isoDateRegex, 'Fecha original inválida'),
     date: z.string().regex(isoDateRegex, 'Selecciona una fecha válida'),
     training_id: nullableSelectionSchema,
+    training_ids: z.array(z.string().trim().min(1)).max(5, 'Máximo 5 entrenamientos').refine(
+      (ids) => new Set(ids).size === ids.length,
+      'No puedes repetir entrenamientos',
+    ).default([]),
     diet_id: nullableSelectionSchema,
     is_rest_day: z.boolean().default(false),
   })
   .superRefine((value, context) => {
-    if (!value.is_rest_day && !value.training_id && !value.diet_id) {
+    if (!value.is_rest_day && value.training_ids.length === 0 && !value.training_id && !value.diet_id) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Selecciona un entrenamiento, una dieta o marca descanso',
-        path: ['training_id'],
+        path: ['training_ids'],
       })
     }
   })

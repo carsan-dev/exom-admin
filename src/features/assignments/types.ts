@@ -51,6 +51,8 @@ export interface AssignmentDay {
   date: string
   is_rest_day: boolean
   training: AssignmentDayTraining | null
+  trainings?: AssignmentDayTraining[]
+  training_ids?: string[]
   diet: AssignmentDayDiet | null
 }
 
@@ -81,6 +83,7 @@ export interface AssignmentEditorDayValues {
   original_date: string
   date: string
   training_id?: string | null
+  training_ids?: string[]
   diet_id?: string | null
   is_rest_day: boolean
 }
@@ -94,6 +97,7 @@ export interface AssignmentEditorValues {
 export interface AssignmentUpdateValues {
   date?: string | null
   training_id?: string | null
+  training_ids?: string[]
   diet_id?: string | null
   is_rest_day: boolean
 }
@@ -101,6 +105,7 @@ export interface AssignmentUpdateValues {
 export interface AssignmentBatchDayInput {
   date: string
   training_id?: string | null
+  training_ids?: string[]
   diet_id?: string | null
   is_rest_day: boolean
 }
@@ -146,6 +151,7 @@ export interface AssignmentPreviewDiet {
 export interface AssignmentPreviewDay {
   date: string
   training: AssignmentPreviewTraining | null
+  trainings: AssignmentPreviewTraining[]
   diet: AssignmentPreviewDiet | null
   is_rest_day: boolean
 }
@@ -168,9 +174,11 @@ export interface AutoAssignmentRuleDay {
   id: string
   weekday: number
   training_id: string | null
+  training_ids?: string[]
   diet_id: string | null
   is_rest_day: boolean
   training: AssignmentDayTraining | null
+  trainings?: AssignmentDayTraining[]
   diet: AssignmentDayDiet | null
 }
 
@@ -194,6 +202,7 @@ export interface CreateAutoAssignmentRuleValues {
   days: Array<{
     weekday: number
     training_id?: string | null
+    training_ids?: string[]
     diet_id?: string | null
     is_rest_day: boolean
   }>
@@ -225,6 +234,7 @@ export interface CopyWeekPreviewDay {
   source_date: string
   target_date: string
   training: AssignmentDayTraining | null
+  trainings: AssignmentDayTraining[]
   diet: AssignmentDayDiet | null
   is_rest_day: boolean
   will_clear_day: boolean
@@ -277,6 +287,8 @@ export function buildPlaceholderDays(
     date,
     is_rest_day: false,
     training: null,
+    trainings: [],
+    training_ids: [],
     diet: null,
   }))
 }
@@ -311,7 +323,7 @@ export function createAssignmentPreviewDiet(diet: AssignmentDietOption): Assignm
 export function buildAssignmentSummary(days: AssignmentDay[]): AssignmentSummary {
   return days.reduce<AssignmentSummary>(
     (summary, day) => ({
-      training_days: summary.training_days + (day.training ? 1 : 0),
+      training_days: summary.training_days + (day.trainings?.length ?? (day.training ? 1 : 0)),
       diet_days: summary.diet_days + (day.diet ? 1 : 0),
       rest_days: summary.rest_days + (day.is_rest_day ? 1 : 0),
     }),
@@ -342,6 +354,7 @@ export function buildCopyWeekPreview(
       date: sourceDate,
       is_rest_day: false,
       training: null,
+      trainings: [],
       diet: null,
     }
 
@@ -349,15 +362,16 @@ export function buildCopyWeekPreview(
       source_date: sourceDate,
       target_date: targetDate,
       training: sourceDay.training,
+      trainings: sourceDay.trainings ?? (sourceDay.training ? [sourceDay.training] : []),
       diet: sourceDay.diet,
       is_rest_day: sourceDay.is_rest_day,
-      will_clear_day: !sourceDay.training && !sourceDay.diet && !sourceDay.is_rest_day,
+      will_clear_day: (sourceDay.trainings?.length ?? (sourceDay.training ? 1 : 0)) === 0 && !sourceDay.diet && !sourceDay.is_rest_day,
     }
   })
 
   const summary = days.reduce<CopyWeekPreviewSummary>(
     (currentSummary, day) => ({
-      training_days: currentSummary.training_days + (day.training ? 1 : 0),
+      training_days: currentSummary.training_days + day.trainings.length,
       diet_days: currentSummary.diet_days + (day.diet ? 1 : 0),
       rest_days: currentSummary.rest_days + (day.is_rest_day ? 1 : 0),
       cleared_days: currentSummary.cleared_days + (day.will_clear_day ? 1 : 0),

@@ -32,6 +32,7 @@ export function buildAssignmentEditorDefaults(
           original_date: date,
           date,
           training_id: day.training_id,
+          training_ids: day.training_ids ?? day.trainings?.map((training) => training.id) ?? (day.training ? [day.training.id] : []),
           diet_id: day.diet_id,
           is_rest_day: day.is_rest_day,
         }
@@ -43,6 +44,7 @@ export function buildAssignmentEditorDefaults(
           original_date: day.date,
           date: day.date,
           training_id: day.training?.id ?? null,
+          training_ids: day.training_ids ?? day.trainings?.map((training) => training.id) ?? (day.training ? [day.training.id] : []),
           diet_id: day.diet?.id ?? null,
           is_rest_day: day.is_rest_day,
         }))

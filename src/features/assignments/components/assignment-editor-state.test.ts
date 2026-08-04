@@ -15,6 +15,16 @@ const selectedDay: AssignmentDay = {
     estimated_duration_min: 45,
     estimated_calories: 300,
   },
+  trainings: [
+    {
+      id: 'selected-training',
+      name: 'Selected training',
+      type: 'FUERZA',
+      level: 'PRINCIPIANTE',
+      estimated_duration_min: 45,
+      estimated_calories: 300,
+    },
+  ],
   diet: null,
 }
 
@@ -32,18 +42,22 @@ const activeAutoRule: AutoAssignmentRule = {
       id: 'rule-day-1',
       weekday: 1,
       training_id: 'monday-training',
+      training_ids: ['monday-training'],
       diet_id: null,
       is_rest_day: false,
       training: null,
+      trainings: [],
       diet: null,
     },
     {
       id: 'rule-day-2',
       weekday: 5,
       training_id: null,
+      training_ids: [],
       diet_id: null,
       is_rest_day: true,
       training: null,
+      trainings: [],
       diet: null,
     },
   ],
@@ -58,6 +72,7 @@ describe('buildAssignmentEditorDefaults', () => {
       original_date: '2026-07-08',
       date: '2026-07-08',
       training_id: 'selected-training',
+      training_ids: ['selected-training'],
       diet_id: null,
       is_rest_day: false,
     }])

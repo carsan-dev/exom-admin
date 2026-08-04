@@ -75,6 +75,7 @@ function normalizeBatchPayload(values: AssignmentEditorValues) {
     days: values.days.map((day) => ({
       date: day.date,
       training_id: day.is_rest_day ? null : normalizeOptionalId(day.training_id),
+      training_ids: day.is_rest_day ? [] : day.training_ids,
       diet_id: day.is_rest_day ? null : normalizeOptionalId(day.diet_id),
       is_rest_day: day.is_rest_day,
     })),
@@ -85,6 +86,7 @@ function normalizeUpdatePayload(values: AssignmentUpdateValues) {
   return {
     date: values.date || undefined,
     training_id: values.is_rest_day ? null : normalizeOptionalId(values.training_id),
+    training_ids: values.is_rest_day ? [] : values.training_ids,
     diet_id: values.is_rest_day ? null : normalizeOptionalId(values.diet_id),
     is_rest_day: values.is_rest_day,
   }
@@ -99,6 +101,7 @@ function normalizeAutoRulePayload(values: CreateAutoAssignmentRuleValues) {
     days: values.days.map((day) => ({
       weekday: day.weekday,
       training_id: day.is_rest_day ? null : normalizeOptionalId(day.training_id),
+      training_ids: day.is_rest_day ? [] : day.training_ids,
       diet_id: day.is_rest_day ? null : normalizeOptionalId(day.diet_id),
       is_rest_day: day.is_rest_day,
     })),

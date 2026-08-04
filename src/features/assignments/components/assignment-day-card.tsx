@@ -38,6 +38,7 @@ export function AssignmentDayCard({
   onSelect,
 }: AssignmentDayCardProps) {
   const displayDate = toDisplayDate(day.date)
+  const trainings = day.trainings ?? (day.training ? [day.training] : [])
 
   if (variant === 'month') {
     return (
@@ -66,10 +67,10 @@ export function AssignmentDayCard({
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          {day.training && (
+          {trainings.length > 0 && (
             <Badge variant="outline" className="gap-1 border-status-info/30 bg-status-info/10 px-2 py-0 text-[10px] text-status-info">
               <Dumbbell className="h-3 w-3" />
-              Entreno
+              {trainings.length} entreno{trainings.length === 1 ? '' : 's'}
             </Badge>
           )}
           {day.diet && (
@@ -91,7 +92,7 @@ export function AssignmentDayCard({
             <p className="text-xs font-medium text-foreground">Recuperación</p>
           ) : (
             <>
-              <p className="line-clamp-1 text-xs font-medium text-foreground">{day.training?.name ?? 'Sin entreno'}</p>
+              <p className="line-clamp-2 text-xs font-medium text-foreground">{trainings.map((training) => training.name).join(' · ') || 'Sin entreno'}</p>
               <p className="line-clamp-1 text-xs text-muted-foreground">{day.diet?.name ?? 'Sin dieta'}</p>
             </>
           )}
@@ -126,10 +127,10 @@ export function AssignmentDayCard({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {day.training && (
+        {trainings.length > 0 && (
           <Badge variant="outline" className="gap-1 border-status-info/30 bg-status-info/10 text-status-info">
             <Dumbbell className="h-3 w-3" />
-            Entreno
+            {trainings.length} entreno{trainings.length === 1 ? '' : 's'}
           </Badge>
         )}
         {day.diet && (
@@ -154,15 +155,21 @@ export function AssignmentDayCard({
               El cliente verá el estado de recuperación para este día.
             </p>
           </div>
-        ) : day.training || day.diet ? (
+        ) : trainings.length > 0 || day.diet ? (
           <div className="space-y-3">
-            {day.training && (
+            {trainings.length > 0 && (
               <div className="rounded-xl border border-border/60 bg-background/50 p-3">
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Entrenamiento</p>
-                <p className="mt-1 text-sm font-medium text-foreground">{day.training.name}</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {day.training.estimated_duration_min ? `${day.training.estimated_duration_min} min` : 'Duración flexible'}
-                </p>
+                <div className="mt-2 space-y-1">
+                  {trainings.map((training, index) => (
+                    <p key={training.id} className="text-sm font-medium text-foreground">
+                      {index + 1}. {training.name}
+                      <span className="ml-2 text-xs font-normal text-muted-foreground">
+                        {training.estimated_duration_min ? `${training.estimated_duration_min} min` : 'Flexible'}
+                      </span>
+                    </p>
+                  ))}
+                </div>
               </div>
             )}
 

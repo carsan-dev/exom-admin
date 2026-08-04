@@ -2,7 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
-import { AlertTriangle, Eye, RefreshCw } from 'lucide-react'
+import { AlertTriangle, Eye, GripVertical, RefreshCw, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -101,14 +101,90 @@ function buildPreviewTraining(trainingId: string | null, availableTrainings: Ass
     return createAssignmentPreviewTraining(training)
   }
 
-  if (sourceDay?.training?.id === trainingId) {
+  const sourceTraining = sourceDay?.trainings?.find((item) => item.id === trainingId) ?? sourceDay?.training
+  if (sourceTraining?.id === trainingId) {
     return {
-      ...sourceDay.training,
+      ...sourceTraining,
       exercises_count: null,
     }
   }
 
   return null
+}
+
+function TrainingMultiSelect({
+  value,
+  trainings,
+  disabled,
+  onChange,
+}: {
+  value: string[]
+  trainings: AssignmentTrainingOption[]
+  disabled: boolean
+  onChange: (ids: string[]) => void
+}) {
+  const [search, setSearch] = useState('')
+  const [draggedId, setDraggedId] = useState<string | null>(null)
+  const selected = value.flatMap((id) => {
+    const training = trainings.find((item) => item.id === id)
+    return training ? [training] : []
+  })
+  const available = trainings.filter((training) =>
+    !value.includes(training.id) && training.name.toLocaleLowerCase('es-ES').includes(search.trim().toLocaleLowerCase('es-ES')),
+  )
+
+  return (
+    <div className="space-y-3">
+      <Input
+        value={search}
+        disabled={disabled || value.length >= 5}
+        placeholder={value.length >= 5 ? 'Máximo de 5 alcanzado' : 'Buscar entrenamiento…'}
+        onChange={(event) => setSearch(event.target.value)}
+      />
+      {search.trim() && value.length < 5 && (
+        <div className="max-h-36 overflow-y-auto rounded-xl border border-border/70 bg-background p-1">
+          {available.length ? available.map((training) => (
+            <button
+              key={training.id}
+              type="button"
+              className="flex w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
+              onClick={() => { onChange([...value, training.id]); setSearch('') }}
+            >
+              {training.name}
+            </button>
+          )) : <p className="px-3 py-2 text-sm text-muted-foreground">Sin resultados</p>}
+        </div>
+      )}
+      <div className="space-y-2">
+        {selected.map((training, position) => (
+          <div
+            key={training.id}
+            draggable={!disabled}
+            onDragStart={() => setDraggedId(training.id)}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={() => {
+              if (!draggedId || draggedId === training.id) return
+              const next = [...value]
+              const from = next.indexOf(draggedId)
+              const to = next.indexOf(training.id)
+              next.splice(to, 0, next.splice(from, 1)[0])
+              onChange(next)
+              setDraggedId(null)
+            }}
+            className="flex items-center gap-2 rounded-xl border border-border/70 bg-muted/20 px-3 py-2"
+          >
+            <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">{position + 1}</span>
+            <span className="min-w-0 flex-1 truncate text-sm font-medium">{training.name}</span>
+            <Button type="button" variant="ghost" size="icon" disabled={disabled} onClick={() => onChange(value.filter((id) => id !== training.id))}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">{value.length}/5 · Arrastra para reordenar</p>
+    </div>
+  )
 }
 
 function buildPreviewDiet(dietId: string | null, availableDiets: AssignmentDietOption[], sourceDay?: AssignmentDay) {
@@ -170,7 +246,7 @@ export function AssignmentEditorDialog({
   const selectedDaysKey = useMemo(
     () =>
       sortedSelectedDays
-        .map((day) => `${day.id ?? 'new'}:${day.date}:${day.training?.id ?? 'none'}:${day.diet?.id ?? 'none'}:${day.is_rest_day}`)
+        .map((day) => `${day.id ?? 'new'}:${day.date}:${day.trainings?.map((training) => training.id).join(',') ?? day.training?.id ?? 'none'}:${day.diet?.id ?? 'none'}:${day.is_rest_day}`)
         .join('|'),
     [sortedSelectedDays],
   )
@@ -185,6 +261,8 @@ export function AssignmentEditorDialog({
           date,
           is_rest_day: day.is_rest_day,
           training: day.training,
+          trainings: day.trainings ?? (day.training ? [day.training] : []),
+          training_ids: day.training_ids ?? (day.training ? [day.training.id] : []),
           diet: day.diet,
         } satisfies AssignmentDay] as const
       }))
@@ -227,7 +305,13 @@ export function AssignmentEditorDialog({
       date: day.date,
       training: day.is_rest_day
         ? null
-        : buildPreviewTraining(day.training_id ?? null, availableTrainings, sourceDayMap.get(day.original_date)),
+        : buildPreviewTraining(day.training_ids[0] ?? day.training_id ?? null, availableTrainings, sourceDayMap.get(day.original_date)),
+      trainings: day.is_rest_day
+        ? []
+        : day.training_ids.flatMap((id) => {
+            const training = buildPreviewTraining(id, availableTrainings, sourceDayMap.get(day.original_date))
+            return training ? [training] : []
+          }),
       diet: day.is_rest_day
         ? null
         : buildPreviewDiet(day.diet_id ?? null, availableDiets, sourceDayMap.get(day.original_date)),
@@ -263,6 +347,7 @@ export function AssignmentEditorDialog({
         original_date: day.original_date,
         date: day.date,
         training_id: day.training_id ?? null,
+        training_ids: day.is_rest_day ? [] : day.training_ids,
         diet_id: day.diet_id ?? null,
         is_rest_day: day.is_rest_day,
       })),
@@ -444,7 +529,12 @@ export function AssignmentEditorDialog({
                                 <Button
                                   type="button"
                                   variant={restField.value ? 'default' : 'outline'}
-                                  onClick={() => restField.onChange(true)}
+                                  onClick={() => {
+                                    restField.onChange(true)
+                                    form.setValue(`days.${index}.training_ids`, [], { shouldDirty: true, shouldValidate: true })
+                                    form.setValue(`days.${index}.training_id`, null, { shouldDirty: true })
+                                    form.setValue(`days.${index}.diet_id`, null, { shouldDirty: true })
+                                  }}
                                 >
                                   Día de descanso
                                 </Button>
@@ -459,37 +549,29 @@ export function AssignmentEditorDialog({
                       <div className="grid gap-4 lg:grid-cols-2">
                         <FormField
                           control={form.control}
-                          name={`days.${index}.training_id`}
+                          name={`days.${index}.training_ids`}
                           render={({ field: trainingField }) => (
                             <FormItem>
-                              <FormLabel>Entrenamiento</FormLabel>
+                              <FormLabel>Entrenamientos</FormLabel>
                               {canUseTrainingCatalog ? (
-                                <Select
-                                  disabled={isRestDay}
-                                  value={trainingField.value ?? CLEAR_SELECTION_VALUE}
-                                  onValueChange={(value) => trainingField.onChange(value === CLEAR_SELECTION_VALUE ? null : value)}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Selecciona un entrenamiento" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value={CLEAR_SELECTION_VALUE}>Sin entrenamiento</SelectItem>
-                                    {availableTrainings.map((training) => (
-                                      <SelectItem key={training.id} value={training.id}>
-                                        {training.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <FormControl>
+                                  <TrainingMultiSelect
+                                    disabled={isRestDay}
+                                    value={trainingField.value ?? []}
+                                    trainings={availableTrainings}
+                                    onChange={(ids) => {
+                                      trainingField.onChange(ids)
+                                      form.setValue(`days.${index}.training_id`, ids[0] ?? null, { shouldDirty: true })
+                                    }}
+                                  />
+                                </FormControl>
                               ) : (
                                 <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm">
                                   <p className="font-medium text-foreground">
-                                    {sourceDay?.training ? `Entreno actual: ${sourceDay.training.name}` : 'Catálogo no disponible'}
+                                    {sourceDay?.trainings?.length ? `Entrenos actuales: ${sourceDay.trainings.map((training) => training.name).join(', ')}` : sourceDay?.training ? `Entreno actual: ${sourceDay.training.name}` : 'Catálogo no disponible'}
                                   </p>
                                   <p className="mt-1 text-muted-foreground">
-                                    {sourceDay?.training
+                                    {sourceDay?.trainings?.length || sourceDay?.training
                                       ? 'Podrás mantener el entreno actual, pero no elegir otro hasta recuperar el catálogo.'
                                       : 'Ahora mismo no puedes seleccionar un entrenamiento nuevo.'}
                                   </p>

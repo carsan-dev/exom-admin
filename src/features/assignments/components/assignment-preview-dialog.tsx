@@ -67,9 +67,9 @@ export function AssignmentPreviewDialog({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {day.training && (
+                  {day.trainings.length > 0 && (
                     <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-status-info">
-                      Entreno asignado
+                      {day.trainings.length} entreno{day.trainings.length === 1 ? '' : 's'} asignado{day.trainings.length === 1 ? '' : 's'}
                     </Badge>
                   )}
                   {day.diet && (
@@ -123,6 +123,14 @@ export function AssignmentPreviewDialog({
                           {LEVEL_LABELS[day.training.level]}
                         </Badge>
                       </div>
+
+                      <ol className="mt-4 space-y-2 rounded-xl border border-border/60 bg-background/50 p-3">
+                        {day.trainings.map((training, index) => (
+                          <li key={training.id} className="text-sm font-medium text-foreground">
+                            {index + 1}. {training.name}
+                          </li>
+                        ))}
+                      </ol>
 
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
                         <div className="rounded-xl border border-border/60 bg-background/50 p-3">

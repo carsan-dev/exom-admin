@@ -401,6 +401,7 @@ export function AssignmentsPage() {
         const updateValues: AssignmentUpdateValues = {
           date: singleDay.date,
           training_id: singleDay.is_rest_day ? null : (singleDay.training_id ?? null),
+          training_ids: singleDay.is_rest_day ? [] : singleDay.training_ids,
           diet_id: singleDay.is_rest_day ? null : (singleDay.diet_id ?? null),
           is_rest_day: singleDay.is_rest_day,
         }
@@ -424,6 +425,7 @@ export function AssignmentsPage() {
           days: values.days.map((day) => ({
             weekday: getIsoWeekday(day.date),
             training_id: day.is_rest_day ? null : (day.training_id ?? null),
+            training_ids: day.is_rest_day ? [] : day.training_ids,
             diet_id: day.is_rest_day ? null : (day.diet_id ?? null),
             is_rest_day: day.is_rest_day,
           })),
