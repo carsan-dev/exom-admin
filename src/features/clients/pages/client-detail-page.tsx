@@ -192,7 +192,7 @@ export function ClientDetailPage() {
           <ClientInfoTab profile={client.profile} clientId={client.id} />
         </TabsContent>
         <TabsContent value="metrics">
-          <ClientMetricsTab metrics={client.bodyMetrics} />
+          <ClientMetricsTab clientId={client.id} metrics={client.bodyMetrics} />
         </TabsContent>
         <TabsContent value="streak">
           <ClientStreakCard streak={client.streak} />

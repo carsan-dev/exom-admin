@@ -98,6 +98,47 @@ export const updateClientProfileSchema = z.object({
     ),
 })
 
+const optionalMetricValue = z
+  .string()
+  .trim()
+  .refine(
+    (value) => value === '' || (!Number.isNaN(Number(value)) && Number(value) >= 0),
+    'Introduce un número igual o mayor que 0'
+  )
+
+export const clientMetricSchema = z
+  .object({
+    date: z
+      .string()
+      .min(1, 'La fecha es obligatoria')
+      .refine(
+        (value) => new Date(`${value}T00:00:00Z`).getTime() <= Date.now(),
+        'La fecha no puede ser futura'
+      ),
+    weight_kg: optionalMetricValue,
+    muscle_mass_kg: optionalMetricValue,
+    height_cm: optionalMetricValue,
+    sleep_hours: optionalMetricValue,
+    neck_cm: optionalMetricValue,
+    shoulders_cm: optionalMetricValue,
+    chest_cm: optionalMetricValue,
+    arm_left_cm: optionalMetricValue,
+    arm_right_cm: optionalMetricValue,
+    forearm_left_cm: optionalMetricValue,
+    forearm_right_cm: optionalMetricValue,
+    waist_cm: optionalMetricValue,
+    hips_cm: optionalMetricValue,
+    thigh_left_cm: optionalMetricValue,
+    thigh_right_cm: optionalMetricValue,
+    calf_left_cm: optionalMetricValue,
+    calf_right_cm: optionalMetricValue,
+  })
+  .refine(
+    (values) =>
+      Object.entries(values).some(([field, value]) => field !== 'date' && value !== ''),
+    { message: 'Introduce al menos una métrica', path: ['weight_kg'] }
+  )
+
 export const updateRoleSchema = z.object({
   role: z.enum(ROLE_OPTIONS),
 })
@@ -112,3 +153,4 @@ export type UpdateUserFormValues = z.infer<typeof updateUserSchema>
 export type UpdateRoleFormValues = z.infer<typeof updateRoleSchema>
 export type UpdateClientAssignmentsFormValues = z.infer<typeof updateClientAssignmentsSchema>
 export type UpdateClientProfileFormValues = z.infer<typeof updateClientProfileSchema>
+export type ClientMetricFormValues = z.infer<typeof clientMetricSchema>

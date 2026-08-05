@@ -5,6 +5,7 @@ import { type ApiEnvelope, getApiErrorMessage, getApiErrorStatus, shouldRetryQue
 import type {
   CreateAdminFormValues,
   CreateClientFormValues,
+  ClientMetricFormValues,
   UpdateClientProfileFormValues,
   UpdateUserFormValues,
 } from './schemas'
@@ -13,6 +14,7 @@ import type {
   Client,
   ClientAssignmentsResponse,
   ClientDetail,
+  BodyMetric,
   PaginatedResponse,
   Role,
   UpdateClientAssignmentsValues,
@@ -37,6 +39,42 @@ interface UpdateUserPayload {
 interface UpdateUserStatusPayload {
   userId: string
   is_active: boolean
+}
+
+const METRIC_VALUE_FIELDS = [
+  'weight_kg',
+  'muscle_mass_kg',
+  'height_cm',
+  'sleep_hours',
+  'neck_cm',
+  'shoulders_cm',
+  'chest_cm',
+  'arm_left_cm',
+  'arm_right_cm',
+  'forearm_left_cm',
+  'forearm_right_cm',
+  'waist_cm',
+  'hips_cm',
+  'thigh_left_cm',
+  'thigh_right_cm',
+  'calf_left_cm',
+  'calf_right_cm',
+] as const satisfies ReadonlyArray<Exclude<keyof ClientMetricFormValues, 'date'>>
+
+export function normalizeClientMetricPayload(values: ClientMetricFormValues) {
+  return METRIC_VALUE_FIELDS.reduce<Record<string, string | number | null>>(
+    (payload, field) => {
+      payload[field] = values[field] === '' ? null : Number(values[field])
+      return payload
+    },
+    { date: values.date },
+  )
+}
+
+async function invalidateClientMetricQueries(queryClient: ReturnType<typeof useQueryClient>, clientId: string) {
+  await invalidateAdminQueries(queryClient, {
+    extraQueryKeys: [clientsQueryKeys.all, clientsQueryKeys.detail(clientId), ['admin-progress', clientId]],
+  })
 }
 
 export const clientsQueryKeys = {
@@ -410,6 +448,44 @@ export function useUpdateClientProfile() {
         extraQueryKeys: [clientsQueryKeys.all, clientsQueryKeys.detail(clientId)],
       })
     },
+  })
+}
+
+export function useCreateClientMetric() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ clientId, values }: { clientId: string; values: ClientMetricFormValues }) => {
+      const response = await api.post<ApiEnvelope<BodyMetric>>(
+        `/admin/clients/${clientId}/metrics`,
+        normalizeClientMetricPayload(values),
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async (_data, { clientId }) => invalidateClientMetricQueries(queryClient, clientId),
+  })
+}
+
+export function useUpdateClientMetric() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      clientId,
+      metricId,
+      values,
+    }: {
+      clientId: string
+      metricId: string
+      values: ClientMetricFormValues
+    }) => {
+      const response = await api.patch<ApiEnvelope<BodyMetric>>(
+        `/admin/clients/${clientId}/metrics/${metricId}`,
+        normalizeClientMetricPayload(values),
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async (_data, { clientId }) => invalidateClientMetricQueries(queryClient, clientId),
   })
 }
 

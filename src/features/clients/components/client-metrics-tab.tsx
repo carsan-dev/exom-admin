@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Activity, Scale } from 'lucide-react'
+import { Activity, Pencil, Plus, Scale } from 'lucide-react'
 import {
   CartesianGrid,
   Line,
@@ -23,8 +23,11 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import type { BodyMetric } from '../types'
+import { Button } from '@/components/ui/button'
+import { ClientMetricDialog } from './client-metric-dialog'
 
 interface ClientMetricsTabProps {
+  clientId: string
   metrics: BodyMetric[]
 }
 
@@ -47,16 +50,42 @@ function formatValue(value: number | null, unit: string) {
   return `${value} ${unit}`
 }
 
-export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
+export function ClientMetricsTab({ clientId, metrics }: ClientMetricsTabProps) {
   const [weightScale, setWeightScale] = useState<ChartScale>('auto')
+  const [metricDialogOpen, setMetricDialogOpen] = useState(false)
+  const [selectedMetric, setSelectedMetric] = useState<BodyMetric | null>(null)
+
+  function openCreateDialog() {
+    setSelectedMetric(null)
+    setMetricDialogOpen(true)
+  }
+
+  function openEditDialog(metric: BodyMetric) {
+    setSelectedMetric(metric)
+    setMetricDialogOpen(true)
+  }
 
   if (metrics.length === 0) {
     return (
-      <Card>
-        <CardContent className="pt-6 text-sm text-muted-foreground">
-          Aún no hay métricas corporales registradas para este cliente.
-        </CardContent>
-      </Card>
+      <>
+        <Card>
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
+            <p className="text-sm text-muted-foreground">
+              Aún no hay métricas corporales registradas para este cliente.
+            </p>
+            <Button size="sm" onClick={openCreateDialog}>
+              <Plus className="h-4 w-4" />
+              Añadir métricas
+            </Button>
+          </CardContent>
+        </Card>
+        <ClientMetricDialog
+          clientId={clientId}
+          metric={null}
+          open={metricDialogOpen}
+          onOpenChange={setMetricDialogOpen}
+        />
+      </>
     )
   }
 
@@ -119,11 +148,19 @@ export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-brand-primary" />
-            <CardTitle className="text-xl">Últimas 10 métricas</CardTitle>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-brand-primary" />
+                <CardTitle className="text-xl">Últimas 10 métricas</CardTitle>
+              </div>
+              <CardDescription>Historial reciente de composición corporal y medidas</CardDescription>
+            </div>
+            <Button size="sm" onClick={openCreateDialog}>
+              <Plus className="h-4 w-4" />
+              Añadir métricas
+            </Button>
           </div>
-          <CardDescription>Historial reciente de composición corporal y medidas</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -147,6 +184,7 @@ export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
                 <TableHead>Muslo der.</TableHead>
                 <TableHead>Gemelo izq.</TableHead>
                 <TableHead>Gemelo der.</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -170,12 +208,29 @@ export function ClientMetricsTab({ metrics }: ClientMetricsTabProps) {
                   <TableCell>{formatValue(metric.thigh_right_cm, 'cm')}</TableCell>
                   <TableCell>{formatValue(metric.calf_left_cm, 'cm')}</TableCell>
                   <TableCell>{formatValue(metric.calf_right_cm, 'cm')}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Editar métricas del ${tableDateFormatter.format(new Date(metric.date))}`}
+                      onClick={() => openEditDialog(metric)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      <ClientMetricDialog
+        clientId={clientId}
+        metric={selectedMetric}
+        open={metricDialogOpen}
+        onOpenChange={setMetricDialogOpen}
+      />
     </div>
   )
 }
