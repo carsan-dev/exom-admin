@@ -31,7 +31,11 @@ import { toast } from 'sonner'
 import { useArchiveRecap, useRecapDetail, useReviewRecap } from '../api'
 import { RecapSectionCard } from '../components/recap-section-card'
 import { RecapStatusBadge } from '../components/recap-status-badge'
-import { formatRecapOption, getRecapClientName } from '../types'
+import {
+  formatAverageDailySteps,
+  formatRecapOption,
+  getRecapClientName,
+} from '../types'
 
 function DetailPageSkeleton() {
   return (
@@ -297,6 +301,10 @@ export function RecapDetailPage() {
               <DetailField
                 label="Sesiones completadas"
                 value={recap.training_sessions?.toString() ?? 'No indicado'}
+              />
+              <DetailField
+                label="Media diaria de pasos"
+                value={formatAverageDailySteps(recap.average_daily_steps, true)}
               />
               <DetailField label="Progreso" value={formatRecapOption(recap.training_progress)} />
               <DetailField label="Notas" value={formatNotes(recap.training_notes)} />

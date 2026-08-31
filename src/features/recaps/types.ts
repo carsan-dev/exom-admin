@@ -21,6 +21,7 @@ export interface RecapItem {
   submitted_at: string | null
   training_effort: number | null
   training_sessions: number | null
+  average_daily_steps?: number | null
   training_progress: string | null
   training_notes: string | null
   nutrition_quality: string | null
@@ -60,8 +61,22 @@ export interface RecapStats {
   archived: number
 }
 
+export interface RecapListItem {
+  id: string
+  client_id: string
+  week_start_date: string
+  week_end_date: string
+  submitted_at: string | null
+  average_daily_steps?: number | null
+  admin_comments: string | null
+  status: RecapStatus
+  archived_at: string | null
+  created_at: string
+  client: RecapClient
+}
+
 export interface PaginatedRecaps {
-  data: RecapItem[]
+  data: RecapListItem[]
   total: number
   page: number
   limit: number
@@ -88,4 +103,14 @@ export function formatRecapOption(value: string | null | undefined) {
     .replace(/_/g, ' ')
     .toLowerCase()
     .replace(/(^|\s)\S/g, (match) => match.toUpperCase())
+}
+
+export function formatAverageDailySteps(
+  value: number | null | undefined,
+  includeUnit = false,
+) {
+  if (value == null) return 'No indicado'
+
+  const formatted = value.toLocaleString('es-ES')
+  return includeUnit ? `${formatted} pasos/día` : formatted
 }

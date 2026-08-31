@@ -12,7 +12,11 @@ import {
 } from '@/components/ui/table'
 import { useRecapsList } from '../api'
 import { RecapStatusBadge } from './recap-status-badge'
-import { getRecapClientName, type RecapStatusFilter } from '../types'
+import {
+  formatAverageDailySteps,
+  getRecapClientName,
+  type RecapStatusFilter,
+} from '../types'
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '—'
@@ -70,6 +74,7 @@ export function RecapsList({ clientId, status, archived, page, onPageChange }: R
               <TableHead>Semana</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Enviado</TableHead>
+              <TableHead>Pasos/día</TableHead>
               <TableHead>Comentario admin</TableHead>
               <TableHead />
             </TableRow>
@@ -77,7 +82,7 @@ export function RecapsList({ clientId, status, archived, page, onPageChange }: R
           <TableBody>
             {Array.from({ length: 5 }).map((_, rowIndex) => (
               <TableRow key={rowIndex}>
-                {Array.from({ length: 6 }).map((_, cellIndex) => (
+                {Array.from({ length: 7 }).map((_, cellIndex) => (
                   <TableCell key={cellIndex}>
                     <Skeleton className="h-4 w-full" />
                   </TableCell>
@@ -128,6 +133,7 @@ export function RecapsList({ clientId, status, archived, page, onPageChange }: R
               <TableHead>Semana</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Enviado</TableHead>
+              <TableHead>Pasos/día</TableHead>
               <TableHead>Comentario admin</TableHead>
               <TableHead />
             </TableRow>
@@ -144,6 +150,9 @@ export function RecapsList({ clientId, status, archived, page, onPageChange }: R
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
                   {formatDate(item.submitted_at ?? item.created_at)}
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {formatAverageDailySteps(item.average_daily_steps)}
                 </TableCell>
                 <TableCell className="max-w-[260px] text-sm text-muted-foreground">
                   {truncateText(item.admin_comments)}
