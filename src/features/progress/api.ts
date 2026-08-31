@@ -14,8 +14,7 @@ export const progressQueryKeys = {
     ['admin-progress', clientId, 'week', weekStart] as const,
   metrics: (clientId: string, page: number) =>
     ['admin-progress', clientId, 'metrics', page] as const,
-  weightHistory: (clientId: string) =>
-    ['admin-progress', clientId, 'weight-history'] as const,
+  weightHistory: (clientId: string) => ['admin-progress', clientId, 'weight-history'] as const,
   bodyHistory: (clientId: string, field: string) =>
     ['admin-progress', clientId, 'body-history', field] as const,
 }
@@ -28,9 +27,28 @@ export function useClientDayProgress(clientId: string, date: string) {
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<DayProgress | null>>(
         `/admin/clients/${clientId}/progress`,
-        { params: { date } },
+        { params: { date } }
       )
       return unwrapResponse(response)
+    },
+  })
+}
+
+export function useReplyToTrainingNote(clientId: string, date: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (reply: string) => {
+      const response = await api.put<ApiEnvelope<DayProgress>>(
+        `/admin/clients/${clientId}/progress/reply`,
+        { date, reply }
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: progressQueryKeys.dayProgress(clientId, date),
+      })
     },
   })
 }
@@ -43,7 +61,7 @@ export function useClientCalendarMonth(clientId: string, year: number, month: nu
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<CalendarDay[]>>(
         `/admin/clients/${clientId}/calendar/month`,
-        { params: { year, month } },
+        { params: { year, month } }
       )
       return unwrapResponse(response)
     },
@@ -58,7 +76,7 @@ export function useClientWeekSummary(clientId: string, weekStart: string) {
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<WeekSummary>>(
         `/admin/clients/${clientId}/calendar/week-summary`,
-        { params: { week_start: weekStart } },
+        { params: { week_start: weekStart } }
       )
       return unwrapResponse(response)
     },
@@ -73,7 +91,7 @@ export function useClientMetrics(clientId: string, page: number, limit = 10) {
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedResponse<BodyMetric>>>(
         `/admin/clients/${clientId}/metrics`,
-        { params: { page, limit } },
+        { params: { page, limit } }
       )
       return unwrapResponse(response)
     },
@@ -87,7 +105,7 @@ export function useClientWeightHistory(clientId: string) {
     retry: shouldRetryQuery,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<MetricHistoryPoint[]>>(
-        `/admin/clients/${clientId}/metrics/weight-history`,
+        `/admin/clients/${clientId}/metrics/weight-history`
       )
       return unwrapResponse(response)
     },
@@ -102,7 +120,7 @@ export function useClientBodyHistory(clientId: string, field: BodyField) {
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<MetricHistoryPoint[]>>(
         `/admin/clients/${clientId}/metrics/body-history`,
-        { params: { field } },
+        { params: { field } }
       )
       return unwrapResponse(response)
     },
@@ -115,7 +133,7 @@ export function useResetStreak(clientId: string) {
   return useMutation({
     mutationFn: async () => {
       const response = await api.post<ApiEnvelope<{ message: string }>>(
-        `/streaks/${clientId}/reset`,
+        `/streaks/${clientId}/reset`
       )
       return unwrapResponse(response)
     },

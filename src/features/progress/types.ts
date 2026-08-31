@@ -2,7 +2,12 @@ export interface ExerciseCompleted {
   exercise_id: string
   exercise_name: string | null
   weight_used?: number | null
-  sets?: Array<{ set_number: number; reps?: number | null; seconds?: number | null; weight_kg?: number | null }>
+  sets?: Array<{
+    set_number: number
+    reps?: number | null
+    seconds?: number | null
+    weight_kg?: number | null
+  }>
   completed_at: string
 }
 
@@ -20,6 +25,8 @@ export interface DayProgress {
   meals_completed: string[]
   meals_completed_details: MealCompletedDetail[]
   notes: string | null
+  admin_reply_text: string | null
+  admin_reply_sent_at: string | null
 }
 
 export interface CalendarDay {

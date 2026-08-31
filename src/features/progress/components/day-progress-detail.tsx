@@ -1,11 +1,17 @@
-import { CheckCircle2, Dumbbell, Salad, StickyNote } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { CheckCircle2, Dumbbell, MessageSquareReply, Salad, StickyNote } from 'lucide-react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { getApiErrorMessage } from '@/lib/api-utils'
 import type { DayProgress } from '../types'
 import { formatCompletedSet } from '../format-completed-set'
+import { useReplyToTrainingNote } from '../api'
 
 interface DayProgressDetailProps {
+  clientId: string
   date: string
   progress: DayProgress | null | undefined
   isLoading?: boolean
@@ -18,8 +24,28 @@ const dateFormatter = new Intl.DateTimeFormat('es-ES', {
   year: 'numeric',
 })
 
-export function DayProgressDetail({ date, progress, isLoading }: DayProgressDetailProps) {
+export function DayProgressDetail({ clientId, date, progress, isLoading }: DayProgressDetailProps) {
   const formattedDate = dateFormatter.format(new Date(date + 'T12:00:00Z'))
+  const [reply, setReply] = useState('')
+  const replyMutation = useReplyToTrainingNote(clientId, date)
+
+  useEffect(() => {
+    setReply(progress?.admin_reply_text ?? '')
+  }, [progress?.id, progress?.admin_reply_text])
+
+  const savedReply = progress?.admin_reply_text ?? ''
+  const hasReplyChanges = reply.trim() !== savedReply
+
+  async function handleSaveReply() {
+    try {
+      await replyMutation.mutateAsync(reply)
+      toast.success(
+        reply.trim() ? 'Respuesta guardada y enviada al cliente' : 'Respuesta eliminada'
+      )
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'No se ha podido guardar la respuesta'))
+    }
+  }
 
   return (
     <Card>
@@ -63,7 +89,10 @@ export function DayProgressDetail({ date, progress, isLoading }: DayProgressDeta
                       {ex.sets && ex.sets.length > 0 && (
                         <div className="ml-6 grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
                           {ex.sets.map((set) => (
-                            <span key={set.set_number} className="rounded-md bg-muted px-2 py-1 text-xs">
+                            <span
+                              key={set.set_number}
+                              className="rounded-md bg-muted px-2 py-1 text-xs"
+                            >
                               {formatCompletedSet(set)}
                             </span>
                           ))}
@@ -102,14 +131,64 @@ export function DayProgressDetail({ date, progress, isLoading }: DayProgressDeta
               )}
             </div>
 
-            {/* Notas */}
+            {/* Nota y respuesta */}
             {progress.notes && (
-              <div className="space-y-1">
+              <div className="space-y-3 border-t border-border pt-4">
                 <div className="flex items-center gap-2">
                   <StickyNote className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Notas</span>
+                  <span className="text-sm font-medium">Nota del cliente</span>
                 </div>
                 <p className="pl-6 text-sm text-muted-foreground">{progress.notes}</p>
+
+                <div className="space-y-2 pl-6">
+                  <label
+                    htmlFor="training-note-reply"
+                    className="flex items-center gap-2 text-sm font-medium"
+                  >
+                    <MessageSquareReply className="h-4 w-4 text-brand-primary" />
+                    Respuesta para el cliente
+                  </label>
+                  <textarea
+                    id="training-note-reply"
+                    value={reply}
+                    onChange={(event) => setReply(event.target.value)}
+                    maxLength={1000}
+                    rows={4}
+                    disabled={replyMutation.isPending}
+                    placeholder="Escribe una respuesta que verá el cliente en el detalle del entreno..."
+                    className="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="text-xs text-muted-foreground">
+                      <span>{reply.length}/1000</span>
+                      {progress.admin_reply_sent_at && (
+                        <span>
+                          {' · Último envío: '}
+                          {new Intl.DateTimeFormat('es-ES', {
+                            dateStyle: 'short',
+                            timeStyle: 'short',
+                          }).format(new Date(progress.admin_reply_sent_at))}
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={handleSaveReply}
+                      disabled={!hasReplyChanges || replyMutation.isPending}
+                    >
+                      {replyMutation.isPending
+                        ? 'Guardando...'
+                        : reply.trim()
+                          ? savedReply
+                            ? 'Guardar cambios'
+                            : 'Responder'
+                          : 'Eliminar respuesta'}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Una respuesta nueva o modificada enviará una notificación push al cliente.
+                  </p>
+                </div>
               </div>
             )}
           </>

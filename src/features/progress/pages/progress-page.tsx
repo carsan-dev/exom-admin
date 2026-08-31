@@ -8,11 +8,7 @@ import { DayProgressDetail } from '../components/day-progress-detail'
 import { MetricsCharts } from '../components/metrics-charts'
 import { MetricsTable } from '../components/metrics-table'
 import { StreakSection } from '../components/streak-section'
-import {
-  useClientCalendarMonth,
-  useClientDayProgress,
-  useClientWeekSummary,
-} from '../api'
+import { useClientCalendarMonth, useClientDayProgress, useClientWeekSummary } from '../api'
 import { useClientProfile } from '../../clients/api'
 import type { BodyField } from '../types'
 
@@ -46,7 +42,7 @@ export function ProgressPage() {
   const { data: calendarData, isLoading: calendarLoading } = useClientCalendarMonth(
     clientId,
     calYear,
-    calMonth,
+    calMonth
   )
   const { data: dayProgress, isLoading: dayLoading } = useClientDayProgress(clientId, selectedDate)
   const { data: weekSummary, isLoading: weekLoading } = useClientWeekSummary(clientId, weekStart)
@@ -106,6 +102,7 @@ export function ProgressPage() {
                 onMonthChange={handleMonthChange}
               />
               <DayProgressDetail
+                clientId={clientId}
                 date={selectedDate}
                 progress={dayProgress}
                 isLoading={dayLoading}
@@ -120,11 +117,7 @@ export function ProgressPage() {
               selectedField={selectedBodyField}
               onFieldChange={setSelectedBodyField}
             />
-            <MetricsTable
-              clientId={clientId}
-              page={metricsPage}
-              onPageChange={setMetricsPage}
-            />
+            <MetricsTable clientId={clientId} page={metricsPage} onPageChange={setMetricsPage} />
           </TabsContent>
 
           {/* Racha Tab */}
