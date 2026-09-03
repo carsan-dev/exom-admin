@@ -82,6 +82,7 @@ export function normalizeDietPayload(values: DietFormValues) {
     type: meal.type,
     name: meal.name.trim(),
     image_url: meal.image_url?.trim() ? meal.image_url.trim() : undefined,
+    image_upload_id: meal.image_upload_id?.trim() || undefined,
     calories: meal.calories ?? undefined,
     protein_g: meal.protein_g ?? undefined,
     carbs_g: meal.carbs_g ?? undefined,

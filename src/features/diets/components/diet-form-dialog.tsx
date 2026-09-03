@@ -398,6 +398,7 @@ const defaultMeal: DietFormValues['meals'][number] = {
   type: 'BREAKFAST',
   name: '',
   image_url: null,
+  image_upload_id: '',
   calories: null,
   protein_g: null,
   carbs_g: null,
@@ -412,6 +413,7 @@ const defaultVariant: NonNullable<DietFormValues['meals'][number]['variants']>[n
   type: 'BREAKFAST',
   name: '',
   image_url: null,
+  image_upload_id: '',
   calories: null,
   protein_g: null,
   carbs_g: null,
@@ -445,7 +447,8 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
         ...(isDuplicate ? {} : { id: meal.id }),
         type: meal.type,
         name: meal.name,
-        image_url: meal.image_url,
+        image_url: isDuplicate ? null : meal.image_url,
+        image_upload_id: '',
         calories: meal.calories,
         protein_g: meal.protein_g,
         carbs_g: meal.carbs_g,
@@ -464,7 +467,8 @@ function toFormValues(diet: Diet, isDuplicate: boolean): DietFormValues {
             ...(isDuplicate ? {} : { id: variant.id }),
             type: variant.type,
             name: variant.name,
-            image_url: variant.image_url,
+            image_url: isDuplicate ? null : variant.image_url,
+            image_upload_id: '',
             calories: variant.calories,
             protein_g: variant.protein_g,
             carbs_g: variant.carbs_g,
@@ -695,8 +699,16 @@ function MealVariantsEditor({
                   <ImageUploadField
                     label="Imagen de la variante"
                     value={field.value ?? ''}
-                    onChange={(url) => field.onChange(url || null)}
+                    onChange={(url, uploadId) => {
+                      field.onChange(url || null)
+                      form.setValue(
+                        `meals.${mealIndex}.variants.${variantIndex}.image_upload_id`,
+                        uploadId ?? '',
+                        { shouldDirty: true },
+                      )
+                    }}
                     fileKeyPrefix="diets/meals"
+                    purpose="MEAL_IMAGE"
                     disabled={isBusy}
                     onUploadingChange={(uploading) =>
                       onUploadingChange(`${mealFieldId}-variant-${variantIndex}`, uploading)
@@ -776,7 +788,7 @@ export function DietFormDialog({
   const dialogDescription = isEditing
     ? 'Modifica los campos y guarda los cambios.'
     : isDuplicate
-      ? 'Se creará una copia de la dieta con el mismo contenido.'
+      ? 'Se copiará el contenido. Por seguridad, vuelve a adjuntar las imágenes de comidas.'
       : importedValues
         ? 'Revisa los datos importados antes de crear la dieta.'
         : 'Rellena los datos de la nueva dieta.'
@@ -1439,8 +1451,16 @@ export function DietFormDialog({
                             <ImageUploadField
                               label="Imagen de la comida"
                               value={field.value ?? ''}
-                              onChange={(url) => field.onChange(url || null)}
+                              onChange={(url, uploadId) => {
+                                field.onChange(url || null)
+                                form.setValue(
+                                  `meals.${mealIndex}.image_upload_id`,
+                                  uploadId ?? '',
+                                  { shouldDirty: true },
+                                )
+                              }}
                               fileKeyPrefix="diets/meals"
+                              purpose="MEAL_IMAGE"
                               disabled={isBusy}
                               onUploadingChange={(uploading) =>
                                 handleMealUploadChange(mealField.id, uploading)

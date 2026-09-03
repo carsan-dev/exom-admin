@@ -6,8 +6,9 @@ import { getApiErrorMessage, useUploadFile } from '@/features/uploads/api'
 
 interface ImageUploadFieldProps {
   value: string
-  onChange: (url: string) => void
+  onChange: (url: string, uploadId?: string) => void
   fileKeyPrefix: string
+  purpose: 'MEAL_IMAGE' | 'EXERCISE_THUMBNAIL'
   label?: string
   disabled?: boolean
   onUploadingChange?: (isUploading: boolean) => void
@@ -32,6 +33,7 @@ export function ImageUploadField({
   value,
   onChange,
   fileKeyPrefix,
+  purpose,
   label = 'Imagen',
   disabled = false,
   onUploadingChange,
@@ -75,7 +77,7 @@ export function ImageUploadField({
     }
 
     if (file.size > MAX_SIZE_BYTES) {
-      setError('La imagen supera el límite de 5 MB')
+      setError('La imagen supera el límite de 10 MB')
       return
     }
 
@@ -88,15 +90,16 @@ export function ImageUploadField({
       const uuid = crypto.randomUUID()
       const fileKey = `${fileKeyPrefix}/${uuid}.${ext}`
 
-      const { file_url, signed_read_url } = await uploadFile.mutateAsync({
+      const { upload_id, file_url, signed_read_url } = await uploadFile.mutateAsync({
         file: compressed,
         file_key: fileKey,
         content_type: compressed.type,
+        purpose,
         onProgress: setProgress,
       })
 
       setPreviewUrl(signed_read_url ?? URL.createObjectURL(compressed))
-      onChange(file_url)
+      onChange(file_url, upload_id)
       setProgress(null)
     } catch (err) {
       setError(getApiErrorMessage(err, 'No se ha podido subir la imagen'))

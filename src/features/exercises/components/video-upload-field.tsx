@@ -6,8 +6,8 @@ import { getApiErrorMessage, useDirectUploadFile, useUploadFile } from '../api'
 
 interface VideoUploadFieldProps {
   value: string
-  onChange: (url: string) => void
-  onThumbnailChange?: (url: string, previewUrl?: string | null) => void
+  onChange: (url: string, uploadId?: string) => void
+  onThumbnailChange?: (url: string, previewUrl?: string | null, uploadId?: string) => void
   label?: string
   disabled?: boolean
   onUploadingChange?: (uploading: boolean) => void
@@ -117,13 +117,14 @@ export function VideoUploadField({
       const videoKey = `exercises/videos/${uuid}.${videoExtension}`
       const videoContentType = processedVideo.type || 'video/mp4'
 
-      let uploadedVideo: { file_url: string; signed_read_url?: string | null }
+      let uploadedVideo: { upload_id: string; file_url: string; signed_read_url?: string | null }
 
       try {
         uploadedVideo = await directUploadFile.mutateAsync({
           file: processedVideo,
           file_key: videoKey,
           content_type: videoContentType,
+          purpose: 'EXERCISE_VIDEO',
           onProgress: setProgress,
         })
       } catch (directUploadError) {
@@ -136,22 +137,24 @@ export function VideoUploadField({
           file: processedVideo,
           file_key: videoKey,
           content_type: videoContentType,
+          purpose: 'EXERCISE_VIDEO',
           onProgress: setProgress,
         })
       }
 
       setPreviewUrl(uploadedVideo.signed_read_url ?? URL.createObjectURL(processedVideo))
-      onChange(uploadedVideo.file_url)
+      onChange(uploadedVideo.file_url, uploadedVideo.upload_id)
 
       // Upload thumbnail
       if (onThumbnailChange) {
         const thumbKey = `exercises/thumbnails/${uuid}.jpg`
-        const { file_url: thumbUrl, signed_read_url: signedThumbUrl } = await uploadFile.mutateAsync({
+        const { upload_id: thumbUploadId, file_url: thumbUrl, signed_read_url: signedThumbUrl } = await uploadFile.mutateAsync({
           file: thumbnail,
           file_key: thumbKey,
           content_type: 'image/jpeg',
+          purpose: 'EXERCISE_THUMBNAIL',
         })
-        onThumbnailChange(thumbUrl, signedThumbUrl ?? URL.createObjectURL(thumbnail))
+        onThumbnailChange(thumbUrl, signedThumbUrl ?? URL.createObjectURL(thumbnail), thumbUploadId)
       }
 
       setPhase('idle')

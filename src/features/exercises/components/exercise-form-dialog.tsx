@@ -69,8 +69,10 @@ const defaultValues: ExerciseFormValues = {
   equipment: [],
   level: 'PRINCIPIANTE',
   video_url: '',
+  video_upload_id: '',
   video_stream_id: '',
   thumbnail_url: '',
+  thumbnail_upload_id: '',
   technique_text: '',
   common_errors_text: '',
   explanation_text: '',
@@ -82,9 +84,11 @@ function toFormValues(exercise: Exercise, isDuplicate: boolean): ExerciseFormVal
     muscle_groups: exercise.muscle_groups,
     equipment: exercise.equipment,
     level: exercise.level,
-    video_url: exercise.video_url ?? '',
+    video_url: isDuplicate ? '' : exercise.video_url ?? '',
+    video_upload_id: '',
     video_stream_id: exercise.video_stream_id ?? '',
-    thumbnail_url: exercise.thumbnail_url ?? '',
+    thumbnail_url: isDuplicate ? '' : exercise.thumbnail_url ?? '',
+    thumbnail_upload_id: '',
     technique_text: exercise.technique_text ?? '',
     common_errors_text: exercise.common_errors_text ?? '',
     explanation_text: exercise.explanation_text ?? '',
@@ -334,7 +338,7 @@ export function ExerciseFormDialog({
             {isEditing
               ? 'Modifica los campos del ejercicio y guarda los cambios.'
               : isDuplicate
-                ? 'Se creará una copia del ejercicio con el mismo contenido.'
+              ? 'Se copiará el contenido. Por seguridad, vuelve a adjuntar el vídeo y la miniatura.'
                 : 'Rellena los datos del nuevo ejercicio para añadirlo al catálogo.'}
           </DialogDescription>
         </DialogHeader>
@@ -432,12 +436,20 @@ export function ExerciseFormDialog({
                     <VideoUploadField
                       label="Vídeo"
                       value={field.value ?? ''}
-                      onChange={field.onChange}
-                      onThumbnailChange={(url, previewUrl) => {
+                      onChange={(url, uploadId) => {
+                        field.onChange(url)
+                        form.setValue('video_upload_id', uploadId ?? '', {
+                          shouldDirty: true,
+                        })
+                      }}
+                      onThumbnailChange={(url, previewUrl, uploadId) => {
                         setThumbnailPreviewUrl(previewUrl ?? null)
                         form.setValue('thumbnail_url', url, {
                           shouldDirty: true,
                           shouldValidate: true,
+                        })
+                        form.setValue('thumbnail_upload_id', uploadId ?? '', {
+                          shouldDirty: true,
                         })
                       }}
                       disabled={isPending}
@@ -459,8 +471,14 @@ export function ExerciseFormDialog({
                     <ImageUploadField
                       label="Thumbnail"
                       value={field.value ?? ''}
-                      onChange={field.onChange}
+                      onChange={(url, uploadId) => {
+                        field.onChange(url)
+                        form.setValue('thumbnail_upload_id', uploadId ?? '', {
+                          shouldDirty: true,
+                        })
+                      }}
                       fileKeyPrefix="exercises/thumbnails"
+                      purpose="EXERCISE_THUMBNAIL"
                       disabled={isPending}
                       previewOverrideUrl={thumbnailPreviewUrl}
                     />

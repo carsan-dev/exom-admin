@@ -59,6 +59,7 @@ const mealBaseSchema = z.object({
   type: z.enum(MEAL_TYPE_OPTIONS),
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
   image_url: z.string().trim().url('URL inválida').optional().or(z.literal('')).nullable(),
+  image_upload_id: z.string().optional().or(z.literal('')),
   calories: z.number().int().min(0).optional().nullable(),
   protein_g: z.number().min(0).optional().nullable(),
   carbs_g: z.number().min(0).optional().nullable(),
