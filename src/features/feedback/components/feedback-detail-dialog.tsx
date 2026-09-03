@@ -91,10 +91,19 @@ export function FeedbackDetailDialog({ item, open, onOpenChange }: FeedbackDetai
                 <span className="font-medium">{item.exercise.name}</span>
               </div>
             )}
+            {item.training && (
+              <div>
+                <span className="text-muted-foreground">Entrenamiento: </span>
+                <span className="font-medium">{item.training.name}</span>
+              </div>
+            )}
             <div>
-              <span className="text-muted-foreground">Fecha: </span>
-              <span>{formatDate(item.created_at)}</span>
+              <span className="text-muted-foreground">Fecha programada: </span>
+              <span>{formatDate(item.assignment_date ?? item.created_at)}</span>
             </div>
+            {item.feedback_kind === 'LAST_SET' && (
+              <Badge variant="outline" className="border-brand-primary/30 text-brand-primary">Última serie</Badge>
+            )}
             <div>
               {item.status === 'PENDING' ? (
                 <Badge variant="outline" className="border-yellow-400 text-yellow-700 bg-yellow-50">

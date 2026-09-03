@@ -116,7 +116,12 @@ export function FeedbackList({ clientId, status, page, onPageChange, onSelect }:
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{getClientName(item)}</TableCell>
                 <TableCell className="text-muted-foreground">
-                  {item.exercise?.name ?? '—'}
+                  <div>{item.exercise?.name ?? '—'}</div>
+                  {item.feedback_kind === 'LAST_SET' && (
+                    <Badge variant="outline" className="mt-1 border-brand-primary/30 text-brand-primary">
+                      Última serie
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell>
                   {item.media_type === 'VIDEO' ? (
@@ -143,7 +148,7 @@ export function FeedbackList({ clientId, status, page, onPageChange, onSelect }:
                   )}
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
-                  {formatDate(item.created_at)}
+                  {formatDate(item.assignment_date ?? item.created_at)}
                 </TableCell>
                 <TableCell>
                   <Button size="sm" variant="outline" onClick={() => onSelect(item)}>

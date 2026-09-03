@@ -2,6 +2,10 @@ export interface FeedbackItem {
   id: string
   client_id: string
   exercise_id: string | null
+  training_id: string | null
+  training_exercise_id: string | null
+  assignment_date: string | null
+  feedback_kind: 'GENERAL' | 'LAST_SET'
   media_type: 'VIDEO' | 'IMAGE'
   media_url: string | null
   notes: string | null
@@ -18,6 +22,7 @@ export interface FeedbackItem {
     profile: { first_name: string; last_name: string } | null
   }
   exercise: { id: string; name: string } | null
+  training: { id: string; name: string } | null
 }
 
 export interface FeedbackStats {
