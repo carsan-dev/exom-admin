@@ -396,7 +396,7 @@ export function AssignmentsPage() {
         && singleDay.original_date !== singleDay.date
 
       if (updatingRule) {
-        // Pattern updates intentionally leave materialized and manual dates untouched.
+        // API reconciles materialized automatic dates; manual overrides remain untouched.
       } else if (movedSingleExistingDay && singleDay?.assignment_id) {
         const updateValues: AssignmentUpdateValues = {
           date: singleDay.date,
