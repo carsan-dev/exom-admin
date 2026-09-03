@@ -73,6 +73,7 @@ describe('buildAssignmentEditorDefaults', () => {
       date: '2026-07-08',
       training_id: 'selected-training',
       training_ids: ['selected-training'],
+      training_policies: { 'selected-training': 'AUTO' },
       diet_id: null,
       is_rest_day: false,
     }])

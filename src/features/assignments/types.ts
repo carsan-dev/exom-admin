@@ -26,6 +26,7 @@ export interface AssignmentCatalogOptions {
 
 export type CatalogKey = 'trainings' | 'diets'
 export type AssignmentsViewMode = 'week' | 'month'
+export type LastSetVideoPolicy = 'AUTO' | 'ALWAYS' | 'NEVER'
 
 export interface AssignmentDayTraining {
   id: string
@@ -34,6 +35,8 @@ export interface AssignmentDayTraining {
   level: Training['level']
   estimated_duration_min: number | null
   estimated_calories: number | null
+  requires_last_set_video?: boolean
+  last_set_video_policy?: LastSetVideoPolicy
 }
 
 export interface AssignmentDayDiet {
@@ -54,6 +57,7 @@ export interface AssignmentDay {
   trainings?: AssignmentDayTraining[]
   training_ids?: string[]
   diet: AssignmentDayDiet | null
+  default_last_set_video_policy?: LastSetVideoPolicy
 }
 
 export interface AssignmentWeekResponse {
@@ -84,6 +88,7 @@ export interface AssignmentEditorDayValues {
   date: string
   training_id?: string | null
   training_ids?: string[]
+  training_policies?: Record<string, LastSetVideoPolicy>
   diet_id?: string | null
   is_rest_day: boolean
 }
@@ -98,6 +103,7 @@ export interface AssignmentUpdateValues {
   date?: string | null
   training_id?: string | null
   training_ids?: string[]
+  training_policies?: Record<string, LastSetVideoPolicy>
   diet_id?: string | null
   is_rest_day: boolean
 }
@@ -106,6 +112,7 @@ export interface AssignmentBatchDayInput {
   date: string
   training_id?: string | null
   training_ids?: string[]
+  training_policies?: Record<string, LastSetVideoPolicy>
   diet_id?: string | null
   is_rest_day: boolean
 }
@@ -203,6 +210,7 @@ export interface CreateAutoAssignmentRuleValues {
     weekday: number
     training_id?: string | null
     training_ids?: string[]
+    trainings?: Array<{ training_id: string; last_set_video_policy: LastSetVideoPolicy }>
     diet_id?: string | null
     is_rest_day: boolean
   }>

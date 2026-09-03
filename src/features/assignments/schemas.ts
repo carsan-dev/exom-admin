@@ -47,6 +47,7 @@ export const assignmentEditorDaySchema = z
       (ids) => new Set(ids).size === ids.length,
       'No puedes repetir entrenamientos',
     ).default([]),
+    training_policies: z.record(z.string(), z.enum(['AUTO', 'ALWAYS', 'NEVER'])).default({}),
     diet_id: nullableSelectionSchema,
     is_rest_day: z.boolean().default(false),
   })

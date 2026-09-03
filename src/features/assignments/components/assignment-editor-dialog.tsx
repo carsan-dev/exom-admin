@@ -41,6 +41,7 @@ import {
   type AssignmentTrainingOption,
   type AutoAssignmentRule,
   type CatalogAvailability,
+  type LastSetVideoPolicy,
 } from '../types'
 import { buildAssignmentEditorDefaults, type AssignmentEditorMode } from './assignment-editor-state'
 import { AssignmentPreviewDialog } from './assignment-preview-dialog'
@@ -69,8 +70,7 @@ function getIsoWeekday(value: string) {
 
 function getWeekStart(value: string) {
   const date = parseUtcDate(value)
-  const weekday = getIsoWeekday(value)
-  date.setUTCDate(date.getUTCDate() - (weekday - 1))
+  date.setUTCDate(date.getUTCDate() - (getIsoWeekday(value) - 1))
   return date
 }
 
@@ -116,12 +116,16 @@ function TrainingMultiSelect({
   value,
   trainings,
   disabled,
+  policies,
   onChange,
+  onPolicyChange,
 }: {
   value: string[]
   trainings: AssignmentTrainingOption[]
   disabled: boolean
+  policies: Record<string, LastSetVideoPolicy>
   onChange: (ids: string[]) => void
+  onPolicyChange: (trainingId: string, policy: LastSetVideoPolicy) => void
 }) {
   const [search, setSearch] = useState('')
   const [draggedId, setDraggedId] = useState<string | null>(null)
@@ -176,6 +180,20 @@ function TrainingMultiSelect({
             <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground">{position + 1}</span>
             <span className="min-w-0 flex-1 truncate text-sm font-medium">{training.name}</span>
+            <Select
+              disabled={disabled}
+              value={policies[training.id] ?? 'AUTO'}
+              onValueChange={(policy) => onPolicyChange(training.id, policy as LastSetVideoPolicy)}
+            >
+              <SelectTrigger className="h-8 w-32 text-xs" aria-label={`Política de vídeo para ${training.name}`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="AUTO">Automático</SelectItem>
+                <SelectItem value="ALWAYS">Siempre</SelectItem>
+                <SelectItem value="NEVER">Nunca</SelectItem>
+              </SelectContent>
+            </Select>
             <Button type="button" variant="ghost" size="icon" disabled={disabled} onClick={() => onChange(value.filter((id) => id !== training.id))}>
               <X className="h-4 w-4" />
             </Button>
@@ -263,6 +281,7 @@ export function AssignmentEditorDialog({
           training: day.training,
           trainings: day.trainings ?? (day.training ? [day.training] : []),
           training_ids: day.training_ids ?? (day.training ? [day.training.id] : []),
+          default_last_set_video_policy: 'AUTO',
           diet: day.diet,
         } satisfies AssignmentDay] as const
       }))
@@ -348,6 +367,7 @@ export function AssignmentEditorDialog({
         date: day.date,
         training_id: day.training_id ?? null,
         training_ids: day.is_rest_day ? [] : day.training_ids,
+        training_policies: day.is_rest_day ? {} : day.training_policies,
         diet_id: day.diet_id ?? null,
         is_rest_day: day.is_rest_day,
       })),
@@ -532,6 +552,7 @@ export function AssignmentEditorDialog({
                                   onClick={() => {
                                     restField.onChange(true)
                                     form.setValue(`days.${index}.training_ids`, [], { shouldDirty: true, shouldValidate: true })
+                                    form.setValue(`days.${index}.training_policies`, {}, { shouldDirty: true })
                                     form.setValue(`days.${index}.training_id`, null, { shouldDirty: true })
                                     form.setValue(`days.${index}.diet_id`, null, { shouldDirty: true })
                                   }}
@@ -558,10 +579,23 @@ export function AssignmentEditorDialog({
                                   <TrainingMultiSelect
                                     disabled={isRestDay}
                                     value={trainingField.value ?? []}
+                                    policies={watchedDays[index]?.training_policies ?? {}}
                                     trainings={availableTrainings}
                                     onChange={(ids) => {
                                       trainingField.onChange(ids)
                                       form.setValue(`days.${index}.training_id`, ids[0] ?? null, { shouldDirty: true })
+                                      const previousIds = trainingField.value ?? []
+                                      const addedId = ids.find((id) => !previousIds.includes(id))
+                                      if (addedId) {
+                                        form.setValue(
+                                          `days.${index}.training_policies.${addedId}`,
+                                          sourceDay?.default_last_set_video_policy ?? 'AUTO',
+                                          { shouldDirty: true },
+                                        )
+                                      }
+                                    }}
+                                    onPolicyChange={(trainingId, policy) => {
+                                      form.setValue(`days.${index}.training_policies.${trainingId}`, policy, { shouldDirty: true })
                                     }}
                                   />
                                 </FormControl>

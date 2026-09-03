@@ -402,6 +402,7 @@ export function AssignmentsPage() {
           date: singleDay.date,
           training_id: singleDay.is_rest_day ? null : (singleDay.training_id ?? null),
           training_ids: singleDay.is_rest_day ? [] : singleDay.training_ids,
+          training_policies: singleDay.is_rest_day ? {} : singleDay.training_policies,
           diet_id: singleDay.is_rest_day ? null : (singleDay.diet_id ?? null),
           is_rest_day: singleDay.is_rest_day,
         }
@@ -426,6 +427,10 @@ export function AssignmentsPage() {
             weekday: getIsoWeekday(day.date),
             training_id: day.is_rest_day ? null : (day.training_id ?? null),
             training_ids: day.is_rest_day ? [] : day.training_ids,
+            trainings: day.is_rest_day ? [] : (day.training_ids ?? []).map((training_id) => ({
+              training_id,
+              last_set_video_policy: day.training_policies?.[training_id] ?? 'AUTO',
+            })),
             diet_id: day.is_rest_day ? null : (day.diet_id ?? null),
             is_rest_day: day.is_rest_day,
           })),
