@@ -644,7 +644,10 @@ export function AssignmentsPage() {
                 </div>
                 <div className="space-y-2">
                   {copySelectionPreview.map(({ day, targetDate, existingTarget }) => {
-                    const sourceLabel = day.is_rest_day ? 'Descanso' : [day.training?.name, day.diet?.name].filter(Boolean).join(' + ') || 'Vacío (limpiará destino)'
+                    const trainingNames = (day.trainings?.length ? day.trainings : day.training ? [day.training] : [])
+                      .map((training) => training.name)
+                      .join(' + ')
+                    const sourceLabel = day.is_rest_day ? 'Descanso' : [trainingNames, day.diet?.name].filter(Boolean).join(' + ') || 'Vacío (limpiará destino)'
                     const targetBusy = Boolean(existingTarget && (existingTarget.training || existingTarget.diet || existingTarget.is_rest_day))
                     return (
                       <div key={day.date} className="rounded-lg border border-border/70 p-3 text-sm">
@@ -681,9 +684,9 @@ export function AssignmentsPage() {
                     <Repeat2 className="h-4 w-4" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-medium">Las asignaciones ya generadas se mantendrán.</p>
+                    <p className="font-medium">Las fechas automáticas pendientes se retirarán.</p>
                     <p className="text-muted-foreground">
-                      Podrás activar otra autoasignación seleccionando días y guardando un nuevo patrón semanal.
+                      El histórico y los cambios manuales se mantienen. Podrás activar otro patrón cuando quieras.
                     </p>
                   </div>
                 </div>
