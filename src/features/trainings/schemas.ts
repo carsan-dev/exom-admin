@@ -75,6 +75,22 @@ const trainingAccentColorSchema = z
     return normalizedColor
   })
 
+const measureTypeSchema = z.enum(['REPS', 'SECONDS']).default('REPS')
+const targetValueSchema = z
+  .number()
+  .int()
+  .min(1, 'Mínimo 1')
+  .max(2147483647, 'Valor demasiado alto')
+  .nullable()
+  .optional()
+const targetRirSchema = z
+  .number()
+  .int('RIR debe ser entero')
+  .min(0, 'RIR mínimo 0')
+  .max(10, 'RIR máximo 10')
+  .nullable()
+  .optional()
+
 export const trainingExerciseSchema = z.object({
   id: z.string().optional(),
   kind: z.literal('EXERCISE').default('EXERCISE'),
@@ -82,6 +98,9 @@ export const trainingExerciseSchema = z.object({
   order: z.number().int().min(0),
   sets: z.number().int().min(1, 'Mínimo 1 serie'),
   reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),
+  measure_type: measureTypeSchema,
+  target_value: targetValueSchema,
+  target_rir: targetRirSchema,
   request_set_tracking: z.boolean().default(false),
   rest_seconds: z.number().int().min(0).default(60),
 })
@@ -90,6 +109,9 @@ export const trainingCircuitExerciseSchema = z.object({
   id: z.string().optional(),
   exercise_id: z.string().trim().min(1, 'Selecciona un ejercicio'),
   reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),
+  measure_type: measureTypeSchema,
+  target_value: targetValueSchema,
+  target_rir: targetRirSchema,
   request_set_tracking: z.boolean().default(false),
   rest_seconds: z.number().int().min(0).default(15),
 })
@@ -109,42 +131,97 @@ export const trainingItemSchema = z.discriminatedUnion('kind', [
   trainingCircuitSchema,
 ])
 
-export const trainingSchema = z.object({
-  name: z.string().trim().min(1, 'El nombre es obligatorio'),
-  types: z.array(trainingTypeSchema).min(1, 'Selecciona o crea al menos un tipo').superRefine((types, context) => {
-    const normalizedTypes = normalizeTrainingTypes(types)
+export function inferLegacyMeasureType(value: string): 'REPS' | 'SECONDS' {
+  const normalized = value.toLowerCase().trim()
+  return /(\bmin\b|\bmins\b|minutos?|minutes?)/i.test(normalized) ||
+    /(\d+\s*s\b|\bseg\b|segundos?|\bsec\b|seconds?|\bs\b|tiempo|time)/i.test(normalized)
+    ? 'SECONDS'
+    : 'REPS'
+}
 
-    if (normalizedTypes.length !== types.length) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'No repitas tipos',
-      })
-    }
+export function resolveLegacyPrescription(value: string) {
+  const legacy = value.trim()
+  const seconds = legacy.match(/^([0-9]+)\s*(?:s|seg|sec|segundo(?:s)?|second(?:s)?)$/i)
+  const minutes = legacy.match(/^([0-9]+)\s*(?:min|mins|minute(?:s)?|minuto(?:s)?)$/i)
+  const reps = legacy.match(/^([0-9]+)\s*(?:rep(?:s|eticiones?)?)?$/i)
+  const parsed = seconds
+    ? Number(seconds[1])
+    : minutes
+      ? Number(minutes[1]) * 60
+      : reps
+        ? Number(reps[1])
+        : null
+  const targetValue =
+    parsed != null && Number.isSafeInteger(parsed) && parsed >= 1 && parsed <= 2147483647
+      ? parsed
+      : null
 
-    if (new Set(types.map(getTrainingTypeKey)).size !== types.length) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'No repitas tipos',
+  return {
+    measure_type: inferLegacyMeasureType(legacy),
+    target_value: targetValue,
+  } as const
+}
+
+export const trainingSchema = z
+  .object({
+    name: z.string().trim().min(1, 'El nombre es obligatorio'),
+    types: z
+      .array(trainingTypeSchema)
+      .min(1, 'Selecciona o crea al menos un tipo')
+      .superRefine((types, context) => {
+        const normalizedTypes = normalizeTrainingTypes(types)
+
+        if (normalizedTypes.length !== types.length) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'No repitas tipos',
+          })
+        }
+
+        if (new Set(types.map(getTrainingTypeKey)).size !== types.length) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'No repitas tipos',
+          })
+        }
+      }),
+    accentColor: trainingAccentColorSchema,
+    level: z.enum(LEVEL_OPTIONS),
+    estimated_duration_min: z.number().int().positive().optional().or(z.literal(0)).nullable(),
+    estimated_calories: z.number().int().positive().optional().or(z.literal(0)).nullable(),
+    warmup_description: z.string().max(1000).optional().or(z.literal('')),
+    warmup_duration_min: z.number().int().positive().optional().or(z.literal(0)).nullable(),
+    cooldown_description: z.string().max(1000).optional().or(z.literal('')),
+    tags: z.array(trainingTagSchema).superRefine((tags, context) => {
+      if (new Set(tags.map(getTrainingTagKey)).size !== tags.length) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'No repitas etiquetas',
+        })
+      }
+    }),
+    items: z.array(trainingItemSchema).min(1, 'Agrega al menos un ejercicio o circuito'),
+  })
+  .superRefine((training, context) => {
+    training.items.forEach((item, itemIndex) => {
+      const exercises = item.kind === 'CIRCUIT' ? item.exercises : [item]
+      exercises.forEach((exercise, exerciseIndex) => {
+        if (
+          exercise.target_value == null &&
+          exercise.measure_type !== inferLegacyMeasureType(exercise.reps_or_duration)
+        ) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Indica un valor objetivo para cambiar el tipo de medida',
+            path:
+              item.kind === 'CIRCUIT'
+                ? ['items', itemIndex, 'exercises', exerciseIndex, 'measure_type']
+                : ['items', itemIndex, 'measure_type'],
+          })
+        }
       })
-    }
-  }),
-  accentColor: trainingAccentColorSchema,
-  level: z.enum(LEVEL_OPTIONS),
-  estimated_duration_min: z.number().int().positive().optional().or(z.literal(0)).nullable(),
-  estimated_calories: z.number().int().positive().optional().or(z.literal(0)).nullable(),
-  warmup_description: z.string().max(1000).optional().or(z.literal('')),
-  warmup_duration_min: z.number().int().positive().optional().or(z.literal(0)).nullable(),
-  cooldown_description: z.string().max(1000).optional().or(z.literal('')),
-  tags: z.array(trainingTagSchema).superRefine((tags, context) => {
-    if (new Set(tags.map(getTrainingTagKey)).size !== tags.length) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'No repitas etiquetas',
-      })
-    }
-  }),
-  items: z.array(trainingItemSchema).min(1, 'Agrega al menos un ejercicio o circuito'),
-})
+    })
+  })
 
 export type TrainingFormValues = z.infer<typeof trainingSchema>
 export type TrainingExerciseFormValues = z.infer<typeof trainingExerciseSchema>

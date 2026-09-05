@@ -20,6 +20,7 @@ export const TRAINING_ACCENT_SWATCHES = [
 ] as const
 
 export type TrainingType = string
+export type TrainingMeasureType = 'REPS' | 'SECONDS'
 
 export interface CatalogValueWithColor {
   value: string
@@ -111,8 +112,7 @@ function hexToRgb(value: string) {
   }
 
   const hex = normalizedValue.slice(1)
-  const expandedHex =
-    hex.length === 6 ? `${hex}FF` : hex.length === 8 ? hex : null
+  const expandedHex = hex.length === 6 ? `${hex}FF` : hex.length === 8 ? hex : null
 
   if (!expandedHex) {
     return null
@@ -193,7 +193,7 @@ export function getCatalogColorMap(items: CatalogValueWithColor[] | undefined) {
 
 export function getTrainingTypeCatalogStyle(
   type: string,
-  colorMap: Map<string, string> | undefined,
+  colorMap: Map<string, string> | undefined
 ) {
   return getTrainingAccentStyle(colorMap?.get(getTrainingTypeKey(type)))
 }
@@ -203,6 +203,9 @@ export interface TrainingExercise {
   order: number
   sets: number
   reps_or_duration: string
+  measure_type?: TrainingMeasureType | null
+  target_value?: number | null
+  target_rir?: number | null
   request_set_tracking: boolean
   rest_seconds: number
   block_id?: string | null

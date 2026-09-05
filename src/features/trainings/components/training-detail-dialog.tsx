@@ -18,6 +18,7 @@ import {
   getTrainingTypeLabel,
   resolveTrainingTypes,
   type Training,
+  type TrainingExercise,
 } from '../types'
 import { useTrainingTypeCatalogColors } from '../api'
 
@@ -27,6 +28,15 @@ interface TrainingDetailDialogProps {
   onOpenChange: (open: boolean) => void
   onEdit?: (training: Training) => void
   onDuplicate?: (training: Training) => void
+}
+
+function formatPrescription(exercise: TrainingExercise) {
+  const target = exercise.target_value == null
+    ? exercise.reps_or_duration
+    : exercise.measure_type === 'SECONDS'
+      ? `${exercise.target_value} s`
+      : `${exercise.target_value} reps`
+  return exercise.target_rir == null ? target : `${target} · RIR ${exercise.target_rir}`
 }
 
 export function TrainingDetailDialog({
@@ -159,7 +169,7 @@ export function TrainingDetailDialog({
                             <span className="w-4 flex-none pt-0.5 text-xs font-medium text-muted-foreground">{nestedIndex + 1}</span>
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium text-foreground">{te.exercise.name}</p>
-                              <p className="text-xs text-muted-foreground">{te.reps_or_duration} · {te.rest_seconds}s tras ejercicio</p>
+                              <p className="text-xs text-muted-foreground">{formatPrescription(te)} · {te.rest_seconds}s tras ejercicio</p>
                             </div>
                           </div>
                         ))}
@@ -192,7 +202,7 @@ export function TrainingDetailDialog({
                     </div>
                     <div className="text-right text-xs text-muted-foreground flex-none space-y-0.5">
                       <p className="font-medium text-foreground">
-                        {te.sets}×{te.reps_or_duration}
+                        {te.sets}×{formatPrescription(te)}
                       </p>
                       <p>{te.rest_seconds}s entre series</p>
                     </div>

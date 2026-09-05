@@ -10,10 +10,7 @@ import {
   shouldRetryQuery,
   unwrapResponse,
 } from '@/lib/api-utils'
-import {
-  normalizeTrainingTags,
-  type TrainingFormValues,
-} from './schemas'
+import { normalizeTrainingTags, type TrainingFormValues } from './schemas'
 import { normalizeTrainingTypes } from './types'
 import type { CatalogValueWithColor, Training } from './types'
 import type { Exercise, PaginatedResponse } from '../exercises/types'
@@ -105,7 +102,19 @@ export function normalizeTrainingPayload(values: TrainingFormValues) {
             exercises: item.exercises.map((ex) => ({
               ...(ex.id ? { id: ex.id } : {}),
               exercise_id: ex.exercise_id,
-              reps_or_duration: ex.reps_or_duration,
+              reps_or_duration:
+                ex.target_value == null
+                  ? ex.reps_or_duration
+                  : ex.measure_type === 'SECONDS'
+                    ? `${ex.target_value}s`
+                    : `${ex.target_value}`,
+              ...(ex.target_value == null
+                ? {}
+                : {
+                    measure_type: ex.measure_type,
+                    target_value: ex.target_value,
+                  }),
+              target_rir: ex.target_rir ?? null,
               request_set_tracking: ex.request_set_tracking,
               rest_seconds: ex.rest_seconds,
             })),
@@ -116,10 +125,22 @@ export function normalizeTrainingPayload(values: TrainingFormValues) {
             exercise_id: item.exercise_id,
             order,
             sets: item.sets,
-            reps_or_duration: item.reps_or_duration,
+            reps_or_duration:
+              item.target_value == null
+                ? item.reps_or_duration
+                : item.measure_type === 'SECONDS'
+                  ? `${item.target_value}s`
+                  : `${item.target_value}`,
+            ...(item.target_value == null
+              ? {}
+              : {
+                  measure_type: item.measure_type,
+                  target_value: item.target_value,
+                }),
+            target_rir: item.target_rir ?? null,
             request_set_tracking: item.request_set_tracking,
             rest_seconds: item.rest_seconds,
-          },
+          }
     ),
     exercises: values.items.flatMap((item, order) =>
       item.kind === 'EXERCISE'
@@ -129,12 +150,24 @@ export function normalizeTrainingPayload(values: TrainingFormValues) {
               exercise_id: item.exercise_id,
               order,
               sets: item.sets,
-              reps_or_duration: item.reps_or_duration,
+              reps_or_duration:
+                item.target_value == null
+                  ? item.reps_or_duration
+                  : item.measure_type === 'SECONDS'
+                    ? `${item.target_value}s`
+                    : `${item.target_value}`,
+              ...(item.target_value == null
+                ? {}
+                : {
+                    measure_type: item.measure_type,
+                    target_value: item.target_value,
+                  }),
+              target_rir: item.target_rir ?? null,
               request_set_tracking: item.request_set_tracking,
               rest_seconds: item.rest_seconds,
             },
           ]
-        : [],
+        : []
     ),
   }
 }
@@ -145,7 +178,20 @@ function normalizeSearch(search?: string) {
 }
 
 export function useTrainings(params: TrainingsListParams) {
-  const { page, limit, search, type, level, tags, duration_min, duration_max, group_id, ungrouped, sort_by, sort_dir } = params
+  const {
+    page,
+    limit,
+    search,
+    type,
+    level,
+    tags,
+    duration_min,
+    duration_max,
+    group_id,
+    ungrouped,
+    sort_by,
+    sort_dir,
+  } = params
   const normalizedSearch = normalizeSearch(search)
   const normalizedType = type ?? []
   const normalizedLevel = level ?? []
@@ -196,7 +242,8 @@ export function useTrainingGroups() {
   return useQuery({
     queryKey: trainingGroupsQueryKey,
     retry: shouldRetryQuery,
-    queryFn: async () => unwrapResponse(await api.get<ApiEnvelope<CatalogGroup[]>>('/training-groups')),
+    queryFn: async () =>
+      unwrapResponse(await api.get<ApiEnvelope<CatalogGroup[]>>('/training-groups')),
   })
 }
 
@@ -214,7 +261,8 @@ export function useCreateTrainingGroup() {
   const queryClient = useQueryClient()
   const invalidate = useInvalidateTrainingGroups()
   return useMutation({
-    mutationFn: async (name: string) => unwrapResponse(await api.post<ApiEnvelope<CatalogGroup>>('/training-groups', { name })),
+    mutationFn: async (name: string) =>
+      unwrapResponse(await api.post<ApiEnvelope<CatalogGroup>>('/training-groups', { name })),
     onSuccess: (group) => {
       queryClient.setQueryData<CatalogGroup[]>(trainingGroupsQueryKey, (current = []) =>
         [...current, group].sort((left, right) => left.name.localeCompare(right.name, 'es'))
@@ -228,10 +276,15 @@ export function useUpdateTrainingGroup() {
   const queryClient = useQueryClient()
   const invalidate = useInvalidateTrainingGroups()
   return useMutation({
-    mutationFn: async ({ id, name }: { id: string; name: string }) => unwrapResponse(await api.patch<ApiEnvelope<CatalogGroup>>(`/training-groups/${id}`, { name })),
+    mutationFn: async ({ id, name }: { id: string; name: string }) =>
+      unwrapResponse(
+        await api.patch<ApiEnvelope<CatalogGroup>>(`/training-groups/${id}`, { name })
+      ),
     onSuccess: (group) => {
       queryClient.setQueryData<CatalogGroup[]>(trainingGroupsQueryKey, (current = []) =>
-        current.map((item) => item.id === group.id ? group : item).sort((left, right) => left.name.localeCompare(right.name, 'es'))
+        current
+          .map((item) => (item.id === group.id ? group : item))
+          .sort((left, right) => left.name.localeCompare(right.name, 'es'))
       )
       invalidate()
     },
@@ -242,9 +295,14 @@ export function useDeleteTrainingGroup() {
   const queryClient = useQueryClient()
   const invalidate = useInvalidateTrainingGroups()
   return useMutation({
-    mutationFn: async (id: string) => { await api.delete(`/training-groups/${id}`); return id },
+    mutationFn: async (id: string) => {
+      await api.delete(`/training-groups/${id}`)
+      return id
+    },
     onSuccess: (id) => {
-      queryClient.setQueryData<CatalogGroup[]>(trainingGroupsQueryKey, (current = []) => current.filter((group) => group.id !== id))
+      queryClient.setQueryData<CatalogGroup[]>(trainingGroupsQueryKey, (current = []) =>
+        current.filter((group) => group.id !== id)
+      )
       invalidate()
     },
   })
@@ -254,7 +312,12 @@ export function useUpdateTrainingGroupMembership() {
   const invalidate = useInvalidateTrainingGroups()
   return useMutation({
     mutationFn: async ({ ids, groupId }: { ids: string[]; groupId: string | null }) =>
-      unwrapResponse(await api.patch<ApiEnvelope<GroupMembershipResult>>('/trainings/group-membership', { training_ids: ids, group_id: groupId })),
+      unwrapResponse(
+        await api.patch<ApiEnvelope<GroupMembershipResult>>('/trainings/group-membership', {
+          training_ids: ids,
+          group_id: groupId,
+        })
+      ),
     onSuccess: invalidate,
   })
 }
@@ -289,8 +352,13 @@ export function useTrainingTypes() {
     queryKey: trainingTypesQueryKey,
     retry: shouldRetryQuery,
     queryFn: async () => {
-      const response = await api.get<ApiEnvelope<{ types: Array<string | CatalogValueWithColor> }>>('/trainings/types')
-      return unwrapResponse(response).types.map((type) => typeof type === 'string' ? type : type.value)
+      const response =
+        await api.get<ApiEnvelope<{ types: Array<string | CatalogValueWithColor> }>>(
+          '/trainings/types'
+        )
+      return unwrapResponse(response).types.map((type) =>
+        typeof type === 'string' ? type : type.value
+      )
     },
   })
 }
@@ -300,7 +368,8 @@ export function useTrainingTypeCatalogColors() {
     queryKey: [...trainingTypesQueryKey, 'colors'] as const,
     retry: shouldRetryQuery,
     queryFn: async () => {
-      const response = await api.get<ApiEnvelope<{ types: CatalogValueWithColor[] }>>('/trainings/types')
+      const response =
+        await api.get<ApiEnvelope<{ types: CatalogValueWithColor[] }>>('/trainings/types')
       return unwrapResponse(response).types
     },
   })
@@ -416,20 +485,29 @@ export function useRenameTrainingType() {
 export function useDeleteTrainingType() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (value: string) => unwrapResponse(await api.delete<ApiEnvelope<CatalogMutationResponse>>(
-      `/trainings/types/${encodeURIComponent(value)}`
-    )),
-    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [trainingsQueryKeys.all] }),
+    mutationFn: async (value: string) =>
+      unwrapResponse(
+        await api.delete<ApiEnvelope<CatalogMutationResponse>>(
+          `/trainings/types/${encodeURIComponent(value)}`
+        )
+      ),
+    onSuccess: async () =>
+      invalidateAdminQueries(queryClient, { extraQueryKeys: [trainingsQueryKeys.all] }),
   })
 }
 
 export function useDeleteTrainingTypes() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (values: string[]) => unwrapResponse(await api.post<ApiEnvelope<{ values: string[]; affected_count: number }>>(
-      '/trainings/types/delete-batch', { values }
-    )),
-    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [trainingsQueryKeys.all] }),
+    mutationFn: async (values: string[]) =>
+      unwrapResponse(
+        await api.post<ApiEnvelope<{ values: string[]; affected_count: number }>>(
+          '/trainings/types/delete-batch',
+          { values }
+        )
+      ),
+    onSuccess: async () =>
+      invalidateAdminQueries(queryClient, { extraQueryKeys: [trainingsQueryKeys.all] }),
   })
 }
 
@@ -474,10 +552,15 @@ export function useDeleteTrainingTag() {
 export function useDeleteTrainingTags() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (values: string[]) => unwrapResponse(await api.post<ApiEnvelope<{ values: string[]; affected_count: number }>>(
-      '/trainings/tags/delete-batch', { values }
-    )),
-    onSuccess: async () => invalidateAdminQueries(queryClient, { extraQueryKeys: [trainingsQueryKeys.all] }),
+    mutationFn: async (values: string[]) =>
+      unwrapResponse(
+        await api.post<ApiEnvelope<{ values: string[]; affected_count: number }>>(
+          '/trainings/tags/delete-batch',
+          { values }
+        )
+      ),
+    onSuccess: async () =>
+      invalidateAdminQueries(queryClient, { extraQueryKeys: [trainingsQueryKeys.all] }),
   })
 }
 

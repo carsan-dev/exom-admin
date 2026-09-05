@@ -53,6 +53,7 @@ import {
   getTrainingTagKey,
   normalizeTrainingTags,
   normalizeTrainingTagLabel,
+  resolveLegacyPrescription,
   trainingSchema,
   type TrainingFormValues,
 } from '../schemas'
@@ -97,10 +98,27 @@ const defaultValues: TrainingFormValues = {
   items: [],
 }
 
+function toPrescriptionFormValues(trainingExercise: Training['exercises'][number]) {
+  if (trainingExercise.measure_type && trainingExercise.target_value != null) {
+    return {
+      measure_type: trainingExercise.measure_type,
+      target_value: trainingExercise.target_value,
+      target_rir: trainingExercise.target_rir ?? null,
+    }
+  }
+
+  return {
+    ...resolveLegacyPrescription(trainingExercise.reps_or_duration),
+    target_rir: trainingExercise.target_rir ?? null,
+  }
+}
+
 function toFormValues(training: Training, isDuplicate: boolean): TrainingFormValues {
   const sourceItems = training.items?.length
     ? training.items
-    : [...training.exercises].sort((a, b) => a.order - b.order).map((te) => ({ kind: 'EXERCISE' as const, ...te }))
+    : [...training.exercises]
+        .sort((a, b) => a.order - b.order)
+        .map((te) => ({ kind: 'EXERCISE' as const, ...te }))
 
   return {
     name: isDuplicate ? `${training.name} (copia)` : training.name,
@@ -128,6 +146,7 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
               ...(isDuplicate ? {} : { id: te.id }),
               exercise_id: te.exercise.id,
               reps_or_duration: te.reps_or_duration,
+              ...toPrescriptionFormValues(te),
               request_set_tracking: te.request_set_tracking,
               rest_seconds: te.rest_seconds,
             })),
@@ -142,6 +161,7 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
         order,
         sets: te.sets,
         reps_or_duration: te.reps_or_duration,
+        ...toPrescriptionFormValues(te),
         request_set_tracking: te.request_set_tracking,
         rest_seconds: te.rest_seconds,
       }
@@ -336,7 +356,10 @@ function TagsField({ value, onChange, error }: TagsFieldProps) {
       {tagsQuery.isError ? (
         <div className="flex items-center gap-2 text-xs text-status-error">
           <span>
-            {getApiErrorMessage(tagsQuery.error, 'No se han podido cargar las etiquetas existentes')}
+            {getApiErrorMessage(
+              tagsQuery.error,
+              'No se han podido cargar las etiquetas existentes'
+            )}
             .
           </span>
           <Button
@@ -428,7 +451,11 @@ function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps)
             <Badge
               key={type}
               variant="outline"
-              className={!getTrainingTypeCatalogStyle(type, trainingTypeColorMap) ? getTrainingTypeBadgeClass(type) : undefined}
+              className={
+                !getTrainingTypeCatalogStyle(type, trainingTypeColorMap)
+                  ? getTrainingTypeBadgeClass(type)
+                  : undefined
+              }
               style={getTrainingTypeCatalogStyle(type, trainingTypeColorMap)}
             >
               {getTrainingTypeLabel(type)}
@@ -471,7 +498,10 @@ function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps)
       ) : trainingTypesQuery.isError ? (
         <div className="flex items-center gap-2 text-xs text-status-error">
           <span>
-            {getApiErrorMessage(trainingTypesQuery.error, 'No se han podido cargar los tipos existentes')}
+            {getApiErrorMessage(
+              trainingTypesQuery.error,
+              'No se han podido cargar los tipos existentes'
+            )}
             .
           </span>
           <Button
@@ -531,12 +561,7 @@ function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps)
   )
 }
 
-function AccentColorField({
-  value,
-  onChange,
-  error,
-  inputInstanceKey,
-}: AccentColorFieldProps) {
+function AccentColorField({ value, onChange, error, inputInstanceKey }: AccentColorFieldProps) {
   const normalizedColor = normalizeTrainingAccentColor(value)
   const previewStyle = getTrainingAccentStyle(normalizedColor, 'solid')
 
@@ -592,14 +617,14 @@ function AccentColorField({
         })}
       </div>
 
-        <div className="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)_auto]">
-          <label className="flex items-center justify-center rounded-md border border-input bg-input p-1">
-            <input
-              key={inputInstanceKey}
-              type="color"
-              value={normalizedColor ?? '#C5E384'}
-              onChange={(event) => onChange(event.target.value)}
-              className="h-9 w-full cursor-pointer rounded border-0 bg-transparent"
+      <div className="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)_auto]">
+        <label className="flex items-center justify-center rounded-md border border-input bg-input p-1">
+          <input
+            key={inputInstanceKey}
+            type="color"
+            value={normalizedColor ?? '#C5E384'}
+            onChange={(event) => onChange(event.target.value)}
+            className="h-9 w-full cursor-pointer rounded border-0 bg-transparent"
           />
         </label>
 
@@ -609,12 +634,7 @@ function AccentColorField({
           placeholder="#C5E384"
         />
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => onChange(null)}
-          disabled={!value}
-        >
+        <Button type="button" variant="outline" onClick={() => onChange(null)} disabled={!value}>
           Limpiar
         </Button>
       </div>
@@ -653,14 +673,14 @@ export function TrainingFormDialog({
       ? 'Duplicar entrenamiento'
       : importedValues
         ? 'Importar entrenamiento'
-      : 'Nuevo entrenamiento'
+        : 'Nuevo entrenamiento'
   const dialogDescription = isEditing
     ? 'Modifica los campos y guarda los cambios.'
     : isDuplicate
       ? 'Se creará una copia del entrenamiento con el mismo contenido.'
       : importedValues
         ? 'Revisa los datos importados antes de crear el entrenamiento.'
-      : 'Rellena los datos del nuevo entrenamiento.'
+        : 'Rellena los datos del nuevo entrenamiento.'
 
   const form = useForm<TrainingFormValues>({
     resolver: zodResolver(trainingSchema),

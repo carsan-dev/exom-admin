@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { normalizeSearchText } from '@/lib/search'
 import { LEVEL_OPTIONS, type Exercise } from '../exercises/types'
 import type { TrainingFormValues, TrainingItemFormValues } from './schemas'
-import { normalizeTrainingTags } from './schemas'
+import { inferLegacyMeasureType, normalizeTrainingTags, resolveLegacyPrescription } from './schemas'
 import { DEFAULT_TRAINING_TYPE, normalizeTrainingTypes } from './types'
 
 export interface TrainingImportResult {
@@ -19,20 +19,40 @@ const optionalInteger = z
   })
   .refine((value) => value == null || Number.isFinite(value), 'Número inválido')
 
+const optionalStrictInteger = z
+  .union([z.number(), z.string(), z.null(), z.undefined()])
+  .transform((value) => {
+    if (value == null || value === '') return null
+    return typeof value === 'number' ? value : Number(value)
+  })
+  .refine((value) => value == null || Number.isInteger(value), 'Debe ser un número entero')
+
 const optionalText = z
   .union([z.string(), z.null(), z.undefined()])
   .transform((value) => value?.trim() ?? '')
 
-const stringList = z.union([z.array(z.string()), z.string(), z.null(), z.undefined()]).transform((value) => {
-  if (Array.isArray(value)) return value
-  if (typeof value === 'string') {
-    return value
-      .split('|')
-      .map((entry) => entry.trim())
-      .filter(Boolean)
-  }
-  return []
-})
+const optionalMeasureType = z.enum(['REPS', 'SECONDS']).optional()
+const optionalTargetValue = optionalStrictInteger.refine(
+  (value) => value == null || (value >= 1 && value <= 2147483647),
+  'target_value debe estar entre 1 y 2147483647'
+)
+const optionalTargetRir = optionalStrictInteger.refine(
+  (value) => value == null || (value >= 0 && value <= 10),
+  'target_rir debe estar entre 0 y 10'
+)
+
+const stringList = z
+  .union([z.array(z.string()), z.string(), z.null(), z.undefined()])
+  .transform((value) => {
+    if (Array.isArray(value)) return value
+    if (typeof value === 'string') {
+      return value
+        .split('|')
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+    }
+    return []
+  })
 
 const importExerciseSchema = z
   .object({
@@ -41,6 +61,9 @@ const importExerciseSchema = z
     exercise_name: optionalText,
     sets: optionalInteger.transform((value) => value ?? 3),
     reps_or_duration: z.string().trim().min(1, 'reps_or_duration es obligatorio'),
+    measure_type: optionalMeasureType,
+    target_value: optionalTargetValue,
+    target_rir: optionalTargetRir,
     request_set_tracking: z.boolean().default(false),
     rest_seconds: optionalInteger.transform((value) => value ?? 60),
   })
@@ -51,6 +74,16 @@ const importExerciseSchema = z
         message: 'Cada ejercicio necesita exercise_id o exercise_name',
       })
     }
+    if (
+      value.target_value == null &&
+      value.measure_type != null &&
+      value.measure_type !== inferLegacyMeasureType(value.reps_or_duration)
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'measure_type necesita target_value si cambia el tipo legacy',
+      })
+    }
   })
 
 const importCircuitExerciseSchema = z
@@ -58,6 +91,9 @@ const importCircuitExerciseSchema = z
     exercise_id: optionalText,
     exercise_name: optionalText,
     reps_or_duration: z.string().trim().min(1, 'reps_or_duration es obligatorio'),
+    measure_type: optionalMeasureType,
+    target_value: optionalTargetValue,
+    target_rir: optionalTargetRir,
     request_set_tracking: z.boolean().default(false),
     rest_seconds: optionalInteger.transform((value) => value ?? 15),
   })
@@ -66,6 +102,16 @@ const importCircuitExerciseSchema = z
       context.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Cada ejercicio de circuito necesita exercise_id o exercise_name',
+      })
+    }
+    if (
+      value.target_value == null &&
+      value.measure_type != null &&
+      value.measure_type !== inferLegacyMeasureType(value.reps_or_duration)
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'measure_type necesita target_value si cambia el tipo legacy',
       })
     }
   })
@@ -110,7 +156,7 @@ function buildExerciseIndexes(exercises: Exercise[]) {
 function resolveExerciseId(
   exercise: Pick<ImportExercise | ImportCircuitExercise, 'exercise_id' | 'exercise_name'>,
   indexes: ReturnType<typeof buildExerciseIndexes>,
-  issues: string[],
+  issues: string[]
 ) {
   if (exercise.exercise_id) {
     return exercise.exercise_id
@@ -137,6 +183,20 @@ function resolveExerciseId(
   return matches[0].id
 }
 
+function resolveImportedPrescription(exercise: {
+  reps_or_duration: string
+  measure_type?: 'REPS' | 'SECONDS'
+  target_value?: number | null
+  target_rir?: number | null
+}) {
+  const legacy = resolveLegacyPrescription(exercise.reps_or_duration)
+  return {
+    measure_type: exercise.measure_type ?? legacy.measure_type,
+    target_value: exercise.target_value ?? legacy.target_value,
+    target_rir: exercise.target_rir ?? null,
+  }
+}
+
 function toFormValues(training: ImportTraining, exercises: Exercise[]): TrainingImportResult {
   const issues: string[] = []
   const indexes = buildExerciseIndexes(exercises)
@@ -152,6 +212,7 @@ function toFormValues(training: ImportTraining, exercises: Exercise[]): Training
         exercises: item.exercises.map((exercise) => ({
           exercise_id: resolveExerciseId(exercise, indexes, issues),
           reps_or_duration: exercise.reps_or_duration,
+          ...resolveImportedPrescription(exercise),
           request_set_tracking: exercise.request_set_tracking,
           rest_seconds: exercise.rest_seconds,
         })),
@@ -164,6 +225,7 @@ function toFormValues(training: ImportTraining, exercises: Exercise[]): Training
       order,
       sets: item.sets,
       reps_or_duration: item.reps_or_duration,
+      ...resolveImportedPrescription(item),
       request_set_tracking: item.request_set_tracking,
       rest_seconds: item.rest_seconds,
     }
@@ -242,7 +304,7 @@ function csvToJson(text: string) {
 
   const columns = header.map((column) => column.trim())
   const records = dataRows.map((row) =>
-    Object.fromEntries(columns.map((column, index) => [column, row[index]?.trim() ?? ''])),
+    Object.fromEntries(columns.map((column, index) => [column, row[index]?.trim() ?? '']))
   )
   const first = records[0]
   const orderedRecords = records
@@ -280,6 +342,9 @@ function csvToJson(text: string) {
         exercise_id: record.exercise_id,
         exercise_name: record.exercise_name,
         reps_or_duration: record.reps_or_duration,
+        measure_type: record.measure_type || undefined,
+        target_value: record.target_value || undefined,
+        target_rir: record.target_rir ?? undefined,
         request_set_tracking: false,
         rest_seconds: record.rest_seconds,
       })
@@ -292,6 +357,9 @@ function csvToJson(text: string) {
       exercise_name: record.exercise_name,
       sets: record.sets,
       reps_or_duration: record.reps_or_duration,
+      measure_type: record.measure_type || undefined,
+      target_value: record.target_value || undefined,
+      target_rir: record.target_rir ?? undefined,
       request_set_tracking: false,
       rest_seconds: record.rest_seconds,
     })
