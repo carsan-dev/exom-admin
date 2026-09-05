@@ -1,12 +1,7 @@
 import { Edit, Copy, Clock, Flame, Layers, Repeat } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
@@ -31,11 +26,13 @@ interface TrainingDetailDialogProps {
 }
 
 function formatPrescription(exercise: TrainingExercise) {
-  const target = exercise.target_value == null
-    ? exercise.reps_or_duration
-    : exercise.measure_type === 'SECONDS'
-      ? `${exercise.target_value} s`
-      : `${exercise.target_value} reps`
+  const suffix = exercise.measure_type === 'SECONDS' ? ' s' : ' reps'
+  const target =
+    exercise.target_value != null
+      ? `${exercise.target_value}${suffix}`
+      : exercise.target_value_min != null && exercise.target_value_max != null
+        ? `${exercise.target_value_min}-${exercise.target_value_max}${suffix}`
+        : exercise.reps_or_duration
   return exercise.target_rir == null ? target : `${target} · RIR ${exercise.target_rir}`
 }
 
@@ -73,7 +70,7 @@ export function TrainingDetailDialog({
                 style={{ backgroundColor: training.accentColor }}
               />
             ) : null}
-            {trainingTypes.map((type) => (
+            {trainingTypes.map((type) =>
               (() => {
                 const catalogStyle = getTrainingTypeCatalogStyle(type, trainingTypeColorMap)
                 const badgeStyle = accentStyle ?? catalogStyle
@@ -89,7 +86,7 @@ export function TrainingDetailDialog({
                   </Badge>
                 )
               })()
-            ))}
+            )}
             <Badge
               variant="outline"
               className={cn('font-medium', getLevelBadgeClass(training.level))}
@@ -102,7 +99,11 @@ export function TrainingDetailDialog({
           {training.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {training.tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="border-border bg-muted text-muted-foreground text-xs">
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="border-border bg-muted text-muted-foreground text-xs"
+                >
                   {tag}
                 </Badge>
               ))}
@@ -136,12 +137,16 @@ export function TrainingDetailDialog({
           {/* Warmup */}
           {(training.warmup_description || training.warmup_duration_min) && (
             <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-amber-600">Calentamiento</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-amber-600">
+                Calentamiento
+              </p>
               {training.warmup_duration_min != null && training.warmup_duration_min > 0 && (
                 <p className="text-sm text-muted-foreground">{training.warmup_duration_min} min</p>
               )}
               {training.warmup_description && (
-                <p className="text-sm text-foreground whitespace-pre-wrap">{training.warmup_description}</p>
+                <p className="text-sm text-foreground whitespace-pre-wrap">
+                  {training.warmup_description}
+                </p>
               )}
             </div>
           )}
@@ -156,20 +161,34 @@ export function TrainingDetailDialog({
                 {items.map((item, index) => {
                   if (item.kind === 'CIRCUIT') {
                     return (
-                      <div key={item.id} className="space-y-2 rounded-lg border border-brand-soft/40 bg-brand-soft/10 p-3">
+                      <div
+                        key={item.id}
+                        className="space-y-2 rounded-lg border border-brand-soft/40 bg-brand-soft/10 p-3"
+                      >
                         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                           <Repeat className="h-4 w-4 text-brand-primary" />
-                          <span>{item.name ?? 'Circuito'} · {item.rounds} rondas</span>
+                          <span>
+                            {item.name ?? 'Circuito'} · {item.rounds} rondas
+                          </span>
                           <span className="ml-auto text-xs font-normal text-muted-foreground">
                             {item.rest_between_rounds_seconds}s entre rondas
                           </span>
                         </div>
                         {item.exercises.map((te, nestedIndex) => (
-                          <div key={te.id} className="flex items-start gap-3 rounded-md border border-border/60 bg-background/60 px-3 py-2">
-                            <span className="w-4 flex-none pt-0.5 text-xs font-medium text-muted-foreground">{nestedIndex + 1}</span>
+                          <div
+                            key={te.id}
+                            className="flex items-start gap-3 rounded-md border border-border/60 bg-background/60 px-3 py-2"
+                          >
+                            <span className="w-4 flex-none pt-0.5 text-xs font-medium text-muted-foreground">
+                              {nestedIndex + 1}
+                            </span>
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-foreground">{te.exercise.name}</p>
-                              <p className="text-xs text-muted-foreground">{formatPrescription(te)} · {te.rest_seconds}s tras ejercicio</p>
+                              <p className="text-sm font-medium text-foreground">
+                                {te.exercise.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatPrescription(te)} · {te.rest_seconds}s tras ejercicio
+                              </p>
                             </div>
                           </div>
                         ))}
@@ -179,34 +198,34 @@ export function TrainingDetailDialog({
 
                   const te = item
                   return (
-                  <div
-                    key={te.id}
-                    className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5"
-                  >
-                    <span className="text-xs font-medium text-muted-foreground w-4 pt-0.5 flex-none">
-                      {index + 1}
-                    </span>
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <p className="text-sm font-medium text-foreground">{te.exercise.name}</p>
-                      <div className="flex flex-wrap gap-1">
-                        {te.exercise.muscle_groups.slice(0, 2).map((mg) => (
-                          <Badge
-                            key={mg}
-                            variant="outline"
-                            className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary"
-                          >
-                            {mg}
-                          </Badge>
-                        ))}
+                    <div
+                      key={te.id}
+                      className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5"
+                    >
+                      <span className="text-xs font-medium text-muted-foreground w-4 pt-0.5 flex-none">
+                        {index + 1}
+                      </span>
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <p className="text-sm font-medium text-foreground">{te.exercise.name}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {te.exercise.muscle_groups.slice(0, 2).map((mg) => (
+                            <Badge
+                              key={mg}
+                              variant="outline"
+                              className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary"
+                            >
+                              {mg}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="text-right text-xs text-muted-foreground flex-none space-y-0.5">
+                        <p className="font-medium text-foreground">
+                          {te.sets}×{formatPrescription(te)}
+                        </p>
+                        <p>{te.rest_seconds}s entre series</p>
                       </div>
                     </div>
-                    <div className="text-right text-xs text-muted-foreground flex-none space-y-0.5">
-                      <p className="font-medium text-foreground">
-                        {te.sets}×{formatPrescription(te)}
-                      </p>
-                      <p>{te.rest_seconds}s entre series</p>
-                    </div>
-                  </div>
                   )
                 })}
               </div>
@@ -216,8 +235,12 @@ export function TrainingDetailDialog({
           {/* Cooldown */}
           {training.cooldown_description && (
             <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3 space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-blue-500">Vuelta a la calma</p>
-              <p className="text-sm text-foreground whitespace-pre-wrap">{training.cooldown_description}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-blue-500">
+                Vuelta a la calma
+              </p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">
+                {training.cooldown_description}
+              </p>
             </div>
           )}
 

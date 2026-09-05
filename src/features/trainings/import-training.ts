@@ -63,6 +63,8 @@ const importExerciseSchema = z
     reps_or_duration: z.string().trim().min(1, 'reps_or_duration es obligatorio'),
     measure_type: optionalMeasureType,
     target_value: optionalTargetValue,
+    target_value_min: optionalTargetValue,
+    target_value_max: optionalTargetValue,
     target_rir: optionalTargetRir,
     request_set_tracking: z.boolean().default(false),
     rest_seconds: optionalInteger.transform((value) => value ?? 60),
@@ -74,14 +76,29 @@ const importExerciseSchema = z
         message: 'Cada ejercicio necesita exercise_id o exercise_name',
       })
     }
-    if (
-      value.target_value == null &&
+    const hasExact = value.target_value != null
+    const hasMin = value.target_value_min != null
+    const hasMax = value.target_value_max != null
+    const hasRange = hasMin && hasMax
+    if (hasMin !== hasMax || (hasExact && hasRange)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Usa target_value o un rango completo, no ambos',
+      })
+    } else if (hasRange && value.target_value_min! > value.target_value_max!) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'target_value_min no puede superar target_value_max',
+      })
+    } else if (
+      !hasExact &&
+      !hasRange &&
       value.measure_type != null &&
       value.measure_type !== inferLegacyMeasureType(value.reps_or_duration)
     ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'measure_type necesita target_value si cambia el tipo legacy',
+        message: 'measure_type necesita un objetivo estructurado si cambia el tipo legacy',
       })
     }
   })
@@ -93,6 +110,8 @@ const importCircuitExerciseSchema = z
     reps_or_duration: z.string().trim().min(1, 'reps_or_duration es obligatorio'),
     measure_type: optionalMeasureType,
     target_value: optionalTargetValue,
+    target_value_min: optionalTargetValue,
+    target_value_max: optionalTargetValue,
     target_rir: optionalTargetRir,
     request_set_tracking: z.boolean().default(false),
     rest_seconds: optionalInteger.transform((value) => value ?? 15),
@@ -104,14 +123,29 @@ const importCircuitExerciseSchema = z
         message: 'Cada ejercicio de circuito necesita exercise_id o exercise_name',
       })
     }
-    if (
-      value.target_value == null &&
+    const hasExact = value.target_value != null
+    const hasMin = value.target_value_min != null
+    const hasMax = value.target_value_max != null
+    const hasRange = hasMin && hasMax
+    if (hasMin !== hasMax || (hasExact && hasRange)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Usa target_value o un rango completo, no ambos',
+      })
+    } else if (hasRange && value.target_value_min! > value.target_value_max!) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'target_value_min no puede superar target_value_max',
+      })
+    } else if (
+      !hasExact &&
+      !hasRange &&
       value.measure_type != null &&
       value.measure_type !== inferLegacyMeasureType(value.reps_or_duration)
     ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'measure_type necesita target_value si cambia el tipo legacy',
+        message: 'measure_type necesita un objetivo estructurado si cambia el tipo legacy',
       })
     }
   })
@@ -187,12 +221,26 @@ function resolveImportedPrescription(exercise: {
   reps_or_duration: string
   measure_type?: 'REPS' | 'SECONDS'
   target_value?: number | null
+  target_value_min?: number | null
+  target_value_max?: number | null
   target_rir?: number | null
 }) {
   const legacy = resolveLegacyPrescription(exercise.reps_or_duration)
+  const hasExact = exercise.target_value != null
+  const hasRange = exercise.target_value_min != null && exercise.target_value_max != null
   return {
     measure_type: exercise.measure_type ?? legacy.measure_type,
-    target_value: exercise.target_value ?? legacy.target_value,
+    target_value: hasExact ? exercise.target_value : hasRange ? null : legacy.target_value,
+    target_value_min: hasExact
+      ? null
+      : hasRange
+        ? exercise.target_value_min
+        : legacy.target_value_min,
+    target_value_max: hasExact
+      ? null
+      : hasRange
+        ? exercise.target_value_max
+        : legacy.target_value_max,
     target_rir: exercise.target_rir ?? null,
   }
 }
@@ -344,6 +392,8 @@ function csvToJson(text: string) {
         reps_or_duration: record.reps_or_duration,
         measure_type: record.measure_type || undefined,
         target_value: record.target_value || undefined,
+        target_value_min: record.target_value_min || undefined,
+        target_value_max: record.target_value_max || undefined,
         target_rir: record.target_rir ?? undefined,
         request_set_tracking: false,
         rest_seconds: record.rest_seconds,
@@ -359,6 +409,8 @@ function csvToJson(text: string) {
       reps_or_duration: record.reps_or_duration,
       measure_type: record.measure_type || undefined,
       target_value: record.target_value || undefined,
+      target_value_min: record.target_value_min || undefined,
+      target_value_max: record.target_value_max || undefined,
       target_rir: record.target_rir ?? undefined,
       request_set_tracking: false,
       rest_seconds: record.rest_seconds,

@@ -109,4 +109,37 @@ describe('normalizeTrainingPayload', () => {
     expect(payload.items[0]).not.toHaveProperty('measure_type')
     expect(payload.items[0]).not.toHaveProperty('target_value')
   })
+
+  it.each([
+    ['REPS', 8, 10, '8-10'],
+    ['SECONDS', 30, 45, '30-45s'],
+  ] as const)('serializes a structured %s range', (measure_type, min, max, legacy) => {
+    const payload = normalizeTrainingPayload({
+      ...base,
+      items: [
+        {
+          kind: 'EXERCISE',
+          exercise_id: 'exercise-1',
+          order: 0,
+          sets: 3,
+          reps_or_duration: 'ignored',
+          measure_type,
+          target_value: null,
+          target_value_min: min,
+          target_value_max: max,
+          target_rir: null,
+          request_set_tracking: false,
+          rest_seconds: 60,
+        },
+      ],
+    })
+
+    expect(payload.items[0]).toMatchObject({
+      reps_or_duration: legacy,
+      measure_type,
+      target_value_min: min,
+      target_value_max: max,
+    })
+    expect(payload.items[0]).not.toHaveProperty('target_value')
+  })
 })

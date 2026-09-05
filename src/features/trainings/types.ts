@@ -205,6 +205,8 @@ export interface TrainingExercise {
   reps_or_duration: string
   measure_type?: TrainingMeasureType | null
   target_value?: number | null
+  target_value_min?: number | null
+  target_value_max?: number | null
   target_rir?: number | null
   request_set_tracking: boolean
   rest_seconds: number

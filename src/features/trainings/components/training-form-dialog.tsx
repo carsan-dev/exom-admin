@@ -99,10 +99,16 @@ const defaultValues: TrainingFormValues = {
 }
 
 function toPrescriptionFormValues(trainingExercise: Training['exercises'][number]) {
-  if (trainingExercise.measure_type && trainingExercise.target_value != null) {
+  if (
+    trainingExercise.measure_type &&
+    (trainingExercise.target_value != null ||
+      (trainingExercise.target_value_min != null && trainingExercise.target_value_max != null))
+  ) {
     return {
       measure_type: trainingExercise.measure_type,
       target_value: trainingExercise.target_value,
+      target_value_min: trainingExercise.target_value_min ?? null,
+      target_value_max: trainingExercise.target_value_max ?? null,
       target_rir: trainingExercise.target_rir ?? null,
     }
   }

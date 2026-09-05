@@ -75,6 +75,38 @@ const trainingTypesQueryKey = ['trainings', 'types'] as const
 const exercisesListQueryKey = ['exercises', 'list-all'] as const
 const trainingGroupsQueryKey = ['training-groups'] as const
 
+function normalizeExercisePrescription(exercise: {
+  reps_or_duration: string
+  measure_type: 'REPS' | 'SECONDS'
+  target_value?: number | null
+  target_value_min?: number | null
+  target_value_max?: number | null
+}) {
+  if (exercise.target_value != null) {
+    return {
+      reps_or_duration:
+        exercise.measure_type === 'SECONDS'
+          ? `${exercise.target_value}s`
+          : `${exercise.target_value}`,
+      measure_type: exercise.measure_type,
+      target_value: exercise.target_value,
+    }
+  }
+
+  if (exercise.target_value_min != null && exercise.target_value_max != null) {
+    return {
+      reps_or_duration: `${exercise.target_value_min}-${exercise.target_value_max}${
+        exercise.measure_type === 'SECONDS' ? 's' : ''
+      }`,
+      measure_type: exercise.measure_type,
+      target_value_min: exercise.target_value_min,
+      target_value_max: exercise.target_value_max,
+    }
+  }
+
+  return { reps_or_duration: exercise.reps_or_duration }
+}
+
 export function normalizeTrainingPayload(values: TrainingFormValues) {
   const normalizedTypes = normalizeTrainingTypes(values.types)
 
@@ -102,18 +134,7 @@ export function normalizeTrainingPayload(values: TrainingFormValues) {
             exercises: item.exercises.map((ex) => ({
               ...(ex.id ? { id: ex.id } : {}),
               exercise_id: ex.exercise_id,
-              reps_or_duration:
-                ex.target_value == null
-                  ? ex.reps_or_duration
-                  : ex.measure_type === 'SECONDS'
-                    ? `${ex.target_value}s`
-                    : `${ex.target_value}`,
-              ...(ex.target_value == null
-                ? {}
-                : {
-                    measure_type: ex.measure_type,
-                    target_value: ex.target_value,
-                  }),
+              ...normalizeExercisePrescription(ex),
               target_rir: ex.target_rir ?? null,
               request_set_tracking: ex.request_set_tracking,
               rest_seconds: ex.rest_seconds,
@@ -125,18 +146,7 @@ export function normalizeTrainingPayload(values: TrainingFormValues) {
             exercise_id: item.exercise_id,
             order,
             sets: item.sets,
-            reps_or_duration:
-              item.target_value == null
-                ? item.reps_or_duration
-                : item.measure_type === 'SECONDS'
-                  ? `${item.target_value}s`
-                  : `${item.target_value}`,
-            ...(item.target_value == null
-              ? {}
-              : {
-                  measure_type: item.measure_type,
-                  target_value: item.target_value,
-                }),
+            ...normalizeExercisePrescription(item),
             target_rir: item.target_rir ?? null,
             request_set_tracking: item.request_set_tracking,
             rest_seconds: item.rest_seconds,
@@ -150,18 +160,7 @@ export function normalizeTrainingPayload(values: TrainingFormValues) {
               exercise_id: item.exercise_id,
               order,
               sets: item.sets,
-              reps_or_duration:
-                item.target_value == null
-                  ? item.reps_or_duration
-                  : item.measure_type === 'SECONDS'
-                    ? `${item.target_value}s`
-                    : `${item.target_value}`,
-              ...(item.target_value == null
-                ? {}
-                : {
-                    measure_type: item.measure_type,
-                    target_value: item.target_value,
-                  }),
+              ...normalizeExercisePrescription(item),
               target_rir: item.target_rir ?? null,
               request_set_tracking: item.request_set_tracking,
               rest_seconds: item.rest_seconds,

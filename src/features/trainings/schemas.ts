@@ -100,6 +100,8 @@ export const trainingExerciseSchema = z.object({
   reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),
   measure_type: measureTypeSchema,
   target_value: targetValueSchema,
+  target_value_min: targetValueSchema,
+  target_value_max: targetValueSchema,
   target_rir: targetRirSchema,
   request_set_tracking: z.boolean().default(false),
   rest_seconds: z.number().int().min(0).default(60),
@@ -111,6 +113,8 @@ export const trainingCircuitExerciseSchema = z.object({
   reps_or_duration: z.string().trim().min(1, 'Especifica reps o duración'),
   measure_type: measureTypeSchema,
   target_value: targetValueSchema,
+  target_value_min: targetValueSchema,
+  target_value_max: targetValueSchema,
   target_rir: targetRirSchema,
   request_set_tracking: z.boolean().default(false),
   rest_seconds: z.number().int().min(0).default(15),
@@ -144,6 +148,10 @@ export function resolveLegacyPrescription(value: string) {
   const seconds = legacy.match(/^([0-9]+)\s*(?:s|seg|sec|segundo(?:s)?|second(?:s)?)$/i)
   const minutes = legacy.match(/^([0-9]+)\s*(?:min|mins|minute(?:s)?|minuto(?:s)?)$/i)
   const reps = legacy.match(/^([0-9]+)\s*(?:rep(?:s|eticiones?)?)?$/i)
+  const secondsRange = legacy.match(
+    /^([0-9]+)\s*-\s*([0-9]+)\s*(?:s|seg|sec|segundo(?:s)?|second(?:s)?)$/i
+  )
+  const repsRange = legacy.match(/^([0-9]+)\s*-\s*([0-9]+)\s*(?:rep(?:s|eticiones?)?)?$/i)
   const parsed = seconds
     ? Number(seconds[1])
     : minutes
@@ -155,11 +163,58 @@ export function resolveLegacyPrescription(value: string) {
     parsed != null && Number.isSafeInteger(parsed) && parsed >= 1 && parsed <= 2147483647
       ? parsed
       : null
+  const range = secondsRange ?? repsRange
+  const rangeMin = range ? Number(range[1]) : null
+  const rangeMax = range ? Number(range[2]) : null
+  const validRange =
+    rangeMin != null &&
+    rangeMax != null &&
+    Number.isSafeInteger(rangeMin) &&
+    Number.isSafeInteger(rangeMax) &&
+    rangeMin >= 1 &&
+    rangeMax <= 2147483647 &&
+    rangeMin <= rangeMax
 
   return {
     measure_type: inferLegacyMeasureType(legacy),
     target_value: targetValue,
+    target_value_min: validRange ? rangeMin : null,
+    target_value_max: validRange ? rangeMax : null,
   } as const
+}
+
+export function parsePrescriptionInput(value: string, measureType: 'REPS' | 'SECONDS') {
+  const raw = value.trim()
+  const exact = raw.match(/^([0-9]+)$/)
+  const range = raw.match(/^([0-9]+)\s*-\s*([0-9]+)$/)
+  const parsedExact = exact ? Number(exact[1]) : null
+  const min = range ? Number(range[1]) : null
+  const max = range ? Number(range[2]) : null
+  const exactValid =
+    parsedExact != null &&
+    Number.isSafeInteger(parsedExact) &&
+    parsedExact >= 1 &&
+    parsedExact <= 2147483647
+  const rangeValid =
+    min != null &&
+    max != null &&
+    Number.isSafeInteger(min) &&
+    Number.isSafeInteger(max) &&
+    min >= 1 &&
+    max <= 2147483647 &&
+    min <= max
+  const suffix = measureType === 'SECONDS' ? 's' : ''
+
+  return {
+    reps_or_duration: exactValid
+      ? `${parsedExact}${suffix}`
+      : rangeValid
+        ? `${min}-${max}${suffix}`
+        : raw,
+    target_value: exactValid ? parsedExact : null,
+    target_value_min: rangeValid ? min : null,
+    target_value_max: rangeValid ? max : null,
+  }
 }
 
 export const trainingSchema = z
@@ -206,17 +261,47 @@ export const trainingSchema = z
     training.items.forEach((item, itemIndex) => {
       const exercises = item.kind === 'CIRCUIT' ? item.exercises : [item]
       exercises.forEach((exercise, exerciseIndex) => {
+        const hasExact = exercise.target_value != null
+        const hasMin = exercise.target_value_min != null
+        const hasMax = exercise.target_value_max != null
+        const hasRange = hasMin && hasMax
+        const path =
+          item.kind === 'CIRCUIT'
+            ? ['items', itemIndex, 'exercises', exerciseIndex, 'target_value']
+            : ['items', itemIndex, 'target_value']
+        if (hasMin !== hasMax || (hasExact && hasRange)) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Indica un número o un rango completo, por ejemplo 8-10',
+            path,
+          })
+          return
+        }
+        if (hasRange && exercise.target_value_min! > exercise.target_value_max!) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'El mínimo no puede superar el máximo',
+            path,
+          })
+          return
+        }
+        if (!hasExact && !hasRange && !exercise.id) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Introduce un número o un rango, por ejemplo 8-10',
+            path,
+          })
+          return
+        }
         if (
-          exercise.target_value == null &&
+          !hasExact &&
+          !hasRange &&
           exercise.measure_type !== inferLegacyMeasureType(exercise.reps_or_duration)
         ) {
           context.addIssue({
             code: z.ZodIssueCode.custom,
             message: 'Indica un valor objetivo para cambiar el tipo de medida',
-            path:
-              item.kind === 'CIRCUIT'
-                ? ['items', itemIndex, 'exercises', exerciseIndex, 'measure_type']
-                : ['items', itemIndex, 'measure_type'],
+            path,
           })
         }
       })

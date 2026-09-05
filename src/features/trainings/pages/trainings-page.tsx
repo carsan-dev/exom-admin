@@ -80,8 +80,8 @@ IMPORTANTE:
 - Cada ejercicio suelto debe tener kind "EXERCISE".
 - Cada circuito debe tener kind "CIRCUIT" y una lista exercises.
 - En circuitos, cada ejercicio representa 1 serie por ronda.
-- Cada ejercicio debe indicar measure_type ("REPS" o "SECONDS"), target_value entero y target_rir entero entre 0 y 10 o null.
-- Mantén reps_or_duration como espejo legacy del objetivo (por ejemplo "10" o "30s").
+- Cada ejercicio debe indicar measure_type ("REPS" o "SECONDS") y un objetivo exacto en target_value, o un rango en target_value_min/target_value_max, nunca ambos.
+- Mantén reps_or_duration como espejo legacy del objetivo (por ejemplo "10", "8-10" o "30-45s").
 - Si NO hay circuito, no incluyas ningún objeto kind "CIRCUIT".
 - Si hay varios ejercicios sueltos, repite el bloque kind "EXERCISE" dentro de items.
 - Si hay varios circuitos, repite el bloque kind "CIRCUIT" dentro de items.
@@ -113,7 +113,9 @@ Devuelve exactamente este JSON:
       "sets": [MODIFICAR: número de series],
       "reps_or_duration": "[MODIFICAR: reps o duración, ej. 10, 12-15, 30s]",
       "measure_type": "[MODIFICAR: REPS | SECONDS]",
-      "target_value": [MODIFICAR: reps o segundos enteros],
+      "target_value": [MODIFICAR: entero exacto o null si usa rango],
+      "target_value_min": [MODIFICAR: entero mínimo o null si usa objetivo exacto],
+      "target_value_max": [MODIFICAR: entero máximo o null si usa objetivo exacto],
       "target_rir": [MODIFICAR: entero 0-10 o null],
       "rest_seconds": [MODIFICAR: descanso entre series en segundos]
     },
@@ -123,7 +125,9 @@ Devuelve exactamente este JSON:
       "sets": [MODIFICAR: número de series],
       "reps_or_duration": "[MODIFICAR: reps o duración]",
       "measure_type": "[MODIFICAR: REPS | SECONDS]",
-      "target_value": [MODIFICAR: reps o segundos enteros],
+      "target_value": [MODIFICAR: entero exacto o null si usa rango],
+      "target_value_min": [MODIFICAR: entero mínimo o null si usa objetivo exacto],
+      "target_value_max": [MODIFICAR: entero máximo o null si usa objetivo exacto],
       "target_rir": [MODIFICAR: entero 0-10 o null],
       "rest_seconds": [MODIFICAR: descanso entre series en segundos]
     },
@@ -137,7 +141,9 @@ Devuelve exactamente este JSON:
           "exercise_name": "[MODIFICAR: nombre exacto del ejercicio del circuito 1]",
           "reps_or_duration": "[MODIFICAR: reps o duración de 1 serie]",
           "measure_type": "[MODIFICAR: REPS | SECONDS]",
-          "target_value": [MODIFICAR: reps o segundos enteros],
+          "target_value": [MODIFICAR: entero exacto o null si usa rango],
+          "target_value_min": [MODIFICAR: entero mínimo o null si usa objetivo exacto],
+          "target_value_max": [MODIFICAR: entero máximo o null si usa objetivo exacto],
           "target_rir": [MODIFICAR: entero 0-10 o null],
           "rest_seconds": [MODIFICAR: descanso tras este ejercicio dentro de la ronda]
         },
@@ -145,7 +151,9 @@ Devuelve exactamente este JSON:
           "exercise_name": "[MODIFICAR: nombre exacto del ejercicio del circuito 2]",
           "reps_or_duration": "[MODIFICAR: reps o duración de 1 serie]",
           "measure_type": "[MODIFICAR: REPS | SECONDS]",
-          "target_value": [MODIFICAR: reps o segundos enteros],
+          "target_value": [MODIFICAR: entero exacto o null si usa rango],
+          "target_value_min": [MODIFICAR: entero mínimo o null si usa objetivo exacto],
+          "target_value_max": [MODIFICAR: entero máximo o null si usa objetivo exacto],
           "target_rir": [MODIFICAR: entero 0-10 o null],
           "rest_seconds": [MODIFICAR: descanso tras este ejercicio dentro de la ronda]
         }

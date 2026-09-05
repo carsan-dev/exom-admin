@@ -25,6 +25,8 @@ describe('parseTrainingImport prescription fields', () => {
     expect(result.values.items[0]).toMatchObject({
       measure_type: 'SECONDS',
       target_value: null,
+      target_value_min: 30,
+      target_value_max: 45,
       target_rir: 0,
     })
   })
@@ -39,6 +41,34 @@ describe('parseTrainingImport prescription fields', () => {
   it('rejects a measure type that contradicts legacy data without a target', () => {
     expect(() =>
       parseTrainingImport('training.json', source({ measure_type: 'REPS' }), [])
-    ).toThrow(/target_value/)
+    ).toThrow(/objetivo estructurado/)
+  })
+
+  it('accepts an explicit structured range', () => {
+    const result = parseTrainingImport(
+      'training.json',
+      source({
+        reps_or_duration: '8-10',
+        measure_type: 'REPS',
+        target_value_min: 8,
+        target_value_max: 10,
+      }),
+      []
+    )
+
+    expect(result.values.items[0]).toMatchObject({
+      measure_type: 'REPS',
+      target_value: null,
+      target_value_min: 8,
+      target_value_max: 10,
+    })
+  })
+
+  it.each([
+    { target_value_min: 8 },
+    { target_value: 8, target_value_min: 8, target_value_max: 10 },
+    { target_value_min: 10, target_value_max: 8 },
+  ])('rejects an incoherent target shape: %o', (fields) => {
+    expect(() => parseTrainingImport('training.json', source(fields), [])).toThrow()
   })
 })

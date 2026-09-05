@@ -7,7 +7,11 @@ import { cn } from '@/lib/utils'
 import { normalizeSearchText } from '@/lib/search'
 import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
 import { useExercisesList } from '../api'
-import type { TrainingCircuitExerciseFormValues, TrainingItemFormValues } from '../schemas'
+import {
+  parsePrescriptionInput,
+  type TrainingCircuitExerciseFormValues,
+  type TrainingItemFormValues,
+} from '../schemas'
 
 interface ExercisePickerProps {
   value: TrainingItemFormValues[]
@@ -18,22 +22,33 @@ interface ExercisePickerProps {
 interface PrescriptionFieldsProps {
   measureType: 'REPS' | 'SECONDS'
   targetValue?: number | null
+  targetValueMin?: number | null
+  targetValueMax?: number | null
   targetRir?: number | null
   legacyValue: string
   onMeasureTypeChange: (value: 'REPS' | 'SECONDS') => void
-  onTargetValueChange: (value: number | null) => void
+  onTargetInputChange: (value: string) => void
   onTargetRirChange: (value: number | null) => void
 }
 
 function PrescriptionFields({
   measureType,
   targetValue,
+  targetValueMin,
+  targetValueMax,
   targetRir,
   legacyValue,
   onMeasureTypeChange,
-  onTargetValueChange,
+  onTargetInputChange,
   onTargetRirChange,
 }: PrescriptionFieldsProps) {
+  const targetInput =
+    targetValue != null
+      ? String(targetValue)
+      : targetValueMin != null && targetValueMax != null
+        ? `${targetValueMin}-${targetValueMax}`
+        : legacyValue
+
   return (
     <>
       <div className="space-y-1">
@@ -52,15 +67,10 @@ function PrescriptionFields({
           {measureType === 'SECONDS' ? 'Segundos objetivo' : 'Repeticiones objetivo'}
         </label>
         <Input
-          type="number"
-          min={1}
-          max={2147483647}
-          step={1}
-          value={targetValue ?? ''}
-          placeholder={targetValue == null ? `Legacy: ${legacyValue}` : undefined}
-          onChange={(event) =>
-            onTargetValueChange(event.target.value === '' ? null : Number(event.target.value))
-          }
+          type="text"
+          value={targetInput}
+          placeholder="Ej. 8 o 8-10"
+          onChange={(event) => onTargetInputChange(event.target.value)}
           className="h-8 text-sm"
         />
       </div>
@@ -143,6 +153,8 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
           reps_or_duration: '10',
           measure_type: 'REPS',
           target_value: 10,
+          target_value_min: null,
+          target_value_max: null,
           target_rir: null,
           request_set_tracking: allTracked,
           rest_seconds: 15,
@@ -164,6 +176,8 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
       reps_or_duration: '10',
       measure_type: 'REPS',
       target_value: 10,
+      target_value_min: null,
+      target_value_max: null,
       target_rir: null,
       request_set_tracking: allTracked,
       rest_seconds: 60,
@@ -224,6 +238,36 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
           ...item,
           exercises: item.exercises.map((exercise, nestedIndex) =>
             nestedIndex === exerciseIndex ? { ...exercise, [field]: fieldValue } : exercise
+          ),
+        }
+      })
+    )
+  }
+
+  const updateExercisePrescription = (index: number, raw: string) => {
+    onChange(
+      value.map((item, itemIndex) =>
+        itemIndex === index && item.kind === 'EXERCISE'
+          ? { ...item, ...parsePrescriptionInput(raw, item.measure_type) }
+          : item
+      )
+    )
+  }
+
+  const updateCircuitExercisePrescription = (
+    circuitIndex: number,
+    exerciseIndex: number,
+    raw: string
+  ) => {
+    onChange(
+      value.map((item, itemIndex) => {
+        if (itemIndex !== circuitIndex || item.kind !== 'CIRCUIT') return item
+        return {
+          ...item,
+          exercises: item.exercises.map((exercise, nestedIndex) =>
+            nestedIndex === exerciseIndex
+              ? { ...exercise, ...parsePrescriptionInput(raw, exercise.measure_type) }
+              : exercise
           ),
         }
       })
@@ -423,13 +467,15 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                             <PrescriptionFields
                               measureType={nested.measure_type}
                               targetValue={nested.target_value}
+                              targetValueMin={nested.target_value_min}
+                              targetValueMax={nested.target_value_max}
                               targetRir={nested.target_rir}
                               legacyValue={nested.reps_or_duration}
                               onMeasureTypeChange={(next) =>
                                 updateCircuitExercise(index, nestedIndex, 'measure_type', next)
                               }
-                              onTargetValueChange={(next) =>
-                                updateCircuitExercise(index, nestedIndex, 'target_value', next)
+                              onTargetInputChange={(next) =>
+                                updateCircuitExercisePrescription(index, nestedIndex, next)
                               }
                               onTargetRirChange={(next) =>
                                 updateCircuitExercise(index, nestedIndex, 'target_rir', next)
@@ -583,10 +629,12 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                   <PrescriptionFields
                     measureType={item.measure_type}
                     targetValue={item.target_value}
+                    targetValueMin={item.target_value_min}
+                    targetValueMax={item.target_value_max}
                     targetRir={item.target_rir}
                     legacyValue={item.reps_or_duration}
                     onMeasureTypeChange={(next) => updateField(index, 'measure_type', next)}
-                    onTargetValueChange={(next) => updateField(index, 'target_value', next)}
+                    onTargetInputChange={(next) => updateExercisePrescription(index, next)}
                     onTargetRirChange={(next) => updateField(index, 'target_rir', next)}
                   />
                   <div className="space-y-1">
