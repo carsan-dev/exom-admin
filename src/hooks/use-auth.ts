@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth'
 import { auth, getIdToken } from '@/lib/firebase'
 import { api } from '@/lib/api'
+import { classifySessionValidationError } from '@/lib/auth-session-validation'
 import type { AuthUser } from '@/types/auth'
 import { FirebaseError } from 'firebase/app'
 
@@ -76,7 +77,33 @@ export const useAuth = create<AuthStore>()((set) => ({
   error: null,
 
   initialize: () => {
+    let validationGeneration = 0
+    const handleValidationFailure = async (error: unknown, generation: number) => {
+      if (generation !== validationGeneration) return
+      const failure = classifySessionValidationError(error)
+      if (failure === 'rejected') {
+        try {
+          await signOut(auth)
+        } catch {
+          // The backend rejection still wins if local Firebase cleanup fails.
+        }
+        if (generation !== validationGeneration) return
+      }
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error:
+          failure === 'locked'
+            ? 'ACCOUNT_BLOCKED'
+            : failure === 'rejected'
+              ? 'UNAUTHORIZED'
+              : (getBackendErrorMessage(error) ?? 'No se pudo validar temporalmente la sesión'),
+      })
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      const generation = ++validationGeneration
       if (!firebaseUser) {
         set({ user: null, isAuthenticated: false, isLoading: false })
         return
@@ -85,11 +112,13 @@ export const useAuth = create<AuthStore>()((set) => ({
       // Page refresh — Firebase session exists, fetch profile from backend
       try {
         const res = await api.get<BackendProfileResponse>('/profile/me')
+        if (generation !== validationGeneration) return
         const profile = res.data.data
         const role = profile.user.role
 
         if (!validateRole(role)) {
           await signOut(auth)
+          if (generation !== validationGeneration) return
           set({ user: null, isAuthenticated: false, isLoading: false, error: 'UNAUTHORIZED' })
           return
         }
@@ -107,15 +136,18 @@ export const useAuth = create<AuthStore>()((set) => ({
 
         set({ user, isAuthenticated: true, isLoading: false, error: null })
       } catch (err) {
+        if (generation !== validationGeneration) return
         // Profile not found (404) — user exists but has no profile yet
         if (axios.isAxiosError(err) && err.response?.status === 404) {
           try {
             const meRes = await api.get<{ data: { id: string; email: string; role: string } }>(
               '/auth/me'
             )
+            if (generation !== validationGeneration) return
             const me = meRes.data.data
             if (!validateRole(me.role)) {
               await signOut(auth)
+              if (generation !== validationGeneration) return
               set({ user: null, isAuthenticated: false, isLoading: false, error: 'UNAUTHORIZED' })
               return
             }
@@ -131,16 +163,19 @@ export const useAuth = create<AuthStore>()((set) => ({
               error: null,
             })
             return
-          } catch {
-            // fall through to sign out
+          } catch (meError) {
+            await handleValidationFailure(meError, generation)
+            return
           }
         }
-        await signOut(auth)
-        set({ user: null, isAuthenticated: false, isLoading: false })
+        await handleValidationFailure(err, generation)
       }
     })
 
-    return unsubscribe
+    return () => {
+      validationGeneration++
+      unsubscribe()
+    }
   },
 
   login: async (email, password) => {
