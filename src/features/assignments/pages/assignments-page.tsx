@@ -645,7 +645,7 @@ export function AssignmentsPage() {
                 <div className="space-y-2">
                   {copySelectionPreview.map(({ day, targetDate, existingTarget }) => {
                     const trainingNames = (day.trainings?.length ? day.trainings : day.training ? [day.training] : [])
-                      .map((training) => training.name)
+                      .map((training) => `${training.name}${training.is_active === false ? ' (retirado)' : ''}`)
                       .join(' + ')
                     const sourceLabel = day.is_rest_day ? 'Descanso' : [trainingNames, day.diet?.name].filter(Boolean).join(' + ') || 'Vacío (limpiará destino)'
                     const targetBusy = Boolean(existingTarget && (existingTarget.training || existingTarget.diet || existingTarget.is_rest_day))

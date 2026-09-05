@@ -35,6 +35,7 @@ import {
   createAssignmentPreviewDiet,
   createAssignmentPreviewTraining,
   type AssignmentDay,
+  type AssignmentDayTraining,
   type AssignmentDietOption,
   type AssignmentEditorValues,
   type AssignmentPreview,
@@ -43,7 +44,11 @@ import {
   type CatalogAvailability,
   type LastSetVideoPolicy,
 } from '../types'
-import { buildAssignmentEditorDefaults, type AssignmentEditorMode } from './assignment-editor-state'
+import {
+  buildAssignmentEditorDefaults,
+  resolveSelectedTrainings,
+  type AssignmentEditorMode,
+} from './assignment-editor-state'
 import { AssignmentPreviewDialog } from './assignment-preview-dialog'
 
 const CLEAR_SELECTION_VALUE = '__none__'
@@ -117,6 +122,7 @@ function TrainingMultiSelect({
   trainings,
   disabled,
   policies,
+  assignedTrainings,
   onChange,
   onPolicyChange,
 }: {
@@ -124,15 +130,13 @@ function TrainingMultiSelect({
   trainings: AssignmentTrainingOption[]
   disabled: boolean
   policies: Record<string, LastSetVideoPolicy>
+  assignedTrainings: AssignmentDayTraining[]
   onChange: (ids: string[]) => void
   onPolicyChange: (trainingId: string, policy: LastSetVideoPolicy) => void
 }) {
   const [search, setSearch] = useState('')
   const [draggedId, setDraggedId] = useState<string | null>(null)
-  const selected = value.flatMap((id) => {
-    const training = trainings.find((item) => item.id === id)
-    return training ? [training] : []
-  })
+  const selected = resolveSelectedTrainings(value, trainings, assignedTrainings)
   const available = trainings.filter((training) =>
     !value.includes(training.id) && training.name.toLocaleLowerCase('es-ES').includes(search.trim().toLocaleLowerCase('es-ES')),
   )
@@ -180,6 +184,11 @@ function TrainingMultiSelect({
             <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground">{position + 1}</span>
             <span className="min-w-0 flex-1 truncate text-sm font-medium">{training.name}</span>
+            {training.is_active === false && (
+              <Badge variant="outline" className="border-status-warning/30 bg-status-warning/10 text-status-warning">
+                Retirado
+              </Badge>
+            )}
             <Select
               disabled={disabled}
               value={policies[training.id] ?? 'AUTO'}
@@ -581,6 +590,7 @@ export function AssignmentEditorDialog({
                                     value={trainingField.value ?? []}
                                     policies={watchedDays[index]?.training_policies ?? {}}
                                     trainings={availableTrainings}
+                                    assignedTrainings={sourceDay?.trainings ?? (sourceDay?.training ? [sourceDay.training] : [])}
                                     onChange={(ids) => {
                                       trainingField.onChange(ids)
                                       form.setValue(`days.${index}.training_id`, ids[0] ?? null, { shouldDirty: true })
@@ -602,7 +612,7 @@ export function AssignmentEditorDialog({
                               ) : (
                                 <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm">
                                   <p className="font-medium text-foreground">
-                                    {sourceDay?.trainings?.length ? `Entrenos actuales: ${sourceDay.trainings.map((training) => training.name).join(', ')}` : sourceDay?.training ? `Entreno actual: ${sourceDay.training.name}` : 'Catálogo no disponible'}
+                                    {sourceDay?.trainings?.length ? `Entrenos actuales: ${sourceDay.trainings.map((training) => `${training.name}${training.is_active === false ? ' (retirado)' : ''}`).join(', ')}` : sourceDay?.training ? `Entreno actual: ${sourceDay.training.name}${sourceDay.training.is_active === false ? ' (retirado)' : ''}` : 'Catálogo no disponible'}
                                   </p>
                                   <p className="mt-1 text-muted-foreground">
                                     {sourceDay?.trainings?.length || sourceDay?.training

@@ -35,6 +35,7 @@ export interface AssignmentDayTraining {
   level: Training['level']
   estimated_duration_min: number | null
   estimated_calories: number | null
+  is_active?: boolean
   requires_last_set_video?: boolean
   last_set_video_policy?: LastSetVideoPolicy
 }
@@ -143,6 +144,7 @@ export interface AssignmentPreviewTraining {
   estimated_duration_min: number | null
   estimated_calories: number | null
   exercises_count: number | null
+  is_active?: boolean
 }
 
 export interface AssignmentPreviewDiet {
@@ -309,6 +311,7 @@ export function createAssignmentPreviewTraining(training: Training | AssignmentT
     level: training.level,
     estimated_duration_min: training.estimated_duration_min,
     estimated_calories: training.estimated_calories,
+    is_active: training.is_active,
     exercises_count:
       'exercises_count' in training
         ? (training.exercises_count ?? null)

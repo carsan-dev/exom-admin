@@ -111,7 +111,9 @@ export function AssignmentPreviewDialog({
                         </div>
                         <div>
                           <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Entrenamiento</p>
-                          <h3 className="mt-2 text-lg font-semibold text-foreground">{day.training.name}</h3>
+                          <h3 className="mt-2 text-lg font-semibold text-foreground">
+                            {day.training.name}{day.training.is_active === false ? ' (retirado)' : ''}
+                          </h3>
                         </div>
                       </div>
 
@@ -127,7 +129,7 @@ export function AssignmentPreviewDialog({
                       <ol className="mt-4 space-y-2 rounded-xl border border-border/60 bg-background/50 p-3">
                         {day.trainings.map((training, index) => (
                           <li key={training.id} className="text-sm font-medium text-foreground">
-                            {index + 1}. {training.name}
+                            {index + 1}. {training.name}{training.is_active === false ? ' (retirado)' : ''}
                           </li>
                         ))}
                       </ol>

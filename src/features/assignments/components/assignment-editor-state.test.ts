@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { AssignmentDay, AutoAssignmentRule } from '../types'
-import { buildAssignmentEditorDefaults } from './assignment-editor-state'
+import { buildAssignmentEditorDefaults, resolveSelectedTrainings } from './assignment-editor-state'
 
 const selectedDay: AssignmentDay = {
   id: 'assignment-1',
@@ -87,5 +87,39 @@ describe('buildAssignmentEditorDefaults', () => {
     expect(result.days.map((day) => day.assignment_id)).toEqual([null, null])
     expect(result.auto_assignment_enabled).toBe(true)
     expect(result.auto_assignment_end_mode).toBe('indefinite')
+  })
+})
+
+describe('resolveSelectedTrainings', () => {
+  it('keeps a retired assigned training visible so it can be replaced', () => {
+    const result = resolveSelectedTrainings(
+      ['retired-training', 'active-training'],
+      [{
+        id: 'active-training',
+        name: 'Active training',
+        type: 'FUERZA',
+        types: ['FUERZA'],
+        accentColor: null,
+        level: 'PRINCIPIANTE',
+        estimated_duration_min: 45,
+        estimated_calories: 300,
+        exercises_count: 4,
+        is_active: true,
+      }],
+      [{
+        id: 'retired-training',
+        name: 'Retired training',
+        type: 'FUERZA',
+        level: 'PRINCIPIANTE',
+        estimated_duration_min: 30,
+        estimated_calories: 200,
+        is_active: false,
+      }],
+    )
+
+    expect(result.map((training) => [training.id, training.is_active])).toEqual([
+      ['retired-training', false],
+      ['active-training', true],
+    ])
   })
 })

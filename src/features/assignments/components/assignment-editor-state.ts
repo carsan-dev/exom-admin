@@ -1,7 +1,30 @@
 import type { AssignmentEditorFormValues } from '../schemas'
-import type { AssignmentDay, AutoAssignmentRule } from '../types'
+import type {
+  AssignmentDay,
+  AssignmentDayTraining,
+  AssignmentTrainingOption,
+  AutoAssignmentRule,
+} from '../types'
 
 export type AssignmentEditorMode = 'selection' | 'auto-rule'
+
+export function resolveSelectedTrainings(
+  selectedIds: string[],
+  availableTrainings: AssignmentTrainingOption[],
+  assignedTrainings: AssignmentDayTraining[],
+): AssignmentDayTraining[] {
+  const trainingsById = new Map(
+    [...assignedTrainings, ...availableTrainings].map((training) => [
+      training.id,
+      training,
+    ]),
+  )
+
+  return selectedIds.flatMap((id) => {
+    const training = trainingsById.get(id)
+    return training ? [training] : []
+  })
+}
 
 function parseUtcDate(value: string) {
   const [year, month, day] = value.split('-').map(Number)

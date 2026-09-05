@@ -122,7 +122,11 @@ export function CopyWeekPreviewDialog({
                 {day.training && (
                   <div className="rounded-xl border border-border/60 bg-background/50 p-3">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Entrenamiento</p>
-                    <p className="mt-1 font-medium text-foreground">{day.training.name}</p>
+                    <p className="mt-1 font-medium text-foreground">
+                      {(day.trainings.length ? day.trainings : [day.training])
+                        .map((training) => `${training.name}${training.is_active === false ? ' (retirado)' : ''}`)
+                        .join(' · ')}
+                    </p>
                   </div>
                 )}
 

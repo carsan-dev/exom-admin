@@ -39,6 +39,7 @@ export function AssignmentDayCard({
 }: AssignmentDayCardProps) {
   const displayDate = toDisplayDate(day.date)
   const trainings = day.trainings ?? (day.training ? [day.training] : [])
+  const retiredTrainings = trainings.filter((training) => training.is_active === false)
 
   if (variant === 'month') {
     return (
@@ -73,6 +74,11 @@ export function AssignmentDayCard({
               {trainings.length} entreno{trainings.length === 1 ? '' : 's'}
             </Badge>
           )}
+          {retiredTrainings.length > 0 && (
+            <Badge variant="outline" className="border-status-warning/30 bg-status-warning/10 px-2 py-0 text-[10px] text-status-warning">
+              {retiredTrainings.length} retirado{retiredTrainings.length === 1 ? '' : 's'}
+            </Badge>
+          )}
           {day.diet && (
             <Badge variant="outline" className="gap-1 border-status-success/30 bg-status-success/10 px-2 py-0 text-[10px] text-status-success">
               <Apple className="h-3 w-3" />
@@ -92,7 +98,7 @@ export function AssignmentDayCard({
             <p className="text-xs font-medium text-foreground">Recuperación</p>
           ) : (
             <>
-              <p className="line-clamp-2 text-xs font-medium text-foreground">{trainings.map((training) => training.name).join(' · ') || 'Sin entreno'}</p>
+              <p className="line-clamp-2 text-xs font-medium text-foreground">{trainings.map((training) => `${training.name}${training.is_active === false ? ' (retirado)' : ''}`).join(' · ') || 'Sin entreno'}</p>
               <p className="line-clamp-1 text-xs text-muted-foreground">{day.diet?.name ?? 'Sin dieta'}</p>
             </>
           )}
@@ -133,6 +139,11 @@ export function AssignmentDayCard({
             {trainings.length} entreno{trainings.length === 1 ? '' : 's'}
           </Badge>
         )}
+        {retiredTrainings.length > 0 && (
+          <Badge variant="outline" className="gap-1 border-status-warning/30 bg-status-warning/10 text-status-warning">
+            {retiredTrainings.length} retirado{retiredTrainings.length === 1 ? '' : 's'}
+          </Badge>
+        )}
         {day.diet && (
           <Badge variant="outline" className="gap-1 border-status-success/30 bg-status-success/10 text-status-success">
             <Apple className="h-3 w-3" />
@@ -164,6 +175,11 @@ export function AssignmentDayCard({
                   {trainings.map((training, index) => (
                     <p key={training.id} className="text-sm font-medium text-foreground">
                       {index + 1}. {training.name}
+                      {training.is_active === false && (
+                        <Badge variant="outline" className="ml-2 border-status-warning/30 bg-status-warning/10 px-1.5 py-0 text-[10px] text-status-warning">
+                          Retirado
+                        </Badge>
+                      )}
                       <span className="ml-2 text-xs font-normal text-muted-foreground">
                         {training.estimated_duration_min ? `${training.estimated_duration_min} min` : 'Flexible'}
                       </span>
