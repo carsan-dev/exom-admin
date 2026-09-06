@@ -9,6 +9,7 @@ import { getApiErrorMessage } from '@/lib/api-utils'
 import type { DayProgress } from '../types'
 import { formatCompletedSet } from '../format-completed-set'
 import { useReplyToTrainingNote } from '../api'
+import { DietHistory } from './diet-history'
 
 interface DayProgressDetailProps {
   clientId: string
@@ -132,6 +133,7 @@ export function DayProgressDetail({ clientId, date, progress, isLoading }: DayPr
             </div>
 
             {/* Nota y respuesta */}
+            <DietHistory entries={progress.diet_history ?? []} />
             {progress.notes && (
               <div className="space-y-3 border-t border-border pt-4">
                 <div className="flex items-center gap-2">

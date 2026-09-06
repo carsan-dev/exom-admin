@@ -1,3 +1,13 @@
+import type { Diet } from '../diets/types'
+
+export interface DietHistoryEntry {
+  diet_id: string
+  version: number
+  captured_at: string
+  provenance: 'observed' | 'legacy_available'
+  diet: Diet
+}
+
 export interface ExerciseCompleted {
   exercise_id: string
   exercise_name: string | null
@@ -24,6 +34,7 @@ export interface DayProgress {
   exercises_completed: ExerciseCompleted[]
   meals_completed: string[]
   meals_completed_details: MealCompletedDetail[]
+  diet_history?: DietHistoryEntry[]
   notes: string | null
   admin_reply_text: string | null
   admin_reply_sent_at: string | null
