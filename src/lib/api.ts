@@ -1,6 +1,7 @@
-import axios from 'axios'
+import axios, { CanceledError } from 'axios'
+import type { User } from 'firebase/auth'
 import { toast } from 'sonner'
-import { getIdToken } from './firebase'
+import { auth, getIdToken } from './firebase'
 import { ApprovalPendingError } from './api-utils'
 
 const AUTH_ROUTES_WITHOUT_REDIRECT = new Set([
@@ -17,9 +18,17 @@ export const api = axios.create({
   },
 })
 
+const requestSessions = new WeakMap<object, User | null>()
+const isStaleSession = (config: object | undefined) =>
+  config !== undefined && requestSessions.has(config) && requestSessions.get(config) !== auth.currentUser
+
 // Request interceptor — inject Firebase JWT
 api.interceptors.request.use(async (config) => {
+  if (AUTH_ROUTES_WITHOUT_REDIRECT.has(config.url ?? '')) return config
+  const session = auth.currentUser
+  requestSessions.set(config, session)
   const token = await getIdToken()
+  if (session !== auth.currentUser) throw new CanceledError('Authentication session changed')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -29,6 +38,7 @@ api.interceptors.request.use(async (config) => {
 // Response interceptor — handle auth errors
 api.interceptors.response.use(
   (response) => {
+    if (isStaleSession(response.config)) return Promise.reject(new CanceledError('Authentication session changed'))
     if (response.status === 202) {
       const approvalData = response.data?.data ?? response.data
       toast.info(approvalData?.message ?? 'Solicitud enviada para aprobación')
@@ -40,6 +50,7 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
+    if (isStaleSession(error.config)) return Promise.reject(new CanceledError('Authentication session changed'))
     const requestUrl = error.config?.url as string | undefined
     const shouldSkipRedirect = requestUrl
       ? AUTH_ROUTES_WITHOUT_REDIRECT.has(requestUrl)

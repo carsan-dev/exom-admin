@@ -70,6 +70,16 @@ function getBackendErrorMessage(error: unknown) {
   return null
 }
 
+let authOperationGeneration = 0
+let pendingLogouts = 0
+let firebaseMutation: Promise<unknown> = Promise.resolve()
+
+function mutateFirebase<T>(operation: () => Promise<T>): Promise<T> {
+  const result = firebaseMutation.then(operation, operation)
+  firebaseMutation = result.then(() => undefined, () => undefined)
+  return result
+}
+
 export const useAuth = create<AuthStore>()((set) => ({
   user: null,
   isLoading: true,
@@ -78,16 +88,16 @@ export const useAuth = create<AuthStore>()((set) => ({
 
   initialize: () => {
     let validationGeneration = 0
-    const handleValidationFailure = async (error: unknown, generation: number) => {
-      if (generation !== validationGeneration) return
+    const handleValidationFailure = async (error: unknown, generation: number, operation: number) => {
+      if (generation !== validationGeneration || operation !== authOperationGeneration) return
       const failure = classifySessionValidationError(error)
       if (failure === 'rejected') {
         try {
-          await signOut(auth)
+          await mutateFirebase(() => signOut(auth))
         } catch {
           // The backend rejection still wins if local Firebase cleanup fails.
         }
-        if (generation !== validationGeneration) return
+        if (generation !== validationGeneration || operation !== authOperationGeneration) return
       }
       set({
         user: null,
@@ -104,21 +114,26 @@ export const useAuth = create<AuthStore>()((set) => ({
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       const generation = ++validationGeneration
+      if (firebaseUser && pendingLogouts > 0) return
+      const operation = authOperationGeneration
+      const isCurrent = () => generation === validationGeneration && operation === authOperationGeneration
       if (!firebaseUser) {
         set({ user: null, isAuthenticated: false, isLoading: false })
         return
       }
 
+      set({ user: null, isAuthenticated: false, isLoading: true, error: null })
+
       // Page refresh — Firebase session exists, fetch profile from backend
       try {
         const res = await api.get<BackendProfileResponse>('/profile/me')
-        if (generation !== validationGeneration) return
+        if (!isCurrent()) return
         const profile = res.data.data
         const role = profile.user.role
 
         if (!validateRole(role)) {
-          await signOut(auth)
-          if (generation !== validationGeneration) return
+          await mutateFirebase(() => signOut(auth))
+          if (!isCurrent()) return
           set({ user: null, isAuthenticated: false, isLoading: false, error: 'UNAUTHORIZED' })
           return
         }
@@ -136,18 +151,18 @@ export const useAuth = create<AuthStore>()((set) => ({
 
         set({ user, isAuthenticated: true, isLoading: false, error: null })
       } catch (err) {
-        if (generation !== validationGeneration) return
+        if (!isCurrent()) return
         // Profile not found (404) — user exists but has no profile yet
         if (axios.isAxiosError(err) && err.response?.status === 404) {
           try {
             const meRes = await api.get<{ data: { id: string; email: string; role: string } }>(
               '/auth/me'
             )
-            if (generation !== validationGeneration) return
+            if (!isCurrent()) return
             const me = meRes.data.data
             if (!validateRole(me.role)) {
-              await signOut(auth)
-              if (generation !== validationGeneration) return
+              await mutateFirebase(() => signOut(auth))
+              if (!isCurrent()) return
               set({ user: null, isAuthenticated: false, isLoading: false, error: 'UNAUTHORIZED' })
               return
             }
@@ -164,11 +179,11 @@ export const useAuth = create<AuthStore>()((set) => ({
             })
             return
           } catch (meError) {
-            await handleValidationFailure(meError, generation)
+            await handleValidationFailure(meError, generation, operation)
             return
           }
         }
-        await handleValidationFailure(err, generation)
+        await handleValidationFailure(err, generation, operation)
       }
     })
 
@@ -179,10 +194,12 @@ export const useAuth = create<AuthStore>()((set) => ({
   },
 
   login: async (email, password) => {
-    set({ isLoading: true, error: null })
+    const generation = ++authOperationGeneration
+    set({ user: null, isAuthenticated: false, isLoading: true, error: null })
     try {
       // Backend handles Firebase auth server-side
       const res = await api.post<BackendAuthResponse>('/auth/login', { email, password })
+      if (generation !== authOperationGeneration) return
       const { access_token, user } = res.data.data
 
       if (!validateRole(user.role)) {
@@ -191,14 +208,18 @@ export const useAuth = create<AuthStore>()((set) => ({
       }
 
       // Sign into Firebase client with the custom token so onAuthStateChanged picks it up
-      await signInWithCustomToken(auth, access_token)
+      await mutateFirebase(() => signInWithCustomToken(auth, access_token))
+      if (generation !== authOperationGeneration) return
 
       set({ user, isAuthenticated: true, isLoading: false, error: null })
     } catch (err: unknown) {
+      if (generation !== authOperationGeneration) return
       const axiosError = err as { response?: { status?: number }; name?: string }
       const backendMessage = getBackendErrorMessage(err)
 
-      let error = backendMessage ?? 'Credenciales inválidas'
+      let error = backendMessage ?? (axiosError.response?.status === 401
+        ? 'Credenciales inválidas'
+        : 'No se pudo iniciar sesión temporalmente. Inténtalo de nuevo.')
       if (axiosError.response?.status === 423 || axiosError.name === 'ACCOUNT_BLOCKED') {
         error = 'ACCOUNT_BLOCKED'
       } else if (axiosError.response?.status === 429) {
@@ -210,12 +231,15 @@ export const useAuth = create<AuthStore>()((set) => ({
   },
 
   loginWithGoogle: async () => {
-    set({ isLoading: true, error: null })
+    const generation = ++authOperationGeneration
+    set({ user: null, isAuthenticated: false, isLoading: true, error: null })
 
     try {
       const provider = new GoogleAuthProvider()
-      const result = await signInWithPopup(auth, provider)
+      const result = await mutateFirebase(() => signInWithPopup(auth, provider))
+      if (generation !== authOperationGeneration) return
       const idToken = await result.user.getIdToken()
+      if (generation !== authOperationGeneration) return
 
       const res = await api.post('/auth/social', {
         token: idToken,
@@ -223,9 +247,11 @@ export const useAuth = create<AuthStore>()((set) => ({
       })
 
       const { access_token, user } = res.data.data
+      if (generation !== authOperationGeneration) return
 
       if (!validateRole(user.role)) {
-        await signOut(auth)
+        await mutateFirebase(() => signOut(auth))
+        if (generation !== authOperationGeneration) return
         set({
           user: null,
           isAuthenticated: false,
@@ -235,7 +261,8 @@ export const useAuth = create<AuthStore>()((set) => ({
         return
       }
 
-      await signInWithCustomToken(auth, access_token)
+      await mutateFirebase(() => signInWithCustomToken(auth, access_token))
+      if (generation !== authOperationGeneration) return
 
       set({
         user: {
@@ -249,18 +276,14 @@ export const useAuth = create<AuthStore>()((set) => ({
         error: null,
       })
     } catch (err: unknown) {
-      console.error('Google login error full:', err)
+      if (generation !== authOperationGeneration) return
 
       if (err instanceof FirebaseError) {
-        console.error('Firebase code:', err.code)
-        console.error('Firebase message:', err.message)
-        console.error('Firebase customData:', err.customData)
         set({ isLoading: false, error: `${err.code}: ${err.message}` })
         return
       }
 
       if (axios.isAxiosError(err)) {
-        console.error('Axios response:', err.response?.data)
         set({
           isLoading: false,
           error: err.response?.data?.message ?? 'Error del backend',
@@ -273,14 +296,26 @@ export const useAuth = create<AuthStore>()((set) => ({
   },
 
   logout: async () => {
+    const generation = ++authOperationGeneration
+    pendingLogouts++
+    set({ user: null, isAuthenticated: false, isLoading: false, error: null })
     try {
       const token = await getIdToken()
+      if (generation !== authOperationGeneration) return
       if (token) {
         await api.post('/auth/logout')
       }
     } finally {
-      await signOut(auth)
-      set({ user: null, isAuthenticated: false, error: null })
+      try {
+        if (generation === authOperationGeneration) {
+          await mutateFirebase(() => signOut(auth))
+          if (generation === authOperationGeneration) {
+            set({ user: null, isAuthenticated: false, isLoading: false, error: null })
+          }
+        }
+      } finally {
+        pendingLogouts--
+      }
     }
   },
 
