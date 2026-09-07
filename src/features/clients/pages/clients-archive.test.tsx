@@ -69,6 +69,25 @@ describe('Client list archive lifecycle', () => {
     cache.clear()
   })
 
+  it('refreshes the list after the archive commits but its response is lost', async () => {
+    put.mockImplementationOnce(async (_url: string, body: { is_archived: boolean }) => {
+      archived = body.is_archived
+      throw new Error('response lost after commit')
+    })
+    const cache = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
+    render(<QueryClientProvider client={cache}><MemoryRouter><ClientsPage /></MemoryRouter></QueryClientProvider>)
+    await screen.findByText('Cliente Prueba')
+    fireEvent.click(screen.getByRole('button', { name: 'Archivar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar archivado' }))
+    await screen.findByRole('alert')
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    await waitFor(() => expect(screen.queryByText('Cliente Prueba')).not.toBeInTheDocument())
+    expect(put).toHaveBeenCalledTimes(1)
+    fireEvent.click(screen.getByRole('button', { name: 'Archivados' }))
+    await screen.findByText('Cliente Prueba')
+    cache.clear()
+  })
+
   it('does not show rows from the main list while archived clients are loading', async () => {
     const main = get.getMockImplementation()!
     let release: (() => void) | undefined

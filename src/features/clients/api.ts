@@ -220,7 +220,9 @@ export function useArchiveClient() {
       const response = await api.put<ApiEnvelope<MutationMessage>>(`/admin/clients/${clientId}/archive`, { is_archived })
       return unwrapResponse(response)
     },
-    onSuccess: () => invalidateAdminQueries(queryClient, { extraQueryKeys: [clientsQueryKeys.all] }),
+    // A lost response can follow a committed change. Reconcile both views even
+    // on error, without automatically sending another state change.
+    onSettled: () => invalidateAdminQueries(queryClient, { extraQueryKeys: [clientsQueryKeys.all] }),
   })
 }
 
