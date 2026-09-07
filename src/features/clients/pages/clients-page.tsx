@@ -29,6 +29,7 @@ import {
 import { AdminsTable } from '../components/admins-table'
 import { ChangeRoleDialog } from '../components/change-role-dialog'
 import { ClientsTable } from '../components/clients-table'
+import { ArchiveClientDialog } from '../components/archive-client-dialog'
 import { CreateAdminDialog } from '../components/create-admin-dialog'
 import { CreateClientDialog } from '../components/create-client-dialog'
 import { EditUserDialog } from '../components/edit-user-dialog'
@@ -150,6 +151,7 @@ export function ClientsPage() {
   const [editUserDialogOpen, setEditUserDialogOpen] = useState(false)
   const [toggleStatusDialogOpen, setToggleStatusDialogOpen] = useState(false)
   const [manageAssignmentsDialogOpen, setManageAssignmentsDialogOpen] = useState(false)
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<ManageableUser | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const deferredClientSearch = useDeferredValue(clientSearch)
@@ -161,6 +163,7 @@ export function ClientsPage() {
   const tabParam = getClientsTab(searchParams.get('tab'))
   const activeTab = isSuperAdmin ? tabParam : 'clients'
   const clientPage = getPageSearchParam(searchParams.get('clientsPage'))
+  const archive = searchParams.get('archive') === 'archived' ? 'archived' : 'visible'
   const adminPage = getPageSearchParam(searchParams.get('adminsPage'))
   const superAdminPage = getPageSearchParam(searchParams.get('superAdminsPage'))
   const clientSections = useMemo<FilterSectionConfig[]>(
@@ -220,7 +223,7 @@ export function ClientsPage() {
     superAdminFilters.values,
     userSections
   ) as Partial<UsersListParams>
-  const clientPageResetKey = `${activeClientSearch}::${JSON.stringify(clientFilterParams)}`
+  const clientPageResetKey = `${archive}::${activeClientSearch}::${JSON.stringify(clientFilterParams)}`
   const adminPageResetKey = `${activeAdminSearch}::${JSON.stringify(adminFilterParams)}`
   const superAdminPageResetKey = `${activeSuperAdminSearch}::${JSON.stringify(superAdminFilterParams)}`
   const lastClientPageResetKeyRef = useRef(clientPageResetKey)
@@ -281,6 +284,7 @@ export function ClientsPage() {
   }, [superAdminPageResetKey, setSearchParams])
 
   const clientsQuery = useClients({
+    archive,
     page: clientPage,
     limit: PAGE_SIZE,
     search: activeClientSearch,
@@ -310,6 +314,12 @@ export function ClientsPage() {
   const clients = clientsQuery.data?.data ?? []
   const totalClients = clientsQuery.data?.total ?? 0
   const clientTotalPages = clientsQuery.data?.totalPages ?? 1
+
+  useEffect(() => {
+    if (clientsQuery.data && !clientsQuery.isPlaceholderData && clientPage > Math.max(1, clientTotalPages)) {
+      replacePaginationSearchParams(setSearchParams, { clientsPage: Math.max(1, clientTotalPages) })
+    }
+  }, [clientsQuery.data, clientsQuery.isPlaceholderData, clientPage, clientTotalPages, setSearchParams])
 
   const admins = adminsQuery.data?.data ?? []
   const totalAdmins = adminsQuery.data?.total ?? 0
@@ -373,7 +383,7 @@ export function ClientsPage() {
     const tableDescription = isSuperAdmin
       ? 'Vista paginada de clientes con reasignación, desbloqueo, cambio de rol y alta/baja de cuenta.'
       : 'Vista paginada de clientes asignados al admin actual.'
-    const hasClientQuery = activeClientSearch.length > 0 || clientFilters.activeCount > 0
+    const hasClientQuery = archive === 'archived' || clientPage > 1 || activeClientSearch.length > 0 || clientFilters.activeCount > 0
 
     if (clientsQuery.isLoading) {
       return <ClientsTableSkeleton />
@@ -421,7 +431,7 @@ export function ClientsPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Listado de clientes</CardTitle>
+          <CardTitle className="text-xl">{archive === 'archived' ? 'Clientes archivados' : 'Listado de clientes'}</CardTitle>
           <CardDescription>{tableDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -439,6 +449,7 @@ export function ClientsPage() {
             </p>
           ) : (
             <ClientsTable
+              onArchive={(client) => { setSelectedClient(client); setArchiveDialogOpen(true) }}
               clients={clients}
               currentUserRole={currentUserRole}
               onUnlock={handleUnlock}
@@ -688,6 +699,22 @@ export function ClientsPage() {
         </Button>
       </div>
 
+      {activeTab === 'clients' && (
+        <div className="flex gap-2" role="group" aria-label="Visibilidad de clientes">
+          {(['visible', 'archived'] as const).map((value) => (
+            <Button key={value} variant={archive === value ? 'default' : 'outline'} aria-pressed={archive === value}
+              onClick={() => setSearchParams((current) => {
+                const next = new URLSearchParams(current)
+                next.set('archive', value)
+                next.delete('clientsPage')
+                return next
+              }, { replace: true })}>
+              {value === 'visible' ? 'Listado principal' : 'Archivados'}
+            </Button>
+          ))}
+        </div>
+      )}
+
       {isSuperAdmin ? (
         <Tabs
           value={activeTab}
@@ -728,6 +755,7 @@ export function ClientsPage() {
         onOpenChange={setCreateDialogOpen}
         onCreated={() => replacePaginationSearchParams(setSearchParams, { clientsPage: 1 })}
       />
+      <ArchiveClientDialog client={selectedClient} open={archiveDialogOpen} onOpenChange={setArchiveDialogOpen} />
       <CreateAdminDialog open={createAdminDialogOpen} onOpenChange={setCreateAdminDialogOpen} />
       <UnlockDialog user={selectedUser} open={unlockDialogOpen} onOpenChange={setUnlockDialogOpen} />
       <EditUserDialog user={selectedUser} open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen} />

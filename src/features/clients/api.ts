@@ -88,6 +88,7 @@ export const clientsQueryKeys = {
       params.level ?? [],
       params.status ?? [],
       params.assignment_state ?? [],
+      params.archive ?? 'all',
       params.created_from ?? null,
       params.created_to ?? null,
     ] as const,
@@ -118,6 +119,7 @@ const usersQueryKeys = {
 const ALL_ADMINS_PAGE_SIZE = 100
 
 export interface ClientsListParams {
+  archive?: 'visible' | 'archived' | 'all'
   page: number
   limit: number
   search?: string
@@ -185,7 +187,8 @@ export function useClients(params: ClientsListParams) {
       status: normalizedStatus,
       assignment_state: normalizedAssignmentState,
     }),
-    placeholderData: keepPreviousData,
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[7] === (params.archive ?? 'all') ? previous : undefined,
     retry: shouldRetryQuery,
     queryFn: async () => {
       const response = await api.get<ApiEnvelope<PaginatedResponse<Client>>>('/admin/clients', {
@@ -193,6 +196,7 @@ export function useClients(params: ClientsListParams) {
           page: params.page,
           limit: params.limit,
           ...(normalizedSearch ? { search: normalizedSearch } : {}),
+          ...(params.archive ? { archive: params.archive } : {}),
           ...(normalizedLevel.length > 0 ? { level: normalizedLevel } : {}),
           ...(normalizedStatus.length > 0 ? { status: normalizedStatus } : {}),
           ...(normalizedAssignmentState.length > 0
@@ -206,6 +210,17 @@ export function useClients(params: ClientsListParams) {
 
       return unwrapResponse(response)
     },
+  })
+}
+
+export function useArchiveClient() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ clientId, is_archived }: { clientId: string; is_archived: boolean }) => {
+      const response = await api.put<ApiEnvelope<MutationMessage>>(`/admin/clients/${clientId}/archive`, { is_archived })
+      return unwrapResponse(response)
+    },
+    onSuccess: () => invalidateAdminQueries(queryClient, { extraQueryKeys: [clientsQueryKeys.all] }),
   })
 }
 

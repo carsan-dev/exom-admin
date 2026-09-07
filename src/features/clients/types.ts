@@ -38,6 +38,7 @@ export interface Client {
   email: string
   role: Role
   is_active: boolean
+  is_archived?: boolean
   is_locked: boolean
   created_at: string
   active_admins_count?: number
