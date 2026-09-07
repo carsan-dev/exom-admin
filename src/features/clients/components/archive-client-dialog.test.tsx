@@ -40,7 +40,7 @@ describe('Client archive independent of access', () => {
   })
   it.each(['light', 'dark'])('offers restore while preserving inactive status in %s theme', (theme) => {
     const archive = vi.fn()
-    render(<div className={theme}><MemoryRouter><ClientsTable clients={[{ ...client, is_archived: true }]} currentUserRole="SUPER_ADMIN" onArchive={archive} onUnlock={vi.fn()} onChangeRole={vi.fn()} onManageAssignments={vi.fn()} onToggleStatus={vi.fn()} /></MemoryRouter></div>)
+    render(<div className={theme}><MemoryRouter><ClientsTable clients={[{ ...client, is_archived: true }]} currentUserRole="SUPER_ADMIN" onArchive={archive} onDelete={vi.fn()} onUnlock={vi.fn()} onChangeRole={vi.fn()} onManageAssignments={vi.fn()} onToggleStatus={vi.fn()} /></MemoryRouter></div>)
     expect(screen.getByText('Inactiva')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Reactivar' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Desarchivar' }))

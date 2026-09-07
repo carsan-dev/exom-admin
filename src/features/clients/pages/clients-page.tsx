@@ -30,6 +30,8 @@ import { AdminsTable } from '../components/admins-table'
 import { ChangeRoleDialog } from '../components/change-role-dialog'
 import { ClientsTable } from '../components/clients-table'
 import { ArchiveClientDialog } from '../components/archive-client-dialog'
+import { DeleteClientDialog } from '../components/delete-client-dialog'
+import { ClientDeletionsPanel } from '../components/client-deletions-panel'
 import { CreateAdminDialog } from '../components/create-admin-dialog'
 import { CreateClientDialog } from '../components/create-client-dialog'
 import { EditUserDialog } from '../components/edit-user-dialog'
@@ -152,6 +154,7 @@ export function ClientsPage() {
   const [toggleStatusDialogOpen, setToggleStatusDialogOpen] = useState(false)
   const [manageAssignmentsDialogOpen, setManageAssignmentsDialogOpen] = useState(false)
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<ManageableUser | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const deferredClientSearch = useDeferredValue(clientSearch)
@@ -449,6 +452,7 @@ export function ClientsPage() {
             </p>
           ) : (
             <ClientsTable
+              onDelete={(client) => { setSelectedClient(client); setDeleteDialogOpen(true) }}
               onArchive={(client) => { setSelectedClient(client); setArchiveDialogOpen(true) }}
               clients={clients}
               currentUserRole={currentUserRole}
@@ -755,6 +759,8 @@ export function ClientsPage() {
         onOpenChange={setCreateDialogOpen}
         onCreated={() => replacePaginationSearchParams(setSearchParams, { clientsPage: 1 })}
       />
+      {isSuperAdmin && <ClientDeletionsPanel />}
+      {isSuperAdmin && selectedClient && deleteDialogOpen && <DeleteClientDialog key={selectedClient.id} client={selectedClient} open onOpenChange={setDeleteDialogOpen} />}
       <ArchiveClientDialog client={selectedClient} open={archiveDialogOpen} onOpenChange={setArchiveDialogOpen} />
       <CreateAdminDialog open={createAdminDialogOpen} onOpenChange={setCreateAdminDialogOpen} />
       <UnlockDialog user={selectedUser} open={unlockDialogOpen} onOpenChange={setUnlockDialogOpen} />

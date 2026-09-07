@@ -1,4 +1,4 @@
-import { Archive, ArchiveRestore, Eye, ShieldCheck, Unlock, UserCheck, UserX, Users } from 'lucide-react'
+import { Archive, ArchiveRestore, Eye, ShieldCheck, Trash2, Unlock, UserCheck, UserX, Users } from 'lucide-react'
 import { Link } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +22,7 @@ interface ClientsTableProps {
   onManageAssignments: (client: Client) => void
   onToggleStatus: (client: Client) => void
   onArchive: (client: Client) => void
+  onDelete: (client: Client) => void
 }
 
 const dateFormatter = new Intl.DateTimeFormat('es-ES', {
@@ -84,6 +85,7 @@ export function ClientsTable({
   onManageAssignments,
   onToggleStatus,
   onArchive,
+  onDelete,
 }: ClientsTableProps) {
   return (
     <Table>
@@ -148,6 +150,12 @@ export function ClientsTable({
                   {client.is_archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
                   {client.is_archived ? 'Desarchivar' : 'Archivar'}
                 </Button>
+                {currentUserRole === 'SUPER_ADMIN' && (
+                  <Button variant="destructive" size="sm" onClick={() => onDelete(client)}>
+                    <Trash2 className="h-4 w-4" />
+                    Eliminar
+                  </Button>
+                )}
                 {currentUserRole === 'SUPER_ADMIN' && (
                   <Button variant="outline" size="sm" onClick={() => onManageAssignments(client)}>
                     <Users className="h-4 w-4" />
