@@ -41,6 +41,7 @@ import { AssignmentsCatalogErrorState } from '../components/assignments-catalog-
 import { AssignmentsEmptyState } from '../components/assignments-empty-state'
 import { AssignmentsMonthGrid } from '../components/assignments-month-grid'
 import { AssignmentsToolbar } from '../components/assignments-toolbar'
+import { RirCyclePanel } from '../components/rir-cycle-panel'
 import { AssignmentsWeekGrid } from '../components/assignments-week-grid'
 import { CopyWeekDialog } from '../components/copy-week-dialog'
 import { CopyWeekPreviewDialog } from '../components/copy-week-preview-dialog'
@@ -538,6 +539,7 @@ export function AssignmentsPage() {
         onClearSelection={handleClearSelection}
       />
 
+      {selectedClientId && days.length > 0 && <RirCyclePanel key={selectedClientId} clientId={selectedClientId} from={days[0].date} to={days[days.length - 1].date} trainings={trainings} />}
       {!selectedClientId ? (
         <AssignmentsEmptyState
           icon={<CalendarDays className="h-8 w-8" />}
