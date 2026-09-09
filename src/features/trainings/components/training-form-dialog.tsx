@@ -1,3 +1,4 @@
+import { RirProposalEditor } from './rir-proposal-editor'
 import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -110,12 +111,14 @@ function toPrescriptionFormValues(trainingExercise: Training['exercises'][number
       target_value_min: trainingExercise.target_value_min ?? null,
       target_value_max: trainingExercise.target_value_max ?? null,
       target_rir: trainingExercise.target_rir ?? null,
+      rir_override: trainingExercise.rir_override,
     }
   }
 
   return {
     ...resolveLegacyPrescription(trainingExercise.reps_or_duration),
     target_rir: trainingExercise.target_rir ?? null,
+      rir_override: trainingExercise.rir_override,
   }
 }
 
@@ -127,6 +130,7 @@ function toFormValues(training: Training, isDuplicate: boolean): TrainingFormVal
         .map((te) => ({ kind: 'EXERCISE' as const, ...te }))
 
   return {
+    rir_proposal: training.rir_proposal ?? null,
     name: isDuplicate ? `${training.name} (copia)` : training.name,
     types: resolveTrainingTypes(training),
     accentColor: training.accentColor ?? null,
@@ -1045,6 +1049,7 @@ export function TrainingFormDialog({
               />
             </div>
 
+            <RirProposalEditor form={form} />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar

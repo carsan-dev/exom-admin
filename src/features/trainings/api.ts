@@ -111,6 +111,7 @@ export function normalizeTrainingPayload(values: TrainingFormValues) {
   const normalizedTypes = normalizeTrainingTypes(values.types)
 
   return {
+    ...(values.rir_proposal !== undefined && { rir_proposal: values.rir_proposal }),
     name: values.name.trim(),
     type: normalizedTypes[0],
     types: normalizedTypes,
@@ -136,6 +137,7 @@ export function normalizeTrainingPayload(values: TrainingFormValues) {
               exercise_id: ex.exercise_id,
               ...normalizeExercisePrescription(ex),
               target_rir: ex.target_rir ?? null,
+              ...(ex.rir_override !== undefined && { rir_override: ex.rir_override }),
               request_set_tracking: ex.request_set_tracking,
               rest_seconds: ex.rest_seconds,
             })),
@@ -148,6 +150,7 @@ export function normalizeTrainingPayload(values: TrainingFormValues) {
             sets: item.sets,
             ...normalizeExercisePrescription(item),
             target_rir: item.target_rir ?? null,
+            ...(item.rir_override !== undefined && { rir_override: item.rir_override }),
             request_set_tracking: item.request_set_tracking,
             rest_seconds: item.rest_seconds,
           }
@@ -162,6 +165,7 @@ export function normalizeTrainingPayload(values: TrainingFormValues) {
               sets: item.sets,
               ...normalizeExercisePrescription(item),
               target_rir: item.target_rir ?? null,
+            ...(item.rir_override !== undefined && { rir_override: item.rir_override }),
               request_set_tracking: item.request_set_tracking,
               rest_seconds: item.rest_seconds,
             },

@@ -1,3 +1,4 @@
+import type { RirOverride } from './rir'
 import type { CSSProperties } from 'react'
 import type { Exercise, Level } from '../exercises/types'
 import type { CatalogGroupSummary } from '../catalog-groups/types'
@@ -199,6 +200,7 @@ export function getTrainingTypeCatalogStyle(
 }
 
 export interface TrainingExercise {
+  rir_override?: RirOverride | null
   id: string
   order: number
   sets: number
@@ -243,6 +245,7 @@ export interface TrainingCircuitItem {
 export type TrainingItem = TrainingExerciseItem | TrainingCircuitItem
 
 export interface Training {
+  rir_proposal?: number[] | null
   id: string
   name: string
   type: string

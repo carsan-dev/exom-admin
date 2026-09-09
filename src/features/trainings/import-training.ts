@@ -1,3 +1,4 @@
+import { rirSequenceSchema, rirOverrideSchema } from './rir'
 import { z } from 'zod'
 import { normalizeSearchText } from '@/lib/search'
 import { LEVEL_OPTIONS, type Exercise } from '../exercises/types'
@@ -66,6 +67,7 @@ const importExerciseSchema = z
     target_value_min: optionalTargetValue,
     target_value_max: optionalTargetValue,
     target_rir: optionalTargetRir,
+    rir_override: rirOverrideSchema.nullable().optional(),
     request_set_tracking: z.boolean().default(false),
     rest_seconds: optionalInteger.transform((value) => value ?? 60),
   })
@@ -113,6 +115,7 @@ const importCircuitExerciseSchema = z
     target_value_min: optionalTargetValue,
     target_value_max: optionalTargetValue,
     target_rir: optionalTargetRir,
+    rir_override: rirOverrideSchema.nullable().optional(),
     request_set_tracking: z.boolean().default(false),
     rest_seconds: optionalInteger.transform((value) => value ?? 15),
   })
@@ -159,6 +162,7 @@ const importCircuitSchema = z.object({
 })
 
 const importTrainingSchema = z.object({
+  rir_proposal: rirSequenceSchema.nullable().optional(),
   name: z.string().trim().min(1, 'name es obligatorio'),
   types: stringList.transform((types) => normalizeTrainingTypes(types)),
   accentColor: optionalText.nullable().transform((value) => value || null),
@@ -224,6 +228,7 @@ function resolveImportedPrescription(exercise: {
   target_value_min?: number | null
   target_value_max?: number | null
   target_rir?: number | null
+  rir_override?: import('./rir').RirOverride | null
 }) {
   const legacy = resolveLegacyPrescription(exercise.reps_or_duration)
   const hasExact = exercise.target_value != null
@@ -242,6 +247,7 @@ function resolveImportedPrescription(exercise: {
         ? exercise.target_value_max
         : legacy.target_value_max,
     target_rir: exercise.target_rir ?? null,
+    rir_override: exercise.rir_override,
   }
 }
 
@@ -281,6 +287,7 @@ function toFormValues(training: ImportTraining, exercises: Exercise[]): Training
 
   return {
     values: {
+      rir_proposal: training.rir_proposal,
       name: training.name,
       types: training.types.length > 0 ? training.types : [DEFAULT_TRAINING_TYPE],
       accentColor: training.accentColor,
@@ -394,6 +401,7 @@ function csvToJson(text: string) {
         target_value: record.target_value || undefined,
         target_value_min: record.target_value_min || undefined,
         target_value_max: record.target_value_max || undefined,
+        rir_override: record.rir_override ? JSON.parse(record.rir_override) : undefined,
         target_rir: record.target_rir ?? undefined,
         request_set_tracking: false,
         rest_seconds: record.rest_seconds,
@@ -411,13 +419,15 @@ function csvToJson(text: string) {
       target_value: record.target_value || undefined,
       target_value_min: record.target_value_min || undefined,
       target_value_max: record.target_value_max || undefined,
-      target_rir: record.target_rir ?? undefined,
+      rir_override: record.rir_override ? JSON.parse(record.rir_override) : undefined,
+        target_rir: record.target_rir ?? undefined,
       request_set_tracking: false,
       rest_seconds: record.rest_seconds,
     })
   }
 
   return {
+    rir_proposal: first.rir_proposal ? JSON.parse(first.rir_proposal) : undefined,
     name: first.training_name,
     types: first.types,
     accentColor: first.accentColor || null,

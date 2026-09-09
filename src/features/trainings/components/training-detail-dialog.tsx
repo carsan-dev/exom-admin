@@ -111,6 +111,7 @@ export function TrainingDetailDialog({
           )}
 
           {/* Metrics */}
+          {training.rir_proposal && <div className="rounded-lg border p-4"><h3 className="font-medium">Propuesta de mesociclo de RIR</h3><p>{training.rir_proposal.join(' → ')} → repetir</p><p className="text-sm text-muted-foreground">Se activa expresamente para cada cliente desde Asignaciones.</p>{training.exercises.filter(e => e.rir_override && e.rir_override.mode !== 'INHERIT').map(e => <p key={e.id} className="text-sm">{e.exercise.name}: {e.rir_override?.mode === 'NONE' ? 'Sin objetivo RIR' : e.rir_override?.mode === 'FIXED' ? `RIR fijo ${e.rir_override.value}` : e.rir_override?.mode === 'SEQUENCE' ? e.rir_override.sequence.join(' → ') : 'Heredar'}</p>)}</div>}
           <div className="flex flex-wrap gap-4">
             {training.estimated_duration_min != null && training.estimated_duration_min > 0 && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">

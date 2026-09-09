@@ -1,3 +1,4 @@
+import { rirSequenceSchema, rirOverrideSchema } from './rir'
 import { z } from 'zod'
 import { LEVEL_OPTIONS } from '../exercises/types'
 import {
@@ -103,6 +104,7 @@ export const trainingExerciseSchema = z.object({
   target_value_min: targetValueSchema,
   target_value_max: targetValueSchema,
   target_rir: targetRirSchema,
+  rir_override: rirOverrideSchema.nullable().optional(),
   request_set_tracking: z.boolean().default(false),
   rest_seconds: z.number().int().min(0).default(60),
 })
@@ -116,6 +118,7 @@ export const trainingCircuitExerciseSchema = z.object({
   target_value_min: targetValueSchema,
   target_value_max: targetValueSchema,
   target_rir: targetRirSchema,
+  rir_override: rirOverrideSchema.nullable().optional(),
   request_set_tracking: z.boolean().default(false),
   rest_seconds: z.number().int().min(0).default(15),
 })
@@ -219,6 +222,7 @@ export function parsePrescriptionInput(value: string, measureType: 'REPS' | 'SEC
 
 export const trainingSchema = z
   .object({
+    rir_proposal: rirSequenceSchema.nullable().optional(),
     name: z.string().trim().min(1, 'El nombre es obligatorio'),
     types: z
       .array(trainingTypeSchema)
@@ -261,6 +265,7 @@ export const trainingSchema = z
     training.items.forEach((item, itemIndex) => {
       const exercises = item.kind === 'CIRCUIT' ? item.exercises : [item]
       exercises.forEach((exercise, exerciseIndex) => {
+        if (training.rir_proposal && exercise.rir_override?.mode === 'SEQUENCE' && exercise.rir_override.sequence.length !== training.rir_proposal.length) context.addIssue({ code: z.ZodIssueCode.custom, message: 'Las excepciones deben tener la misma duración que la secuencia común', path: ['rir_proposal'] })
         const hasExact = exercise.target_value != null
         const hasMin = exercise.target_value_min != null
         const hasMax = exercise.target_value_max != null
