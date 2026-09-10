@@ -15,7 +15,9 @@ export function ClientDeletionsPanel() {
       <p role="status" className={operation.status === 'BLOCKED' ? 'text-destructive' : 'text-muted-foreground'}>
         {operation.status === 'COMPLETED' ? 'Eliminación completada' : operation.status === 'BLOCKED'
           ? 'Acceso retirado. La limpieza de la cuenta y sus archivos requiere verificación técnica; la eliminación aún no está completada.'
-          : 'Eliminación en curso. Pendiente de confirmar la limpieza de la cuenta y sus archivos.'}
+          : operation.last_error === 'CREDENTIALS_EXPIRING'
+            ? 'Acceso retirado. La eliminación finalizará automáticamente cuando caduquen los accesos anteriores. No tienes que hacer nada más.'
+            : 'Eliminación en curso. La limpieza de la cuenta y sus archivos se comprueba y reintenta automáticamente.'}
       </p>
     </div>)}
   </section>

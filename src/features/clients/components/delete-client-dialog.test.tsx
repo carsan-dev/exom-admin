@@ -67,4 +67,11 @@ describe('Permanent client deletion controls', () => {
     else expect(label).not.toHaveTextContent('Eliminación completada')
     if (status === 'BLOCKED') expect(label).toHaveTextContent('requiere verificación técnica')
   })
+  it('explains automatic expiry waiting without requiring a manual action', () => {
+    state.data = [{ id: 'op-a', client_id: client.id, status: 'PENDING', last_error: 'CREDENTIALS_EXPIRING', created_at: '2026-09-10', completed_at: null }]
+    render(<ClientDeletionsPanel />)
+    expect(screen.getByRole('status')).toHaveTextContent('finalizará automáticamente')
+    expect(screen.getByRole('status')).toHaveTextContent('No tienes que hacer nada más')
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
 })
