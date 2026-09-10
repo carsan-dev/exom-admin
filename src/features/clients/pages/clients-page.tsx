@@ -452,6 +452,7 @@ export function ClientsPage() {
             </p>
           ) : (
             <ClientsTable
+              actionDialogOpen={unlockDialogOpen || changeRoleDialogOpen || toggleStatusDialogOpen || manageAssignmentsDialogOpen || archiveDialogOpen || deleteDialogOpen}
               onDelete={(client) => { setSelectedClient(client); setDeleteDialogOpen(true) }}
               onArchive={(client) => { setSelectedClient(client); setArchiveDialogOpen(true) }}
               clients={clients}

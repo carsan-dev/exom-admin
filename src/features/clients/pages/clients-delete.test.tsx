@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -28,7 +29,9 @@ describe('Client page permanent deletion', () => {
     cache.setQueryData(['clients', 'client-a'], { private: 'old profile' })
     const view = render(<QueryClientProvider client={cache}><MemoryRouter initialEntries={['/clients?archive=archived']}><ClientsPage /></MemoryRouter></QueryClientProvider>)
     await screen.findByText('Cliente Prueba')
-    fireEvent.click(screen.getByRole('button', { name: 'Eliminar' }))
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Acciones de Cliente Prueba' }))
+    await user.click(screen.getByRole('menuitem', { name: 'Eliminar definitivamente' }))
     fireEvent.change(screen.getByLabelText('Escribe ELIMINAR para confirmar'), { target: { value: 'ELIMINAR' } })
     fireEvent.click(screen.getByRole('button', { name: 'Eliminar permanentemente' }))
     await waitFor(() => expect(remove).toHaveBeenCalledWith('/admin/clients/client-a', { data: { confirmation: 'ELIMINAR' } }))

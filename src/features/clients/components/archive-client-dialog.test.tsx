@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router'
 import { ArchiveClientDialog } from './archive-client-dialog'
@@ -38,12 +39,14 @@ describe('Client archive independent of access', () => {
     await waitFor(() => expect(close).toHaveBeenCalledWith(false))
     expect(mutate.mock.calls).toEqual([[{ clientId: client.id, is_archived: true }], [{ clientId: client.id, is_archived: true }]])
   })
-  it.each(['light', 'dark'])('offers restore while preserving inactive status in %s theme', (theme) => {
+  it.each(['light', 'dark'])('offers restore while preserving inactive status in %s theme', async (theme) => {
     const archive = vi.fn()
     render(<div className={theme}><MemoryRouter><ClientsTable clients={[{ ...client, is_archived: true }]} currentUserRole="SUPER_ADMIN" onArchive={archive} onDelete={vi.fn()} onUnlock={vi.fn()} onChangeRole={vi.fn()} onManageAssignments={vi.fn()} onToggleStatus={vi.fn()} /></MemoryRouter></div>)
     expect(screen.getByText('Inactiva')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Reactivar' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Desarchivar' }))
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Acciones de client@example.test' }))
+    expect(screen.getByRole('menuitem', { name: 'Reactivar' })).toBeInTheDocument()
+    await user.click(screen.getByRole('menuitem', { name: 'Desarchivar' }))
     expect(archive).toHaveBeenCalledWith(expect.objectContaining({ is_active: false, is_archived: true }))
   })
 })

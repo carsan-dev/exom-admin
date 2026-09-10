@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router'
 import { toast } from 'sonner'
@@ -46,14 +47,17 @@ describe('Permanent client deletion controls', () => {
     await waitFor(() => expect(close).toHaveBeenCalledWith(false))
     expect(mutate.mock.calls).toEqual([[client.id], [client.id]])
   })
-  it.each([false, true])('offers deletion to Super Admin for archived=%s clients', (is_archived) => {
+  it.each([false, true])('offers deletion to Super Admin for archived=%s clients', async (is_archived) => {
     const remove = vi.fn()
     const props = { clients: [{ ...client, is_archived }], onDelete: remove, onArchive: vi.fn(), onUnlock: vi.fn(), onChangeRole: vi.fn(), onManageAssignments: vi.fn(), onToggleStatus: vi.fn() }
     const view = render(<MemoryRouter><ClientsTable {...props} currentUserRole="SUPER_ADMIN" /></MemoryRouter>)
-    fireEvent.click(screen.getByRole('button', { name: 'Eliminar' }))
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Acciones de client@example.test' }))
+    await user.click(screen.getByRole('menuitem', { name: 'Eliminar definitivamente' }))
     expect(remove).toHaveBeenCalledWith(expect.objectContaining({ id: client.id, is_archived }))
     view.rerender(<MemoryRouter><ClientsTable {...props} currentUserRole="ADMIN" /></MemoryRouter>)
-    expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Acciones de client@example.test' }))
+    expect(screen.queryByRole('menuitem', { name: 'Eliminar definitivamente' })).not.toBeInTheDocument()
   })
   it.each(['PENDING', 'PROCESSING', 'BLOCKED', 'COMPLETED'] as const)('shows the durable %s state on remount', (status) => {
     state.data = [{ id: 'op-a', client_id: client.id, status, last_error: null, created_at: '2026-09-07', completed_at: null }]

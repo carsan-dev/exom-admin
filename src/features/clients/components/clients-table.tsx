@@ -1,8 +1,17 @@
-import { Archive, ArchiveRestore, Eye, ShieldCheck, Trash2, Unlock, UserCheck, UserX, Users } from 'lucide-react'
+import { Archive, ArchiveRestore, Eye, MoreHorizontal, ShieldCheck, Trash2, Unlock, UserCheck, UserX, Users } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Table,
   TableBody,
@@ -17,6 +26,7 @@ import { getClientDetailRoute, getUserDisplayName, LEVEL_LABELS, type Client, ty
 interface ClientsTableProps {
   clients: Client[]
   currentUserRole: Role
+  actionDialogOpen?: boolean
   onUnlock: (client: Client) => void
   onChangeRole: (client: Client) => void
   onManageAssignments: (client: Client) => void
@@ -80,6 +90,7 @@ function renderAssignedAdminsCount(client: Client) {
 export function ClientsTable({
   clients,
   currentUserRole,
+  actionDialogOpen = false,
   onUnlock,
   onChangeRole,
   onManageAssignments,
@@ -87,8 +98,27 @@ export function ClientsTable({
   onArchive,
   onDelete,
 }: ClientsTableProps) {
+  const tableRef = useRef<HTMLTableElement>(null)
+  const actionTriggerRef = useRef<HTMLButtonElement | null>(null)
+  const wasActionDialogOpen = useRef(actionDialogOpen)
+
+  useEffect(() => {
+    const shouldRestoreFocus = wasActionDialogOpen.current && !actionDialogOpen
+    wasActionDialogOpen.current = actionDialogOpen
+    if (!shouldRestoreFocus) return
+
+    // Dialogs are controlled by the page, outside the row's Radix trigger scope.
+    // Restore after their focus trap closes; the row may have been removed.
+    const frame = requestAnimationFrame(() => {
+      const trigger = actionTriggerRef.current
+      if (trigger?.isConnected) trigger.focus()
+      else tableRef.current?.focus()
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [actionDialogOpen])
+
   return (
-    <Table>
+    <Table ref={tableRef} tabIndex={-1}>
       <TableHeader>
         <TableRow>
           <TableHead>Cliente</TableHead>
@@ -132,48 +162,76 @@ export function ClientsTable({
             </TableCell>
             <TableCell>{renderAssignedAdminsCount(client)}</TableCell>
             <TableCell className="text-muted-foreground">{dateFormatter.format(new Date(client.created_at))}</TableCell>
-            <TableCell>
-              <div className="flex flex-wrap justify-end gap-2">
+            <TableCell className="w-px whitespace-nowrap">
+              <div className="flex items-center justify-end gap-1">
                 <Button variant="ghost" size="sm" asChild>
                   <Link to={getClientDetailRoute(client.id, currentUserRole)}>
                     <Eye className="h-4 w-4" />
                     Ver perfil
                   </Link>
                 </Button>
-                {client.is_locked && (
-                  <Button variant="outline" size="sm" onClick={() => onUnlock(client)}>
-                    <Unlock className="h-4 w-4" />
-                    Desbloquear
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" onClick={() => onArchive(client)}>
-                  {client.is_archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
-                  {client.is_archived ? 'Desarchivar' : 'Archivar'}
-                </Button>
-                {currentUserRole === 'SUPER_ADMIN' && (
-                  <Button variant="destructive" size="sm" onClick={() => onDelete(client)}>
-                    <Trash2 className="h-4 w-4" />
-                    Eliminar
-                  </Button>
-                )}
-                {currentUserRole === 'SUPER_ADMIN' && (
-                  <Button variant="outline" size="sm" onClick={() => onManageAssignments(client)}>
-                    <Users className="h-4 w-4" />
-                    Gestionar admins
-                  </Button>
-                )}
-                {currentUserRole === 'SUPER_ADMIN' && (
-                  <Button variant="outline" size="sm" onClick={() => onChangeRole(client)}>
-                    <ShieldCheck className="h-4 w-4" />
-                    Cambiar rol
-                  </Button>
-                )}
-                {currentUserRole === 'SUPER_ADMIN' && (
-                  <Button variant="outline" size="sm" onClick={() => onToggleStatus(client)}>
-                    {client.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                    {client.is_active ? 'Dar de baja' : 'Reactivar'}
-                  </Button>
-                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 shrink-0"
+                      aria-label={`Acciones de ${getUserDisplayName(client)}`}
+                      onFocus={(event) => { actionTriggerRef.current = event.currentTarget }}
+                      onPointerDown={(event) => { actionTriggerRef.current = event.currentTarget }}
+                    >
+                      <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-60 max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto bg-background shadow-lg"
+                    collisionPadding={8}
+                  >
+                    {currentUserRole === 'SUPER_ADMIN' && (
+                      <>
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem onSelect={() => onManageAssignments(client)}>
+                            <Users aria-hidden="true" />
+                            Gestionar admins
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => onChangeRole(client)}>
+                            <ShieldCheck aria-hidden="true" />
+                            Cambiar rol
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                        <DropdownMenuSeparator className="bg-foreground/10" />
+                      </>
+                    )}
+                    <DropdownMenuGroup>
+                      {client.is_locked && (
+                        <DropdownMenuItem onSelect={() => onUnlock(client)}>
+                          <Unlock aria-hidden="true" />
+                          Desbloquear
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onSelect={() => onArchive(client)}>
+                        {client.is_archived ? <ArchiveRestore aria-hidden="true" /> : <Archive aria-hidden="true" />}
+                        {client.is_archived ? 'Desarchivar' : 'Archivar'}
+                      </DropdownMenuItem>
+                      {currentUserRole === 'SUPER_ADMIN' && (
+                        <DropdownMenuItem onSelect={() => onToggleStatus(client)}>
+                          {client.is_active ? <UserX aria-hidden="true" /> : <UserCheck aria-hidden="true" />}
+                          {client.is_active ? 'Dar de baja' : 'Reactivar'}
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuGroup>
+                    {currentUserRole === 'SUPER_ADMIN' && (
+                      <>
+                        <DropdownMenuSeparator className="bg-foreground/10" />
+                        <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive" onSelect={() => onDelete(client)}>
+                          <Trash2 aria-hidden="true" />
+                          Eliminar definitivamente
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </TableCell>
           </TableRow>
