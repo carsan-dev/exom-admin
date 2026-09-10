@@ -1,3 +1,6 @@
+import { useRef } from 'react'
+import { useAuth } from '@/hooks/use-auth'
+import { createIdentityRequest } from './identity-request'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { invalidateAdminQueries } from '@/lib/admin-query-invalidations'
@@ -322,13 +325,21 @@ export function useAllAdminsList(enabled = true) {
 
 export function useCreateClient() {
   const queryClient = useQueryClient()
+  const identityRequest = useRef(createIdentityRequest()).current
+  const owner = useAuth((state) => state.user?.id)
 
   return useMutation({
+    onError: (error) => identityRequest.failure(error),
     mutationFn: async (payload: CreateClientFormValues) => {
-      const response = await api.post<ApiEnvelope<Client>>('/admin/users', normalizeCreateClientPayload(payload))
+      const response = await api.post<ApiEnvelope<Client>>(
+        '/admin/users',
+        normalizeCreateClientPayload(payload),
+        { headers: identityRequest.headers(owner, payload) }
+      )
+      identityRequest.complete()
       return unwrapResponse(response)
     },
-    onSuccess: async () => {
+    onSettled: async () => {
       await invalidateAdminQueries(queryClient, {
         includeDashboard: true,
         extraQueryKeys: [clientsQueryKeys.all, usersQueryKeys.all],
@@ -339,17 +350,22 @@ export function useCreateClient() {
 
 export function useCreateAdmin() {
   const queryClient = useQueryClient()
+  const identityRequest = useRef(createIdentityRequest()).current
+  const owner = useAuth((state) => state.user?.id)
 
   return useMutation({
+    onError: (error) => identityRequest.failure(error),
     mutationFn: async (payload: CreateAdminFormValues) => {
       const response = await api.post<ApiEnvelope<AdminUserListItem>>(
         '/admin/users/admins',
         normalizeCreateAdminPayload(payload),
+        { headers: identityRequest.headers(owner, payload) }
       )
 
+      identityRequest.complete()
       return unwrapResponse(response)
     },
-    onSuccess: async () => {
+    onSettled: async () => {
       await invalidateAdminQueries(queryClient, {
         extraQueryKeys: [usersQueryKeys.all],
       })
@@ -376,17 +392,22 @@ export function useUnlockUser() {
 
 export function useUpdateUser() {
   const queryClient = useQueryClient()
+  const identityRequest = useRef(createIdentityRequest()).current
+  const owner = useAuth((state) => state.user?.id)
 
   return useMutation({
+    onError: (error) => identityRequest.failure(error),
     mutationFn: async ({ userId, values }: UpdateUserPayload) => {
       const response = await api.put<ApiEnvelope<AdminUserListItem>>(
         `/admin/users/${userId}`,
         normalizeUpdateUserPayload(values),
+        { headers: identityRequest.headers(owner, { userId, values }) }
       )
 
+      identityRequest.complete()
       return unwrapResponse(response)
     },
-    onSuccess: async (_data, { userId }) => {
+    onSettled: async (_data, _error, { userId }) => {
       await invalidateAdminQueries(queryClient, {
         includeDashboard: true,
         extraQueryKeys: [clientsQueryKeys.all, clientsQueryKeys.detail(userId), usersQueryKeys.all],
@@ -397,16 +418,24 @@ export function useUpdateUser() {
 
 export function useUpdateUserStatus() {
   const queryClient = useQueryClient()
+  const identityRequest = useRef(createIdentityRequest()).current
+  const owner = useAuth((state) => state.user?.id)
 
   return useMutation({
+    onError: (error) => identityRequest.failure(error),
     mutationFn: async ({ userId, is_active }: UpdateUserStatusPayload) => {
-      const response = await api.put<ApiEnvelope<MutationMessage>>(`/admin/users/${userId}/status`, {
-        is_active,
-      })
+      const response = await api.put<ApiEnvelope<MutationMessage>>(
+        `/admin/users/${userId}/status`,
+        {
+          is_active,
+        },
+        { headers: identityRequest.headers(owner, { userId, is_active }) }
+      )
 
+      identityRequest.complete()
       return unwrapResponse(response)
     },
-    onSuccess: async (_data, { userId }) => {
+    onSettled: async (_data, _error, { userId }) => {
       await invalidateAdminQueries(queryClient, {
         includeDashboard: true,
         extraQueryKeys: [
