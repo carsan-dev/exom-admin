@@ -74,4 +74,11 @@ describe('Permanent client deletion controls', () => {
     expect(screen.getByRole('status')).toHaveTextContent('No tienes que hacer nada más')
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
+  it('keeps uncertain transfers pending without a manual override', () => {
+    state.data = [{ id: 'op-a', client_id: client.id, status: 'PENDING', last_error: 'STORAGE_TRANSFER_PENDING', created_at: '2026-09-10', completed_at: null }]
+    render(<ClientDeletionsPanel />)
+    expect(screen.getByRole('status')).toHaveTextContent('transferencias cuyo cierre aún no se ha podido confirmar')
+    expect(screen.getByRole('status')).not.toHaveTextContent('Eliminación completada')
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
 })
