@@ -14,7 +14,7 @@ export function ClientDeletionsPanel() {
       <p>Cliente: {operation.client_id}</p>
       <p role="status" className={operation.status === 'BLOCKED' ? 'text-destructive' : 'text-muted-foreground'}>
         {operation.status === 'COMPLETED' ? 'Eliminación completada' : operation.status === 'BLOCKED'
-          ? 'Acceso retirado. La limpieza de archivos requiere verificación técnica; la eliminación aún no está completada.'
+          ? 'Acceso retirado. La limpieza de la cuenta y sus archivos requiere verificación técnica; la eliminación aún no está completada.'
           : 'Eliminación en curso. Pendiente de confirmar la limpieza de la cuenta y sus archivos.'}
       </p>
     </div>)}

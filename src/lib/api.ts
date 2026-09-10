@@ -41,6 +41,8 @@ api.interceptors.response.use(
     if (isStaleSession(response.config)) return Promise.reject(new CanceledError('Authentication session changed'))
     if (response.status === 202) {
       const approvalData = response.data?.data ?? response.data
+      // Deletion also returns 202; approval receipts have their own identifier.
+      if (typeof approvalData?.approval_request_id !== 'string') return response
       toast.info(approvalData?.message ?? 'Solicitud enviada para aprobación')
 
       // Approval requests are a transitional UI state, not a hard failure.
