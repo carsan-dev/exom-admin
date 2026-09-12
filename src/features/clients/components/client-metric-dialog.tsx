@@ -65,9 +65,7 @@ const METRIC_SECTIONS: Array<{
 const METRIC_FIELDS = METRIC_SECTIONS.flatMap((section) => section.fields.map((field) => field.name))
 
 function getToday() {
-  const now = new Date()
-  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
-  return localDate.toISOString().slice(0, 10)
+  return new Date().toISOString().slice(0, 10)
 }
 
 function getDefaultValues(metric: BodyMetric | null): ClientMetricFormValues {
@@ -135,7 +133,7 @@ export function ClientMetricDialog({ clientId, metric, open, onOpenChange }: Cli
               name="date"
               render={({ field }) => (
                 <FormItem className="max-w-xs">
-                  <FormLabel>Fecha</FormLabel>
+                  <FormLabel>Fecha (UTC)</FormLabel>
                   <FormControl>
                     <Input type="date" max={getToday()} {...field} />
                   </FormControl>
