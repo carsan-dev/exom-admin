@@ -1,0 +1,29 @@
+name: Admin CI
+
+on:
+  push:
+    branches: [main, 'feat/**', 'feature/**', 'fix/**', 'phase9/**']
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Admin lint, tests and TypeScript/Vite build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.21.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test -- --run
+      - name: Typecheck and build (tsc -b then Vite)
+        run: npm run build
