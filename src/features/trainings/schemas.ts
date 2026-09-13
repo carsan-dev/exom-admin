@@ -1,3 +1,4 @@
+import { timedConfigSchema } from './timed-prescription'
 import { rirSequenceSchema, rirOverrideSchema } from './rir'
 import { z } from 'zod'
 import { LEVEL_OPTIONS } from '../exercises/types'
@@ -104,6 +105,7 @@ export const trainingExerciseSchema = z.object({
   target_value_min: targetValueSchema,
   target_value_max: targetValueSchema,
   target_rir: targetRirSchema,
+  timed_config: timedConfigSchema.nullable().optional(),
   rir_override: rirOverrideSchema.nullable().optional(),
   request_set_tracking: z.boolean().default(false),
   rest_seconds: z.number().int().min(0).default(60),
@@ -118,6 +120,7 @@ export const trainingCircuitExerciseSchema = z.object({
   target_value_min: targetValueSchema,
   target_value_max: targetValueSchema,
   target_rir: targetRirSchema,
+  timed_config: timedConfigSchema.nullable().optional(),
   rir_override: rirOverrideSchema.nullable().optional(),
   request_set_tracking: z.boolean().default(false),
   rest_seconds: z.number().int().min(0).default(15),
@@ -265,7 +268,29 @@ export const trainingSchema = z
     training.items.forEach((item, itemIndex) => {
       const exercises = item.kind === 'CIRCUIT' ? item.exercises : [item]
       exercises.forEach((exercise, exerciseIndex) => {
-        if (training.rir_proposal && exercise.rir_override?.mode === 'SEQUENCE' && exercise.rir_override.sequence.length !== training.rir_proposal.length) context.addIssue({ code: z.ZodIssueCode.custom, message: 'Las excepciones deben tener la misma duración que la secuencia común', path: ['rir_proposal'] })
+        if (
+          training.rir_proposal &&
+          exercise.rir_override?.mode === 'SEQUENCE' &&
+          exercise.rir_override.sequence.length !== training.rir_proposal.length
+        )
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Las excepciones deben tener la misma duración que la secuencia común',
+            path: ['rir_proposal'],
+          })
+        if (
+          exercise.timed_config &&
+          (exercise.measure_type !== 'SECONDS' ||
+            (exercise.target_value == null &&
+              (exercise.timed_config.segments.length > 0 ||
+                exercise.target_value_min == null ||
+                exercise.target_value_max == null)))
+        )
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Indica una duración válida; los intervalos requieren un total exacto',
+            path: ['items', itemIndex],
+          })
         const hasExact = exercise.target_value != null
         const hasMin = exercise.target_value_min != null
         const hasMax = exercise.target_value_max != null

@@ -1,3 +1,4 @@
+import { timedConfigSchema, type TimedConfig } from './timed-prescription'
 import { rirSequenceSchema, rirOverrideSchema } from './rir'
 import { z } from 'zod'
 import { normalizeSearchText } from '@/lib/search'
@@ -67,6 +68,7 @@ const importExerciseSchema = z
     target_value_min: optionalTargetValue,
     target_value_max: optionalTargetValue,
     target_rir: optionalTargetRir,
+    timed_config: timedConfigSchema.nullable().optional(),
     rir_override: rirOverrideSchema.nullable().optional(),
     request_set_tracking: z.boolean().default(false),
     rest_seconds: optionalInteger.transform((value) => value ?? 60),
@@ -115,6 +117,7 @@ const importCircuitExerciseSchema = z
     target_value_min: optionalTargetValue,
     target_value_max: optionalTargetValue,
     target_rir: optionalTargetRir,
+    timed_config: timedConfigSchema.nullable().optional(),
     rir_override: rirOverrideSchema.nullable().optional(),
     request_set_tracking: z.boolean().default(false),
     rest_seconds: optionalInteger.transform((value) => value ?? 15),
@@ -228,11 +231,20 @@ function resolveImportedPrescription(exercise: {
   target_value_min?: number | null
   target_value_max?: number | null
   target_rir?: number | null
+  timed_config?: TimedConfig | null
   rir_override?: import('./rir').RirOverride | null
 }) {
   const legacy = resolveLegacyPrescription(exercise.reps_or_duration)
   const hasExact = exercise.target_value != null
   const hasRange = exercise.target_value_min != null && exercise.target_value_max != null
+  if (
+    exercise.timed_config &&
+    ((exercise.measure_type ?? legacy.measure_type) !== 'SECONDS' ||
+      (exercise.timed_config.segments.length > 0 &&
+        (hasRange || (!hasExact && legacy.target_value == null))))
+  ) {
+    throw new Error('Los intervalos necesitan una duración total exacta en segundos')
+  }
   return {
     measure_type: exercise.measure_type ?? legacy.measure_type,
     target_value: hasExact ? exercise.target_value : hasRange ? null : legacy.target_value,
@@ -248,6 +260,7 @@ function resolveImportedPrescription(exercise: {
         : legacy.target_value_max,
     target_rir: exercise.target_rir ?? null,
     rir_override: exercise.rir_override,
+    timed_config: exercise.timed_config,
   }
 }
 
@@ -398,6 +411,7 @@ function csvToJson(text: string) {
         exercise_name: record.exercise_name,
         reps_or_duration: record.reps_or_duration,
         measure_type: record.measure_type || undefined,
+        timed_config: record.timed_config ? JSON.parse(record.timed_config) : undefined,
         target_value: record.target_value || undefined,
         target_value_min: record.target_value_min || undefined,
         target_value_max: record.target_value_max || undefined,
@@ -416,11 +430,12 @@ function csvToJson(text: string) {
       sets: record.sets,
       reps_or_duration: record.reps_or_duration,
       measure_type: record.measure_type || undefined,
+      timed_config: record.timed_config ? JSON.parse(record.timed_config) : undefined,
       target_value: record.target_value || undefined,
       target_value_min: record.target_value_min || undefined,
       target_value_max: record.target_value_max || undefined,
       rir_override: record.rir_override ? JSON.parse(record.rir_override) : undefined,
-        target_rir: record.target_rir ?? undefined,
+      target_rir: record.target_rir ?? undefined,
       request_set_tracking: false,
       rest_seconds: record.rest_seconds,
     })

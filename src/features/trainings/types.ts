@@ -1,3 +1,4 @@
+import type { TimedConfig } from './timed-prescription'
 import type { RirOverride } from './rir'
 import type { CSSProperties } from 'react'
 import type { Exercise, Level } from '../exercises/types'
@@ -200,6 +201,7 @@ export function getTrainingTypeCatalogStyle(
 }
 
 export interface TrainingExercise {
+  timed_config?: TimedConfig | null
   rir_override?: RirOverride | null
   id: string
   order: number

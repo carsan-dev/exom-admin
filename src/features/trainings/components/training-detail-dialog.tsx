@@ -1,3 +1,4 @@
+import { timedInstructions, formatTime } from '../timed-prescription'
 import { Edit, Copy, Clock, Flame, Layers, Repeat } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -26,6 +27,19 @@ interface TrainingDetailDialogProps {
 }
 
 function formatPrescription(exercise: TrainingExercise) {
+  const withRir = (target: string) =>
+    exercise.target_rir == null ? target : `${target} · RIR ${exercise.target_rir}`
+  if (exercise.timed_config && exercise.measure_type === 'SECONDS') {
+    const config = exercise.timed_config
+    if (exercise.target_value != null)
+      return withRir(timedInstructions(exercise.target_value, config))
+    if (exercise.target_value_min != null && exercise.target_value_max != null)
+      return withRir(
+        formatTime(exercise.target_value_min, config.unit) +
+          ' – ' +
+          formatTime(exercise.target_value_max, config.unit)
+      )
+  }
   const suffix = exercise.measure_type === 'SECONDS' ? ' s' : ' reps'
   const target =
     exercise.target_value != null
@@ -33,7 +47,7 @@ function formatPrescription(exercise: TrainingExercise) {
       : exercise.target_value_min != null && exercise.target_value_max != null
         ? `${exercise.target_value_min}-${exercise.target_value_max}${suffix}`
         : exercise.reps_or_duration
-  return exercise.target_rir == null ? target : `${target} · RIR ${exercise.target_rir}`
+  return withRir(target)
 }
 
 export function TrainingDetailDialog({
@@ -111,7 +125,29 @@ export function TrainingDetailDialog({
           )}
 
           {/* Metrics */}
-          {training.rir_proposal && <div className="rounded-lg border p-4"><h3 className="font-medium">Propuesta de mesociclo de RIR</h3><p>{training.rir_proposal.join(' → ')} → repetir</p><p className="text-sm text-muted-foreground">Se activa expresamente para cada cliente desde Asignaciones.</p>{training.exercises.filter(e => e.rir_override && e.rir_override.mode !== 'INHERIT').map(e => <p key={e.id} className="text-sm">{e.exercise.name}: {e.rir_override?.mode === 'NONE' ? 'Sin objetivo RIR' : e.rir_override?.mode === 'FIXED' ? `RIR fijo ${e.rir_override.value}` : e.rir_override?.mode === 'SEQUENCE' ? e.rir_override.sequence.join(' → ') : 'Heredar'}</p>)}</div>}
+          {training.rir_proposal && (
+            <div className="rounded-lg border p-4">
+              <h3 className="font-medium">Propuesta de mesociclo de RIR</h3>
+              <p>{training.rir_proposal.join(' → ')} → repetir</p>
+              <p className="text-sm text-muted-foreground">
+                Se activa expresamente para cada cliente desde Asignaciones.
+              </p>
+              {training.exercises
+                .filter((e) => e.rir_override && e.rir_override.mode !== 'INHERIT')
+                .map((e) => (
+                  <p key={e.id} className="text-sm">
+                    {e.exercise.name}:{' '}
+                    {e.rir_override?.mode === 'NONE'
+                      ? 'Sin objetivo RIR'
+                      : e.rir_override?.mode === 'FIXED'
+                        ? `RIR fijo ${e.rir_override.value}`
+                        : e.rir_override?.mode === 'SEQUENCE'
+                          ? e.rir_override.sequence.join(' → ')
+                          : 'Heredar'}
+                  </p>
+                ))}
+            </div>
+          )}
           <div className="flex flex-wrap gap-4">
             {training.estimated_duration_min != null && training.estimated_duration_min > 0 && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -201,7 +237,7 @@ export function TrainingDetailDialog({
                   return (
                     <div
                       key={te.id}
-                      className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5"
+                      className="flex flex-wrap items-start gap-3 rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5"
                     >
                       <span className="text-xs font-medium text-muted-foreground w-4 pt-0.5 flex-none">
                         {index + 1}
@@ -220,10 +256,24 @@ export function TrainingDetailDialog({
                           ))}
                         </div>
                       </div>
-                      <div className="text-right text-xs text-muted-foreground flex-none space-y-0.5">
+                      <div
+                        className={cn(
+                          'text-xs text-muted-foreground min-w-0 space-y-0.5',
+                          te.measure_type === 'SECONDS'
+                            ? 'basis-full text-left'
+                            : 'text-right flex-none'
+                        )}
+                      >
                         <p className="font-medium text-foreground">
-                          {te.sets}×{formatPrescription(te)}
+                          {te.measure_type === 'SECONDS'
+                            ? formatPrescription(te)
+                            : `${te.sets}×${formatPrescription(te)}`}
                         </p>
+                        {te.measure_type === 'SECONDS' && (
+                          <p>
+                            {te.sets} {te.sets === 1 ? 'serie' : 'series'}
+                          </p>
+                        )}
                         <p>{te.rest_seconds}s entre series</p>
                       </div>
                     </div>

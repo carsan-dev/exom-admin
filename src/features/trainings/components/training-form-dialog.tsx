@@ -112,13 +112,15 @@ function toPrescriptionFormValues(trainingExercise: Training['exercises'][number
       target_value_max: trainingExercise.target_value_max ?? null,
       target_rir: trainingExercise.target_rir ?? null,
       rir_override: trainingExercise.rir_override,
+      timed_config: trainingExercise.timed_config,
     }
   }
 
   return {
     ...resolveLegacyPrescription(trainingExercise.reps_or_duration),
     target_rir: trainingExercise.target_rir ?? null,
-      rir_override: trainingExercise.rir_override,
+    rir_override: trainingExercise.rir_override,
+    timed_config: trainingExercise.timed_config,
   }
 }
 

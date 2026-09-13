@@ -1,3 +1,4 @@
+import { TimedPrescriptionEditor } from './timed-prescription-editor'
 import { useMemo, useState } from 'react'
 import { ChevronDown, ChevronUp, Plus, Repeat, Search, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -59,10 +60,10 @@ function PrescriptionFields({
           className="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground"
         >
           <option value="REPS">Repeticiones</option>
-          <option value="SECONDS">Segundos</option>
+          <option value="SECONDS">Tiempo</option>
         </select>
       </div>
-      <div className="space-y-1">
+      <div className={measureType === 'SECONDS' ? 'hidden' : 'space-y-1'}>
         <label className="text-xs text-muted-foreground">
           {measureType === 'SECONDS' ? 'Segundos objetivo' : 'Repeticiones objetivo'}
         </label>
@@ -221,7 +222,15 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
   }
 
   const updateField = (index: number, field: string, fieldValue: unknown) => {
-    const updated = value.map((ex, i) => (i === index ? { ...ex, [field]: fieldValue } : ex))
+    const updated = value.map((ex, i) =>
+      i === index
+        ? {
+            ...ex,
+            [field]: fieldValue,
+            ...(field === 'measure_type' && fieldValue === 'REPS' ? { timed_config: null } : {}),
+          }
+        : ex
+    )
     onChange(updated as TrainingItemFormValues[])
   }
 
@@ -237,7 +246,15 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
         return {
           ...item,
           exercises: item.exercises.map((exercise, nestedIndex) =>
-            nestedIndex === exerciseIndex ? { ...exercise, [field]: fieldValue } : exercise
+            nestedIndex === exerciseIndex
+              ? {
+                  ...exercise,
+                  [field]: fieldValue,
+                  ...(field === 'measure_type' && fieldValue === 'REPS'
+                    ? { timed_config: null }
+                    : {}),
+                }
+              : exercise
           ),
         }
       })
@@ -464,6 +481,37 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                             </Button>
                           </div>
                           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                            {nested.measure_type === 'SECONDS' && (
+                              <TimedPrescriptionEditor
+                                total={nested.target_value}
+                                minimum={nested.target_value_min}
+                                maximum={nested.target_value_max}
+                                config={nested.timed_config}
+                                onChange={(patch) =>
+                                  onChange(
+                                    value.map((v, j) =>
+                                      j === index && v.kind === 'CIRCUIT'
+                                        ? {
+                                            ...v,
+                                            exercises: v.exercises.map((e, k) =>
+                                              k === nestedIndex
+                                                ? {
+                                                    ...e,
+                                                    ...patch,
+                                                    reps_or_duration:
+                                                      String(
+                                                        patch.target_value ?? patch.target_value_min
+                                                      ) + 's',
+                                                  }
+                                                : e
+                                            ),
+                                          }
+                                        : v
+                                    )
+                                  )
+                                }
+                              />
+                            )}
                             <PrescriptionFields
                               measureType={nested.measure_type}
                               targetValue={nested.target_value}
@@ -626,6 +674,28 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                       className="h-8 text-sm"
                     />
                   </div>
+                  {item.measure_type === 'SECONDS' && (
+                    <TimedPrescriptionEditor
+                      total={item.target_value}
+                      minimum={item.target_value_min}
+                      maximum={item.target_value_max}
+                      config={item.timed_config}
+                      onChange={(patch) =>
+                        onChange(
+                          value.map((v, j) =>
+                            j === index && v.kind === 'EXERCISE'
+                              ? {
+                                  ...v,
+                                  ...patch,
+                                  reps_or_duration:
+                                    String(patch.target_value ?? patch.target_value_min) + 's',
+                                }
+                              : v
+                          )
+                        )
+                      }
+                    />
+                  )}
                   <PrescriptionFields
                     measureType={item.measure_type}
                     targetValue={item.target_value}
