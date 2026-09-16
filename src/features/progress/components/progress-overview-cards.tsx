@@ -26,7 +26,7 @@ export function ProgressOverviewCards({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 sm:pt-6">
               <Skeleton className="h-4 w-24 mb-3" />
               <Skeleton className="h-8 w-16" />
             </CardContent>
@@ -87,7 +87,7 @@ export function ProgressOverviewCards({
         const Icon = card.icon
         return (
           <Card key={card.label}>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 sm:pt-6">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
                 <Icon className={`h-4 w-4 ${card.accent}`} />
                 {card.label}
