@@ -46,11 +46,18 @@ describe('P1 period and metrics UI', () => {
   it('distinguishes observed zero, no data and a non-comparable singleton', async () => {
     render(<QueryClientProvider client={queryClient()}><MetricsOverviewPanel clientId="a" to="2026-09-16" page={1} valid onPageChange={() => {}} /></QueryClientProvider>)
     const table = await screen.findByRole('table', { name: 'Comparativa de métricas del periodo' })
-    expect(within(table).getAllByText('0 pasos/día')).toHaveLength(2)
     expect(within(table).getAllByText('Sin datos')).toHaveLength(2)
-    expect(within(table).getAllByText('No comparable')).toHaveLength(2)
+    expect(within(table).getAllByText('No comparable')).toHaveLength(1)
+    expect(within(table).queryByText('0 pasos/día')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Hábitos' }))
+    expect(screen.getByRole('button', { name: 'Hábitos' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(table).getAllByText('0 pasos/día')).toHaveLength(2)
+    expect(within(table).getAllByText('No comparable')).toHaveLength(1)
+    expect(within(table).queryByText('Peso')).not.toBeInTheDocument()
     expect(within(table).getAllByText('07/09/2026 – 13/09/2026')).toHaveLength(2)
     expect(screen.queryByText(/Masa grasa/)).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Evolución corporal' }))
+    expect(within(table).getAllByText('Sin datos')).toHaveLength(2)
   })
   it('isolates cache and late responses when switching clients', async () => {
     let resolveA: ((value: ReturnType<typeof response>) => void) | undefined
@@ -60,9 +67,11 @@ describe('P1 period and metrics UI', () => {
     const view = render(panel('a'))
     expect(screen.getByRole('status')).toHaveTextContent('Cargando')
     view.rerender(panel('b'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Hábitos' }))
     await screen.findAllByText('9000 pasos/día')
     await act(async () => { resolveA?.(response(fixture('a', 123))); await Promise.resolve() })
     expect(screen.queryByText('123 pasos/día')).not.toBeInTheDocument()
+    expect(screen.getAllByText('9000 pasos/día')).toHaveLength(2)
     expect(client.getQueryData<MetricsOverview>(['admin-progress', 'b', 'metrics-overview', 'all', '2026-09-16', 1])?.client_id).toBe('b')
   })
   it('shows errors separately from empty history and supports retry', async () => {
