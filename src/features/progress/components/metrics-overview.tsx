@@ -70,31 +70,44 @@ function MetricChart({ series, title, period }: { series: MetricSeries[], title:
 export function MetricsOverviewPanel({ clientId, from, to, page, onPageChange, valid }: {
   clientId: string, from?: string, to: string, page: number, onPageChange: (page: number) => void, valid: boolean
 }) {
+  const [group, setGroup] = useState<(typeof groups)[number][0]>('body')
   const query = useMetricsOverview(clientId, from, to, page, valid)
   if (!valid) return <p role="alert">Selecciona un periodo válido, sin fechas futuras.</p>
   if (query.isPending) return <p role="status">Cargando métricas…</p>
   if (query.isError) return <div role="alert"><p>No se pudieron cargar las métricas. Comprueba el acceso y el periodo.</p><Button variant="outline" onClick={() => void query.refetch()}>Reintentar</Button></div>
   const data = query.data
+  const visibleSeries = data.series.filter((item) => item.group === group)
+  const title = groups.find(([key]) => key === group)![1]
   return <div className="space-y-4">
+    <div className="flex flex-wrap gap-2" role="group" aria-label="Grupo de métricas">
+      {groups.map(([key, label]) => <Button key={key} variant={group === key ? 'default' : 'outline'} aria-pressed={group === key} onClick={() => setGroup(key)}>{label}</Button>)}
+    </div>
+    <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
     <Card><CardHeader><CardTitle>Inicio → Actual → Cambio</CardTitle>
       <CardDescription>{date(data.from)} – {date(data.to)} · Primera y última observación válida del periodo. Un solo registro no permite calcular cambio.</CardDescription></CardHeader>
-      <CardContent><p className="mb-4 text-sm text-muted-foreground">Recaps: semanas cuyo lunes pertenece al periodo, sin repartir valores por días. Sueño: mediciones corporales; los rangos del recap no se convierten en horas. Nutrición: estimaciones de comidas marcadas, no ingesta real. Los datos parciales no entran en la comparación ni en la línea del gráfico; pueden consultarse en su tabla. El histórico legacy refleja lo disponible al capturarlo, no reconstruye ediciones anteriores.</p>
-        <p className="mb-4 text-sm text-muted-foreground">Hambre: 1 sin hambre, 10 extrema. Energía: 1 sin energía, 10 mucha. Digestión: 1 muy mala, 10 muy buena. Estrés: escala histórica 0 sin estrés, 5 máximo.</p>
+      <CardContent>
         <p className="mb-2 text-sm sm:hidden">Desliza la tabla para ver Actual y Cambio.</p>
-        <div className="overflow-x-auto" role="region" aria-label="Tabla comparativa desplazable" tabIndex={0}><table className="w-full min-w-[580px] text-left text-sm"><caption className="sr-only">Comparativa de métricas del periodo</caption>
-          <thead><tr className="border-b"><th className="py-3">Métrica / fuente</th><th>Inicio</th><th>Actual</th><th>Cambio</th></tr></thead>
-          <tbody>{data.series.map((metric) => <tr key={metric.key} className="border-b align-top">
-            <th scope="row" className="py-3 pr-3 font-medium">{metric.label}<span className="block text-xs font-normal text-muted-foreground">{metric.source}</span>
+        <div className="max-h-96 overflow-auto" role="region" aria-label="Tabla comparativa desplazable" tabIndex={0}><table className="w-full min-w-[580px] text-left text-sm"><caption className="sr-only">Comparativa de métricas del periodo</caption>
+          <thead className="sticky top-0 z-10 bg-card"><tr className="border-b"><th className="py-3">Métrica / fuente</th><th>Inicio</th><th>Actual</th><th>Cambio</th></tr></thead>
+          <tbody>{visibleSeries.map((metric) => <tr key={metric.key} className="border-b align-top">
+            <th scope="row" className="py-2 pr-3 font-medium">{metric.label}<span className="block text-xs font-normal text-muted-foreground">{metric.source}</span>
               {metric.incomplete_count > 0 && <span className="block text-xs font-normal">{metric.incomplete_count} observaciones con información incompleta</span>}</th>
-            <td className="py-3 pr-3">{observation(metric.first, metric.unit)}</td><td className="py-3 pr-3">{observation(metric.last, metric.unit)}</td>
-            <td className="py-3">{metric.change === null ? 'No comparable' : `${metric.change > 0 ? '+' : ''}${number.format(metric.change)} ${isRating(metric.unit) ? 'puntos' : metric.unit}`}</td>
+            <td className="py-2 pr-3">{observation(metric.first, metric.unit)}</td><td className="py-2 pr-3">{observation(metric.last, metric.unit)}</td>
+            <td className="py-2">{metric.change === null ? 'No comparable' : `${metric.change > 0 ? '+' : ''}${number.format(metric.change)} ${isRating(metric.unit) ? 'puntos' : metric.unit}`}</td>
           </tr>)}</tbody></table></div>
       </CardContent></Card>
+    <div className="space-y-3">
+    <MetricChart key={group} title={title} period={`${date(data.chart_from)} – ${date(data.chart_to)}`} series={visibleSeries} />
     <div className="flex flex-wrap items-center justify-between gap-2" aria-label="Paginación del histórico">
       <p className="text-sm">Gráficos: {date(data.chart_from)} – {date(data.chart_to)} · Página {data.page} de {data.total_pages}</p>
       <div className="flex gap-2"><Button variant="outline" disabled={page >= data.total_pages} onClick={() => onPageChange(page + 1)}>Más antiguo</Button><Button variant="outline" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>Más reciente</Button></div>
     </div>
-    <div className="grid gap-4 xl:grid-cols-3">{groups.map(([group, title]) => <MetricChart key={group} title={title}
-      period={`${date(data.chart_from)} – ${date(data.chart_to)}`} series={data.series.filter((item) => item.group === group)} />)}</div>
+    </div>
+    </div>
+    <details className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+      <summary className="cursor-pointer font-medium text-foreground">Cómo se calculan las métricas y sus escalas</summary>
+      <p className="mt-3">Recaps: semanas cuyo lunes pertenece al periodo, sin repartir valores por días. Sueño: mediciones corporales; los rangos del recap no se convierten en horas. Nutrición: estimaciones de comidas marcadas, no ingesta real. Los datos parciales no entran en la comparación ni en la línea del gráfico; pueden consultarse en su tabla. El histórico legacy refleja lo disponible al capturarlo, no reconstruye ediciones anteriores.</p>
+      <p className="mt-3">Hambre: 1 sin hambre, 10 extrema. Energía: 1 sin energía, 10 mucha. Digestión: 1 muy mala, 10 muy buena. Estrés: escala histórica 0 sin estrés, 5 máximo.</p>
+    </details>
   </div>
 }
