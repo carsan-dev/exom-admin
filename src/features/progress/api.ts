@@ -3,6 +3,20 @@ import { api } from '@/lib/api'
 import { type ApiEnvelope, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { BodyField, CalendarDay, DayProgress, MetricHistoryPoint, WeekSummary } from './types'
 import type { BodyMetric, PaginatedResponse } from '../clients/types'
+import type { MetricsOverview } from './metrics-overview'
+
+export function useMetricsOverview(clientId: string, from: string | undefined, to: string, page: number, valid = true) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'metrics-overview', from ?? 'all', to, page],
+    enabled: Boolean(clientId) && valid,
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => {
+      const response = await api.get<ApiEnvelope<MetricsOverview>>(
+        `/admin/clients/${clientId}/metrics/overview`, { params: { from, to, page }, signal })
+      return unwrapResponse(response)
+    },
+  })
+}
 
 export const progressQueryKeys = {
   all: ['admin-progress'] as const,

@@ -376,6 +376,9 @@ export function RecapDetailPage() {
               <DetailField label="Estado de ánimo" value={formatRecapOption(recap.mood)} />
               <DetailField label="Estrés activado" value={recap.stress_enabled ? 'Sí' : 'No'} />
               <DetailField label="Nivel de estrés" value={recap.stress_level?.toString() ?? 'No indicado'} />
+              <DetailField label="Hambre semanal (1 sin hambre – 10 extrema)" value={recap.hunger_level?.toString() ?? 'No indicado'} />
+              <DetailField label="Energía semanal (1 sin energía – 10 mucha)" value={recap.energy_level?.toString() ?? 'No indicado'} />
+              <DetailField label="Digestión semanal (1 muy mala – 10 muy buena)" value={recap.digestion_level?.toString() ?? 'No indicado'} />
               <DetailField label="Notas" value={formatNotes(recap.general_notes)} />
             </div>
           </RecapSectionCard>

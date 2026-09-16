@@ -37,6 +37,9 @@ export interface RecapItem {
   mood: string | null
   stress_enabled: boolean
   stress_level: number | null
+  hunger_level?: number | null
+  energy_level?: number | null
+  digestion_level?: number | null
   general_notes: string | null
   improvement_app_rating: number | null
   improvement_service_rating: number | null
