@@ -1,7 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { type ApiEnvelope, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
-import type { BodyField, CalendarDay, DayProgress, MetricHistoryPoint, WeekSummary } from './types'
+import type {
+  BodyField,
+  CalendarDay,
+  DayProgress,
+  MetricHistoryPoint,
+  ProgressPhoto,
+  ProgressPhotoHistory,
+  ProgressPhotoSession,
+  ProgressPhotoView,
+  WeekSummary,
+} from './types'
 import type { BodyMetric, PaginatedResponse } from '../clients/types'
 import type { MetricsOverview } from './metrics-overview'
 
@@ -31,6 +41,78 @@ export const progressQueryKeys = {
   weightHistory: (clientId: string) => ['admin-progress', clientId, 'weight-history'] as const,
   bodyHistory: (clientId: string, field: string) =>
     ['admin-progress', clientId, 'body-history', field] as const,
+  photoHistory: (clientId: string, page: number, limit: number) =>
+    ['admin-progress', clientId, 'progress-photos', 'history', page, limit] as const,
+  photoQueries: (clientId: string) =>
+    ['admin-progress', clientId, 'progress-photos'] as const,
+}
+
+export function createProgressPhotoOperationId(action: 'session' | 'upload' | 'association') {
+  return `progress-photo-${action}:${crypto.randomUUID()}`
+}
+
+interface CreateProgressPhotoSessionInput {
+  session_date: string
+  operation_id: string
+}
+
+interface AssociateProgressPhotoInput {
+  sessionId: string
+  upload_id: string
+  view: ProgressPhotoView
+  operation_id: string
+  replaces_photo_id?: string
+}
+
+export function useClientProgressPhotoHistory(clientId: string, page = 1, limit = 20) {
+  return useQuery({
+    queryKey: progressQueryKeys.photoHistory(clientId, page, limit),
+    enabled: Boolean(clientId),
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => {
+      const response = await api.get<ApiEnvelope<ProgressPhotoHistory>>(
+        `/admin/clients/${clientId}/progress-photos/sessions`,
+        { params: { page, limit }, signal },
+      )
+      return unwrapResponse(response)
+    },
+  })
+}
+
+export function useCreateClientProgressPhotoSession(clientId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    retry: shouldRetryQuery,
+    mutationFn: async (payload: CreateProgressPhotoSessionInput) => {
+      const response = await api.post<ApiEnvelope<ProgressPhotoSession>>(
+        `/admin/clients/${clientId}/progress-photos/sessions`,
+        payload,
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: progressQueryKeys.photoQueries(clientId) })
+    },
+  })
+}
+
+export function useAssociateClientProgressPhoto(clientId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    retry: shouldRetryQuery,
+    mutationFn: async ({ sessionId, ...payload }: AssociateProgressPhotoInput) => {
+      const response = await api.post<ApiEnvelope<ProgressPhoto>>(
+        `/admin/clients/${clientId}/progress-photos/sessions/${sessionId}/photos`,
+        payload,
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: progressQueryKeys.photoQueries(clientId) })
+    },
+  })
 }
 
 export function useClientDayProgress(clientId: string, date: string) {

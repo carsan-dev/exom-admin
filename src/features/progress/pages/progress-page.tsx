@@ -9,6 +9,7 @@ import { MetricsOverviewPanel } from '../components/metrics-overview'
 import { metricsPeriod } from '../metrics-overview'
 import { MetricsTable } from '../components/metrics-table'
 import { StreakSection } from '../components/streak-section'
+import { ProgressPhotosPanel } from '../components/progress-photos-panel'
 import { useClientCalendarMonth, useClientDayProgress, useClientWeekSummary } from '../api'
 import { useClientProfile } from '../../clients/api'
 
@@ -30,7 +31,7 @@ export function ProgressPage() {
   const clientId = searchParams.get('clientId') ?? ''
   const selectedDate = searchParams.get('date') ?? getTodayStr()
   const requestedSection = searchParams.get('section') ?? 'resumen'
-  const section = ['resumen', 'metricas', 'racha'].includes(requestedSection) ? requestedSection : 'metricas'
+  const section = ['resumen', 'metricas', 'fotos', 'racha'].includes(requestedSection) ? requestedSection : 'metricas'
   const period = metricsPeriod(searchParams)
   const historyPage = Math.max(1, Number(searchParams.get('historyPage')) || 1)
 
@@ -111,7 +112,7 @@ export function ProgressPage() {
           <TabsList className="h-auto flex-wrap justify-start">
             <TabsTrigger value="dashboard" disabled>Dashboard · pendiente</TabsTrigger>
             <TabsTrigger value="metricas">Métricas</TabsTrigger>
-            <TabsTrigger value="fotos" disabled>Fotos · pendiente</TabsTrigger>
+            <TabsTrigger value="fotos">Fotos</TabsTrigger>
             <TabsTrigger value="entrenamiento" disabled>Entrenamiento · pendiente</TabsTrigger>
             <TabsTrigger value="adherencia" disabled>Adherencia · pendiente</TabsTrigger>
             <TabsTrigger value="seguimiento" disabled>Seguimiento · pendiente</TabsTrigger>
@@ -153,6 +154,11 @@ export function ProgressPage() {
             <details><summary className="cursor-pointer text-sm">Registros corporales originales · historial completo</summary>
               <MetricsTable key={clientId} clientId={clientId} page={metricsPage} onPageChange={setMetricsPage} />
             </details>
+          </TabsContent>
+
+          {/* Fotos Tab */}
+          <TabsContent value="fotos" className="space-y-4">
+            <ProgressPhotosPanel key={clientId} clientId={clientId} />
           </TabsContent>
 
           {/* Racha Tab */}
