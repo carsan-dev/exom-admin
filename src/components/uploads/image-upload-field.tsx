@@ -2,17 +2,26 @@ import { useEffect, useRef, useState } from 'react'
 import imageCompression from 'browser-image-compression'
 import { Image, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getApiErrorMessage, useUploadFile } from '@/features/uploads/api'
+import {
+  getApiErrorMessage,
+  isManagedUploadCompletionError,
+  type ManagedUploadCheckpoint,
+  retryManagedUploadCompletion,
+  useDirectUploadFile,
+  useUploadFile,
+} from '@/features/uploads/api'
 
 interface ImageUploadFieldProps {
   value: string
   onChange: (url: string, uploadId?: string) => void
   fileKeyPrefix: string
-  purpose: 'MEAL_IMAGE' | 'EXERCISE_THUMBNAIL'
+  purpose: 'MEAL_IMAGE' | 'EXERCISE_THUMBNAIL' | 'PROGRESS_PHOTO'
   label?: string
   disabled?: boolean
   onUploadingChange?: (isUploading: boolean) => void
   previewOverrideUrl?: string | null
+  managedOnly?: boolean
+  managedUploadOperationId?: string
 }
 
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -21,7 +30,7 @@ const MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10 MB (pre-compression limit)
 const COMPRESSION_OPTIONS = {
   maxSizeMB: 1,
   maxWidthOrHeight: 1200,
-  useWebWorker: true,
+  useWebWorker: false,
   fileType: 'image/webp' as const,
 }
 
@@ -38,13 +47,18 @@ export function ImageUploadField({
   disabled = false,
   onUploadingChange,
   previewOverrideUrl,
+  managedOnly = false,
+  managedUploadOperationId,
 }: ImageUploadFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const uploadingChangeRef = useRef(onUploadingChange)
   const [progress, setProgress] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const uploadFile = useUploadFile()
+  const [completionCheckpoint, setCompletionCheckpoint] = useState<ManagedUploadCheckpoint | null>(null)
+  const managedUploadFile = useDirectUploadFile()
+  const fallbackUploadFile = useUploadFile()
+  const uploadFile = managedOnly ? managedUploadFile : fallbackUploadFile
 
   const isUploading = progress !== null || uploadFile.isPending
 
@@ -83,9 +97,10 @@ export function ImageUploadField({
 
     setError(null)
     setProgress(0)
+    let compressed: File | null = null
 
     try {
-      const compressed = await imageCompression(file, COMPRESSION_OPTIONS)
+      compressed = await imageCompression(file, COMPRESSION_OPTIONS)
       const ext = compressed.type === 'image/webp' ? 'webp' : getExtension(file.name)
       const uuid = crypto.randomUUID()
       const fileKey = `${fileKeyPrefix}/${uuid}.${ext}`
@@ -95,14 +110,41 @@ export function ImageUploadField({
         file_key: fileKey,
         content_type: compressed.type,
         purpose,
+        ...(managedUploadOperationId ? { client_operation_id: managedUploadOperationId } : {}),
         onProgress: setProgress,
       })
 
       setPreviewUrl(signed_read_url ?? URL.createObjectURL(compressed))
+      setCompletionCheckpoint(null)
       onChange(file_url, upload_id)
       setProgress(null)
     } catch (err) {
-      setError(getApiErrorMessage(err, 'No se ha podido subir la imagen'))
+      if (managedOnly && isManagedUploadCompletionError(err)) {
+        setCompletionCheckpoint(err.checkpoint)
+        setPreviewUrl(
+          err.checkpoint.signed_read_url ?? (compressed ? URL.createObjectURL(compressed) : null),
+        )
+        setError('La imagen se subió, pero no se confirmó. Reintenta la confirmación sin subirla otra vez.')
+      } else {
+        setError(getApiErrorMessage(err, 'No se ha podido subir la imagen'))
+      }
+      setProgress(null)
+    }
+  }
+
+  const handleRetryCompletion = async () => {
+    if (!completionCheckpoint) return
+
+    setError(null)
+    setProgress(100)
+    try {
+      const { upload_id, file_url, signed_read_url } = await retryManagedUploadCompletion(completionCheckpoint)
+      setPreviewUrl(signed_read_url ?? completionCheckpoint.signed_read_url ?? previewUrl)
+      setCompletionCheckpoint(null)
+      onChange(file_url, upload_id)
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No se ha podido confirmar la imagen subida'))
+    } finally {
       setProgress(null)
     }
   }
@@ -112,6 +154,7 @@ export function ImageUploadField({
     setError(null)
     setProgress(null)
     setPreviewUrl(null)
+    setCompletionCheckpoint(null)
   }
 
   return (
@@ -141,6 +184,14 @@ export function ImageUploadField({
               Quitar
             </Button>
           </div>
+        </div>
+      ) : completionCheckpoint ? (
+        <div className="space-y-2 rounded-lg border border-status-warning/40 bg-status-warning/5 p-4">
+          {previewUrl && <img src={previewUrl} alt={`${label} pendiente de confirmación`} className="aspect-video max-h-56 w-full rounded object-cover" />}
+          <p className="text-sm text-muted-foreground">La transferencia terminó, pero falta confirmar la misma subida.</p>
+          <Button type="button" variant="outline" onClick={() => void handleRetryCompletion()} disabled={isUploading}>
+            Reintentar confirmación
+          </Button>
         </div>
       ) : isUploading ? (
         <div className="space-y-2 rounded-lg border border-border/60 bg-muted/50 p-4">

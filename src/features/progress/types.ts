@@ -62,6 +62,36 @@ export interface MetricHistoryPoint {
   value: number
 }
 
+export type ProgressPhotoView = 'FRONT' | 'LEFT' | 'RIGHT' | 'BACK'
+
+export interface ProgressPhoto {
+  id: string
+  view: ProgressPhotoView
+  state: 'ACTIVE' | 'REPLACED'
+  replaces_photo_id: string | null
+  created_at: string
+  image_url: string
+  content_type: string
+  bytes: number
+}
+
+export interface ProgressPhotoSession {
+  id: string
+  session_date: string
+  created_at: string
+  updated_at: string
+  is_complete: boolean
+  photos: ProgressPhoto[]
+}
+
+export interface ProgressPhotoHistory {
+  data: ProgressPhotoSession[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
 export type BodyField =
   | 'weight_kg'
   | 'muscle_mass_kg'
