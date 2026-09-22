@@ -30,7 +30,7 @@ const MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10 MB (pre-compression limit)
 const COMPRESSION_OPTIONS = {
   maxSizeMB: 1,
   maxWidthOrHeight: 1200,
-  useWebWorker: true,
+  useWebWorker: false,
   fileType: 'image/webp' as const,
 }
 
