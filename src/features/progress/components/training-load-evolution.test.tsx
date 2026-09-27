@@ -23,6 +23,7 @@ function renderPanel() {
 }
 
 beforeEach(() => {
+  Element.prototype.scrollIntoView = vi.fn()
   vi.stubGlobal('ResizeObserver', class {
     observe() {}
     unobserve() {}
@@ -49,6 +50,8 @@ describe('TrainingLoadEvolution', () => {
       throw new Error(`Unexpected GET: ${url}`)
     })
     renderPanel()
+    fireEvent.click(await screen.findByRole('combobox', { name: 'Ejercicio para evolución de cargas' }))
+    fireEvent.click(await screen.findByRole('option', { name: 'Plancha' }))
     const table = await screen.findByRole('table', { name: 'Cargas del ejercicio seleccionado' })
     expect(within(table).getByRole('columnheader', { name: 'Segundos' })).toBeInTheDocument()
     const rows = within(table).getAllByRole('row')
@@ -74,6 +77,8 @@ describe('TrainingLoadEvolution', () => {
       throw new Error(`Unexpected GET: ${url}`)
     })
     renderPanel()
+    fireEvent.click(await screen.findByRole('combobox', { name: 'Ejercicio para evolución de cargas' }))
+    fireEvent.click(await screen.findByRole('option', { name: 'Plancha' }))
     const table = await screen.findByRole('table', { name: 'Cargas del ejercicio seleccionado' })
     expect(within(table).getByText('08 sep 2026')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Más antiguo' }))
