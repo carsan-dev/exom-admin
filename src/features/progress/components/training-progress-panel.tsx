@@ -24,8 +24,8 @@ export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingPro
   const overviewScope = JSON.stringify([clientId, from, to])
   const [cursorState, setCursorState] = useState<{ scope: string; cursors: (string | null)[] }>({ scope: overviewScope, cursors: [null] })
   const [selected, setSelected] = useState<{ scope: string; session: TrainingSession } | null>(null)
-  const [legacyState, setLegacyState] = useState<{ scope: string; expanded: boolean; cursors: (string | null)[] }>({ scope: overviewScope, expanded: true, cursors: [null] })
-  const legacyExpanded = legacyState.scope !== overviewScope || legacyState.expanded
+  const [legacyState, setLegacyState] = useState<{ scope: string; expanded: boolean; cursors: (string | null)[] }>({ scope: overviewScope, expanded: false, cursors: [null] })
+  const legacyExpanded = legacyState.scope === overviewScope && legacyState.expanded
   const legacyCursors = legacyState.scope === overviewScope ? legacyState.cursors : [null]
   const cursors = cursorState.scope === overviewScope ? cursorState.cursors : [null]
   const currentSelection = selected?.scope === overviewScope ? selected.session : null
