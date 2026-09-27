@@ -162,6 +162,12 @@ export interface CursorPage<T> {
   nextCursor: string | null
 }
 
+export interface LegacyTrainingRecord {
+  date: string
+  record_index: number
+  kind: 'uncertain_legacy'
+}
+
 export type BodyField =
   | 'weight_kg'
   | 'muscle_mass_kg'
