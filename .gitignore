@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Pi skills
+/.pi/skills/
+/skills-lock.json
