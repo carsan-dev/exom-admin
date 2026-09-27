@@ -4,11 +4,27 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
 import { TrainingProgressPanel } from './training-progress-panel'
+import { TrainingExerciseTable } from './training-exercise-table'
 
 const named = { exercise_id: 'named', exercise_name: 'Remo', sets: 2, max_reps: 8, max_seconds: null, volume: 80, mean_rir: 2, pr: null }
 const unnamed = { ...named, exercise_id: 'unknown', exercise_name: null }
 const indicators = { trainings_completed: 3, volume: 160, mean_rir: 2, mean_rpe: 7 }
 const envelope = (data: unknown) => ({ data: { data } })
+
+it('keeps the empty exercise card free of pagination and offers all records', async () => {
+  vi.spyOn(api, 'get').mockImplementation(async (_url, config) => envelope({
+    indicators, exercises: config?.params?.identification === 'all' ? [unnamed] : [], next_cursor: null,
+  }))
+  render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <TrainingExerciseTable clientId="client-a" from="2026-09-01" to="2026-09-27" />
+  </QueryClientProvider>)
+  expect(await screen.findByText('No hay ejercicios identificados para esta consulta.')).toBeVisible()
+  expect(screen.queryByRole('button', { name: 'Ejercicios anteriores' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Más ejercicios' })).not.toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: 'Mostrar todos' }))
+  expect(await screen.findByRole('rowheader', { name: /Nombre no disponible/ })).toBeVisible()
+  expect(screen.queryByRole('button', { name: 'Más ejercicios' })).not.toBeInTheDocument()
+})
 
 beforeEach(() => {
   vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
