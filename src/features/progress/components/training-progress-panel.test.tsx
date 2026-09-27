@@ -167,7 +167,7 @@ describe('TrainingProgressPanel', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Ver detalle de Sesión A/ }))
     expect(await screen.findByText(/Detalle: Sesión A/)).toBeInTheDocument()
     view.switchWindow('2026-08-01', '2026-08-31')
-    expect(await screen.findByText('Sin sesiones finalizadas en esta página.')).toBeInTheDocument()
+    expect(await screen.findByText('Sin sesiones con detalle en esta página.')).toBeInTheDocument()
     expect(screen.queryByText(/Detalle: Sesión A/)).not.toBeInTheDocument()
     expect(get.mock.calls.filter(([url]) => url.includes('/progress/training-sessions/'))).toHaveLength(1)
   })
@@ -184,6 +184,127 @@ describe('TrainingProgressPanel', () => {
     expect(screen.getByText('Sin dato')).toBeInTheDocument()
   })
 
+  it('explains ambiguous historical counts, session-only detail, volume and missing names without changing values', async () => {
+    const historicalOverview = {
+      indicators: { trainings_completed: 28, volume: 117619.9, mean_rir: null, mean_rpe: null },
+      exercises: [{ ...exerciseA, exercise_name: null, volume: 117619.9 }],
+      next_cursor: null,
+    }
+    vi.spyOn(api, 'get').mockImplementation((url) => {
+      if (url.endsWith('/progress/training-overview')) return Promise.resolve(envelope(historicalOverview))
+      if (url.endsWith('/progress/training-sessions')) return Promise.resolve(envelope({ page: [], nextCursor: null }))
+      if (url.includes('/load-history')) return Promise.resolve(envelope({ page: [], nextCursor: null }))
+      throw new Error(`Unexpected GET: ${url}`)
+    })
+    renderPanel()
+    const completed = await screen.findByRole('heading', { name: 'Entrenos completados' })
+    const completedCard = completed.parentElement?.parentElement
+    expect(completedCard).toHaveTextContent('28')
+    expect(completedCard).toHaveTextContent(/históric[oa]s?.*sin.*confirmación.*sesión/i)
+    const volumeCard = screen.getByRole('heading', { name: 'Volumen' }).parentElement?.parentElement
+    expect(volumeCard).toHaveTextContent('117.619,9 kg·reps')
+    expect(volumeCard).toHaveTextContent(/peso.*repeticiones.*series.*segundos.*no/i)
+    const exercisesTable = screen.getByRole('table', { name: 'Resumen de ejercicios del periodo' })
+    const unnamedRow = within(exercisesTable).getByRole('row', { name: /Ejercicio sin nombre/ })
+    expect(within(unnamedRow).getByText('117.619,9 kg·reps')).toBeInTheDocument()
+    expect(screen.getByText(/nombre.*históric[oa].*no.*atribuir.*inequívoca.*no.*falte.*copia histórica/i)).toBeInTheDocument()
+    const sessionsCard = screen.getByRole('heading', { name: 'Sesiones con detalle' }).parentElement?.parentElement
+    expect(sessionsCard).toHaveTextContent('Sin sesiones con detalle en esta página.')
+    expect(sessionsCard).toHaveTextContent(/sesiones con identificador y acceso a detalle/i)
+    expect(sessionsCard).toHaveTextContent(/identificador de sesión antiguo.*no certifica.*finalización explícita/i)
+    expect(screen.queryByRole('button', { name: /Ver detalle/ })).not.toBeInTheDocument()
+  })
+
+  it('keeps legacy records hidden and does not fetch until explicitly expanded with a valid range', async () => {
+    const get = vi.spyOn(api, 'get').mockImplementation((url) => {
+      if (url.endsWith('/progress/training-overview')) return Promise.resolve(envelope(overview))
+      if (url.endsWith('/progress/training-sessions')) return Promise.resolve(envelope({ page: [], nextCursor: null }))
+      if (url.endsWith('/progress/legacy-training-records')) return Promise.resolve(envelope({ page: [], nextCursor: null }))
+      throw new Error('Unexpected GET')
+    })
+    const view = renderPanel()
+    await screen.findByRole('heading', { name: 'Entrenos completados' })
+    expect(screen.getByRole('button', { name: 'Mostrar registros históricos' })).toBeInTheDocument()
+    expect(screen.queryByText(/registro histórico sin sesión verificable; no confirma finalización/i)).not.toBeInTheDocument()
+    expect(get.mock.calls.filter(([url]) => url.endsWith('/progress/legacy-training-records'))).toHaveLength(0)
+    view.rerender(<QueryClientProvider client={new QueryClient()}><TrainingProgressPanel clientId="client-a" from="bad" to="2026-09-28" valid={false} /></QueryClientProvider>)
+    expect(screen.queryByRole('button', { name: 'Mostrar registros históricos' })).not.toBeInTheDocument()
+    expect(get.mock.calls.filter(([url]) => url.endsWith('/progress/legacy-training-records'))).toHaveLength(0)
+  })
+
+  it('shows separate same-day ordinals only, pages independently and resets on collapse, client and range changes', async () => {
+    const get = vi.spyOn(api, 'get').mockImplementation((url, config) => {
+      if (url.endsWith('/progress/training-overview')) return Promise.resolve(envelope(overview))
+      if (url.endsWith('/progress/training-sessions')) return Promise.resolve(envelope({ page: [session], nextCursor: null }))
+      if (url.endsWith('/progress/legacy-training-records')) {
+        const page = hasCursor(config, 'legacy-next') ? [{ date: '2026-09-09', record_index: 1, kind: 'uncertain_legacy', training_id: 'private-key' }] :
+          [{ date: '2026-09-10', record_index: 1, kind: 'uncertain_legacy', training_id: 'private-key', training_name: 'private-name', payload: 'private-payload' },
+            { date: '2026-09-10', record_index: 2, kind: 'uncertain_legacy' }]
+        return Promise.resolve(envelope({ page, nextCursor: hasCursor(config, 'legacy-next') ? null : 'legacy-next' }))
+      }
+      if (url.includes('/progress/training-sessions/')) return Promise.resolve(envelope(detail))
+      throw new Error('Unexpected GET')
+    })
+    const view = renderPanel()
+    fireEvent.click(await screen.findByRole('button', { name: 'Mostrar registros históricos' }))
+    const list = await screen.findByRole('list', { name: 'Registros históricos' })
+    expect(within(list).getAllByRole('listitem')).toHaveLength(2)
+    expect(list).toHaveTextContent('2026-09-10 · Registro 1')
+    expect(list).toHaveTextContent('2026-09-10 · Registro 2')
+    expect(list).toHaveTextContent('registro histórico sin sesión verificable; no confirma finalización')
+    expect(list).not.toHaveTextContent(/private-key|private-name|private-payload/)
+    expect(within(list).queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Ver detalle de Sesión A/ })).toBeInTheDocument()
+    expect(get).toHaveBeenCalledWith('/admin/clients/client-a/progress/legacy-training-records', expect.objectContaining({ params: { from: '2026-09-01', to: '2026-09-28', limit: 20 } }))
+    fireEvent.click(screen.getByRole('button', { name: 'Más registros históricos' }))
+    expect(await screen.findByText(/2026-09-09 · Registro 1/)).toBeInTheDocument()
+    expect(get).toHaveBeenCalledWith('/admin/clients/client-a/progress/legacy-training-records', expect.objectContaining({ params: { from: '2026-09-01', to: '2026-09-28', limit: 20, cursor: 'legacy-next' } }))
+    fireEvent.click(screen.getByRole('button', { name: 'Registros históricos anteriores' }))
+    expect(await screen.findByText(/2026-09-10 · Registro 2/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Ocultar registros históricos' }))
+    expect(screen.queryByRole('list', { name: 'Registros históricos' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Mostrar registros históricos' }))
+    expect(await screen.findByText(/2026-09-10 · Registro 2/)).toBeInTheDocument()
+    view.switchClient('client-b')
+    expect(await screen.findByRole('button', { name: 'Mostrar registros históricos' })).toBeInTheDocument()
+    expect(get.mock.calls.some(([url]) => url.includes('/client-b/progress/legacy-training-records'))).toBe(false)
+    fireEvent.click(screen.getByRole('button', { name: 'Mostrar registros históricos' }))
+    await waitFor(() => expect(get.mock.calls.some(([url]) => url.includes('/client-b/progress/legacy-training-records'))).toBe(true))
+    expect(get.mock.calls.some(([url, config]) => url.includes('/client-b/progress/legacy-training-records') && hasCursor(config, 'legacy-next'))).toBe(false)
+    view.switchWindow('2026-08-01', '2026-08-31')
+    expect(await screen.findByRole('button', { name: 'Mostrar registros históricos' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Mostrar registros históricos' }))
+    await waitFor(() => expect(get).toHaveBeenCalledWith('/admin/clients/client-a/progress/legacy-training-records', expect.objectContaining({ params: { from: '2026-08-01', to: '2026-08-31', limit: 20 } })))
+  })
+
+  it.each([[403, 'No tienes acceso a los registros históricos.'], [404, 'Los registros históricos aún no están disponibles.']])('reports historical %i independently of the session panel', async (status, message) => {
+    vi.spyOn(api, 'get').mockImplementation((url) => {
+      if (url.endsWith('/progress/training-overview')) return Promise.resolve(envelope(overview))
+      if (url.endsWith('/progress/training-sessions')) return Promise.resolve(envelope({ page: [session], nextCursor: null }))
+      if (url.endsWith('/progress/legacy-training-records')) return Promise.reject(axios.AxiosError.from(new Error('Unavailable'), 'ERR_BAD_RESPONSE', undefined, undefined,
+        { status, statusText: 'Unavailable', headers: {}, config: { headers: {} } as never, data: {} }))
+      throw new Error('Unexpected GET')
+    })
+    renderPanel()
+    fireEvent.click(await screen.findByRole('button', { name: 'Mostrar registros históricos' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(message)
+    expect(screen.queryByText('Sin registros históricos en este periodo.')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Ver detalle de Sesión A/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Entrenos completados' })).toBeInTheDocument()
+  })
+
+  it('shows an explicit empty historical page separately', async () => {
+    vi.spyOn(api, 'get').mockImplementation((url) => {
+      if (url.endsWith('/progress/training-overview')) return Promise.resolve(envelope(overview))
+      if (url.endsWith('/progress/training-sessions')) return Promise.resolve(envelope({ page: [], nextCursor: null }))
+      if (url.endsWith('/progress/legacy-training-records')) return Promise.resolve(envelope({ page: [], nextCursor: null }))
+      throw new Error('Unexpected GET')
+    })
+    renderPanel()
+    fireEvent.click(await screen.findByRole('button', { name: 'Mostrar registros históricos' }))
+    expect(await screen.findByText('Sin registros históricos en este periodo.')).toBeInTheDocument()
+  })
+
   it('renders a null RPE and one session note above a timed set with RIR zero', async () => {
     vi.spyOn(api, 'get').mockImplementation((url) => {
       if (url.endsWith('/progress/training-overview')) return Promise.resolve(envelope(overview))
@@ -193,6 +314,8 @@ describe('TrainingProgressPanel', () => {
     })
     renderPanel()
     fireEvent.click(await screen.findByRole('button', { name: /Ver detalle de Sesión A/ }))
+    expect(screen.getByRole('heading', { name: 'Sesiones con detalle' })).toBeInTheDocument()
+    expect(screen.getByText(/identificador de sesión antiguo.*no certifica.*finalización explícita/i)).toBeInTheDocument()
     const table = await screen.findByRole('table', { name: 'Series del entrenamiento' })
     expect(screen.getByText('RPE: Sin dato')).toBeInTheDocument()
     expect(screen.getAllByText(`Nota: ${session.note}`)).toHaveLength(1)
@@ -217,7 +340,7 @@ describe('TrainingProgressPanel', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Ver detalle de Sesión A/ }))
     expect(await screen.findByText('Cargando detalle…')).toBeInTheDocument()
     view.switchClient('client-b')
-    expect(await screen.findByText('Sin sesiones finalizadas en esta página.')).toBeInTheDocument()
+    expect(await screen.findByText('Sin sesiones con detalle en esta página.')).toBeInTheDocument()
     expect(screen.queryByText(/Detalle: Sesión A/)).not.toBeInTheDocument()
     expect(get.mock.calls.some(([url]) => url.includes('/client-b/progress/training-sessions/execution-a'))).toBe(false)
     resolveOldDetail?.(envelope(detail))
@@ -252,7 +375,7 @@ describe('TrainingProgressPanel', () => {
     })
     renderPanel()
     expect(await screen.findByRole('alert')).toHaveTextContent('No tienes acceso al entrenamiento de este cliente.')
-    expect(screen.queryByText('Sin sesiones finalizadas en esta página.')).not.toBeInTheDocument()
+    expect(screen.queryByText('Sin sesiones con detalle en esta página.')).not.toBeInTheDocument()
   })
 
   it('distinguishes a forbidden session detail from a missing or empty detail', async () => {

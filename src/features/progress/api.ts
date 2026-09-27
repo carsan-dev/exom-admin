@@ -15,6 +15,7 @@ import type {
   TrainingSet,
   TrainingSession,
   TrainingSessionDetail,
+  LegacyTrainingRecord,
   CursorPage,
 } from './types'
 import type { BodyMetric, PaginatedResponse } from '../clients/types'
@@ -64,6 +65,18 @@ export function useTrainingSessions(clientId: string, from: string, to: string, 
     retry: shouldRetryQuery,
     queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<CursorPage<TrainingSession>>>(
       `/admin/clients/${clientId}/progress/training-sessions`,
+      { params: { from, to, limit: 20, ...(cursor ? { cursor } : {}) }, signal },
+    )),
+  })
+}
+
+export function useLegacyTrainingRecords(clientId: string, from: string, to: string, valid: boolean, expanded: boolean, cursor: string | null) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'legacy-training-records', from, to, cursor],
+    enabled: Boolean(clientId) && valid && expanded,
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<CursorPage<LegacyTrainingRecord>>>(
+      `/admin/clients/${clientId}/progress/legacy-training-records`,
       { params: { from, to, limit: 20, ...(cursor ? { cursor } : {}) }, signal },
     )),
   })
