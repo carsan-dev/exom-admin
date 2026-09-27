@@ -8,6 +8,9 @@ import { DayProgressDetail } from '../components/day-progress-detail'
 import { MetricsOverviewPanel } from '../components/metrics-overview'
 import { metricsPeriod } from '../metrics-overview'
 import { MetricsTable } from '../components/metrics-table'
+import { TrainingProgressPanel } from '../components/training-progress-panel'
+import { trainingWindowFor } from '../training-window'
+import { Button } from '@/components/ui/button'
 import { StreakSection } from '../components/streak-section'
 import { ProgressPhotosPanel } from '../components/progress-photos-panel'
 import { useClientCalendarMonth, useClientDayProgress, useClientWeekSummary } from '../api'
@@ -31,9 +34,14 @@ export function ProgressPage() {
   const clientId = searchParams.get('clientId') ?? ''
   const selectedDate = searchParams.get('date') ?? getTodayStr()
   const requestedSection = searchParams.get('section') ?? 'resumen'
-  const section = ['resumen', 'metricas', 'fotos', 'racha'].includes(requestedSection) ? requestedSection : 'metricas'
+  const section = ['resumen', 'metricas', 'fotos', 'entrenamiento', 'racha'].includes(requestedSection) ? requestedSection : 'metricas'
   const period = metricsPeriod(searchParams)
   const historyPage = Math.max(1, Number(searchParams.get('historyPage')) || 1)
+  const trainingWindow = trainingWindowFor(getTodayStr(), searchParams.get('trainingWindow'))
+  const trainingFrom = period.period === 'all' ? trainingWindow.from : period.from ?? period.to
+  const trainingTo = period.period === 'all' ? trainingWindow.to : period.to
+  const trainingValid = period.period === 'all' || (period.valid &&
+    (Date.parse(`${trainingTo}T00:00:00Z`) - Date.parse(`${trainingFrom}T00:00:00Z`)) / 86400000 <= 365)
 
   const today = new Date()
   const [calYear, setCalYear] = useState(today.getFullYear())
@@ -52,7 +60,7 @@ export function ProgressPage() {
   const { data: weekSummary, isLoading: weekLoading } = useClientWeekSummary(clientId, weekStart)
 
   function handleClientSelect(id: string) {
-    updateParams({ clientId: id, date: getTodayStr(), historyPage: '1' })
+    updateParams({ clientId: id, date: getTodayStr(), historyPage: '1', trainingWindow: '0' })
     setMetricsPage(1)
   }
 
@@ -96,7 +104,7 @@ export function ProgressPage() {
             {clientData?.profile?.main_goal && <p className="text-sm text-muted-foreground">{clientData.profile.main_goal}</p>}
             <div className="flex flex-wrap items-end gap-3">
               <label className="text-sm">Periodo
-                <select aria-label="Periodo" value={period.period} onChange={(event) => updateParams({ period: event.target.value, historyPage: '1' })}
+                <select aria-label="Periodo" value={period.period} onChange={(event) => updateParams({ period: event.target.value, historyPage: '1', trainingWindow: '0' })}
                   className="mt-1 block rounded-md border bg-background p-2 text-foreground">
                   <option value="all">Desde inicio</option><option value="4w">Últimas cuatro semanas</option><option value="3m">Últimos tres meses</option><option value="custom">Personalizado</option>
                 </select>
@@ -113,7 +121,7 @@ export function ProgressPage() {
             <TabsTrigger value="dashboard" disabled>Dashboard · pendiente</TabsTrigger>
             <TabsTrigger value="metricas">Métricas</TabsTrigger>
             <TabsTrigger value="fotos">Fotos</TabsTrigger>
-            <TabsTrigger value="entrenamiento" disabled>Entrenamiento · pendiente</TabsTrigger>
+            <TabsTrigger value="entrenamiento">Entrenamiento</TabsTrigger>
             <TabsTrigger value="adherencia" disabled>Adherencia · pendiente</TabsTrigger>
             <TabsTrigger value="seguimiento" disabled>Seguimiento · pendiente</TabsTrigger>
             <TabsTrigger value="resumen">Resumen</TabsTrigger>
@@ -159,6 +167,15 @@ export function ProgressPage() {
           {/* Fotos Tab */}
           <TabsContent value="fotos" className="space-y-4">
             <ProgressPhotosPanel key={clientId} clientId={clientId} />
+          </TabsContent>
+
+          <TabsContent value="entrenamiento" className="space-y-4">
+            {period.period === 'all' && <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-4 text-sm" aria-label="Ventanas consecutivas desde inicio">
+              <p>Desde inicio · ventana {trainingWindow.index + 1}: {trainingFrom} – {trainingTo} (hasta 366 días inclusivos). Consulta las ventanas anteriores para ver todo el histórico.</p>
+              <Button variant="outline" disabled={!trainingWindow.hasOlder} onClick={() => updateParams({ trainingWindow: String(trainingWindow.index + 1) })}>Ventana anterior</Button>
+              <Button variant="outline" disabled={!trainingWindow.hasNewer} onClick={() => updateParams({ trainingWindow: String(trainingWindow.index - 1) })}>Ventana posterior</Button>
+            </div>}
+            <TrainingProgressPanel key={`${clientId}:${trainingFrom}:${trainingTo}`} clientId={clientId} from={trainingFrom} to={trainingTo} valid={trainingValid} />
           </TabsContent>
 
           {/* Racha Tab */}
