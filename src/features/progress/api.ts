@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { type ApiEnvelope, getApiErrorStatus, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type {
@@ -34,14 +34,37 @@ export function useMetricsOverview(clientId: string, from: string | undefined, t
   })
 }
 
-export function useTrainingOverview(clientId: string, from: string, to: string, valid: boolean, cursor: string | null) {
+export const EXERCISE_IDENTIFICATION = { all: 'all', identified: 'identified' } as const
+export type ExerciseIdentification = (typeof EXERCISE_IDENTIFICATION)[keyof typeof EXERCISE_IDENTIFICATION]
+
+interface ExerciseFilters {
+  search?: string
+  identification?: ExerciseIdentification
+  limit?: number
+}
+
+export function useTrainingOverview(clientId: string, from: string, to: string, valid: boolean, cursor: string | null, filters: ExerciseFilters = {}) {
   return useQuery({
-    queryKey: ['admin-progress', clientId, 'training-overview', from, to, cursor],
+    queryKey: ['admin-progress', clientId, 'training-overview', from, to, cursor, filters],
     enabled: Boolean(clientId) && valid,
     retry: (count, error) => getApiErrorStatus(error) !== 413 && shouldRetryQuery(count, error),
     queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<TrainingOverview>>(
       `/admin/clients/${clientId}/progress/training-overview`,
-      { params: { from, to, limit: 100, ...(cursor !== null ? { cursor } : {}) }, signal },
+      { params: { from, to, limit: 100, ...filters, ...(cursor !== null ? { cursor } : {}) }, signal },
+    )),
+  })
+}
+
+export function useTrainingExerciseSearch(clientId: string, from: string, to: string, search: string, enabled: boolean) {
+  return useInfiniteQuery({
+    queryKey: ['admin-progress', clientId, 'training-exercise-search', from, to, search],
+    enabled: Boolean(clientId) && enabled,
+    initialPageParam: null as string | null,
+    getNextPageParam: (page: TrainingOverview) => page.next_cursor ?? undefined,
+    retry: (count, error) => getApiErrorStatus(error) !== 413 && shouldRetryQuery(count, error),
+    queryFn: async ({ signal, pageParam }) => unwrapResponse(await api.get<ApiEnvelope<TrainingOverview>>(
+      `/admin/clients/${clientId}/progress/training-overview`,
+      { params: { from, to, limit: 20, search, identification: 'identified', ...(pageParam ? { cursor: pageParam } : {}) }, signal },
     )),
   })
 }

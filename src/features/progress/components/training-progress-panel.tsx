@@ -5,6 +5,8 @@ import { formatDate } from '@/lib/utils'
 import { getApiErrorStatus } from '@/lib/api-utils'
 import { useLegacyTrainingRecords, useTrainingOverview, useTrainingSessions } from '../api'
 import type { TrainingSession } from '../types'
+import { TrainingInfo } from './training-info'
+import { TrainingExerciseTable } from './training-exercise-table'
 import { TrainingLoadEvolution } from './training-load-evolution'
 import { TrainingSessionDetail } from './training-session-detail'
 
@@ -21,16 +23,13 @@ const value = (amount: number | null | undefined, unit = '') => amount == null ?
 export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingProgressPanelProps) {
   const overviewScope = JSON.stringify([clientId, from, to])
   const [cursorState, setCursorState] = useState<{ scope: string; cursors: (string | null)[] }>({ scope: overviewScope, cursors: [null] })
-  const [exerciseCursorState, setExerciseCursorState] = useState<{ scope: string; cursors: (string | null)[] }>({ scope: overviewScope, cursors: [null] })
   const [selected, setSelected] = useState<{ scope: string; session: TrainingSession } | null>(null)
   const [legacyState, setLegacyState] = useState<{ scope: string; expanded: boolean; cursors: (string | null)[] }>({ scope: overviewScope, expanded: true, cursors: [null] })
   const legacyExpanded = legacyState.scope !== overviewScope || legacyState.expanded
   const legacyCursors = legacyState.scope === overviewScope ? legacyState.cursors : [null]
   const cursors = cursorState.scope === overviewScope ? cursorState.cursors : [null]
-  const exerciseCursors = exerciseCursorState.scope === overviewScope ? exerciseCursorState.cursors : [null]
-  const exerciseCursor = exerciseCursors[exerciseCursors.length - 1]
   const currentSelection = selected?.scope === overviewScope ? selected.session : null
-  const overview = useTrainingOverview(clientId, from, to, valid, exerciseCursor)
+  const overview = useTrainingOverview(clientId, from, to, valid, null, { limit: 1 })
   const sessions = useTrainingSessions(valid ? clientId : '', from, to, cursors[cursors.length - 1])
   const legacy = useLegacyTrainingRecords(clientId, from, to, valid, legacyExpanded, legacyCursors[legacyCursors.length - 1])
   if (!valid) return <p role="alert">Selecciona un intervalo válido de hasta 366 días para Entrenamiento.</p>
@@ -42,9 +41,7 @@ export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingPro
     const error = overview.error ?? sessions.error
     return <div role="alert"><p>{getApiErrorStatus(error) === 403 ? 'No tienes acceso al entrenamiento de este cliente.' : 'No se pudo cargar el entrenamiento. Comprueba el periodo y vuelve a intentarlo.'}</p><Button variant="outline" onClick={() => { void overview.refetch(); void sessions.refetch() }}>Reintentar</Button></div>
   }
-  const { indicators, exercises } = overview.data
-  const exerciseLabels = Object.fromEntries(exercises.map((item, index) => [item.exercise_id,
-    item.exercise_name || `Nombre no disponible · Ref. ${exerciseCursors.length}.${index + 1}`]))
+  const { indicators } = overview.data
   const cards = [
     { label: 'Registros de entrenamiento', text: value(indicators.trainings_completed) },
     { label: 'Volumen', text: value(indicators.volume, ' kg·reps') },
@@ -52,7 +49,7 @@ export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingPro
     { label: 'RPE medio', text: value(indicators.mean_rpe) },
   ]
   return <div className="space-y-4">
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{cards.map((item) => <Card key={item.label}><CardHeader><CardTitle className="text-base">{item.label}</CardTitle></CardHeader><CardContent><p className="text-2xl font-semibold">{item.text}</p>{item.label === 'Registros de entrenamiento' && <p className="mt-2 text-sm text-muted-foreground">Puede incluir registros antiguos. El total no permite confirmar cuántos entrenamientos se finalizaron.</p>}{item.label === 'Volumen' && <p className="mt-2 text-sm text-muted-foreground">Suma de peso × repeticiones de series válidas; las series en segundos no suman kg·reps.</p>}</CardContent></Card>)}</div>
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{cards.map((item) => <Card key={item.label}><CardHeader><CardTitle className="flex items-center justify-between gap-2 text-base"><span>{item.label}</span>{item.label === 'Registros de entrenamiento' && <TrainingInfo label={item.label}>Puede incluir registros antiguos. El total no permite confirmar cuántos entrenamientos se finalizaron.</TrainingInfo>}{item.label === 'Volumen' && <TrainingInfo label={item.label}>Suma de peso × repeticiones de series válidas; las series en segundos no suman kg·reps.</TrainingInfo>}</CardTitle></CardHeader><CardContent><p className="text-2xl font-semibold">{item.text}</p></CardContent></Card>)}</div>
     <section aria-label="Historial de entrenamiento" className="space-y-4">
       <h2 className="text-lg font-semibold">Historial de entrenamiento</h2>
     <Card><CardHeader><CardTitle>Sesiones con detalle</CardTitle></CardHeader><CardContent className="space-y-3">
@@ -61,6 +58,9 @@ export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingPro
       <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={cursors.length === 1} onClick={() => { setSelected(null); setCursorState({ scope: overviewScope, cursors: cursors.slice(0, -1) }) }}>Más recientes</Button><Button variant="outline" disabled={!sessions.data.nextCursor} onClick={() => { if (sessions.data.nextCursor) { setSelected(null); setCursorState({ scope: overviewScope, cursors: [...cursors, sessions.data.nextCursor] }) } }}>Más antiguos</Button></div>
     </CardContent></Card>
     {currentSelection && <TrainingSessionDetail key={`${clientId}:${currentSelection.date}:${currentSelection.training_session_id}`} clientId={clientId} session={currentSelection} onClose={() => setSelected(null)} />}
+    </section>
+    <TrainingExerciseTable key={overviewScope} clientId={clientId} from={from} to={to} />
+    <TrainingLoadEvolution key={overviewScope} clientId={clientId} from={from} to={to} />
     <Card><CardHeader><CardTitle>Registros históricos</CardTitle></CardHeader><CardContent className="space-y-3">
       <p className="text-sm text-muted-foreground">Registros antiguos sin detalle de la sesión. No permiten saber si el entrenamiento se terminó.</p>
       <Button variant="outline" aria-expanded={legacyExpanded} onClick={() => setLegacyState({ scope: overviewScope, expanded: !legacyExpanded, cursors: [null] })}>{legacyExpanded ? 'Ocultar registros históricos' : 'Mostrar registros históricos'}</Button>
@@ -71,12 +71,5 @@ export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingPro
         </>}
       </div>}
     </CardContent></Card>
-    </section>
-    <Card><CardHeader><CardTitle>Ejercicios</CardTitle></CardHeader><CardContent>
-      {exercises.length === 0 ? <p>Sin ejercicios registrados en este periodo.</p> : <div role="region" tabIndex={0} aria-label="Tabla de ejercicios desplazable" className="overflow-x-auto"><table className="w-full min-w-[720px] text-left text-sm"><caption className="sr-only">Resumen de ejercicios del periodo</caption><thead><tr><th>Ejercicio</th><th>Carga</th><th>Reps o segundos</th><th>Series</th><th>RIR</th><th>Volumen</th><th>PR</th></tr></thead><tbody>{exercises.map((item) => <tr key={item.exercise_id} className="border-t"><th scope="row" className="py-2">{exerciseLabels[item.exercise_id]}</th><td>{value(item.pr?.weight_kg, ' kg')}</td><td>{item.max_seconds !== null ? value(item.max_seconds, ' s') : value(item.max_reps, ' reps')}</td><td>{value(item.sets)}</td><td>{value(item.mean_rir)}</td><td>{value(item.volume, ' kg·reps')}</td><td>{item.pr ? `${value(item.pr.weight_kg, ' kg')} × ${value(item.pr.reps, ' reps')} · ${formatDate(`${item.pr.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}` : 'Sin dato'}</td></tr>)}</tbody></table></div>}
-      {exercises.some((item) => !item.exercise_name) && <p className="mt-2 text-sm text-muted-foreground">Conservamos las series y cargas aunque el nombre original no esté disponible. Las referencias distinguen los ejercicios de esta página; no son sus nombres.</p>}
-      <div className="mt-3 flex flex-wrap gap-2"><Button variant="outline" disabled={exerciseCursors.length === 1} onClick={() => setExerciseCursorState({ scope: overviewScope, cursors: exerciseCursors.slice(0, -1) })}>Ejercicios anteriores</Button><Button variant="outline" disabled={!overview.data.next_cursor} onClick={() => { const nextCursor = overview.data.next_cursor; if (nextCursor) setExerciseCursorState({ scope: overviewScope, cursors: [...exerciseCursors, nextCursor] }) }}>Más ejercicios</Button></div>
-    </CardContent></Card>
-    <TrainingLoadEvolution key={JSON.stringify([clientId, from, to, exerciseCursor])} clientId={clientId} from={from} to={to} exercises={exercises} exerciseLabels={exerciseLabels} />
   </div>
 }

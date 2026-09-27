@@ -84,18 +84,19 @@ describe('TrainingProgressPanel', () => {
     expect(list).not.toHaveTextContent(/sesión verificable|confirma finalización/)
     const titles = screen.getAllByRole('heading').map((item) => item.textContent)
     expect(titles.indexOf('Historial de entrenamiento')).toBeLessThan(titles.indexOf('Sesiones con detalle'))
-    expect(titles.indexOf('Registros históricos')).toBeLessThan(titles.indexOf('Ejercicios'))
-    const table = screen.getByRole('table', { name: 'Resumen de ejercicios del periodo' })
+    expect(titles.indexOf('Registros históricos')).toBeGreaterThan(titles.indexOf('Evolución de cargas'))
+    fireEvent.change(screen.getByRole('combobox', { name: 'Mostrar ejercicios' }), { target: { value: 'all' } })
+    const table = await screen.findByRole('table', { name: 'Resumen de ejercicios del periodo' })
     for (const label of ['Nombre no disponible · Ref. 1.1', 'Nombre no disponible · Ref. 1.2']) {
       expect(within(table).getByRole('rowheader', { name: label })).toBeInTheDocument()
-      expect(screen.getByRole('option', { name: label })).toBeInTheDocument()
+      expect(screen.queryByRole('option', { name: label })).not.toBeInTheDocument()
     }
     expect(table).toHaveTextContent('160 kg·reps')
     expect(table).toHaveTextContent('300 kg·reps')
     expect(table).not.toHaveTextContent(/exercise-a|exercise-b/)
   })
 
-  it('pages overview exercises without changing global indicators or reusing the prior load selection', async () => {
+  it('pages overview exercises without changing global indicators or the independent load picker', async () => {
     const get = vi.spyOn(api, 'get').mockImplementation((url, config) => {
       if (url.endsWith('/progress/training-overview')) {
         return Promise.resolve(envelope(hasCursor(config, 'opaque-next') ? secondExercisePage : firstExercisePage))
@@ -109,22 +110,22 @@ describe('TrainingProgressPanel', () => {
     const table = await screen.findByRole('table', { name: 'Resumen de ejercicios del periodo' })
     expect(within(table).getByRole('row', { name: /Remo/ })).toBeInTheDocument()
     expect(get).toHaveBeenCalledWith('/admin/clients/client-a/progress/training-overview',
-      expect.objectContaining({ params: { from: '2026-09-01', to: '2026-09-28', limit: 100 } }))
+      expect.objectContaining({ params: { from: '2026-09-01', to: '2026-09-28', limit: 100, identification: 'identified', search: '' } }))
     expectGlobalIndicators()
-    expect(screen.getByRole('combobox', { name: 'Ejercicio para evolución de cargas' })).toHaveValue('exercise-a')
+    expect(screen.getByRole('combobox', { name: 'Ejercicio para evolución de cargas' })).toHaveTextContent('Selecciona un ejercicio')
 
     fireEvent.click(screen.getByRole('button', { name: 'Más ejercicios' }))
     await waitFor(() => expect(get).toHaveBeenCalledWith('/admin/clients/client-a/progress/training-overview',
-      expect.objectContaining({ params: { from: '2026-09-01', to: '2026-09-28', limit: 100, cursor: 'opaque-next' } })))
+      expect.objectContaining({ params: { from: '2026-09-01', to: '2026-09-28', limit: 100, identification: 'identified', search: '', cursor: 'opaque-next' } })))
     expect(await screen.findByRole('row', { name: /Sentadilla/ })).toBeInTheDocument()
     expect(within(screen.getByRole('table', { name: 'Resumen de ejercicios del periodo' })).queryByRole('row', { name: /Remo/ })).not.toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: 'Ejercicio para evolución de cargas' })).toHaveValue('exercise-b')
+    expect(screen.getByRole('combobox', { name: 'Ejercicio para evolución de cargas' })).toHaveTextContent('Selecciona un ejercicio')
     expectGlobalIndicators()
 
     fireEvent.click(screen.getByRole('button', { name: 'Ejercicios anteriores' }))
     expect(await screen.findByRole('row', { name: /Remo/ })).toBeInTheDocument()
     expect(within(screen.getByRole('table', { name: 'Resumen de ejercicios del periodo' })).queryByRole('row', { name: /Sentadilla/ })).not.toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: 'Ejercicio para evolución de cargas' })).toHaveValue('exercise-a')
+    expect(screen.getByRole('combobox', { name: 'Ejercicio para evolución de cargas' })).toHaveTextContent('Selecciona un ejercicio')
   })
 
   it('resets the overview cursor on client switch and ignores a late page from the previous client', async () => {
@@ -146,11 +147,11 @@ describe('TrainingProgressPanel', () => {
     expect(await screen.findByRole('row', { name: /Remo/ })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Más ejercicios' }))
     await waitFor(() => expect(get).toHaveBeenCalledWith('/admin/clients/client-a/progress/training-overview',
-      expect.objectContaining({ params: { from: '2026-09-01', to: '2026-09-28', limit: 100, cursor: 'opaque-next' } })))
+      expect.objectContaining({ params: { from: '2026-09-01', to: '2026-09-28', limit: 100, identification: 'identified', search: '', cursor: 'opaque-next' } })))
     view.switchClient('client-b')
     expect(await screen.findByRole('row', { name: /Sentadilla/ })).toBeInTheDocument()
     expect(get).toHaveBeenCalledWith('/admin/clients/client-b/progress/training-overview',
-      expect.objectContaining({ params: { from: '2026-09-01', to: '2026-09-28', limit: 100 } }))
+      expect.objectContaining({ params: { from: '2026-09-01', to: '2026-09-28', limit: 100, identification: 'identified', search: '' } }))
     expect(get.mock.calls.some(([url, config]) => url.includes('/client-b/progress/training-overview') &&
       hasCursor(config, 'opaque-next'))).toBe(false)
     await act(async () => { resolveOldPage?.(envelope(firstExercisePage)) })
@@ -235,11 +236,18 @@ describe('TrainingProgressPanel', () => {
     const completed = await screen.findByRole('heading', { name: 'Registros de entrenamiento' })
     const completedCard = completed.parentElement?.parentElement
     expect(completedCard).toHaveTextContent('28')
-    expect(completedCard).toHaveTextContent(/Puede incluir registros antiguos.*no permite confirmar.*finalizaron/i)
+    expect(completedCard).not.toHaveTextContent(/Puede incluir registros antiguos/i)
+    fireEvent.click(screen.getByRole('button', { name: 'Información sobre Registros de entrenamiento' }))
+    expect(await screen.findByText(/Puede incluir registros antiguos.*no permite confirmar.*finalizaron/i)).toBeVisible()
+    fireEvent.keyDown(document, { key: 'Escape' })
     const volumeCard = screen.getByRole('heading', { name: 'Volumen' }).parentElement?.parentElement
     expect(volumeCard).toHaveTextContent('117.619,9 kg·reps')
-    expect(volumeCard).toHaveTextContent(/peso.*repeticiones.*series.*segundos.*no/i)
-    const exercisesTable = screen.getByRole('table', { name: 'Resumen de ejercicios del periodo' })
+    expect(volumeCard).not.toHaveTextContent(/peso.*repeticiones.*series.*segundos.*no/i)
+    fireEvent.click(screen.getByRole('button', { name: 'Información sobre Volumen' }))
+    expect(await screen.findByText(/peso.*repeticiones.*series.*segundos.*no/i)).toBeVisible()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    fireEvent.change(screen.getByRole('combobox', { name: 'Mostrar ejercicios' }), { target: { value: 'all' } })
+    const exercisesTable = await screen.findByRole('table', { name: 'Resumen de ejercicios del periodo' })
     const unnamedRow = within(exercisesTable).getByRole('row', { name: /Nombre no disponible · Ref. 1.1/ })
     expect(within(unnamedRow).getByText('117.619,9 kg·reps')).toBeInTheDocument()
     expect(screen.getByText(/Conservamos las series y cargas.*nombre original/i)).toBeInTheDocument()
