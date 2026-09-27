@@ -45,6 +45,7 @@ describe('TrainingLoadEvolution', () => {
       }))
       if (url.endsWith('/progress/training-sessions')) return Promise.resolve(envelope({ page: [], nextCursor: null }))
       if (url.endsWith('/load-history')) return Promise.resolve(envelope({ page: [weighted, timed], nextCursor: null }))
+      if (url.endsWith('/progress/legacy-training-records')) return Promise.resolve(envelope({ page: [], nextCursor: null }))
       throw new Error(`Unexpected GET: ${url}`)
     })
     renderPanel()
@@ -69,21 +70,22 @@ describe('TrainingLoadEvolution', () => {
       if (url.endsWith('/load-history')) return Promise.resolve(envelope(
         config?.params?.cursor === 'older' ? { page: [timed], nextCursor: null } : { page: [weighted], nextCursor: 'older' },
       ))
+      if (url.endsWith('/progress/legacy-training-records')) return Promise.resolve(envelope({ page: [], nextCursor: null }))
       throw new Error(`Unexpected GET: ${url}`)
     })
     renderPanel()
     const table = await screen.findByRole('table', { name: 'Cargas del ejercicio seleccionado' })
-    expect(within(table).getByText('2026-09-08')).toBeInTheDocument()
+    expect(within(table).getByText('08 sep 2026')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Más antiguo' }))
     const olderTable = await screen.findByRole('table', { name: 'Cargas del ejercicio seleccionado' })
-    expect(await within(olderTable).findByText('2026-09-15')).toBeInTheDocument()
-    expect(within(olderTable).queryByText('2026-09-08')).not.toBeInTheDocument()
+    expect(await within(olderTable).findByText('15 sep 2026')).toBeInTheDocument()
+    expect(within(olderTable).queryByText('08 sep 2026')).not.toBeInTheDocument()
     expect(get).toHaveBeenCalledWith(
       '/admin/clients/client-a/progress/exercises/exercise-a/load-history',
       expect.objectContaining({ params: expect.objectContaining({ from: '2026-09-01', to: '2026-09-28', limit: 20, cursor: 'older' }) }),
     )
     fireEvent.click(screen.getByRole('button', { name: 'Más reciente' }))
     const recentTable = await screen.findByRole('table', { name: 'Cargas del ejercicio seleccionado' })
-    expect(await within(recentTable).findByText('2026-09-08')).toBeInTheDocument()
+    expect(await within(recentTable).findByText('08 sep 2026')).toBeInTheDocument()
   })
 })

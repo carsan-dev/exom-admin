@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatDate } from '@/lib/utils'
 import { getApiErrorStatus } from '@/lib/api-utils'
 import { useTrainingSessionDetail } from '../api'
 import type { TrainingSession } from '../types'
@@ -10,7 +11,7 @@ export function TrainingSessionDetail({ clientId, session, onClose }: {
 }) {
   const [cursors, setCursors] = useState<(string | null)[]>([null])
   const query = useTrainingSessionDetail(clientId, session.date, session.training_session_id, cursors[cursors.length - 1])
-  return <Card><CardHeader><CardTitle>Detalle: {session.training_name || 'Entrenamiento sin nombre'} · {session.date}</CardTitle></CardHeader><CardContent className="space-y-3">
+  return <Card><CardHeader><CardTitle>Detalle: {session.training_name || 'Nombre no disponible'} · {formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}</CardTitle></CardHeader><CardContent className="space-y-3">
     <Button variant="outline" onClick={onClose}>Cerrar detalle</Button>
     {query.isPending ? <p role="status">Cargando detalle…</p> : query.isError ? <div role="alert">{getApiErrorStatus(query.error) === 403 ? 'No tienes acceso a esta sesión.' : 'No se pudo cargar el detalle.'} <Button variant="outline" onClick={() => void query.refetch()}>Reintentar</Button></div> : !query.data ? <p>Sesión no disponible.</p> : <>
       <p>RPE: {query.data.rpe ?? 'Sin dato'}</p><p>Nota: {query.data.note || 'Sin dato'}</p>
