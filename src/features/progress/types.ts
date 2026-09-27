@@ -92,6 +92,76 @@ export interface ProgressPhotoHistory {
   totalPages: number
 }
 
+export interface TrainingIndicators {
+  trainings_completed: number
+  volume: number | null
+  mean_rir: number | null
+  mean_rpe: number | null
+}
+
+export interface TrainingPr {
+  weight_kg: number
+  reps: number
+  date: string
+  training_session_id: string | null
+  set_number: number
+}
+
+export interface TrainingExerciseSummary {
+  exercise_id: string
+  exercise_name: string | null
+  sets: number
+  max_reps: number | null
+  max_seconds: number | null
+  volume: number | null
+  mean_rir: number | null
+  pr: TrainingPr | null
+}
+
+export interface TrainingOverview {
+  indicators: TrainingIndicators
+  exercises: TrainingExerciseSummary[]
+  next_cursor?: string | null
+}
+
+export interface TrainingSet {
+  date?: string
+  exercise_id?: string
+  exercise_name?: string | null
+  training_session_id?: string | null
+  training_exercise_id: string | null
+  set_number: number | null
+  reps: number | null
+  seconds: number | null
+  weight_kg: number | null
+  rir: number | null
+  volume?: number | null
+}
+
+export interface TrainingSession {
+  date: string
+  training_id: string
+  training_session_id: string
+  training_name: string | null
+  rpe: number | null
+  note: string | null
+}
+
+export interface TrainingSessionDetail {
+  training_id: string
+  training_session_id: string
+  training_name: string | null
+  rpe: number | null
+  note: string | null
+  page: TrainingSet[]
+  nextCursor: string | null
+}
+
+export interface CursorPage<T> {
+  page: T[]
+  nextCursor: string | null
+}
+
 export type BodyField =
   | 'weight_kg'
   | 'muscle_mass_kg'
