@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { type ApiEnvelope, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
+import { type ApiEnvelope, getApiErrorStatus, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type {
   BodyField,
   CalendarDay,
@@ -11,6 +11,11 @@ import type {
   ProgressPhotoSession,
   ProgressPhotoView,
   WeekSummary,
+  TrainingOverview,
+  TrainingSet,
+  TrainingSession,
+  TrainingSessionDetail,
+  CursorPage,
 } from './types'
 import type { BodyMetric, PaginatedResponse } from '../clients/types'
 import type { MetricsOverview } from './metrics-overview'
@@ -25,6 +30,54 @@ export function useMetricsOverview(clientId: string, from: string | undefined, t
         `/admin/clients/${clientId}/metrics/overview`, { params: { from, to, page }, signal })
       return unwrapResponse(response)
     },
+  })
+}
+
+export function useTrainingOverview(clientId: string, from: string, to: string, valid: boolean, cursor: string | null) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'training-overview', from, to, cursor],
+    enabled: Boolean(clientId) && valid,
+    retry: (count, error) => getApiErrorStatus(error) !== 413 && shouldRetryQuery(count, error),
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<TrainingOverview>>(
+      `/admin/clients/${clientId}/progress/training-overview`,
+      { params: { from, to, limit: 100, ...(cursor !== null ? { cursor } : {}) }, signal },
+    )),
+  })
+}
+
+export function useTrainingLoadHistory(clientId: string, exerciseId: string, from: string, to: string, cursor: string | null) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'training-load', exerciseId, from, to, cursor],
+    enabled: Boolean(clientId && exerciseId),
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<CursorPage<TrainingSet>>>(
+      `/admin/clients/${clientId}/progress/exercises/${encodeURIComponent(exerciseId)}/load-history`,
+      { params: { from, to, limit: 20, ...(cursor ? { cursor } : {}) }, signal },
+    )),
+  })
+}
+
+export function useTrainingSessions(clientId: string, from: string, to: string, cursor: string | null) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'training-sessions', from, to, cursor],
+    enabled: Boolean(clientId),
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<CursorPage<TrainingSession>>>(
+      `/admin/clients/${clientId}/progress/training-sessions`,
+      { params: { from, to, limit: 20, ...(cursor ? { cursor } : {}) }, signal },
+    )),
+  })
+}
+
+export function useTrainingSessionDetail(clientId: string, date: string, sessionId: string, cursor: string | null) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'training-session-detail', date, sessionId, cursor],
+    enabled: Boolean(clientId && date && sessionId),
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<TrainingSessionDetail | null>>(
+      `/admin/clients/${clientId}/progress/training-sessions/${encodeURIComponent(date)}/${encodeURIComponent(sessionId)}`,
+      { params: { limit: 20, ...(cursor ? { cursor } : {}) }, signal },
+    )),
   })
 }
 
