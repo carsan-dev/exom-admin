@@ -97,6 +97,43 @@ describe('TrainingProgressPanel', () => {
     expect(table).not.toHaveTextContent(/exercise-a|exercise-b/)
   })
 
+  it('shows completed exercises without measured sets as unavailable metrics', async () => {
+    const unmeasured = {
+      sets: 0, max_reps: null, max_seconds: null, volume: null, mean_rir: null, pr: null,
+    }
+    vi.spyOn(api, 'get').mockImplementation((url) => {
+      if (url.endsWith('/progress/training-overview')) return Promise.resolve(envelope({
+        indicators: { trainings_completed: 1, volume: null, mean_rir: null, mean_rpe: null },
+        exercises: [
+          { exercise_id: 'pull-up', exercise_name: 'Pull-up', sets: 1, max_reps: 8,
+            max_seconds: null, volume: 0, mean_rir: null, pr: null },
+          { exercise_id: 'squat', exercise_name: 'Squat', ...unmeasured },
+          { exercise_id: 'lunge', exercise_name: 'Lunge', ...unmeasured },
+        ],
+        next_cursor: null,
+      }))
+      if (url.endsWith('/progress/training-sessions') || url.includes('/load-history')) {
+        return Promise.resolve(envelope({ page: [], nextCursor: null }))
+      }
+      if (url.endsWith('/progress/legacy-training-records')) return Promise.resolve(envelope({ page: [], nextCursor: null }))
+      throw new Error(`Unexpected GET: ${url}`)
+    })
+    renderPanel()
+    const table = await screen.findByRole('table', { name: 'Resumen de ejercicios del periodo' })
+    const rows = within(table).getAllByRole('row').slice(1)
+    expect(rows).toHaveLength(3)
+    expect(screen.getByRole('combobox', { name: 'Mostrar ejercicios' })).toHaveValue('identified')
+    const measured = within(table).getByRole('row', { name: /Pull-up/ })
+    expect(within(measured).getByRole('cell', { name: '1' })).toBeInTheDocument()
+    for (const name of ['Squat', 'Lunge']) {
+      const row = within(table).getByRole('row', { name: new RegExp(name) })
+      expect(within(row).getByRole('rowheader', { name })).toBeInTheDocument()
+      const cells = within(row).getAllByRole('cell')
+      expect(cells).toHaveLength(6)
+      for (const cell of cells) expect(cell).toHaveTextContent(/^Sin dato$/)
+    }
+  })
+
   it('pages overview exercises without changing global indicators or the independent load picker', async () => {
     const get = vi.spyOn(api, 'get').mockImplementation((url, config) => {
       if (url.endsWith('/progress/training-overview')) {
