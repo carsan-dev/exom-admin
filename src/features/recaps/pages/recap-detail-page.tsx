@@ -31,6 +31,8 @@ import { toast } from 'sonner'
 import { useArchiveRecap, useRecapDetail, useReviewRecap } from '../api'
 import { RecapSectionCard } from '../components/recap-section-card'
 import { RecapStatusBadge } from '../components/recap-status-badge'
+import { RecapPrintableSummary } from '../components/recap-printable-summary'
+import { toRecapPrintModel } from '../components/recap-print-model'
 import {
   formatAverageDailySteps,
   formatRecapOption,
@@ -105,16 +107,14 @@ export function RecapDetailPage() {
   const recap = recapQuery.data
   const existingInternalNote = recap?.admin_comments ?? ''
   const existingClientFeedback = recap?.client_feedback_text ?? ''
-  useUnsavedChanges(
-    'recap-review',
-    Boolean(
-      recap &&
-        (internalNote !== existingInternalNote ||
-          clientFeedback !== existingClientFeedback ||
-          reviewMutation.isPending ||
-          archiveMutation.isPending),
-    ),
+  const hasUnsavedChanges = Boolean(
+    recap &&
+      (internalNote !== existingInternalNote ||
+        clientFeedback !== existingClientFeedback ||
+        reviewMutation.isPending ||
+        archiveMutation.isPending),
   )
+  useUnsavedChanges('recap-review', hasUnsavedChanges)
   const canReviewSubmittedRecap = Boolean(
     recap && recap.status === 'SUBMITTED' && !recap.archived_at,
   )
@@ -169,6 +169,9 @@ export function RecapDetailPage() {
   }
 
   const clientName = getRecapClientName(recap.client)
+  const printClientName = [recap.client.profile?.first_name?.trim(), recap.client.profile?.last_name?.trim()]
+    .filter(Boolean).join(' ') || 'Cliente sin nombre'
+  const printModel = toRecapPrintModel(recap, printClientName)
 
   function handleReview() {
     if (!recap || reviewMutation.isPending || (!canReviewSubmittedRecap && !canEditReviewedComment)) {
@@ -221,6 +224,7 @@ export function RecapDetailPage() {
         </Button>
 
         <div className="flex flex-wrap gap-3">
+          <RecapPrintableSummary model={printModel} disabled={hasUnsavedChanges} />
           {!recap.archived_at && recap.status !== 'DRAFT' && (
             <Button onClick={handleReview} disabled={!canSubmitReview}>
               <CheckCircle2 className="h-4 w-4" />
