@@ -11,6 +11,7 @@ import { getApiErrorMessage, getApiErrorStatus, useClientProfile } from '../api'
 import { ChangeRoleDialog } from '../components/change-role-dialog'
 import { ClientAssignedAdminsCard } from '../components/client-assigned-admins-card'
 import { ClientHeader } from '../components/client-header'
+import { ClientAdherenceTab } from '../components/client-adherence-tab'
 import { ClientInfoTab } from '../components/client-info-tab'
 import { ManageClientAssignmentsDialog } from '../components/manage-client-assignments-dialog'
 import { ClientMetricsTab } from '../components/client-metrics-tab'
@@ -176,7 +177,7 @@ export function ClientDetailPage() {
       )}
 
       <Tabs defaultValue="info" className="space-y-4">
-        <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-3">
+        <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-4">
           <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="info">
             Info general
           </TabsTrigger>
@@ -185,6 +186,9 @@ export function ClientDetailPage() {
           </TabsTrigger>
           <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="streak">
             Racha
+          </TabsTrigger>
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="adherence">
+            Adherencia
           </TabsTrigger>
         </TabsList>
 
@@ -196,6 +200,9 @@ export function ClientDetailPage() {
         </TabsContent>
         <TabsContent value="streak">
           <ClientStreakCard streak={client.streak} />
+        </TabsContent>
+        <TabsContent value="adherence">
+          {id === client.id && <ClientAdherenceTab clientId={id} />}
         </TabsContent>
       </Tabs>
 
