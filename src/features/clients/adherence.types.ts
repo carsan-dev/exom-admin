@@ -70,6 +70,29 @@ export interface AdherenceWeek {
   dailyTargets: WeeklyStepTarget[]
   aggregate: ClosedAggregate
 }
+export const RECENT_CLOSED_STATUS = {
+  LOW: 'low', NOT_LOW: 'not_low', INSUFFICIENT: 'insufficient', NOT_APPLICABLE: 'not_applicable',
+} as const
+export type RecentClosedStatus = (typeof RECENT_CLOSED_STATUS)[keyof typeof RECENT_CLOSED_STATUS]
+export const RECENT_CLOSED_ANCHOR = { SELECTED_END_OR_LAST_CLOSED_UTC: 'selected_end_or_last_closed_utc' } as const
+export interface RecentClosedConfiguration extends EvaluationConfiguration { effective_date: string | null }
+export interface RecentClosedCoverage {
+  expected: number
+  available: number
+  evaluable: number
+  not_applicable: number
+  insufficient: number
+}
+export interface RecentClosedAdherence {
+  start: string
+  end: string
+  anchor: (typeof RECENT_CLOSED_ANCHOR)[keyof typeof RECENT_CLOSED_ANCHOR]
+  provisional: false
+  aggregate: ClosedAggregate
+  configuration: RecentClosedConfiguration
+  coverage: RecentClosedCoverage
+  status: RecentClosedStatus
+}
 export interface AdherenceReport {
   version: 1
   start: string
@@ -79,6 +102,7 @@ export interface AdherenceReport {
   days: AdherenceDay[]
   weeks: AdherenceWeek[]
   aggregate: ClosedAggregate
+  recentClosed?: RecentClosedAdherence
 }
 export interface AdherenceRange { start: string; end: string }
 export interface ConfigValues {

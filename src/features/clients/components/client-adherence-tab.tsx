@@ -10,7 +10,7 @@ import {
 } from '../adherence.api'
 import type {
   AdherenceConfig, AdherenceDay, AdherenceRange, AdherenceReport, ClosedAggregate,
-  ComponentAdherence, ConfigValues, GlobalAdherence, IndicatorStatus,
+  ComponentAdherence, ConfigValues, IndicatorStatus, RecentClosedAdherence, RecentClosedStatus,
 } from '../adherence.types'
 
 const civil = (at: Date) => at.toISOString().slice(0, 10)
@@ -58,9 +58,26 @@ function Aggregate({ value }: { value: ClosedAggregate }) {
     <Metric label="Global" value={value.global} />
   </div><p className="text-sm text-muted-foreground">{sourceLabels[value.global.source]}</p></>
 }
-function isLow(value: GlobalAdherence, day: AdherenceDay) {
-  return value.status === 'evaluable' && value.ratio !== null && day.configuration.known &&
-    day.configuration.low_global_percent !== null && value.ratio * 100 < day.configuration.low_global_percent
+const recentStatusLabels: Record<RecentClosedStatus, string> = {
+  low: 'Baja adherencia global', not_low: 'Sin baja adherencia global',
+  insufficient: 'Información insuficiente para clasificar',
+  not_applicable: 'No aplicable: sin componentes evaluables',
+}
+function RecentClosed({ value }: { value: RecentClosedAdherence | undefined }) {
+  return <section aria-label="Últimos siete días cerrados" className="rounded-xl border p-4 space-y-3">
+    <h2 className="font-semibold">Últimos siete días cerrados</h2>
+    {value ? <>
+      <p>{value.start} — {value.end} · UTC</p>
+      <p className="text-xs text-muted-foreground">Anclaje: final seleccionado o último día cerrado UTC. Hoy provisional y futuro quedan fuera; esta ventana puede preceder al periodo seleccionado.</p>
+      <p className="font-medium">{recentStatusLabels[value.status]}</p>
+      <Aggregate value={value.aggregate} />
+      <p className="text-sm">{value.configuration.known
+        ? `Configuración al cierre de ${value.end}: versión ${value.configuration.version ?? 'desconocida'} · vigencia ${value.configuration.effective_date ?? 'desconocida'}`
+        : 'Configuración desconocida'}</p>
+      <p className="text-sm">Umbral global de siete días: {value.configuration.known ? value.configuration.low_global_percent ?? 'desconocido' : 'desconocido'}{value.configuration.known && value.configuration.low_global_percent !== null ? ' %' : ''}. Clasificación del servidor, estrictamente por debajo del umbral; no es un umbral diario.</p>
+      <p className="text-xs text-muted-foreground">Cobertura: {value.coverage.available} / {value.coverage.expected} días disponibles · {value.coverage.evaluable} evaluables · {value.coverage.not_applicable} no aplicables · {value.coverage.insufficient} insuficientes. Un ratio parcial no acredita información completa.</p>
+    </> : <p>Resultado de siete días no disponible. No se reconstruye desde el calendario, el agregado seleccionado ni la configuración actual.</p>}
+  </section>
 }
 function DayDetail({ day }: { day: AdherenceDay }) {
   const closed = day.evaluation.period === 'closed'
@@ -76,9 +93,8 @@ function DayDetail({ day }: { day: AdherenceDay }) {
       {day.revision !== null && ` · Revisión ${day.revision}`}</p>
     <p className="text-sm">Entrenamiento: {scheduleLabels[day.schedule.training]} · Nutrición: {scheduleLabels[day.schedule.nutrition]}</p>
     <Aggregate value={day.evaluation} />
-    {isLow(day.evaluation.global, day) && <p className="text-sm font-medium">Baja adherencia · menos del {day.configuration.low_global_percent} % (umbral de este día)</p>}
     <p className="text-xs text-muted-foreground">Configuración {day.configuration.known ? `versión ${day.configuration.version ?? 'sin versión'}` : 'desconocida'}
-      {day.configuration.known && day.configuration.low_global_percent !== null && ` · umbral global ${day.configuration.low_global_percent} %`}</p>
+      {day.configuration.known && day.configuration.low_global_percent !== null && ` · política global de siete días ${day.configuration.low_global_percent} %`}</p>
     <div className="text-sm space-y-1">
       <p>Calorías: {day.intake.estimated_calories ?? 'Sin dato'} kcal estimadas / {day.targets.calories ?? 'Sin objetivo'} kcal pautadas · {indicatorLabels[day.indicators.calories.status]}</p>
       <p>Proteína: {day.intake.estimated_protein_g ?? 'Sin dato'} g estimados / {day.targets.protein_g ?? 'Sin objetivo'} g pautados · {indicatorLabels[day.indicators.protein.status]}</p>
@@ -87,6 +103,7 @@ function DayDetail({ day }: { day: AdherenceDay }) {
 }
 function Report({ report }: { report: AdherenceReport }) {
   return <div className="space-y-5">
+    <RecentClosed value={report.recentClosed} />
     <section aria-label="Periodo cerrado" className="rounded-xl border p-4 space-y-3">
       <h2 className="font-semibold">Periodo cerrado · {report.start} — {report.end}</h2>
       <Aggregate value={report.aggregate} />

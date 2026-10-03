@@ -103,12 +103,13 @@ describe('Adherencia canónica en el detalle', () => {
     expect(screen.getAllByText(/Información insuficiente/).length).toBeGreaterThan(0)
     expect(screen.getByText(/Pauta original desconocida/)).toBeInTheDocument()
   })
-  it('muestra umbral propio del día y compara el ratio servidor, no contadores ni configuración actual', async () => {
+  it('conserva metadata histórica diaria sin clasificar baja adherencia por día', async () => {
     const data = report(); data.days[0].evaluation.global = { ...component(0.37), source: 'nutrition_only' }
     data.days[0].configuration.low_global_percent = 40
     shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : data)))
     mount()
-    expect(await screen.findByText(/Baja adherencia · menos del 40 %/)).toBeInTheDocument()
+    expect(await screen.findByText(/Configuración versión 2 · política global de siete días 40 %/)).toBeInTheDocument()
+    expect(screen.queryByText(/Baja adherencia · menos del/)).not.toBeInTheDocument()
     expect(screen.getByText('Solo nutrición')).toBeInTheDocument()
   })
   it('fallo HTTP es error y no UNKNOWN; permite actualización explícita de revisiones', async () => {
@@ -172,6 +173,79 @@ describe('Adherencia canónica en el detalle', () => {
     mount()
     expect(shared.get).not.toHaveBeenCalled()
     expect(screen.getByText('Sesión de administrador requerida')).toBeInTheDocument()
+  })
+})
+describe('Últimos siete días cerrados del servidor', () => {
+  function recent(ratio = 1 / 7, status = 'low') {
+    return {
+      start: '2019-12-28', end: '2020-01-03', anchor: 'selected_end_or_last_closed_utc', provisional: false,
+      aggregate: { training: component(1), nutrition: component(0), global: { ...component(ratio), source: 'both' } },
+      configuration: { known: true, version: 5, effective_date: '2019-12-01', low_global_percent: 80 },
+      coverage: { expected: 7, available: 7, evaluable: 7, not_applicable: 0, insufficient: 0 }, status,
+    }
+  }
+  function serve(window: ReturnType<typeof recent> | undefined) {
+    const data = report()
+    data.aggregate.global.ratio = 0.75
+    data.days[0].evaluation.global.ratio = 0
+    shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? { ...config, low_global_percent: 99 } : { ...data, recentClosed: window })))
+    mount()
+  }
+  it('separa mensual 75 % de global 1/7 y muestra ventana, anclaje y política fechada', async () => {
+    serve(recent())
+    const region = await screen.findByRole('region', { name: 'Últimos siete días cerrados' })
+    expect(within(region).getByText('14,29 %')).toBeInTheDocument()
+    expect(within(region).getByText('Baja adherencia global')).toBeInTheDocument()
+    expect(region).toHaveTextContent('2019-12-28 — 2020-01-03 · UTC')
+    expect(region).toHaveTextContent('final seleccionado o último día cerrado UTC')
+    expect(region).toHaveTextContent('versión 5 · vigencia 2019-12-01')
+    expect(region).toHaveTextContent('Umbral global de siete días: 80 %')
+    expect(region).toHaveTextContent('7 / 7 días disponibles')
+    expect(within(screen.getByRole('region', { name: 'Periodo cerrado' })).getByText('75 %')).toBeInTheDocument()
+    expect(within(screen.getByRole('article', { name: 'Día 2020-01-01' })).queryByText(/Baja adherencia/)).not.toBeInTheDocument()
+  })
+  it.each([0.8, 0.25])('respeta not_low del servidor incluso con diario cero y ratio %s', async (ratio) => {
+    serve(recent(ratio, 'not_low'))
+    const region = await screen.findByRole('region', { name: 'Últimos siete días cerrados' })
+    expect(within(region).getByText('Sin baja adherencia global')).toBeInTheDocument()
+    expect(within(region).queryByText('Baja adherencia global')).not.toBeInTheDocument()
+    expect(region).toHaveTextContent(ratio === 0.8 ? '80 %' : '25 %')
+  })
+  it('payload ausente no reconstruye ventana desde días, mensual ni configuración actual', async () => {
+    serve(undefined)
+    const region = await screen.findByRole('region', { name: 'Últimos siete días cerrados' })
+    expect(region).toHaveTextContent('Resultado de siete días no disponible')
+    expect(screen.queryByText('Baja adherencia global')).not.toBeInTheDocument()
+    expect(within(region).queryByText(/75 %|0 %|99 %/)).not.toBeInTheDocument()
+  })
+  it('cobertura y política desconocidas conservan ratio parcial sin veredicto bajo', async () => {
+    const window = recent(0.25, 'insufficient')
+    const unknown = { ...window, configuration: { known: false, version: null, effective_date: null, low_global_percent: null }, coverage: { ...window.coverage, available: 6, insufficient: 1 } }
+    shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : { ...report(), recentClosed: unknown })))
+    mount()
+    const region = await screen.findByRole('region', { name: 'Últimos siete días cerrados' })
+    expect(region).toHaveTextContent('Información insuficiente para clasificar')
+    expect(region).toHaveTextContent('Configuración desconocida')
+    expect(region).toHaveTextContent('6 / 7 días disponibles')
+    expect(region).toHaveTextContent('1 insuficientes')
+    expect(within(region).queryByText('Baja adherencia global')).not.toBeInTheDocument()
+  })
+  it('versión y vigencia nulas no se atribuyen a la configuración futura', async () => {
+    const window = recent()
+    shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : { ...report(), recentClosed: { ...window, configuration: { ...window.configuration, version: null, effective_date: null } } })))
+    mount()
+    const region = await screen.findByRole('region', { name: 'Últimos siete días cerrados' })
+    expect(region).toHaveTextContent('versión desconocida · vigencia desconocida')
+  })
+  it('sin componentes aplicables es neutral, no éxito al 80 %', async () => {
+    const window = recent(0, 'not_applicable')
+    const noComponent = { ...component(null), status: 'not_applicable', caveats: [] }
+    shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : { ...report(), recentClosed: { ...window, aggregate: { training: noComponent, nutrition: noComponent, global: { ...noComponent, source: 'none' } }, coverage: { ...window.coverage, evaluable: 0, not_applicable: 7 } } })))
+    mount()
+    const region = await screen.findByRole('region', { name: 'Últimos siete días cerrados' })
+    expect(region).toHaveTextContent('No aplicable: sin componentes evaluables')
+    expect(within(region).queryByText('Sin baja adherencia global')).not.toBeInTheDocument()
+    expect(within(region).queryByText('0 %')).not.toBeInTheDocument()
   })
 })
 describe('Configuración futura versionada', () => {
