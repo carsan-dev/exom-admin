@@ -1,7 +1,10 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { useAuth } from '@/hooks/use-auth'
 import { type ApiEnvelope, getApiErrorStatus, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type {
+  AdherenceConfig,
+  UpdateAdherenceConfigVariables,
   BodyField,
   CalendarDay,
   DayProgress,
@@ -119,6 +122,10 @@ export function useTrainingSessionDetail(clientId: string, date: string, session
 
 export const progressQueryKeys = {
   all: ['admin-progress'] as const,
+  adherenceConfigs: (adminId: string, clientId: string) =>
+    ['admin-progress', adminId, clientId, 'adherence-config'] as const,
+  adherenceConfig: (adminId: string, clientId: string, date: string) =>
+    ['admin-progress', adminId, clientId, 'adherence-config', date] as const,
   dayProgress: (clientId: string, date: string) =>
     ['admin-progress', clientId, 'day', date] as const,
   calendarMonth: (clientId: string, year: number, month: number) =>
@@ -200,6 +207,49 @@ export function useAssociateClientProgressPhoto(clientId: string) {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: progressQueryKeys.photoQueries(clientId) })
+    },
+  })
+}
+
+// A client assignment may be revoked between sessions for the same admin ID.
+// Subscribe before query observers so a logout (including one between renders) advances the namespace.
+let adherenceSessionGeneration = 0
+useAuth.subscribe((state, previous) => {
+  const priorAdmin = previous.isAuthenticated && !previous.isLoading ? previous.user?.id : undefined
+  const currentAdmin = state.isAuthenticated && !state.isLoading ? state.user?.id : undefined
+  if (priorAdmin && priorAdmin !== currentAdmin) adherenceSessionGeneration++
+})
+
+export function useAdherenceConfig(clientId: string, date: string) {
+  const adminId = useAuth((state) => state.isAuthenticated && !state.isLoading ? state.user?.id : undefined)
+  const session = useAuth((state) => state.isAuthenticated && !state.isLoading ? adherenceSessionGeneration : undefined)
+  return useQuery({
+    queryKey: [...progressQueryKeys.adherenceConfig(adminId ?? '', clientId, date), session],
+    enabled: Boolean(adminId && clientId && date),
+    gcTime: 0,
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<AdherenceConfig>>(
+      `/admin/clients/${clientId}/adherence/config`, { params: { date }, signal },
+    )),
+  })
+}
+
+export function useUpdateAdherenceConfig() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    retry: false,
+    onMutate: () => {
+      const state = useAuth.getState()
+      return { adminId: state.isAuthenticated && !state.isLoading ? state.user?.id : undefined }
+    },
+    mutationFn: async ({ clientId, config }: UpdateAdherenceConfigVariables) =>
+      unwrapResponse(await api.put<ApiEnvelope<AdherenceConfig>>(
+        `/admin/clients/${clientId}/adherence/config`, config,
+      )),
+    onSuccess: async (_result, { clientId }, context) => {
+      if (context?.adminId) {
+        await queryClient.invalidateQueries({ queryKey: progressQueryKeys.adherenceConfigs(context.adminId, clientId) })
+      }
     },
   })
 }

@@ -40,6 +40,34 @@ export interface DayProgress {
   admin_reply_sent_at: string | null
 }
 
+export interface AdherencePolicyFields {
+  steps_goal: number | null
+  calorie_lower_percent: number
+  calorie_upper_percent: number
+  protein_min_percent: number
+  steps_min_percent: number
+  low_global_percent: number
+}
+
+export type AdherenceConfig =
+  | { version: number; known: false; source: 'uncaptured'; effective_date: null }
+  | (AdherencePolicyFields & {
+      version: number
+      known: true
+      source: 'default' | 'revision'
+      effective_date: string | null
+    })
+
+export interface UpdateAdherenceConfig extends AdherencePolicyFields {
+  effective_date: string
+  expected_version: number
+}
+
+export interface UpdateAdherenceConfigVariables {
+  clientId: string
+  config: UpdateAdherenceConfig
+}
+
 export interface CalendarDay {
   date: string
   has_training: boolean

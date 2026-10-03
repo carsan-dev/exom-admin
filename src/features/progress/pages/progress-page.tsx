@@ -15,6 +15,7 @@ import { StreakSection } from '../components/streak-section'
 import { ProgressPhotosPanel } from '../components/progress-photos-panel'
 import { useClientCalendarMonth, useClientDayProgress, useClientWeekSummary } from '../api'
 import { useClientProfile } from '../../clients/api'
+import { ClientAdherenceTab } from '../../clients/components/client-adherence-tab'
 
 function getTodayStr() {
   return new Date().toISOString().split('T')[0]
@@ -34,7 +35,7 @@ export function ProgressPage() {
   const clientId = searchParams.get('clientId') ?? ''
   const selectedDate = searchParams.get('date') ?? getTodayStr()
   const requestedSection = searchParams.get('section') ?? 'resumen'
-  const section = ['resumen', 'metricas', 'fotos', 'entrenamiento', 'racha'].includes(requestedSection) ? requestedSection : 'metricas'
+  const section = ['resumen', 'metricas', 'fotos', 'entrenamiento', 'adherencia', 'racha'].includes(requestedSection) ? requestedSection : 'metricas'
   const period = metricsPeriod(searchParams)
   const historyPage = Math.max(1, Number(searchParams.get('historyPage')) || 1)
   const trainingWindow = trainingWindowFor(getTodayStr(), searchParams.get('trainingWindow'))
@@ -122,7 +123,7 @@ export function ProgressPage() {
             <TabsTrigger value="metricas">Métricas</TabsTrigger>
             <TabsTrigger value="fotos">Fotos</TabsTrigger>
             <TabsTrigger value="entrenamiento">Entrenamiento</TabsTrigger>
-            <TabsTrigger value="adherencia" disabled>Adherencia · pendiente</TabsTrigger>
+            <TabsTrigger value="adherencia">Adherencia</TabsTrigger>
             <TabsTrigger value="seguimiento" disabled>Seguimiento · pendiente</TabsTrigger>
             <TabsTrigger value="resumen">Resumen</TabsTrigger>
             <TabsTrigger value="racha">Racha</TabsTrigger>
@@ -176,6 +177,10 @@ export function ProgressPage() {
               <Button variant="outline" disabled={!trainingWindow.hasNewer} onClick={() => updateParams({ trainingWindow: String(trainingWindow.index - 1) })}>Ventana posterior</Button>
             </div>}
             <TrainingProgressPanel key={`${clientId}:${trainingFrom}:${trainingTo}`} clientId={clientId} from={trainingFrom} to={trainingTo} valid={trainingValid} />
+          </TabsContent>
+
+          <TabsContent value="adherencia" className="space-y-4">
+            <ClientAdherenceTab key={clientId} clientId={clientId} />
           </TabsContent>
 
           {/* Racha Tab */}
