@@ -5,7 +5,6 @@ import {
   Line,
   LineChart,
   ResponsiveContainer,
-  Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
 } from 'recharts'
@@ -24,14 +23,17 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { BODY_FIELD_LABELS, type BodyField } from '../types'
 import { useClientBodyHistory, useClientWeightHistory } from '../api'
+import { ProgressChartTooltip } from './progress-chart-tooltip'
+import { observationTimestamp, orderObservedRecords } from './observed-chart-series'
 
 const chartDateFormatter = new Intl.DateTimeFormat('es-ES', {
   day: '2-digit',
   month: 'short',
+  timeZone: 'UTC',
 })
 
-function formatDate(dateStr: string) {
-  return chartDateFormatter.format(new Date(dateStr + 'T00:00:00'))
+function formatDate(timestamp: number) {
+  return chartDateFormatter.format(new Date(timestamp))
 }
 
 interface MetricsChartsProps {
@@ -49,21 +51,18 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
   const { data: weightData, isLoading: weightLoading } = useClientWeightHistory(clientId)
   const { data: bodyData, isLoading: bodyLoading } = useClientBodyHistory(clientId, selectedField)
 
-  const weightChartData = (weightData ?? []).map((p) => ({
-    date: formatDate(p.date),
-    value: p.value,
+  const chartData = (data: typeof weightData) => orderObservedRecords((data ?? []).map((point) => {
+    const timestamp = observationTimestamp(point.date)
+    return { timestamp, value: Number.isFinite(point.value) && Number.isFinite(timestamp) ? point.value : null }
   }))
-
-  const bodyChartData = (bodyData ?? []).map((p) => ({
-    date: formatDate(p.date),
-    value: p.value,
-  }))
+  const weightChartData = chartData(weightData)
+  const bodyChartData = chartData(bodyData)
 
   const bodyFields = Object.keys(BODY_FIELD_LABELS) as BodyField[]
   const bodyScale = bodyScaleState.field === selectedField ? bodyScaleState.scale : 'auto'
-  const weightYAxis = calculateYAxisScale(weightChartData.map((point) => point.value), weightScale, 1)
+  const weightYAxis = calculateYAxisScale(weightChartData.map((point) => point.value ?? NaN), weightScale, 1)
   const bodyYAxis = calculateYAxisScale(
-    bodyChartData.map((point) => point.value),
+    bodyChartData.map((point) => point.value ?? NaN),
     bodyScale,
     selectedField === 'sleep_hours' ? 0.5 : 1,
   )
@@ -85,30 +84,26 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
         <CardContent>
           {weightLoading ? (
             <Skeleton className="h-64 w-full" />
-          ) : weightChartData.length === 0 ? (
+          ) : !weightChartData.some((point) => Number.isFinite(point.timestamp)) ? (
             <p className="text-sm text-muted-foreground py-8 text-center">Sin registros de peso</p>
           ) : (
             <div className="h-64 w-full">
               <ResponsiveContainer>
                 <LineChart data={weightChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
+                  <XAxis dataKey="timestamp" type="number" scale="time" domain={['dataMin', 'dataMax']}
+                    tickFormatter={formatDate} tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
                   <YAxis
                     domain={weightYAxis?.domain}
                     ticks={weightYAxis?.ticks}
                     tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }}
                   />
-                  <RechartsTooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--card)',
-                      borderColor: 'var(--border)',
-                      borderRadius: '12px',
-                      color: 'var(--foreground)',
-                    }}
-                    formatter={(value) => [`${value} kg`, 'Peso']}
-                  />
+                  <ProgressChartTooltip contentStyle={{ borderRadius: '12px' }}
+                    labelFormatter={(value) => formatDate(Number(value))}
+                    formatter={(value) => [`${value} kg`, 'Peso']} />
                   <Line
-                    type="monotone"
+                    type="linear"
+                    connectNulls={false}
                     dataKey="value"
                     stroke="var(--brand-primary)"
                     strokeWidth={3}
@@ -157,7 +152,7 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
         <CardContent>
           {bodyLoading ? (
             <Skeleton className="h-64 w-full" />
-          ) : bodyChartData.length === 0 ? (
+          ) : !bodyChartData.some((point) => Number.isFinite(point.timestamp)) ? (
             <p className="text-sm text-muted-foreground py-8 text-center">
               Sin registros de {BODY_FIELD_LABELS[selectedField].toLowerCase()}
             </p>
@@ -166,23 +161,19 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
               <ResponsiveContainer>
                 <LineChart data={bodyChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
+                  <XAxis dataKey="timestamp" type="number" scale="time" domain={['dataMin', 'dataMax']}
+                    tickFormatter={formatDate} tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
                   <YAxis
                     domain={bodyYAxis?.domain}
                     ticks={bodyYAxis?.ticks}
                     tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }}
                   />
-                  <RechartsTooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--card)',
-                      borderColor: 'var(--border)',
-                      borderRadius: '12px',
-                      color: 'var(--foreground)',
-                    }}
-                    formatter={(value) => [value, BODY_FIELD_LABELS[selectedField]]}
-                  />
+                  <ProgressChartTooltip contentStyle={{ borderRadius: '12px' }}
+                    labelFormatter={(value) => formatDate(Number(value))}
+                    formatter={(value) => [value, BODY_FIELD_LABELS[selectedField]]} />
                   <Line
-                    type="monotone"
+                    type="linear"
+                    connectNulls={false}
                     dataKey="value"
                     stroke="var(--brand-primary)"
                     strokeWidth={3}

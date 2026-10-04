@@ -9,8 +9,8 @@ import type { TrainingSet } from '../types'
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   ScatterChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Scatter: ({ data, isAnimationActive }: { data: unknown; isAnimationActive: boolean }) =>
-    <output data-testid="load-points" data-animation={String(isAnimationActive)}>{JSON.stringify(data)}</output>,
+  Scatter: ({ data, isAnimationActive, line }: { data: unknown; isAnimationActive: boolean; line?: boolean }) =>
+    <output data-testid={line ? 'load-guide' : 'load-points'} data-animation={String(isAnimationActive)}>{JSON.stringify(data)}</output>,
   LineChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Line: () => <span data-testid="interpolation" />,
   CartesianGrid: () => null, XAxis: () => null, YAxis: () => null, Tooltip: () => null,
@@ -64,6 +64,7 @@ it('shows a single load observation without trend or interpolation and offers ex
   expect(screen.getByRole('combobox', { name: 'Medida de las series' })).toHaveValue('weight_kg')
   expect(screen.getByTestId('load-points')).toHaveAttribute('data-animation', 'false')
   expect(screen.queryByTestId('interpolation')).not.toBeInTheDocument()
+  expect(screen.queryByTestId('load-guide')).not.toBeInTheDocument()
   expect(screen.getByText(/Peso externo.*kg.*volumen.*kg·reps/)).toBeVisible()
 })
 
@@ -75,10 +76,36 @@ it('keeps weighted timed sets and missing values in the table, switching units w
   expect(within(table).getAllByRole('row')).toHaveLength(4)
   const points = JSON.parse(screen.getByTestId('load-points').textContent || '[]')
   expect(points.map((point: { amount: number }) => point.amount)).toEqual([40, 12])
+  expect(screen.queryByTestId('load-guide')).not.toBeInTheDocument()
   fireEvent.change(screen.getByRole('combobox', { name: 'Medida de las series' }), { target: { value: 'seconds' } })
   const seconds = JSON.parse(screen.getByTestId('load-points').textContent || '[]')
   expect(seconds.map((point: { amount: number }) => point.amount)).toEqual([45, 60])
+  const guide = JSON.parse(screen.getByTestId('load-guide').textContent || '[]')
+  expect(guide.map((point: { amount: number }) => point.amount)).toEqual([45, 60])
   expect(screen.getByRole('img')).toHaveAccessibleName(/Duración.*s/)
+})
+
+it('joins only comparable dated sets with straight observed guides and breaks null records', async () => {
+  setup([{ ...set, weight_kg: 0 }, { ...set, date: '2026-09-10', weight_kg: 20 },
+    { ...set, date: '2026-09-11', weight_kg: null }, { ...set, date: '2026-09-13', weight_kg: 30 }])
+  await selectExercise()
+  const guides = await screen.findAllByTestId('load-guide')
+  expect(guides).toHaveLength(1)
+  const guide = JSON.parse(guides[0].textContent || '[]')
+  expect(guide.map((point: { amount: number }) => point.amount)).toEqual([0, 20])
+  expect(guide[1].timestamp - guide[0].timestamp).toBe(2 * 86400000)
+  expect(JSON.parse(screen.getByTestId('load-points').textContent || '[]')).toHaveLength(3)
+})
+
+it('does not draw or join a record explicitly belonging to a different exercise', async () => {
+  setup([{ ...set, exercise_id: 'remo', weight_kg: 0 },
+    { ...set, date: '2026-09-09', exercise_id: 'otro', weight_kg: 25 },
+    { ...set, date: '2026-09-10', exercise_id: 'remo', weight_kg: 40 }])
+  await selectExercise()
+  await screen.findByRole('table', { name: 'Cargas del ejercicio seleccionado' })
+  expect(JSON.parse(screen.getByTestId('load-points').textContent || '[]').map((point: { amount: number }) => point.amount)).toEqual([0, 40])
+  expect(screen.queryByTestId('load-guide')).not.toBeInTheDocument()
+  expect(screen.getByRole('table', { name: 'Cargas del ejercicio seleccionado' })).toHaveTextContent('25')
 })
 
 it('focuses opened session detail and returns focus to its session action on close', async () => {
