@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
@@ -61,6 +61,131 @@ afterEach(() => {
 })
 
 describe('ProgressPhotosPanel', () => {
+  it('keeps a single dated session useful without inventing a comparison or metadata', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(envelope(history([session('2026-09-20', ['FRONT'])])))
+    const post = vi.spyOn(api, 'post')
+    renderPanel()
+    expect(await screen.findByRole('region', { name: 'Espacio de comparación de fotos' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /Ampliar Frontal del/ })).toBeInTheDocument()
+    expect(screen.getByText(/Una sola fecha disponible/)).toBeInTheDocument()
+    expect(screen.getByText('Contexto de captura: no proporcionado')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Frontal' })).toHaveAttribute('aria-pressed', 'true')
+    expect(post).not.toHaveBeenCalled()
+  })
+
+  it('distinguishes present views from an unconfirmed complete session', async () => {
+    const unconfirmed = { ...session('2026-09-20'), is_complete: false }
+    vi.spyOn(api, 'get').mockResolvedValue(envelope(history([unconfirmed])))
+    renderPanel()
+    expect(await screen.findByText('4 de 4 vistas · finalización no confirmada')).toBeInTheDocument()
+    expect(screen.queryByText(/faltan 0/)).not.toBeInTheDocument()
+  })
+
+  it('recovers a failed comparison image without replacing it or creating a write', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(envelope(history([session('2026-09-20'), session('2026-09-01')])))
+    const post = vi.spyOn(api, 'post')
+    const user = userEvent.setup()
+    renderPanel()
+    const image = (await screen.findAllByAltText(/Frontal del/))[0]
+    fireEvent.error(image)
+    const retry = screen.getByRole('button', { name: /Reintentar imagen Frontal del/ })
+    expect(screen.getByText(/No se pudo cargar la imagen/)).toBeInTheDocument()
+    await user.click(retry)
+    expect(screen.queryByRole('button', { name: /Reintentar imagen Frontal del/ })).not.toBeInTheDocument()
+    expect(post).not.toHaveBeenCalled()
+  })
+
+  it('navigates enlargement with keyboard controls and restores focus to its opener', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(envelope(history([session('2026-09-20'), session('2026-09-01')])))
+    const user = userEvent.setup()
+    renderPanel()
+    const [opener] = await screen.findAllByRole('button', { name: /Ampliar Frontal del/ })
+    await user.click(opener)
+    await user.click(screen.getByRole('button', { name: 'Imagen siguiente' }))
+    expect(within(screen.getByRole('dialog')).getByRole('heading')).toHaveTextContent('Lateral izquierda')
+    await user.keyboard('{Escape}')
+    await waitFor(() => expect(opener).toHaveFocus())
+  })
+
+  it('clears an enlarged image when the selected comparison session changes', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(envelope(history([session('2026-09-20'), session('2026-09-01'), session('2026-08-01')])))
+    const user = userEvent.setup()
+    renderPanel()
+    const [opener] = await screen.findAllByRole('button', { name: /Ampliar Frontal del/ })
+    await user.click(opener)
+    fireEvent.change(screen.getByLabelText('Fecha anterior'), { target: { value: 'session-2026-08-01' } })
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+
+  it('keeps comparator date labels chronological after selecting a later reference', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(envelope(history([
+      session('2026-09-20'), session('2026-09-01'), session('2026-10-01'),
+    ])))
+    const user = userEvent.setup()
+    renderPanel()
+    const older = await screen.findByLabelText('Fecha anterior')
+    await waitFor(() => expect(older).toHaveValue('session-2026-09-01'))
+    await user.selectOptions(older, 'session-2026-10-01')
+    expect(older).toHaveValue('session-2026-09-20')
+    expect(screen.getByLabelText('Fecha posterior')).toHaveValue('session-2026-10-01')
+  })
+
+  it('resets a failed creation identity and error when a different date is selected', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(envelope(history([])))
+    const post = vi.spyOn(api, 'post').mockRejectedValueOnce({ isAxiosError: true, response: { status: 400, data: { message: 'Fecha inválida' } } })
+      .mockResolvedValueOnce(envelope(session('2026-09-22', [])))
+    const user = userEvent.setup()
+    renderPanel()
+    const date = await screen.findByLabelText('Fecha de nueva sesión')
+    fireEvent.change(date, { target: { value: '2026-09-21' } })
+    await user.click(screen.getByRole('button', { name: 'Crear sesión incompleta' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Fecha inválida')
+    fireEvent.change(date, { target: { value: '2026-09-22' } })
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Crear sesión incompleta' }))
+    await waitFor(() => expect(post).toHaveBeenCalledTimes(2))
+    expect(post.mock.calls[1][1]).toEqual(expect.objectContaining({ session_date: '2026-09-22' }))
+    expect(post.mock.calls[1][1]).not.toEqual(post.mock.calls[0][1])
+  })
+
+  it('isolates cached client selections, dialogs and late association responses', async () => {
+    const incomplete = session('2026-09-20', ['FRONT'])
+    vi.spyOn(api, 'get').mockImplementation((url: string) => Promise.resolve(envelope(history(url.includes('/client-1/')
+      ? [incomplete, session('2026-09-01')] : [session('2026-08-01'), session('2026-07-01')]))) as never)
+    let resolveAssociation: ((value: unknown) => void) | undefined
+    const post = vi.spyOn(api, 'post').mockImplementation(() => new Promise((resolve) => { resolveAssociation = resolve }) as never)
+    const user = userEvent.setup()
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const rendered = render(<QueryClientProvider client={queryClient}><ProgressPhotosPanel clientId="client-1" /></QueryClientProvider>)
+    await screen.findByText('Comparador')
+    await user.click(screen.getByRole('button', { name: 'Espalda' }))
+    await user.click(screen.getByRole('button', { name: 'Subir Lateral izquierda' }))
+    await user.click(screen.getByRole('button', { name: 'Simular subida: Nueva imagen Lateral izquierda' }))
+    await waitFor(() => expect(resolveAssociation).toBeTypeOf('function'))
+    rendered.rerender(<QueryClientProvider client={queryClient}><ProgressPhotosPanel clientId="client-2" /></QueryClientProvider>)
+    await screen.findByText('Comparador')
+    expect(screen.getByRole('button', { name: 'Frontal' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.queryByText(/Simular subida/)).not.toBeInTheDocument()
+    resolveAssociation?.(envelope(incomplete.photos[0]))
+    await waitFor(() => expect(screen.getByLabelText('Fecha posterior')).toHaveValue('session-2026-08-01'))
+    expect(screen.queryByText('20 de septiembre de 2026')).not.toBeInTheDocument()
+    expect(post).toHaveBeenCalledTimes(1)
+  })
+
+  it('resets image errors and progressively disclosed metadata on a view change', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(envelope(history([session('2026-09-20'), session('2026-09-01')])))
+    const user = userEvent.setup()
+    renderPanel()
+    const [image] = await screen.findAllByAltText(/Frontal del/)
+    fireEvent.error(image)
+    await user.click(screen.getByText('Metadatos de Frontal · 01 de septiembre de 2026'))
+    expect(screen.getByText('Metadatos de Frontal · 01 de septiembre de 2026').closest('details')).toHaveAttribute('open')
+    await user.click(screen.getByRole('button', { name: 'Lateral izquierda' }))
+    expect(screen.queryByRole('button', { name: /Reintentar imagen Frontal/ })).not.toBeInTheDocument()
+    expect(screen.getByText('Metadatos de Lateral izquierda · 01 de septiembre de 2026').closest('details')).not.toHaveAttribute('open')
+    expect(screen.getAllByAltText(/Lateral izquierda del/)).toHaveLength(2)
+  })
+
   it('renders four complete views, incomplete sessions, two distinct dates and same-view switching', async () => {
     vi.spyOn(api, 'get').mockResolvedValue(envelope(history([
       session('2026-09-20'),
