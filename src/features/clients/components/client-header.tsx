@@ -8,80 +8,45 @@ interface ClientHeaderProps {
 }
 
 const dateFormatter = new Intl.DateTimeFormat('es-ES', {
-  day: '2-digit',
-  month: 'long',
-  year: 'numeric',
+  day: '2-digit', month: 'long', year: 'numeric',
 })
 
 function getInitials(client: ClientDetail) {
   const firstName = client.profile?.first_name?.[0] ?? ''
   const lastName = client.profile?.last_name?.[0] ?? ''
   const initials = `${firstName}${lastName}`.trim().toUpperCase()
-
   return initials || client.email.slice(0, 2).toUpperCase()
 }
 
 export function ClientHeader({ client }: ClientHeaderProps) {
   return (
-    <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16 border border-border/60 shadow-sm">
-            <AvatarImage src={client.profile?.avatar_url ?? undefined} alt={getUserDisplayName(client)} />
-            <AvatarFallback className="text-lg font-semibold">{getInitials(client)}</AvatarFallback>
-          </Avatar>
-
-          <div className="space-y-3">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Perfil de cliente</p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                {getUserDisplayName(client)}
-              </h1>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="border-brand-soft/40 bg-brand-soft/10 text-brand-primary">
-                {ROLE_LABELS[client.role]}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={
-                  client.is_locked
-                    ? 'border-status-error/30 bg-status-error/10 text-status-error'
-                    : client.is_active
-                      ? 'border-status-success/30 bg-status-success/10 text-status-success'
-                      : 'border-border bg-muted text-muted-foreground'
-                }
-              >
-                {client.is_locked ? 'Bloqueada' : client.is_active ? 'Activa' : 'Inactiva'}
-              </Badge>
-              {client.profile?.level && (
-                <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-status-info">
-                  {LEVEL_LABELS[client.profile.level]}
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2 lg:min-w-[280px]">
-          <div className="rounded-xl border border-border/60 bg-background/50 p-3">
-            <div className="flex items-center gap-2 text-foreground">
-              <Mail className="h-4 w-4 text-brand-primary" />
-              <span className="font-medium">Email</span>
-            </div>
-            <p className="mt-2 break-all">{client.email}</p>
-          </div>
-
-          <div className="rounded-xl border border-border/60 bg-background/50 p-3">
-            <div className="flex items-center gap-2 text-foreground">
-              <CalendarClock className="h-4 w-4 text-brand-primary" />
-              <span className="font-medium">Alta</span>
-            </div>
-            <p className="mt-2">{dateFormatter.format(new Date(client.created_at))}</p>
+    <section aria-label="Perfil de cliente" className="rounded-2xl border border-border/70 bg-card p-4 text-foreground sm:p-5">
+      <div className="flex items-start gap-3">
+        <Avatar className="h-12 w-12 shrink-0 border border-border/60">
+          <AvatarImage src={client.profile?.avatar_url ?? undefined} alt={getUserDisplayName(client)} />
+          <AvatarFallback className="font-semibold">{getInitials(client)}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 space-y-2">
+          <h1 className="break-words text-xl font-semibold tracking-tight sm:text-2xl">{getUserDisplayName(client)}</h1>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="border-brand-soft/40 bg-brand-soft/10 text-foreground">{ROLE_LABELS[client.role]}</Badge>
+            <Badge variant="outline" className={client.is_locked
+              ? 'border-status-error/30 bg-status-error/10 text-foreground'
+              : client.is_active ? 'border-status-success/30 bg-status-success/10 text-foreground'
+                : 'border-border bg-muted text-foreground'}>
+              {client.is_locked ? 'Bloqueada' : client.is_active ? 'Activa' : 'Inactiva'}
+            </Badge>
+            {client.profile?.level && <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-foreground">{LEVEL_LABELS[client.profile.level]}</Badge>}
           </div>
         </div>
       </div>
-    </div>
+      <details className="mt-3 border-t border-border/60 pt-2">
+        <summary className="min-h-11 cursor-pointer content-center rounded text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Datos de contacto y alta</summary>
+        <dl className="grid gap-3 pb-2 pt-2 text-sm sm:grid-cols-2">
+          <div><dt className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" />Email</dt><dd className="mt-1 break-all">{client.email}</dd></div>
+          <div><dt className="flex items-center gap-2 font-medium"><CalendarClock className="h-4 w-4" />Alta</dt><dd className="mt-1">{dateFormatter.format(new Date(client.created_at))}</dd></div>
+        </dl>
+      </details>
+    </section>
   )
 }

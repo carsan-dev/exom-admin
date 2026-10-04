@@ -44,21 +44,27 @@ export function ProgressPage() {
   const trainingValid = period.period === 'all' || (period.valid &&
     (Date.parse(`${trainingTo}T00:00:00Z`) - Date.parse(`${trainingFrom}T00:00:00Z`)) / 86400000 <= 365)
 
-  const today = new Date()
-  const [calYear, setCalYear] = useState(today.getFullYear())
-  const [calMonth, setCalMonth] = useState(today.getMonth() + 1)
+  const calendarDate = /^\d{4}-\d{2}-\d{2}$/.test(selectedDate) ? selectedDate : getTodayStr()
+  const [calendarView, setCalendarView] = useState({ clientId, date: calendarDate, year: Number(calendarDate.slice(0, 4)), month: Number(calendarDate.slice(5, 7)) })
+  const sameContext = calendarView.clientId === clientId && calendarView.date === calendarDate
+  const calYear = sameContext ? calendarView.year : Number(calendarDate.slice(0, 4))
+  const calMonth = sameContext ? calendarView.month : Number(calendarDate.slice(5, 7))
   const [metricsPage, setMetricsPage] = useState(1)
 
   const weekStart = getWeekStart(selectedDate)
 
-  const { data: clientData, isLoading: profileLoading } = useClientProfile(clientId || undefined)
-  const { data: calendarData, isLoading: calendarLoading } = useClientCalendarMonth(
+  const profileQuery = useClientProfile(clientId || undefined)
+  const { data: clientData, isLoading: profileLoading } = profileQuery
+  const calendarQuery = useClientCalendarMonth(
     clientId,
     calYear,
     calMonth
   )
-  const { data: dayProgress, isLoading: dayLoading } = useClientDayProgress(clientId, selectedDate)
-  const { data: weekSummary, isLoading: weekLoading } = useClientWeekSummary(clientId, weekStart)
+  const { data: calendarData, isLoading: calendarLoading } = calendarQuery
+  const dayQuery = useClientDayProgress(clientId, selectedDate)
+  const { data: dayProgress, isLoading: dayLoading } = dayQuery
+  const weekQuery = useClientWeekSummary(clientId, weekStart)
+  const { data: weekSummary, isLoading: weekLoading } = weekQuery
 
   function handleClientSelect(id: string) {
     updateParams({ clientId: id, date: getTodayStr(), historyPage: '1', trainingWindow: '0' })
@@ -78,66 +84,75 @@ export function ProgressPage() {
   }
 
   function handleMonthChange(year: number, month: number) {
-    setCalYear(year)
-    setCalMonth(month)
+    setCalendarView({ clientId, date: calendarDate, year, month })
   }
 
   return (
-    <div className="space-y-6 [--muted-foreground:var(--foreground-secondary)]">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">Progreso de clientes</h1>
-        <p className="text-sm text-muted-foreground">
-          Monitorea el progreso, métricas y cumplimiento de tus clientes
-        </p>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-muted-foreground">Cliente:</span>
-        <ClientSelector selectedClientId={clientId} onSelect={handleClientSelect} />
+    <div className="mx-auto max-w-7xl space-y-3 sm:space-y-5 [--muted-foreground:var(--foreground-secondary)] [--primary-foreground:#30271e] [&_button]:duration-150 [&_button]:motion-reduce:transition-none">
+      <div className="flex min-w-0 flex-wrap items-center gap-3">
+        <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Progreso</h1>
+        <div className="min-w-0 flex-1 sm:flex-none">
+          <span className="sr-only">Cliente:</span>
+          <ClientSelector selectedClientId={clientId} onSelect={handleClientSelect} />
+        </div>
       </div>
 
       {!clientId ? (
         <EmptyClientState />
       ) : (
         <Tabs value={section} onValueChange={(value) => updateParams({ section: value })} className="space-y-4">
-          <div className="rounded-lg border bg-card p-4 space-y-3">
-            <p className="font-medium">{profileLoading ? 'Cargando cliente…' : clientData?.profile ? `${clientData.profile.first_name} ${clientData.profile.last_name}` : 'Cliente seleccionado'}</p>
-            {clientData?.profile?.main_goal && <p className="text-sm text-muted-foreground">{clientData.profile.main_goal}</p>}
-            <div className="flex flex-wrap items-end gap-3">
+          <section aria-label="Contexto del cliente y periodo" className="border-y border-border py-2">
+            <details>
+              <summary aria-label={`Periodo de métricas y entrenamiento: ${period.from ?? 'Inicio'} a ${period.to} UTC`} className="min-h-11 cursor-pointer rounded-sm text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                Periodo · {period.from ?? 'Inicio'} → {period.to} · UTC
+              </summary>
+              <div className="flex flex-wrap items-end gap-3 pt-3">
               <label className="text-sm">Periodo
                 <select aria-label="Periodo" value={period.period} onChange={(event) => updateParams({ period: event.target.value, historyPage: '1', trainingWindow: '0' })}
-                  className="mt-1 block rounded-md border bg-background p-2 text-foreground">
+                  className="mt-1 block min-h-11 max-w-full rounded-md border bg-background p-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <option value="all">Desde inicio</option><option value="4w">Últimas cuatro semanas</option><option value="3m">Últimos tres meses</option><option value="custom">Personalizado</option>
                 </select>
               </label>
               {period.period === 'custom' && <>
-                <label className="text-sm">Desde<input type="date" value={period.from ?? ''} max={period.to} onChange={(event) => updateParams({ from: event.target.value, historyPage: '1' })} className="mt-1 block rounded-md border bg-background p-2" /></label>
-                <label className="text-sm">Hasta<input type="date" value={period.to} max={getTodayStr()} onChange={(event) => updateParams({ to: event.target.value, historyPage: '1' })} className="mt-1 block rounded-md border bg-background p-2" /></label>
+                <label className="text-sm">Desde<input type="date" value={period.from ?? ''} max={period.to} onChange={(event) => updateParams({ from: event.target.value, historyPage: '1' })} className="mt-1 block min-h-11 rounded-md border bg-background p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
+                <label className="text-sm">Hasta<input type="date" value={period.to} max={getTodayStr()} onChange={(event) => updateParams({ to: event.target.value, historyPage: '1' })} className="mt-1 block min-h-11 rounded-md border bg-background p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
               </>}
-              <p className="text-sm text-muted-foreground">Métricas: {period.from ?? 'Inicio'} → {period.to}. Resumen conserva su calendario diario.</p>
-            </div>
-          </div>
-          <div className="overflow-x-auto">
-          <TabsList className="h-auto flex-wrap justify-start">
-            <TabsTrigger value="dashboard" disabled>Dashboard · pendiente</TabsTrigger>
+              <p className="max-w-prose text-sm text-muted-foreground">Métricas y entrenamiento: {period.from ?? 'Inicio'} → {period.to} · UTC. Resumen usa la semana del día seleccionado; Adherencia y Fotos tienen su propia consulta. Racha muestra los contadores registrados.</p>
+              </div>
+            </details>
+            {!period.valid && <p role="alert" className="text-sm text-status-error">Revisa el periodo: las fechas deben estar ordenadas y no superar hoy.</p>}
+          </section>
+          <div>
+          <TabsList aria-label="Secciones de progreso" className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 [&_button]:min-h-11 [&_button]:shrink-0 sm:flex-wrap [&_button]:rounded-md [&_button]:data-[state=active]:bg-brand-soft/10 [&_button]:data-[state=active]:text-foreground [&_button]:data-[state=active]:shadow-none">
+            <TabsTrigger value="resumen">Resumen</TabsTrigger>
             <TabsTrigger value="metricas">Métricas</TabsTrigger>
             <TabsTrigger value="fotos">Fotos</TabsTrigger>
             <TabsTrigger value="entrenamiento">Entrenamiento</TabsTrigger>
             <TabsTrigger value="adherencia">Adherencia</TabsTrigger>
-            <TabsTrigger value="seguimiento" disabled>Seguimiento · pendiente</TabsTrigger>
-            <TabsTrigger value="resumen">Resumen</TabsTrigger>
             <TabsTrigger value="racha">Racha</TabsTrigger>
+            <TabsTrigger value="dashboard" disabled>Dashboard · pendiente</TabsTrigger>
+            <TabsTrigger value="seguimiento" disabled>Seguimiento · pendiente</TabsTrigger>
           </TabsList>
           </div>
 
           {/* Resumen Tab */}
           <TabsContent value="resumen" className="space-y-4 pt-2 sm:pt-3">
+            {(profileQuery.isError || weekQuery.isError) && <div role="alert" className="flex flex-wrap items-center gap-3 text-sm">
+              <p>No se pudo cargar el resumen completo. Los datos ausentes no son ceros.</p>
+              <Button variant="outline" size="sm" onClick={() => { void profileQuery.refetch(); void weekQuery.refetch() }}>Reintentar resumen</Button>
+            </div>}
             <ProgressOverviewCards
               streak={clientData?.streak}
               weekSummary={weekSummary}
               isLoading={profileLoading || weekLoading}
+              onStreakSelect={() => updateParams({ section: 'racha' })}
             />
-            <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="text-sm font-medium">Día de consulta · UTC<input type="date" value={selectedDate} onChange={(event) => { if (event.target.value) handleDateSelect(event.target.value) }} className="mt-1 block min-h-11 rounded-md border bg-background p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
+              <Button variant="outline" onClick={() => handleDateSelect(getTodayStr())}>Ir a hoy</Button>
+            </div>
+            {calendarQuery.isError && <div role="alert" className="flex flex-wrap items-center gap-3 text-sm"><p>No se pudo cargar el calendario.</p><Button variant="outline" size="sm" onClick={() => { void calendarQuery.refetch() }}>Reintentar calendario</Button></div>}
+            <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               <ProgressCalendar
                 year={calYear}
                 month={calMonth}
@@ -148,6 +163,9 @@ export function ProgressPage() {
                 onMonthChange={handleMonthChange}
               />
               <DayProgressDetail
+                key={`${clientId}:${selectedDate}`}
+                isError={dayQuery.isError}
+                onRetry={() => { void dayQuery.refetch() }}
                 clientId={clientId}
                 date={selectedDate}
                 progress={dayProgress}
@@ -184,8 +202,10 @@ export function ProgressPage() {
           </TabsContent>
 
           {/* Racha Tab */}
-          <TabsContent value="racha">
-            <StreakSection clientId={clientId} streak={clientData?.streak} />
+          <TabsContent value="racha" className="space-y-4">
+            {profileQuery.isError && <div role="alert" className="flex flex-wrap items-center gap-3 text-sm"><p>No se pudo cargar la racha.</p><Button variant="outline" size="sm" onClick={() => { void profileQuery.refetch() }}>Reintentar racha</Button></div>}
+            <StreakSection key={clientId} clientId={clientId} streak={clientData?.streak} isLoading={profileLoading} />
+            <Button variant="outline" onClick={() => updateParams({ section: 'resumen' })}>Consultar actividad diaria en Resumen</Button>
           </TabsContent>
         </Tabs>
       )}

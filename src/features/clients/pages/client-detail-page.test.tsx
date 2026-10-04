@@ -24,6 +24,24 @@ vi.mock('../components/manage-client-assignments-dialog', () => ({ ManageClientA
 vi.mock('../components/toggle-user-status-dialog', () => ({ ToggleUserStatusDialog: () => null }))
 vi.mock('../components/unlock-dialog', () => ({ UnlockDialog: () => null }))
 describe('ruta real de detalle de cliente', () => {
+  it('preserva navegación, acciones permitidas y las cuatro pestañas en el shell compacto', () => {
+    render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <MemoryRouter initialEntries={['/clients/client-route?date=2026-10-04']}><Routes>
+        <Route path="/clients/:id" element={<ClientDetailPage />} />
+      </Routes></MemoryRouter>
+    </QueryClientProvider>)
+    expect(screen.getByRole('link', { name: 'Volver a clientes' })).toHaveAttribute('href', '/clients')
+    expect(screen.getByRole('link', { name: 'Planificar asignaciones' })).toHaveAttribute('href', '/assignments?clientId=client-route')
+    expect(screen.queryByRole('button', { name: 'Cambiar rol' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Gestionar admins' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Dar de baja' })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('tab')).toHaveLength(4)
+    for (const [name, content] of [['Métricas', 'Métricas preservadas'], ['Racha', 'Racha preservada'], ['Info general', 'Información preservada']]) {
+      const tab = screen.getByRole('tab', { name })
+      fireEvent.mouseDown(tab, { button: 0, ctrlKey: false }); fireEvent.click(tab)
+      expect(screen.getByText(content)).toBeInTheDocument()
+    }
+  })
   it('restaura el periodo UTC del enlace sin usar un rango de otro cliente', async () => {
     render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <MemoryRouter initialEntries={['/clients/client-linked?adherence_start=2020-01-01&adherence_end=2020-01-31']}><Routes>
