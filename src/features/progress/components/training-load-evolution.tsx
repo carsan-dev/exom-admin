@@ -1,11 +1,13 @@
 import { useId, useState } from 'react'
-import { CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from 'recharts'
+import { CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, XAxis, YAxis } from 'recharts'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/lib/utils'
 import { getApiErrorStatus } from '@/lib/api-utils'
 import { useTrainingLoadHistory } from '../api'
 import { TrainingExercisePicker } from './training-exercise-picker'
 import type { TrainingExerciseSummary } from '../types'
+import { ProgressChartTooltip } from './progress-chart-tooltip'
+import { observedChartSeries, observationTimestamp } from './observed-chart-series'
 
 const measures = {
   weight_kg: { label: 'Peso externo', unit: 'kg' },
@@ -28,20 +30,19 @@ export function TrainingLoadEvolution({ clientId, from, to }: {
   const sets = query.data?.page ?? []
   const metric = measures[measure]
   // A point is one observed set, not a daily aggregate or an estimated value.
-  const points = sets.flatMap((item) => {
-    const amount = item[measure]
-    const timestamp = item.date ? Date.parse(item.date) : NaN
-    return item.date && amount !== null && Number.isFinite(amount) && Number.isFinite(timestamp)
-      ? [{ timestamp, amount, date: item.date, set: item.set_number, reps: item.reps, seconds: item.seconds }]
-      : []
-  }).sort((a, b) => a.timestamp - b.timestamp)
+  const { points, segments } = observedChartSeries(sets.map((item) => ({
+    timestamp: observationTimestamp(item.date), amount: item[measure] ?? NaN,
+    date: item.date ?? '', set: item.set_number, reps: item.reps, seconds: item.seconds,
+    comparable: !item.exercise_id || item.exercise_id === exerciseId,
+  })), (point) => point.comparable && Number.isFinite(point.amount))
   const measured = sets.filter((item) => item[measure] !== null && Number.isFinite(item[measure])).length
-  const missingDates = measured - points.length
+  const missingDates = sets.filter((item) => item[measure] !== null && Number.isFinite(item[measure])
+    && !Number.isFinite(observationTimestamp(item.date))).length
 
   return <section aria-labelledby={`${id}-title`} className="min-w-0 space-y-5 rounded-lg border bg-card p-4 sm:p-6">
     <div className="space-y-1">
       <h2 id={`${id}-title`} className="text-xl font-semibold">Evolución de cargas</h2>
-      <p className="max-w-prose text-sm text-muted-foreground">Explora las series de un ejercicio. Cada punto es un registro; no un promedio ni una estimación entre fechas.</p>
+      <p className="max-w-prose text-sm text-muted-foreground">Explora las series de un ejercicio. Cada punto es un registro; no un promedio ni una estimación entre fechas. Las líneas rectas son una guía entre registros del mismo ejercicio y medida; los datos ausentes interrumpen la guía.</p>
     </div>
     <div className="grid items-end gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(180px,240px)]">
       <div className="space-y-2"><p className="text-sm font-medium">Ejercicio</p>
@@ -75,18 +76,22 @@ export function TrainingLoadEvolution({ clientId, from, to }: {
         {points.length === 0 ? <p className="rounded-md bg-muted p-4 text-sm">Sin observaciones fechadas de {metric.label.toLowerCase()} en esta página. Selecciona otra medida o consulta otras series.</p> :
           <div role="img" aria-label={`${metric.label} (${metric.unit}), ${points.length} observaciones. Valores disponibles en la tabla siguiente.`} className="h-64 min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart margin={{ top: 12, right: 16, bottom: 8, left: 0 }}>
+              {/* Recharts retains active payload internally; a new observation context must start without hover. */}
+              <ScatterChart key={JSON.stringify([clientId, exerciseId, from, to, cursors, measure, sets])}
+                margin={{ top: 12, right: 16, bottom: 8, left: 0 }}>
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
                 <XAxis dataKey="timestamp" type="number" name="Fecha" scale="time" domain={['dataMin', 'dataMax']}
                   tickFormatter={(value: number) => dateLabel(new Date(value).toISOString().slice(0, 10))}
                   minTickGap={40} tick={{ fill: 'var(--foreground)', fontSize: 11 }} />
                 <YAxis dataKey="amount" name={metric.label} unit={` ${metric.unit}`} width={70} domain={[0, 'auto']}
                   tick={{ fill: 'var(--foreground)', fontSize: 11 }} />
-                <Tooltip cursor={{ strokeDasharray: '3 3' }}
+                <ProgressChartTooltip cursor={{ strokeDasharray: '3 3' }}
                   formatter={(value, name) => name === 'Fecha'
                     ? [dateLabel(new Date(Number(value)).toISOString().slice(0, 10)), 'Fecha']
-                    : [`${number.format(Number(value))} ${metric.unit}`, metric.label]}
-                  contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+                    : [number.format(Number(value)), metric.label]} />
+                {segments.map((segment, index) => <Scatter key={index} data={segment} line lineType="joint" lineJointType="linear"
+                  shape={() => <g />} legendType="none" tooltipType="none" fill="var(--foreground-accent)"
+                  isAnimationActive={false} />)}
                 <Scatter data={points} name={metric.label} fill="var(--foreground-accent)" isAnimationActive={false} />
               </ScatterChart>
             </ResponsiveContainer>

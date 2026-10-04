@@ -27,8 +27,20 @@ const dateFormatter = new Intl.DateTimeFormat('es-ES', {
   timeZone: 'UTC',
 })
 
+function toCivilUtcDate(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  // Progress dates are civil days, not instants to convert through local time.
+  const match = /^(\d{4}-\d{2}-\d{2})(?:T00:00:00\.000Z)?$/.exec(value)
+  if (!match) return null
+  const civilDate = match[1]
+  const parsed = new Date(`${civilDate}T00:00:00.000Z`)
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString() === `${civilDate}T00:00:00.000Z`
+    ? civilDate
+    : null
+}
+
 export function DayProgressDetail({ clientId, date, progress: receivedProgress, isLoading, isError, onRetry }: DayProgressDetailProps) {
-  const progress = receivedProgress?.client_id === clientId && receivedProgress.date === date ? receivedProgress : null
+  const progress = receivedProgress?.client_id === clientId && toCivilUtcDate(receivedProgress.date) === date ? receivedProgress : null
   const formattedDate = dateFormatter.format(new Date(date + 'T12:00:00Z'))
   const [reply, setReply] = useState('')
   const replyMutation = useReplyToTrainingNote(clientId, date)

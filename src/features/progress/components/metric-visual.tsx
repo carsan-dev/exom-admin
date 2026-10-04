@@ -1,8 +1,10 @@
 import { useId, useState } from 'react'
-import { CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from 'recharts'
+import { CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, XAxis, YAxis } from 'recharts'
 import { ChartScaleSelect } from '@/components/charts/chart-scale'
 import { calculateYAxisScale, type ChartScale } from '@/components/charts/chart-scale-utils'
 import type { MetricSeries, Observation } from '../metrics-overview'
+import { ProgressChartTooltip } from './progress-chart-tooltip'
+import { observedChartSeries, observationTimestamp } from './observed-chart-series'
 
 interface MetricVisualProps {
   series: MetricSeries[]
@@ -23,18 +25,20 @@ function pointLabel(point: Observation | null, unit: string) {
     {point.provenance === 'legacy_available' && <span className="block text-xs font-normal">Histórico legacy disponible</span>}</>
 }
 
-/** One unit per axis; dots are observations, never interpolated daily estimates. */
+/** One unit per axis; straight guides join observations, never daily estimates. */
 export function MetricVisual({ series, period, chartPeriod }: MetricVisualProps) {
   const [selected, setSelected] = useState(series[0]?.key ?? '')
   const [scale, setScale] = useState<ChartScale>('auto')
   const id = useId()
   const metric = series.find((item) => item.key === selected) ?? series[0]
   if (!metric) return <p className="py-6 text-sm text-foreground-secondary">No hay mediciones disponibles en este grupo.</p>
-  const points = metric.points.filter(complete).map((point) => ({ ...point, timestamp: Date.parse(point.date) }))
+  const { points, segments } = observedChartSeries(
+    metric.points.map((point) => ({ ...point, timestamp: observationTimestamp(point.date) })), complete,
+  )
   const comparable = metric.count > 1 && complete(metric.first) && complete(metric.last) && metric.first.date < metric.last.date
     && metric.change !== null && Number.isFinite(metric.change)
   const axis = rating(metric.unit) ? { domain: metric.unit === '0–5' ? [0, 5] : [1, 10], ticks: undefined }
-    : calculateYAxisScale(points.map((point) => point.value), scale, metric.unit === 'h' ? 0.5 : 1)
+    : calculateYAxisScale(points.map((point) => point.value ?? NaN), scale, metric.unit === 'h' ? 0.5 : 1)
   const delta = comparable && metric.change !== null
     ? `${metric.change > 0 ? '+' : ''}${number.format(metric.change)} ${rating(metric.unit) ? 'puntos' : metric.unit}` : 'No comparable'
 
@@ -66,7 +70,7 @@ export function MetricVisual({ series, period, chartPeriod }: MetricVisualProps)
       <h3 className="text-sm font-medium">Observaciones del histórico · {metric.unit}</h3>
       {!rating(metric.unit) && points.length > 0 && <ChartScaleSelect value={scale} onValueChange={setScale} />}
     </div>
-    <p className="text-sm text-muted-foreground">Ventana gráfica: {chartPeriod}. No estimamos valores entre fechas; solo se muestran observaciones completas.</p>
+    <p className="text-sm text-muted-foreground">Ventana gráfica: {chartPeriod}. No estimamos valores entre fechas; solo se muestran observaciones completas. Las líneas son una guía visual entre ellas; los registros incompletos interrumpen la guía.</p>
     {points.length === 0 ? <p className="rounded-md bg-muted p-4 text-sm">Sin observaciones completas en esta página del histórico. Consulta otra página o selecciona otra medición.</p> :
       <div className="h-64 min-w-0" role="img" aria-label={`${metric.label}, ${metric.unit}, ${chartPeriod}. ${points.length} observaciones completas; alternativa en tabla de datos.`}>
         <ResponsiveContainer width="100%" height="100%">
@@ -75,8 +79,10 @@ export function MetricVisual({ series, period, chartPeriod }: MetricVisualProps)
             <XAxis dataKey="timestamp" name="Fecha" type="number" scale="time" domain={['dataMin', 'dataMax']}
               tickFormatter={(value: number) => date(new Date(value).toISOString())} minTickGap={40} tick={{ fill: 'var(--foreground)', fontSize: 11 }} />
             <YAxis dataKey="value" name={metric.label} tickFormatter={(value: number) => `${number.format(value)} ${metric.unit}`} width={70} domain={axis?.domain} ticks={axis?.ticks} tick={{ fill: 'var(--foreground)', fontSize: 11 }} />
-            <Tooltip cursor={{ strokeDasharray: '3 3' }} formatter={(value, name) => name === 'Fecha' ? [date(new Date(Number(value)).toISOString()), 'Fecha'] : [valueLabel(Number(value), metric.unit), metric.label]}
-              contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+            <ProgressChartTooltip cursor={{ strokeDasharray: '3 3' }} formatter={(value, name) => name === 'Fecha' ? [date(new Date(Number(value)).toISOString()), 'Fecha'] : [valueLabel(Number(value), metric.unit), metric.label]} />
+            {segments.map((segment, index) => <Scatter key={index} data={segment} line lineType="joint" lineJointType="linear"
+              shape={() => <g />} legendType="none" tooltipType="none" fill="var(--foreground-accent)"
+              isAnimationActive={false} />)}
             <Scatter name={metric.label} data={points} fill="var(--foreground-accent)" isAnimationActive={false} />
           </ScatterChart>
         </ResponsiveContainer>
