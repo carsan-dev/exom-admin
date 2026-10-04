@@ -26,7 +26,7 @@ vi.mock('../components/client-selector', () => ({
   EmptyClientState: () => <p>Selecciona un cliente</p>,
 }))
 vi.mock('../components/progress-overview-cards', () => ({ ProgressOverviewCards: () => null }))
-vi.mock('../components/progress-calendar', () => ({ ProgressCalendar: () => null }))
+vi.mock('../components/progress-calendar', () => ({ ProgressCalendar: ({ year, month, onDateSelect }: { year: number; month: number; onDateSelect: (date: string) => void }) => <button onClick={() => onDateSelect('2020-01-04')}>Calendario {year}-{month}</button> }))
 vi.mock('../components/day-progress-detail', () => ({ DayProgressDetail: () => null }))
 vi.mock('../components/metrics-overview', () => ({ MetricsOverviewPanel: () => <p>Métricas existentes</p> }))
 vi.mock('../components/metrics-table', () => ({ MetricsTable: () => null }))
@@ -64,6 +64,36 @@ function reportCalls() {
 beforeEach(() => {
   api.get.mockReset(); api.put.mockReset()
   api.get.mockImplementation((url: string) => Promise.resolve({ data: { success: true, data: url.endsWith('/config') ? config : report } }))
+})
+
+describe('Progreso: contexto y navegación', () => {
+  it('mantiene el periodo activo visible y conserva los filtros en detalle progresivo', () => {
+    mount('clientId=client-a&section=metricas&period=custom&from=2020-01-01&to=2020-01-05&historyPage=2')
+    const summary = screen.getByText('Periodo · 2020-01-01 → 2020-01-05 · UTC')
+    const details = summary.closest('details')
+    expect(details).not.toHaveAttribute('open')
+    fireEvent.click(summary)
+    // JSDOM does not implement the native details click default; exercise the disclosed controls explicitly.
+    details?.setAttribute('open', '')
+    fireEvent.change(screen.getByLabelText('Periodo'), { target: { value: '4w' } })
+    expect(params().get('period')).toBe('4w')
+    expect(params().get('historyPage')).toBe('1')
+    expect(params().get('clientId')).toBe('client-a')
+    expect(params().get('section')).toBe('metricas')
+    expect(screen.getByRole('tab', { name: 'Dashboard · pendiente' })).toBeDisabled()
+  })
+
+  it('no oculta la validación de fechas cuando el detalle de filtros está cerrado', () => {
+    mount('clientId=client-a&section=metricas&period=custom&from=2020-01-06&to=2020-01-05')
+    expect(screen.getByRole('alert')).toHaveTextContent('Revisa el periodo')
+    expect(screen.getByRole('alert').closest('details')).toBeNull()
+  })
+
+  it('abre el mes de la fecha URL y conserva periodo y parámetros al seleccionar otro día', () => {
+    mount('clientId=client-a&section=resumen&date=2020-01-03&period=3m&historyPage=2')
+    fireEvent.click(screen.getByRole('button', { name: 'Calendario 2020-1' }))
+    expect(Object.fromEntries(params())).toEqual({ clientId: 'client-a', section: 'resumen', date: '2020-01-04', period: '3m', historyPage: '2' })
+  })
 })
 
 describe('Progreso: pestaña Adherencia canónica', () => {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { CalendarClock, Flame, RotateCcw, Trophy } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ClientStreakCard } from '../../clients/components/client-streak-card'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,15 +19,10 @@ import type { Streak } from '../../clients/types'
 interface StreakSectionProps {
   clientId: string
   streak: Streak | null | undefined
+  isLoading?: boolean
 }
 
-const dateFormatter = new Intl.DateTimeFormat('es-ES', {
-  day: '2-digit',
-  month: 'long',
-  year: 'numeric',
-})
-
-export function StreakSection({ clientId, streak }: StreakSectionProps) {
+export function StreakSection({ clientId, streak, isLoading }: StreakSectionProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const resetMutation = useResetStreak(clientId)
 
@@ -41,74 +36,16 @@ export function StreakSection({ clientId, streak }: StreakSectionProps) {
     setConfirmOpen(false)
   }
 
-  if (!streak) {
-    return (
-      <Card>
-        <CardContent className="pt-6 text-sm text-muted-foreground">
-          El cliente todavía no tiene una racha registrada.
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const items = [
-    {
-      label: 'Racha actual',
-      value: `${streak.current_days} días`,
-      icon: Flame,
-      accent: 'text-status-warning',
-    },
-    {
-      label: 'Mejor récord',
-      value: `${streak.longest_days} días`,
-      icon: Trophy,
-      accent: 'text-brand-primary',
-    },
-    {
-      label: 'Última actividad',
-      value: streak.last_active_date
-        ? dateFormatter.format(new Date(streak.last_active_date))
-        : 'Sin actividad',
-      icon: CalendarClock,
-      accent: 'text-status-info',
-    },
-  ]
-
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-xl">Racha del cliente</CardTitle>
-              <CardDescription>Actividad reciente y mejor consistencia histórica</CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setConfirmOpen(true)}
-              className="gap-2 text-status-error border-status-error/40 hover:bg-status-error/10"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Reiniciar racha
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3">
-          {items.map((item) => {
-            const Icon = item.icon
-            return (
-              <div key={item.label} className="rounded-xl border border-border/60 bg-background/60 p-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <Icon className={`h-4 w-4 ${item.accent}`} />
-                  {item.label}
-                </div>
-                <p className="mt-3 text-2xl font-semibold text-foreground">{item.value}</p>
-              </div>
-            )
-          })}
-        </CardContent>
-      </Card>
+      <ClientStreakCard streak={streak} isLoading={isLoading} action={
+        <Button variant="outline" size="sm" disabled={resetMutation.isPending}
+          onClick={() => setConfirmOpen(true)}
+          className="gap-2 text-status-error border-status-error/40 hover:bg-status-error/10">
+          <RotateCcw className="h-4 w-4" aria-hidden="true" />
+          Reiniciar racha
+        </Button>
+      } />
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
@@ -122,6 +59,7 @@ export function StreakSection({ clientId, streak }: StreakSectionProps) {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleReset}
+              disabled={resetMutation.isPending}
               className="bg-status-error hover:bg-status-error/90"
             >
               Reiniciar
