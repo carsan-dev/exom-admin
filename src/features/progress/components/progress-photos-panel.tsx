@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ImagePlus, Maximize2, RefreshCw } from 'lucide-react'
+import { ImagePlus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -28,6 +28,8 @@ import {
   useCreateClientProgressPhotoSession,
 } from '../api'
 import type { ProgressPhoto, ProgressPhotoSession, ProgressPhotoView } from '../types'
+import { ProgressPhotosImage } from './progress-photos-image'
+import { ProgressPhotosWorkspace } from './progress-photos-workspace'
 
 const HISTORY_PAGE_SIZE = 20
 const MAX_LOADED_COMPARISON_SESSIONS = HISTORY_PAGE_SIZE * 5
@@ -67,9 +69,10 @@ function sessionMissingViews(session: ProgressPhotoSession) {
 
 function statusLabel(session: ProgressPhotoSession) {
   const missing = sessionMissingViews(session)
-  return missing.length === 0 && session.is_complete
-    ? 'Completa · 4 de 4 vistas'
-    : `Incompleta · faltan ${missing.length} de 4 vistas`
+  if (missing.length === 0) {
+    return session.is_complete ? 'Completa · 4 de 4 vistas' : '4 de 4 vistas · finalización no confirmada'
+  }
+  return `Incompleta · faltan ${missing.length} de 4 vistas`
 }
 
 function sessionWithDifferentDate(sessions: ProgressPhotoSession[], session: ProgressPhotoSession | undefined) {
@@ -77,9 +80,13 @@ function sessionWithDifferentDate(sessions: ProgressPhotoSession[], session: Pro
 }
 
 export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
+  return <ClientProgressPhotosPanel key={clientId} clientId={clientId} />
+}
+
+function ClientProgressPhotosPanel({ clientId }: { clientId: string }) {
   const [historyPage, setHistoryPage] = useState(1)
-  const activeClientIdRef = useRef(clientId)
-  const currentHistoryPage = activeClientIdRef.current === clientId ? historyPage : 1
+  const currentHistoryPage = historyPage
+  const enlargeTrigger = useRef<HTMLButtonElement | null>(null)
   const history = useClientProgressPhotoHistory(clientId, currentHistoryPage, HISTORY_PAGE_SIZE)
   const createSession = useCreateClientProgressPhotoSession(clientId)
   const associatePhoto = useAssociateClientProgressPhoto(clientId)
@@ -98,7 +105,7 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
   const [pendingAssociation, setPendingAssociation] = useState<PendingAssociation | null>(null)
   const pendingAssociationRef = useRef<PendingAssociation | null>(null)
   const [uploadPreview, setUploadPreview] = useState<string | null>(null)
-  const [replaceCandidate, setReplaceCandidate] = useState<{ view: ProgressPhotoView; photo: ProgressPhoto } | null>(null)
+  const [replaceCandidate, setReplaceCandidate] = useState<{ sessionId: string; view: ProgressPhotoView; photo: ProgressPhoto } | null>(null)
   const [enlarged, setEnlarged] = useState<{ photo: ProgressPhoto; label: string; date: string } | null>(null)
 
   const setCurrentAction = (action: PendingPhotoAction | null) => {
@@ -111,24 +118,12 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
     setPendingAssociation(association)
   }
 
-  useEffect(() => {
-    if (activeClientIdRef.current === clientId) return
-
-    activeClientIdRef.current = clientId
-    setHistoryPage(1)
-    setLoadedComparisonSessions([])
-    setOlderSessionId('')
-    setNewerSessionId('')
-    setSelectedView('FRONT')
-    setUploadSessionId('')
+  useEffect(() => () => {
+    // Invalidate callbacks from requests/uploads belonging to an unmounted client.
     createOperationRef.current = null
-    setCreateOperation(null)
-    setCurrentAction(null)
-    setCurrentAssociation(null)
-    setUploadPreview(null)
-    setReplaceCandidate(null)
-    setEnlarged(null)
-  }, [clientId])
+    pendingActionRef.current = null
+    pendingAssociationRef.current = null
+  }, [])
 
   useEffect(() => {
     if (history.data && currentHistoryPage > totalPages) {
@@ -161,8 +156,11 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
       ? currentOlder
       : sessionWithDifferentDate(loadedComparisonSessions, nextNewer)
 
-    if (nextNewer.id !== newerSessionId) setNewerSessionId(nextNewer.id)
-    if (nextOlder?.id !== olderSessionId) setOlderSessionId(nextOlder?.id ?? '')
+    const reversed = nextOlder && nextOlder.session_date > nextNewer.session_date
+    const earlier = reversed ? nextNewer : nextOlder
+    const later = reversed ? nextOlder : nextNewer
+    if (later.id !== newerSessionId) setNewerSessionId(later.id)
+    if (earlier?.id !== olderSessionId) setOlderSessionId(earlier?.id ?? '')
   }, [loadedComparisonSessions, newerSessionId, olderSessionId])
 
   useEffect(() => {
@@ -183,9 +181,18 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
     [sessions, uploadSessionId],
   )
   const comparisonSessions = olderSession && newerSession && olderSession.session_date !== newerSession.session_date
-    ? [olderSession, newerSession]
-    : []
-  const comparisonReady = comparisonSessions.length === 2
+    ? [olderSession, newerSession].sort((a, b) => a.session_date.localeCompare(b.session_date))
+    : newerSession ? [newerSession] : []
+  const enlargementPhotos = comparisonSessions.flatMap((session) => PHOTO_VIEWS.flatMap(({ value, label }) => {
+    const photo = activePhoto(session, value)
+    return photo ? [{ photo, label, date: session.session_date }] : []
+  }))
+  const enlargedIndex = enlargementPhotos.findIndex((item) => item.photo.id === enlarged?.photo.id)
+
+  function navigateEnlargement(offset: number) {
+    const next = enlargementPhotos[enlargedIndex + offset]
+    if (next) setEnlarged(next)
+  }
   const photoActionBusy = Boolean(pendingAction) || Boolean(pendingAssociation) || associatePhoto.isPending
 
   async function createDatedSession() {
@@ -249,20 +256,25 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
   function chooseComparisonSession(kind: 'older' | 'newer', sessionId: string) {
     const selected = loadedComparisonSessions.find((session) => session.id === sessionId)
     if (!selected) return
+    setEnlarged(null)
 
-    const other = kind === 'older' ? newerSession : olderSession
-    if (kind === 'older') setOlderSessionId(selected.id)
-    else setNewerSessionId(selected.id)
-
-    if (other?.session_date === selected.session_date) {
-      const replacement = sessionWithDifferentDate(loadedComparisonSessions, selected)
-      if (kind === 'older') setNewerSessionId(replacement?.id ?? '')
-      else setOlderSessionId(replacement?.id ?? '')
+    const currentOther = kind === 'older' ? newerSession : olderSession
+    const other = currentOther?.session_date === selected.session_date
+      ? sessionWithDifferentDate(loadedComparisonSessions, selected)
+      : currentOther
+    if (!other) {
+      setOlderSessionId('')
+      setNewerSessionId(selected.id)
+      return
     }
+    // Keep the controls and the displayed columns in the same civil-date order.
+    const [earlier, later] = [selected, other].sort((a, b) => a.session_date.localeCompare(b.session_date))
+    setOlderSessionId(earlier.id)
+    setNewerSessionId(later.id)
   }
 
   if (history.isLoading) {
-    return <Card><CardContent className="py-8 text-sm text-muted-foreground" role="status">Cargando fotos de progreso…</CardContent></Card>
+    return <Card><CardContent className="space-y-4 py-8 text-sm text-muted-foreground" role="status"><p>Cargando fotos de progreso…</p><div aria-hidden="true" className="grid gap-4 sm:grid-cols-2"><div className="h-64 rounded bg-muted/50" /><div className="h-64 rounded bg-muted/50" /></div></CardContent></Card>
   }
 
   if (history.isError) {
@@ -277,16 +289,34 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-6 motion-reduce:[&_*]:transition-none motion-reduce:[&_*]:animate-none">
+      <header className="space-y-2">
+        <h2 className="text-xl font-semibold">Fotos de progreso</h2>
+        <p className="max-w-prose text-sm text-muted-foreground">Revisa fechas, vistas disponibles y contexto antes de comparar. Completar o reemplazar fotos requiere una acción explícita.</p>
+        <p className="text-sm tabular-nums">{history.data?.total ?? 0} sesiones en el historial · {sessions.length} en esta página · {sessions.filter((session) => session.is_complete && sessionMissingViews(session).length === 0).length} completas en esta página</p>
+      </header>
+      {sessions.length > 0 && <ProgressPhotosWorkspace
+        sessions={loadedComparisonSessions} olderId={olderSessionId} newerId={newerSessionId}
+        selectedView={selectedView} views={PHOTO_VIEWS} formatDate={formatDate}
+        onOlderChange={(id) => chooseComparisonSession('older', id)}
+        onNewerChange={(id) => chooseComparisonSession('newer', id)}
+        onViewChange={(view) => { setSelectedView(view); setEnlarged(null) }}
+        onEnlarge={(photo, label, date, trigger) => { enlargeTrigger.current = trigger; setEnlarged({ photo, label, date }) }}
+      />}
       <Card>
         <CardHeader>
-          <CardTitle>Fotos de progreso</CardTitle>
-          <CardDescription>Compara la misma vista entre dos fechas y completa sesiones pendientes sin sustituir imágenes por accidente.</CardDescription>
+          <CardTitle className="text-lg">Historial y nueva sesión</CardTitle>
+          <CardDescription>Consulta otras fechas o crea una sesión para añadir las cuatro vistas. Crear una sesión no añade fotos.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-end gap-3">
             <label className="text-sm font-medium">Nueva sesión fechada
-              <input aria-label="Fecha de nueva sesión" type="date" value={sessionDate} onChange={(event) => setSessionDate(event.target.value)} className="mt-1 block rounded-md border bg-background p-2" />
+              <input aria-label="Fecha de nueva sesión" type="date" value={sessionDate} disabled={createSession.isPending} onChange={(event) => {
+                setSessionDate(event.target.value)
+                createOperationRef.current = null
+                setCreateOperation(null)
+                createSession.reset()
+              }} className="mt-1 block min-h-11 rounded-md border bg-background p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
             </label>
             <Button onClick={() => void createDatedSession()} disabled={createSession.isPending || !sessionDate}>
               <ImagePlus className="h-4 w-4" />{createSession.isPending ? 'Creando…' : createOperation ? 'Reintentar crear sesión' : 'Crear sesión incompleta'}
@@ -302,7 +332,7 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
                 {sessions.map((session) => {
                   const missing = sessionMissingViews(session)
                   return (
-                    <li key={session.id} className="rounded-lg border bg-card p-4">
+                    <li key={session.id} className="min-w-0 border-b py-3">
                       <p className="font-medium">{formatDate(session.session_date)}</p>
                       <p className="mt-1 text-sm" aria-label={`Estado ${formatDate(session.session_date)}`}>{statusLabel(session)}</p>
                       {missing.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Pendientes: {missing.map(({ label }) => label).join(', ')}</p>}
@@ -311,9 +341,9 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
                 })}
               </ul>
               <div className="flex items-center justify-between gap-3" aria-label="Paginación del historial de fotos">
-                <Button type="button" variant="outline" size="sm" onClick={() => setHistoryPage((page) => Math.max(1, page - 1))} disabled={currentHistoryPage <= 1}>Anterior</Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setHistoryPage((page) => Math.max(1, page - 1))} disabled={currentHistoryPage <= 1 || photoActionBusy}>Anterior</Button>
                 <p className="text-sm text-muted-foreground">Página {currentHistoryPage} de {totalPages}</p>
-                <Button type="button" variant="outline" size="sm" onClick={() => setHistoryPage((page) => Math.min(totalPages, page + 1))} disabled={currentHistoryPage >= totalPages}>Siguiente</Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setHistoryPage((page) => Math.min(totalPages, page + 1))} disabled={currentHistoryPage >= totalPages || photoActionBusy}>Siguiente</Button>
               </div>
             </>
           )}
@@ -323,53 +353,12 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
       {sessions.length > 0 && <>
         <Card>
           <CardHeader>
-            <CardTitle>Comparador</CardTitle>
-            <CardDescription>Elige dos sesiones de fechas civiles distintas. La vista seleccionada se mantiene en ambas columnas.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm font-medium">Fecha anterior
-                <select aria-label="Fecha anterior" value={olderSessionId} onChange={(event) => chooseComparisonSession('older', event.target.value)} className="mt-1 block w-full rounded-md border bg-background p-2">
-                  <option value="">Seleccionar otra fecha</option>
-                  {loadedComparisonSessions.map((session) => <option key={session.id} value={session.id} disabled={session.id !== olderSessionId && session.session_date === newerSession?.session_date}>{formatDate(session.session_date)} · sesión {session.id.slice(0, 8)}</option>)}
-                </select>
-              </label>
-              <label className="text-sm font-medium">Fecha posterior
-                <select aria-label="Fecha posterior" value={newerSessionId} onChange={(event) => chooseComparisonSession('newer', event.target.value)} className="mt-1 block w-full rounded-md border bg-background p-2">
-                  <option value="">Seleccionar otra fecha</option>
-                  {loadedComparisonSessions.map((session) => <option key={session.id} value={session.id} disabled={session.id !== newerSessionId && session.session_date === olderSession?.session_date}>{formatDate(session.session_date)} · sesión {session.id.slice(0, 8)}</option>)}
-                </select>
-              </label>
-            </div>
-            {!comparisonReady ? <p className="text-sm text-muted-foreground">Crea o consulta una sesión de otra fecha para comparar dos fechas distintas.</p> : <>
-              <div className="flex flex-wrap gap-2" aria-label="Vista comparada">
-                {PHOTO_VIEWS.map(({ value, label }) => <Button key={value} type="button" size="sm" variant={value === selectedView ? 'default' : 'outline'} aria-pressed={value === selectedView} onClick={() => setSelectedView(value)}>{label}</Button>)}
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                {comparisonSessions.map((session) => {
-                  const photo = activePhoto(session, selectedView)
-                  const label = PHOTO_VIEWS.find(({ value }) => value === selectedView)?.label ?? selectedView
-                  return <div key={session.id} className="rounded-lg border p-3">
-                    <p className="font-medium">{formatDate(session.session_date)}</p>
-                    {photo ? <button type="button" className="mt-3 block w-full overflow-hidden rounded-md border text-left focus:outline-none focus:ring-2 focus:ring-ring" onClick={() => setEnlarged({ photo, label, date: session.session_date })} aria-label={`Ampliar ${label} del ${formatDate(session.session_date)}`}>
-                      <img src={photo.image_url} alt={`${label} del ${formatDate(session.session_date)}`} className="aspect-[3/4] w-full object-cover" />
-                      <span className="flex items-center gap-1 p-2 text-sm"><Maximize2 className="h-4 w-4" />Ampliar imagen</span>
-                    </button> : <p className="mt-3 rounded-md border border-dashed p-6 text-sm text-muted-foreground" role="status">Vista {label} no disponible en esta fecha.</p>}
-                  </div>
-                })}
-              </div>
-            </>}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Completar sesión</CardTitle>
+            <CardTitle className="text-lg">Completar sesión</CardTitle>
             <CardDescription>Las acciones de foto se procesan de una en una: reintenta una asociación pendiente antes de iniciar otra.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <label className="text-sm font-medium">Sesión a completar
-              <select aria-label="Sesión a completar" value={uploadSessionId} onChange={(event) => { setUploadSessionId(event.target.value); setCurrentAction(null); setCurrentAssociation(null); setUploadPreview(null) }} disabled={photoActionBusy} className="mt-1 block w-full rounded-md border bg-background p-2">
+              <select aria-label="Sesión a completar" value={uploadSessionId} onChange={(event) => { setUploadSessionId(event.target.value); setCurrentAction(null); setCurrentAssociation(null); setUploadPreview(null); setReplaceCandidate(null) }} disabled={photoActionBusy} className="mt-1 block min-h-11 w-full rounded-md border bg-background p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 {sessions.map((session) => <option key={session.id} value={session.id}>{formatDate(session.session_date)} · {statusLabel(session)}</option>)}
               </select>
             </label>
@@ -380,8 +369,8 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
                 return <div key={value} className="rounded-lg border p-3">
                   <p className="font-medium">{label}</p>
                   {photo ? <>
-                    <img src={photo.image_url} alt={`${label} activo del ${formatDate(uploadSession.session_date)}`} className="mt-2 aspect-[3/4] w-full rounded object-cover" />
-                    <Button type="button" className="mt-3 w-full" variant="outline" onClick={() => setReplaceCandidate({ view: value, photo })} disabled={photoActionBusy}>Reemplazar {label}</Button>
+                    <div className="mt-2"><ProgressPhotosImage key={`${uploadSession.id}:${photo.id}:${photo.image_url}`} src={photo.image_url} alt={`${label} activo del ${formatDate(uploadSession.session_date)}`} /></div>
+                    <Button type="button" className="mt-3 w-full" variant="outline" onClick={() => setReplaceCandidate({ sessionId: uploadSession.id, view: value, photo })} disabled={photoActionBusy}>Reemplazar {label}</Button>
                   </> : <>
                     <p className="mt-2 text-sm text-muted-foreground">Pendiente · sin imagen</p>
                     <Button type="button" className="mt-3 w-full" variant="outline" onClick={() => startPhotoAction({ sessionId: uploadSession.id, view: value })} disabled={photoActionBusy}>Subir {label}</Button>
@@ -399,7 +388,7 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
       </>}
 
       <AlertDialog open={Boolean(replaceCandidate)} onOpenChange={(open) => { if (!open) setReplaceCandidate(null) }}>
-        <AlertDialogContent>
+        <AlertDialogContent className="motion-reduce:animate-none motion-reduce:transition-none motion-reduce:[&_*]:transition-none">
           <AlertDialogHeader>
             <AlertDialogTitle>¿Reemplazar esta foto activa?</AlertDialogTitle>
             <AlertDialogDescription>La foto actual dejará de ser la vista activa. Esta acción solo continúa con la identidad de la foto que estás viendo como precondición.</AlertDialogDescription>
@@ -408,7 +397,7 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={(event) => {
               event.preventDefault()
-              if (!replaceCandidate || !uploadSession || photoActionBusy) return
+              if (!replaceCandidate || !uploadSession || replaceCandidate.sessionId !== uploadSession.id || photoActionBusy) return
               startPhotoAction({ sessionId: uploadSession.id, view: replaceCandidate.view, replaces_photo_id: replaceCandidate.photo.id })
               setReplaceCandidate(null)
             }}>Confirmar reemplazo</AlertDialogAction>
@@ -417,12 +406,24 @@ export function ProgressPhotosPanel({ clientId }: { clientId: string }) {
       </AlertDialog>
 
       <Dialog open={Boolean(enlarged)} onOpenChange={(open) => { if (!open) setEnlarged(null) }}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl motion-reduce:animate-none motion-reduce:transition-none motion-reduce:[&_*]:transition-none" onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          if (enlargeTrigger.current?.isConnected) enlargeTrigger.current.focus()
+        }} onKeyDown={(event) => {
+          if (event.key === 'ArrowLeft') { event.preventDefault(); navigateEnlargement(-1) }
+          if (event.key === 'ArrowRight') { event.preventDefault(); navigateEnlargement(1) }
+        }}>
           <DialogHeader>
-            <DialogTitle>{enlarged ? `${enlarged.label} · ${formatDate(enlarged.date)}` : 'Foto de progreso'}</DialogTitle>
+            <DialogTitle aria-live="polite">{enlarged ? `${enlarged.label} · ${formatDate(enlarged.date)}` : 'Foto de progreso'}</DialogTitle>
             <DialogDescription>Imagen ampliada de la sesión seleccionada. Pulsa Escape o el botón de cerrar para volver al comparador.</DialogDescription>
           </DialogHeader>
-          {enlarged && <img src={enlarged.photo.image_url} alt={`${enlarged.label} ampliada del ${formatDate(enlarged.date)}`} className="max-h-[70vh] w-full rounded object-contain" />}
+          {enlarged && <ProgressPhotosImage key={`${enlarged.photo.id}:${enlarged.photo.image_url}`} src={enlarged.photo.image_url} alt={`${enlarged.label} ampliada del ${formatDate(enlarged.date)}`} enlarged />}
+          <nav aria-label="Navegación de imágenes ampliadas" className="flex flex-wrap items-center justify-between gap-2">
+            <Button type="button" variant="outline" className="motion-reduce:transition-none" disabled={enlargedIndex <= 0} onClick={() => navigateEnlargement(-1)}>Imagen anterior</Button>
+            <span className="text-sm tabular-nums">{enlargedIndex + 1} de {enlargementPhotos.length} fotos disponibles</span>
+            <Button type="button" variant="outline" className="motion-reduce:transition-none" disabled={enlargedIndex < 0 || enlargedIndex >= enlargementPhotos.length - 1} onClick={() => navigateEnlargement(1)}>Imagen siguiente</Button>
+            <Button type="button" variant="ghost" className="motion-reduce:transition-none" onClick={() => setEnlarged(null)}>Cerrar ampliación</Button>
+          </nav>
         </DialogContent>
       </Dialog>
     </div>
