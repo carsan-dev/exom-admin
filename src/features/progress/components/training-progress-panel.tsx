@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDate } from '@/lib/utils'
@@ -22,6 +22,8 @@ const value = (amount: number | null | undefined, unit = '') => amount == null ?
 
 export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingProgressPanelProps) {
   const overviewScope = JSON.stringify([clientId, from, to])
+  const detailId = useId()
+  const sessionTrigger = useRef<HTMLButtonElement | null>(null)
   const [cursorState, setCursorState] = useState<{ scope: string; cursors: (string | null)[] }>({ scope: overviewScope, cursors: [null] })
   const [selected, setSelected] = useState<{ scope: string; session: TrainingSession } | null>(null)
   const [legacyState, setLegacyState] = useState<{ scope: string; expanded: boolean; cursors: (string | null)[] }>({ scope: overviewScope, expanded: false, cursors: [null] })
@@ -48,19 +50,45 @@ export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingPro
     { label: 'RIR medio', text: value(indicators.mean_rir) },
     { label: 'RPE medio', text: value(indicators.mean_rpe) },
   ]
-  return <div className="space-y-4">
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{cards.map((item) => <Card key={item.label}><CardHeader><CardTitle className="flex items-center justify-between gap-2 text-base"><span>{item.label}</span>{item.label === 'Registros de entrenamiento' && <TrainingInfo label={item.label}>Puede incluir registros antiguos. El total no permite confirmar cuántos entrenamientos se finalizaron.</TrainingInfo>}{item.label === 'Volumen' && <TrainingInfo label={item.label}>Suma de peso × repeticiones de series válidas; las series en segundos no suman kg·reps.</TrainingInfo>}</CardTitle></CardHeader><CardContent><p className="text-2xl font-semibold">{item.text}</p></CardContent></Card>)}</div>
+  return <div className="min-w-0 space-y-6">
+    <section aria-label="Lectura del periodo de entrenamiento" className="space-y-4 rounded-lg border bg-card p-4 sm:p-6">
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold">Entrenamiento del periodo</h2>
+        <p className="text-sm text-muted-foreground">{formatDate(`${from}T00:00:00`)} – {formatDate(`${to}T00:00:00`)} · Totales del intervalo, independientes de las páginas de detalle.</p>
+        <p className="max-w-prose text-sm">{indicators.trainings_completed === 0 ? 'Sin registros de entrenamiento en este intervalo.' : 'El recuento de registros no confirma la finalización de las sesiones antiguas.'} Consulta las series para interpretar las cargas y el esfuerzo registrado.</p>
+      </div>
+      <div className="grid gap-4 border-t pt-4 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((item) => <div key={item.label} className="min-w-0">
+          <CardHeader className="p-0 pb-2"><CardTitle className="flex items-center justify-between gap-2 text-sm font-medium text-muted-foreground">
+            <span>{item.label}</span>
+            {item.label === 'Registros de entrenamiento' && <TrainingInfo label={item.label}>Puede incluir registros antiguos. El total no permite confirmar cuántos entrenamientos se finalizaron.</TrainingInfo>}
+            {item.label === 'Volumen' && <TrainingInfo label={item.label}>Suma de peso × repeticiones de series válidas; las series en segundos no suman kg·reps.</TrainingInfo>}
+            {item.label === 'RIR medio' && <TrainingInfo label={item.label}>Repeticiones en reserva de las series con RIR registrado. Sin dato no equivale a cero.</TrainingInfo>}
+            {item.label === 'RPE medio' && <TrainingInfo label={item.label}>Esfuerzo percibido de las sesiones con valoración registrada; no es una medida de carga.</TrainingInfo>}
+          </CardTitle></CardHeader>
+          <CardContent className="p-0"><p className="text-xl font-semibold tabular-nums">{item.text}</p></CardContent>
+        </div>)}
+      </div>
+    </section>
+    <TrainingLoadEvolution key={`loads:${overviewScope}`} clientId={clientId} from={from} to={to} />
     <section aria-label="Historial de entrenamiento" className="space-y-4">
       <h2 className="text-lg font-semibold">Historial de entrenamiento</h2>
     <Card><CardHeader><CardTitle>Sesiones con detalle</CardTitle></CardHeader><CardContent className="space-y-3">
       <p className="text-sm text-muted-foreground">Consulta las series, cargas y valoraciones guardadas. El detalle disponible no confirma por sí solo la finalización de una sesión antigua.</p>
-      {sessions.data.page.length === 0 ? <p>Sin sesiones con detalle en esta página.</p> : <ul className="space-y-2">{sessions.data.page.map((session) => <li key={`${session.date}:${session.training_session_id}`} className="flex flex-wrap items-center justify-between gap-2 border-b py-2"><span>{formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")} · {session.training_name || 'Nombre no disponible'}</span><Button variant="outline" aria-label={`Ver detalle de ${session.training_name || 'entrenamiento'} del ${formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}`} onClick={() => setSelected({ scope: overviewScope, session })}>Ver detalle</Button></li>)}</ul>}
+      {sessions.data.page.length === 0 ? <p>Sin sesiones con detalle en esta página.</p> : <ul className="space-y-2">{sessions.data.page.map((session) => <li key={`${session.date}:${session.training_session_id}`} className="flex flex-wrap items-center justify-between gap-3 rounded-md border-b px-2 py-3 transition-colors duration-150 hover:bg-muted/50 motion-reduce:transition-none">
+        <span className="min-w-0 break-words"><span className="block font-medium">{session.training_name || 'Nombre no disponible'}</span><span className="text-sm text-muted-foreground">{formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}</span></span>
+        <Button variant="outline" aria-expanded={currentSelection?.training_session_id === session.training_session_id && currentSelection.date === session.date}
+          aria-controls={detailId} aria-label={`Ver detalle de ${session.training_name || 'entrenamiento'} del ${formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}`}
+          onClick={(event) => { sessionTrigger.current = event.currentTarget; setSelected({ scope: overviewScope, session }) }}>Ver detalle</Button>
+      </li>)}</ul>}
       <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={cursors.length === 1} onClick={() => { setSelected(null); setCursorState({ scope: overviewScope, cursors: cursors.slice(0, -1) }) }}>Más recientes</Button><Button variant="outline" disabled={!sessions.data.nextCursor} onClick={() => { if (sessions.data.nextCursor) { setSelected(null); setCursorState({ scope: overviewScope, cursors: [...cursors, sessions.data.nextCursor] }) } }}>Más antiguos</Button></div>
     </CardContent></Card>
-    {currentSelection && <TrainingSessionDetail key={`${clientId}:${currentSelection.date}:${currentSelection.training_session_id}`} clientId={clientId} session={currentSelection} onClose={() => setSelected(null)} />}
+    <div id={detailId}>
+      {currentSelection && <TrainingSessionDetail key={`${clientId}:${currentSelection.date}:${currentSelection.training_session_id}`} clientId={clientId} session={currentSelection}
+        onClose={() => { setSelected(null); sessionTrigger.current?.focus() }} />}
+    </div>
     </section>
-    <TrainingExerciseTable key={overviewScope} clientId={clientId} from={from} to={to} />
-    <TrainingLoadEvolution key={overviewScope} clientId={clientId} from={from} to={to} />
+    <TrainingExerciseTable key={`exercises:${overviewScope}`} clientId={clientId} from={from} to={to} />
     <Card><CardHeader><CardTitle>Registros históricos</CardTitle></CardHeader><CardContent className="space-y-3">
       <p className="text-sm text-muted-foreground">Registros antiguos sin detalle de la sesión. No permiten saber si el entrenamiento se terminó.</p>
       <Button variant="outline" aria-expanded={legacyExpanded} onClick={() => setLegacyState({ scope: overviewScope, expanded: !legacyExpanded, cursors: [null] })}>{legacyExpanded ? 'Ocultar registros históricos' : 'Mostrar registros históricos'}</Button>

@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -56,9 +57,63 @@ function selectRange() {
   fireEvent.click(screen.getByRole('button', { name: 'Consultar periodo' }))
 }
 beforeEach(() => {
+  // jsdom has no layout observer; data semantics are verified via the table.
+  vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
   shared.get.mockReset(); shared.put.mockReset()
   useAuth.setState({ user: actor, isAuthenticated: true, isLoading: false })
   shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : report())))
+})
+describe('Adherencia visual', () => {
+  it('selecciona un día sin consultar ni escribir y separa evolución del veredicto', async () => {
+    const data = report()
+    data.days.push({ ...data.days[0], date: '2020-01-02', calendar: 'insufficient', evaluation: { ...data.days[0].evaluation, global: { ...component(null), source: 'none' } } })
+    shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : data)))
+    mount()
+    const calendar = await screen.findByRole('region', { name: 'Calendario de adherencia' })
+    const count = shared.get.mock.calls.length
+    const day = within(calendar).getByRole('button', { name: /2020-01-02 · Información insuficiente/ })
+    day.focus()
+    await userEvent.keyboard('{Enter}')
+    expect(day).toHaveFocus()
+    expect(day).toHaveClass('motion-reduce:transition-none')
+    expect(day).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('article', { name: 'Día 2020-01-02' })).toHaveTextContent('Información insuficiente')
+    expect(screen.queryByRole('article', { name: 'Día 2020-01-01' })).not.toBeInTheDocument()
+    const evolution = screen.getByRole('region', { name: 'Evolución diaria del periodo seleccionado' })
+    expect(evolution).toHaveTextContent('Sin dato evaluable')
+    expect(evolution).not.toHaveTextContent('Baja adherencia global')
+    expect(shared.get).toHaveBeenCalledTimes(count)
+    expect(shared.put).not.toHaveBeenCalled()
+  })
+  it('la tabla conserva cero medido y huecos para datos insuficientes, neutrales y no cerrados', async () => {
+    const data = report()
+    const base = data.days[0]
+    data.days = [
+      { ...base, evaluation: { ...base.evaluation, global: { ...component(0), source: 'both' } } },
+      { ...base, date: '2020-01-02', evaluation: { ...base.evaluation, global: { ...component(null), source: 'none' } } },
+      { ...base, date: '2020-01-03', evaluation: { ...base.evaluation, global: { ...component(null), status: 'not_applicable', source: 'none' } } },
+      { ...base, date: '2020-01-04', evaluation: { ...base.evaluation, period: 'provisional', global: { ...component(1), source: 'both' } } },
+      { ...base, date: '2020-01-05', evaluation: { ...base.evaluation, period: 'future', global: { ...component(1), source: 'both' } } },
+    ]
+    shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : data)))
+    mount()
+    await screen.findByRole('region', { name: 'Periodo cerrado' })
+    fireEvent.click(screen.getByText('Ver valores diarios en tabla'))
+    const table = screen.getByRole('table', { name: 'Porcentajes diarios cerrados del periodo seleccionado' })
+    const rows = within(table).getAllByRole('row').slice(1)
+    expect(within(rows[0]).getAllByRole('cell')[0]).toHaveTextContent('0 %')
+    for (const row of rows.slice(1)) {
+      expect(within(row).getAllByRole('cell')[0]).toHaveTextContent('Sin dato evaluable')
+      expect(within(row).getAllByRole('cell')[0]).not.toHaveTextContent('0 %')
+    }
+    expect(screen.getByText(/Una observación global/)).toBeInTheDocument()
+  })
+  it('mantiene configuración y pasos como detalles secundarios', async () => {
+    mount()
+    await screen.findByRole('region', { name: 'Periodo cerrado' })
+    expect(screen.getByText('Configuración de adherencia').closest('details')).not.toHaveAttribute('open')
+    expect(screen.getByText('Pasos y detalle semanal').closest('details')).not.toHaveAttribute('open')
+  })
 })
 describe('Adherencia canónica en el detalle', () => {
   it('consulta cliente/rango y consume ratios cerrados sin promediar días; pasos una vez con siete objetivos', async () => {
@@ -66,6 +121,7 @@ describe('Adherencia canónica en el detalle', () => {
     const summary = await screen.findByRole('region', { name: 'Periodo cerrado' })
     expect(within(summary).getByText('37 %')).toBeInTheDocument()
     expect(shared.get).toHaveBeenCalledWith('/admin/clients/client-a/adherence', expect.objectContaining({ params: { start: '2020-01-01', end: '2020-01-05' } }))
+    fireEvent.click(screen.getByText('Pasos y detalle semanal'))
     const weekly = screen.getByRole('region', { name: 'Pasos semanales 2019-12-30' })
     expect(within(weekly).getByText('6000')).toBeInTheDocument()
     expect(within(weekly).getAllByRole('listitem')).toHaveLength(7)
@@ -97,11 +153,14 @@ describe('Adherencia canónica en el detalle', () => {
     shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : data)))
     mount()
     expect(await screen.findByText('Descanso')).toBeInTheDocument()
-    expect(screen.getByText('Sin asignación')).toBeInTheDocument()
-    expect(screen.getByText(/Provisional · no incluido/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /2020-01-03 · Sin asignación/ })).toBeInTheDocument()
     expect(screen.getByText('Futuro')).toBeInTheDocument()
     expect(screen.getAllByText(/Información insuficiente/).length).toBeGreaterThan(0)
     expect(screen.getByText(/Pauta original desconocida/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /2020-01-04.*Provisional/ }))
+    expect(screen.getByText(/Provisional · no incluido/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /2020-01-05.*Futuro/ }))
+    expect(screen.getByText(/Fecha futura · no penaliza/)).toBeInTheDocument()
   })
   it('conserva metadata histórica diaria sin clasificar baja adherencia por día', async () => {
     const data = report(); data.days[0].evaluation.global = { ...component(0.37), source: 'nutrition_only' }
@@ -249,12 +308,17 @@ describe('Últimos siete días cerrados del servidor', () => {
   })
 })
 describe('Configuración futura versionada', () => {
+  function mountSettings() {
+    const view = mount()
+    fireEvent.click(screen.getByText('Configuración de adherencia'))
+    return view
+  }
   function draft() {
     fireEvent.change(screen.getByLabelText('Vigencia desde (UTC)'), { target: { value: '2099-01-01' } })
     fireEvent.click(screen.getByRole('button', { name: 'Cargar configuración de la fecha' }))
   }
   it('PUT exacto, pendiente deshabilitado, éxito con vigencia e invalidación de todos los periodos del cliente', async () => {
-    const view = mount(); await screen.findByLabelText('Objetivo de pasos')
+    const view = mountSettings(); await screen.findByLabelText('Objetivo de pasos')
     draft(); await screen.findByDisplayValue('80')
     view.queryClient.setQueryData(['client-adherence', 'client-a', 'old-period'], report())
     const invalidate = vi.spyOn(view.queryClient, 'invalidateQueries')
@@ -270,7 +334,7 @@ describe('Configuración futura versionada', () => {
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['client-adherence-config', 'client-a'] })
   })
   it('409 conserva borrador; recarga versión sin sobrescribir campos, reintento manual', async () => {
-    mount(); await screen.findByLabelText('Objetivo de pasos'); draft()
+    mountSettings(); await screen.findByLabelText('Objetivo de pasos'); draft()
     await screen.findByLabelText('Baja adherencia global (%)')
     fireEvent.change(screen.getByLabelText('Baja adherencia global (%)'), { target: { value: '65' } })
     shared.put.mockRejectedValue({ isAxiosError: true, response: { status: 409 } })
@@ -291,14 +355,14 @@ describe('Configuración futura versionada', () => {
     ['Margen superior de calorías (%)', '-1'], ['Proteína mínima (%)', '201'], ['Pasos mínimos (%)', '201'],
     ['Baja adherencia global (%)', '101'],
   ])('bloquea fuera de los límites del DTO: %s=%s', async (label, value) => {
-    mount(); await screen.findByLabelText('Objetivo de pasos')
+    mountSettings(); await screen.findByLabelText('Objetivo de pasos')
     fireEvent.change(screen.getByLabelText(label), { target: { value } })
     expect(screen.getByRole('button', { name: 'Guardar configuración futura' })).toBeDisabled()
     expect(shared.put).not.toHaveBeenCalled()
   })
   it('bloquea vigencia pasada y versión desconocida', async () => {
     shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? { ...config, version: NaN } : report())))
-    mount(); await screen.findByLabelText('Objetivo de pasos')
+    mountSettings(); await screen.findByLabelText('Objetivo de pasos')
     expect(screen.getByText('Versión de escritura: desconocida')).toBeInTheDocument()
     fireEvent.change(screen.getByLabelText('Vigencia desde (UTC)'), { target: { value: '2020-01-01' } })
     expect(screen.getByRole('alert')).toHaveTextContent('La vigencia debe ser una fecha futura UTC válida.')
@@ -306,7 +370,7 @@ describe('Configuración futura versionada', () => {
     expect(shared.put).not.toHaveBeenCalled()
   })
   it('fallo al guardar conserva valores sin afirmar éxito ni vigencia', async () => {
-    mount(); await screen.findByLabelText('Objetivo de pasos')
+    mountSettings(); await screen.findByLabelText('Objetivo de pasos')
     shared.put.mockRejectedValue(new Error('offline'))
     fireEvent.change(screen.getByLabelText('Baja adherencia global (%)'), { target: { value: '65' } })
     fireEvent.click(screen.getByRole('button', { name: 'Guardar configuración futura' }))
@@ -315,7 +379,7 @@ describe('Configuración futura versionada', () => {
     expect(screen.queryByText(/Guardada · vigente/)).not.toBeInTheDocument()
   })
   it('recarga fallida tras conflicto conserva el borrador editable', async () => {
-    mount(); await screen.findByLabelText('Objetivo de pasos')
+    mountSettings(); await screen.findByLabelText('Objetivo de pasos')
     fireEvent.change(screen.getByLabelText('Baja adherencia global (%)'), { target: { value: '65' } })
     shared.put.mockRejectedValue({ isAxiosError: true, response: { status: 409 } })
     fireEvent.click(screen.getByRole('button', { name: 'Guardar configuración futura' }))
@@ -328,7 +392,7 @@ describe('Configuración futura versionada', () => {
   })
   it('configuración desconocida no inventa defaults históricos y bloquea campos incompletos', async () => {
     shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? { known: false, version: 0, source: 'uncaptured', effective_date: null } : report())))
-    mount()
+    mountSettings()
     expect(await screen.findByText(/Configuración desconocida/)).toBeInTheDocument()
     expect(screen.getByLabelText('Baja adherencia global (%)')).toHaveValue(null)
     expect(screen.getByRole('button', { name: 'Guardar configuración futura' })).toBeDisabled()

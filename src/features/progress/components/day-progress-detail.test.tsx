@@ -30,6 +30,14 @@ describe('formatCompletedSet', () => {
 })
 
 describe('DayProgressDetail', () => {
+  it('no presenta registros de otro cliente o día como el detalle seleccionado', () => {
+    renderDetail({ id: 'old', client_id: 'client-other', date: '2026-06-28', training_completed: true,
+      exercises_completed: [], meals_completed: [], meals_completed_details: [], notes: 'Nota anterior',
+      admin_reply_text: null, admin_reply_sent_at: null })
+    expect(screen.queryByText('Nota anterior')).not.toBeInTheDocument()
+    expect(screen.getByText('Sin registro de progreso para este día.')).toBeInTheDocument()
+  })
+
   it('shows readable exercise and meal names instead of identifiers', () => {
     renderDetail({
       id: 'progress-1',

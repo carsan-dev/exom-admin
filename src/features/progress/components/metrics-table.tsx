@@ -25,15 +25,20 @@ const tableDateFormatter = new Intl.DateTimeFormat('es-ES', {
   day: '2-digit',
   month: '2-digit',
   year: 'numeric',
+  timeZone: 'UTC',
 })
 
 function formatValue(value: number | null, unit: string) {
-  if (value == null) return '-'
+  if (value == null) return 'Sin datos'
   return `${value} ${unit}`
 }
 
-export function MetricsTable({ clientId, page, onPageChange }: MetricsTableProps) {
-  const { data, isLoading } = useClientMetrics(clientId, page)
+export function MetricsTable(props: MetricsTableProps) {
+  return <MetricsTableContent key={props.clientId} {...props} />
+}
+
+function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps) {
+  const { data, isLoading, isError, refetch } = useClientMetrics(clientId, page)
   const [metricDialogOpen, setMetricDialogOpen] = useState(false)
   const [selectedMetric, setSelectedMetric] = useState<BodyMetric | null>(null)
 
@@ -67,17 +72,24 @@ export function MetricsTable({ clientId, page, onPageChange }: MetricsTableProps
         </CardHeader>
         <CardContent>
         {isLoading ? (
-          <div className="space-y-2">
+          <div className="space-y-2" role="status" aria-label="Cargando historial de métricas">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-8 w-full" />
+              <Skeleton key={i} className="h-8 w-full motion-reduce:animate-none" />
             ))}
+          </div>
+        ) : isError ? (
+          <div role="alert" className="space-y-3">
+            <p className="text-sm">No se pudo cargar el historial de métricas. Comprueba el acceso e inténtalo de nuevo.</p>
+            <Button variant="outline" onClick={() => void refetch()}>Reintentar historial</Button>
           </div>
         ) : !data || data.data.length === 0 ? (
           <p className="text-sm text-muted-foreground">Sin métricas registradas</p>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <p className="mb-3 text-sm text-muted-foreground">Registros corporales y edición. Desplaza la tabla para consultar todas las medidas y acciones.</p>
+            <div className="overflow-x-auto rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" role="region" aria-label="Historial corporal desplazable" tabIndex={0}>
               <Table>
+                <caption className="sr-only">Historial de métricas corporales y acciones</caption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Fecha</TableHead>
@@ -146,6 +158,7 @@ export function MetricsTable({ clientId, page, onPageChange }: MetricsTableProps
                   <Button
                     variant="outline"
                     size="icon"
+                    aria-label="Página anterior de métricas"
                     disabled={page <= 1}
                     onClick={() => onPageChange(page - 1)}
                   >
@@ -154,6 +167,7 @@ export function MetricsTable({ clientId, page, onPageChange }: MetricsTableProps
                   <Button
                     variant="outline"
                     size="icon"
+                    aria-label="Página siguiente de métricas"
                     disabled={page >= data.totalPages}
                     onClick={() => onPageChange(page + 1)}
                   >

@@ -71,7 +71,7 @@ describe('P1 period and metrics UI', () => {
     await screen.findAllByText('9000 pasos/día')
     await act(async () => { resolveA?.(response(fixture('a', 123))); await Promise.resolve() })
     expect(screen.queryByText('123 pasos/día')).not.toBeInTheDocument()
-    expect(screen.getAllByText('9000 pasos/día')).toHaveLength(2)
+    expect(within(screen.getByRole('table', { name: 'Comparativa de métricas del periodo' })).getAllByText('9000 pasos/día')).toHaveLength(2)
     expect(client.getQueryData<MetricsOverview>(['admin-progress', 'b', 'metrics-overview', 'all', '2026-09-16', 1])?.client_id).toBe('b')
   })
   it('shows errors separately from empty history and supports retry', async () => {
@@ -80,7 +80,10 @@ describe('P1 period and metrics UI', () => {
     await screen.findByRole('alert')
     expect(screen.queryByText('Sin datos')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
-    await screen.findByRole('table')
+    const table = await screen.findByRole('table', { name: 'Comparativa de métricas del periodo' })
+    expect(within(table).getAllByText('Sin datos')).toHaveLength(2)
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledTimes(2)
   })
   it('preserves URL period on client/section changes and keeps existing destinations', async () => {
     render(<QueryClientProvider client={queryClient()}><MemoryRouter initialEntries={['/progress?clientId=a&section=metricas&period=custom&from=2026-09-01&to=2026-09-16']}><ProgressPage /><Location /></MemoryRouter></QueryClientProvider>)
