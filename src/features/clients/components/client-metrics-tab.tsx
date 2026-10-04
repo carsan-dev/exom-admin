@@ -1,19 +1,8 @@
 import { useState } from 'react'
-import { Activity, Pencil, Plus, Scale } from 'lucide-react'
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip as RechartsTooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { Activity, Pencil, Plus } from 'lucide-react'
+import { MetricVisual } from '../../progress/components/metric-visual'
+import type { MetricSeries, Observation } from '../../progress/metrics-overview'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  ChartScaleSelect,
-} from '@/components/charts/chart-scale'
-import { calculateYAxisScale, type ChartScale } from '@/components/charts/chart-scale-utils'
 import {
   Table,
   TableBody,
@@ -31,27 +20,51 @@ interface ClientMetricsTabProps {
   metrics: BodyMetric[]
 }
 
-const chartDateFormatter = new Intl.DateTimeFormat('es-ES', {
-  day: '2-digit',
-  month: 'short',
-})
+const measurements = [
+  ['weight_kg', 'Peso', 'kg'], ['muscle_mass_kg', 'Masa muscular', 'kg'],
+  ['height_cm', 'Altura', 'cm'], ['sleep_hours', 'Sueño', 'h'],
+  ['neck_cm', 'Cuello', 'cm'], ['shoulders_cm', 'Hombros', 'cm'], ['chest_cm', 'Pecho', 'cm'],
+  ['arm_left_cm', 'Brazo izquierdo', 'cm'], ['arm_right_cm', 'Brazo derecho', 'cm'],
+  ['forearm_left_cm', 'Antebrazo izquierdo', 'cm'], ['forearm_right_cm', 'Antebrazo derecho', 'cm'],
+  ['waist_cm', 'Cintura', 'cm'], ['hips_cm', 'Cadera', 'cm'],
+  ['thigh_left_cm', 'Muslo izquierdo', 'cm'], ['thigh_right_cm', 'Muslo derecho', 'cm'],
+  ['calf_left_cm', 'Gemelo izquierdo', 'cm'], ['calf_right_cm', 'Gemelo derecho', 'cm'],
+] as const
+
+function bodySeries(metrics: BodyMetric[]): MetricSeries[] {
+  const sorted = [...metrics].sort((a, b) => a.date.localeCompare(b.date))
+  return measurements.map(([key, label, unit]) => {
+    const points: Observation[] = sorted.map((metric) => ({ date: metric.date.slice(0, 10), value: metric[key],
+      quality: metric[key] === null ? 'missing' : 'complete', provenance: 'recorded' }))
+    const complete = points.filter((point) => point.value !== null)
+    const first = complete[0] ?? null
+    const last = complete[complete.length - 1] ?? null
+    return { key, label, unit, group: 'body', source: 'Mediciones corporales', points,
+      count: complete.length, incomplete_count: points.length - complete.length, first, last,
+      change: complete.length > 1 && first?.value != null && last?.value != null && first.date < last.date ? last.value - first.value : null }
+  })
+}
 
 const tableDateFormatter = new Intl.DateTimeFormat('es-ES', {
   day: '2-digit',
   month: '2-digit',
   year: 'numeric',
+  timeZone: 'UTC',
 })
 
 function formatValue(value: number | null, unit: string) {
   if (value == null) {
-    return '-'
+    return 'Sin datos'
   }
 
   return `${value} ${unit}`
 }
 
-export function ClientMetricsTab({ clientId, metrics }: ClientMetricsTabProps) {
-  const [weightScale, setWeightScale] = useState<ChartScale>('auto')
+export function ClientMetricsTab(props: ClientMetricsTabProps) {
+  return <ClientMetricsContent key={props.clientId} {...props} />
+}
+
+function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
   const [metricDialogOpen, setMetricDialogOpen] = useState(false)
   const [selectedMetric, setSelectedMetric] = useState<BodyMetric | null>(null)
 
@@ -69,7 +82,7 @@ export function ClientMetricsTab({ clientId, metrics }: ClientMetricsTabProps) {
     return (
       <>
         <Card>
-          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6 [--muted-foreground:var(--foreground-secondary)] [--primary-foreground:#30271e]">
             <p className="text-sm text-muted-foreground">
               Aún no hay métricas corporales registradas para este cliente.
             </p>
@@ -89,62 +102,14 @@ export function ClientMetricsTab({ clientId, metrics }: ClientMetricsTabProps) {
     )
   }
 
-  const chartData = [...metrics]
-    .filter((metric) => metric.weight_kg != null)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .map((metric) => ({
-      date: chartDateFormatter.format(new Date(metric.date)),
-      weight: metric.weight_kg,
-    }))
-  const weightYAxis = calculateYAxisScale(chartData.map((point) => point.weight), weightScale, 1)
+  const series = bodySeries(metrics)
+  const dates = metrics.map((metric) => metric.date).sort()
+  const period = `${tableDateFormatter.format(new Date(dates[0]))} – ${tableDateFormatter.format(new Date(dates[dates.length - 1]))}`
 
   return (
-    <div className="space-y-4">
-      {chartData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Scale className="h-5 w-5 text-brand-primary" />
-                <CardTitle className="text-xl">Evolución del peso</CardTitle>
-              </div>
-              <ChartScaleSelect value={weightScale} onValueChange={setWeightScale} />
-            </div>
-            <CardDescription>Últimas mediciones con peso registrado</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 w-full">
-              <ResponsiveContainer>
-                <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }} />
-                  <YAxis
-                    domain={weightYAxis?.domain}
-                    ticks={weightYAxis?.ticks}
-                    tick={{ fill: 'var(--foreground-muted)', fontSize: 12 }}
-                  />
-                  <RechartsTooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--card)',
-                      borderColor: 'var(--border)',
-                      borderRadius: '12px',
-                      color: 'var(--foreground)',
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="weight"
-                    stroke="var(--brand-primary)"
-                    strokeWidth={3}
-                    dot={{ fill: 'var(--brand-primary)', strokeWidth: 0, r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+    <div className="space-y-4 [--muted-foreground:var(--foreground-secondary)] [--primary-foreground:#30271e]">
+      <p className="text-sm text-muted-foreground">Histórico reciente disponible: {metrics.length} registros. La comparación se limita a estas mediciones, no a todo el historial del cliente.</p>
+      <MetricVisual series={series} period={period} chartPeriod={period} />
 
       <Card>
         <CardHeader>
@@ -163,7 +128,9 @@ export function ClientMetricsTab({ clientId, metrics }: ClientMetricsTabProps) {
           </div>
         </CardHeader>
         <CardContent>
+          <div role="region" aria-label="Historial corporal desplazable" tabIndex={0} className="overflow-x-auto rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <Table>
+            <caption className="sr-only">Historial reciente de métricas corporales y acciones</caption>
             <TableHeader>
               <TableRow>
                 <TableHead>Fecha</TableHead>
@@ -222,6 +189,7 @@ export function ClientMetricsTab({ clientId, metrics }: ClientMetricsTabProps) {
               ))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 
