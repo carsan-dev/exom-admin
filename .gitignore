@@ -13,6 +13,13 @@ dist-ssr
 *.local
 *.tsbuildinfo
 
+# REST-T2E isolated generated verification artifacts; authored evidence remains visible.
+/docs/evidence/rest-t2e-admin-20261005/build/
+/docs/evidence/rest-t2e-admin-20261005/browser-output/
+/docs/evidence/rest-t2e-admin-20261005/cache/
+/docs/evidence/rest-t2e-admin-20261005/checkpoint/
+/docs/evidence/rest-t2e-admin-20261005/correction-source-hashes.json
+
 # Environment variables
 .env
 .env.local

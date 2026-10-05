@@ -1,6 +1,9 @@
-import { useSearchParams } from 'react-router'
+import { UNSAFE_DataRouterContext, useSearchParams } from 'react-router'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useState } from 'react'
+import { useCallback, useContext, useRef, useState } from 'react'
+import { TaskRouteGuard } from '../follow-up-tasks/route-guard'
+import { FollowUpPanel } from '../follow-up-tasks/follow-up-panel'
+import type { NavigationGuard } from '../follow-up-tasks/task-editor'
 import { ClientSelector, EmptyClientState } from '../components/client-selector'
 import { ProgressOverviewCards } from '../components/progress-overview-cards'
 import { ProgressCalendar } from '../components/progress-calendar'
@@ -35,7 +38,7 @@ export function ProgressPage() {
   const clientId = searchParams.get('clientId') ?? ''
   const selectedDate = searchParams.get('date') ?? getTodayStr()
   const requestedSection = searchParams.get('section') ?? 'resumen'
-  const section = ['resumen', 'metricas', 'fotos', 'entrenamiento', 'adherencia', 'racha'].includes(requestedSection) ? requestedSection : 'metricas'
+  const section = ['resumen', 'metricas', 'fotos', 'entrenamiento', 'adherencia', 'racha', 'seguimiento'].includes(requestedSection) ? requestedSection : 'metricas'
   const period = metricsPeriod(searchParams)
   const historyPage = Math.max(1, Number(searchParams.get('historyPage')) || 1)
   const trainingWindow = trainingWindowFor(getTodayStr(), searchParams.get('trainingWindow'))
@@ -66,7 +69,12 @@ export function ProgressPage() {
   const weekQuery = useClientWeekSummary(clientId, weekStart)
   const { data: weekSummary, isLoading: weekLoading } = weekQuery
 
+  const dataRouter = useContext(UNSAFE_DataRouterContext)
+  const taskGuard = useRef<NavigationGuard | null>(null)
+  const registerTaskGuard = useCallback((guard: NavigationGuard | null) => { taskGuard.current = guard }, [])
+
   function handleClientSelect(id: string) {
+    if (!dataRouter && id !== clientId && taskGuard.current && !taskGuard.current()) return
     updateParams({ clientId: id, date: getTodayStr(), historyPage: '1', trainingWindow: '0' })
     setMetricsPage(1)
   }
@@ -89,6 +97,7 @@ export function ProgressPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-3 sm:space-y-5 [--muted-foreground:var(--foreground-secondary)] [--primary-foreground:#30271e] [&_button]:duration-150 [&_button]:motion-reduce:transition-none">
+      <TaskRouteGuard guard={taskGuard} />
       <div className="flex min-w-0 flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Progreso</h1>
         <div className="min-w-0 flex-1 sm:flex-none">
@@ -100,7 +109,7 @@ export function ProgressPage() {
       {!clientId ? (
         <EmptyClientState />
       ) : (
-        <Tabs value={section} onValueChange={(value) => updateParams({ section: value })} className="space-y-4">
+        <Tabs value={section} onValueChange={(value) => { if (dataRouter || !taskGuard.current || taskGuard.current()) updateParams({ section: value }) }} className="space-y-4">
           <section aria-label="Contexto del cliente y periodo" className="border-y border-border py-2">
             <details>
               <summary aria-label={`Periodo de métricas y entrenamiento: ${period.from ?? 'Inicio'} a ${period.to} UTC`} className="min-h-11 cursor-pointer rounded-sm text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -131,7 +140,7 @@ export function ProgressPage() {
             <TabsTrigger value="adherencia">Adherencia</TabsTrigger>
             <TabsTrigger value="racha">Racha</TabsTrigger>
             <TabsTrigger value="dashboard" disabled>Dashboard · pendiente</TabsTrigger>
-            <TabsTrigger value="seguimiento" disabled>Seguimiento · pendiente</TabsTrigger>
+            <TabsTrigger value="seguimiento">Seguimiento</TabsTrigger>
           </TabsList>
           </div>
 
@@ -199,6 +208,10 @@ export function ProgressPage() {
 
           <TabsContent value="adherencia" className="space-y-4">
             <ClientAdherenceTab key={clientId} clientId={clientId} />
+          </TabsContent>
+
+          <TabsContent value="seguimiento" className="space-y-4">
+            <FollowUpPanel key={clientId} clientId={clientId} onGuard={registerTaskGuard} />
           </TabsContent>
 
           {/* Racha Tab */}
