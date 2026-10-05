@@ -3,7 +3,9 @@
 > Copia saneada para entrega: ubicaciones normalizadas; resultados, fechas y hashes conservan su significado histórico y corresponden al snapshot privado original, no a esta copia. WORKSPACE_ROOT identifica la coordinación; SDK_ROOT el SDK instalado; RUNTIME_ROOT las herramientas locales; TEST_ARTIFACT_ROOT los recursos privados retenidos, no publicados.
 
 
-**Estado actual: APPROVED / VERIFIED — commit local y evidencia final pendientes del parent; no DONE ni cierre P5. Sin aprobación de diseño del usuario.** Implementación y checkpoint preservados; los resultados independientes y el historial de fallos se registran abajo. Seguimiento queda habilitado en el Progreso existente: resumen canónico, tareas paginadas y editor lateral. **Navegador/aceptación visual NOT_RUN en este writer; no declarar REST-T2E ni P5 cerrados.** Sin publicación, mensajes, cambios remotos, commits ni implementación de REST-T3/P6.
+**Estado actual: DONE local para el alcance acotado REST-T2E2/T2E3. P5 permanece abierto.** Commit de implementación `d7922adf760d50dd99b624b00ac4bf083a2c05c0` — `feat(admin): integra tareas de seguimiento`, sobre la base indicada abajo; 24 archivos, incluidos pruebas y evidencia. Revisión `review-629aec3476ffc9b0` aprobada y acknowledgement consumido. Verificación: suite del writer 388 PASS, lint sin errores y build aislado PASS; verificador independiente 33 pruebas focalizadas y continuación funcional de navegador 2/2 PASS, junto con los 14 casos anteriores documentados (no una nueva ejecución 18/18). Transporte sintético: no acredita integración real API/Firebase ni aprobación visual del usuario. Las tres observaciones informativas siguen abiertas para seguimiento separado de P5. No push, despliegue, cambios remotos ni implementación de REST-T3/P6.
+
+Las notas de commit pendiente, consentimiento caducado y pruebas NOT_RUN que aparecen en la cronología inferior son históricas; este cierre no altera los fallos ni amplía su evidencia. Los archivos generados y checkpoints ignorados siguen siendo LOCAL_ONLY.
 
 ## Identidad y alcance — 2026-10-05
 
