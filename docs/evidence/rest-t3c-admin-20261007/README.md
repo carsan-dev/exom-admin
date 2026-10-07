@@ -3,7 +3,7 @@
 > Copia saneada para entrega: ubicaciones normalizadas; resultados, fechas y hashes conservan su significado histórico y corresponden al snapshot privado original, no a esta copia. WORKSPACE_ROOT identifica la coordinación; SDK_ROOT el SDK instalado; RUNTIME_ROOT las herramientas locales; TEST_ARTIFACT_ROOT los recursos privados retenidos, no publicados.
 
 
-2026-10-07. Recibo actual: navegador independiente 14/14 PASS y 10/10 PDF proofs PASS; revisión visual parcial. Revisión nativa y futuro commit PENDING. No DONE, cierre de P5, despliegue ni inicio de App. Las secciones anteriores a «Recibo final de aceptación» son historia fechada, no el estado actual.
+2026-10-07. **REST-T3C1 DONE local** en `6fdaba71096e415871738cc92db8af31986d5b5f` (`feat(admin): publica revisiones de recap`). Native cuatro lentes aprobadas/ACK completado, autoridad consumida. Navegador independiente 14/14 PASS y 10/10 PDF proofs PASS; revisión visual parcial. Sin cierre P5, despliegue ni inicio App. STOP por instrucción del usuario. Las secciones anteriores a «Recibo final de aceptación» son historia fechada, no el estado actual.
 
 ## Identidad y alcance
 
@@ -133,9 +133,9 @@ Fuente/recuperación: las tres fuentes print y su test actualizan únicamente tr
 
 **Preflight pendiente del padre:** verify-browser.cjs todavía fija el digest anterior `9a7ccd…`. Antes del próximo run debe reconciliar ese pin con `4b8ce1ae…`; ese archivo no pertenece a las superficies de edición de esta corrección y no se tocó. No nuevo navegador/PDF, revisión nativa, Git index/publicación ni writes API/App. No cierre de P5: aceptación geométrica, legibilidad/PDF y revisión final siguen pendientes.
 
-## Recibo final de aceptación — antes de revisión nativa
+## Recibo final de aceptación — cierre local posterior al commit
 
-Estado: **implementado y verificado en harness sintético; native review/commit PENDING**. Fuente vigente: base Admin `af64addb18a772518ea443568cd5351763a60c00`, manifest de 13 `4b8ce1ae66e37aa2c67b3c82a31015d583f399b042c38749a663a23ad9f9477b`. El padre actualizó el pin del runner; esta tarea final modifica solo documentación/checkpoint. No API/App writes, navegador nuevo, commits ni invocación de revisión nativa por este escritor.
+Estado: **REST-T3C1 DONE local; native review y commit completados por el padre**. Commit `6fdaba71096e415871738cc92db8af31986d5b5f`, 25 archivos/1705 líneas según el padre; árbol aprobado/staged/commit `129200adf2229a3b28f03a0f324fefe87348d408`. Este escritor confirmó HEAD/árbol y Admin limpio antes de editar solo documentación. Fuente vigente: base Admin `af64addb18a772518ea443568cd5351763a60c00`, manifest de 13 `4b8ce1ae66e37aa2c67b3c82a31015d583f399b042c38749a663a23ad9f9477b`. El padre actualizó el pin del runner; esta tarea final modifica solo documentación/checkpoint. No API/App writes, navegador nuevo, commits ni invocación de revisión nativa por este escritor.
 
 ### Aceptación independiente y límites
 
@@ -161,7 +161,7 @@ npm exec -- vite --config docs/evidence/rest-t3c-admin-20261007/vite.browser.con
 node docs/evidence/rest-t3c-admin-20261007/verify-browser.cjs
 ```
 
-No instaladores automáticos, API live ni vaciado de outputs. El runner crea un run exclusivo, conserva perfiles y registra 14 casos y 10 proofs nominales; utiliza pdftotext instalado. Los `results.json`, traces, PNGs, PDFs, texto extraído, perfiles, wheels y rasterizaciones existentes son **LOCAL_ONLY/ignored**, no una entrega Git ni evidencia disponible tras un checkout nuevo. Este README no ignorado es el recibo durable previsto para revisión/commit; actualmente es untracked, no se staged aquí. Archivar los outputs locales por separado si deben acompañar el handoff. La reproducción genera evidencia nueva y nunca sustituye los FAIL históricos.
+No instaladores automáticos, API live ni vaciado de outputs. El runner crea un run exclusivo, conserva perfiles y registra 14 casos y 10 proofs nominales; utiliza pdftotext instalado. Los `results.json`, traces, PNGs, PDFs, texto extraído, perfiles, wheels y rasterizaciones existentes son **LOCAL_ONLY/ignored**, no una entrega Git ni evidencia disponible tras un checkout nuevo. Este README no ignorado quedó versionado en el commit de implementación indicado; esta actualización pasiva posterior queda pendiente de lectura/commit documental exclusivo del padre, sin staging por este escritor. Archivar los outputs locales por separado si deben acompañar el handoff. La reproducción genera evidencia nueva y nunca sustituye los FAIL históricos.
 
 Compatibilidad: el filtro por sent_at es exclusivamente del informe Admin autorizado. API client select y App legacy card mantienen sus lectores text-based; servicios, timestamps/notificaciones legacy y clientes antiguos no se alteraron ni se declara que oculten el texto unsent. Los campos publicados del coach no dependen del feedback legacy. No trabajo App ni otra fase iniciado; el padre mantiene seguimiento/decisión de feature, disposición nativa y futura unidad de commit.
 
@@ -186,4 +186,12 @@ Untracked **intencionados** que la revisión debe incluir:
 - `docs/evidence/rest-t3c-admin-20261007/browser/fixture-auth.ts`
 - `docs/evidence/rest-t3c-admin-20261007/browser/fixture.css`
 
-Diff-check final se reporta en handoff. Native review, disposición final y commit **PENDING**; ningún DONE/cierre P5, push, merge, despliegue ni aprobación de producto inferidos de este recibo.
+### Autoridad nativa, checkpoint y parada
+
+Native `review-00547c380a077c42`: cuatro lentes aprobadas, ACK completado y autoridad consumida revisión `44d5147fc0b6e8b50ad17e8f547c08faf416408b6d451a2ccfb20973cfafb9ad`, según evidencia del padre. El ACK inicial fue bloqueado por input exclusivo del controlador, sin mutación; retry exitoso con lineage solamente consumió autoridad. No se consultó STATUS tras consumirla ni se invocó revisión por este escritor.
+
+Advisories informativos no bloqueantes, separados: `R3-fresh-checkout-output` (`verify-browser.cjs:330–345`) y `R3/R4-recovery-print-cache` (editor:75). OPEN para disposición futura REST-T3D; texto detallado no disponible, sin inferir causa/fix ni reabrir candidato aprobado.
+
+Checkpoint posterior al commit: `checkpoint/committed/final-receipt.json`, metadata mínima LOCAL_ONLY/ignored, sin copias de fuentes ni secretos. El inventario candidato anterior describe historia precommit; las 25 fuentes/recibos están recuperables desde el commit, no los outputs ignorados. Diff-check documental y hashes se reportan en handoff; no rerun funcional bajo exención docs-only pasiva.
+
+**STOP.** REST-T3C2 App NOT_STARTED; siguiente paso permitido únicamente al reanudar el usuario. REST-T3C3: subchecks Admin navegador/PDF PASS, aceptación integrada PENDING. REST-T3D/P5 pendientes. Autorización futura de entrega conservada, sin remotos esta noche, nueva unidad, P6, despliegue ni apagado. API `2860703`/probe original y App `db72c7f` intacta proceden de comprobaciones anteriores del padre, no nuevas verificaciones aquí.
