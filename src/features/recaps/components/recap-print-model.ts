@@ -2,7 +2,8 @@ import { formatAverageDailySteps, formatRecapOption, type RecapItem } from '../t
 
 export type RecapPrintSource = Readonly<Pick<RecapItem,
   | 'id' | 'status' | 'submitted_at' | 'reviewed_at'
-  | 'week_start_date' | 'week_end_date' | 'client_feedback_text'
+  | 'week_start_date' | 'week_end_date' | 'client_feedback_text' | 'client_feedback_sent_at'
+  | 'published_coach_summary' | 'published_changes' | 'published_next_week_goals'
   | 'training_effort' | 'training_sessions' | 'average_daily_steps'
   | 'training_progress' | 'training_notes' | 'nutrition_quality' | 'food_quality'
   | 'hydration_enabled' | 'hydration_level' | 'nutrition_notes' | 'sleep_hours_range'
@@ -25,6 +26,7 @@ export interface RecapPrintModel {
   week: string
   submittedDate: string
   feedback: string | null
+  publishedReview: PrintAnswer[]
   sections: PrintSection[]
 }
 
@@ -50,8 +52,13 @@ export function toRecapPrintModel(source: RecapPrintSource, clientName: string):
     clientName: clientName.trim() || 'Cliente sin nombre',
     week: `${dateLabel(source.week_start_date, true)} - ${dateLabel(source.week_end_date, true)}`,
     submittedDate: dateLabel(source.submitted_at),
-    feedback: source.status === 'REVIEWED' && source.reviewed_at
+    feedback: source.client_feedback_sent_at
       ? source.client_feedback_text?.trim() || null : null,
+    publishedReview: [
+      answer('Resumen del coach', source.published_coach_summary ?? ''),
+      answer('Cambios realizados', source.published_changes ?? ''),
+      answer('Objetivos de la próxima semana', source.published_next_week_goals ?? ''),
+    ].filter((item) => item.value.trim()),
     sections: [
       { title: 'Entrenos', answers: [
         answer('Esfuerzo semanal', numberLabel(source.training_effort)),

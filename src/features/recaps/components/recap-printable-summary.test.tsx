@@ -11,6 +11,10 @@ vi.mock('../api', () => ({
   useRecapDetail: () => ({ ...query, isLoading: false, isError: false }),
   useReviewRecap: () => ({ isPending: false, mutate: vi.fn() }),
   useArchiveRecap: () => ({ isPending: false, mutate: vi.fn() }),
+  useRecapIdentity: () => 'staff:0',
+  recapIdentity: () => 'staff:0',
+  useSaveRecapReviewDraft: () => ({ isPending: false, mutateAsync: vi.fn() }),
+  usePublishRecapReview: () => ({ isPending: false, mutateAsync: vi.fn() }),
 }))
 vi.mock('@/hooks/use-unsaved-changes', () => ({ useUnsavedChanges: vi.fn() }))
 
@@ -41,10 +45,29 @@ function fixture(overrides: Partial<RecapItem> = {}): RecapItem {
 afterEach(() => { vi.restoreAllMocks(); query.data = undefined })
 
 describe('existing recap print projection', () => {
+  it('projects only the three published coach fields, retaining legacy sent feedback independently', () => {
+    const model = toRecapPrintModel(fixture({ status: 'REVIEWED', reviewed_at: '2026-10-05',
+      client_feedback_text: 'Feedback legacy enviado', client_feedback_sent_at: '2026-10-05T12:00:00Z',
+      published_coach_summary: 'Resumen publicado\nSegunda línea', published_changes: 'Cambios publicados',
+      published_next_week_goals: `Objetivos publicados ${'x'.repeat(2900)}`, draft_coach_summary: 'PRIVATE_DRAFT',
+      draft_changes: 'PRIVATE_CHANGES', draft_next_week_goals: 'PRIVATE_GOALS', review_version: 9 }), 'Cliente')
+    expect(JSON.stringify(model)).not.toMatch(/PRIVATE_|review_version|draft_/)
+    render(<RecapPrintableSummary model={model} />)
+    expect(screen.getByRole('heading', { name: 'Resumen del coach', hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Cambios realizados', hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Objetivos de la próxima semana', hidden: true })).toBeInTheDocument()
+    expect(screen.getByText('Feedback legacy enviado')).toBeInTheDocument()
+    expect(screen.getByText(/Resumen publicado/).textContent).toBe('Resumen publicado\nSegunda línea')
+    expect(screen.getByText(/Objetivos publicados/).textContent).toBe(`Objetivos publicados ${'x'.repeat(2900)}`)
+    const css = document.querySelector('#recap-print-report style')?.textContent
+    expect(css).toContain('overflow-wrap: anywhere')
+    expect(css).toContain('break-after: avoid')
+    expect(css).toContain('orphans: 3; widows: 3')
+  })
   it('allowlists answers and identity, excluding private fields and unconfirmed feedback', () => {
     const model = toRecapPrintModel(fixture(), 'Cliente Sintético')
     expect(model).not.toBeNull()
-    expect(Object.keys(model ?? {})).toEqual(['clientName', 'week', 'submittedDate', 'feedback', 'sections'])
+    expect(Object.keys(model ?? {})).toEqual(['clientName', 'week', 'submittedDate', 'feedback', 'publishedReview', 'sections'])
     expect(JSON.stringify(model)).not.toMatch(/PRIVATE_|DRAFT_FEEDBACK_SENTINEL|fake-client|fake-recap/)
     render(<RecapPrintableSummary model={model} />)
     expect(screen.getByText('Resumen de recap')).toBeInTheDocument()
@@ -69,10 +92,48 @@ describe('existing recap print projection', () => {
     expect(style).not.toMatch(/max-height|overflow:\s*hidden|line-clamp/)
   })
 
-  it('prints only saved reviewed feedback, including archived reviewed recaps', () => {
+  it.each(['SUBMITTED', 'REVIEWED'] as const)('excludes unsent legacy feedback for %s without hiding published coach fields', (status) => {
+    const model = toRecapPrintModel(fixture({ status, reviewed_at: '2026-10-05T12:00:00Z',
+      client_feedback_text: 'UNSENT_FEEDBACK_SENTINEL', client_feedback_sent_at: null,
+      published_coach_summary: 'Coach publicado', published_changes: 'Cambio publicado',
+      published_next_week_goals: 'Objetivo publicado' }), 'Cliente')
+    expect(model?.feedback).toBeNull()
+    expect(JSON.stringify(model)).not.toContain('UNSENT_FEEDBACK_SENTINEL')
+    render(<RecapPrintableSummary model={model} />)
+    expect(screen.queryByText('Revisión compartible')).not.toBeInTheDocument()
+    expect(document.getElementById('recap-print-report')?.textContent).not.toContain('UNSENT_FEEDBACK_SENTINEL')
+    for (const text of ['Coach publicado', 'Cambio publicado', 'Objetivo publicado']) expect(screen.getByText(text)).toBeInTheDocument()
+  })
+
+  it.each(['SUBMITTED', 'REVIEWED'] as const)('uses the sent marker rather than reviewed_at to preserve sent feedback for %s', (status) => {
+    const model = toRecapPrintModel(fixture({ status, reviewed_at: null,
+      client_feedback_text: 'Feedback enviado sin fecha de revisión', client_feedback_sent_at: '2026-10-05T12:00:00Z' }), 'Cliente')
+    render(<RecapPrintableSummary model={model} />)
+    expect(screen.getByText('Feedback enviado sin fecha de revisión')).toBeInTheDocument()
+  })
+
+  it('keeps published paragraphs and client answers intact with bounded whitespace wrapping, including trailing spaces', () => {
+    const content = `NUEVO_RESUMEN_CONFIRMADO\n${'Resumen nuevo publicado tras confirmación explícita. '.repeat(35)}\nFINAL_NUEVO_RESUMEN`
+    const word = `NUEVOS_OBJETIVOS_CONFIRMADOS\n${'Z'.repeat(2900)}`
+    render(<RecapPrintableSummary model={toRecapPrintModel(fixture({ training_notes: content,
+      published_coach_summary: content, published_next_week_goals: word }), 'Cliente')} />)
+    const report = document.getElementById('recap-print-report')
+    if (!report) throw new Error('Missing printable report')
+    expect([...report.querySelectorAll('p, dd')].filter((node) => node.textContent === content)).toHaveLength(2)
+    expect(screen.getByText(/NUEVOS_OBJETIVOS_CONFIRMADOS/).textContent).toBe(word)
+    const css = report?.querySelector('style')?.textContent
+    expect(css).toContain('min-width: 0; max-width: 100%')
+    expect(css).toContain('#recap-print-report section p, #recap-print-report dd { white-space: break-spaces; }')
+    expect(css).toContain('overflow-wrap: anywhere')
+    expect(css).toContain('orphans: 3; widows: 3')
+    expect(css).toContain('break-after: avoid')
+    expect(css).not.toMatch(/overflow:\s*hidden|line-clamp|max-height/)
+  })
+
+  it('prints only sent feedback, including archived reviewed recaps', () => {
     const model = toRecapPrintModel(fixture({ status: 'REVIEWED',
       reviewed_at: '2026-09-29T12:00:00Z', archived_at: '2026-09-30T12:00:00Z',
-      client_feedback_text: 'Feedback compartible confirmado' }), 'Cliente Sintético')
+      client_feedback_text: 'Feedback compartible confirmado', client_feedback_sent_at: '2026-09-29T12:00:00Z' }), 'Cliente Sintético')
     render(<RecapPrintableSummary model={model} />)
     expect(screen.getByText('Revisión compartible')).toBeInTheDocument()
     expect(screen.getByText('Feedback compartible confirmado')).toBeInTheDocument()
@@ -104,7 +165,7 @@ describe('existing recap print projection', () => {
 
   it.each(['feedback', 'internal note', 'both'])('disables printing for dirty %s while preserving the saved private-safe report', (editedField) => {
     query.data = fixture({ status: 'REVIEWED', reviewed_at: '2026-09-29T12:00:00Z',
-      client_feedback_text: 'Feedback guardado' })
+      client_feedback_text: 'Feedback guardado', client_feedback_sent_at: '2026-09-29T12:00:00Z' })
     const { rerender } = render(<MemoryRouter><RecapDetailPage /></MemoryRouter>)
     const report = document.getElementById('recap-print-report')
     const assertSavedReport = () => {
@@ -136,6 +197,7 @@ describe('existing recap print projection', () => {
     // Simulate the persisted query refresh after saving, without an API request.
     query.data = fixture({ status: 'REVIEWED', reviewed_at: '2026-09-29T12:00:00Z',
       client_feedback_text: editedField === 'internal note' ? 'Feedback guardado' : 'UNSAVED_FEEDBACK_SENTINEL',
+      client_feedback_sent_at: '2026-09-29T12:00:00Z',
       admin_comments: editedField === 'feedback' ? 'PRIVATE_INTERNAL_SENTINEL' : 'UNSAVED_PRIVATE_SENTINEL' })
     rerender(<MemoryRouter><RecapDetailPage /></MemoryRouter>)
     expect(printButton).toBeEnabled()

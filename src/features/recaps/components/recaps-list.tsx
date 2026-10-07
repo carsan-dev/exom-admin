@@ -54,9 +54,10 @@ interface RecapsListProps {
   archived: boolean
   page: number
   onPageChange: (page: number) => void
+  returnTo?: string
 }
 
-export function RecapsList({ clientId, status, archived, page, onPageChange }: RecapsListProps) {
+export function RecapsList({ clientId, status, archived, page, onPageChange, returnTo }: RecapsListProps) {
   const { data, isError, isLoading, isRefetching, refetch } = useRecapsList(
     clientId,
     status,
@@ -159,7 +160,7 @@ export function RecapsList({ clientId, status, archived, page, onPageChange }: R
                 </TableCell>
                 <TableCell>
                   <Button size="sm" variant="outline" asChild>
-                    <Link to={`/recaps/${item.id}`}>Abrir</Link>
+                    <Link to={`/recaps/${item.id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`}>Abrir</Link>
                   </Button>
                 </TableCell>
               </TableRow>

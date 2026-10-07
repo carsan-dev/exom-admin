@@ -1,5 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router'
+import { RecapsList } from '@/features/recaps/components/recaps-list'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAuth } from '@/hooks/use-auth'
 import { FollowUpPanel } from './follow-up-panel'
@@ -20,7 +22,7 @@ let client: QueryClient
 const onGuard = vi.fn()
 function mount(clientId: string = ids.client) {
   client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
-  const node = (id: string) => <QueryClientProvider client={client}><FollowUpPanel clientId={id} onGuard={onGuard} /></QueryClientProvider>
+  const node = (id: string) => <QueryClientProvider client={client}><MemoryRouter initialEntries={[`/progress?clientId=${id}&section=follow-up`]}><FollowUpPanel clientId={id} onGuard={onGuard} /></MemoryRouter></QueryClientProvider>
   const result = render(node(clientId))
   return { ...result, changeClient: (id: string) => result.rerender(node(id)) }
 }
@@ -81,11 +83,20 @@ describe('Seguimiento: contratos y presentación', () => {
     expect(screen.queryByRole('button', { name: 'Completar tarea' })).not.toBeInTheDocument()
     expect(api.put).not.toHaveBeenCalled()
   })
-  it('deja Recaps explícitamente pendiente sin simular publicación', async () => {
+  it('integra Recaps paginados por cliente con contexto de vuelta; conserva enlaces globales', async () => {
+    const recap = { id: 'synthetic-recap', client_id: ids.client, week_start_date: '2026-10-05', week_end_date: '2026-10-11', submitted_at: '2026-10-12', created_at: '2026-10-05', status: 'SUBMITTED', archived_at: null, admin_comments: null, client: { id: ids.client, email: 'client@example.invalid', profile: null } }
+    const prior = api.get.getMockImplementation()
+    api.get.mockImplementation((url, options) => url === '/recaps' ? Promise.resolve(envelope({ data: [recap], total: 21, page: options.params.page, limit: 20, totalPages: 2 })) : prior?.(url, options))
     mount()
     fireEvent.mouseDown(screen.getByRole('tab', { name: 'Recaps' }), { button: 0, ctrlKey: false })
-    expect(await screen.findByText(/pendiente de REST-T3/)).toBeInTheDocument()
+    const link = await screen.findByRole('link', { name: 'Abrir' })
+    expect(link.getAttribute('href')).toContain(`/recaps/synthetic-recap?returnTo=${encodeURIComponent(`/progress?clientId=${ids.client}&section=follow-up`)}`)
+    expect(api.get).toHaveBeenCalledWith('/recaps', expect.objectContaining({ params: { page: 1, limit: 20, client_id: ids.client } }))
+    fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/recaps', expect.objectContaining({ params: { page: 2, limit: 20, client_id: ids.client } })))
     expect(api.post).not.toHaveBeenCalled()
+    render(<QueryClientProvider client={client}><MemoryRouter><RecapsList archived={false} page={1} onPageChange={vi.fn()} /></MemoryRouter></QueryClientProvider>)
+    await waitFor(() => expect(screen.getAllByRole('link', { name: 'Abrir' }).some((item) => item.getAttribute('href') === '/recaps/synthetic-recap')).toBe(true))
   })
   it('separa cachés por cliente, identidad y filtros', () => {
     const filters = { page: 1, view: 'active' as const }
