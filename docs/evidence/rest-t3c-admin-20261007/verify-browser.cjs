@@ -17,6 +17,7 @@ const requiredPDFs = {
   'desktop-light': ['before', 'after'], 'desktop-dark': ['before', 'after'],
   'mobile-light': ['before', 'after'], 'mobile-dark': ['before', 'after'],
   'private-only-submitted': ['private-only'], 'reviewed-unsent-feedback-contract': ['unsent-feedback'],
+  'archived-submitted-print-contract': ['archived-submitted'],
 };
 const expectedRequiredPDFCount = Object.values(requiredPDFs).flat().length;
 const manifestSha256 = '4b8ce1ae66e37aa2c67b3c82a31015d583f399b042c38749a663a23ad9f9477b';
@@ -109,7 +110,7 @@ async function pdfText(filename, buffer) {
   // No installation, network, shell interpolation or production environment.
   const env = {};
   for (const key of ['PATH', 'SYSTEMROOT', 'SystemRoot', 'WINDIR', 'TEMP', 'TMP', 'TMPDIR']) if (process.env[key]) env[key] = process.env[key];
-  const local = spawnSync('pdftotext', ['-layout', filename, '-'], { encoding: 'utf8', env, timeout: 20000, maxBuffer: 10 * 1024 * 1024, windowsHide: true });
+  const local = spawnSync('pdftotext', ['-enc', 'UTF-8', '-layout', filename, '-'], { encoding: 'utf8', env, timeout: 20000, maxBuffer: 10 * 1024 * 1024, windowsHide: true });
   if (!local.error && local.status === 0) return { tool: 'installed pdftotext', text: local.stdout };
   const pdfjs = resolveInstalled('pdfjs-dist/legacy/build/pdf.mjs');
   if (pdfjs) {
@@ -384,11 +385,49 @@ async function main() {
     await visible(summary(page));
     await printProof(page, record, 'private-only', ['FINAL_RESPUESTA_CLIENTE'], ['PRIVATE_DRAFT_SENTINEL', 'Resumen del coach', 'Cambios realizados', 'Objetivos de la próxima semana', 'UNSENT_FEEDBACK_SENTINEL', 'Revisión compartible'], 2);
   });
-  await caseRun('unsent-draft', mobile, 'dark', '/recaps/recap-unsent', async (page) => {
+  await caseRun('unsent-draft', mobile, 'dark', '/recaps/recap-unsent', async (page, record) => {
+    const priorPrintCalls = await page.evaluate(() => window.__nativePrintCalls);
+    assert.equal(priorPrintCalls, 0);
     await visible(summary(page)); assert.equal(await summary(page).isDisabled(), true);
+    const responses = await control(page, 'recapResponses');
+    const initial = responses.find((response) => response.path === '/recaps/recap-unsent');
+    assert.ok(initial, 'Unsubmitted policy must be tested against the actual initial adapter GET');
+    assert.equal(initial.body.data.submitted_at, null);
     assert.equal(await button(page, 'Imprimir / Guardar PDF').count(), 0);
     assert.equal(await page.locator('#recap-print-report').count(), 0);
     await visible(page.getByText('El cliente debe enviar el recap antes de que puedas redactar o publicar su revisión.', { exact: true }));
+    assert.equal(await page.evaluate(() => window.__nativePrintCalls), priorPrintCalls, 'Unsubmitted recap must never invoke native print');
+    assert.deepEqual(record.printProofs, [], 'Unsubmitted recap must not generate a PDF proof');
+    assert.deepEqual(fs.readdirSync(output).filter((filename) => filename.startsWith(`${record.name}-`) && filename.endsWith('.pdf')), [], 'No PDF output for an unsubmitted recap');
+    record.unsubmittedPrintPolicy = { submittedAt: null, nativePrintCalls: priorPrintCalls, buttonCount: 0, reportCount: 0, pdfCount: 0 };
+  });
+  await caseRun('archived-submitted-print-contract', desktop, 'light', '/recaps/recap-a?fixture=archived-submitted', async (page, record) => {
+    await waitEnabled(button(page, 'Imprimir / Guardar PDF'));
+    const responses = await control(page, 'recapResponses');
+    const initial = responses.find((response) => response.path === '/recaps/recap-a');
+    assert.ok(initial, 'Archived setup must reach the component through the initial adapter GET');
+    assert.equal(initial.method, 'get'); assert.equal(initial.status, 200);
+    const row = initial.body.data;
+    assert.equal(row.id, 'recap-a'); assert.equal(row.status, 'REVIEWED');
+    assert.equal(row.archived_at, '2026-10-07T12:00:00Z');
+    assert.equal(row.submitted_at, '2026-10-07T12:00:00Z');
+    assert.equal(row.client_feedback_sent_at, '2026-10-07T12:00:00Z');
+    const expected = [row.published_coach_summary, row.published_changes, row.published_next_week_goals,
+      row.client_feedback_text, row.training_notes, row.nutrition_notes];
+    assert.ok(expected.every((text) => typeof text === 'string' && text.trim().length > 0), 'All archived public fields must be populated');
+    assert.ok(row.training_notes.endsWith('FINAL_RESPUESTA_CLIENTE'));
+    assert.ok(row.nutrition_notes.endsWith('FINAL_RESPUESTA_NUTRICION'));
+    assert.ok(row.published_coach_summary.endsWith('FINAL_RESUMEN_ANTERIOR'));
+    assert.ok(row.published_next_week_goals.endsWith('FINAL_OBJETIVOS'));
+    const forbidden = [row.draft_coach_summary, row.draft_changes, row.draft_next_week_goals, row.admin_comments, row.client.email];
+    assert.ok(forbidden.every((text) => typeof text === 'string' && text.trim().length > 0), 'Privacy sentinels must not be empty');
+    assert.equal((await calls(page, 'put')).length, 0); assert.equal((await calls(page, 'post')).length, 0);
+    record.archivedInitialGET = initial;
+    await printProof(page, record, 'archived-submitted', expected, forbidden, 3);
+    assert.equal(record.printProofs.length, 1);
+    assert.equal(record.printProofs[0].pdfTextStatus, 'PASS', 'Archived acceptance requires actual extracted PDF text/privacy');
+    assert.equal((await calls(page, 'put')).length, 0, 'Printing an archived recap must not mutate it');
+    assert.equal((await calls(page, 'post')).length, 0, 'Printing an archived recap must not publish it');
   });
   await caseRun('reviewed-unsent-feedback-contract', desktop, 'light', '/recaps/recap-reviewed-unsent', async (page, record) => {
     await visible(summary(page));
@@ -439,11 +478,11 @@ main().catch((error) => { console.error(error.stack || String(error)); results.p
   const missingPDFs = Object.entries(requiredPDFs).flatMap(([caseName, suffixes]) => suffixes
     .filter((suffix) => !proofs.some((proof) => proof.caseName === caseName && proof.suffix === suffix)).map((suffix) => `${caseName}:${suffix}`));
   const coverageComplete = proofs.length >= expectedRequiredPDFCount && missingPDFs.length === 0;
-  const passed = results.length === 14 && results.every((record) => record.status === 'PASS') && coverageComplete;
+  const passed = results.length === 15 && results.every((record) => record.status === 'PASS') && coverageComplete;
   const pdfCoverageStatus = proofs.length === 0 ? 'NOT_RUN' : coverageComplete ? 'PASS' : 'INCOMPLETE';
   const pdfTextStatus = proofs.length === 0 ? 'NOT_RUN' : !coverageComplete ? 'INCOMPLETE' :
     proofs.every((proof) => proof.pdfTextStatus === 'PASS') ? 'PASS' : 'NOT_VERIFIED';
-  if (output) fs.writeFileSync(path.join(output, 'results.json'), JSON.stringify({ status: passed ? 'PASS' : 'FAIL', expectedCases: 14, playwrightPath, origin, output, runtimePathLength: output.length, retainedProfileCount: results.filter((record) => record.profile).length,
+  if (output) fs.writeFileSync(path.join(output, 'results.json'), JSON.stringify({ status: passed ? 'PASS' : 'FAIL', expectedCases: 15, playwrightPath, origin, output, runtimePathLength: output.length, retainedProfileCount: results.filter((record) => record.profile).length,
     sourceManifestSha256: manifestSha256, verifiedSourceCount: 13,
     pdfProofCount: proofs.length, expectedRequiredPDFCount, missingPDFs, pdfCoverageStatus, pdfTextStatus, results,
     limits: ['Synthetic API/auth only; no live Firebase/API/DB integration.', 'PNG/PDF artifacts require independent human legibility review; computed layout alone is not visual approval.', 'If no parser exists, PDF text/privacy is not independently extracted.', 'No ProtectedRoute/login-provider lifecycle claim; shipping UnsavedChangesGuard and shell are mounted with controlled auth.'] }, null, 2));

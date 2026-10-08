@@ -3,6 +3,71 @@
 > Copia saneada para entrega: ubicaciones normalizadas; resultados, fechas y hashes conservan su significado histórico y corresponden al snapshot privado original, no a esta copia. WORKSPACE_ROOT identifica la coordinación; SDK_ROOT el SDK instalado; RUNTIME_ROOT las herramientas locales; TEST_ARTIFACT_ROOT los recursos privados retenidos, no publicados.
 
 
+## REST-T3C3A — verificación funcional completa; revisión/commit pendientes (2026-10-08)
+
+**REST-T3C3A IN_PROGRESS; REST-T3C3A-PDF-TEXT-01 RESOLVED funcionalmente.** Recibo pasivo: resultados reales del verificador independiente `muzdq56f-c-1xtr`, `functions.subagent_result`, transmitidos por el padre. Revisión y commit local del padre pendientes; no aprobación nativa ni SHA futuro. No cierre T3C3/P5.
+
+| Comando/evidencia (verificador; no ejecutados por este escritor) | Resultado vigente |
+| --- | --- |
+| `node docs/evidence/rest-t3c-admin-20261007/verify-browser.cjs` — una vez, exit0 | [results.json](browser-output/r-8374ccf4/results.json): **15/15 casos y 11/11 proofs nominales requeridos PASS**, ninguno ausente; PDF Chrome real, extracción obligatoria/privacidad/geometría PASS. Los 14 escenarios anteriores rerun más archivado. 15 perfiles p-01–p-15 y artefactos JSON/DOM/traces/PNG/PDF/txt retenidos. [stdout](browser-output/run-independent-20261008-verifier-01/browser-stdout.log). |
+| `npm run lint` — exit0 | 0 errores/1 warning preexistente `.local/progress-ux6.tsx:14:10`. [stdout](browser-output/run-independent-20261008-verifier-01/lint-stdout.log). |
+| [Archivado enviado](browser-output/r-8374ccf4/archived-submitted-print-contract.json) | Primer GET200 real del adapter sintético: REVIEWED, archived_at/submitted_at `2026-10-07T12:00:00Z`; cero PUT/POST. PDF adicional 10 páginas con publicaciones, legacy enviado y respuestas propias completas. |
+| No enviado | `unsent-draft`: submitted_at null, cero botones/informes/llamadas nativas/PDFs; no proof negativo contado. |
+| Geometría/páginas | Before/archivado/reviewed-unsent maxRight 793.6875≤794; after 788.046875; private-only 777.484375. Before8×4 + after6×4 + private-only4 + reviewed-unsent8 =68; archivado10: **78 páginas/11 documentos**, no 78 páginas visualmente inspeccionadas. |
+
+Seis valores completos GET inicial/DOM contra PDF UTF-8, en orden, comparación estricta ignorando **solo whitespace**, longitud/índice normalizado: training_notes **8308/193**, nutrition_notes **8312/7485**, published_coach_summary **9770/15211**, published_changes **1159/23916**, published_next_week_goals **2937/24980**, client_feedback_text **23/27934**. Encabezados Unicode reales preservados, no IDs ASCII; valores privados prohibidos no vacíos excluidos.
+
+Fix auxiliar ya verificado: solo argv `pdfText`, `'-enc', 'UTF-8'` antes de `'-layout'` en pdftotext instalado4.00; default e1→485 U+FFFD, explícito c3a1→0. Sin strip de acentos, nueva normalización ni relajación de privacidad/geometría/assertions. Negativos read-only previos del verificador: borrar una `á` rechaza contenido e inyectar `INTERNAL_NOTE_SENTINEL` rechaza privacidad; probes en memoria, **no nuevos casos browser**. RED [r-9c6f034c](browser-output/r-9c6f034c/results.json) conserva **FAIL14/15**, 11 PDFs generados/10 verificados, archivado EXTRACTED_NOT_VERIFIED; outputs/assertions/logs originales intactos, no reclasificados.
+
+**Lectura visual parcial del padre:** archivado páginas1/10, [P1.png](browser-output/r-8374ccf4/pdf-pages/P1.png) y [Plast.png](browser-output/r-8374ccf4/pdf-pages/Plast.png), rasterizaciones reales 1600×2265; acentos/cuerpo legibles, token largo envuelto, FINAL_OBJETIVOS y legacy enviado sin clipping observado. Solo **2/10 páginas archivadas**, no todas las78 ni aprobación del usuario. [Log renderer](browser-output/r-8374ccf4/pdf-pages/render-stdout.log), pypdfium2 aislado ya instalado; ninguna instalación aquí.
+
+Focal17/tsc/Vite aislados PASS antes del fix argv **no repetidos**; suite414 más antigua, no nuevo run. Producto13/pin intactos: `4b8ce1ae66e37aa2c67b3c82a31015d583f399b042c38749a663a23ad9f9477b`. Sintético Axios/auth/browser: no integración API/Firebase/JWT reales, dispositivo/emulador/iOS ni histórico completo de entrenamientos/dietas/catálogos.
+
+Admin HEAD `2e5d43d2aeb7540d9bed231c08c8328547da7e7f`, rama/upstream `fix/progress-detail-and-charts` / `origin/fix/progress-detail-and-charts`, índice vacío y tres dirty authored README/fixture/runner. Hashes previos coinciden con `checkpoint/t3c3a-pdf-text-01/after.json`, SHA256 `62cd06c206145680c23d65d0ded5f1486598c051953f47e0edc15d4c76a650e6`. Nuevo [checkpoint/t3c3a-verified/manifest.json](checkpoint/t3c3a-verified/manifest.json) **LOCAL_ONLY/ignored**: fechas, snapshots completos before/after tareas/README y fixture/helper read-only, SHA256/blobs y hashes de proofs; no overwrite previo. Raíz no Git, snapshot previo, sin inicializar. Outputs ignorados necesitan archivo separado fuera de este equipo.
+
+REST-T3C3B API/Admin/App **PENDING**; T3D/canon/advisories pendientes; P5-04 solo diferido P6 PENDING, sin implementación/entrega. App implementación afb7230/recibo pasivo e8d6a6f DONE local, autoridad consumida, no rereview; API2860703/probe y App limpia son contexto del padre. Escritor solo normaliza tareas/README/checkpoint: sin código/helper/fixture, tests/browser, instalaciones/servidores, Git mutante ni revisión nativa. Siguiente paso acotado: revisión/commit local del padre del candidato congelado.
+
+---
+
+### Preparación anterior — historia 2026-10-08, sustituida solo por el recibo vigente superior
+
+## REST-T3C3A-PDF-TEXT-01 — fix causal preparado, GREEN pendiente (2026-10-08)
+
+**IN_PROGRESS / OPEN.** Este añadido actualiza el estado vigente sin reescribir los recibos históricos siguientes. Issue registrado en tareas antes del helper. RED real independiente: [`browser-output/r-9c6f034c/results.json`](browser-output/r-9c6f034c/results.json), **14/15 PASS, agregado FAIL**; 11 PDFs generados, 10 verificados. [`archived-submitted-print-contract.json`](browser-output/r-9c6f034c/archived-submitted-print-contract.json) conserva `EXTRACTED_NOT_VERIFIED` y el error de texto completo; PDF, texto default, DOM y trace originales intactos.
+
+Diagnóstico read-only del padre (no nueva ejecución de este escritor): pdftotext instalado **4.00** admite `-enc <string>`. Default emite `Párrafo` como bytes `50e172…`, que el helper decodifica como UTF-8 con **485 U+FFFD**; salida explícita `-enc UTF-8`, bytes `50c3a172…`, **0 U+FFFD**. La salida default reproduce exactamente el texto fallido. Con UTF-8 explícito coinciden estrictamente seis valores completos del GET sintético almacenado y DOM: resumen publicado **9770**, cambios **1159**, objetivos **2937**, `client_feedback_text` **23**, Training **8308**, Nutrition **8312** caracteres; solo se ignora whitespace con el normalizador original. Negativos transmitidos: borrar una sola `á` sigue fallando contenido; inyectar `INTERNAL_NOTE_SENTINEL` sigue fallando privacidad. No demuestra glifos ausentes en el PDF real ni un defecto de producto. El probe distinto no es GREEN del runner.
+
+Delta funcional único: `pdfText` pasa `['-enc', 'UTF-8', '-layout', filename, '-']` al proceso instalado, coherente con `spawnSync` `encoding: 'utf8'`. Entorno sanitizado, fallback parsers, normalización, comparación completa, privacidad, geometría, prueba no vacua, 14 casos originales y nuevo archivado/11 proofs conservados. Sin cambios de locale/PATH/GODEBUG, producto/modelos/UI, fixture, manifest/pin de 13 fuentes ni instalación. Manifest SHA256 intacto: `4b8ce1ae66e37aa2c67b3c82a31015d583f399b042c38749a663a23ad9f9477b`.
+
+Checkpoint exclusivo LOCAL_ONLY/ignored: `checkpoint/t3c3a-pdf-text-01/`, snapshots completos before/after de los tres archivos authored, hashes fechados y patch causal del helper; no sobrescribe checkpoint ni run original. HEAD Admin `2e5d43d2aeb7540d9bed231c08c8328547da7e7f`, tres dirty preexistentes README/fixture/runner; fixture permanece intacto. Raíz de coordinación no Git, sin inicializar.
+
+**GREEN real NOT_RUN hasta ejecución independiente.** Unit17, lint0 errores/1 warning antiguo y tsc/Vite aislados PASS previos son historia, no validación del helper corregido. Verificador, desde Admin y sin arrancar/parar servidores ni instalar: `node docs/evidence/rest-t3c-admin-20261007/verify-browser.cjs` y `npm run lint`, bajo su autorización. Reutilizar solo Vite retenido con marker conocido, PID **48084** comunicado por el padre; no inspeccionado/controlado aquí. Registrar agregado real nuevo y lectura visual si corresponde. REST-T3C3A-PDF-TEXT-01 OPEN hasta GREEN/revisión nativa si procede/commit del padre; REST-T3C3A, task21 y P5 no DONE. No navegador, suites, build, revisión nativa ni operaciones Git terminales mutantes por este escritor.
+
+## REST-T3C3A — PREPARED, verificación pendiente (2026-10-08)
+
+**Preparación test-only; nuevos resultados NOT_RUN.** Sustituye únicamente la pausa/siguiente paso históricos de este recibo: App cerrada por el padre en `afb7230` y recibo pasivo `e8d6a6f`; ahora REST-T3C3A IN_PROGRESS, REST-T3C3B cross-contract PENDING y contenedor REST-T3C3 IN_PROGRESS. No cierre P5/T3C3, cambios de producto ni disposición de advisories R3.
+
+| Aceptación preparada | Prueba requerida, aún NOT_RUN |
+| --- | --- |
+| `archived-submitted-print-contract:archived-submitted` | Un PDF nominal adicional. Ruta `/recaps/recap-a?fixture=archived-submitted`: inicialización aislada de la fila sintética antes del GET (`status=REVIEWED`, `archived_at` y `submitted_at` presentes), no DOM falso ni nuevo status. `recapResponses` confirma el primer GET entregado al componente; `calls` exige cero PUT/POST antes/después de imprimir. |
+| Texto y privacidad del archivado | `printProof` existente: llamada nativa, binario Chrome completo, extracción obligatoria PASS, geometría/whitespace/wrapping/viudas/huérfanas intactos. Comparación del texto completo de las tres publicaciones, feedback legacy enviado y notas propias Training/Nutrition contra el GET, con endmarkers; drafts/notas internas/email ausentes. Nutrición añade una respuesta larga sintética solo en esta variante. |
+| `unsent-draft` reforzado | GET inicial con `submitted_at=null`; sin botón, informe, incremento de `__nativePrintCalls`, proof ni archivo PDF del caso. No se genera un PDF negativo ni se cuenta como proof requerido. |
+| Cobertura nominal | Esperados **15 casos y 11 PDFs** (los 14 casos/10 nombres PDF originales más uno). Agregación exige todos los nombres/suffixes; cero/incompleto no es PASS. Contexto fresco por caso, sin alterar escenarios originales. |
+
+Los **14/14 casos y 10/10 PDFs PASS de `r-015608fa` (2026-10-07)** y todos los FAIL históricos siguientes se preservan; no acreditan esta extensión. Cobertura del nuevo PDF limitada a respuestas del propio recap, no al histórico completo de entrenamientos/dietas, catálogos ni integración live API/Firebase/JWT. Lectura visual del nuevo PDF pendiente; assertions no equivalen a aprobación visual humana.
+
+Baseline: Admin HEAD `2e5d43d2aeb7540d9bed231c08c8328547da7e7f`, rama/upstream `fix/progress-detail-and-charts` / `origin/fix/progress-detail-and-charts`, limpio antes de editar. Pin del manifest **sin cambios** `4b8ce1ae66e37aa2c67b3c82a31015d583f399b042c38749a663a23ad9f9477b`, 13 fuentes de producto inmutables. Snapshot completo previo de tareas/fixture/runner/README en `checkpoint/t3c3a-before/manifest.json`, fechado y con SHA256/blob Git filtrado, LOCAL_ONLY/ignored; no overwrite ni inicialización Git en raíz.
+
+Autocheck estructural observado: `git -C exom-admin diff --check` PASS; inspección Node read-only de hashes/nombres/snapshots PASS (13/13 fuentes, pin íntegro, 14 nombres originales retenidos y 15 casos esperados, proof archivado nominal, 4/4 copias previas íntegras). No ejecución del runner ni de suites.
+
+RED/GREEN: NOT_APPLICABLE para cobertura de aceptación sin defecto demostrado; no RED inventado por ausencia de caso. El escritor solo prepara archivos y comprueba estructura. Si la nueva ejecución descubre un defecto, el padre aislará su fix causal en otra unidad.
+
+Verificador independiente, comandos pendientes desde raíz Admin: focal de cinco archivos registrado abajo; `node docs/evidence/rest-t3c-admin-20261007/verify-browser.cjs`; `npm run lint`; `npm run build -- --config docs/evidence/rest-t2e-admin-20261005/vite.isolated.config.ts`. Funcionales/browser/PDF/lint/build **NOT_RUN por este escritor**, autorización/output propios a cargo del padre. Reutilizar únicamente el Vite 5188 ya retenido con marcador `REST-T3C-ISOLATED-20261007`: **no ejecutar los comandos históricos de arranque**, duplicar, parar, cambiar puerto ni instalar herramientas. Runner sin arranque/apagado, fences HTTP/WebSocket y adapter fail-closed conservados; cada nueva ejecución crea un output exclusivo sin sobrescribir runs/perfiles/PDF tools.
+
+---
+
+### Recibo histórico 2026-10-07 (sin reclasificar)
+
 2026-10-07. **REST-T3C1 DONE local** en `6fdaba71096e415871738cc92db8af31986d5b5f` (`feat(admin): publica revisiones de recap`). Native cuatro lentes aprobadas/ACK completado, autoridad consumida. Navegador independiente 14/14 PASS y 10/10 PDF proofs PASS; revisión visual parcial. Sin cierre P5, despliegue ni inicio App. STOP por instrucción del usuario. Las secciones anteriores a «Recibo final de aceptación» son historia fechada, no el estado actual.
 
 ## Identidad y alcance

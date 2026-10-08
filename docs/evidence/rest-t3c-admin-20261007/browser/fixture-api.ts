@@ -40,6 +40,12 @@ const rows = new Map<string, RecapItem>([
   [recapIds.other, { ...recap(recapIds.other, ids.otherClient), draft_coach_summary: 'BORRADOR_CLIENTE_B', published_coach_summary: 'PUBLICACION_CLIENTE_B' }],
   [recapIds.reviewedUnsent, { ...recap(recapIds.reviewedUnsent), client_feedback_text: 'UNSENT_FEEDBACK_SENTINEL', client_feedback_sent_at: null }],
 ])
+// Fresh browser contexts isolate this initial GET fixture from the original 14 cases.
+// Archived is a timestamp on REVIEWED, never a new status or an API mutation.
+if (new URLSearchParams(location.search).get('fixture') === 'archived-submitted') {
+  rows.set(recapIds.reviewed, { ...recap(recapIds.reviewed), archived_at: date,
+    nutrition_notes: `RESPUESTA_NUTRICION_LARGA\n${'Respuesta extensa del cliente con continuidad de párrafos. '.repeat(140)}\nFINAL_RESPUESTA_NUTRICION` })
+}
 for (let i = 1; i <= 20; i++) rows.set(`recap-page-${i}`, { ...recap(`recap-page-${i}`), training_notes: null })
 interface Call { method: string; path: string; params: unknown; payload: unknown; identity: string | null; generation: number }
 export const fixtureCalls: Call[] = []
@@ -101,7 +107,7 @@ export const api = axios.create({ adapter: async (config) => {
     if (suffix === 'follow-up-tasks/summary') return reply({ as_of_date: '2026-10-07', next_task: null, next_review: null })
     if (suffix === 'follow-up-tasks/assignees') return reply(fixturePage([fixtureAssignee]))
   }
-  if (method === 'get' && path === '/recaps/stats') return reply({ total: rows.size, submitted: 1, reviewed: rows.size - 2, archived: 0 })
+  if (method === 'get' && path === '/recaps/stats') return reply({ total: rows.size, submitted: 1, reviewed: rows.size - 2, archived: [...rows.values()].filter((row) => row.archived_at !== null).length })
   if (method === 'get' && path === '/recaps') {
     const params = config.params ?? {}
     const filtered = [...rows.values()].filter((row) => (!params.client_id || row.client_id === params.client_id) && row.status !== 'DRAFT' && (!params.status || row.status === params.status) && Boolean(row.archived_at) === Boolean(params.archived))
