@@ -1,12 +1,13 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter, useSearchParams } from 'react-router'
+import { createMemoryRouter, RouterProvider, useSearchParams } from 'react-router'
+import { fixtureAssignee, fixturePage, fixtureSummary, fixtureTask } from '../follow-up-tasks/fixtures'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AuthUser } from '@/types/auth'
 import type { AdherenceConfig, AdherenceReport } from '../../clients/adherence.types'
 import { ProgressPage } from './progress-page'
 
-const api = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn() }))
+const api = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn() }))
 vi.mock('@/lib/api', () => ({ api }))
 vi.mock('@/hooks/use-auth', async () => {
   const { create } = await import('zustand')
@@ -51,9 +52,9 @@ function RouteProbe() {
 }
 function mount(query: string) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
-  render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/progress?${query}`]}>
-    <ProgressPage /><RouteProbe />
-  </MemoryRouter></QueryClientProvider>)
+  const router = createMemoryRouter([{ path: '/progress', element: <><ProgressPage /><RouteProbe /></> }], { initialEntries: [`/progress?${query}`] })
+  render(<QueryClientProvider client={client}><RouterProvider router={router} /></QueryClientProvider>)
+  return router
 }
 function params() {
   return new URLSearchParams(screen.getByLabelText('Ruta actual').textContent ?? '')
@@ -62,11 +63,42 @@ function reportCalls() {
   return api.get.mock.calls.filter(([url]) => String(url).endsWith('/adherence'))
 }
 beforeEach(() => {
-  api.get.mockReset(); api.put.mockReset()
-  api.get.mockImplementation((url: string) => Promise.resolve({ data: { success: true, data: url.endsWith('/config') ? config : report } }))
+  api.get.mockReset(); api.put.mockReset(); api.post.mockReset()
+  api.get.mockImplementation((url: string) => Promise.resolve({ data: { success: true, data:
+    url.endsWith('/follow-up-tasks/summary') ? fixtureSummary : url.endsWith('/follow-up-tasks/assignees') ? fixturePage([fixtureAssignee]) : url.endsWith('/follow-up-tasks') ? fixturePage([fixtureTask]) : url.endsWith('/config') ? config : report,
+  } }))
 })
 
 describe('Progreso: contexto y navegación', () => {
+  it('abre Seguimiento por URL, preserva navegación y confirma descarte al cambiar cliente', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    mount('clientId=client-a&section=seguimiento&period=3m&date=2020-01-03')
+    expect(screen.getByRole('tab', { name: 'Seguimiento' })).toHaveAttribute('aria-selected', 'true')
+    await screen.findByRole('button', { name: fixtureTask.title })
+    fireEvent.click(screen.getByRole('button', { name: 'Nueva tarea' }))
+    fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Draft A' } })
+    // The sheet modal isolates the background; route changes exercise the same
+    // navigation blocker as browser back and external client deep links.
+    fireEvent.click(screen.getByText('Seleccionar cliente B'))
+    expect(confirm).toHaveBeenCalled()
+    expect(params().get('clientId')).toBe('client-a')
+    expect(screen.getByLabelText('Título')).toHaveValue('Draft A')
+    confirm.mockReturnValue(true)
+    fireEvent.click(screen.getByText('Seleccionar cliente B'))
+    await waitFor(() => expect(params().get('clientId')).toBe('client-b'))
+    expect(screen.queryByLabelText('Título')).not.toBeInTheDocument()
+    expect(params().get('section')).toBe('seguimiento')
+    expect(params().get('period')).toBe('3m')
+    expect(api.post).not.toHaveBeenCalled()
+  })
+
+  it('habilita Seguimiento sin cambiar entrada, URL ni Dashboard pendiente', () => {
+    mount('clientId=client-a&section=metricas&period=3m&date=2020-01-03')
+    expect(screen.getByRole('tab', { name: 'Seguimiento' })).toBeEnabled()
+    expect(params().get('section')).toBe('metricas')
+    expect(params().get('period')).toBe('3m')
+    expect(screen.getByRole('tab', { name: 'Dashboard · pendiente' })).toBeDisabled()
+  })
   it('mantiene el periodo activo visible y conserva los filtros en detalle progresivo', () => {
     mount('clientId=client-a&section=metricas&period=custom&from=2020-01-01&to=2020-01-05&historyPage=2')
     const summary = screen.getByText('Periodo · 2020-01-01 → 2020-01-05 · UTC')
@@ -104,7 +136,7 @@ describe('Progreso: pestaña Adherencia canónica', () => {
     expect(tab).toHaveAttribute('aria-selected', 'true')
     expect(screen.queryByText('Adherencia · pendiente')).not.toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Dashboard · pendiente' })).toBeDisabled()
-    expect(screen.getByRole('tab', { name: 'Seguimiento · pendiente' })).toBeDisabled()
+    expect(screen.getByRole('tab', { name: 'Seguimiento' })).toBeEnabled()
     const summary = await screen.findByRole('region', { name: 'Periodo cerrado' })
     expect(within(summary).getByText('37 %')).toBeInTheDocument()
     expect(reportCalls()).toHaveLength(1)
