@@ -94,7 +94,9 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
     try {
       await mutation.mutateAsync(payload)
       // Invalidate only the operation's original owner/client, never the currently navigated client.
-      await queryClient.invalidateQueries({ queryKey: taskKeys.scope(identity, clientId) })
+      // Refresh failure cannot turn a confirmed commit into an uncertain mutation/retry.
+      // Query observers own refresh errors; closing/focus must not wait for network liveness.
+      void queryClient.invalidateQueries({ queryKey: taskKeys.scope(identity, clientId) }).catch(() => undefined)
       if (stillHere()) { setDirty(false); setFrozen(null); onClose() }
     } catch (failure) {
       if (stillHere()) {
