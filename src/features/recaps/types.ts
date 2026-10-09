@@ -13,7 +13,33 @@ export interface RecapClient {
   profile: RecapClientProfile | null
 }
 
-export interface RecapItem {
+export interface RecapReviewFields {
+  // Optional for compatibility with legacy fixtures/servers; missing version disables authoring.
+  review_version?: number
+  draft_coach_summary?: string | null
+  draft_changes?: string | null
+  draft_next_week_goals?: string | null
+  published_coach_summary?: string | null
+  published_changes?: string | null
+  published_next_week_goals?: string | null
+}
+export interface RecapReviewRecord extends RecapReviewFields {
+  id: string
+  status: RecapStatus
+  reviewed_at: string | null
+}
+export interface RecapReviewDraft {
+  expected_version: number
+  coach_summary: string | null
+  changes: string | null
+  next_week_goals: string | null
+}
+export interface RecapReviewPublish {
+  expected_version: number
+  confirm: true
+}
+
+export interface RecapItem extends RecapReviewFields {
   id: string
   client_id: string
   week_start_date: string
