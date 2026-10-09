@@ -1,5 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router'
+import { RecapsList } from '@/features/recaps/components/recaps-list'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAuth } from '@/hooks/use-auth'
 import { FollowUpPanel } from './follow-up-panel'
@@ -20,7 +22,7 @@ let client: QueryClient
 const onGuard = vi.fn()
 function mount(clientId: string = ids.client) {
   client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
-  const node = (id: string) => <QueryClientProvider client={client}><FollowUpPanel clientId={id} onGuard={onGuard} /></QueryClientProvider>
+  const node = (id: string) => <QueryClientProvider client={client}><MemoryRouter initialEntries={[`/progress?clientId=${id}&section=follow-up`]}><FollowUpPanel clientId={id} onGuard={onGuard} /></MemoryRouter></QueryClientProvider>
   const result = render(node(clientId))
   return { ...result, changeClient: (id: string) => result.rerender(node(id)) }
 }
@@ -81,11 +83,20 @@ describe('Seguimiento: contratos y presentación', () => {
     expect(screen.queryByRole('button', { name: 'Completar tarea' })).not.toBeInTheDocument()
     expect(api.put).not.toHaveBeenCalled()
   })
-  it('deja Recaps explícitamente pendiente sin simular publicación', async () => {
+  it('integra Recaps paginados por cliente con contexto de vuelta; conserva enlaces globales', async () => {
+    const recap = { id: 'synthetic-recap', client_id: ids.client, week_start_date: '2026-10-05', week_end_date: '2026-10-11', submitted_at: '2026-10-12', created_at: '2026-10-05', status: 'SUBMITTED', archived_at: null, admin_comments: null, client: { id: ids.client, email: 'client@example.invalid', profile: null } }
+    const prior = api.get.getMockImplementation()
+    api.get.mockImplementation((url, options) => url === '/recaps' ? Promise.resolve(envelope({ data: [recap], total: 21, page: options.params.page, limit: 20, totalPages: 2 })) : prior?.(url, options))
     mount()
     fireEvent.mouseDown(screen.getByRole('tab', { name: 'Recaps' }), { button: 0, ctrlKey: false })
-    expect(await screen.findByText(/pendiente de REST-T3/)).toBeInTheDocument()
+    const link = await screen.findByRole('link', { name: 'Abrir' })
+    expect(link.getAttribute('href')).toContain(`/recaps/synthetic-recap?returnTo=${encodeURIComponent(`/progress?clientId=${ids.client}&section=follow-up`)}`)
+    expect(api.get).toHaveBeenCalledWith('/recaps', expect.objectContaining({ params: { page: 1, limit: 20, client_id: ids.client } }))
+    fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/recaps', expect.objectContaining({ params: { page: 2, limit: 20, client_id: ids.client } })))
     expect(api.post).not.toHaveBeenCalled()
+    render(<QueryClientProvider client={client}><MemoryRouter><RecapsList archived={false} page={1} onPageChange={vi.fn()} /></MemoryRouter></QueryClientProvider>)
+    await waitFor(() => expect(screen.getAllByRole('link', { name: 'Abrir' }).some((item) => item.getAttribute('href') === '/recaps/synthetic-recap')).toBe(true))
   })
   it('separa cachés por cliente, identidad y filtros', () => {
     const filters = { page: 1, view: 'active' as const }
@@ -149,6 +160,108 @@ describe('Seguimiento: editor y operaciones', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledTimes(2))
     expect(api.post.mock.calls[1][1]).toEqual(first)
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+  it.each([400, 403, 409])('respuesta perdida seguida de %s conserva el UUID/payload congelado', async (code) => {
+    api.post.mockRejectedValueOnce(failure()).mockRejectedValueOnce(failure(code))
+    mount(); await openNew(); fillNew()
+    fireEvent.change(screen.getByLabelText('Descripción (opcional)'), { target: { value: '  Contexto original  ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Crear tarea' }))
+    await screen.findByRole('button', { name: 'Reintentar mismo guardado' })
+    const original = structuredClone(api.post.mock.calls[0][1])
+    const priorGet = api.get.getMockImplementation()
+    api.get.mockImplementation((url, options) => url === `${taskBase(ids.client)}/${original.id}`
+      ? Promise.resolve(envelope({ ...fixtureTask, id: original.id })) : priorGet?.(url, options))
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar mismo guardado' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(screen.getByRole('alert')).not.toHaveTextContent('No se pudo confirmar'))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByLabelText('Título')).toBeDisabled()
+    expect(screen.getByLabelText('Descripción (opcional)')).toHaveValue('  Contexto original  ')
+    expect(screen.getByLabelText('Responsable')).toBeDisabled()
+    expect(api.post.mock.calls[1][1]).toEqual(original)
+    expect(original.description).toBe('Contexto original')
+    const retry = screen.getByRole('button', { name: 'Reintentar mismo guardado' })
+    if (code === 409) {
+      expect(retry).toBeDisabled()
+      expect(screen.getByRole('region', { name: 'Versión del servidor' })).toBeInTheDocument()
+      // A UUID conflict is not proof the original create did not commit.
+      fireEvent.click(retry)
+      expect(api.post).toHaveBeenCalledTimes(2)
+    } else {
+      expect(retry).toBeEnabled()
+      // Rights/validation recovered: only replay the original command, never a new UUID.
+      fireEvent.click(retry)
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+      expect(api.post).toHaveBeenCalledTimes(3)
+      expect(api.post.mock.calls[2][1]).toEqual(original)
+    }
+  })
+  it('cerrar un resultado incierto advierte de posible aplicación y no crea otra tarea', async () => {
+    api.post.mockRejectedValueOnce(failure())
+    mount(); await openNew(); fillNew()
+    fireEvent.click(screen.getByRole('button', { name: 'Crear tarea' }))
+    await screen.findByRole('button', { name: 'Reintentar mismo guardado' })
+    vi.mocked(window.confirm).mockReturnValueOnce(false)
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar detalle' }))
+    expect(window.confirm).toHaveBeenLastCalledWith('El guardado puede haberse realizado. ¿Cerrar y comprobar el listado antes de crear otra tarea?')
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar detalle' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(api.post).toHaveBeenCalledTimes(1)
+  })
+  it.each([
+    ['create', 'pending'], ['create', 'rejected'],
+    ['update', 'pending'], ['update', 'rejected'],
+  ])('guardado confirmado %s cierra y restaura foco aunque refetch esté %s', async (operation, refetch) => {
+    vi.mocked(window.confirm).mockClear()
+    mount()
+    const opener = await screen.findByRole('button', { name: operation === 'create' ? 'Nueva tarea' : fixtureTask.title })
+    opener.focus(); fireEvent.click(opener)
+    await screen.findByRole('option', { name: fixtureAssignee.display_name ?? '' })
+    if (operation === 'create') fillNew()
+    else fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Actualización confirmada' } })
+    let rejectRefresh: (reason: unknown) => void = () => undefined
+    const refresh = new Promise<void>((_resolve, reject) => { rejectRefresh = reject })
+    const invalidate = vi.spyOn(client, 'invalidateQueries').mockReturnValue(refresh)
+    fireEvent.click(screen.getByRole('button', { name: operation === 'create' ? 'Crear tarea' : 'Guardar cambios' }))
+    await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: taskKeys.scope(ids.staff, ids.client) }))
+    if (refetch === 'rejected') await act(async () => { rejectRefresh(failure(503)) })
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await waitFor(() => expect(opener).toHaveFocus())
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(api.post).toHaveBeenCalledTimes(operation === 'create' ? 1 : 0)
+    expect(api.put).toHaveBeenCalledTimes(operation === 'update' ? 1 : 0)
+    expect(window.confirm).not.toHaveBeenCalled()
+  })
+  it.each(['client', 'identity', 'unmount'])('confirmación tardía tras %s no cierra un editor nuevo ni restaura foco antiguo', async (change) => {
+    let finish: (value: unknown) => void = () => undefined
+    api.post.mockImplementationOnce(() => new Promise((resolve) => { finish = resolve }))
+    const view = mount()
+    const oldOpener = screen.getByRole('button', { name: 'Nueva tarea' })
+    await openNew(); fillNew()
+    const oldFocus = vi.spyOn(oldOpener, 'focus')
+    const invalidate = vi.spyOn(client, 'invalidateQueries').mockResolvedValue(undefined)
+    fireEvent.click(screen.getByRole('button', { name: 'Crear tarea' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1))
+    if (change === 'client') view.changeClient(ids.otherClient)
+    else if (change === 'identity') await act(async () => { useAuth.setState({ user: { id: ids.otherStaff, email: 'other@example.invalid', role: 'ADMIN', profile: null } }) })
+    else view.unmount()
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    if (change !== 'unmount') {
+      await openNew()
+      fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Nuevo propietario' } })
+      await waitFor(() => expect(screen.getByLabelText('Título')).toHaveFocus())
+    }
+    oldFocus.mockClear()
+    await act(async () => { finish(envelope(fixtureTask)) })
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: taskKeys.scope(ids.staff, ids.client) })
+    expect(oldFocus).not.toHaveBeenCalled()
+    if (change !== 'unmount') {
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+      expect(screen.getByLabelText('Título')).toHaveValue('Nuevo propietario')
+      expect(screen.getByLabelText('Título')).toHaveFocus()
+    }
+    expect(api.post).toHaveBeenCalledTimes(1)
   })
   it('edita con expected_version y fecha civil; inicio de progreso sin enviar responsable intacto', async () => {
     mount(); await openExisting()

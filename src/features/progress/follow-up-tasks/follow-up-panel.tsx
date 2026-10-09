@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
+import { useLocation } from 'react-router'
+import { RecapsList } from '@/features/recaps/components/recaps-list'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -21,6 +23,8 @@ function NextSummary({ label, task }: { label: string; task: NextTask | null }) 
 }
 function ClientTasks({ clientId, identity, onGuard }: PanelProps & { identity: string }) {
   const [filters, setFilters] = useState<TaskFilters>({ page: 1, view: 'active' })
+  const [recapPage, setRecapPage] = useState(1)
+  const location = useLocation()
   const [editor, setEditor] = useState<{ task: Task | null; key: number } | null>(null)
   const panel = useRef<HTMLElement>(null)
   const opener = useRef<HTMLButtonElement | null>(null)
@@ -54,7 +58,7 @@ function ClientTasks({ clientId, identity, onGuard }: PanelProps & { identity: s
     </div>}
     <Tabs defaultValue="tasks" className="space-y-4">
       <TabsList aria-label="Organización de seguimiento"><TabsTrigger value="tasks">Tareas</TabsTrigger><TabsTrigger value="recaps">Recaps</TabsTrigger></TabsList>
-      <TabsContent value="recaps"><p className="max-w-prose text-sm text-muted-foreground">La revisión compartible de Recaps está pendiente de REST-T3. La bandeja global actual se conserva; aquí no se publica ninguna revisión.</p></TabsContent>
+      <TabsContent value="recaps"><RecapsList clientId={clientId} archived={false} page={recapPage} onPageChange={setRecapPage} returnTo={`${location.pathname}${location.search}`} /></TabsContent>
       <TabsContent value="tasks" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex gap-2" aria-label="Vista de tareas">{Object.entries(TASK_VIEWS).map(([value, label]) => <Button key={value} variant={filters.view === value ? 'default' : 'outline'} aria-pressed={filters.view === value} onClick={() => filter({ view: value as TaskView, status: undefined })}>{label}</Button>)}</div>

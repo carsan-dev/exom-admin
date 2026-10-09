@@ -1,0 +1,13 @@
+07e582462c870e5f1edf9b9508f50fbb6b2abc120c0c409c30042d1b15b16e0b *src/features/recaps/types.ts
+f0b22de53416b65b066c282c036103abc65ad84dfcf1b2d208c53df2f461bb4d *src/features/recaps/api.ts
+9583d904df095a336d15798501a10f28bbf0f97b70b5cf436864b42de03a30ad *src/features/recaps/api.test.tsx
+d37566fd7a48cb6f91870ecf585812074efd7b5c97e3945c1053b1f19c4befb5 *src/features/recaps/pages/recap-detail-page.tsx
+bc8471816040e4d6d9fc658e2d9bbdf9a1e6c210a242aac9585c871e50436535 *src/features/recaps/pages/recap-detail-page.test.tsx
+a02b08102c3ef52f34cf49c2126a17180ececbfc4ede9e7bc59c4f23ab82a366 *src/features/recaps/components/recap-review-editor.tsx
+ab7b318124becbb89e29f307f699120b5646442f5d99390bb4f6535a128f9490 *src/features/recaps/components/recap-review-editor.test.tsx
+c7e10b028f6d4de4b5d77c664a02f28080d7665988c01c9fee8e20f978fde2c0 *src/features/recaps/components/recap-print-model.ts
+b1a749fc6ebebe0aa8269f92d12f0151fbb43f8f2eb8019aeee3fde54d2e6973 *src/features/recaps/components/recap-printable-summary.tsx
+7a2823860df1ba65ec3b594304317c38d82c177998ba563cc480d72b2665e4b4 *src/features/recaps/components/recap-printable-summary.test.tsx
+a3f1804e032c90f3c2db280b3e82eb48c90ee46336715c1f77a6b8ec52c806fb *src/features/recaps/components/recaps-list.tsx
+89d2e350df9a07bda8dea626cabed529abe996b4700f4441d121bfb07574191b *src/features/progress/follow-up-tasks/follow-up-panel.tsx
+84382337c58bfc369c5b3e7137804890a8182186e2ee5bd5afb5a7cd59f4081f *src/features/progress/follow-up-tasks/follow-up-panel.test.tsx
