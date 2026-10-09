@@ -18,6 +18,51 @@ vi.mock('../api', () => ({
 }))
 vi.mock('@/hooks/use-unsaved-changes', () => ({ useUnsavedChanges: vi.fn() }))
 
+const publicationPayload = {
+  id: "recap-1",
+  client_id: "client-1",
+  week_start_date: "2026-10-05T00:00:00.000Z",
+  week_end_date: "2026-10-11T00:00:00.000Z",
+  submitted_at: "2026-10-08T09:00:00.000Z",
+  created_at: "2026-10-05T09:15:30.123Z",
+  updated_at: "2026-10-09T11:00:00.000Z",
+  reviewed_at: "2026-10-08T10:20:30.456Z",
+  archived_at: null,
+  status: "REVIEWED" as const,
+  client_feedback_sent_at: "2026-10-08T10:21:30.000Z",
+  client_feedback_read_at: "2026-10-08T10:22:30.000Z",
+  client_feedback_text: "Legacy feedback",
+  training_sessions: 3,
+  general_notes: "Client notes",
+  hydration_enabled: false,
+  stress_enabled: false,
+  muscle_pain_zones: [],
+  improvement_areas: [],
+  training_effort: null,
+  average_daily_steps: null,
+  training_progress: null,
+  training_notes: null,
+  nutrition_quality: null,
+  hydration_level: null,
+  food_quality: null,
+  nutrition_notes: null,
+  sleep_hours_range: null,
+  fatigue_level: null,
+  pain_intensity: null,
+  recovery_notes: null,
+  mood: null,
+  stress_level: null,
+  hunger_level: null,
+  energy_level: null,
+  digestion_level: null,
+  improvement_app_rating: null,
+  improvement_service_rating: null,
+  improvement_feedback_text: null,
+  published_coach_summary: "Resumen ñ",
+  published_changes: "Cambios",
+  published_next_week_goals: "Objetivos",
+}
+
 const longAnswer = `Primera línea\nSegunda línea ${'respuesta extensa '.repeat(400)}`
 function fixture(overrides: Partial<RecapItem> = {}): RecapItem {
   return {
@@ -45,6 +90,40 @@ function fixture(overrides: Partial<RecapItem> = {}): RecapItem {
 afterEach(() => { vi.restoreAllMocks(); query.data = undefined })
 
 describe('existing recap print projection', () => {
+  it.each([
+    ['full', ['Resumen ñ', 'Cambios', 'Objetivos']],
+    ['partial', ['Resumen ñ', null, 'Objetivos']],
+    ['null', [null, null, null]],
+    ['absent legacy', [null, null, null]],
+] as const)('prints the common %s publication, never the newer private draft', (variant, values) => {
+    const payload: RecapItem = {
+      ...publicationPayload,
+      admin_comments: 'PRIVATE_INTERNAL_SENTINEL',
+      draft_coach_summary: 'PRIVATE_NEW_SUMMARY_SENTINEL',
+      draft_changes: 'PRIVATE_NEW_CHANGES_SENTINEL',
+      draft_next_week_goals: 'PRIVATE_NEW_GOALS_SENTINEL',
+      review_version: 9,
+      client: fixture().client,
+    }
+    if (variant === 'absent legacy') {
+      delete payload.published_coach_summary
+      delete payload.published_changes
+      delete payload.published_next_week_goals
+    } else {
+      [payload.published_coach_summary, payload.published_changes, payload.published_next_week_goals] = values
+    }
+    const model = toRecapPrintModel(payload, 'Cliente Sintético')
+    expect(model?.publishedReview.map((answer) => answer.value)).toEqual(values.filter((value) => value !== null))
+    expect(model?.feedback).toBe('Legacy feedback')
+    expect(JSON.stringify(model)).not.toMatch(/PRIVATE_|draft_|review_version/)
+    render(<RecapPrintableSummary model={model} />)
+    const report = document.querySelector('#recap-print-report')
+    expect(report?.textContent).toContain('Legacy feedback')
+    for (const value of values) if (value !== null) expect(report?.textContent).toContain(value)
+    expect(report?.textContent).not.toMatch(/PRIVATE_/)
+  })
+
+
   it('projects only the three published coach fields, retaining legacy sent feedback independently', () => {
     const model = toRecapPrintModel(fixture({ status: 'REVIEWED', reviewed_at: '2026-10-05',
       client_feedback_text: 'Feedback legacy enviado', client_feedback_sent_at: '2026-10-05T12:00:00Z',
