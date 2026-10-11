@@ -1,0 +1,13 @@
+# R3-001 — navegación de recaps paginados, 2026-10-11
+
+LOCAL PASS / REVIEW_REQUIRED, seguimiento autorizado P6-03/P6-04. Causa: enlace condicionado a lista filtrada no vacía, aunque existen páginas adicionales. Fix mueve solo ese enlace; mismo destino/label, sin contar backlog ni generar alertas futuras.
+TDD: RED válido `npm test -- src/features/progress/components/progress-dashboard.test.tsx -t R3-001`:1 FAIL/12 fuera del filtro; GREEN focal completo13/13 PASS. Primer assertion exploratorio de label incorrecto no acredita RED; fue corregido antes del RED válido.
+Final: `npm run lint` PASS0 errores/1 warning ajeno; `npm test -- --run` PASS444/444 en68 archivos; `npm run build` PASS TypeScript/Vite; `git diff --check` PASS. Sin autoformat ni tests debilitados.
+Browser: `node docs/evidence/progress-dashboard-p6-20261011/verify-browser.cjs --activated` PASS14/14 flujos/ocho casos; nueva página sintética con filas actuales/futuras y totalPages2 mantiene navegación sin avisos futuros. HTTP/WS loopback cercados, sin nuevas capturas/pulido. Salida local `browser-output/navigation-final.json`.
+Dashboard SHA256 `dae34e4de763f18ae2b9e7c32a46a389be5dcb181b19d5db98ca7354cbd818c9`; test SHA256 `dea7e4596d4b7851987b22b892b224deec0c896131df26255d247f6729140650`.
+Adapter SHA256 `e7ce7b0826585a54a89e77eaeaca41dac0a3f5376597c3dea5e9c87b556b26ba`; runner SHA256 `1f2d55b0082a466b2ae2058e773e04524e4643ec899e50e81d7f4947f969b31f`.
+Fixture API congelado SHA256 `474f667eda623200619fc7ef279bef0819d99ffabc46309221702a26fa3ff584`, sin editar. Browser no acredita JWT vivo ni sustituye pruebas canónicas PostgreSQL.
+Approval Admin anterior y acknowledgement exacto consumido pertenecen a versión previa443/13; esta regresión es nueva unidad, assessment medium pendiente del padre, no reapertura ni corrección nativa. CI/publicación pendientes, sin commits/remotos/despliegue. P5 DONE histórico/iOS externo intactos.
+Rollback: revertir únicamente el cambio R3-001 Dashboard/test y escenario correspondiente del harness; preserva núcleo Dashboard, API y fixture común. Diff incremental fuente/test19 líneas; harness completo336; sin excepción de tamaño.
+Raíz sin Git: snapshot documental antes/después, no commit. Plan antes `E37616EE447CC0DC4665CEF6F31566713FED0D211D8567B008EF579FC85E6B59`; después `26C4259E15BF513969A5AB7B15C09DE4EC6719A49A0DB0D0E3C3D51F9E644BA1`.
+Tareas antes `1400E7A64200D96BCED044EC489439559B1B3B4DFDF55288C6B8EFB60A49B7DC`; después `027A664BA7D6FFE8EACEADE0F9E225BEF67CBDA45F7ACA435E0D2863B269FAF7`. Fecha UTC cierre `2026-10-11T10:46:52.6381255Z`; Engram PENDING, sin identidad inventada ni mutación.
