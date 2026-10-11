@@ -83,6 +83,8 @@ export interface WeekSummary {
   trainings_completed: number
   total_meals: number
   meals_completed: number
+  diet_days_assigned?: number
+  diet_days_completed?: number
 }
 
 export interface MetricHistoryPoint {

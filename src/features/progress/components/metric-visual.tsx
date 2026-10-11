@@ -10,6 +10,7 @@ interface MetricVisualProps {
   series: MetricSeries[]
   period: string
   chartPeriod: string
+  compact?: boolean
 }
 const number = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 })
 const date = (value: string) => value.slice(0, 10).split('-').reverse().join('/')
@@ -26,7 +27,7 @@ function pointLabel(point: Observation | null, unit: string) {
 }
 
 /** One unit per axis; straight guides join observations, never daily estimates. */
-export function MetricVisual({ series, period, chartPeriod }: MetricVisualProps) {
+export function MetricVisual({ series, period, chartPeriod, compact = false }: MetricVisualProps) {
   const [selected, setSelected] = useState(series[0]?.key ?? '')
   const [scale, setScale] = useState<ChartScale>('auto')
   const id = useId()
@@ -42,20 +43,7 @@ export function MetricVisual({ series, period, chartPeriod }: MetricVisualProps)
   const delta = comparable && metric.change !== null
     ? `${metric.change > 0 ? '+' : ''}${number.format(metric.change)} ${rating(metric.unit) ? 'puntos' : metric.unit}` : 'No comparable'
 
-  return <section className="min-w-0 space-y-5 rounded-lg border bg-card p-4 sm:p-6 [--muted-foreground:var(--foreground-secondary)]" aria-labelledby={`${id}-title`}>
-    <div className="flex flex-wrap items-end justify-between gap-4">
-      <div className="space-y-1">
-        <h2 id={`${id}-title`} className="text-xl font-semibold">{metric.label} · {metric.unit}</h2>
-        <p className="text-sm text-muted-foreground">{metric.source} · {period}</p>
-      </div>
-      <label className="w-full text-sm sm:w-auto">Medición
-        <select aria-label="Medición" value={metric.key} onChange={(event) => { setSelected(event.target.value); setScale('auto') }}
-          className="mt-1 block min-h-10 w-full rounded-md border border-input bg-background px-3 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-w-56">
-          {series.map((item) => <option key={item.key} value={item.key}>{item.label} ({item.unit})</option>)}
-        </select>
-      </label>
-    </div>
-    <div className="space-y-4 border-y py-4" aria-live="polite">
+  const observationSummary = (<div className="space-y-4 border-y py-4" aria-live="polite">
       <p className="text-sm">{metric.count} {metric.count === 1 ? 'observación completa' : 'observaciones completas'} · {metric.incomplete_count} {metric.incomplete_count === 1 ? 'incompleta' : 'incompletas'}</p>
       <dl className="grid gap-4 sm:grid-cols-3">
         <div><dt className="text-sm text-muted-foreground">Primera observación</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{pointLabel(metric.first, metric.unit)}</dd></div>
@@ -65,12 +53,27 @@ export function MetricVisual({ series, period, chartPeriod }: MetricVisualProps)
       </dl>
       {metric.count === 0 && <p className="text-sm text-muted-foreground">Sin observaciones completas para esta medición.</p>}
       {metric.count === 1 && <p className="text-sm text-muted-foreground">Una observación no permite establecer una tendencia.</p>}
+    </div>)
+
+  return <section className="min-w-0 space-y-5 rounded-lg border bg-card p-4 sm:p-6 [--muted-foreground:var(--foreground-secondary)]" aria-labelledby={`${id}-title`}>
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="space-y-1">
+        <h2 id={`${id}-title`} className="text-xl font-semibold">{metric.label} · {metric.unit}</h2>
+        <p className="text-sm text-muted-foreground">{metric.source} · {period}</p>
+      </div>
+      {!compact && <label className="w-full text-sm sm:w-auto">Medición
+        <select aria-label="Medición" value={metric.key} onChange={(event) => { setSelected(event.target.value); setScale('auto') }}
+          className="mt-1 block min-h-10 w-full rounded-md border border-input bg-background px-3 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-w-56">
+          {series.map((item) => <option key={item.key} value={item.key}>{item.label} ({item.unit})</option>)}
+        </select>
+      </label>}
     </div>
+    {!compact && observationSummary}
     <div className="flex flex-wrap items-center justify-between gap-3">
       <h3 className="text-sm font-medium">Observaciones del histórico · {metric.unit}</h3>
       {!rating(metric.unit) && points.length > 0 && <ChartScaleSelect value={scale} onValueChange={setScale} />}
     </div>
-    <p className="text-sm text-muted-foreground">Ventana gráfica: {chartPeriod}. No estimamos valores entre fechas; solo se muestran observaciones completas. Las líneas son una guía visual entre ellas; los registros incompletos interrumpen la guía.</p>
+    {!compact && <p className="text-sm text-muted-foreground">Ventana gráfica: {chartPeriod}. No estimamos valores entre fechas; solo se muestran observaciones completas. Las líneas son una guía visual entre ellas; los registros incompletos interrumpen la guía.</p>}
     {points.length === 0 ? <p className="rounded-md bg-muted p-4 text-sm">Sin observaciones completas en esta página del histórico. Consulta otra página o selecciona otra medición.</p> :
       <div className="h-64 min-w-0" role="img" aria-label={`${metric.label}, ${metric.unit}, ${chartPeriod}. ${points.length} observaciones completas; alternativa en tabla de datos.`}>
         <ResponsiveContainer width="100%" height="100%">
@@ -87,8 +90,10 @@ export function MetricVisual({ series, period, chartPeriod }: MetricVisualProps)
           </ScatterChart>
         </ResponsiveContainer>
       </div>}
+    {compact && <p className="text-xs text-muted-foreground">{metric.count} observaciones completas · {metric.incomplete_count} incompletas · {chartPeriod}</p>}
     <details className="border-t pt-4 text-sm">
       <summary className="cursor-pointer rounded-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Ver datos, semanas y procedencia</summary>
+      {compact && <><p className="my-3 text-sm text-muted-foreground">Solo observaciones completas; los huecos no son ceros y las líneas no reconstruyen días sin datos.</p>{observationSummary}</>}
       <div role="region" aria-label="Datos de la medición" tabIndex={0} className="mt-3 overflow-x-auto rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <table className="w-full min-w-[480px] text-left text-sm tabular-nums">
           <caption className="sr-only">{metric.label} · {metric.unit} · {chartPeriod}</caption>
