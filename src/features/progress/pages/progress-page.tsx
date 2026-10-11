@@ -5,6 +5,7 @@ import { TaskRouteGuard } from '../follow-up-tasks/route-guard'
 import { FollowUpPanel } from '../follow-up-tasks/follow-up-panel'
 import type { NavigationGuard } from '../follow-up-tasks/task-editor'
 import { ClientSelector, EmptyClientState } from '../components/client-selector'
+import { ProgressDashboard } from '../components/progress-dashboard'
 import { ProgressOverviewCards } from '../components/progress-overview-cards'
 import { ProgressCalendar } from '../components/progress-calendar'
 import { DayProgressDetail } from '../components/day-progress-detail'
@@ -37,8 +38,8 @@ export function ProgressPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const clientId = searchParams.get('clientId') ?? ''
   const selectedDate = searchParams.get('date') ?? getTodayStr()
-  const requestedSection = searchParams.get('section') ?? 'resumen'
-  const section = ['resumen', 'metricas', 'fotos', 'entrenamiento', 'adherencia', 'racha', 'seguimiento'].includes(requestedSection) ? requestedSection : 'metricas'
+  const requestedSection = searchParams.get('section') ?? 'dashboard'
+  const section = ['dashboard', 'resumen', 'metricas', 'fotos', 'entrenamiento', 'adherencia', 'racha', 'seguimiento'].includes(requestedSection) ? requestedSection : 'metricas'
   const period = metricsPeriod(searchParams)
   const historyPage = Math.max(1, Number(searchParams.get('historyPage')) || 1)
   const trainingWindow = trainingWindowFor(getTodayStr(), searchParams.get('trainingWindow'))
@@ -110,7 +111,7 @@ export function ProgressPage() {
         <EmptyClientState />
       ) : (
         <Tabs value={section} onValueChange={(value) => { if (dataRouter || !taskGuard.current || taskGuard.current()) updateParams({ section: value }) }} className="space-y-4">
-          <section aria-label="Contexto del cliente y periodo" className="border-y border-border py-2">
+          {section !== 'dashboard' && <section aria-label="Contexto del cliente y periodo" className="border-y border-border py-2">
             <details>
               <summary aria-label={`Periodo de métricas y entrenamiento: ${period.from ?? 'Inicio'} a ${period.to} UTC`} className="min-h-11 cursor-pointer rounded-sm text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 Periodo · {period.from ?? 'Inicio'} → {period.to} · UTC
@@ -130,19 +131,21 @@ export function ProgressPage() {
               </div>
             </details>
             {!period.valid && <p role="alert" className="text-sm text-status-error">Revisa el periodo: las fechas deben estar ordenadas y no superar hoy.</p>}
-          </section>
+          </section>}
           <div>
           <TabsList aria-label="Secciones de progreso" className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 [&_button]:min-h-11 [&_button]:shrink-0 sm:flex-wrap [&_button]:rounded-md [&_button]:data-[state=active]:bg-brand-soft/10 [&_button]:data-[state=active]:text-foreground [&_button]:data-[state=active]:shadow-none">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="resumen">Resumen</TabsTrigger>
             <TabsTrigger value="metricas">Métricas</TabsTrigger>
             <TabsTrigger value="fotos">Fotos</TabsTrigger>
             <TabsTrigger value="entrenamiento">Entrenamiento</TabsTrigger>
             <TabsTrigger value="adherencia">Adherencia</TabsTrigger>
             <TabsTrigger value="racha">Racha</TabsTrigger>
-            <TabsTrigger value="dashboard" disabled>Dashboard · pendiente</TabsTrigger>
             <TabsTrigger value="seguimiento">Seguimiento</TabsTrigger>
           </TabsList>
           </div>
+
+          <TabsContent value="dashboard" className="pt-2"><ProgressDashboard key={clientId} clientId={clientId} /></TabsContent>
 
           {/* Resumen Tab */}
           <TabsContent value="resumen" className="space-y-4 pt-2 sm:pt-3">

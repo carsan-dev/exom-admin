@@ -88,7 +88,7 @@ describe('P1 period and metrics UI', () => {
   it('preserves URL period on client/section changes and keeps existing destinations', async () => {
     render(<QueryClientProvider client={queryClient()}><MemoryRouter initialEntries={['/progress?clientId=a&section=metricas&period=custom&from=2026-09-01&to=2026-09-16']}><ProgressPage /><Location /></MemoryRouter></QueryClientProvider>)
     await screen.findByRole('table', { name: 'Comparativa de métricas del periodo' })
-    expect(screen.getByRole('tab', { name: /Dashboard/ })).toBeDisabled()
+    expect(screen.getByRole('tab', { name: /Dashboard/ })).toBeEnabled()
     expect(screen.getByRole('tab', { name: /Fotos/ })).not.toBeDisabled()
     fireEvent.mouseDown(screen.getByRole('tab', { name: 'Fotos' }), { button: 0, ctrlKey: false })
     await waitFor(() => expect(screen.getByLabelText('URL').textContent).toContain('section=fotos'))

@@ -26,6 +26,7 @@ vi.mock('../components/client-selector', () => ({
   ClientSelector: ({ onSelect }: { onSelect: (id: string) => void }) => <button onClick={() => onSelect('client-b')}>Seleccionar cliente B</button>,
   EmptyClientState: () => <p>Selecciona un cliente</p>,
 }))
+vi.mock('../components/progress-dashboard', () => ({ ProgressDashboard: () => <p>Dashboard existente</p> }))
 vi.mock('../components/progress-overview-cards', () => ({ ProgressOverviewCards: () => null }))
 vi.mock('../components/progress-calendar', () => ({ ProgressCalendar: ({ year, month, onDateSelect }: { year: number; month: number; onDateSelect: (date: string) => void }) => <button onClick={() => onDateSelect('2020-01-04')}>Calendario {year}-{month}</button> }))
 vi.mock('../components/day-progress-detail', () => ({ DayProgressDetail: () => null }))
@@ -70,6 +71,24 @@ beforeEach(() => {
 })
 
 describe('Progreso: contexto y navegación', () => {
+  it('abre Dashboard sin sección y conserva filtros y acceso explícito a Resumen', () => {
+    mount('clientId=client-a&period=3m&date=2020-01-03&historyPage=2')
+    expect(screen.getByRole('tab', { name: 'Dashboard' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByText('Dashboard existente')).toBeInTheDocument()
+    expect(params().get('period')).toBe('3m')
+    expect(params().get('date')).toBe('2020-01-03')
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'Resumen' }), { button: 0, ctrlKey: false })
+    expect(params().get('section')).toBe('resumen')
+    expect(params().get('historyPage')).toBe('2')
+  })
+
+  it('mantiene Métricas como fallback de sección desconocida', () => {
+    mount('clientId=client-a&section=unknown&period=3m')
+    expect(screen.getByRole('tab', { name: 'Métricas' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByText('Métricas existentes')).toBeInTheDocument()
+    expect(params().get('period')).toBe('3m')
+  })
+
   it('abre Seguimiento por URL, preserva navegación y confirma descarte al cambiar cliente', async () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
     mount('clientId=client-a&section=seguimiento&period=3m&date=2020-01-03')
@@ -97,7 +116,7 @@ describe('Progreso: contexto y navegación', () => {
     expect(screen.getByRole('tab', { name: 'Seguimiento' })).toBeEnabled()
     expect(params().get('section')).toBe('metricas')
     expect(params().get('period')).toBe('3m')
-    expect(screen.getByRole('tab', { name: 'Dashboard · pendiente' })).toBeDisabled()
+    expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeEnabled()
   })
   it('mantiene el periodo activo visible y conserva los filtros en detalle progresivo', () => {
     mount('clientId=client-a&section=metricas&period=custom&from=2020-01-01&to=2020-01-05&historyPage=2')
@@ -112,7 +131,7 @@ describe('Progreso: contexto y navegación', () => {
     expect(params().get('historyPage')).toBe('1')
     expect(params().get('clientId')).toBe('client-a')
     expect(params().get('section')).toBe('metricas')
-    expect(screen.getByRole('tab', { name: 'Dashboard · pendiente' })).toBeDisabled()
+    expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeEnabled()
   })
 
   it('no oculta la validación de fechas cuando el detalle de filtros está cerrado', () => {
@@ -135,7 +154,7 @@ describe('Progreso: pestaña Adherencia canónica', () => {
     expect(tab).toBeEnabled()
     expect(tab).toHaveAttribute('aria-selected', 'true')
     expect(screen.queryByText('Adherencia · pendiente')).not.toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Dashboard · pendiente' })).toBeDisabled()
+    expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeEnabled()
     expect(screen.getByRole('tab', { name: 'Seguimiento' })).toBeEnabled()
     const summary = await screen.findByRole('region', { name: 'Periodo cerrado' })
     expect(within(summary).getByText('37 %')).toBeInTheDocument()

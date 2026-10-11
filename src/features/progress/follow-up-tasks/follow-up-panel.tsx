@@ -7,19 +7,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { taskError, useAssignees, useTaskIdentity, useTaskList, useTaskSummary } from './api'
 import { TaskEditor, type NavigationGuard } from './task-editor'
+import { NextTaskSummary } from './next-task-summary'
 import { isClosed, TASK_PRIORITIES, TASK_STATUSES, TASK_TYPES, TASK_VIEWS,
-  type NextTask, type Task, type TaskFilters, type TaskStatus, type TaskView } from './types'
+  type Task, type TaskFilters, type TaskStatus, type TaskView } from './types'
 
 interface PanelProps { clientId: string; onGuard: (guard: NavigationGuard | null) => void }
 export function FollowUpPanel(props: PanelProps) {
   const identity = useTaskIdentity()
   return <ClientTasks key={`${identity}:${props.clientId}`} {...props} identity={identity} />
-}
-function NextSummary({ label, task }: { label: string; task: NextTask | null }) {
-  return <div className="min-w-0 flex-1 space-y-1">
-    <dt className="text-sm text-muted-foreground">{label}</dt>
-    <dd className="break-words text-sm font-medium">{task ? `${task.title} · ${task.due_date} · ${TASK_PRIORITIES[task.priority]}${task.overdue ? ' · Vencida' : ''}` : 'Sin tareas abiertas'}</dd>
-  </div>
 }
 function ClientTasks({ clientId, identity, onGuard }: PanelProps & { identity: string }) {
   const [filters, setFilters] = useState<TaskFilters>({ page: 1, view: 'active' })
@@ -52,10 +47,7 @@ function ClientTasks({ clientId, identity, onGuard }: PanelProps & { identity: s
   if (!identity) return <p role="alert">Inicia sesión para consultar tareas internas.</p>
   return <section ref={panel} aria-label="Seguimiento del cliente" className="min-w-0 space-y-5">
     <div className="space-y-1"><h2 className="text-lg font-semibold">Seguimiento</h2><p className="text-sm text-muted-foreground">Tareas internas del equipo. El vencimiento se consulta en UTC, independientemente del periodo de métricas.</p></div>
-    {summary.isPending ? <Skeleton className="h-20 w-full" /> : summary.isError ? <div role="alert" className="space-y-2 text-sm"><p>{taskError(summary.error)}</p><Button variant="outline" onClick={() => { void summary.refetch() }}>Reintentar próximos pasos</Button></div> : summary.data && <div className="space-y-2 border-y border-border py-3">
-      <dl className="flex flex-col gap-3 sm:flex-row sm:gap-6"><NextSummary label="Próxima tarea" task={summary.data.next_task} /><NextSummary label="Próxima revisión" task={summary.data.next_review} /></dl>
-      <p className="text-xs text-muted-foreground">Fecha del servidor: {summary.data.as_of_date} · UTC</p>
-    </div>}
+    <NextTaskSummary query={summary} />
     <Tabs defaultValue="tasks" className="space-y-4">
       <TabsList aria-label="Organización de seguimiento"><TabsTrigger value="tasks">Tareas</TabsTrigger><TabsTrigger value="recaps">Recaps</TabsTrigger></TabsList>
       <TabsContent value="recaps"><RecapsList clientId={clientId} archived={false} page={recapPage} onPageChange={setRecapPage} returnTo={`${location.pathname}${location.search}`} /></TabsContent>
