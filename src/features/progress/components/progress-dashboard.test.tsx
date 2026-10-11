@@ -84,6 +84,20 @@ describe('Dashboard: presentación canónica', () => {
     expect(screen.queryByText('Baja adherencia global')).not.toBeInTheDocument()
     expect(screen.getByText(/Clasificación reciente no disponible/)).toBeInTheDocument()
   })
+  it('R3-001 conserva navegación de recaps paginados aunque la primera página solo contenga fechas actuales o futuras', async () => {
+    const previous = api.get.getMockImplementation()!
+    api.get.mockImplementation((url: string, options?: { params?: Record<string, unknown> }) => url === '/recaps'
+      ? Promise.resolve({ data: { success: true, data: { data: [
+        { id: 'current', client_id: 'client-a', status: 'SUBMITTED', submitted_at: '2026-10-11T10:00:00Z', week_start_date: '2026-10-05', week_end_date: '2026-10-11' },
+        { id: 'future', client_id: 'client-a', status: 'SUBMITTED', submitted_at: '2026-10-12T10:00:00Z', week_start_date: '2026-10-12', week_end_date: '2026-10-18' },
+      ], page: 1, total: 21, limit: 20, totalPages: 2 } } }) : previous(url, options))
+    mount()
+    const link = await screen.findByRole('link', { name: 'Consultar todos los recaps en Seguimiento' })
+    expect(link).toHaveAttribute('href', expect.stringContaining('section=seguimiento'))
+    const alerts = screen.getByRole('region', { name: 'Alertas importantes' })
+    expect(within(alerts).queryByText(/Recaps enviados pendientes de revisión/)).not.toBeInTheDocument()
+    expect(within(alerts).queryByRole('link', { name: /2026-10-11|2026-10-12/ })).not.toBeInTheDocument()
+  })
   it('datos ausentes, cliente nuevo y sin pauta no son éxito ni ceros ficticios', async () => {
     metrics = { ...weight, first: null, last: null, change: null, count: 0, points: [] }
     week = { ...week, trainings_assigned: 0, diet_days_assigned: 0 }
