@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ArrowLeft, AlertTriangle, CalendarDays, ShieldCheck, Unlock, UserCheck, UserX, Users } from 'lucide-react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,6 +19,8 @@ import { ClientStreakCard } from '../components/client-streak-card'
 import { ToggleUserStatusDialog } from '../components/toggle-user-status-dialog'
 import { UnlockDialog } from '../components/unlock-dialog'
 import { getUsersRoute } from '../types'
+
+const CLIENT_TABS = ['info', 'metrics', 'streak', 'adherence'] as const
 
 function DetailPageSkeleton() {
   return (
@@ -85,6 +87,18 @@ export function ClientDetailPage() {
   const [changeRoleDialogOpen, setChangeRoleDialogOpen] = useState(false)
   const [manageAssignmentsDialogOpen, setManageAssignmentsDialogOpen] = useState(false)
   const [toggleStatusDialogOpen, setToggleStatusDialogOpen] = useState(false)
+
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedTab = searchParams.get('tab')
+  const activeTab = CLIENT_TABS.find((tab) => tab === requestedTab) ?? 'info'
+
+  function handleTabChange(value: string) {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.set('tab', value)
+      return next
+    }, { replace: true })
+  }
 
   const clientProfile = useClientProfile(id)
   const errorStatus = getApiErrorStatus(clientProfile.error)
@@ -179,7 +193,7 @@ export function ClientDetailPage() {
         </details>
       )}
 
-      <Tabs defaultValue="info" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList aria-label="Secciones del cliente" className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 [&_button]:min-h-11 [&_button]:shrink-0 [&_button]:text-foreground [&_button]:data-[state=active]:text-foreground! sm:flex-wrap">
           <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="info">
             Info general

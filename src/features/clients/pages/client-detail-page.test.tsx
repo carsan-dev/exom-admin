@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter, Route, Routes } from 'react-router'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import { ClientDetailPage } from './client-detail-page'
 
@@ -66,6 +66,24 @@ describe('ruta real de detalle de cliente', () => {
     fireEvent.mouseDown(tab, { button: 0, ctrlKey: false })
     fireEvent.click(tab)
     await waitFor(() => expect(shared.get).toHaveBeenCalledWith('/admin/clients/client-route/adherence', expect.objectContaining({ params: expect.objectContaining({ start: expect.any(String), end: expect.any(String) }) })))
-    expect(screen.getByLabelText('Desde (UTC)')).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Periodo' })).toBeInTheDocument()
+  })
+  it('la pestaña activa vive en la URL y un valor inválido cae en Info general', () => {
+    const Probe = () => <p data-testid="search">{useLocation().search}</p>
+    const view = (entry: string) => render(<QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={[entry]}><Routes>
+        <Route path="/clients/:id" element={<><ClientDetailPage /><Probe /></>} />
+      </Routes></MemoryRouter>
+    </QueryClientProvider>)
+    const first = view('/clients/c1?tab=metrics&x=1')
+    expect(screen.getByText('Métricas preservadas')).toBeInTheDocument()
+    const racha = screen.getByRole('tab', { name: 'Racha' })
+    fireEvent.mouseDown(racha, { button: 0, ctrlKey: false }); fireEvent.click(racha)
+    expect(screen.getByTestId('search')).toHaveTextContent('tab=streak')
+    expect(screen.getByTestId('search')).toHaveTextContent('x=1')
+    first.unmount()
+    view('/clients/c1?tab=bogus')
+    expect(screen.getByText('Información preservada')).toBeInTheDocument()
+    expect(screen.getByTestId('search').textContent).toBe('?tab=bogus')
   })
 })
