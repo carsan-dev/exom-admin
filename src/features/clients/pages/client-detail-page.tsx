@@ -11,6 +11,7 @@ import { getApiErrorMessage, getApiErrorStatus, useClientProfile } from '../api'
 import { ChangeRoleDialog } from '../components/change-role-dialog'
 import { ClientAssignedAdminsCard } from '../components/client-assigned-admins-card'
 import { ClientHeader } from '../components/client-header'
+import { ClientAdherenceTab } from '../components/client-adherence-tab'
 import { ClientInfoTab } from '../components/client-info-tab'
 import { ManageClientAssignmentsDialog } from '../components/manage-client-assignments-dialog'
 import { ClientMetricsTab } from '../components/client-metrics-tab'
@@ -126,7 +127,7 @@ export function ClientDetailPage() {
   const client = clientProfile.data
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-5 [--muted-foreground:var(--foreground-secondary)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button variant="ghost" asChild>
           <Link to={usersRoute}>
@@ -172,11 +173,14 @@ export function ClientDetailPage() {
       <ClientHeader client={client} />
 
       {currentUserRole === 'SUPER_ADMIN' && (
-        <ClientAssignedAdminsCard clientId={client.id} onManage={() => setManageAssignmentsDialogOpen(true)} />
+        <details className="rounded-xl border p-3">
+          <summary className="min-h-11 cursor-pointer content-center rounded font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Administradores asignados</summary>
+          <ClientAssignedAdminsCard clientId={client.id} onManage={() => setManageAssignmentsDialogOpen(true)} />
+        </details>
       )}
 
       <Tabs defaultValue="info" className="space-y-4">
-        <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-3">
+        <TabsList aria-label="Secciones del cliente" className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 [&_button]:min-h-11 [&_button]:shrink-0 [&_button]:text-foreground [&_button]:data-[state=active]:text-foreground! sm:flex-wrap">
           <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="info">
             Info general
           </TabsTrigger>
@@ -185,6 +189,9 @@ export function ClientDetailPage() {
           </TabsTrigger>
           <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="streak">
             Racha
+          </TabsTrigger>
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="adherence">
+            Adherencia
           </TabsTrigger>
         </TabsList>
 
@@ -196,6 +203,9 @@ export function ClientDetailPage() {
         </TabsContent>
         <TabsContent value="streak">
           <ClientStreakCard streak={client.streak} />
+        </TabsContent>
+        <TabsContent value="adherence">
+          {id === client.id && <ClientAdherenceTab clientId={id} />}
         </TabsContent>
       </Tabs>
 

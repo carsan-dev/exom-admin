@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle2, Dumbbell, MessageSquareReply, Salad, StickyNote } from 'lucide-react'
 import { toast } from 'sonner'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -16,6 +15,8 @@ interface DayProgressDetailProps {
   date: string
   progress: DayProgress | null | undefined
   isLoading?: boolean
+  isError?: boolean
+  onRetry?: () => void
 }
 
 const dateFormatter = new Intl.DateTimeFormat('es-ES', {
@@ -23,16 +24,30 @@ const dateFormatter = new Intl.DateTimeFormat('es-ES', {
   day: '2-digit',
   month: 'long',
   year: 'numeric',
+  timeZone: 'UTC',
 })
 
-export function DayProgressDetail({ clientId, date, progress, isLoading }: DayProgressDetailProps) {
+function toCivilUtcDate(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  // Progress dates are civil days, not instants to convert through local time.
+  const match = /^(\d{4}-\d{2}-\d{2})(?:T00:00:00\.000Z)?$/.exec(value)
+  if (!match) return null
+  const civilDate = match[1]
+  const parsed = new Date(`${civilDate}T00:00:00.000Z`)
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString() === `${civilDate}T00:00:00.000Z`
+    ? civilDate
+    : null
+}
+
+export function DayProgressDetail({ clientId, date, progress: receivedProgress, isLoading, isError, onRetry }: DayProgressDetailProps) {
+  const progress = receivedProgress?.client_id === clientId && toCivilUtcDate(receivedProgress.date) === date ? receivedProgress : null
   const formattedDate = dateFormatter.format(new Date(date + 'T12:00:00Z'))
   const [reply, setReply] = useState('')
   const replyMutation = useReplyToTrainingNote(clientId, date)
 
   useEffect(() => {
     setReply(progress?.admin_reply_text ?? '')
-  }, [progress?.id, progress?.admin_reply_text])
+  }, [clientId, date, progress?.id, progress?.admin_reply_text])
 
   const savedReply = progress?.admin_reply_text ?? ''
   const hasReplyChanges = reply.trim() !== savedReply
@@ -49,30 +64,38 @@ export function DayProgressDetail({ clientId, date, progress, isLoading }: DayPr
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl capitalize">{formattedDate}</CardTitle>
-        <CardDescription>Detalle de actividad del día</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isLoading ? (
+    <section aria-label="Detalle del día seleccionado" className="min-w-0 space-y-5 rounded-lg bg-card p-4 sm:p-6">
+      <header className="space-y-2 border-b pb-4">
+        <h2 className="text-lg font-semibold capitalize">{formattedDate}</h2>
+        <p className="text-sm text-muted-foreground">Detalle de actividad del día · UTC. Los registros conservan ejercicios, comidas y valores históricos.</p>
+      </header>
+      <div className="space-y-5">
+        {isError ? <div role="alert" className="space-y-3"><p className="text-sm">No se pudo cargar el detalle del día. No significa que no haya actividad.</p>{onRetry && <Button variant="outline" size="sm" onClick={onRetry}>Reintentar detalle</Button>}</div> : isLoading ? (
           <div className="space-y-3">
             <Skeleton className="h-4 w-48" />
             <Skeleton className="h-4 w-36" />
             <Skeleton className="h-4 w-52" />
           </div>
         ) : !progress ? (
-          <p className="text-sm text-muted-foreground">Sin registro de progreso para este día.</p>
+          <div className="space-y-2 text-sm"><p>Sin registro de progreso para este día.</p><p className="text-muted-foreground">No permite concluir que no hubo actividad. Selecciona otra fecha en el calendario o en el historial del mes.</p></div>
         ) : (
           <>
             {/* Entrenamiento */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <Dumbbell className="h-4 w-4 text-brand-primary" />
                 <span className="text-sm font-medium">Entrenamiento</span>
                 <Badge variant={progress.training_completed ? 'default' : 'secondary'}>
                   {progress.training_completed ? 'Completado' : 'No completado'}
                 </Badge>
+                {progress.training_summary && progress.training_summary.assigned_count > 1 && (
+                  <span className="text-xs text-muted-foreground">
+                    {progress.training_summary.completed_count} de {progress.training_summary.assigned_count} entrenamientos
+                  </span>
+                )}
+                {progress.training_summary?.training_completion_mode === 'ANY' && progress.training_summary.assigned_count > 1 && (
+                  <Badge variant="secondary">Elegir uno</Badge>
+                )}
               </div>
               {progress.exercises_completed.length > 0 ? (
                 <ul className="space-y-1 pl-6">
@@ -108,8 +131,8 @@ export function DayProgressDetail({ clientId, date, progress, isLoading }: DayPr
             </div>
 
             {/* Dieta */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex flex-wrap items-center gap-2">
                 <Salad className="h-4 w-4 text-status-success" />
                 <span className="text-sm font-medium">Dieta</span>
                 <Badge variant={progress.meals_completed.length > 0 ? 'default' : 'secondary'}>
@@ -140,9 +163,9 @@ export function DayProgressDetail({ clientId, date, progress, isLoading }: DayPr
                   <StickyNote className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Nota del cliente</span>
                 </div>
-                <p className="pl-6 text-sm text-muted-foreground">{progress.notes}</p>
+                <p className="whitespace-pre-wrap break-words text-sm text-foreground">{progress.notes}</p>
 
-                <div className="space-y-2 pl-6">
+                <div className="space-y-2">
                   <label
                     htmlFor="training-note-reply"
                     className="flex items-center gap-2 text-sm font-medium"
@@ -195,7 +218,7 @@ export function DayProgressDetail({ clientId, date, progress, isLoading }: DayPr
             )}
           </>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { assignmentOptionQueryKeys } from '@/lib/assignment-query-keys'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { Role } from '../clients/types'
+import { progressQueryKeys } from '../progress/api'
 import type {
   AssignmentCatalogOptions,
   AssignmentDay,
@@ -55,6 +56,15 @@ export const assignmentsQueryKeys = {
   autoRule: (clientId?: string) => ['assignments', 'auto-rule', clientId] as const,
 }
 
+/** Completion mode/assignments change day, calendar and week-summary progress for that client. */
+function invalidateClientProgress(queryClient: QueryClient, clientId: string) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: progressQueryKeys.clientDayQueries(clientId) }),
+    queryClient.invalidateQueries({ queryKey: progressQueryKeys.clientCalendarQueries(clientId) }),
+    queryClient.invalidateQueries({ queryKey: progressQueryKeys.clientWeekQueries(clientId) }),
+  ])
+}
+
 function normalizeOptionalId(value: string | null | undefined) {
   if (typeof value !== 'string') {
     return null
@@ -80,6 +90,7 @@ function normalizeBatchPayload(values: AssignmentEditorValues) {
         training_id,
         last_set_video_policy: day.training_policies?.[training_id] ?? 'AUTO',
       })),
+      ...(!day.is_rest_day && day.training_completion_mode && { training_completion_mode: day.training_completion_mode }),
       diet_id: day.is_rest_day ? null : normalizeOptionalId(day.diet_id),
       is_rest_day: day.is_rest_day,
     })),
@@ -95,6 +106,7 @@ function normalizeUpdatePayload(values: AssignmentUpdateValues) {
       training_id,
       last_set_video_policy: values.training_policies?.[training_id] ?? 'AUTO',
     })),
+    ...(!values.is_rest_day && values.training_completion_mode && { training_completion_mode: values.training_completion_mode }),
     diet_id: values.is_rest_day ? null : normalizeOptionalId(values.diet_id),
     is_rest_day: values.is_rest_day,
   }
@@ -106,6 +118,7 @@ function normalizeAutoRulePayload(values: CreateAutoAssignmentRuleValues) {
     source_week_start: values.source_week_start,
     starts_on: values.starts_on,
     ends_on: values.ends_on || null,
+    ...(values.training_completion_mode && { training_completion_mode: values.training_completion_mode }),
     days: values.days.map((day) => ({
       weekday: day.weekday,
       training_id: day.is_rest_day ? null : normalizeOptionalId(day.training_id),
@@ -289,6 +302,7 @@ export function useCreateAutoAssignmentRule() {
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.autoRule(values.client_id) }),
+        invalidateClientProgress(queryClient, values.client_id),
       ])
     },
   })
@@ -309,6 +323,7 @@ export function useUpdateAutoAssignmentRule() {
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.autoRule(rule.client_id) }),
+        invalidateClientProgress(queryClient, rule.client_id),
       ])
     },
   })
@@ -340,10 +355,11 @@ export function useBatchAssign() {
       const response = await api.post<ApiEnvelope<AssignmentDay[]>>('/assignments/batch', normalizeBatchPayload(values))
       return unwrapResponse(response)
     },
-    onSuccess: async () => {
+    onSuccess: async (_days, values) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+        invalidateClientProgress(queryClient, values.client_id),
       ])
     },
   })
@@ -389,10 +405,11 @@ export function useUpdateAssignment() {
       const response = await api.put<ApiEnvelope<AssignmentDay>>(`/assignments/${assignmentId}`, normalizeUpdatePayload(values))
       return unwrapResponse(response)
     },
-    onSuccess: async () => {
+    onSuccess: async (day) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.weeks }),
         queryClient.invalidateQueries({ queryKey: assignmentsQueryKeys.months }),
+        invalidateClientProgress(queryClient, day.client_id),
       ])
     },
   })

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router'
 import {
   AlertTriangle,
   Archive,
@@ -28,9 +28,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getApiErrorMessage } from '@/lib/api-utils'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
-import { useArchiveRecap, useRecapDetail, useReviewRecap } from '../api'
+import { recapIdentity, useRecapIdentity, useArchiveRecap, useRecapDetail, useReviewRecap } from '../api'
+import { RecapReviewEditor } from '../components/recap-review-editor'
 import { RecapSectionCard } from '../components/recap-section-card'
 import { RecapStatusBadge } from '../components/recap-status-badge'
+import { RecapPrintableSummary } from '../components/recap-printable-summary'
+import { toRecapPrintModel } from '../components/recap-print-model'
 import {
   formatAverageDailySteps,
   formatRecapOption,
@@ -90,31 +93,55 @@ function formatNotes(value: string | null, emptyCopy = 'Sin notas del cliente') 
 
 export function RecapDetailPage() {
   const { id } = useParams()
+  const identity = useRecapIdentity()
+  if (!identity.split(':')[0]) return <p role="alert">Inicia sesión para consultar el recap.</p>
+  return <ScopedRecapDetailPage key={`${identity}:${id}`} id={id} identity={identity} />
+}
+function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string }) {
   const recapQuery = useRecapDetail(id)
+  const [searchParams] = useSearchParams()
+  const returnTo = searchParams.get('returnTo')
+  const backTo = returnTo?.startsWith('/progress?') ? returnTo : '/recaps'
+  const backLabel = backTo === '/recaps' ? 'Volver a recaps' : 'Volver a seguimiento'
+  const live = useRef(false)
+  useEffect(() => { live.current = true; return () => { live.current = false } }, [])
+  const current = () => live.current && recapIdentity() === identity
   const reviewMutation = useReviewRecap()
   const archiveMutation = useArchiveRecap()
   const [internalNote, setInternalNote] = useState('')
   const [clientFeedback, setClientFeedback] = useState('')
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false)
+  const [reviewDirty, setReviewDirty] = useState(false)
+  const [reviewPending, setReviewPending] = useState(false)
+  const [baseline, setBaseline] = useState({ note: '', feedback: '' })
+  const [legacyError, setLegacyError] = useState('')
+  const [legacyServer, setLegacyServer] = useState<typeof recapQuery.data>()
 
   useEffect(() => {
-    setInternalNote(recapQuery.data?.admin_comments ?? '')
-    setClientFeedback(recapQuery.data?.client_feedback_text ?? '')
-  }, [recapQuery.data?.admin_comments, recapQuery.data?.client_feedback_text, recapQuery.data?.id])
+    const data = recapQuery.data
+    if (!data || legacyError) return
+    const note = data.admin_comments ?? ''
+    const feedback = data.client_feedback_text ?? ''
+    // A background refresh may acknowledge matching values, never erase edits.
+    if ((internalNote === baseline.note && clientFeedback === baseline.feedback) ||
+      (internalNote === note && clientFeedback === feedback)) {
+      if (baseline.note !== note || baseline.feedback !== feedback) setBaseline({ note, feedback })
+      if (internalNote !== note) setInternalNote(note)
+      if (clientFeedback !== feedback) setClientFeedback(feedback)
+    }
+  }, [recapQuery.data, internalNote, clientFeedback, baseline, legacyError])
 
   const recap = recapQuery.data
-  const existingInternalNote = recap?.admin_comments ?? ''
-  const existingClientFeedback = recap?.client_feedback_text ?? ''
-  useUnsavedChanges(
-    'recap-review',
-    Boolean(
-      recap &&
-        (internalNote !== existingInternalNote ||
-          clientFeedback !== existingClientFeedback ||
-          reviewMutation.isPending ||
-          archiveMutation.isPending),
-    ),
+  const existingInternalNote = baseline.note
+  const existingClientFeedback = baseline.feedback
+  const hasUnsavedChanges = Boolean(
+    recap &&
+      (internalNote !== existingInternalNote ||
+        clientFeedback !== existingClientFeedback ||
+        reviewMutation.isPending || reviewDirty || Boolean(legacyError) ||
+        archiveMutation.isPending),
   )
+  useUnsavedChanges('recap-review', hasUnsavedChanges)
   const canReviewSubmittedRecap = Boolean(
     recap && recap.status === 'SUBMITTED' && !recap.archived_at,
   )
@@ -123,7 +150,7 @@ export function RecapDetailPage() {
   )
   const canSubmitReview = Boolean(
     recap &&
-      !reviewMutation.isPending &&
+      !reviewMutation.isPending && !archiveMutation.isPending && !reviewPending && !legacyError &&
       (canReviewSubmittedRecap ||
         (canEditReviewedComment &&
           (internalNote.trim() !== existingInternalNote.trim() ||
@@ -141,7 +168,7 @@ export function RecapDetailPage() {
     return <DetailPageSkeleton />
   }
 
-  if (recapQuery.isError || !recap) {
+  if (!recap) {
     const message = getApiErrorMessage(recapQuery.error, 'No se ha podido cargar el recap solicitado.')
 
     return (
@@ -156,9 +183,9 @@ export function RecapDetailPage() {
           </div>
           <div className="flex flex-wrap justify-center gap-3">
             <Button variant="outline" asChild>
-              <Link to="/recaps">
+              <Link to={backTo}>
                 <ArrowLeft className="h-4 w-4" />
-                Volver a recaps
+                {backLabel}
               </Link>
             </Button>
             <Button onClick={() => void recapQuery.refetch()}>Reintentar</Button>
@@ -169,9 +196,12 @@ export function RecapDetailPage() {
   }
 
   const clientName = getRecapClientName(recap.client)
+  const printClientName = [recap.client.profile?.first_name?.trim(), recap.client.profile?.last_name?.trim()]
+    .filter(Boolean).join(' ') || 'Cliente sin nombre'
+  const printModel = toRecapPrintModel(recap, printClientName)
 
   function handleReview() {
-    if (!recap || reviewMutation.isPending || (!canReviewSubmittedRecap && !canEditReviewedComment)) {
+    if (!current() || !recap || !canSubmitReview) {
       return
     }
 
@@ -182,7 +212,11 @@ export function RecapDetailPage() {
         client_feedback_text: clientFeedback.trim(),
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
+          if (!current()) return
+          const note = data.admin_comments ?? ''
+          const feedback = data.client_feedback_text ?? ''
+          setInternalNote(note); setClientFeedback(feedback); setBaseline({ note, feedback })
           toast.success(
             recap.status === 'SUBMITTED'
               ? 'Recap revisado correctamente'
@@ -190,21 +224,24 @@ export function RecapDetailPage() {
           )
         },
         onError: (error) => {
-          toast.error(getApiErrorMessage(error, 'No se pudo guardar la revisión'))
+          if (!current()) return
+          setLegacyError(getApiErrorMessage(error, 'No se pudo confirmar el guardado.'))
         },
       },
     )
   }
 
   function handleArchive() {
-    if (!recap) return
+    if (!current() || !recap || hasUnsavedChanges) return
 
     archiveMutation.mutate(recap.id, {
       onSuccess: () => {
+        if (!current()) return
         toast.success('Recap archivado correctamente')
         setArchiveDialogOpen(false)
       },
       onError: (error) => {
+        if (!current()) return
         toast.error(getApiErrorMessage(error, 'No se pudo archivar el recap'))
       },
     })
@@ -214,13 +251,14 @@ export function RecapDetailPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button variant="ghost" asChild>
-          <Link to="/recaps">
+          <Link to={backTo}>
             <ArrowLeft className="h-4 w-4" />
-            Volver a recaps
+            {backLabel}
           </Link>
         </Button>
 
         <div className="flex flex-wrap gap-3">
+          <RecapPrintableSummary model={printModel} disabled={hasUnsavedChanges} />
           {!recap.archived_at && recap.status !== 'DRAFT' && (
             <Button onClick={handleReview} disabled={!canSubmitReview}>
               <CheckCircle2 className="h-4 w-4" />
@@ -228,7 +266,7 @@ export function RecapDetailPage() {
             </Button>
           )}
           {recap.status === 'REVIEWED' && !recap.archived_at && (
-            <Button variant="outline" onClick={() => setArchiveDialogOpen(true)}>
+            <Button variant="outline" disabled={hasUnsavedChanges} onClick={() => setArchiveDialogOpen(true)}>
               <Archive className="h-4 w-4" />
               Archivar recap
             </Button>
@@ -376,6 +414,9 @@ export function RecapDetailPage() {
               <DetailField label="Estado de ánimo" value={formatRecapOption(recap.mood)} />
               <DetailField label="Estrés activado" value={recap.stress_enabled ? 'Sí' : 'No'} />
               <DetailField label="Nivel de estrés" value={recap.stress_level?.toString() ?? 'No indicado'} />
+              <DetailField label="Hambre semanal (1 sin hambre – 10 extrema)" value={recap.hunger_level?.toString() ?? 'No indicado'} />
+              <DetailField label="Energía semanal (1 sin energía – 10 mucha)" value={recap.energy_level?.toString() ?? 'No indicado'} />
+              <DetailField label="Digestión semanal (1 muy mala – 10 muy buena)" value={recap.digestion_level?.toString() ?? 'No indicado'} />
               <DetailField label="Notas" value={formatNotes(recap.general_notes)} />
             </div>
           </RecapSectionCard>
@@ -426,6 +467,18 @@ export function RecapDetailPage() {
         </TabsContent>
       </Tabs>
 
+      {recapQuery.isError && <div role="alert" className="space-y-2 text-sm"><p>No se pudo actualizar el recap. Se conservan tus cambios.</p><Button variant="outline" disabled={recapQuery.isFetching} onClick={() => void recapQuery.refetch()}>Reintentar consulta</Button></div>}
+      <RecapReviewEditor recap={recap} archived={Boolean(recap.archived_at)} onDirty={setReviewDirty} onPending={setReviewPending} disabled={reviewMutation.isPending || archiveMutation.isPending || Boolean(legacyError)} />
+      {legacyError && <div role="alert" className="space-y-2 text-sm"><p>{legacyError} Se conservan tus comentarios. Consulta el servidor antes de repetir un guardado que pueda enviar feedback.</p><Button variant="outline" disabled={recapQuery.isFetching} onClick={async () => {
+        const result = await recapQuery.refetch()
+        if (current() && result.data && !result.isError) setLegacyServer(result.data)
+      }}>Consultar comentarios guardados</Button>
+        {legacyServer && <><p className="whitespace-pre-wrap [overflow-wrap:anywhere]">Comentario guardado: {legacyServer.client_feedback_text || 'Sin comentario'}</p><Button variant="outline" onClick={() => {
+          if (!current() || !window.confirm('Descartar tus comentarios locales y cargar los guardados?')) return
+          const note = legacyServer.admin_comments ?? ''; const feedback = legacyServer.client_feedback_text ?? ''
+          setInternalNote(note); setClientFeedback(feedback); setBaseline({ note, feedback }); setLegacyError(''); setLegacyServer(undefined)
+        }}>Descartar comentarios y cargar guardados</Button></>}
+      </div>}
       <RecapSectionCard
         title="Revisión del admin"
         description="Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push."

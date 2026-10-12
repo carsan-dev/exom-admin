@@ -1,70 +1,35 @@
-import { CalendarClock, Flame, Trophy } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import type { ReactNode } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Streak } from '../types'
 
 interface ClientStreakCardProps {
-  streak: Streak | null
+  streak: Streak | null | undefined
+  isLoading?: boolean
+  action?: ReactNode
 }
 
 const dateFormatter = new Intl.DateTimeFormat('es-ES', {
-  day: '2-digit',
-  month: 'long',
-  year: 'numeric',
+  day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC',
 })
 
-export function ClientStreakCard({ streak }: ClientStreakCardProps) {
-  if (!streak) {
-    return (
-      <Card>
-        <CardContent className="pt-6 text-sm text-muted-foreground">
-          El cliente todavía no tiene una racha registrada.
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const items = [
-    {
-      label: 'Racha actual',
-      value: `${streak.current_days} días`,
-      icon: Flame,
-      accent: 'text-status-warning',
-    },
-    {
-      label: 'Mejor récord',
-      value: `${streak.longest_days} días`,
-      icon: Trophy,
-      accent: 'text-brand-primary',
-    },
-    {
-      label: 'Última actividad',
-      value: streak.last_active_date ? dateFormatter.format(new Date(streak.last_active_date)) : 'Sin actividad',
-      icon: CalendarClock,
-      accent: 'text-status-info',
-    },
-  ]
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Racha del cliente</CardTitle>
-        <CardDescription>Actividad reciente y mejor consistencia histórica</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-3">
-        {items.map((item) => {
-          const Icon = item.icon
-
-          return (
-            <div key={item.label} className="rounded-xl border border-border/60 bg-background/60 p-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <Icon className={`h-4 w-4 ${item.accent}`} />
-                {item.label}
-              </div>
-              <p className="mt-3 text-2xl font-semibold text-foreground">{item.value}</p>
-            </div>
-          )
-        })}
-      </CardContent>
-    </Card>
-  )
+/** Read-only canonical presentation. Actions remain owned by the route. */
+export function ClientStreakCard({ streak, isLoading, action }: ClientStreakCardProps) {
+  return <section aria-label="Racha del cliente" className="space-y-6 rounded-lg bg-card p-4 sm:p-6 [--muted-foreground:var(--foreground-secondary)]">
+    <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold">Racha del cliente</h2>
+        <p className="max-w-prose text-sm text-muted-foreground">Racha actual y mejor récord registrado, en días. Estos contadores no se filtran por el periodo de métricas.</p>
+      </div>
+      {!isLoading && streak && action}
+    </div>
+    {isLoading ? <Skeleton className="h-24 w-full" /> : !streak ?
+      <p className="text-sm">{streak === null ? 'El cliente todavía no tiene una racha registrada.' : 'Racha no disponible.'} No equivale a una racha de cero días.</p> : <>
+        <dl className="grid gap-6 border-y border-border py-5 sm:grid-cols-3">
+          <div><dt className="text-sm text-muted-foreground">Racha actual</dt><dd className="mt-2 text-2xl font-semibold tabular-nums">{streak.current_days} días</dd></div>
+          <div><dt className="text-sm text-muted-foreground">Mejor récord</dt><dd className="mt-2 text-2xl font-semibold tabular-nums">{streak.longest_days} días</dd></div>
+          <div><dt className="text-sm text-muted-foreground">Última actividad · UTC</dt><dd className="mt-2 text-base font-medium">{streak.last_active_date ? dateFormatter.format(new Date(streak.last_active_date)) : 'Fecha no disponible'}</dd></div>
+        </dl>
+        <p className="max-w-prose text-sm text-muted-foreground">No se dispone del historial de rachas ni de los motivos de interrupción. La última actividad no permite reconstruir qué ocurrió en los días anteriores.</p>
+      </>}
+  </section>
 }

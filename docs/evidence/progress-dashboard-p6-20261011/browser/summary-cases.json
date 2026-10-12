@@ -1,0 +1,145 @@
+{
+  "provenance": {
+    "generator": "REAL_CURRENT_SERVICE_POSTGRESQL",
+    "frozen_utc": "2026-10-11T12:00:00Z",
+    "service": "src/modules/client-followup-tasks/client-followup-tasks.service.ts",
+    "query": "src/modules/client-followup-tasks/client-followup-tasks.queries.ts",
+    "source_sha256": {
+      "src/modules/client-followup-tasks/client-followup-tasks.service.ts": "034adfd9cd3df30377eb9b93e201d9daddc1e973d7292b45d7a2b6384dfcadf2",
+      "src/modules/client-followup-tasks/client-followup-tasks.queries.ts": "10f8ecfa72793406adb02f0e9d1e3f6ce5787fb958e5f86357542001f9679083",
+      "src/common/date-only.ts": "c82e6f505f73cf48f7ad4a38aa3f861ac627b6eb12ed9e656b44f18024b2c746"
+    },
+    "inputs_sha256": "7495736151286d6c366ea0f889f537154efe74469ea8efefc8f5327cc269b136",
+    "schema": "minimal synthetic projection tables; not migration acceptance",
+    "actor": "synthetic SUPER_ADMIN; full HTTP authorization proved separately"
+  },
+  "cases": [
+    {
+      "name": "overdue",
+      "summary": {
+        "as_of_date": "2026-10-11",
+        "next_task": {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "type": "CALL",
+          "title": "Próxima tarea canónica",
+          "due_date": "2026-10-10",
+          "priority": "HIGH",
+          "assigned_to_id": null,
+          "version": 1,
+          "overdue": true
+        },
+        "next_review": {
+          "id": "66666666-6666-4666-8666-666666666666",
+          "type": "REVIEW",
+          "title": "Revisión canónica",
+          "due_date": "2026-10-11",
+          "priority": "HIGH",
+          "assigned_to_id": null,
+          "version": 1,
+          "overdue": false
+        }
+      }
+    },
+    {
+      "name": "empty",
+      "summary": {
+        "as_of_date": "2026-10-11",
+        "next_task": null,
+        "next_review": null
+      }
+    },
+    {
+      "name": "today",
+      "summary": {
+        "as_of_date": "2026-10-11",
+        "next_task": {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "type": "CALL",
+          "title": "Tarea de hoy canónica",
+          "due_date": "2026-10-11",
+          "priority": "HIGH",
+          "assigned_to_id": null,
+          "version": 1,
+          "overdue": false
+        },
+        "next_review": null
+      }
+    },
+    {
+      "name": "future",
+      "summary": {
+        "as_of_date": "2026-10-11",
+        "next_task": {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "type": "CALL",
+          "title": "Tarea futura canónica",
+          "due_date": "2026-10-12",
+          "priority": "HIGH",
+          "assigned_to_id": null,
+          "version": 1,
+          "overdue": false
+        },
+        "next_review": null
+      }
+    },
+    {
+      "name": "changed",
+      "summary": {
+        "as_of_date": "2026-10-11",
+        "next_task": {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "type": "CALL",
+          "title": "Cambio canónico",
+          "due_date": "2026-10-10",
+          "priority": "HIGH",
+          "assigned_to_id": null,
+          "version": 2,
+          "overdue": true
+        },
+        "next_review": null
+      }
+    },
+    {
+      "name": "ties",
+      "summary": {
+        "as_of_date": "2026-10-11",
+        "next_task": {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "type": "CALL",
+          "title": "Próxima tarea canónica",
+          "due_date": "2026-10-10",
+          "priority": "HIGH",
+          "assigned_to_id": null,
+          "version": 1,
+          "overdue": true
+        },
+        "next_review": {
+          "id": "66666666-6666-4666-8666-666666666666",
+          "type": "REVIEW",
+          "title": "Revisión canónica",
+          "due_date": "2026-10-10",
+          "priority": "HIGH",
+          "assigned_to_id": null,
+          "version": 1,
+          "overdue": true
+        }
+      }
+    },
+    {
+      "name": "closed-status",
+      "summary": {
+        "as_of_date": "2026-10-11",
+        "next_task": null,
+        "next_review": null
+      }
+    },
+    {
+      "name": "client-isolation",
+      "summary": {
+        "as_of_date": "2026-10-11",
+        "next_task": null,
+        "next_review": null
+      }
+    }
+  ]
+}

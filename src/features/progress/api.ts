@@ -1,11 +1,134 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { type ApiEnvelope, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
-import type { BodyField, CalendarDay, DayProgress, MetricHistoryPoint, WeekSummary } from './types'
+import { useAuth } from '@/hooks/use-auth'
+import { type ApiEnvelope, getApiErrorStatus, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
+import type {
+  AdherenceConfig,
+  UpdateAdherenceConfigVariables,
+  BodyField,
+  CalendarDay,
+  DayProgress,
+  MetricHistoryPoint,
+  ProgressPhoto,
+  ProgressPhotoHistory,
+  ProgressPhotoSession,
+  ProgressPhotoView,
+  WeekSummary,
+  TrainingOverview,
+  TrainingSet,
+  TrainingSession,
+  TrainingSessionDetail,
+  LegacyTrainingRecord,
+  CursorPage,
+} from './types'
 import type { BodyMetric, PaginatedResponse } from '../clients/types'
+import type { MetricsOverview } from './metrics-overview'
+
+export function useMetricsOverview(clientId: string, from: string | undefined, to: string, page: number, valid = true) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'metrics-overview', from ?? 'all', to, page],
+    enabled: Boolean(clientId) && valid,
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => {
+      const response = await api.get<ApiEnvelope<MetricsOverview>>(
+        `/admin/clients/${clientId}/metrics/overview`, { params: { from, to, page }, signal })
+      return unwrapResponse(response)
+    },
+  })
+}
+
+export const EXERCISE_IDENTIFICATION = { all: 'all', identified: 'identified' } as const
+export type ExerciseIdentification = (typeof EXERCISE_IDENTIFICATION)[keyof typeof EXERCISE_IDENTIFICATION]
+
+interface ExerciseFilters {
+  search?: string
+  identification?: ExerciseIdentification
+  limit?: number
+}
+
+export function useTrainingOverview(clientId: string, from: string, to: string, valid: boolean, cursor: string | null, filters: ExerciseFilters = {}) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'training-overview', from, to, cursor, filters],
+    enabled: Boolean(clientId) && valid,
+    retry: (count, error) => getApiErrorStatus(error) !== 413 && shouldRetryQuery(count, error),
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<TrainingOverview>>(
+      `/admin/clients/${clientId}/progress/training-overview`,
+      { params: { from, to, limit: 100, ...filters, ...(cursor !== null ? { cursor } : {}) }, signal },
+    )),
+  })
+}
+
+export function useTrainingExerciseSearch(clientId: string, from: string, to: string, search: string, enabled: boolean) {
+  return useInfiniteQuery({
+    queryKey: ['admin-progress', clientId, 'training-exercise-search', from, to, search],
+    enabled: Boolean(clientId) && enabled,
+    initialPageParam: null as string | null,
+    getNextPageParam: (page: TrainingOverview) => page.next_cursor ?? undefined,
+    retry: (count, error) => getApiErrorStatus(error) !== 413 && shouldRetryQuery(count, error),
+    queryFn: async ({ signal, pageParam }) => unwrapResponse(await api.get<ApiEnvelope<TrainingOverview>>(
+      `/admin/clients/${clientId}/progress/training-overview`,
+      { params: { from, to, limit: 20, search, identification: 'identified', ...(pageParam ? { cursor: pageParam } : {}) }, signal },
+    )),
+  })
+}
+
+export function useTrainingLoadHistory(clientId: string, exerciseId: string, from: string, to: string, cursor: string | null) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'training-load', exerciseId, from, to, cursor],
+    enabled: Boolean(clientId && exerciseId),
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<CursorPage<TrainingSet>>>(
+      `/admin/clients/${clientId}/progress/exercises/${encodeURIComponent(exerciseId)}/load-history`,
+      { params: { from, to, limit: 20, ...(cursor ? { cursor } : {}) }, signal },
+    )),
+  })
+}
+
+export function useTrainingSessions(clientId: string, from: string, to: string, cursor: string | null) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'training-sessions', from, to, cursor],
+    enabled: Boolean(clientId),
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<CursorPage<TrainingSession>>>(
+      `/admin/clients/${clientId}/progress/training-sessions`,
+      { params: { from, to, limit: 20, ...(cursor ? { cursor } : {}) }, signal },
+    )),
+  })
+}
+
+export function useLegacyTrainingRecords(clientId: string, from: string, to: string, valid: boolean, expanded: boolean, cursor: string | null) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'legacy-training-records', from, to, cursor],
+    enabled: Boolean(clientId) && valid && expanded,
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<CursorPage<LegacyTrainingRecord>>>(
+      `/admin/clients/${clientId}/progress/legacy-training-records`,
+      { params: { from, to, limit: 20, ...(cursor ? { cursor } : {}) }, signal },
+    )),
+  })
+}
+
+export function useTrainingSessionDetail(clientId: string, date: string, sessionId: string, cursor: string | null) {
+  return useQuery({
+    queryKey: ['admin-progress', clientId, 'training-session-detail', date, sessionId, cursor],
+    enabled: Boolean(clientId && date && sessionId),
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<TrainingSessionDetail | null>>(
+      `/admin/clients/${clientId}/progress/training-sessions/${encodeURIComponent(date)}/${encodeURIComponent(sessionId)}`,
+      { params: { limit: 20, ...(cursor ? { cursor } : {}) }, signal },
+    )),
+  })
+}
 
 export const progressQueryKeys = {
   all: ['admin-progress'] as const,
+  adherenceConfigs: (adminId: string, clientId: string) =>
+    ['admin-progress', adminId, clientId, 'adherence-config'] as const,
+  adherenceConfig: (adminId: string, clientId: string, date: string) =>
+    ['admin-progress', adminId, clientId, 'adherence-config', date] as const,
+  clientDayQueries: (clientId: string) => ['admin-progress', clientId, 'day'] as const,
+  clientCalendarQueries: (clientId: string) => ['admin-progress', clientId, 'calendar'] as const,
+  clientWeekQueries: (clientId: string) => ['admin-progress', clientId, 'week'] as const,
   dayProgress: (clientId: string, date: string) =>
     ['admin-progress', clientId, 'day', date] as const,
   calendarMonth: (clientId: string, year: number, month: number) =>
@@ -17,6 +140,121 @@ export const progressQueryKeys = {
   weightHistory: (clientId: string) => ['admin-progress', clientId, 'weight-history'] as const,
   bodyHistory: (clientId: string, field: string) =>
     ['admin-progress', clientId, 'body-history', field] as const,
+  photoHistory: (clientId: string, page: number, limit: number) =>
+    ['admin-progress', clientId, 'progress-photos', 'history', page, limit] as const,
+  photoQueries: (clientId: string) =>
+    ['admin-progress', clientId, 'progress-photos'] as const,
+}
+
+export function createProgressPhotoOperationId(action: 'session' | 'upload' | 'association') {
+  return `progress-photo-${action}:${crypto.randomUUID()}`
+}
+
+interface CreateProgressPhotoSessionInput {
+  session_date: string
+  operation_id: string
+}
+
+interface AssociateProgressPhotoInput {
+  sessionId: string
+  upload_id: string
+  view: ProgressPhotoView
+  operation_id: string
+  replaces_photo_id?: string
+}
+
+export function useClientProgressPhotoHistory(clientId: string, page = 1, limit = 20) {
+  return useQuery({
+    queryKey: progressQueryKeys.photoHistory(clientId, page, limit),
+    enabled: Boolean(clientId),
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => {
+      const response = await api.get<ApiEnvelope<ProgressPhotoHistory>>(
+        `/admin/clients/${clientId}/progress-photos/sessions`,
+        { params: { page, limit }, signal },
+      )
+      return unwrapResponse(response)
+    },
+  })
+}
+
+export function useCreateClientProgressPhotoSession(clientId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    retry: shouldRetryQuery,
+    mutationFn: async (payload: CreateProgressPhotoSessionInput) => {
+      const response = await api.post<ApiEnvelope<ProgressPhotoSession>>(
+        `/admin/clients/${clientId}/progress-photos/sessions`,
+        payload,
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: progressQueryKeys.photoQueries(clientId) })
+    },
+  })
+}
+
+export function useAssociateClientProgressPhoto(clientId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    retry: shouldRetryQuery,
+    mutationFn: async ({ sessionId, ...payload }: AssociateProgressPhotoInput) => {
+      const response = await api.post<ApiEnvelope<ProgressPhoto>>(
+        `/admin/clients/${clientId}/progress-photos/sessions/${sessionId}/photos`,
+        payload,
+      )
+      return unwrapResponse(response)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: progressQueryKeys.photoQueries(clientId) })
+    },
+  })
+}
+
+// A client assignment may be revoked between sessions for the same admin ID.
+// Subscribe before query observers so a logout (including one between renders) advances the namespace.
+let adherenceSessionGeneration = 0
+useAuth.subscribe((state, previous) => {
+  const priorAdmin = previous.isAuthenticated && !previous.isLoading ? previous.user?.id : undefined
+  const currentAdmin = state.isAuthenticated && !state.isLoading ? state.user?.id : undefined
+  if (priorAdmin && priorAdmin !== currentAdmin) adherenceSessionGeneration++
+})
+
+export function useAdherenceConfig(clientId: string, date: string) {
+  const adminId = useAuth((state) => state.isAuthenticated && !state.isLoading ? state.user?.id : undefined)
+  const session = useAuth((state) => state.isAuthenticated && !state.isLoading ? adherenceSessionGeneration : undefined)
+  return useQuery({
+    queryKey: [...progressQueryKeys.adherenceConfig(adminId ?? '', clientId, date), session],
+    enabled: Boolean(adminId && clientId && date),
+    gcTime: 0,
+    retry: shouldRetryQuery,
+    queryFn: async ({ signal }) => unwrapResponse(await api.get<ApiEnvelope<AdherenceConfig>>(
+      `/admin/clients/${clientId}/adherence/config`, { params: { date }, signal },
+    )),
+  })
+}
+
+export function useUpdateAdherenceConfig() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    retry: false,
+    onMutate: () => {
+      const state = useAuth.getState()
+      return { adminId: state.isAuthenticated && !state.isLoading ? state.user?.id : undefined }
+    },
+    mutationFn: async ({ clientId, config }: UpdateAdherenceConfigVariables) =>
+      unwrapResponse(await api.put<ApiEnvelope<AdherenceConfig>>(
+        `/admin/clients/${clientId}/adherence/config`, config,
+      )),
+    onSuccess: async (_result, { clientId }, context) => {
+      if (context?.adminId) {
+        await queryClient.invalidateQueries({ queryKey: progressQueryKeys.adherenceConfigs(context.adminId, clientId) })
+      }
+    },
+  })
 }
 
 export function useClientDayProgress(clientId: string, date: string) {

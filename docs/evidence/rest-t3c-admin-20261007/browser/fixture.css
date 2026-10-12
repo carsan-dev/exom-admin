@@ -1,0 +1,3 @@
+/* Shipping tokens/styles and canonical Tailwind source discovery; no UI overrides. */
+@import "../../../../src/index.css";
+@source "../../../../src";

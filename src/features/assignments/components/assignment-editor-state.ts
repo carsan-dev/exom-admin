@@ -62,6 +62,7 @@ export function buildAssignmentEditorDefaults(
               training.last_set_video_policy ?? 'AUTO',
             ]),
           ),
+          training_completion_mode: editingAutoRule.training_completion_mode ?? 'ALL',
           diet_id: day.diet_id,
           is_rest_day: day.is_rest_day,
         }
@@ -80,6 +81,7 @@ export function buildAssignmentEditorDefaults(
               training.last_set_video_policy ?? 'AUTO',
             ]),
           ),
+          training_completion_mode: day.training_completion_mode ?? 'ALL',
           diet_id: day.diet?.id ?? null,
           is_rest_day: day.is_rest_day,
         }))
@@ -89,5 +91,6 @@ export function buildAssignmentEditorDefaults(
     auto_assignment_enabled: Boolean(editingAutoRule),
     auto_assignment_end_mode: editingAutoRule?.ends_on ? 'date' : 'indefinite',
     auto_assignment_ends_on: editingAutoRule?.ends_on ?? null,
+    auto_assignment_completion_mode: editingAutoRule?.training_completion_mode ?? 'ALL',
   }
 }

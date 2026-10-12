@@ -45,6 +45,7 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
         <Button
           variant="outline"
           role="combobox"
+          aria-label={selectedName ? `Cliente: ${selectedName}` : 'Seleccionar cliente'}
           aria-expanded={open}
           className="w-full justify-between sm:w-[280px]"
         >

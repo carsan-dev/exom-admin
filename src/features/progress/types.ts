@@ -26,11 +26,25 @@ export interface MealCompletedDetail {
   meal_name: string | null
 }
 
+export type TrainingCompletionMode = 'ALL' | 'ANY'
+
+/** Absent or null means unknown (older API); render as a historical snapshot. */
+export type TrainingNameSource = 'snapshot' | 'current_catalog'
+
+export interface TrainingDaySummary {
+  training_completion_mode: TrainingCompletionMode
+  assigned_count: number
+  completed_count: number
+  assigned_training_ids: string[]
+  completed_training_ids: string[]
+}
+
 export interface DayProgress {
   id: string | null
   client_id: string
   date: string
   training_completed: boolean
+  training_summary?: TrainingDaySummary | null
   exercises_completed: ExerciseCompleted[]
   meals_completed: string[]
   meals_completed_details: MealCompletedDetail[]
@@ -40,6 +54,34 @@ export interface DayProgress {
   admin_reply_sent_at: string | null
 }
 
+export interface AdherencePolicyFields {
+  steps_goal: number | null
+  calorie_lower_percent: number
+  calorie_upper_percent: number
+  protein_min_percent: number
+  steps_min_percent: number
+  low_global_percent: number
+}
+
+export type AdherenceConfig =
+  | { version: number; known: false; source: 'uncaptured'; effective_date: null }
+  | (AdherencePolicyFields & {
+      version: number
+      known: true
+      source: 'default' | 'revision'
+      effective_date: string | null
+    })
+
+export interface UpdateAdherenceConfig extends AdherencePolicyFields {
+  effective_date: string
+  expected_version: number
+}
+
+export interface UpdateAdherenceConfigVariables {
+  clientId: string
+  config: UpdateAdherenceConfig
+}
+
 export interface CalendarDay {
   date: string
   has_training: boolean
@@ -47,19 +89,136 @@ export interface CalendarDay {
   is_rest_day: boolean
   training_completed: boolean
   diet_completed: boolean
+  training_completion_mode?: TrainingCompletionMode
+  trainings_assigned?: number
+  trainings_done?: number
 }
 
 export interface WeekSummary {
   week_start: string
   trainings_assigned: number
   trainings_completed: number
+  training_days_assigned?: number
+  training_days_completed?: number
   total_meals: number
   meals_completed: number
+  diet_days_assigned?: number
+  diet_days_completed?: number
 }
 
 export interface MetricHistoryPoint {
   date: string
   value: number
+}
+
+export type ProgressPhotoView = 'FRONT' | 'LEFT' | 'RIGHT' | 'BACK'
+
+export interface ProgressPhoto {
+  id: string
+  view: ProgressPhotoView
+  state: 'ACTIVE' | 'REPLACED'
+  replaces_photo_id: string | null
+  created_at: string
+  image_url: string
+  content_type: string
+  bytes: number
+}
+
+export interface ProgressPhotoSession {
+  id: string
+  session_date: string
+  created_at: string
+  updated_at: string
+  is_complete: boolean
+  photos: ProgressPhoto[]
+}
+
+export interface ProgressPhotoHistory {
+  data: ProgressPhotoSession[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+export interface TrainingIndicators {
+  trainings_completed: number
+  volume: number | null
+  mean_rir: number | null
+  mean_rpe: number | null
+}
+
+export interface TrainingPr {
+  weight_kg: number
+  reps: number
+  date: string
+  training_session_id: string | null
+  set_number: number
+}
+
+export interface TrainingExerciseSummary {
+  exercise_id: string
+  exercise_name: string | null
+  name_source?: TrainingNameSource | null
+  sets: number
+  max_reps: number | null
+  max_seconds: number | null
+  volume: number | null
+  mean_rir: number | null
+  pr: TrainingPr | null
+}
+
+export interface TrainingOverview {
+  indicators: TrainingIndicators
+  exercises: TrainingExerciseSummary[]
+  next_cursor?: string | null
+}
+
+export interface TrainingSet {
+  date?: string
+  exercise_id?: string
+  exercise_name?: string | null
+  exercise_name_source?: TrainingNameSource | null
+  training_session_id?: string | null
+  training_exercise_id: string | null
+  set_number: number | null
+  reps: number | null
+  seconds: number | null
+  weight_kg: number | null
+  rir: number | null
+  volume?: number | null
+}
+
+export interface TrainingSession {
+  date: string
+  training_id: string
+  training_session_id: string
+  training_name: string | null
+  training_name_source?: TrainingNameSource | null
+  rpe: number | null
+  note: string | null
+}
+
+export interface TrainingSessionDetail {
+  training_id: string
+  training_session_id: string
+  training_name: string | null
+  training_name_source?: TrainingNameSource | null
+  rpe: number | null
+  note: string | null
+  page: TrainingSet[]
+  nextCursor: string | null
+}
+
+export interface CursorPage<T> {
+  page: T[]
+  nextCursor: string | null
+}
+
+export interface LegacyTrainingRecord {
+  date: string
+  record_index: number
+  kind: 'uncertain_legacy'
 }
 
 export type BodyField =
