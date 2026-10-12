@@ -14,12 +14,17 @@ vi.mock('../api', () => ({
   useClientWeekSummary: () => ({ data: undefined, isLoading: false }),
 }))
 vi.mock('../components/client-selector', () => ({ ClientSelector: () => null, EmptyClientState: () => <p>Selecciona un cliente</p> }))
-vi.mock('../components/progress-dashboard', () => ({ ProgressDashboard: () => null }))
+vi.mock('../components/progress-dashboard', () => ({ ProgressDashboard: () => <p>Sección dashboard</p> }))
+vi.mock('../components/progress-overview-cards', () => ({ ProgressOverviewCards: () => <p>Sección resumen</p> }))
+vi.mock('../components/progress-calendar', () => ({ ProgressCalendar: () => null }))
+vi.mock('../components/day-progress-detail', () => ({ DayProgressDetail: () => null }))
+vi.mock('../components/progress-photos-panel', () => ({ ProgressPhotosPanel: () => <p>Sección fotos</p> }))
+vi.mock('../components/streak-section', () => ({ StreakSection: () => <p>Sección racha</p> }))
 vi.mock('../components/metrics-overview', () => ({ MetricsOverviewPanel: (p: Record<string, unknown>) => { props.metrics.push(p); return <p>Métricas</p> } }))
 vi.mock('../components/metrics-table', () => ({ MetricsTable: () => null }))
 vi.mock('../components/training-progress-panel', () => ({ TrainingProgressPanel: (p: Record<string, unknown>) => { props.training.push(p); return <p>Entrenamiento</p> } }))
-vi.mock('../../clients/components/client-adherence-tab', () => ({ ClientAdherenceTab: () => null }))
-vi.mock('../follow-up-tasks/follow-up-panel', () => ({ FollowUpPanel: () => null }))
+vi.mock('../../clients/components/client-adherence-tab', () => ({ ClientAdherenceTab: () => <p>Sección adherencia</p> }))
+vi.mock('../follow-up-tasks/follow-up-panel', () => ({ FollowUpPanel: () => <p>Sección seguimiento</p> }))
 
 const DAY = 86_400_000
 const today = () => new Date().toISOString().slice(0, 10)
@@ -56,8 +61,17 @@ describe('Progreso: periodo compartido de Métricas y Entrenamiento', () => {
   })
 
   it.each(['dashboard', 'resumen', 'fotos', 'adherencia', 'racha', 'seguimiento'])('oculta el selector de periodo de la página en %s', (section) => {
-    mount(`clientId=client-a&section=${section}`)
-    expect(screen.queryByRole('combobox', { name: 'Periodo de métricas y entrenamiento' })).not.toBeInTheDocument()
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    try {
+      mount(`clientId=client-a&section=${section}`)
+      // La sección debe renderizarse de verdad: si el ErrorBoundary de React Router sustituye la página, el test falla.
+      expect(screen.getByText(`Sección ${section}`)).toBeInTheDocument()
+      expect(screen.queryByText(/Unexpected Application Error/)).not.toBeInTheDocument()
+      expect(screen.queryByRole('combobox', { name: 'Periodo de métricas y entrenamiento' })).not.toBeInTheDocument()
+      expect(consoleError.mock.calls.flat().join(' ')).not.toMatch(/ErrorBoundary|No ".*" export is defined/)
+    } finally {
+      consoleError.mockRestore()
+    }
   })
 
   it('sin periodo en la URL usa los últimos 30 días UTC', () => {
