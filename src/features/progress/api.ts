@@ -126,6 +126,9 @@ export const progressQueryKeys = {
     ['admin-progress', adminId, clientId, 'adherence-config'] as const,
   adherenceConfig: (adminId: string, clientId: string, date: string) =>
     ['admin-progress', adminId, clientId, 'adherence-config', date] as const,
+  clientDayQueries: (clientId: string) => ['admin-progress', clientId, 'day'] as const,
+  clientCalendarQueries: (clientId: string) => ['admin-progress', clientId, 'calendar'] as const,
+  clientWeekQueries: (clientId: string) => ['admin-progress', clientId, 'week'] as const,
   dayProgress: (clientId: string, date: string) =>
     ['admin-progress', clientId, 'day', date] as const,
   calendarMonth: (clientId: string, year: number, month: number) =>

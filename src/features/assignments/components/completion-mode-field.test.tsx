@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { CompletionModeField } from './completion-mode-field'
-import { COMPLETION_MODE_HELP, isCompletionModeVisible, resolveCompletionModeForSubmit } from './completion-mode'
+import { COMPLETION_MODE_HELP, isCompletionModeVisible, resolveCompletionModeForSubmit, resolveDayCompletionModeForSubmit } from './completion-mode'
 
 describe('completion mode submit rules', () => {
   it('shows the field only with more than one training on a non-rest day', () => {
@@ -16,6 +16,14 @@ describe('completion mode submit rules', () => {
     expect(resolveCompletionModeForSubmit(['a', 'b'], true, 'ANY')).toBeUndefined()
     expect(resolveCompletionModeForSubmit(['a', 'b'], false, 'ANY')).toBe('ANY')
     expect(resolveCompletionModeForSubmit(['a', 'b'], false, undefined)).toBe('ALL')
+  })
+})
+
+describe('auto-assignment enabled', () => {
+  it('applies the rule-level mode to every day so manual rows match the rule', () => {
+    expect(resolveDayCompletionModeForSubmit(['a', 'b'], false, 'ALL', true, 'ANY')).toBe('ANY')
+    expect(resolveDayCompletionModeForSubmit(['a'], false, 'ALL', true, 'ANY')).toBeUndefined()
+    expect(resolveDayCompletionModeForSubmit(['a', 'b'], false, 'ANY', false, 'ALL')).toBe('ANY')
   })
 })
 

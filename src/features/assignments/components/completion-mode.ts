@@ -24,3 +24,17 @@ export function resolveCompletionModeForSubmit(
 ): TrainingCompletionMode | undefined {
   return isCompletionModeVisible(trainingIds, isRestDay) ? (mode ?? 'ALL') : undefined
 }
+
+/**
+ * With auto-assignment enabled the rule-level mode governs every saved day
+ * (current-week rows and later weeks must match); otherwise the per-day mode applies.
+ */
+export function resolveDayCompletionModeForSubmit(
+  trainingIds: readonly string[] | undefined,
+  isRestDay: boolean,
+  dayMode: TrainingCompletionMode | undefined,
+  autoAssignmentEnabled: boolean,
+  ruleMode: TrainingCompletionMode | undefined,
+): TrainingCompletionMode | undefined {
+  return resolveCompletionModeForSubmit(trainingIds, isRestDay, autoAssignmentEnabled ? ruleMode : dayMode)
+}

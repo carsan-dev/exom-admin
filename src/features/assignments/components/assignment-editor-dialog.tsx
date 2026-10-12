@@ -51,7 +51,7 @@ import {
 } from './assignment-editor-state'
 import { AssignmentPreviewDialog } from './assignment-preview-dialog'
 import { CompletionModeField } from './completion-mode-field'
-import { isCompletionModeVisible, resolveCompletionModeForSubmit } from './completion-mode'
+import { isCompletionModeVisible, resolveDayCompletionModeForSubmit } from './completion-mode'
 
 const CLEAR_SELECTION_VALUE = '__none__'
 
@@ -382,7 +382,7 @@ export function AssignmentEditorDialog({
         training_id: day.training_id ?? null,
         training_ids: day.is_rest_day ? [] : day.training_ids,
         training_policies: day.is_rest_day ? {} : day.training_policies,
-        training_completion_mode: resolveCompletionModeForSubmit(day.training_ids, day.is_rest_day, day.training_completion_mode),
+        training_completion_mode: resolveDayCompletionModeForSubmit(day.training_ids, day.is_rest_day, day.training_completion_mode, values.auto_assignment_enabled, values.auto_assignment_completion_mode),
         diet_id: day.diet_id ?? null,
         is_rest_day: day.is_rest_day,
       })),
@@ -688,7 +688,7 @@ export function AssignmentEditorDialog({
                         />
                       </div>
 
-                      {!editingAutoRule && isCompletionModeVisible(watchedDays[index]?.training_ids, isRestDay) && (
+                      {!editingAutoRule && !autoAssignmentEnabled && isCompletionModeVisible(watchedDays[index]?.training_ids, isRestDay) && (
                         <FormField
                           control={form.control}
                           name={`days.${index}.training_completion_mode`}
