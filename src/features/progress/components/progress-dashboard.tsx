@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router'
 import { ArrowUpRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DeltaBadge, PERIOD_LABELS, PeriodSelector, todayUtc, usePeriodParam, type PeriodParamKeys, type PeriodPreset } from '@/components/period'
 import { useClientAdherence } from '@/features/clients/adherence.api'
 import { useRecapsList } from '@/features/recaps/api'
 import { useClientWeekSummary, useMetricsOverview } from '../api'
@@ -20,17 +21,27 @@ function QueryContent({ query, label, children }: { query: QueryState; label: st
   if (query.isPending) return <div role="status"><span className="sr-only">Cargando {label}…</span><Skeleton className="h-16 w-full motion-reduce:animate-none" /></div>
   return children
 }
+// The adherence report accepts at most 31 days, so the dashboard only offers these presets.
+const DASHBOARD_PERIOD_OPTIONS: readonly PeriodPreset[] = ['7d', '30d']
+const DASHBOARD_PERIOD_KEYS: PeriodParamKeys = { period: 'dashboard_period', from: 'dashboard_from', to: 'dashboard_to' }
+const adherencePercent = (global: { status: string; ratio: number | null } | undefined) =>
+  global?.status === 'evaluable' && global.ratio !== null && Number.isFinite(global.ratio) ? global.ratio * 100 : null
 const linkClass = 'inline-flex min-h-11 items-center gap-1 rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
 
 export function ProgressDashboard({ clientId }: { clientId: string }) {
   const [params] = useSearchParams()
-  const today = new Date().toISOString().slice(0, 10)
-  const from = shift(today, -29)
+  const period = usePeriodParam({ section: 'progress-dashboard', options: DASHBOARD_PERIOD_OPTIONS, defaultPreset: '30d', keys: DASHBOARD_PERIOD_KEYS })
+  const today = todayUtc()
+  const from = period.range.from ?? shift(period.range.to, -29)
+  const periodTo = period.range.to
+  const periodLabel = PERIOD_LABELS[period.effectivePreset]
+  const previousRange = period.previousRange
   const weekStart = shift(today, -((new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7))
   const weekEnd = shift(weekStart, 6)
   const historical = useMetricsOverview(clientId, undefined, today, 1)
-  const chart = useMetricsOverview(clientId, from, today, 1)
-  const adherence = useClientAdherence(clientId, { start: from, end: today })
+  const chart = useMetricsOverview(clientId, from, periodTo, 1)
+  const adherence = useClientAdherence(clientId, { start: from, end: periodTo })
+  const previousAdherence = useClientAdherence(clientId, { start: previousRange?.from ?? '', end: previousRange?.from ? previousRange.to : '' })
   const week = useClientWeekSummary(clientId, weekStart)
   const summary = useTaskSummary(useTaskIdentity(), clientId)
   const recaps = useRecapsList(clientId, 'SUBMITTED', false, 1, 20)
@@ -38,6 +49,9 @@ export function ProgressDashboard({ clientId }: { clientId: string }) {
   const chartData = chart.data?.client_id === clientId ? chart.data : undefined
   const report = adherence.data
   const global = report?.aggregate.global
+  const previousGlobal = previousAdherence.isSuccess ? adherencePercent(previousAdherence.data.aggregate.global) : null
+  const periodWeight = chartData?.series.find((item) => item.key === 'weight_kg')
+  const periodWeightChange = periodWeight && periodWeight.count > 1 && periodWeight.change !== null && Number.isFinite(periodWeight.change) ? periodWeight.change : null
   const weekly = week.data?.week_start === weekStart ? week.data : undefined
   function href(section: string, updates: Record<string, string> = {}) {
     const next = new URLSearchParams(params)
@@ -45,7 +59,7 @@ export function ProgressDashboard({ clientId }: { clientId: string }) {
     for (const [key, value] of Object.entries(updates)) next.set(key, value)
     return `/progress?${next}`
   }
-  const adherenceHref = href('adherencia', { adherence_start: from, adherence_end: today })
+  const adherenceHref = href('adherencia', { adherence_start: from, adherence_end: periodTo })
   const closedDays = report?.days.filter((day) => day.evaluation.period === 'closed' && day.date < report.today &&
     day.date < today && (day.calendar === 'partial' || day.calendar === 'incomplete') &&
     (day.schedule.training === 'assigned' || day.schedule.nutrition === 'assigned')) ?? []
@@ -58,20 +72,24 @@ export function ProgressDashboard({ clientId }: { clientId: string }) {
     <header className="flex flex-wrap items-baseline justify-between gap-2">
       <h2 className="text-xl font-semibold">Una mirada al progreso</h2>
       <p className="text-sm text-muted-foreground">Actualizado a {displayDate(today)} · UTC</p>
+      <PeriodSelector className="w-full" label="Periodo del dashboard" value={period.preset} options={DASHBOARD_PERIOD_OPTIONS} onChange={period.setPreset}
+        custom={period.custom} onCustomChange={period.setCustomRange} error={period.error} range={period.range} previousRange={previousRange} effectivePreset={period.effectivePreset} />
     </header>
     <section aria-label="Estado y cobertura" className="space-y-4 border-y border-border py-4">
       <dl className="grid grid-cols-2 gap-x-5 gap-y-4 lg:grid-cols-4">
         <div className="min-w-0 space-y-1"><dt className="text-sm text-muted-foreground">Peso actual</dt><dd>
           <QueryContent query={historical} label="el peso histórico">
             {weight?.last?.quality === 'complete' && weight.last.value !== null && Number.isFinite(weight.last.value)
-              ? <><p className="text-3xl font-semibold tabular-nums">{number.format(weight.last.value)} kg</p><p className="text-xs text-muted-foreground">Registro: {displayDate(weight.last.date)}</p><p className="mt-2 text-sm">{weight.change !== null && weight.count > 1 ? <><strong className="font-medium tabular-nums">{weight.change > 0 ? '+' : ''}{number.format(weight.change)} kg</strong> desde inicio</> : 'Cambio no comparable'}</p></>
+              ? <><p className="text-3xl font-semibold tabular-nums">{number.format(weight.last.value)} kg</p><p className="text-xs text-muted-foreground">Registro: {displayDate(weight.last.date)}</p><p className="mt-2 text-sm">{weight.change !== null && weight.count > 1 ? <><strong className="font-medium tabular-nums">{weight.change > 0 ? '+' : ''}{number.format(weight.change)} kg</strong> desde inicio</> : 'Cambio no comparable'}</p>
+                <p className="text-sm tabular-nums text-muted-foreground">{chart.isPending ? 'Cambio en el periodo: cargando…' : chart.isError ? 'Cambio en el periodo no disponible' : `Cambio en el periodo: ${periodWeightChange === null ? 'Sin datos en el periodo' : `${periodWeightChange > 0 ? '+' : ''}${number.format(periodWeightChange)} kg`}`}</p></>
               : <p className="text-sm">Sin registros de peso</p>}
           </QueryContent>
         </dd></div>
         <div className="min-w-0 space-y-1"><dt className="text-sm text-muted-foreground">Adherencia global</dt><dd>
           <QueryContent query={adherence} label="la adherencia">
             <p className="text-3xl font-semibold tabular-nums">{global?.status === 'evaluable' && global.ratio !== null ? `${number.format(global.ratio * 100)} %` : global?.status === 'not_applicable' ? 'Sin componentes evaluables' : 'Información insuficiente'}</p>
-            <p className="text-xs text-muted-foreground">30 días · solo días cerrados</p>
+            {!previousAdherence.isPending && adherencePercent(global) !== null && <DeltaBadge current={adherencePercent(global)} previous={previousGlobal} polarity="higher-is-better" unit="p. p." />}
+            <p className="text-xs text-muted-foreground">{periodLabel} · solo días cerrados</p>
           </QueryContent>
         </dd></div>
         <div className="min-w-0 space-y-1"><dt className="text-sm text-muted-foreground">{weekly?.training_days_assigned !== undefined ? 'Días de entrenamiento esta semana' : 'Entrenamientos esta semana'}</dt><dd>
@@ -90,10 +108,10 @@ export function ProgressDashboard({ clientId }: { clientId: string }) {
       {report?.recentClosed ? <p className="text-xs text-muted-foreground">Cobertura reciente: {report.recentClosed.coverage.available} / {report.recentClosed.coverage.expected} días disponibles · {report.recentClosed.coverage.evaluable} evaluables · {report.recentClosed.coverage.insufficient} insuficientes.</p> : !adherence.isPending && !adherence.isError && <p className="text-xs text-muted-foreground">Clasificación reciente no disponible; no se infiere desde el porcentaje global.</p>}
     </section>
     <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(18rem,1fr)]">
-    <section aria-label="Evolución de los últimos treinta días" className="order-2 min-w-0 space-y-4 xl:order-1">
-      <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className="text-lg font-semibold">Evolución · últimos 30 días</h2><p className="text-sm text-muted-foreground">{displayDate(from)} – {displayDate(today)} · UTC</p></div>
-      <QueryContent query={chart} label="la evolución del peso">{chartData ? <MetricVisual compact series={chartData.series.filter((item) => item.key === 'weight_kg')} period={`${displayDate(from)} – ${displayDate(today)}`} chartPeriod={`${displayDate(chartData.chart_from)} – ${displayDate(chartData.chart_to)}`} /> : <p className="text-sm">Evolución del peso no disponible.</p>}</QueryContent>
-      <Link className={linkClass} to={href('metricas', { period: 'custom', from, to: today, historyPage: '1' })}>Ver métricas de estos 30 días <ArrowUpRight size={14} aria-hidden="true" /></Link>
+    <section aria-label="Evolución del periodo" className="order-2 min-w-0 space-y-4 xl:order-1">
+      <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className="text-lg font-semibold">Evolución · {periodLabel.toLowerCase()}</h2><p className="text-sm text-muted-foreground">{displayDate(from)} – {displayDate(periodTo)} · UTC</p></div>
+      <QueryContent query={chart} label="la evolución del peso">{chartData ? <MetricVisual compact series={chartData.series.filter((item) => item.key === 'weight_kg')} period={`${displayDate(from)} – ${displayDate(periodTo)}`} chartPeriod={`${displayDate(chartData.chart_from)} – ${displayDate(chartData.chart_to)}`} /> : <p className="text-sm">Evolución del peso no disponible.</p>}</QueryContent>
+      <Link className={linkClass} to={href('metricas', { period: 'custom', from, to: periodTo, historyPage: '1' })}>Ver métricas de este periodo <ArrowUpRight size={14} aria-hidden="true" /></Link>
       <QueryContent query={adherence} label="la evolución de adherencia">{report ? <AdherenceEvolution days={report.days} /> : <p className="text-sm">Evolución de adherencia no disponible.</p>}</QueryContent>
     </section>
       <div className="order-1 min-w-0 space-y-5 xl:order-2">

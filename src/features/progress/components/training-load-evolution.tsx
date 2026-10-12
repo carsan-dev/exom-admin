@@ -8,23 +8,28 @@ import { TrainingExercisePicker } from './training-exercise-picker'
 import type { TrainingExerciseSummary } from '../types'
 import { ProgressChartTooltip } from './progress-chart-tooltip'
 import { observedChartSeries, observationTimestamp } from './observed-chart-series'
+import { parseTrainingLoadMeasure, type TrainingLoadMeasure } from './training-load-measure'
 
-const measures = {
+const measures: Record<TrainingLoadMeasure, { label: string; unit: string }> = {
   weight_kg: { label: 'Peso externo', unit: 'kg' },
   reps: { label: 'Repeticiones', unit: 'reps' },
   seconds: { label: 'Duración', unit: 's' },
-} as const
-type Measure = keyof typeof measures
+}
+type Measure = TrainingLoadMeasure
 const number = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 })
 const dateLabel = (date: string) => formatDate(`${date}T00:00:00`)
 
-export function TrainingLoadEvolution({ clientId, from, to }: {
+export function TrainingLoadEvolution({ clientId, from, to, measure: controlledMeasure, onMeasureChange }: {
   clientId: string; from: string; to: string
+  /** Controlled measure (persisted in the URL by the page); uncontrolled when `onMeasureChange` is absent. */
+  measure?: Measure; onMeasureChange?: (measure: Measure) => void
 }) {
   const id = useId()
   const [selected, setSelected] = useState<TrainingExerciseSummary | null>(null)
   const [cursors, setCursors] = useState<(string | null)[]>([null])
-  const [measure, setMeasure] = useState<Measure>('weight_kg')
+  const [localMeasure, setLocalMeasure] = useState<Measure>('weight_kg')
+  const measure = onMeasureChange ? controlledMeasure ?? 'weight_kg' : localMeasure
+  const setMeasure = onMeasureChange ?? setLocalMeasure
   const exerciseId = selected?.exercise_id ?? ''
   const query = useTrainingLoadHistory(clientId, exerciseId, from, to, cursors[cursors.length - 1])
   const sets = query.data?.page ?? []
@@ -51,8 +56,8 @@ export function TrainingLoadEvolution({ clientId, from, to }: {
       <label className="space-y-2 text-sm font-medium">Medida de las series
         <select aria-label="Medida de las series" value={measure}
           onChange={(event) => {
-            const next = event.target.value
-            if (next === 'weight_kg' || next === 'reps' || next === 'seconds') setMeasure(next)
+            const next = parseTrainingLoadMeasure(event.target.value)
+            if (next) setMeasure(next)
           }}
           className="block min-h-10 w-full rounded-md border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           {Object.entries(measures).map(([key, item]) => <option key={key} value={key}>{item.label} ({item.unit})</option>)}

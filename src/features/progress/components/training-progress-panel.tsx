@@ -10,18 +10,25 @@ import { TrainingInfo } from './training-info'
 import { TrainingExerciseTable } from './training-exercise-table'
 import { TrainingLoadEvolution } from './training-load-evolution'
 import { TrainingSessionDetail } from './training-session-detail'
+import type { TrainingLoadMeasure } from './training-load-measure'
+import { DeltaBadge } from '@/components/period'
 
 interface TrainingProgressPanelProps {
   clientId: string
   from: string
   to: string
   valid: boolean
+  /** Equivalent previous interval (≤ 366 days) for neutral deltas; omitted when there is no comparison. */
+  previousFrom?: string
+  previousTo?: string
+  measure?: TrainingLoadMeasure
+  onMeasureChange?: (measure: TrainingLoadMeasure) => void
 }
 
 const number = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 })
 const value = (amount: number | null | undefined, unit = '') => amount == null ? 'Sin dato' : `${number.format(amount)}${unit}`
 
-export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingProgressPanelProps) {
+export function TrainingProgressPanel({ clientId, from, to, valid, previousFrom, previousTo, measure, onMeasureChange }: TrainingProgressPanelProps) {
   const overviewScope = JSON.stringify([clientId, from, to])
   const detailId = useId()
   const sessionTrigger = useRef<HTMLButtonElement | null>(null)
@@ -33,6 +40,8 @@ export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingPro
   const cursors = cursorState.scope === overviewScope ? cursorState.cursors : [null]
   const currentSelection = selected?.scope === overviewScope ? selected.session : null
   const overview = useTrainingOverview(clientId, from, to, valid, null, { limit: 1 })
+  const hasPrevious = Boolean(previousFrom && previousTo)
+  const previousOverview = useTrainingOverview(hasPrevious ? clientId : '', previousFrom ?? '', previousTo ?? '', valid && hasPrevious, null, { limit: 1 })
   const sessions = useTrainingSessions(valid ? clientId : '', from, to, cursors[cursors.length - 1])
   const legacy = useLegacyTrainingRecords(clientId, from, to, valid, legacyExpanded, legacyCursors[legacyCursors.length - 1])
   if (!valid) return <p role="alert">Selecciona un intervalo válido de hasta 366 días para Entrenamiento.</p>
@@ -45,17 +54,20 @@ export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingPro
     return <div role="alert"><p>{getApiErrorStatus(error) === 403 ? 'No tienes acceso al entrenamiento de este cliente.' : 'No se pudo cargar el entrenamiento. Comprueba el periodo y vuelve a intentarlo.'}</p><Button variant="outline" onClick={() => { void overview.refetch(); void sessions.refetch() }}>Reintentar</Button></div>
   }
   const { indicators } = overview.data
+  // A failed or missing previous interval stays null: "Sin datos previos", never zero.
+  const previous = previousOverview.isSuccess ? previousOverview.data.indicators : null
+  const showDelta = hasPrevious && !previousOverview.isPending
   const cards = [
-    { label: 'Registros de entrenamiento', text: value(indicators.trainings_completed) },
-    { label: 'Volumen', text: value(indicators.volume, ' kg·reps') },
-    { label: 'RIR medio', text: value(indicators.mean_rir) },
-    { label: 'RPE medio', text: value(indicators.mean_rpe) },
+    { label: 'Registros de entrenamiento', text: value(indicators.trainings_completed), current: indicators.trainings_completed, previous: previous?.trainings_completed ?? null, unit: undefined },
+    { label: 'Volumen', text: value(indicators.volume, ' kg·reps'), current: indicators.volume, previous: previous?.volume ?? null, unit: 'kg·reps' },
+    { label: 'RIR medio', text: value(indicators.mean_rir), current: indicators.mean_rir, previous: previous?.mean_rir ?? null, unit: undefined },
+    { label: 'RPE medio', text: value(indicators.mean_rpe), current: indicators.mean_rpe, previous: previous?.mean_rpe ?? null, unit: undefined },
   ]
   return <div className="min-w-0 space-y-6">
     <section aria-label="Lectura del periodo de entrenamiento" className="space-y-4 rounded-lg border bg-card p-4 sm:p-6">
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Entrenamiento del periodo</h2>
-        <p className="text-sm text-muted-foreground">{formatDate(`${from}T00:00:00`)} – {formatDate(`${to}T00:00:00`)} · Totales del intervalo, independientes de las páginas de detalle.</p>
+        <p className="text-sm text-muted-foreground">{formatDate(`${from}T00:00:00`)} – {formatDate(`${to}T00:00:00`)} · Totales del intervalo, independientes de las páginas de detalle.{hasPrevious && previousFrom && previousTo && ` Comparado con ${formatDate(`${previousFrom}T00:00:00`)} – ${formatDate(`${previousTo}T00:00:00`)}; la variación no indica por sí sola mejora o empeoramiento.`}</p>
         <p className="max-w-prose text-sm">{indicators.trainings_completed === 0 ? 'Sin registros de entrenamiento en este intervalo.' : 'El recuento de registros no confirma la finalización de las sesiones antiguas.'} Consulta las series para interpretar las cargas y el esfuerzo registrado.</p>
       </div>
       <div className="grid gap-4 border-t pt-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -67,11 +79,12 @@ export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingPro
             {item.label === 'RIR medio' && <TrainingInfo label={item.label}>Repeticiones en reserva de las series con RIR registrado. Sin dato no equivale a cero.</TrainingInfo>}
             {item.label === 'RPE medio' && <TrainingInfo label={item.label}>Esfuerzo percibido de las sesiones con valoración registrada; no es una medida de carga.</TrainingInfo>}
           </CardTitle></CardHeader>
-          <CardContent className="p-0"><p className="text-xl font-semibold tabular-nums">{item.text}</p></CardContent>
+          <CardContent className="space-y-1 p-0"><p className="text-xl font-semibold tabular-nums">{item.text}</p>
+            {showDelta && item.current !== null && <DeltaBadge current={item.current} previous={item.previous} polarity="neutral" unit={item.unit} />}</CardContent>
         </div>)}
       </div>
     </section>
-    <TrainingLoadEvolution key={`loads:${overviewScope}`} clientId={clientId} from={from} to={to} />
+    <TrainingLoadEvolution key={`loads:${overviewScope}`} clientId={clientId} from={from} to={to} measure={measure} onMeasureChange={onMeasureChange} />
     <section aria-label="Historial de entrenamiento" className="space-y-4">
       <h2 className="text-lg font-semibold">Historial de entrenamiento</h2>
     <Card><CardHeader><CardTitle>Sesiones con detalle</CardTitle></CardHeader><CardContent className="space-y-3">

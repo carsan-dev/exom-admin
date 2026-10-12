@@ -165,3 +165,59 @@ describe('Dashboard: presentación canónica', () => {
     expect(screen.getByRole('region', { name: 'Datos de la medición' })).toBeInTheDocument()
   })
 })
+
+describe('Dashboard: periodo propio y comparación', () => {
+  beforeEach(() => { window.localStorage.clear() })
+  function mountAt(search: string) {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/progress?${search}`]}><ProgressDashboard clientId="client-a" /></MemoryRouter></QueryClientProvider>)
+  }
+  function previousAdherence(previous: Record<string, unknown> | null) {
+    const base = api.get.getMockImplementation()!
+    api.get.mockImplementation(async (url: string, options?: { params?: Record<string, unknown> }) => {
+      if (url.endsWith('/adherence') && options?.params?.end !== '2026-10-11') {
+        calls.push({ url, params: options?.params ?? {} })
+        return { data: { success: true, data: { ...report, start: options?.params?.start, end: options?.params?.end, aggregate: { global: previous } } } }
+      }
+      return base(url, options)
+    })
+  }
+  const adherenceRanges = () => calls.filter((c) => c.url.endsWith('/adherence')).map((c) => [c.params.start, c.params.end])
+
+  it('por defecto usa 30 días y compara la adherencia global en puntos porcentuales con el periodo anterior', async () => {
+    previousAdherence({ ...global, ratio: 0.3 })
+    mountAt('date=2099-01-01')
+    expect(await screen.findByRole('img', { name: /Sube 7 p\. p\. respecto al periodo anterior/ })).toHaveTextContent('+7 p. p.')
+    expect(screen.getByRole('combobox', { name: 'Periodo del dashboard' })).toHaveTextContent('Últimos 30 días')
+    expect(screen.getByText('Últimos 30 días · solo días cerrados')).toBeInTheDocument()
+    expect(adherenceRanges()).toEqual(expect.arrayContaining([['2026-09-12', '2026-10-11'], ['2026-08-13', '2026-09-11']]))
+  })
+
+  it('restaura 7 días desde la URL para gráficos, KPI y enlaces', async () => {
+    previousAdherence({ ...global, ratio: 0.5 })
+    mountAt('dashboard_period=7d&period=3m')
+    expect(await screen.findByRole('img', { name: /Baja 13 p\. p\./ })).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Periodo del dashboard' })).toHaveTextContent('Últimos 7 días')
+    expect(screen.getByText('Últimos 7 días · solo días cerrados')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Evolución · últimos 7 días' })).toBeInTheDocument()
+    expect(calls.filter((c) => c.url.endsWith('/metrics/overview')).map((c) => c.params.from)).toEqual([undefined, '2026-10-05'])
+    expect(adherenceRanges()).toEqual(expect.arrayContaining([['2026-10-05', '2026-10-11'], ['2026-09-28', '2026-10-04']]))
+    const link = new URL(screen.getByRole('link', { name: 'Ver adherencia' }).getAttribute('href')!, 'https://example.invalid')
+    expect(link.searchParams.get('adherence_start')).toBe('2026-10-05')
+  })
+
+  it('un periodo anterior sin adherencia evaluable no se compara como cero', async () => {
+    previousAdherence({ ...global, status: 'insufficient', ratio: null })
+    mountAt('dashboard_period=30d')
+    expect(await screen.findByRole('img', { name: 'Sin datos del periodo anterior' })).toHaveTextContent('Sin datos previos')
+  })
+
+  it('el KPI de peso añade el cambio del periodo con color neutral y distingue la ausencia de datos', async () => {
+    mountAt('dashboard_period=30d')
+    expect(await screen.findByText('Cambio en el periodo: -8 kg')).toHaveClass('text-muted-foreground')
+    window.localStorage.clear()
+    metrics = { ...weight, change: null, count: 1 }
+    mountAt('dashboard_period=7d')
+    expect(await screen.findByText('Cambio en el periodo: Sin datos en el periodo')).toBeInTheDocument()
+  })
+})
