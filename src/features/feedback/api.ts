@@ -1,14 +1,20 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { cleanParams, type StatsPeriodParams } from '@/lib/stats-period'
 import { invalidateAdminQueries } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { FeedbackItem, FeedbackStats, FeedbackStatusFilter, PaginatedFeedback } from './types'
+
+export interface FeedbackStatsParams extends StatsPeriodParams {
+  client_id?: string
+}
 
 export const feedbackQueryKeys = {
   all: ['admin-feedback'] as const,
   list: (clientId?: string, status?: FeedbackStatusFilter, page?: number, limit?: number) =>
     ['admin-feedback', 'list', clientId, status, page, limit] as const,
-  stats: () => ['admin-feedback', 'stats'] as const,
+  stats: (params: FeedbackStatsParams = {}) =>
+    ['admin-feedback', 'stats', params.from, params.to, params.client_id] as const,
 }
 
 export function useFeedbackList(
@@ -30,12 +36,15 @@ export function useFeedbackList(
   })
 }
 
-export function useFeedbackStats() {
+export function useFeedbackStats(params: FeedbackStatsParams = {}) {
   return useQuery({
-    queryKey: feedbackQueryKeys.stats(),
+    queryKey: feedbackQueryKeys.stats(params),
+    placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
-      const response = await api.get<ApiEnvelope<FeedbackStats>>('/feedback/stats')
+      const response = await api.get<ApiEnvelope<FeedbackStats>>('/feedback/stats', {
+        params: cleanParams(params),
+      })
       return unwrapResponse(response)
     },
   })

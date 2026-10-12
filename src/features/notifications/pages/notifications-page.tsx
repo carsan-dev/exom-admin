@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/button'
+import { PeriodStatsHeader } from '@/components/stats/period-stats-header'
+import { useStatsPeriod } from '@/components/stats/use-stats-period'
 import { NotificationsFilters } from '../components/notifications-filters'
 import { NotificationsList } from '../components/notifications-list'
 import { NotificationsStatsCards } from '../components/notifications-stats-cards'
@@ -24,6 +26,7 @@ export function NotificationsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
+  const statsPeriod = useStatsPeriod('notifications')
   const recipientId = searchParams.get('recipientId') ?? ''
   const status = getStatusFilter(searchParams.get('status'))
   const search = searchParams.get('search') ?? ''
@@ -85,7 +88,10 @@ export function NotificationsPage() {
         <Button onClick={() => setIsDialogOpen(true)}>Enviar notificación</Button>
       </div>
 
-      <NotificationsStatsCards />
+      <div className="space-y-4">
+        <PeriodStatsHeader period={statsPeriod} filtered={Boolean(recipientId)} filterLabel="Destinatario filtrado" />
+        <NotificationsStatsCards params={{ ...statsPeriod.params, ...(recipientId ? { recipient_id: recipientId } : {}) }} />
+      </div>
 
       <NotificationsFilters
         recipientId={recipientId}

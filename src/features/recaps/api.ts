@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from 'react'
 import { useAuth } from '@/hooks/use-auth'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { cleanParams, type StatsPeriodParams } from '@/lib/stats-period'
 import { invalidateAdminQueries } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { PaginatedRecaps, RecapItem, RecapStats, RecapStatusFilter, RecapReviewDraft, RecapReviewPublish, RecapReviewRecord } from './types'
@@ -23,6 +24,10 @@ export async function getRecapForReview(id: string, identity: string, signal?: A
   return unwrapResponse(response)
 }
 
+export interface RecapStatsParams extends StatsPeriodParams {
+  client_id?: string
+}
+
 export const recapsQueryKeys = {
   all: ['admin-recaps'] as const,
   list: (
@@ -33,7 +38,8 @@ export const recapsQueryKeys = {
     limit?: number,
     identity?: string,
   ) => ['admin-recaps', 'list', clientId, status, archived, page, limit, identity] as const,
-  stats: () => ['admin-recaps', 'stats'] as const,
+  stats: (params: RecapStatsParams = {}) =>
+    ['admin-recaps', 'stats', params.from, params.to, params.client_id] as const,
   detail: (id?: string, identity?: string) => ['admin-recaps', 'detail', id, identity] as const,
 }
 
@@ -63,12 +69,15 @@ export function useRecapsList(
   })
 }
 
-export function useRecapStats() {
+export function useRecapStats(params: RecapStatsParams = {}) {
   return useQuery({
-    queryKey: recapsQueryKeys.stats(),
+    queryKey: recapsQueryKeys.stats(params),
+    placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
-      const response = await api.get<ApiEnvelope<RecapStats>>('/recaps/stats')
+      const response = await api.get<ApiEnvelope<RecapStats>>('/recaps/stats', {
+        params: cleanParams(params),
+      })
       return unwrapResponse(response)
     },
   })

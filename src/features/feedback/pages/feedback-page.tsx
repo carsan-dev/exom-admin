@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
+import { PeriodStatsHeader } from '@/components/stats/period-stats-header'
+import { useStatsPeriod } from '@/components/stats/use-stats-period'
 import { FeedbackDetailDialog } from '../components/feedback-detail-dialog'
 import { FeedbackFilters } from '../components/feedback-filters'
 import { FeedbackList } from '../components/feedback-list'
@@ -24,6 +26,7 @@ export function FeedbackPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedItem, setSelectedItem] = useState<FeedbackItem | null>(null)
 
+  const statsPeriod = useStatsPeriod('feedback')
   const clientId = searchParams.get('clientId') ?? ''
   const status = getStatusFilter(searchParams.get('status'))
   const page = getPage(searchParams.get('page'))
@@ -87,7 +90,10 @@ export function FeedbackPage() {
         </p>
       </div>
 
-      <FeedbackStatsCards />
+      <div className="space-y-4">
+        <PeriodStatsHeader period={statsPeriod} filtered={Boolean(clientId)} />
+        <FeedbackStatsCards params={{ ...statsPeriod.params, ...(clientId ? { client_id: clientId } : {}) }} />
+      </div>
 
       <FeedbackFilters
         clientId={clientId}
