@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from 'react-router'
+import { MemoryRouter, useLocation } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AuthUser } from '@/types/auth'
 import type { AdherenceReport, ComponentAdherence, AdherenceConfig } from '../adherence.types'
@@ -47,18 +47,27 @@ const config: AdherenceConfig = { version: 2, known: true, source: 'revision', e
   steps_goal: null, calorie_lower_percent: 10, calorie_upper_percent: 10, protein_min_percent: 90,
   steps_min_percent: 100, low_global_percent: 80 }
 const envelope = <T,>(data: T) => ({ data: { success: true, data, timestamp: '2020-01-01T00:00:00Z' } })
-function mount(clientId = 'client-a', queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })) {
-  const view = render(<QueryClientProvider client={queryClient}><MemoryRouter><ClientAdherenceTab clientId={clientId} /></MemoryRouter></QueryClientProvider>)
-  return { ...view, queryClient, changeClient: (id: string) => view.rerender(<QueryClientProvider client={queryClient}><MemoryRouter><ClientAdherenceTab clientId={id} /></MemoryRouter></QueryClientProvider>) }
+const CUSTOM = '/?adherence_period=custom&adherence_start=2020-01-01&adherence_end=2020-01-05'
+const calls = () => shared.get.mock.calls.filter(([url]) => !String(url).endsWith('/config')) as Array<[string, { params: { start: string; end: string } }]>
+function LocationProbe() { return <output data-testid="location">{useLocation().search}</output> }
+function mount(clientId = 'client-a', queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } }), url = '/') {
+  const tree = (id: string) => <QueryClientProvider client={queryClient}><MemoryRouter initialEntries={[url]}><LocationProbe /><ClientAdherenceTab clientId={id} /></MemoryRouter></QueryClientProvider>
+  const view = render(tree(clientId))
+  return { ...view, queryClient, changeClient: (id: string) => view.rerender(tree(id)) }
 }
-function selectRange() {
-  fireEvent.change(screen.getByLabelText('Desde (UTC)'), { target: { value: '2020-01-01' } })
-  fireEvent.change(screen.getByLabelText('Hasta (UTC)'), { target: { value: '2020-01-05' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Consultar periodo' }))
+function setCustom(from: string, to: string) {
+  fireEvent.change(screen.getByLabelText('Desde'), { target: { value: from } })
+  fireEvent.change(screen.getByLabelText('Hasta'), { target: { value: to } })
 }
 beforeEach(() => {
   // jsdom has no layout observer; data semantics are verified via the table.
   vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
+  // Radix Select needs these in jsdom.
+  Element.prototype.hasPointerCapture = () => false
+  Element.prototype.setPointerCapture = () => undefined
+  Element.prototype.releasePointerCapture = () => undefined
+  Element.prototype.scrollIntoView = () => undefined
+  window.localStorage.clear()
   shared.get.mockReset(); shared.put.mockReset()
   useAuth.setState({ user: actor, isAuthenticated: true, isLoading: false })
   shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : report())))
@@ -117,7 +126,7 @@ describe('Adherencia visual', () => {
 })
 describe('Adherencia canónica en el detalle', () => {
   it('consulta cliente/rango y consume ratios cerrados sin promediar días; pasos una vez con siete objetivos', async () => {
-    mount(); selectRange()
+    mount('client-a', undefined, CUSTOM)
     const summary = await screen.findByRole('region', { name: 'Periodo cerrado' })
     expect(within(summary).getByText('37 %')).toBeInTheDocument()
     expect(shared.get).toHaveBeenCalledWith('/admin/clients/client-a/adherence', expect.objectContaining({ params: { start: '2020-01-01', end: '2020-01-05' } }))
@@ -132,12 +141,17 @@ describe('Adherencia canónica en el detalle', () => {
     expect(within(summary).queryByText(/Baja adherencia/)).not.toBeInTheDocument()
   })
   it.each([['2020-02-30', '2020-03-01'], ['2020-02-02', '2020-02-01'], ['2020-01-01', '2020-02-01']])('no solicita fechas inválidas %s..%s', async (start, end) => {
-    mount(); await screen.findByRole('region', { name: 'Periodo cerrado' })
+    mount('client-a', undefined, CUSTOM); await screen.findByRole('region', { name: 'Periodo cerrado' })
     const count = shared.get.mock.calls.length
-    fireEvent.change(screen.getByLabelText('Desde (UTC)'), { target: { value: start } })
-    fireEvent.change(screen.getByLabelText('Hasta (UTC)'), { target: { value: end } })
-    fireEvent.click(screen.getByRole('button', { name: 'Consultar periodo' }))
-    expect(screen.getByRole('alert')).toHaveTextContent(/1 a 31 días/)
+    setCustom(start, end)
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    expect(shared.get).toHaveBeenCalledTimes(count)
+  })
+  it('un periodo personalizado de más de 31 días muestra error y no consulta', async () => {
+    mount('client-a', undefined, CUSTOM); await screen.findByRole('region', { name: 'Periodo cerrado' })
+    const count = shared.get.mock.calls.length
+    setCustom('2020-01-01', '2020-02-01')
+    expect(screen.getByRole('alert')).toHaveTextContent(/31/)
     expect(shared.get).toHaveBeenCalledTimes(count)
   })
   it('diferencia insuficiente, provisional, futuro, descanso y sin asignación sin convertirlos en cero', async () => {
@@ -151,7 +165,7 @@ describe('Adherencia canónica en el detalle', () => {
       { ...day, date: '2020-01-05', calendar: 'future', evaluation: { ...day.evaluation, period: 'future', includeInClosedAggregate: false, global: { ...component(null), status: 'neutral', source: 'none' } } },
     ]
     shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : data)))
-    mount()
+    mount('client-a', undefined, CUSTOM)
     expect(await screen.findByText('Descanso')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /2020-01-03 · Sin asignación/ })).toBeInTheDocument()
     expect(screen.getByText('Futuro')).toBeInTheDocument()
@@ -166,7 +180,7 @@ describe('Adherencia canónica en el detalle', () => {
     const data = report(); data.days[0].evaluation.global = { ...component(0.37), source: 'nutrition_only' }
     data.days[0].configuration.low_global_percent = 40
     shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : data)))
-    mount()
+    mount('client-a', undefined, CUSTOM)
     expect(await screen.findByText(/Configuración versión 2 · política global de siete días 40 %/)).toBeInTheDocument()
     expect(screen.queryByText(/Baja adherencia · menos del/)).not.toBeInTheDocument()
     expect(screen.getByText('Solo nutrición')).toBeInTheDocument()
@@ -196,20 +210,72 @@ describe('Adherencia canónica en el detalle', () => {
     act(() => useAuth.setState({ user: { ...actor }, isAuthenticated: true }))
     expect(screen.queryByText('73 %')).not.toBeInTheDocument()
   })
-  it('selecciones semanal/mensual UTC incluyen límites de mes y admite ventanas de 1 y 31 días', async () => {
+  it('por defecto consulta los últimos 30 días UTC y el periodo anterior equivalente', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-12T10:00:00Z'))
+    try {
+      mount(); await screen.findByRole('region', { name: 'Periodo cerrado' })
+      await waitFor(() => expect(calls()).toHaveLength(2))
+      expect(calls().map(([, config]) => config.params)).toEqual(expect.arrayContaining([
+        { start: '2026-09-13', end: '2026-10-12' }, { start: '2026-08-14', end: '2026-09-12' },
+      ]))
+    } finally { vi.useRealTimers() }
+  })
+  it('un enlace antiguo con solo adherence_start/end carga como personalizado', async () => {
+    mount('client-a', undefined, '/?adherence_start=2020-01-01&adherence_end=2020-01-05')
+    await screen.findByRole('region', { name: 'Periodo cerrado' })
+    expect(screen.getByRole('combobox', { name: 'Periodo' })).toHaveTextContent('Personalizado')
+    expect(calls().map(([, config]) => config.params)).toContainEqual({ start: '2020-01-01', end: '2020-01-05' })
+  })
+  it('cambiar el preset actualiza la URL y consulta el nuevo rango', async () => {
     mount(); await screen.findByRole('region', { name: 'Periodo cerrado' })
-    fireEvent.change(screen.getByLabelText('Desde (UTC)'), { target: { value: '2020-01-01' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Semana de la fecha inicial' }))
-    await waitFor(() => expect(shared.get).toHaveBeenCalledWith('/admin/clients/client-a/adherence', expect.objectContaining({ params: { start: '2019-12-30', end: '2020-01-05' } })))
-    fireEvent.change(screen.getByLabelText('Desde (UTC)'), { target: { value: '2020-02-15' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Mes de la fecha inicial' }))
-    await waitFor(() => expect(shared.get).toHaveBeenCalledWith('/admin/clients/client-a/adherence', expect.objectContaining({ params: { start: '2020-02-01', end: '2020-02-29' } })))
+    await userEvent.click(screen.getByRole('combobox', { name: 'Periodo' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Últimos 7 días' }))
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('adherence_period=7d'))
+    await waitFor(() => expect(calls().some(([, config]) => {
+      const days = (Date.parse(config.params.end) - Date.parse(config.params.start)) / 86_400_000 + 1
+      return days === 7
+    })).toBe(true))
+  })
+  it('admite ventanas personalizadas de 1 y 31 días', async () => {
+    mount('client-a', undefined, CUSTOM); await screen.findByRole('region', { name: 'Periodo cerrado' })
     for (const end of ['2020-01-01', '2020-01-31']) {
-      fireEvent.change(screen.getByLabelText('Desde (UTC)'), { target: { value: '2020-01-01' } })
-      fireEvent.change(screen.getByLabelText('Hasta (UTC)'), { target: { value: end } })
-      fireEvent.click(screen.getByRole('button', { name: 'Consultar periodo' }))
-      await waitFor(() => expect(shared.get).toHaveBeenCalledWith('/admin/clients/client-a/adherence', expect.objectContaining({ params: { start: '2020-01-01', end } })))
+      setCustom('2020-01-01', end)
+      await waitFor(() => expect(calls().map(([, config]) => config.params)).toContainEqual({ start: '2020-01-01', end }))
     }
+  })
+  const previousStart = '2019-12-27'
+  const route = (previous: () => unknown) => (url: string, config: { params: { start: string } }) => url.endsWith('/config')
+    ? Promise.resolve(envelope(config)) : config.params.start === previousStart ? previous() : Promise.resolve(envelope(report()))
+  it('muestra deltas en puntos porcentuales frente al periodo anterior', async () => {
+    const previous = report()
+    previous.aggregate = { training: component(0.5), nutrition: component(0.2), global: { ...component(0.3), source: 'both' } }
+    shared.get.mockImplementation(route(() => Promise.resolve(envelope(previous))))
+    mount('client-a', undefined, CUSTOM)
+    const summary = await screen.findByRole('region', { name: 'Periodo cerrado' })
+    await waitFor(() => expect(within(summary).getAllByTestId('delta-badge')).toHaveLength(3))
+    const labels = within(summary).getAllByTestId('delta-badge').map((badge) => badge.textContent)
+    expect(labels).toEqual(expect.arrayContaining(['+10 p. p.', '−6 p. p.', '+7 p. p.']))
+  })
+  it('un ratio previo nulo muestra Sin datos previos, nunca cero', async () => {
+    const previous = report()
+    previous.aggregate = { training: component(null), nutrition: component(0.2), global: { ...component(null), source: 'none' } }
+    shared.get.mockImplementation(route(() => Promise.resolve(envelope(previous))))
+    mount('client-a', undefined, CUSTOM)
+    const summary = await screen.findByRole('region', { name: 'Periodo cerrado' })
+    await waitFor(() => expect(within(summary).getAllByText('Sin datos previos')).toHaveLength(2))
+  })
+  it('si falla la consulta anterior el informe principal sigue y los deltas indican Sin datos previos', async () => {
+    shared.get.mockImplementation(route(() => Promise.reject(new Error('offline'))))
+    mount('client-a', undefined, CUSTOM)
+    const summary = await screen.findByRole('region', { name: 'Periodo cerrado' })
+    await waitFor(() => expect(within(summary).getAllByText('Sin datos previos')).toHaveLength(3))
+    expect(within(summary).getByText('37 %')).toBeInTheDocument()
+  })
+  it('Actualizar evaluaciones vuelve a consultar ambos periodos', async () => {
+    mount('client-a', undefined, CUSTOM); await screen.findByRole('region', { name: 'Periodo cerrado' })
+    await waitFor(() => expect(calls()).toHaveLength(2))
+    fireEvent.click(screen.getByRole('button', { name: 'Actualizar evaluaciones' }))
+    await waitFor(() => expect(calls()).toHaveLength(4))
   })
   it('la respuesta en vuelo del actor anterior nunca aparece para un nuevo actor en el mismo cliente', async () => {
     let finish: (value: ReturnType<typeof envelope<AdherenceReport>>) => void = () => undefined

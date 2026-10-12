@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DeltaBadge, PeriodSelector, usePeriodParam } from '@/components/period'
+import type { PeriodPreset, PeriodRange } from '@/components/period'
 import { getApiErrorStatus } from '@/lib/api-utils'
 import { AdherenceEvolution } from '@/features/progress/components/adherence-evolution'
 import { cn } from '@/lib/utils'
@@ -21,16 +22,6 @@ function minimumEffectiveDate() {
   // revisions can require a later date; only the server can validate that.
   return shift(civil(new Date(Date.now() + 31_000)), 1)
 }
-function weekRange(date: string): AdherenceRange {
-  const at = new Date(date + 'T00:00:00Z')
-  const start = shift(date, -((at.getUTCDay() + 6) % 7))
-  return { start, end: shift(start, 6) }
-}
-function monthRange(date: string): AdherenceRange {
-  const at = new Date(date + 'T00:00:00Z')
-  return { start: civil(new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), 1))),
-    end: civil(new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth() + 1, 0))) }
-}
 const indicatorLabels: Record<IndicatorStatus, string> = {
   met: 'Dentro del objetivo', below: 'Por debajo del objetivo', above: 'Por encima del objetivo',
   insufficient: 'Información insuficiente', not_applicable: 'No aplicable',
@@ -43,21 +34,27 @@ const calendarLabels = {
   insufficient: 'Información insuficiente', rest: 'Descanso', future: 'Futuro', not_assigned: 'Sin asignación',
 }
 const scheduleLabels = { rest: 'Descanso', assigned: 'Pautado', not_assigned: 'Sin asignación', unknown: 'Pauta desconocida' }
-function Metric({ label, value }: { label: string; value: ComponentAdherence }) {
+type Comparison = { state: 'ready'; value: ClosedAggregate } | { state: 'error' }
+const comparableRatio = (value: ComponentAdherence) => value.status === 'evaluable' && value.ratio !== null ? value.ratio * 100 : null
+function Metric({ label, value, previous }: { label: string; value: ComponentAdherence; previous?: ComponentAdherence | null }) {
   const text = value.status === 'evaluable' && value.ratio !== null
     ? `${new Intl.NumberFormat('es', { maximumFractionDigits: 2 }).format(value.ratio * 100)} %`
     : value.status === 'insufficient' ? 'Información insuficiente'
       : value.status === 'neutral' ? 'Neutral' : 'No aplicable'
   return <div className="space-y-2"><p className="text-sm font-medium text-muted-foreground">{label}</p><p className="text-xl font-semibold tabular-nums">{text}</p>
+    {previous !== undefined && <DeltaBadge current={comparableRatio(value)} previous={previous ? comparableRatio(previous) : null} polarity="higher-is-better" unit="p. p." />}
     {value.status === 'evaluable' && value.ratio !== null && <svg viewBox="0 0 100 4" className="h-1 w-full" aria-hidden="true" preserveAspectRatio="none"><rect width="100" height="4" fill="var(--muted)" /><rect width={Math.max(0, Math.min(100, value.ratio * 100))} height="4" fill="var(--primary)" /></svg>}
     {value.status === 'evaluable' && <p className="text-xs text-muted-foreground">{value.numerator} / {value.denominator} evaluables</p>}
     {value.caveats.length > 0 && <p className="text-xs text-muted-foreground">Hay información indeterminada excluida del cálculo.</p>}
   </div>
 }
-function Aggregate({ value }: { value: ClosedAggregate }) {
+function Aggregate({ value, comparison }: { value: ClosedAggregate; comparison?: Comparison }) {
+  // undefined: no comparison shown (none requested or still loading); error: badges show "Sin datos previos".
+  const previous = comparison?.state === 'ready' ? comparison.value : comparison?.state === 'error' ? null : undefined
   return <><div className="grid gap-3 sm:grid-cols-3">
-    <Metric label="Entrenamiento" value={value.training} /><Metric label="Nutrición" value={value.nutrition} />
-    <Metric label="Global" value={value.global} />
+    <Metric label="Entrenamiento" value={value.training} previous={previous?.training ?? (previous === null ? null : undefined)} />
+    <Metric label="Nutrición" value={value.nutrition} previous={previous?.nutrition ?? (previous === null ? null : undefined)} />
+    <Metric label="Global" value={value.global} previous={previous?.global ?? (previous === null ? null : undefined)} />
   </div><p className="text-sm text-muted-foreground">{sourceLabels[value.global.source]}</p></>
 }
 const recentStatusLabels: Record<RecentClosedStatus, string> = {
@@ -103,7 +100,7 @@ function DayDetail({ day }: { day: AdherenceDay }) {
     </div>
   </article>
 }
-function Report({ report }: { report: AdherenceReport }) {
+function Report({ report, comparison }: { report: AdherenceReport; comparison?: Comparison }) {
   const [selectedDate, setSelectedDate] = useState(report.days[0]?.date)
   const days = [...report.days].sort((a, b) => a.date.localeCompare(b.date))
   const selected = days.find((day) => day.date === selectedDate) ?? days[0]
@@ -111,7 +108,7 @@ function Report({ report }: { report: AdherenceReport }) {
     <RecentClosed value={report.recentClosed} />
     <section aria-label="Periodo cerrado" className="rounded-xl border p-4 space-y-3">
       <h2 className="font-semibold">Periodo cerrado · {report.start} — {report.end}</h2>
-      <Aggregate value={report.aggregate} />
+      <Aggregate value={report.aggregate} comparison={comparison} />
       <p className="text-xs text-muted-foreground">Resultado del servidor: hoy provisional y futuro quedan fuera. Los umbrales históricos pueden variar; no se aplica un único umbral actual al periodo.</p>
     </section>
     <p className="text-xs text-muted-foreground">Evaluado: {report.evaluated_at} · Hoy UTC: {report.today}. Las evidencias tardías aceptadas pueden añadir revisiones sin modificar la pauta original. La configuración no reconstruye el histórico desconocido.</p>
@@ -249,57 +246,36 @@ function Settings({ clientId }: { clientId: string }) {
     </div>
   </details>
 }
-interface RangeControlsProps {
-  range: AdherenceRange
-  applyRange: (range: AdherenceRange) => void
-  fetching: boolean
-  refresh: () => void
-}
-function RangeControls({ range, applyRange, fetching, refresh }: RangeControlsProps) {
-  const [draft, setDraft] = useState(range)
-  const [rangeError, setRangeError] = useState(!isAdherenceRange(range))
-  function apply(next = draft) {
-    if (!isAdherenceRange(next)) { setRangeError(true); return }
-    setRangeError(false); setDraft(next); applyRange(next)
-  }
-  function preset(month: boolean) {
-    const anchor = isCivilDate(draft.start) ? draft.start : civil(new Date())
-    apply(month ? monthRange(anchor) : weekRange(anchor))
-  }
-  return <>
-    <div className="grid gap-3 sm:grid-cols-2">
-      <label className="text-sm">Desde (UTC)<Input type="date" value={draft.start} onChange={(event) => setDraft({ ...draft, start: event.target.value })} /></label>
-      <label className="text-sm">Hasta (UTC)<Input type="date" value={draft.end} onChange={(event) => setDraft({ ...draft, end: event.target.value })} /></label>
-    </div>
-    <div className="flex flex-wrap gap-2"><Button className="text-[#30271e]" onClick={() => apply()}>Consultar periodo</Button>
-      <Button variant="outline" onClick={() => preset(false)}>Semana de la fecha inicial</Button>
-      <Button variant="outline" onClick={() => preset(true)}>Mes de la fecha inicial</Button>
-      <Button variant="outline" disabled={fetching || !isAdherenceRange(range)} onClick={refresh}>Actualizar evaluaciones</Button>
-    </div>
-    {rangeError && <p role="alert">Selecciona fechas UTC válidas y ordenadas, de 1 a 31 días inclusive.</p>}
-  </>
-}
+const ADHERENCE_PERIODS: readonly PeriodPreset[] = ['7d', '30d', 'month', 'prev_month', 'custom']
+const ADHERENCE_KEYS = { period: 'adherence_period', from: 'adherence_start', to: 'adherence_end' }
+// The API needs a closed window; an open-ended range collapses to its end day.
+const toAdherenceRange = (range: PeriodRange): AdherenceRange => ({ start: range.from ?? range.to, end: range.to })
 function AdherenceContent({ clientId }: { clientId: string }) {
-  const [params, setParams] = useSearchParams()
-  const hasRange = params.has('adherence_start') || params.has('adherence_end')
-  const range = hasRange ? { start: params.get('adherence_start') ?? '', end: params.get('adherence_end') ?? '' } : monthRange(civil(new Date()))
+  const period = usePeriodParam({ section: 'adherence', options: ADHERENCE_PERIODS, defaultPreset: '30d', keys: ADHERENCE_KEYS, maxDays: 31 })
+  const range = toAdherenceRange(period.range)
+  const previous = period.previousRange ? toAdherenceRange(period.previousRange) : null
   const query = useClientAdherence(clientId, range)
-  function applyRange(next: AdherenceRange) {
-    setParams((previous) => {
-      const updated = new URLSearchParams(previous)
-      updated.set('adherence_start', next.start); updated.set('adherence_end', next.end)
-      return updated
-    })
+  // Disabled (invalid sentinel range) unless a comparison period exists.
+  const previousQuery = useClientAdherence(clientId, previous ?? { start: '', end: '' })
+  const comparison: Comparison | undefined = !previous ? undefined
+    : previousQuery.data ? { state: 'ready', value: previousQuery.data.aggregate }
+      : previousQuery.isError ? { state: 'error' } : undefined
+  const fetching = query.isFetching || (!!previous && previousQuery.isFetching)
+  function refresh() {
+    void query.refetch()
+    if (previous) void previousQuery.refetch()
   }
   return <div className="space-y-5 [--muted-foreground:var(--foreground-secondary)]">
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Adherencia</h2>
-      <details className="rounded-xl border p-3" open={!isAdherenceRange(range) || query.isError || undefined}>
-        <summary className="min-h-11 cursor-pointer content-center rounded text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Periodo UTC: {range.start} — {range.end}</summary>
-        <div className="space-y-3 pt-3"><RangeControls key={`${range.start}:${range.end}`} range={range} applyRange={applyRange} fetching={query.isFetching} refresh={() => query.refetch()} /></div>
-      </details>
+      <div className="flex flex-wrap items-end gap-3">
+        <PeriodSelector value={period.preset} options={ADHERENCE_PERIODS} onChange={period.setPreset} custom={period.custom}
+          onCustomChange={period.setCustomRange} error={period.error} range={period.range} previousRange={period.previousRange} />
+        <Button variant="outline" disabled={fetching || !isAdherenceRange(range)} onClick={refresh}>Actualizar evaluaciones</Button>
+      </div>
+      <p className="text-sm text-muted-foreground">Periodo UTC: {range.start} — {range.end}</p>
       {isAdherenceRange(range) && (query.isPending ? <p role="status">Cargando adherencia…</p> : query.isError ? <p role="alert">No se pudo cargar la adherencia. Reintenta la consulta; este error no significa información histórica insuficiente.</p>
-        : query.data && <Report report={query.data} />)}
+        : query.data && <Report report={query.data} comparison={comparison} />)}
       {query.isFetching && !query.isPending && <p role="status">Actualizando evaluaciones…</p>}
     </div>
     <Settings clientId={clientId} />
