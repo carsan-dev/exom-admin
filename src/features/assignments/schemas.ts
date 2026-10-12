@@ -29,6 +29,8 @@ function isoWeekday(value: string) {
   return weekday === 0 ? 7 : weekday
 }
 
+const trainingCompletionModeSchema = z.enum(['ALL', 'ANY']).default('ALL')
+
 const nullableSelectionSchema = z
   .string()
   .trim()
@@ -48,6 +50,7 @@ export const assignmentEditorDaySchema = z
       'No puedes repetir entrenamientos',
     ).default([]),
     training_policies: z.record(z.string(), z.enum(['AUTO', 'ALWAYS', 'NEVER'])).default({}),
+    training_completion_mode: trainingCompletionModeSchema,
     diet_id: nullableSelectionSchema,
     is_rest_day: z.boolean().default(false),
   })
@@ -67,6 +70,7 @@ export const assignmentEditorSchema = z
     auto_assignment_enabled: z.boolean().default(false),
     auto_assignment_end_mode: z.enum(['indefinite', 'date']).default('indefinite'),
     auto_assignment_ends_on: z.string().regex(isoDateRegex, 'Selecciona una fecha válida').nullable().optional(),
+    auto_assignment_completion_mode: trainingCompletionModeSchema,
   })
   .superRefine((value, context) => {
     if (!value.auto_assignment_enabled) {

@@ -1,3 +1,4 @@
+import { NameSourceTag } from './name-source-tag'
 import { useId, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -76,7 +77,7 @@ export function TrainingProgressPanel({ clientId, from, to, valid }: TrainingPro
     <Card><CardHeader><CardTitle>Sesiones con detalle</CardTitle></CardHeader><CardContent className="space-y-3">
       <p className="text-sm text-muted-foreground">Consulta las series, cargas y valoraciones guardadas. El detalle disponible no confirma por sí solo la finalización de una sesión antigua.</p>
       {sessions.data.page.length === 0 ? <p>Sin sesiones con detalle en esta página.</p> : <ul className="space-y-2">{sessions.data.page.map((session) => <li key={`${session.date}:${session.training_session_id}`} className="flex flex-wrap items-center justify-between gap-3 rounded-md border-b px-2 py-3 transition-colors duration-150 hover:bg-muted/50 motion-reduce:transition-none">
-        <span className="min-w-0 break-words"><span className="block font-medium">{session.training_name || 'Nombre no disponible'}</span><span className="text-sm text-muted-foreground">{formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}</span></span>
+        <span className="min-w-0 break-words"><span className="block font-medium">{session.training_name || 'Nombre no disponible'}<NameSourceTag source={session.training_name ? session.training_name_source : null} /></span><span className="text-sm text-muted-foreground">{formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}</span></span>
         <Button variant="outline" aria-expanded={currentSelection?.training_session_id === session.training_session_id && currentSelection.date === session.date}
           aria-controls={detailId} aria-label={`Ver detalle de ${session.training_name || 'entrenamiento'} del ${formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}`}
           onClick={(event) => { sessionTrigger.current = event.currentTarget; setSelected({ scope: overviewScope, session }) }}>Ver detalle</Button>

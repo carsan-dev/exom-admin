@@ -17,7 +17,11 @@ export function ProgressOverviewCards({ streak, weekSummary, isLoading, onStreak
   const weekEnd = weekSummary ? new Date(`${weekSummary.week_start}T12:00:00Z`) : null
   if (weekEnd) weekEnd.setUTCDate(weekEnd.getUTCDate() + 6)
   const observations = weekSummary ? [
-    { label: 'Cumplimiento entrenamiento', value: weekSummary.trainings_assigned > 0
+    { label: 'Cumplimiento entrenamiento', value: weekSummary.training_days_assigned !== undefined && weekSummary.training_days_completed !== undefined
+      ? (weekSummary.training_days_assigned > 0
+        ? `${weekSummary.training_days_completed} de ${weekSummary.training_days_assigned} días con entrenamiento · ${Math.round(weekSummary.training_days_completed / weekSummary.training_days_assigned * 100)} %`
+        : 'Sin entrenamientos asignados')
+      : weekSummary.trainings_assigned > 0
       ? `${weekSummary.trainings_completed} de ${weekSummary.trainings_assigned} entrenamientos · ${Math.round(weekSummary.trainings_completed / weekSummary.trainings_assigned * 100)} %`
       : 'Sin entrenamientos asignados' },
     { label: 'Cumplimiento dieta', value: weekSummary.total_meals > 0

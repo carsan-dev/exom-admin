@@ -50,6 +50,8 @@ import {
   type AssignmentEditorMode,
 } from './assignment-editor-state'
 import { AssignmentPreviewDialog } from './assignment-preview-dialog'
+import { CompletionModeField } from './completion-mode-field'
+import { isCompletionModeVisible, resolveCompletionModeForSubmit } from './completion-mode'
 
 const CLEAR_SELECTION_VALUE = '__none__'
 
@@ -258,6 +260,7 @@ export function AssignmentEditorDialog({
       auto_assignment_enabled: false,
       auto_assignment_end_mode: 'indefinite',
       auto_assignment_ends_on: null,
+      auto_assignment_completion_mode: 'ALL',
     },
   })
   useUnsavedChanges('assignment-editor', open && (form.formState.isDirty || isSubmitting))
@@ -301,6 +304,7 @@ export function AssignmentEditorDialog({
   const watchedDays = form.watch('days') ?? []
   const autoAssignmentEnabled = form.watch('auto_assignment_enabled')
   const autoAssignmentEndMode = form.watch('auto_assignment_end_mode')
+  const showRuleCompletionMode = watchedDays.some((day) => isCompletionModeVisible(day.training_ids, day.is_rest_day))
   const isRestOnlyMode = catalogAvailability.is_rest_only
   const canUseTrainingCatalog = catalogAvailability.can_use_training_catalog
   const canUseDietCatalog = catalogAvailability.can_use_diet_catalog
@@ -319,6 +323,7 @@ export function AssignmentEditorDialog({
         auto_assignment_enabled: false,
         auto_assignment_end_mode: 'indefinite',
         auto_assignment_ends_on: null,
+        auto_assignment_completion_mode: 'ALL',
       })
       return
     }
@@ -377,6 +382,7 @@ export function AssignmentEditorDialog({
         training_id: day.training_id ?? null,
         training_ids: day.is_rest_day ? [] : day.training_ids,
         training_policies: day.is_rest_day ? {} : day.training_policies,
+        training_completion_mode: resolveCompletionModeForSubmit(day.training_ids, day.is_rest_day, day.training_completion_mode),
         diet_id: day.diet_id ?? null,
         is_rest_day: day.is_rest_day,
       })),
@@ -391,6 +397,9 @@ export function AssignmentEditorDialog({
                 values.auto_assignment_end_mode === 'date'
                   ? (values.auto_assignment_ends_on ?? null)
                   : null,
+              training_completion_mode: values.days.some((day) => isCompletionModeVisible(day.training_ids, day.is_rest_day))
+                ? values.auto_assignment_completion_mode
+                : undefined,
             }
           : undefined,
     })
@@ -678,6 +687,22 @@ export function AssignmentEditorDialog({
                           )}
                         />
                       </div>
+
+                      {!editingAutoRule && isCompletionModeVisible(watchedDays[index]?.training_ids, isRestDay) && (
+                        <FormField
+                          control={form.control}
+                          name={`days.${index}.training_completion_mode`}
+                          render={({ field: modeField }) => (
+                            <FormItem>
+                              <CompletionModeField
+                                id={`completion-mode-${index}`}
+                                value={modeField.value ?? 'ALL'}
+                                onChange={modeField.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                      )}
                     </div>
                   )
                 })}
@@ -729,6 +754,18 @@ export function AssignmentEditorDialog({
                       {' · '}
                       Empieza: <span className="font-medium text-foreground">{startsOn ?? '—'}</span>
                     </div>
+
+                    {showRuleCompletionMode && (
+                      <FormField
+                        control={form.control}
+                        name="auto_assignment_completion_mode"
+                        render={({ field }) => (
+                          <FormItem>
+                            <CompletionModeField id="auto-completion-mode" value={field.value} onChange={field.onChange} />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     <FormField
                       control={form.control}

@@ -1,3 +1,4 @@
+import { NameSourceTag } from './name-source-tag'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -54,7 +55,7 @@ export function TrainingExerciseTable({ clientId, from, to }: { clientId: string
           <caption className="sr-only">Resumen de ejercicios del periodo</caption>
           <thead><tr><th scope="col">Ejercicio</th><th scope="col">Peso del PR (kg)</th><th scope="col">Máx. reps o segundos</th><th scope="col">Series</th><th scope="col">RIR</th><th scope="col">Volumen (kg·reps)</th><th scope="col">PR</th></tr></thead>
           <tbody>{exercises.map((item) => <tr key={item.exercise_id} className="border-t">
-            <th scope="row" className="min-w-56 max-w-80 whitespace-normal break-words px-3 py-3 align-top font-medium">{exerciseLabels[item.exercise_id]}</th>
+            <th scope="row" className="min-w-56 max-w-80 whitespace-normal break-words px-3 py-3 align-top font-medium">{exerciseLabels[item.exercise_id]}<NameSourceTag source={item.name_source} /></th>
             <td>{value(item.pr?.weight_kg, ' kg')}</td>
             <td>{item.max_seconds !== null ? value(item.max_seconds, ' s') : value(item.max_reps, ' reps')}</td>
             <td>{item.sets === 0 ? 'Sin dato' : value(item.sets)}</td><td>{value(item.mean_rir)}</td><td>{value(item.volume, ' kg·reps')}</td>

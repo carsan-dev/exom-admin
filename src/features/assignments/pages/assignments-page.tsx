@@ -404,6 +404,7 @@ export function AssignmentsPage() {
           training_id: singleDay.is_rest_day ? null : (singleDay.training_id ?? null),
           training_ids: singleDay.is_rest_day ? [] : singleDay.training_ids,
           training_policies: singleDay.is_rest_day ? {} : singleDay.training_policies,
+          training_completion_mode: singleDay.is_rest_day ? undefined : singleDay.training_completion_mode,
           diet_id: singleDay.is_rest_day ? null : (singleDay.diet_id ?? null),
           is_rest_day: singleDay.is_rest_day,
         }
@@ -424,6 +425,7 @@ export function AssignmentsPage() {
           source_week_start: values.auto_assignment.source_week_start,
           starts_on: values.auto_assignment.starts_on,
           ends_on: values.auto_assignment.ends_on ?? null,
+          training_completion_mode: values.auto_assignment.training_completion_mode,
           days: values.days.map((day) => ({
             weekday: getIsoWeekday(day.date),
             training_id: day.is_rest_day ? null : (day.training_id ?? null),

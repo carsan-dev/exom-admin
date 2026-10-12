@@ -27,6 +27,7 @@ export interface AssignmentCatalogOptions {
 export type CatalogKey = 'trainings' | 'diets'
 export type AssignmentsViewMode = 'week' | 'month'
 export type LastSetVideoPolicy = 'AUTO' | 'ALWAYS' | 'NEVER'
+export type TrainingCompletionMode = 'ALL' | 'ANY'
 
 export interface AssignmentDayTraining {
   id: string
@@ -59,6 +60,8 @@ export interface AssignmentDay {
   training_ids?: string[]
   diet: AssignmentDayDiet | null
   default_last_set_video_policy?: LastSetVideoPolicy
+  /** Absent in older API versions; treat as ALL. */
+  training_completion_mode?: TrainingCompletionMode
 }
 
 export interface AssignmentWeekResponse {
@@ -90,6 +93,8 @@ export interface AssignmentEditorDayValues {
   training_id?: string | null
   training_ids?: string[]
   training_policies?: Record<string, LastSetVideoPolicy>
+  /** Only set when the field was shown (more than one training); otherwise omitted. */
+  training_completion_mode?: TrainingCompletionMode
   diet_id?: string | null
   is_rest_day: boolean
 }
@@ -105,6 +110,7 @@ export interface AssignmentUpdateValues {
   training_id?: string | null
   training_ids?: string[]
   training_policies?: Record<string, LastSetVideoPolicy>
+  training_completion_mode?: TrainingCompletionMode
   diet_id?: string | null
   is_rest_day: boolean
 }
@@ -114,6 +120,7 @@ export interface AssignmentBatchDayInput {
   training_id?: string | null
   training_ids?: string[]
   training_policies?: Record<string, LastSetVideoPolicy>
+  training_completion_mode?: TrainingCompletionMode
   diet_id?: string | null
   is_rest_day: boolean
 }
@@ -177,6 +184,8 @@ export interface AutoAssignmentEditorValues {
   source_week_start: string
   starts_on: string
   ends_on?: string | null
+  /** Only set when the field was shown (a rule day has more than one training). */
+  training_completion_mode?: TrainingCompletionMode
 }
 
 export interface AutoAssignmentRuleDay {
@@ -200,6 +209,8 @@ export interface AutoAssignmentRule {
   ends_on: string | null
   is_active: boolean
   deactivated_at: string | null
+  /** Absent in older API versions; treat as ALL. */
+  training_completion_mode?: TrainingCompletionMode
   days: AutoAssignmentRuleDay[]
 }
 
@@ -208,6 +219,7 @@ export interface CreateAutoAssignmentRuleValues {
   source_week_start: string
   starts_on: string
   ends_on?: string | null
+  training_completion_mode?: TrainingCompletionMode
   days: Array<{
     weekday: number
     training_id?: string | null
