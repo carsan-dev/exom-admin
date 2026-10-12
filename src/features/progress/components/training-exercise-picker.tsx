@@ -1,3 +1,4 @@
+import { NameSourceTag } from './name-source-tag'
 import { useId, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -38,7 +39,7 @@ export function TrainingExercisePicker({ clientId, from, to, selected, onSelect 
             </div>}
             {!query.isError && exercises.length === 0 && <p className="p-3 text-sm">No hay ejercicios identificados para esta búsqueda.</p>}
             {exercises.map((exercise) => <CommandItem key={exercise.exercise_id} value={exercise.exercise_id} onSelect={() => { onSelect(exercise); setOpen(false) }}>
-              <span className="min-w-0 break-words">{exercise.exercise_name}</span>
+              <span className="min-w-0 break-words">{exercise.exercise_name}<NameSourceTag source={exercise.name_source} /></span>
               {selected?.exercise_id === exercise.exercise_id && <Check className="ml-auto h-4 w-4 shrink-0" aria-hidden="true" />}
             </CommandItem>)}
           </>}

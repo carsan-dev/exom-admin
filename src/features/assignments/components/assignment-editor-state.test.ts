@@ -74,6 +74,7 @@ describe('buildAssignmentEditorDefaults', () => {
       training_id: 'selected-training',
       training_ids: ['selected-training'],
       training_policies: { 'selected-training': 'AUTO' },
+      training_completion_mode: 'ALL',
       diet_id: null,
       is_rest_day: false,
     }])
@@ -86,6 +87,7 @@ describe('buildAssignmentEditorDefaults', () => {
     expect(result.days.map((day) => day.date)).toEqual(['2026-07-06', '2026-07-10'])
     expect(result.days.map((day) => day.assignment_id)).toEqual([null, null])
     expect(result.auto_assignment_enabled).toBe(true)
+    expect(result.auto_assignment_completion_mode).toBe('ALL')
     expect(result.auto_assignment_end_mode).toBe('indefinite')
   })
 })

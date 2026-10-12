@@ -26,11 +26,25 @@ export interface MealCompletedDetail {
   meal_name: string | null
 }
 
+export type TrainingCompletionMode = 'ALL' | 'ANY'
+
+/** Absent or null means unknown (older API); render as a historical snapshot. */
+export type TrainingNameSource = 'snapshot' | 'current_catalog'
+
+export interface TrainingDaySummary {
+  training_completion_mode: TrainingCompletionMode
+  assigned_count: number
+  completed_count: number
+  assigned_training_ids: string[]
+  completed_training_ids: string[]
+}
+
 export interface DayProgress {
   id: string | null
   client_id: string
   date: string
   training_completed: boolean
+  training_summary?: TrainingDaySummary | null
   exercises_completed: ExerciseCompleted[]
   meals_completed: string[]
   meals_completed_details: MealCompletedDetail[]
@@ -75,12 +89,17 @@ export interface CalendarDay {
   is_rest_day: boolean
   training_completed: boolean
   diet_completed: boolean
+  training_completion_mode?: TrainingCompletionMode
+  trainings_assigned?: number
+  trainings_done?: number
 }
 
 export interface WeekSummary {
   week_start: string
   trainings_assigned: number
   trainings_completed: number
+  training_days_assigned?: number
+  training_days_completed?: number
   total_meals: number
   meals_completed: number
   diet_days_assigned?: number
@@ -140,6 +159,7 @@ export interface TrainingPr {
 export interface TrainingExerciseSummary {
   exercise_id: string
   exercise_name: string | null
+  name_source?: TrainingNameSource | null
   sets: number
   max_reps: number | null
   max_seconds: number | null
@@ -158,6 +178,7 @@ export interface TrainingSet {
   date?: string
   exercise_id?: string
   exercise_name?: string | null
+  exercise_name_source?: TrainingNameSource | null
   training_session_id?: string | null
   training_exercise_id: string | null
   set_number: number | null
@@ -173,6 +194,7 @@ export interface TrainingSession {
   training_id: string
   training_session_id: string
   training_name: string | null
+  training_name_source?: TrainingNameSource | null
   rpe: number | null
   note: string | null
 }
@@ -181,6 +203,7 @@ export interface TrainingSessionDetail {
   training_id: string
   training_session_id: string
   training_name: string | null
+  training_name_source?: TrainingNameSource | null
   rpe: number | null
   note: string | null
   page: TrainingSet[]

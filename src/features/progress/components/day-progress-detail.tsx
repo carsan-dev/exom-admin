@@ -88,6 +88,14 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                 <Badge variant={progress.training_completed ? 'default' : 'secondary'}>
                   {progress.training_completed ? 'Completado' : 'No completado'}
                 </Badge>
+                {progress.training_summary && progress.training_summary.assigned_count > 1 && (
+                  <span className="text-xs text-muted-foreground">
+                    {progress.training_summary.completed_count} de {progress.training_summary.assigned_count} entrenamientos
+                  </span>
+                )}
+                {progress.training_summary?.training_completion_mode === 'ANY' && progress.training_summary.assigned_count > 1 && (
+                  <Badge variant="secondary">Elegir uno</Badge>
+                )}
               </div>
               {progress.exercises_completed.length > 0 ? (
                 <ul className="space-y-1 pl-6">

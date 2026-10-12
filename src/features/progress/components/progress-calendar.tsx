@@ -60,7 +60,10 @@ export function ProgressCalendar({ year, month, days, isLoading, selectedDate, o
         {Array.from({ length: firstWeekday }, (_, i) => <span key={`blank-${i}`} />)}
         {dates.map((date, i) => {
           const { label, icon: Icon, color } = getDayStatus(daysByDate.get(date))
-          return <button key={date} type="button" aria-label={`${date} · ${label}`} title={label}
+          const calendarDay = daysByDate.get(date)
+          const trainingCount = calendarDay?.trainings_assigned !== undefined && calendarDay.trainings_assigned > 1
+            ? ` · ${calendarDay.trainings_done ?? 0} de ${calendarDay.trainings_assigned} entrenamientos` : ''
+          return <button key={date} type="button" aria-label={`${date} · ${label}${trainingCount}`} title={`${label}${trainingCount}`}
             aria-pressed={date === selectedDate} onClick={() => onDateSelect(date)}
             className={cn('flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-md border border-border text-sm tabular-nums transition-colors duration-150 motion-reduce:transition-none hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', color,
               date === selectedDate && 'border-brand-primary ring-2 ring-brand-primary ring-offset-1')}>

@@ -74,8 +74,8 @@ export function ProgressDashboard({ clientId }: { clientId: string }) {
             <p className="text-xs text-muted-foreground">30 días · solo días cerrados</p>
           </QueryContent>
         </dd></div>
-        <div className="min-w-0 space-y-1"><dt className="text-sm text-muted-foreground">Entrenamientos esta semana</dt><dd>
-          <QueryContent query={week} label="la semana"><p className="text-2xl font-semibold tabular-nums">{!weekly ? 'Semana no disponible' : weekly.trainings_assigned === 0 ? 'Sin pauta esta semana' : `${weekly.trainings_completed} / ${weekly.trainings_assigned}`}</p></QueryContent>
+        <div className="min-w-0 space-y-1"><dt className="text-sm text-muted-foreground">{weekly?.training_days_assigned !== undefined ? 'Días de entrenamiento esta semana' : 'Entrenamientos esta semana'}</dt><dd>
+          <QueryContent query={week} label="la semana"><p className="text-2xl font-semibold tabular-nums">{!weekly ? 'Semana no disponible' : (weekly.training_days_assigned ?? weekly.trainings_assigned) === 0 ? 'Sin pauta esta semana' : weekly.training_days_assigned !== undefined && weekly.training_days_completed !== undefined ? `${weekly.training_days_completed} / ${weekly.training_days_assigned}` : `${weekly.trainings_completed} / ${weekly.trainings_assigned}`}</p></QueryContent>
         </dd></div>
         <div className="min-w-0 space-y-1"><dt className="text-sm text-muted-foreground">Días de dieta esta semana</dt><dd>
           <QueryContent query={week} label="los días de dieta"><p className="text-2xl font-semibold tabular-nums">{weekly?.diet_days_assigned === undefined || weekly.diet_days_completed === undefined ? 'Días de dieta no disponibles' : weekly.diet_days_assigned === 0 ? 'Sin pauta esta semana' : `${weekly.diet_days_completed} / ${weekly.diet_days_assigned}`}</p></QueryContent>

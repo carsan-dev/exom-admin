@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
-import { useAssignmentCatalogOptions, useAssignmentClients, useDeleteAssignments, useUpdateAutoAssignmentRule } from './api'
+import { useBatchAssign, useUpdateAssignment, useAssignmentCatalogOptions, useAssignmentClients, useDeleteAssignments, useUpdateAutoAssignmentRule } from './api'
 
 vi.mock('@/lib/api', () => ({
   api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
@@ -85,6 +85,56 @@ describe('assignment option queries', () => {
       ends_on: null,
       days: [expect.objectContaining({ weekday: 4 })],
     }))
+  })
+
+  it('sends training_completion_mode only when provided, in batch, update and rule payloads', async () => {
+    mockedPost.mockResolvedValue(envelope([]) as never)
+    mockedPut.mockResolvedValue(envelope({ id: 'rule-1', client_id: 'client-1', days: [] }) as never)
+    const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
+    const wrapper = createWrapper(queryClient)
+    const day = { original_date: '2026-07-06', is_rest_day: false, training_ids: ['a', 'b'] }
+
+    const batch = renderHook(() => useBatchAssign(), { wrapper })
+    await batch.result.current.mutateAsync({ client_id: 'client-1', days: [
+      { ...day, date: '2026-07-06', training_completion_mode: 'ANY' },
+      { ...day, date: '2026-07-07', training_ids: ['a'] },
+    ] })
+    const batchDays = (mockedPost.mock.calls[0][1] as { days: Array<Record<string, unknown>> }).days
+    expect(batchDays[0]).toMatchObject({ training_completion_mode: 'ANY' })
+    expect(batchDays[1]).not.toHaveProperty('training_completion_mode')
+
+    const update = renderHook(() => useUpdateAssignment(), { wrapper })
+    await update.result.current.mutateAsync({ assignmentId: 'as-1', values: { is_rest_day: false, training_ids: ['a', 'b'], training_completion_mode: 'ANY' } })
+    expect(mockedPut.mock.calls[0][1]).toMatchObject({ training_completion_mode: 'ANY' })
+    await update.result.current.mutateAsync({ assignmentId: 'as-1', values: { is_rest_day: false, training_ids: ['a'] } })
+    expect(mockedPut.mock.calls[1][1]).not.toHaveProperty('training_completion_mode')
+
+    const rule = renderHook(() => useUpdateAutoAssignmentRule(), { wrapper })
+    const ruleValues = { client_id: 'client-1', source_week_start: '2026-06-29', starts_on: '2026-07-06', days: [{ weekday: 1, is_rest_day: false }] }
+    await rule.result.current.mutateAsync({ ruleId: 'rule-1', values: { ...ruleValues, training_completion_mode: 'ANY' } })
+    expect(mockedPut.mock.calls[2][1]).toMatchObject({ training_completion_mode: 'ANY' })
+    await rule.result.current.mutateAsync({ ruleId: 'rule-1', values: ruleValues })
+    expect(mockedPut.mock.calls[3][1]).not.toHaveProperty('training_completion_mode')
+  })
+
+  it('invalidates the client progress, calendar and week-summary queries after mode-changing saves', async () => {
+    mockedPost.mockResolvedValue(envelope([]) as never)
+    mockedPut.mockResolvedValue(envelope({ id: 'x', client_id: 'client-1', days: [] }) as never)
+    const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
+    const spy = vi.spyOn(queryClient, 'invalidateQueries')
+    const wrapper = createWrapper(queryClient)
+    const keys = () => spy.mock.calls.map(([filters]) => JSON.stringify(filters?.queryKey))
+    const expected = ['day', 'calendar', 'week'].map((part) => JSON.stringify(['admin-progress', 'client-1', part]))
+
+    await renderHook(() => useBatchAssign(), { wrapper }).result.current.mutateAsync({ client_id: 'client-1', days: [] })
+    expect(keys()).toEqual(expect.arrayContaining(expected))
+    spy.mockClear()
+    await renderHook(() => useUpdateAssignment(), { wrapper }).result.current.mutateAsync({ assignmentId: 'a', values: { is_rest_day: true } })
+    expect(keys()).toEqual(expect.arrayContaining(expected))
+    spy.mockClear()
+    await renderHook(() => useUpdateAutoAssignmentRule(), { wrapper }).result.current.mutateAsync({
+      ruleId: 'r', values: { client_id: 'client-1', source_week_start: '2026-06-29', starts_on: '2026-07-06', days: [] } })
+    expect(keys()).toEqual(expect.arrayContaining(expected))
   })
 
   it('posts selected assignment ids for batch deletion', async () => {

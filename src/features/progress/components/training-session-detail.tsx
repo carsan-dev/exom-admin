@@ -1,3 +1,4 @@
+import { NameSourceTag } from './name-source-tag'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/lib/utils'
@@ -17,7 +18,7 @@ export function TrainingSessionDetail({ clientId, session, onClose }: {
   return <section aria-labelledby={id} className="space-y-4 rounded-lg border bg-muted/30 p-4 sm:p-6">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <h3 id={id} ref={titleRef} tabIndex={-1} className="max-w-prose rounded-sm text-lg font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-        Detalle: {session.training_name || 'Nombre no disponible'} · {formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}
+        Detalle: {session.training_name || 'Nombre no disponible'}<NameSourceTag source={session.training_name ? (query.data?.training_name_source ?? session.training_name_source) : null} /> · {formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}
       </h3>
       <Button variant="outline" onClick={onClose}>Cerrar detalle</Button>
     </div>
@@ -35,7 +36,7 @@ export function TrainingSessionDetail({ clientId, session, onClose }: {
             <caption className="sr-only">Series del entrenamiento</caption>
             <thead><tr><th scope="col">Ejercicio</th><th scope="col">Serie</th><th scope="col">Carga (kg)</th><th scope="col">Reps / segundos</th><th scope="col">RIR</th></tr></thead>
             <tbody>{query.data.page.map((item, index) => <tr key={`${item.training_exercise_id}-${item.set_number}-${index}`} className="border-t align-top">
-              <th scope="row" className="max-w-64 whitespace-normal break-words font-medium">{item.exercise_name || 'Ejercicio sin nombre'}</th>
+              <th scope="row" className="max-w-64 whitespace-normal break-words font-medium">{item.exercise_name || 'Ejercicio sin nombre'}<NameSourceTag source={item.exercise_name ? item.exercise_name_source : null} /></th>
               <td>{item.set_number ?? 'Sin dato'}</td><td>{item.weight_kg === null ? 'Sin dato' : `${item.weight_kg} kg`}</td>
               <td>{item.seconds !== null ? `${item.seconds} s` : item.reps !== null ? `${item.reps} reps` : 'Sin dato'}</td><td>{item.rir ?? 'Sin dato'}</td>
             </tr>)}</tbody>
