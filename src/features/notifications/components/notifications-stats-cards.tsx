@@ -2,10 +2,10 @@ import { AlertTriangle, BellRing, CalendarClock, TriangleAlert } from 'lucide-re
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useNotificationStats } from '../api'
+import { useNotificationStats, type NotificationStatsParams } from '../api'
 
-export function NotificationsStatsCards() {
-  const { data: stats, isError, isFetching, isLoading, refetch } = useNotificationStats()
+export function NotificationsStatsCards({ params }: { params?: NotificationStatsParams }) {
+  const { data: stats, isError, isFetching, isLoading, refetch } = useNotificationStats(params)
 
   if (isLoading) {
     return (
@@ -62,10 +62,10 @@ export function NotificationsStatsCards() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Enviadas hoy</CardTitle>
-          <CalendarClock className="h-4 w-4 text-brand-primary" />
+          <CalendarClock className="h-4 w-4 text-status-info" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-brand-primary">{stats?.today ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{stats?.today ?? 0}</p>
         </CardContent>
       </Card>
 
@@ -75,7 +75,7 @@ export function NotificationsStatsCards() {
           <TriangleAlert className="h-4 w-4 text-status-error" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-status-error">{stats?.failed ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{stats?.failed ?? 0}</p>
         </CardContent>
       </Card>
     </div>

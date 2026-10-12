@@ -64,6 +64,7 @@ function reportCalls() {
   return api.get.mock.calls.filter(([url]) => String(url).endsWith('/adherence'))
 }
 beforeEach(() => {
+  window.localStorage.clear()
   api.get.mockReset(); api.put.mockReset(); api.post.mockReset()
   api.get.mockImplementation((url: string) => Promise.resolve({ data: { success: true, data:
     url.endsWith('/follow-up-tasks/summary') ? fixtureSummary : url.endsWith('/follow-up-tasks/assignees') ? fixturePage([fixtureAssignee]) : url.endsWith('/follow-up-tasks') ? fixturePage([fixtureTask]) : url.endsWith('/config') ? config : report,
@@ -118,25 +119,26 @@ describe('Progreso: contexto y navegación', () => {
     expect(params().get('period')).toBe('3m')
     expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeEnabled()
   })
-  it('mantiene el periodo activo visible y conserva los filtros en detalle progresivo', () => {
+  // Contract change: the native <select> inside <details> was replaced by the shared, always visible
+  // PeriodSelector (usePeriodParam). Changing the range still restarts history paging and keeps other filters.
+  it('mantiene el periodo activo visible y conserva los filtros al cambiarlo', async () => {
     mount('clientId=client-a&section=metricas&period=custom&from=2020-01-01&to=2020-01-05&historyPage=2')
-    const summary = screen.getByText('Periodo · 2020-01-01 → 2020-01-05 · UTC')
-    const details = summary.closest('details')
-    expect(details).not.toHaveAttribute('open')
-    fireEvent.click(summary)
-    // JSDOM does not implement the native details click default; exercise the disclosed controls explicitly.
-    details?.setAttribute('open', '')
-    fireEvent.change(screen.getByLabelText('Periodo'), { target: { value: '4w' } })
-    expect(params().get('period')).toBe('4w')
-    expect(params().get('historyPage')).toBe('1')
+    const selector = screen.getByRole('combobox', { name: 'Periodo de métricas y entrenamiento' })
+    expect(selector).toHaveTextContent('Personalizado')
+    expect(selector.closest('details')).toBeNull()
+    expect(screen.getByText(/Se aplica a Métricas y Entrenamiento/)).toBeVisible()
+    fireEvent.change(screen.getByLabelText('Desde'), { target: { value: '2020-01-02' } })
+    await waitFor(() => expect(params().get('historyPage')).toBe('1'))
+    expect(params().get('from')).toBe('2020-01-02')
+    expect(params().get('period')).toBe('custom')
     expect(params().get('clientId')).toBe('client-a')
     expect(params().get('section')).toBe('metricas')
     expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeEnabled()
   })
 
-  it('no oculta la validación de fechas cuando el detalle de filtros está cerrado', () => {
+  it('no oculta la validación de fechas del periodo', () => {
     mount('clientId=client-a&section=metricas&period=custom&from=2020-01-06&to=2020-01-05')
-    expect(screen.getByRole('alert')).toHaveTextContent('Revisa el periodo')
+    expect(screen.getByRole('alert')).toHaveTextContent('La fecha de inicio debe ser anterior o igual a la de fin.')
     expect(screen.getByRole('alert').closest('details')).toBeNull()
   })
 
@@ -148,7 +150,7 @@ describe('Progreso: contexto y navegación', () => {
 })
 
 describe('Progreso: pestaña Adherencia canónica', () => {
-  it('abre la ruta directa, habilita Adherencia y monta una única consulta del cliente/rango UTC', async () => {
+  it('abre la ruta directa, habilita Adherencia y monta la consulta del cliente/rango UTC y su periodo anterior', async () => {
     mount('clientId=client-a&section=adherencia&date=2020-01-03&period=3m&adherence_start=2020-01-01&adherence_end=2020-01-05')
     const tab = screen.getByRole('tab', { name: 'Adherencia' })
     expect(tab).toBeEnabled()
@@ -158,24 +160,25 @@ describe('Progreso: pestaña Adherencia canónica', () => {
     expect(screen.getByRole('tab', { name: 'Seguimiento' })).toBeEnabled()
     const summary = await screen.findByRole('region', { name: 'Periodo cerrado' })
     expect(within(summary).getByText('37 %')).toBeInTheDocument()
-    expect(reportCalls()).toHaveLength(1)
+    // Legacy adherence_start/end links load as custom; the previous period (5 days before) is the only extra call.
+    await waitFor(() => expect(reportCalls()).toHaveLength(2))
     expect(api.get).toHaveBeenCalledWith('/admin/clients/client-a/adherence', expect.objectContaining({ params: { start: '2020-01-01', end: '2020-01-05' } }))
+    expect(api.get).toHaveBeenCalledWith('/admin/clients/client-a/adherence', expect.objectContaining({ params: { start: '2019-12-27', end: '2019-12-31' } }))
   })
 
   it('persiste selección y rango propio sin perder los parámetros de Progreso', async () => {
-    mount('clientId=client-a&section=metricas&date=2020-01-03&period=custom&from=2019-01-01&to=2020-01-05&historyPage=2')
+    mount('clientId=client-a&section=metricas&date=2020-01-03&period=custom&from=2019-01-01&to=2020-01-05&historyPage=2&adherence_period=custom&adherence_start=2020-01-01&adherence_end=2020-01-10')
     expect(reportCalls()).toHaveLength(0)
     fireEvent.mouseDown(screen.getByRole('tab', { name: 'Adherencia' }), { button: 0, ctrlKey: false })
-    await screen.findByLabelText('Desde (UTC)')
-    fireEvent.change(screen.getByLabelText('Desde (UTC)'), { target: { value: '2020-01-01' } })
-    fireEvent.change(screen.getByLabelText('Hasta (UTC)'), { target: { value: '2020-01-05' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Consultar periodo' }))
+    const heading = await screen.findByRole('heading', { name: 'Adherencia' })
+    fireEvent.change(await within(heading.parentElement as HTMLElement).findByLabelText('Hasta'), { target: { value: '2020-01-05' } })
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/admin/clients/client-a/adherence', expect.objectContaining({ params: { start: '2020-01-01', end: '2020-01-05' } })))
-    expect(Object.fromEntries(params())).toEqual({ clientId: 'client-a', section: 'adherencia', date: '2020-01-03', period: 'custom', from: '2019-01-01', to: '2020-01-05', historyPage: '2', adherence_start: '2020-01-01', adherence_end: '2020-01-05' })
+    expect(Object.fromEntries(params())).toEqual({ clientId: 'client-a', section: 'adherencia', date: '2020-01-03', period: 'custom', from: '2019-01-01', to: '2020-01-05', historyPage: '2', adherence_period: 'custom', adherence_start: '2020-01-01', adherence_end: '2020-01-05' })
     fireEvent.mouseDown(screen.getByRole('tab', { name: 'Métricas' }), { button: 0, ctrlKey: false })
-    expect(screen.queryByLabelText('Desde (UTC)')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Adherencia' })).not.toBeInTheDocument()
     fireEvent.mouseDown(screen.getByRole('tab', { name: 'Adherencia' }), { button: 0, ctrlKey: false })
-    expect(screen.getByLabelText('Desde (UTC)')).toHaveValue('2020-01-01')
+    expect(screen.getByRole('heading', { name: 'Adherencia' })).toBeInTheDocument()
+    expect(params().get('adherence_end')).toBe('2020-01-05')
     expect(params().get('section')).toBe('adherencia')
   })
 
@@ -183,16 +186,19 @@ describe('Progreso: pestaña Adherencia canónica', () => {
     mount(`clientId=client-a&section=adherencia&period=${period}&from=2019-01-01&to=2020-01-05`)
     await screen.findByRole('region', { name: 'Periodo cerrado' })
     const today = new Date()
-    const start = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)).toISOString().slice(0, 10)
-    const end = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 0)).toISOString().slice(0, 10)
-    expect(reportCalls()).toHaveLength(1)
+    // Adherence owns its period (default last 30 UTC days); the metrics period is never forwarded.
+    const end = today.toISOString().slice(0, 10)
+    const start = new Date(Date.parse(end) - 29 * 86_400_000).toISOString().slice(0, 10)
+    await waitFor(() => expect(reportCalls()).toHaveLength(2))
     expect(api.get).toHaveBeenCalledWith('/admin/clients/client-a/adherence', expect.objectContaining({ params: { start, end } }))
   })
 
   it('mantiene la validación canónica de rangos URL mayores de 31 días', async () => {
     mount('clientId=client-a&section=adherencia&adherence_start=2020-01-01&adherence_end=2020-02-01')
-    expect(await screen.findByRole('alert')).toHaveTextContent('1 a 31 días')
-    expect(reportCalls()).toHaveLength(0)
+    expect(await screen.findByRole('alert')).toHaveTextContent('31 días')
+    // The invalid range is never requested; the default period is shown instead.
+    await screen.findByRole('region', { name: 'Periodo cerrado' })
+    expect(api.get).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ params: expect.objectContaining({ start: '2020-01-01' }) }))
   })
 
   it('desmonta el borrador del cliente anterior y consulta solo la identidad seleccionada', async () => {
@@ -208,6 +214,9 @@ describe('Progreso: pestaña Adherencia canónica', () => {
     expect(next).toHaveValue(null)
     expect(params().get('clientId')).toBe('client-b')
     expect(params().get('section')).toBe('adherencia')
-    expect(reportCalls().map(([url]) => url)).toEqual(['/admin/clients/client-a/adherence', '/admin/clients/client-b/adherence'])
+    expect(reportCalls().map(([url]) => url)).toEqual([
+      '/admin/clients/client-a/adherence', '/admin/clients/client-a/adherence',
+      '/admin/clients/client-b/adherence', '/admin/clients/client-b/adherence',
+    ])
   })
 })

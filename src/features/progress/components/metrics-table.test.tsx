@@ -27,4 +27,9 @@ describe('Historial corporal: estados y acciones', () => {
     rerender(<MetricsTable clientId="b" page={1} onPageChange={vi.fn()} />)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
+  it('declara que el historial original no se filtra por el periodo seleccionado', () => {
+    // GET /admin/clients/:id/metrics only accepts page/limit; the table must not pretend to follow the period.
+    render(<MetricsTable clientId="a" page={1} onPageChange={vi.fn()} />)
+    expect(screen.getByText('Muestra todas las mediciones, sin filtrar por periodo.')).toBeInTheDocument()
+  })
 })

@@ -1,4 +1,6 @@
 import { useSearchParams } from 'react-router'
+import { PeriodStatsHeader } from '@/components/stats/period-stats-header'
+import { useStatsPeriod } from '@/components/stats/use-stats-period'
 import { RecapsFilters } from '../components/recaps-filters'
 import { RecapsList } from '../components/recaps-list'
 import { RecapsStatsCards } from '../components/recaps-stats-cards'
@@ -24,6 +26,7 @@ function getArchived(value: string | null) {
 export function RecapsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
 
+  const statsPeriod = useStatsPeriod('recaps')
   const clientId = searchParams.get('clientId') ?? ''
   const status = getStatusFilter(searchParams.get('status'))
   const archived = getArchived(searchParams.get('archived'))
@@ -81,7 +84,10 @@ export function RecapsPage() {
         </p>
       </div>
 
-      <RecapsStatsCards />
+      <div className="space-y-4">
+        <PeriodStatsHeader period={statsPeriod} filtered={Boolean(clientId)} />
+        <RecapsStatsCards params={{ ...statsPeriod.params, ...(clientId ? { client_id: clientId } : {}) }} />
+      </div>
 
       <RecapsFilters
         clientId={clientId}

@@ -2,15 +2,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, Archive, CheckCircle2, Clock3, FileText } from 'lucide-react'
-import { useRecapStats } from '../api'
+import { AvgReviewTimeCard } from '@/components/stats/avg-review-time-card'
+import { useRecapStats, type RecapStatsParams } from '../api'
 
-export function RecapsStatsCards() {
-  const { data: stats, isError, isFetching, isLoading, refetch } = useRecapStats()
+export function RecapsStatsCards({ params }: { params?: RecapStatsParams }) {
+  const { data: stats, isError, isFetching, isLoading, refetch } = useRecapStats(params)
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
           <Card key={i}>
             <CardHeader className="pb-2">
               <Skeleton className="h-4 w-32" />
@@ -26,8 +27,8 @@ export function RecapsStatsCards() {
 
   if (isError) {
     return (
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Card className="border-status-error/30 sm:col-span-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <Card className="border-status-error/30 sm:col-span-2 xl:col-span-5">
           <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
             <div className="space-y-1">
               <CardTitle className="text-base">No se pudo cargar el resumen</CardTitle>
@@ -48,7 +49,7 @@ export function RecapsStatsCards() {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Total recaps</CardTitle>
@@ -62,32 +63,34 @@ export function RecapsStatsCards() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Por revisar</CardTitle>
-          <Clock3 className="h-4 w-4 text-yellow-500" />
+          <Clock3 className="h-4 w-4 text-status-warning" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-yellow-600">{stats?.submitted ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{stats?.submitted ?? 0}</p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Revisados</CardTitle>
-          <CheckCircle2 className="h-4 w-4 text-green-500" />
+          <CheckCircle2 className="h-4 w-4 text-status-success" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-green-600">{stats?.reviewed ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{stats?.reviewed ?? 0}</p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Archivados</CardTitle>
-          <Archive className="h-4 w-4 text-slate-500" />
+          <Archive className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-slate-700">{stats?.archived ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{stats?.archived ?? 0}</p>
         </CardContent>
       </Card>
+
+      <AvgReviewTimeCard seconds={stats?.avg_review_seconds} reviewedInPeriod={stats?.reviewed_in_period} />
     </div>
   )
 }

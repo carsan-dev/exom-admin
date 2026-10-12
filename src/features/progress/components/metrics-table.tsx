@@ -63,6 +63,8 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
                 <CardTitle className="text-xl">Historial de métricas</CardTitle>
               </div>
               <CardDescription>Todas las métricas corporales registradas</CardDescription>
+              {/* GET /admin/clients/:id/metrics only paginates; it accepts no from/to range. */}
+              <p className="mt-1 text-xs text-muted-foreground">Muestra todas las mediciones, sin filtrar por periodo.</p>
             </div>
             <Button size="sm" onClick={openCreateDialog}>
               <Plus className="h-4 w-4" />

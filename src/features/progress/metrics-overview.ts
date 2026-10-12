@@ -1,5 +1,3 @@
-import { subMonths } from 'date-fns'
-
 export interface Observation {
   date: string
   end_date?: string
@@ -16,6 +14,10 @@ export interface MetricSeries {
   first: Observation | null
   last: Observation | null
   change: number | null
+  /** Range statistics over complete observations; absent on older APIs and then treated as null. */
+  min?: number | null
+  max?: number | null
+  mean?: number | null
   count: number
   incomplete_count: number
   points: Observation[]
@@ -29,15 +31,4 @@ export interface MetricsOverview {
   page: number
   total_pages: number
   series: MetricSeries[]
-}
-
-export function metricsPeriod(params: URLSearchParams, today = new Date().toISOString().slice(0, 10)) {
-  const period = params.get('period') ?? 'all'
-  const to = period === 'custom' ? params.get('to') ?? today : today
-  const from = period === 'custom' ? params.get('from') ?? to
-    : period === '4w' ? new Date(new Date(`${to}T00:00:00Z`).getTime() - 27 * 86400000).toISOString().slice(0, 10)
-    : period === '3m' ? subMonths(new Date(`${to}T12:00:00Z`), 3).toISOString().slice(0, 10) : undefined
-  const validDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value
-  return { period, from, to, valid: validDate(to) && (!from || (validDate(from) && from <= to)) && to <= today }
 }

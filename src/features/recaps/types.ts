@@ -88,6 +88,8 @@ export interface RecapStats {
   submitted: number
   reviewed: number
   archived: number
+  avg_review_seconds: number | null
+  reviewed_in_period: number
 }
 
 export interface RecapListItem {

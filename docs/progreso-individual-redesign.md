@@ -20,7 +20,12 @@ La cabecera y el contexto se despliegan progresivamente para dejar visibles los 
 ## Periodos y significado de los datos
 
 - Todas las fechas civiles y cierres se explican en **UTC**; no se desplazan por la zona horaria del navegador.
-- El selector general ofrece desde inicio, cuatro semanas, tres meses y rango personalizado para **Métricas y Entrenamiento**, no para todas las pantallas. Valida orden y límite de hoy.
+- El **selector de periodo compartido** (`usePeriodParam` + `PeriodSelector`) ofrece: Últimos 7 días, Últimos 30 días, Últimos 90 días, Año en curso, Todo el historial y Personalizado. En Progreso solo se muestra en **Métricas y Entrenamiento**; el resto de secciones no lo muestran. Valida orden, límite de hoy y longitud máxima.
+  - **Estado:** URL (`period`, `from`, `to`; el dashboard usa `dashboard_period`, `dashboard_from`, `dashboard_to`) y `localStorage` por sección (`exom-admin-period:<sección>`), solo como comodidad: la URL manda. Los enlaces antiguos (`4w`, `3m`, o solo `from`/`to`) se interpretan como 30 días, 90 días y personalizado.
+  - **Predeterminado: «Últimos 30 días»** (decisión aprobada por el product owner el 2026-10-12, sustituye al anterior «Desde inicio»).
+  - Si el rango personalizado es inválido, el selector muestra el error y los datos, títulos y subtítulos siguen describiendo el último rango válido (`effectivePreset`), no «Personalizado».
+  - **Comparación con el periodo anterior:** misma duración inmediatamente anterior; *año en curso* → mismas fechas del año previo; *mes* → mismo tramo del mes previo; *todo el historial* → sin comparación.
+  - **`DeltaBadge`:** el color semántico (verde/rojo según polaridad) solo va en el icono y el texto es neutro; peso y entrenamiento tienen polaridad **neutral** (sin verde/rojo); sin diferencia visible (incluido redondeo a cero) → «Sin cambios»; sin dato previo → «Sin datos previos», nunca 0.
 - En Entrenamiento, «Desde inicio» recorre ventanas consecutivas de hasta 366 días inclusivos mediante anterior/posterior. Resumen usa la semana del día seleccionado; Fotos y Adherencia tienen consultas propias; Racha muestra contadores registrados.
 - **`null` no es cero.** Ausencia, insuficiencia, no aplicable, sin asignación, provisional y futuro conservan etiquetas distintas. Carga, vacío, error y reintento no se sustituyen por gráficas de ceros.
 - La baja adherencia es el **veredicto del servidor sobre siete días cerrados**: puede preceder al periodo explorado y excluye hoy provisional y futuro. No se reconstruye desde el calendario, el agregado elegido ni la configuración actual; el estado de un día no equivale a ese veredicto.

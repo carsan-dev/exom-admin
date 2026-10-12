@@ -1,5 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { cleanParams, type StatsPeriodParams } from '@/lib/stats-period'
 import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
 import {
   type ApiEnvelope,
@@ -18,6 +19,10 @@ import type {
 
 export { getApiErrorMessage }
 
+export interface NotificationStatsParams extends StatsPeriodParams {
+  recipient_id?: string
+}
+
 export const notificationsQueryKeys = {
   all: ['admin-notifications'] as const,
   list: (
@@ -27,7 +32,8 @@ export const notificationsQueryKeys = {
     page?: number,
     limit?: number,
   ) => ['admin-notifications', 'list', recipientId, status, search, page, limit] as const,
-  stats: () => ['admin-notifications', 'stats'] as const,
+  stats: (params: NotificationStatsParams = {}) =>
+    ['admin-notifications', 'stats', params.from, params.to, params.recipient_id] as const,
 }
 
 export function useNotificationHistory(
@@ -54,12 +60,15 @@ export function useNotificationHistory(
   })
 }
 
-export function useNotificationStats() {
+export function useNotificationStats(params: NotificationStatsParams = {}) {
   return useQuery({
-    queryKey: notificationsQueryKeys.stats(),
+    queryKey: notificationsQueryKeys.stats(params),
+    placeholderData: keepPreviousData,
     retry: shouldRetryQuery,
     queryFn: async () => {
-      const response = await api.get<ApiEnvelope<NotificationStats>>('/notifications/stats')
+      const response = await api.get<ApiEnvelope<NotificationStats>>('/notifications/stats', {
+        params: cleanParams(params),
+      })
       return unwrapResponse(response)
     },
   })
