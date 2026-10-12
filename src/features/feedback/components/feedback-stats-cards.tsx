@@ -2,15 +2,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, MessageSquare, Clock, CheckCircle2 } from 'lucide-react'
-import { useFeedbackStats } from '../api'
+import { AvgReviewTimeCard } from '@/components/stats/avg-review-time-card'
+import { useFeedbackStats, type FeedbackStatsParams } from '../api'
 
-export function FeedbackStatsCards() {
-  const { data: stats, isError, isFetching, isLoading, refetch } = useFeedbackStats()
+export function FeedbackStatsCards({ params }: { params?: FeedbackStatsParams }) {
+  const { data: stats, isError, isFetching, isLoading, refetch } = useFeedbackStats(params)
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>
             <CardHeader className="pb-2">
               <Skeleton className="h-4 w-32" />
@@ -26,8 +27,8 @@ export function FeedbackStatsCards() {
 
   if (isError) {
     return (
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="sm:col-span-3 border-status-error/30">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Card className="sm:col-span-2 xl:col-span-4 border-status-error/30">
           <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
             <div className="space-y-1">
               <CardTitle className="text-base">No se pudo cargar el resumen</CardTitle>
@@ -48,7 +49,7 @@ export function FeedbackStatsCards() {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <Card>
         <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">Total feedback</CardTitle>
@@ -62,22 +63,24 @@ export function FeedbackStatsCards() {
       <Card>
         <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">Pendientes</CardTitle>
-          <Clock className="h-4 w-4 text-yellow-500" />
+          <Clock className="h-4 w-4 text-status-warning" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-yellow-600">{stats?.pending ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{stats?.pending ?? 0}</p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">Revisados</CardTitle>
-          <CheckCircle2 className="h-4 w-4 text-green-500" />
+          <CheckCircle2 className="h-4 w-4 text-status-success" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-green-600">{stats?.reviewed ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{stats?.reviewed ?? 0}</p>
         </CardContent>
       </Card>
+
+      <AvgReviewTimeCard seconds={stats?.avg_review_seconds} reviewedInPeriod={stats?.reviewed_in_period} />
     </div>
   )
 }

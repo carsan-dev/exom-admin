@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Activity, Pencil, Plus } from 'lucide-react'
-import { MetricVisual } from '../../progress/components/metric-visual'
-import type { MetricSeries, Observation } from '../../progress/metrics-overview'
+import { Link } from 'react-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
@@ -31,18 +30,32 @@ const measurements = [
   ['calf_left_cm', 'Gemelo izquierdo', 'cm'], ['calf_right_cm', 'Gemelo derecho', 'cm'],
 ] as const
 
-function bodySeries(metrics: BodyMetric[]): MetricSeries[] {
+interface MetricSummary {
+  key: string
+  label: string
+  unit: string
+  lastValue: number
+  lastDate: string
+  change: number | null
+}
+
+function summarize(metrics: BodyMetric[]): MetricSummary[] {
   const sorted = [...metrics].sort((a, b) => a.date.localeCompare(b.date))
-  return measurements.map(([key, label, unit]) => {
-    const points: Observation[] = sorted.map((metric) => ({ date: metric.date.slice(0, 10), value: metric[key],
-      quality: metric[key] === null ? 'missing' : 'complete', provenance: 'recorded' }))
-    const complete = points.filter((point) => point.value !== null)
-    const first = complete[0] ?? null
-    const last = complete[complete.length - 1] ?? null
-    return { key, label, unit, group: 'body', source: 'Mediciones corporales', points,
-      count: complete.length, incomplete_count: points.length - complete.length, first, last,
-      change: complete.length > 1 && first?.value != null && last?.value != null && first.date < last.date ? last.value - first.value : null }
+  return measurements.flatMap(([key, label, unit]) => {
+    const complete = sorted.filter((metric) => metric[key] !== null)
+    const last = complete[complete.length - 1]
+    if (!last || last[key] === null) return []
+    const previous = complete[complete.length - 2]
+    const change = previous && previous[key] !== null ? last[key] - previous[key] : null
+    return [{ key, label, unit, lastValue: last[key], lastDate: last.date, change }]
   })
+}
+
+const numberFormatter = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 })
+
+function formatChange(change: number, unit: string) {
+  const sign = change > 0 ? '+' : change < 0 ? '−' : ''
+  return `${sign}${numberFormatter.format(Math.abs(change))} ${unit}`
 }
 
 const tableDateFormatter = new Intl.DateTimeFormat('es-ES', {
@@ -102,14 +115,36 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
     )
   }
 
-  const series = bodySeries(metrics)
-  const dates = metrics.map((metric) => metric.date).sort()
-  const period = `${tableDateFormatter.format(new Date(dates[0]))} – ${tableDateFormatter.format(new Date(dates[dates.length - 1]))}`
+  const summary = summarize(metrics)
 
   return (
     <div className="space-y-4 [--muted-foreground:var(--foreground-secondary)] [--primary-foreground:#30271e]">
-      <p className="text-sm text-muted-foreground">Histórico reciente disponible: {metrics.length} registros. La comparación se limita a estas mediciones, no a todo el historial del cliente.</p>
-      <MetricVisual series={series} period={period} chartPeriod={period} />
+      <section aria-label="Resumen de últimas mediciones" className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Última medición disponible de cada valor entre los {metrics.length} registros recientes.
+          </p>
+          <Button variant="outline" size="sm" asChild>
+            <Link to={`/progress?clientId=${encodeURIComponent(clientId)}&section=metricas`}>Ver evolución completa</Link>
+          </Button>
+        </div>
+        {summary.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Ninguna medición tiene valores completos.</p>
+        ) : (
+          <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {summary.map((item) => (
+              <div key={item.key} className="rounded-xl border border-border bg-card p-3">
+                <dt className="text-sm text-muted-foreground">{item.label}</dt>
+                <dd className="mt-1 text-lg font-semibold text-foreground">{numberFormatter.format(item.lastValue)} {item.unit}</dd>
+                <dd className="text-xs text-muted-foreground">{tableDateFormatter.format(new Date(item.lastDate))}</dd>
+                <dd className="text-xs text-muted-foreground">
+                  {item.change === null ? 'Sin medición anterior' : `Cambio desde la medición anterior: ${formatChange(item.change, item.unit)}`}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </section>
 
       <Card>
         <CardHeader>

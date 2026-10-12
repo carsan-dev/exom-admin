@@ -1,6 +1,7 @@
 import { UNSAFE_DataRouterContext, useSearchParams } from 'react-router'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useCallback, useContext, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { PeriodSelector, rangeLengthDays, usePeriodParam, type PeriodPreset } from '@/components/period'
 import { TaskRouteGuard } from '../follow-up-tasks/route-guard'
 import { FollowUpPanel } from '../follow-up-tasks/follow-up-panel'
 import type { NavigationGuard } from '../follow-up-tasks/task-editor'
@@ -9,8 +10,8 @@ import { ProgressDashboard } from '../components/progress-dashboard'
 import { ProgressOverviewCards } from '../components/progress-overview-cards'
 import { ProgressCalendar } from '../components/progress-calendar'
 import { DayProgressDetail } from '../components/day-progress-detail'
-import { MetricsOverviewPanel } from '../components/metrics-overview'
-import { metricsPeriod } from '../metrics-overview'
+import { MetricsOverviewPanel, type MetricsSelection } from '../components/metrics-overview'
+import { parseTrainingLoadMeasure, type TrainingLoadMeasure } from '../components/training-load-measure'
 import { MetricsTable } from '../components/metrics-table'
 import { TrainingProgressPanel } from '../components/training-progress-panel'
 import { trainingWindowFor } from '../training-window'
@@ -20,6 +21,13 @@ import { ProgressPhotosPanel } from '../components/progress-photos-panel'
 import { useClientCalendarMonth, useClientDayProgress, useClientWeekSummary } from '../api'
 import { useClientProfile } from '../../clients/api'
 import { ClientAdherenceTab } from '../../clients/components/client-adherence-tab'
+
+const PROGRESS_PERIOD_OPTIONS: readonly PeriodPreset[] = ['7d', '30d', '90d', 'ytd', 'all', 'custom']
+const PERIOD_SECTIONS = ['metricas', 'entrenamiento']
+/** Training overview API limit (inclusive days). */
+const TRAINING_MAX_DAYS = 366
+const METRIC_SELECTION_PARAMS = { group: 'metric_group', metric: 'metric', compare: 'compare' } as const
+const METRIC_SELECTION_FIELDS = ['group', 'metric', 'compare'] as const
 
 function getTodayStr() {
   return new Date().toISOString().split('T')[0]
@@ -40,13 +48,36 @@ export function ProgressPage() {
   const selectedDate = searchParams.get('date') ?? getTodayStr()
   const requestedSection = searchParams.get('section') ?? 'dashboard'
   const section = ['dashboard', 'resumen', 'metricas', 'fotos', 'entrenamiento', 'adherencia', 'racha', 'seguimiento'].includes(requestedSection) ? requestedSection : 'metricas'
-  const period = metricsPeriod(searchParams)
+  const period = usePeriodParam({ section: 'progress', options: PROGRESS_PERIOD_OPTIONS, defaultPreset: '30d' })
+  const { range, previousRange } = period
+  const allHistory = period.effectivePreset === 'all'
   const historyPage = Math.max(1, Number(searchParams.get('historyPage')) || 1)
   const trainingWindow = trainingWindowFor(getTodayStr(), searchParams.get('trainingWindow'))
-  const trainingFrom = period.period === 'all' ? trainingWindow.from : period.from ?? period.to
-  const trainingTo = period.period === 'all' ? trainingWindow.to : period.to
-  const trainingValid = period.period === 'all' || (period.valid &&
-    (Date.parse(`${trainingTo}T00:00:00Z`) - Date.parse(`${trainingFrom}T00:00:00Z`)) / 86400000 <= 365)
+  const trainingFrom = allHistory ? trainingWindow.from : range.from ?? range.to
+  const trainingTo = allHistory ? trainingWindow.to : range.to
+  const trainingValid = allHistory || rangeLengthDays(trainingFrom, trainingTo) <= TRAINING_MAX_DAYS
+  const trainingPrevious = !allHistory && trainingValid && previousRange?.from
+    && rangeLengthDays(previousRange.from, previousRange.to) <= TRAINING_MAX_DAYS ? { from: previousRange.from, to: previousRange.to } : null
+  const trainingMeasure: TrainingLoadMeasure = parseTrainingLoadMeasure(searchParams.get('measure')) ?? 'weight_kg'
+  const metricSelection: MetricsSelection = {
+    group: searchParams.get(METRIC_SELECTION_PARAMS.group),
+    metric: searchParams.get(METRIC_SELECTION_PARAMS.metric),
+    compare: searchParams.get(METRIC_SELECTION_PARAMS.compare),
+  }
+
+  // A new period restarts history paging and training windows (the period hook owns its own URL write).
+  const periodKey = `${period.effectivePreset}:${range.from ?? ''}:${range.to}`
+  const lastPeriodKey = useRef(periodKey)
+  useEffect(() => {
+    if (lastPeriodKey.current === periodKey) return
+    lastPeriodKey.current = periodKey
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.set('historyPage', '1')
+      next.set('trainingWindow', '0')
+      return next
+    }, { replace: true })
+  }, [periodKey, setSearchParams])
 
   const calendarDate = /^\d{4}-\d{2}-\d{2}$/.test(selectedDate) ? selectedDate : getTodayStr()
   const [calendarView, setCalendarView] = useState({ clientId, date: calendarDate, year: Number(calendarDate.slice(0, 4)), month: Number(calendarDate.slice(5, 7)) })
@@ -92,6 +123,19 @@ export function ProgressPage() {
     })
   }
 
+  function handleMetricSelection(updates: Partial<MetricsSelection>) {
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      for (const field of METRIC_SELECTION_FIELDS) {
+        if (!(field in updates)) continue
+        const value = updates[field]
+        if (value) next.set(METRIC_SELECTION_PARAMS[field], value)
+        else next.delete(METRIC_SELECTION_PARAMS[field])
+      }
+      return next
+    }, { replace: true })
+  }
+
   function handleMonthChange(year: number, month: number) {
     setCalendarView({ clientId, date: calendarDate, year, month })
   }
@@ -111,26 +155,11 @@ export function ProgressPage() {
         <EmptyClientState />
       ) : (
         <Tabs value={section} onValueChange={(value) => { if (dataRouter || !taskGuard.current || taskGuard.current()) updateParams({ section: value }) }} className="space-y-4">
-          {section !== 'dashboard' && <section aria-label="Contexto del cliente y periodo" className="border-y border-border py-2">
-            <details>
-              <summary aria-label={`Periodo de métricas y entrenamiento: ${period.from ?? 'Inicio'} a ${period.to} UTC`} className="min-h-11 cursor-pointer rounded-sm text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                Periodo · {period.from ?? 'Inicio'} → {period.to} · UTC
-              </summary>
-              <div className="flex flex-wrap items-end gap-3 pt-3">
-              <label className="text-sm">Periodo
-                <select aria-label="Periodo" value={period.period} onChange={(event) => updateParams({ period: event.target.value, historyPage: '1', trainingWindow: '0' })}
-                  className="mt-1 block min-h-11 max-w-full rounded-md border bg-background p-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <option value="all">Desde inicio</option><option value="4w">Últimas cuatro semanas</option><option value="3m">Últimos tres meses</option><option value="custom">Personalizado</option>
-                </select>
-              </label>
-              {period.period === 'custom' && <>
-                <label className="text-sm">Desde<input type="date" value={period.from ?? ''} max={period.to} onChange={(event) => updateParams({ from: event.target.value, historyPage: '1' })} className="mt-1 block min-h-11 rounded-md border bg-background p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
-                <label className="text-sm">Hasta<input type="date" value={period.to} max={getTodayStr()} onChange={(event) => updateParams({ to: event.target.value, historyPage: '1' })} className="mt-1 block min-h-11 rounded-md border bg-background p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
-              </>}
-              <p className="max-w-prose text-sm text-muted-foreground">Métricas y entrenamiento: {period.from ?? 'Inicio'} → {period.to} · UTC. Resumen usa la semana del día seleccionado; Adherencia y Fotos tienen su propia consulta. Racha muestra los contadores registrados.</p>
-              </div>
-            </details>
-            {!period.valid && <p role="alert" className="text-sm text-status-error">Revisa el periodo: las fechas deben estar ordenadas y no superar hoy.</p>}
+          {PERIOD_SECTIONS.includes(section) && <section aria-label="Contexto del cliente y periodo" className="space-y-2 border-y border-border py-3">
+            <PeriodSelector label="Periodo de métricas y entrenamiento" value={period.preset} options={PROGRESS_PERIOD_OPTIONS}
+              onChange={period.setPreset} custom={period.custom} onCustomChange={period.setCustomRange} error={period.error}
+              range={range} previousRange={previousRange} effectivePreset={period.effectivePreset} />
+            <p className="max-w-prose text-sm text-muted-foreground">Se aplica a Métricas y Entrenamiento · fechas UTC. Resumen usa la semana del día seleccionado; Adherencia y Fotos tienen su propia consulta. Racha muestra los contadores registrados.</p>
           </section>}
           <div>
           <TabsList aria-label="Secciones de progreso" className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 [&_button]:min-h-11 [&_button]:shrink-0 sm:flex-wrap [&_button]:rounded-md [&_button]:data-[state=active]:bg-brand-soft/10 [&_button]:data-[state=active]:text-foreground [&_button]:data-[state=active]:shadow-none">
@@ -188,8 +217,9 @@ export function ProgressPage() {
 
           {/* Métricas Tab */}
           <TabsContent value="metricas" className="space-y-4">
-            <MetricsOverviewPanel key={clientId} clientId={clientId} from={period.from} to={period.to}
-              valid={period.valid} page={historyPage} onPageChange={(page) => updateParams({ historyPage: String(page) })} />
+            <MetricsOverviewPanel key={clientId} clientId={clientId} from={range.from} to={range.to}
+              page={historyPage} onPageChange={(page) => updateParams({ historyPage: String(page) })}
+              selection={metricSelection} onSelectionChange={handleMetricSelection} />
             <details><summary className="cursor-pointer text-sm">Registros corporales originales · historial completo</summary>
               <MetricsTable key={clientId} clientId={clientId} page={metricsPage} onPageChange={setMetricsPage} />
             </details>
@@ -201,12 +231,16 @@ export function ProgressPage() {
           </TabsContent>
 
           <TabsContent value="entrenamiento" className="space-y-4">
-            {period.period === 'all' && <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-4 text-sm" aria-label="Ventanas consecutivas desde inicio">
+            {allHistory && <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-4 text-sm" aria-label="Ventanas consecutivas desde inicio">
               <p>Desde inicio · ventana {trainingWindow.index + 1}: {trainingFrom} – {trainingTo} (hasta 366 días inclusivos). Consulta las ventanas anteriores para ver todo el histórico.</p>
               <Button variant="outline" disabled={!trainingWindow.hasOlder} onClick={() => updateParams({ trainingWindow: String(trainingWindow.index + 1) })}>Ventana anterior</Button>
               <Button variant="outline" disabled={!trainingWindow.hasNewer} onClick={() => updateParams({ trainingWindow: String(trainingWindow.index - 1) })}>Ventana posterior</Button>
             </div>}
-            <TrainingProgressPanel key={`${clientId}:${trainingFrom}:${trainingTo}`} clientId={clientId} from={trainingFrom} to={trainingTo} valid={trainingValid} />
+            {trainingValid
+              ? <TrainingProgressPanel key={`${clientId}:${trainingFrom}:${trainingTo}`} clientId={clientId} from={trainingFrom} to={trainingTo} valid
+                previousFrom={trainingPrevious?.from} previousTo={trainingPrevious?.to}
+                measure={trainingMeasure} onMeasureChange={(measure) => updateParams({ measure })} />
+              : <p role="alert" className="rounded-lg border p-4 text-sm">El periodo seleccionado tiene {rangeLengthDays(trainingFrom, trainingTo)} días y Entrenamiento admite hasta {TRAINING_MAX_DAYS}. Reduce el intervalo o elige «Todo el historial» para consultarlo por ventanas consecutivas.</p>}
           </TabsContent>
 
           <TabsContent value="adherencia" className="space-y-4">

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
-import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 import type { MetricSeries } from '../metrics-overview'
 import { MetricVisual } from './metric-visual'
 
@@ -74,5 +75,96 @@ describe('Gráfico compartido: solo observaciones', () => {
     expect(screen.getByLabelText('Cambio observado')).toHaveTextContent('No comparable')
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
     expect(screen.getByText(/Sin observaciones completas en esta página/)).toBeInTheDocument()
+  })
+})
+
+describe('Métricas: estadísticas y comparación de mediciones', () => {
+  beforeAll(() => {
+    // Radix Select relies on pointer capture and scrolling, which JSDOM does not implement.
+    Element.prototype.hasPointerCapture = () => false
+    Element.prototype.setPointerCapture = () => undefined
+    Element.prototype.releasePointerCapture = () => undefined
+    Element.prototype.scrollIntoView = () => undefined
+  })
+  const complete = (date: string, value: number) => ({ date, value, quality: 'complete' as const, provenance: 'recorded' })
+  const waist: MetricSeries = { ...weight, key: 'waist', label: 'Cintura', unit: 'cm', min: 80, max: 82.5, mean: 81.25, count: 2, incomplete_count: 0, change: 2.5,
+    first: complete('2020-01-01', 80), last: complete('2020-01-04', 82.5), points: [complete('2020-01-01', 80), complete('2020-01-04', 82.5)] }
+  const hips: MetricSeries = { ...waist, key: 'hips', label: 'Cadera', min: 95, max: 96, mean: 95.5, points: [complete('2020-01-02', 95), complete('2020-01-03', 96)] }
+  const muscle: MetricSeries = { ...weight, key: 'muscle', label: 'Masa muscular', unit: 'kg' }
+  const sleep: MetricSeries = { ...waist, key: 'sleep_h', label: 'Sueño', unit: 'h' }
+  const otherGroupCm: MetricSeries = { ...waist, key: 'habit_cm', label: 'Otra', group: 'habits' }
+
+  it('muestra Primera, Última, Cambio, Mín, Máx, Media y Mediciones con formato es-ES', () => {
+    render(<MetricVisual series={[waist]} period="P" chartPeriod="C" />)
+    const stats = screen.getByLabelText('Estadísticas del periodo · Cintura')
+    const value = (label: string) => within(stats).getByText(label).nextElementSibling?.textContent
+    expect(value('Primera')).toBe('80 cm')
+    expect(value('Última')).toBe('82,5 cm')
+    expect(value('Cambio')).toBe('+2,5 cm')
+    expect(value('Mín')).toBe('80 cm')
+    expect(value('Máx')).toBe('82,5 cm')
+    expect(value('Media')).toBe('81,25 cm')
+    expect(value('Mediciones')).toBe('2')
+  })
+
+  it('null y campos ausentes (API anterior) se muestran como «—», nunca como cero', () => {
+    const legacy: MetricSeries = { ...weight, first: null, last: null, change: null, count: 0, points: [] }
+    render(<MetricVisual series={[legacy, { ...waist, min: null, max: null, mean: null }]} period="P" chartPeriod="C" />)
+    const stats = screen.getByLabelText('Estadísticas del periodo · Peso')
+    for (const label of ['Primera', 'Última', 'Cambio', 'Mín', 'Máx', 'Media']) {
+      expect(within(stats).getByText(label).nextElementSibling).toHaveTextContent('—')
+    }
+    expect(within(stats).getByText('Mediciones').nextElementSibling).toHaveTextContent('0')
+    expect(within(stats).queryByText('0 kg')).not.toBeInTheDocument()
+  })
+
+  it('«Comparar con» solo ofrece mediciones del mismo grupo y unidad idéntica, y Ninguna por defecto', async () => {
+    render(<MetricVisual series={[waist, hips, muscle, sleep, otherGroupCm]} period="P" chartPeriod="C" />)
+    const trigger = screen.getByRole('combobox', { name: 'Comparar con' })
+    expect(trigger).toHaveTextContent('Ninguna')
+    await userEvent.click(trigger)
+    const options = screen.getAllByRole('option').map((option) => option.textContent)
+    expect(options).toEqual(['Ninguna', 'Cadera (cm)'])
+  })
+
+  it('sin mediciones compatibles el selector queda deshabilitado', () => {
+    render(<MetricVisual series={[weight, sleep]} period="P" chartPeriod="C" />)
+    expect(screen.getByRole('combobox', { name: 'Comparar con' })).toBeDisabled()
+  })
+
+  it('traza la segunda medición en el mismo eje con guía discontinua, rombos, leyenda textual y tabla conjunta', () => {
+    chart.scatter.mockClear()
+    const onSelectionChange = vi.fn()
+    render(<MetricVisual series={[waist, hips]} selection={{ metric: 'waist', compare: 'hips' }} onSelectionChange={onSelectionChange} period="P" chartPeriod="C" />)
+    const calls = chart.scatter.mock.calls.map(([props]) => props as Record<string, unknown>)
+    expect(calls.find((props) => props.name === 'Cintura')).toEqual(expect.objectContaining({ fill: 'var(--foreground-accent)' }))
+    expect(calls.find((props) => props.name === 'Cadera')).toEqual(expect.objectContaining({ fill: 'var(--foreground)', shape: 'diamond' }))
+    expect(calls.filter((props) => props.line && typeof props.line === 'object')).toEqual([
+      expect.objectContaining({ fill: 'var(--foreground)', line: { strokeDasharray: '6 4' }, data: [expect.objectContaining({ value: 95 }), expect.objectContaining({ value: 96 })] }),
+    ])
+    expect(calls.filter((props) => props.line === true)).toHaveLength(1)
+    expect(chart.axis.mock.lastCall?.[0]).toEqual(expect.objectContaining({ name: 'Cintura' }))
+    expect(screen.getByText(/Cintura: círculos y guía continua · Cadera: rombos y guía discontinua/)).toBeInTheDocument()
+    const table = screen.getByRole('table')
+    expect(within(table).getByRole('columnheader', { name: 'Medición' })).toBeInTheDocument()
+    expect(within(table).getAllByText('Cintura')).toHaveLength(2)
+    expect(within(table).getAllByText('Cadera')).toHaveLength(2)
+    expect(table).toHaveTextContent('95 cm')
+  })
+
+  it('cambiar de medición reinicia la comparación en una sola actualización; una comparación inválida se ignora', () => {
+    const onSelectionChange = vi.fn()
+    render(<MetricVisual series={[waist, hips, muscle]} selection={{ metric: 'waist', compare: 'muscle' }} onSelectionChange={onSelectionChange} period="P" chartPeriod="C" />)
+    expect(screen.getByRole('combobox', { name: 'Comparar con' })).toHaveTextContent('Ninguna')
+    expect(screen.queryByText(/rombos y guía discontinua/)).not.toBeInTheDocument()
+    fireEvent.change(screen.getByRole('combobox', { name: 'Medición' }), { target: { value: 'hips' } })
+    expect(onSelectionChange).toHaveBeenCalledTimes(1)
+    expect(onSelectionChange).toHaveBeenCalledWith({ metric: 'hips', compare: null })
+  })
+
+  it('la presentación compacta no ofrece comparación ni fila de estadísticas', () => {
+    render(<MetricVisual compact series={[waist, hips]} period="P" chartPeriod="C" />)
+    expect(screen.queryByRole('combobox', { name: 'Comparar con' })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/Estadísticas del periodo/)).not.toBeInTheDocument()
   })
 })

@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
 import { MetricsOverviewPanel } from './components/metrics-overview'
 import { ProgressPage } from './pages/progress-page'
-import { metricsPeriod, type MetricsOverview } from './metrics-overview'
+import type { MetricsOverview } from './metrics-overview'
 
 vi.mock('@/lib/api', () => ({ api: { get: vi.fn() } }))
 vi.mock('../clients/api', () => ({ useClientProfile: () => ({ data: { profile: { first_name: 'Cliente', last_name: 'Prueba' } } }) }))
@@ -37,14 +37,19 @@ beforeEach(() => {
 })
 
 describe('P1 period and metrics UI', () => {
-  it('calculates inclusive four weeks, calendar months and leap-day bounds', () => {
-    expect(metricsPeriod(new URLSearchParams('period=4w'), '2026-09-16').from).toBe('2026-08-20')
-    expect(metricsPeriod(new URLSearchParams('period=3m'), '2026-05-31').from).toBe('2026-02-28')
-    expect(metricsPeriod(new URLSearchParams('period=custom&from=2026-02-30&to=2026-03-01')).valid).toBe(false)
-    expect(metricsPeriod(new URLSearchParams('period=custom&from=2026-09-02&to=2026-09-01')).valid).toBe(false)
+  // metricsPeriod() was replaced by usePeriodParam: the calendar-month/leap-day bounds are covered in
+  // src/components/period/period.test.ts; here the page must still honour legacy links.
+  it('keeps legacy period=4w/3m links working through the shared period presets', async () => {
+    window.localStorage.clear()
+    const today = new Date().toISOString().slice(0, 10)
+    const shift = (days: number) => new Date(Date.parse(`${today}T00:00:00Z`) - days * 86400000).toISOString().slice(0, 10)
+    render(<QueryClientProvider client={queryClient()}><MemoryRouter initialEntries={['/progress?clientId=a&section=metricas&period=4w']}><ProgressPage /><Location /></MemoryRouter></QueryClientProvider>)
+    await screen.findByRole('table', { name: 'Comparativa de métricas del periodo' })
+    expect(screen.getByRole('combobox', { name: 'Periodo de métricas y entrenamiento' })).toHaveTextContent('Últimos 30 días')
+    expect(api.get).toHaveBeenCalledWith('/admin/clients/a/metrics/overview', expect.objectContaining({ params: { from: shift(29), to: today, page: 1 } }))
   })
   it('distinguishes observed zero, no data and a non-comparable singleton', async () => {
-    render(<QueryClientProvider client={queryClient()}><MetricsOverviewPanel clientId="a" to="2026-09-16" page={1} valid onPageChange={() => {}} /></QueryClientProvider>)
+    render(<QueryClientProvider client={queryClient()}><MetricsOverviewPanel clientId="a" to="2026-09-16" page={1} onPageChange={() => {}} /></QueryClientProvider>)
     const table = await screen.findByRole('table', { name: 'Comparativa de métricas del periodo' })
     expect(within(table).getAllByText('Sin datos')).toHaveLength(2)
     expect(within(table).getAllByText('No comparable')).toHaveLength(1)
@@ -63,7 +68,7 @@ describe('P1 period and metrics UI', () => {
     let resolveA: ((value: ReturnType<typeof response>) => void) | undefined
     vi.mocked(api.get).mockImplementation((url) => String(url).includes('/a/') ? new Promise((resolve) => { resolveA = resolve }) : Promise.resolve(response(fixture('b', 9000))))
     const client = queryClient()
-    const panel = (id: string) => <QueryClientProvider client={client}><MetricsOverviewPanel clientId={id} to="2026-09-16" page={1} valid onPageChange={() => {}} /></QueryClientProvider>
+    const panel = (id: string) => <QueryClientProvider client={client}><MetricsOverviewPanel clientId={id} to="2026-09-16" page={1} onPageChange={() => {}} /></QueryClientProvider>
     const view = render(panel('a'))
     expect(screen.getByRole('status')).toHaveTextContent('Cargando')
     view.rerender(panel('b'))
@@ -76,7 +81,7 @@ describe('P1 period and metrics UI', () => {
   })
   it('shows errors separately from empty history and supports retry', async () => {
     vi.mocked(api.get).mockRejectedValueOnce({ isAxiosError: true, response: { status: 403 } })
-    render(<QueryClientProvider client={queryClient()}><MetricsOverviewPanel clientId="a" to="2026-09-16" page={1} valid onPageChange={() => {}} /></QueryClientProvider>)
+    render(<QueryClientProvider client={queryClient()}><MetricsOverviewPanel clientId="a" to="2026-09-16" page={1} onPageChange={() => {}} /></QueryClientProvider>)
     await screen.findByRole('alert')
     expect(screen.queryByText('Sin datos')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))

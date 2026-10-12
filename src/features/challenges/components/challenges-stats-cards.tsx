@@ -56,10 +56,10 @@ export function ChallengesStatsCards({ summary, isLoading, isError, isFetching, 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Retos semanales</CardTitle>
-          <CalendarDays className="h-4 w-4 text-amber-500" />
+          <CalendarDays className="h-4 w-4 text-status-warning" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-amber-600">{summary?.weekly ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{summary?.weekly ?? 0}</p>
         </CardContent>
       </Card>
 
@@ -76,20 +76,20 @@ export function ChallengesStatsCards({ summary, isLoading, isError, isFetching, 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Retos automáticos</CardTitle>
-          <WandSparkles className="h-4 w-4 text-violet-500" />
+          <WandSparkles className="h-4 w-4 text-primary" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-violet-600">{summary?.automatic ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{summary?.automatic ?? 0}</p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Alcance global</CardTitle>
-          <Globe className="h-4 w-4 text-sky-500" />
+          <Globe className="h-4 w-4 text-status-info" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-sky-600">{summary?.global ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{summary?.global ?? 0}</p>
         </CardContent>
       </Card>
 
@@ -99,7 +99,7 @@ export function ChallengesStatsCards({ summary, isLoading, isError, isFetching, 
           <Target className="h-4 w-4 text-status-success" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-status-success">{summary?.total ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{summary?.total ?? 0}</p>
         </CardContent>
       </Card>
     </div>

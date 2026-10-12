@@ -29,6 +29,8 @@ export interface FeedbackStats {
   total: number
   pending: number
   reviewed: number
+  avg_review_seconds: number | null
+  reviewed_in_period: number
 }
 
 export type FeedbackStatusFilter = 'ALL' | 'PENDING' | 'REVIEWED'
