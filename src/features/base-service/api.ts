@@ -164,15 +164,32 @@ export function useSendMonth() {
   })
 }
 
+export const SOURCE_CHANGED_CODE = 'SOURCE_CHANGED_SINCE_DELIVERY'
+
+export function isSourceChangedError(error: unknown) {
+  return getApiErrorStatus(error) === 409 && getApiErrorCode(error) === SOURCE_CHANGED_CODE
+}
+
 export function useResendDelivery() {
   const refresh = useRefreshBaseService()
   return useMutation({
-    mutationFn: async ({ subscriberId, deliveryId }: { subscriberId: string; deliveryId: string }) =>
-      unwrapResponse(
-        await api.post<ApiEnvelope<BaseDelivery>>(
-          `${BASE}/subscribers/${subscriberId}/deliveries/${deliveryId}/resend`,
-        ),
-      ),
+    mutationFn: async ({
+      subscriberId,
+      deliveryId,
+      acceptChangedSource = false,
+    }: {
+      subscriberId: string
+      deliveryId: string
+      /** Only set after the owner confirmed that the current material replaces the delivered one. */
+      acceptChangedSource?: boolean
+    }) => {
+      const url = `${BASE}/subscribers/${subscriberId}/deliveries/${deliveryId}/resend`
+      return unwrapResponse(
+        await (acceptChangedSource
+          ? api.post<ApiEnvelope<BaseDelivery>>(url, { accept_changed_source: true })
+          : api.post<ApiEnvelope<BaseDelivery>>(url)),
+      )
+    },
     onSuccess: refresh,
     onError: refresh,
   })
