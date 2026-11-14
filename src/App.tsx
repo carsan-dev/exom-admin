@@ -29,6 +29,7 @@ const router = createBrowserRouter([
           { path: 'clients/:id', lazy: async () => ({ Component: (await import('@/features/clients/pages/client-detail-page')).ClientDetailPage }) },
           { path: 'users', lazy: async () => ({ Component: (await import('@/features/clients/pages/clients-page')).ClientsPage }) },
           { path: 'users/:id', lazy: async () => ({ Component: (await import('@/features/clients/pages/client-detail-page')).ClientDetailPage }) },
+          { path: 'base-service', lazy: async () => ({ Component: (await import('@/features/base-service/pages/base-service-page')).BaseServicePage }) },
           { path: 'exercises', lazy: async () => ({ Component: (await import('@/features/exercises/pages/exercises-page')).ExercisesPage }) },
           { path: 'trainings', lazy: async () => ({ Component: (await import('@/features/trainings/pages/trainings-page')).TrainingsPage }) },
           { path: 'badges', lazy: async () => ({ Component: (await import('@/features/badges/pages/badges-page')).BadgesPage }) },
