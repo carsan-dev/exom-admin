@@ -23,6 +23,9 @@ import type { BaseRoute, BaseSubscriber } from '../types'
 
 const FORM_ID = 'base-service-subscriber-form'
 
+const DAYS_CHANGE_NOTE =
+  'El cambio se aplica a partir del próximo mes que envíes. Los meses ya enviados se reenvían con los días que tenían.'
+
 const emptyValues: SubscriberFormValues = { name: '', email: '', goal: '', days_per_week: '', notes: '' }
 
 function toFormValues(subscriber: BaseSubscriber | null): SubscriberFormValues {
@@ -73,6 +76,12 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
     : subscriber && subscriber.goal === goal
       ? [subscriber.days_per_week]
       : []
+  const watchedDays = form.watch('days_per_week')
+  const hasDeliveries = subscriber !== null && (subscriber.latest_delivery !== null || subscriber.last_sent_month !== null)
+  const daysChangeNote =
+    subscriber && hasDeliveries && watchedDays !== '' && Number(watchedDays) !== subscriber.days_per_week
+      ? DAYS_CHANGE_NOTE
+      : null
   const goalKeys = routes ? routes.map((item) => item.objetivo) : []
   if (goal && !goalKeys.includes(goal)) goalKeys.push(goal)
 
@@ -224,7 +233,7 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
                 name="days_per_week"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Días por semana</FormLabel>
+                    <FormLabel>Días de entrenamiento por semana</FormLabel>
                     <Select value={field.value} disabled={!goal} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
@@ -239,6 +248,11 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
                         ))}
                       </SelectContent>
                     </Select>
+                    {daysChangeNote && (
+                      <p role="note" className="text-xs text-muted-foreground">
+                        {daysChangeNote}
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

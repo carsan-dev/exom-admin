@@ -153,7 +153,17 @@ export function SubscriberDetailDialog({ subscriberId, onClose, onEdit }: Subscr
                 <dt className="text-muted-foreground">Email</dt>
                 <dd className="break-all">{subscriber.email}</dd>
                 <dt className="text-muted-foreground">Ruta</dt>
-                <dd>{formatRoute(subscriber.goal, subscriber.days_per_week)}</dd>
+                <dd className="flex flex-wrap items-center gap-x-2">
+                  <span>{formatRoute(subscriber.goal, subscriber.days_per_week)}</span>
+                  <Button
+                    variant="link"
+                    className="h-auto p-0 text-sm"
+                    aria-label="Cambiar días por semana"
+                    onClick={() => onEdit(subscriber)}
+                  >
+                    Cambiar
+                  </Button>
+                </dd>
                 <dt className="text-muted-foreground">Notas</dt>
                 <dd className="whitespace-pre-wrap break-words">{subscriber.notes ?? '—'}</dd>
                 <dt className="text-muted-foreground">Alta</dt>
