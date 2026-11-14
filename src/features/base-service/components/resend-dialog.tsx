@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getApiErrorMessage, isNotConfiguredError, useBaseSubscriber, useResendDelivery } from '../api'
+import { getApiErrorMessage, isNotConfiguredError, isSourceChangedError, useBaseSubscriber, useResendDelivery } from '../api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { canResendDelivery, getResendMessage, NOT_CONFIGURED_HELP, NOT_CONFIGURED_TITLE } from '../labels'
 import type { BaseDelivery } from '../types'
@@ -27,6 +27,8 @@ export function ResendDialog({ delivery, pendingMonth, loadFailed = false, onRet
   const month = delivery?.month ?? pendingMonth
   const refetchSubscriber = subscriberQuery.refetch
   const [error, setError] = useState<string | null>(null)
+  // Set once the first attempt hit SOURCE_CHANGED_SINCE_DELIVERY: the dialog asks before sending the current material.
+  const [confirmingChange, setConfirmingChange] = useState(false)
   const inFlight = useRef(false)
   const subscriber = subscriberQuery.data
 
@@ -36,24 +38,43 @@ export function ResendDialog({ delivery, pendingMonth, loadFailed = false, onRet
 
   const close = (value: boolean) => {
     if (inFlight.current) return
-    if (!value) setError(null)
+    if (!value) {
+      setError(null)
+      setConfirmingChange(false)
+    }
     onOpenChange(value)
   }
 
-  const confirm = async () => {
+  const send = async (acceptChangedSource: boolean) => {
     if (!delivery || inFlight.current) return
     inFlight.current = true
     setError(null)
     try {
-      await resend.mutateAsync({ subscriberId: delivery.subscriber_id, deliveryId: delivery.id })
+      await resend.mutateAsync({
+        subscriberId: delivery.subscriber_id,
+        deliveryId: delivery.id,
+        ...(acceptChangedSource ? { acceptChangedSource: true } : {}),
+      })
       toast.success(`Mes ${delivery.month} en cola para reenviar`)
+      setConfirmingChange(false)
       onOpenChange(false)
     } catch (cause) {
-      setError(
-        isNotConfiguredError(cause)
-          ? `${NOT_CONFIGURED_TITLE} ${NOT_CONFIGURED_HELP}`
-          : getApiErrorMessage(cause, 'No se ha podido reenviar el mes. Inténtalo de nuevo.'),
-      )
+      if (isSourceChangedError(cause)) {
+        if (acceptChangedSource) {
+          setError('No se ha podido reenviar con la versión actual. Inténtalo de nuevo más tarde.')
+          setConfirmingChange(false)
+        } else {
+          setConfirmingChange(true)
+        }
+      } else {
+        // A different failure invalidates the confirmation: the next attempt must start without the flag.
+        setConfirmingChange(false)
+        setError(
+          isNotConfiguredError(cause)
+            ? `${NOT_CONFIGURED_TITLE} ${NOT_CONFIGURED_HELP}`
+            : getApiErrorMessage(cause, 'No se ha podido reenviar el mes. Inténtalo de nuevo.'),
+        )
+      }
     } finally {
       inFlight.current = false
     }
@@ -68,33 +89,38 @@ export function ResendDialog({ delivery, pendingMonth, loadFailed = false, onRet
       : delivery && subscriber && !subscriberQuery.isFetching && !canResendDelivery(delivery, subscriber)
         ? 'El suscriptor está archivado.'
         : null
+  const showChangeConfirmation = confirmingChange && !blockedText && !loadFailed
 
   return (
     <Dialog open={open} onOpenChange={close}>
       <DialogContent onCloseAutoFocus={onCloseAutoFocus}>
         <DialogHeader>
-          <DialogTitle>Reenviar mes {month}</DialogTitle>
+          <DialogTitle>{showChangeConfirmation ? 'El material de este mes ha cambiado' : `Reenviar mes ${month}`}</DialogTitle>
           <DialogDescription>
-            {blockedText ?? (loadFailed ? 'No se ha podido comprobar el envío.' : (lines[0] ?? 'Comprobando los datos actuales del suscriptor…'))}
+            {showChangeConfirmation
+              ? `Los PDF del mes ${month} se han actualizado desde el último envío de esta entrega. Si continúas, el cliente recibirá la versión actual.`
+              : (blockedText ?? (loadFailed ? 'No se ha podido comprobar el envío.' : (lines[0] ?? 'Comprobando los datos actuales del suscriptor…')))}
           </DialogDescription>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">
+        {!showChangeConfirmation && (
+          <p className="text-sm text-muted-foreground">
           Úsalo cuando al cliente no le ha llegado o lo ha perdido. Se envía al email actual del suscriptor, no al de la
           vez anterior.
-        </p>
-        {loading && (
+          </p>
+        )}
+        {loading && !showChangeConfirmation && (
           <div className="space-y-2" aria-busy="true">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-2/3" />
           </div>
         )}
-        {!blockedText &&
+        {!blockedText && !showChangeConfirmation &&
           lines.slice(1).map((line) => (
             <p key={line} className="text-sm">
               {line}
             </p>
           ))}
-        {!blockedText && delivery?.status === 'SENT' && (
+        {!blockedText && !showChangeConfirmation && delivery?.status === 'SENT' && (
           <p className="text-sm text-muted-foreground">Mientras se reenvía no podrás enviar el mes siguiente.</p>
         )}
         {loadFailed && (
@@ -115,12 +141,21 @@ export function ResendDialog({ delivery, pendingMonth, loadFailed = false, onRet
               </Button>
               {loadFailed && onRetry && <Button onClick={onRetry}>Reintentar</Button>}
             </>
+          ) : showChangeConfirmation ? (
+            <>
+              <Button variant="outline" disabled={resend.isPending} onClick={() => close(false)}>
+                Cancelar
+              </Button>
+              <Button disabled={!delivery || resend.isPending} onClick={() => void send(true)}>
+                Enviar versión actual
+              </Button>
+            </>
           ) : (
             <>
               <Button variant="outline" disabled={resend.isPending} onClick={() => close(false)}>
                 Cancelar
               </Button>
-              <Button disabled={!delivery || !subscriber || subscriberQuery.isFetching || resend.isPending} onClick={confirm}>
+              <Button disabled={!delivery || !subscriber || subscriberQuery.isFetching || resend.isPending} onClick={() => void send(false)}>
                 Reenviar mes {month}
               </Button>
             </>

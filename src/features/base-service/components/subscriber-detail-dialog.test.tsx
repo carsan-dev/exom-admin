@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { SubscriberDetailDialog } from './subscriber-detail-dialog'
+import { toast } from 'sonner'
 import { AMBIGUOUS_WARNING } from '../labels'
 import {
   BASE_URL,
@@ -171,7 +172,6 @@ describe('Resend confirmation', () => {
   })
 
   it.each([
-    [409, 'SOURCE_CHANGED_SINCE_DELIVERY', 'Un PDF de ese mes cambió desde la entrega.'],
     [409, 'SUBSCRIBER_CHANGED', 'El suscriptor se editó mientras se preparaba el reenvío. Reintenta.'],
     [403, 'STAFF_ACCESS_CHANGED', 'Tu acceso ha cambiado.'],
     [409, 'DELIVERY_CHANGED', 'La entrega ha cambiado mientras se preparaba el reenvío. Recarga el historial y comprueba su estado antes de volver a intentarlo.'],
@@ -199,6 +199,105 @@ describe('Resend confirmation', () => {
     const item = screen.getByText('Mes 3').closest('li')
     if (!item) throw new Error('no history item for month 3')
     expect((await within(item).findAllByText('Enviado')).length).toBeGreaterThan(0)
+  })
+})
+
+describe('Resend with changed source material', () => {
+  const resendUrl = `${BASE_URL}/subscribers/s1/deliveries/d3/resend`
+  const changed = () =>
+    axiosError(409, { message: 'Los PDF del mes 3 han cambiado. Avisa al equipo técnico.', code: 'SOURCE_CHANGED_SINCE_DELIVERY' })
+
+  beforeEach(() => {
+    backend.subscribers = [makeSubscriber()]
+    backend.deliveries = { s1: [sentWithResend, opsFailed] }
+  })
+
+  async function reachConfirmation() {
+    api.post.mockRejectedValueOnce(changed())
+    const user = userEvent.setup()
+    renderDetail()
+    const item = await historyItem(3)
+    await user.click(within(item).getByRole('button', { name: 'Reenviar mes 3' }))
+    const first = await screen.findByRole('dialog', { name: 'Reenviar mes 3' })
+    await waitFor(() => expect(within(first).getByRole('button', { name: 'Reenviar mes 3' })).toBeEnabled())
+    await user.click(within(first).getByRole('button', { name: 'Reenviar mes 3' }))
+    const dialog = await screen.findByRole('dialog', { name: 'El material de este mes ha cambiado' })
+    return { user, dialog }
+  }
+
+  it('first attempt carries no flag; the 409 switches to a confirmation without an error', async () => {
+    const { dialog } = await reachConfirmation()
+    expect(api.post).toHaveBeenCalledTimes(1)
+    expect(api.post).toHaveBeenCalledWith(resendUrl)
+    expect(
+      within(dialog).getByText(
+        'Los PDF del mes 3 se han actualizado desde el último envío de esta entrega. Si continúas, el cliente recibirá la versión actual.',
+      ),
+    ).toBeInTheDocument()
+    expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
+    expect(within(dialog).queryByText(/equipo técnico/)).not.toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: 'Cancelar' })).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: 'Enviar versión actual' })).toBeInTheDocument()
+  })
+
+  it('confirming repeats the request with accept_changed_source and follows the success path', async () => {
+    const { user, dialog } = await reachConfirmation()
+    api.post.mockResolvedValueOnce(envelope(makeDelivery({ id: 'd3', month: 3, status: 'PENDING' })))
+    await user.click(within(dialog).getByRole('button', { name: 'Enviar versión actual' }))
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'El material de este mes ha cambiado' })).not.toBeInTheDocument())
+    expect(api.post).toHaveBeenCalledTimes(2)
+    expect(api.post).toHaveBeenNthCalledWith(2, resendUrl, { accept_changed_source: true })
+    expect(toast.success).toHaveBeenCalledWith('Mes 3 en cola para reenviar')
+  })
+
+  it('cancelling closes without a second request and reopening starts clean', async () => {
+    const { user, dialog } = await reachConfirmation()
+    await user.click(within(dialog).getByRole('button', { name: 'Cancelar' }))
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'El material de este mes ha cambiado' })).not.toBeInTheDocument())
+    expect(api.post).toHaveBeenCalledTimes(1)
+    const item = await historyItem(3)
+    await user.click(within(item).getByRole('button', { name: 'Reenviar mes 3' }))
+    const reopened = await screen.findByRole('dialog', { name: 'Reenviar mes 3' })
+    expect(within(reopened).queryByRole('button', { name: 'Enviar versión actual' })).not.toBeInTheDocument()
+    expect(within(reopened).queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('a second 409 shows the final message and does not loop', async () => {
+    const { user, dialog } = await reachConfirmation()
+    api.post.mockRejectedValueOnce(changed())
+    await user.click(within(dialog).getByRole('button', { name: 'Enviar versión actual' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se ha podido reenviar con la versión actual. Inténtalo de nuevo más tarde.')
+    expect(api.post).toHaveBeenCalledTimes(2)
+    expect(screen.queryByRole('button', { name: 'Enviar versión actual' })).not.toBeInTheDocument()
+  })
+
+  it('double click on Enviar versión actual posts once', async () => {
+    const { dialog } = await reachConfirmation()
+    api.post.mockImplementationOnce(() => new Promise(() => undefined))
+    const confirm = within(dialog).getByRole('button', { name: 'Enviar versión actual' })
+    await act(async () => {
+      fireEvent.click(confirm)
+      fireEvent.click(confirm)
+    })
+    expect(api.post).toHaveBeenCalledTimes(2)
+  })
+
+  it('another error on the confirmed attempt returns to the normal dialog and the next attempt has no flag', async () => {
+    const { user, dialog } = await reachConfirmation()
+    api.post.mockRejectedValueOnce(
+      axiosError(409, { message: 'La entrega ha cambiado mientras se preparaba el reenvío.', code: 'DELIVERY_CHANGED' }),
+    )
+    await user.click(within(dialog).getByRole('button', { name: 'Enviar versión actual' }))
+    const normal = await screen.findByRole('dialog', { name: 'Reenviar mes 3' })
+    expect(await within(normal).findByRole('alert')).toHaveTextContent('La entrega ha cambiado mientras se preparaba el reenvío.')
+    expect(api.post).toHaveBeenCalledTimes(2)
+    expect(api.post).toHaveBeenNthCalledWith(2, resendUrl, { accept_changed_source: true })
+    api.post.mockResolvedValueOnce(envelope(makeDelivery({ id: 'd3', month: 3, status: 'PENDING' })))
+    const retry = within(normal).getByRole('button', { name: 'Reenviar mes 3' })
+    await waitFor(() => expect(retry).toBeEnabled())
+    await user.click(retry)
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(3))
+    expect(api.post).toHaveBeenNthCalledWith(3, resendUrl)
   })
 })
 
