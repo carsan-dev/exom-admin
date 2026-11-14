@@ -179,6 +179,31 @@ describe('Resend from the row', () => {
   })
 })
 
+describe('Resend from the row: changed source material', () => {
+  it('asks for confirmation on SOURCE_CHANGED_SINCE_DELIVERY and resends the current version', async () => {
+    backend.subscribers = [withLatest('SENT')]
+    backend.deliveries = { s1: [makeDelivery()] }
+    const url = `${BASE_URL}/subscribers/s1/deliveries/d1/resend`
+    api.post.mockRejectedValueOnce(axiosError(409, { message: 'Avisa al equipo técnico', code: 'SOURCE_CHANGED_SINCE_DELIVERY' }))
+    api.post.mockResolvedValueOnce(envelope(makeDelivery({ status: 'PENDING', send_seq: 2 })))
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByText('EXB-000001')
+    await user.click(screen.getByRole('button', { name: 'Reenviar mes 1 de Ana Pérez' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Reenviar mes 1' })
+    const confirm = within(dialog).getByRole('button', { name: 'Reenviar mes 1' })
+    await waitFor(() => expect(confirm).toBeEnabled())
+    await user.click(confirm)
+    const changed = await screen.findByRole('dialog', { name: 'El material de este mes ha cambiado' })
+    expect(within(changed).queryByRole('alert')).not.toBeInTheDocument()
+    expect(api.post).toHaveBeenNthCalledWith(1, url)
+    await user.click(within(changed).getByRole('button', { name: 'Enviar versión actual' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(2))
+    expect(api.post).toHaveBeenNthCalledWith(2, url, { accept_changed_source: true })
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+})
+
 describe('Resend from the row: loading and failures', () => {
   const deliveriesUrl = `${BASE_URL}/subscribers/s1/deliveries`
 
