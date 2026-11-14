@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getPageSearchParam, replacePaginationSearchParams } from '@/lib/pagination-search-params'
 import { getApiErrorMessage, isNotConfiguredError, useBaseRoutes, useBaseSubscribers } from '../api'
+import { RowResendDialog } from '../components/row-resend-dialog'
 import { SendMonthDialog } from '../components/send-month-dialog'
 import { SubscriberDetailDialog } from '../components/subscriber-detail-dialog'
 import { SubscriberFormDialog } from '../components/subscriber-form-dialog'
@@ -32,6 +33,7 @@ export function BaseServicePage() {
   const [searchText, setSearchText] = useState('')
   const [detailId, setDetailId] = useState<string | null>(null)
   const [sendTarget, setSendTarget] = useState<BaseSubscriber | null>(null)
+  const [resendSubscriber, setResendSubscriber] = useState<BaseSubscriber | null>(null)
   const [form, setForm] = useState<{ open: boolean; subscriber: BaseSubscriber | null }>({
     open: false,
     subscriber: null,
@@ -115,6 +117,8 @@ export function BaseServicePage() {
           routes={routesQuery.data}
           routesFailed={routesQuery.isError}
           onSend={setSendTarget}
+          onResend={setResendSubscriber}
+          onEdit={(subscriber) => setForm({ open: true, subscriber })}
           onView={(subscriber) => setDetailId(subscriber.id)}
         />
         {totalPages > 1 && (
@@ -202,6 +206,7 @@ export function BaseServicePage() {
         open={sendTarget !== null}
         onOpenChange={(open) => !open && setSendTarget(null)}
       />
+      <RowResendDialog subscriber={resendSubscriber} onClose={() => setResendSubscriber(null)} />
       <SubscriberDetailDialog
         subscriberId={detailId}
         onClose={() => setDetailId(null)}
