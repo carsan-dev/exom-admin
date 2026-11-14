@@ -131,7 +131,10 @@ export function getResendMessage(delivery: BaseDelivery, subscriber: BaseSubscri
   return lines
 }
 
-export function canResendDelivery(delivery: BaseDelivery, subscriber: BaseSubscriber) {
+export function canResendDelivery(
+  delivery: { status: DeliveryStatus },
+  subscriber: { is_archived: boolean },
+) {
   return !subscriber.is_archived && delivery.status !== 'PENDING'
 }
 
