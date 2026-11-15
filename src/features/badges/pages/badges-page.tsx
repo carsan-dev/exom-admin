@@ -687,29 +687,29 @@ export function BadgesPage() {
       </div>
 
       <Tabs value={activeCatalog} onValueChange={(value) => setActiveCatalog(value as CatalogId)}>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <TabsList className="grid h-auto w-full grid-cols-1 gap-1 sm:grid-cols-3 lg:grid-cols-6 lg:w-auto">
-            <TabsTrigger value="muscle-groups" className="min-h-10 whitespace-normal">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <TabsList className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto xl:w-auto xl:overflow-visible">
+            <TabsTrigger value="muscle-groups" className="min-h-10 shrink-0">
               Grupos musculares
             </TabsTrigger>
-            <TabsTrigger value="equipment" className="min-h-10 whitespace-normal">
+            <TabsTrigger value="equipment" className="min-h-10 shrink-0">
               Equipamiento
             </TabsTrigger>
-            <TabsTrigger value="training-types" className="min-h-10 whitespace-normal">
+            <TabsTrigger value="training-types" className="min-h-10 shrink-0">
               Tipos entrenos
             </TabsTrigger>
-            <TabsTrigger value="training-tags" className="min-h-10 whitespace-normal">
+            <TabsTrigger value="training-tags" className="min-h-10 shrink-0">
               Tags entrenos
             </TabsTrigger>
-            <TabsTrigger value="diet-badges" className="min-h-10 whitespace-normal">
+            <TabsTrigger value="diet-badges" className="min-h-10 shrink-0">
               Badges dieta
             </TabsTrigger>
-            <TabsTrigger value="diet-tags" className="min-h-10 whitespace-normal">
+            <TabsTrigger value="diet-tags" className="min-h-10 shrink-0">
               Tags dieta
             </TabsTrigger>
           </TabsList>
 
-          <div className="relative w-full lg:max-w-sm">
+          <div className="relative w-full xl:max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
