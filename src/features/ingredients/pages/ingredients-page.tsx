@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, Apple, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { Apple, Plus } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import {
   FilterToolbar,
@@ -8,8 +8,8 @@ import {
   type FilterSectionConfig,
   useListFilters,
 } from '@/components/filters'
+import { EmptyState, ErrorState, PageHeader, Pagination } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
@@ -30,19 +30,17 @@ const ICON_STATE_OPTIONS: FilterOption[] = [
   { value: 'WITHOUT_ICON', label: 'Sin icono' },
 ]
 
-function IngredientsTableSkeleton() {
+function IngredientsListSkeleton() {
   return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-7 w-40" />
-        <Skeleton className="h-4 w-64" />
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <Skeleton key={index} className="h-12 w-full rounded-lg" />
-        ))}
-      </CardContent>
-    </Card>
+    <div role="status" aria-busy="true" className="divide-y divide-border border-y border-border">
+      <span className="sr-only">Cargando ingredientes</span>
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} aria-hidden="true" className="flex items-center gap-3 py-3">
+          <Skeleton className="h-4 w-40 max-w-[50%]" />
+          <Skeleton className="ml-auto h-4 w-16" />
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -151,128 +149,102 @@ export function IngredientsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-accent-text">Catálogo</p>
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Ingredientes</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Gestiona la biblioteca reutilizable de ingredientes con sus macros por 100 g para usarlos después en comidas y dietas.
-            </p>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {total > 0 ? `${total} ingredientes en el catálogo` : 'Aún no hay ingredientes en el catálogo'}
-          </p>
-        </div>
-
-        <Button onClick={handleCreate} className="lg:self-start">
-          <Plus className="h-4 w-4" />
-          Nuevo ingrediente
-        </Button>
-      </div>
+    <div>
+      <PageHeader
+        eyebrow="Catálogo"
+        title="Ingredientes"
+        description={
+          <>
+            Gestiona la biblioteca reutilizable de ingredientes con sus macros por 100 g para usarlos después en comidas y dietas.
+            <span className="mt-1 block text-foreground-muted">
+              {total > 0 ? `${total} ingredientes en el catálogo` : 'Aún no hay ingredientes en el catálogo'}
+            </span>
+          </>
+        }
+        actions={
+          <Button onClick={handleCreate}>
+            <Plus className="h-4 w-4" />
+            Nuevo ingrediente
+          </Button>
+        }
+      />
 
       {ingredientsQuery.isLoading ? (
-        <IngredientsTableSkeleton />
+        <IngredientsListSkeleton />
       ) : ingredientsQuery.isError ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-            <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-              <AlertTriangle className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">No se ha podido cargar el catálogo</h2>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                {getApiErrorMessage(ingredientsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
-              </p>
-            </div>
-            <Button onClick={() => ingredientsQuery.refetch()}>Reintentar</Button>
-          </CardContent>
-        </Card>
+        <ErrorState
+          className="border-y border-border"
+          title="No se ha podido cargar el catálogo"
+          description={getApiErrorMessage(ingredientsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
+          onRetry={() => ingredientsQuery.refetch()}
+        />
       ) : total === 0 && !hasActiveQuery ? (
-        <Card className="border-dashed border-border/70">
-          <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
-              <Apple className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">Aún no hay ingredientes</h2>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                Crea el primer ingrediente del catálogo para reutilizarlo después al construir comidas y dietas.
-              </p>
-            </div>
+        <EmptyState
+          className="border-y border-border"
+          icon={<Apple />}
+          title="Aún no hay ingredientes"
+          description="Crea el primer ingrediente del catálogo para reutilizarlo después al construir comidas y dietas."
+          action={
             <Button onClick={handleCreate}>
               <Plus className="h-4 w-4" />
               Crear primer ingrediente
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Listado de ingredientes</CardTitle>
-            <CardDescription>
+        <section aria-labelledby="ingredients-list-title" className="space-y-4">
+          <div>
+            <h2
+              id="ingredients-list-title"
+              className="font-display text-lg font-bold uppercase leading-none text-foreground"
+            >
+              Listado de ingredientes
+            </h2>
+            <p className="mt-1 text-[13px] text-foreground-secondary">
               Vista paginada del catálogo con búsqueda, filtros de macros y acciones de administración.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <FilterToolbar
-              search={search}
-              onSearchChange={setSearch}
-              searchPlaceholder="Buscar por nombre..."
-              sections={filterSections}
-              filters={filters}
+            </p>
+          </div>
+          <FilterToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Buscar por nombre..."
+            sections={filterSections}
+            filters={filters}
+          />
+
+          {ingredients.length === 0 ? (
+            <EmptyState
+              className="border-y border-border"
+              title="Sin resultados"
+              description="No se encontraron ingredientes con la búsqueda y filtros actuales."
             />
+          ) : (
+            <IngredientsTable
+              ingredients={ingredients}
+              approvalById={ingredientApprovalById}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              sortBy={sort.sort_by}
+              sortDir={sort.sort_dir}
+              onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
+            />
+          )}
 
-            {ingredients.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                No se encontraron ingredientes con la búsqueda y filtros actuales.
-              </p>
-            ) : (
-              <IngredientsTable
-                ingredients={ingredients}
-                approvalById={ingredientApprovalById}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                sortBy={sort.sort_by}
-                sortDir={sort.sort_dir}
-                onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
-              />
-            )}
-
-            <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                Página {page} de {totalPages}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    replacePaginationSearchParams(setSearchParams, {
-                      page: Math.max(1, page - 1),
-                    })
-                  }
-                  disabled={page === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Anterior
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    replacePaginationSearchParams(setSearchParams, {
-                      page: Math.min(totalPages, page + 1),
-                    })
-                  }
-                  disabled={page >= totalPages}
-                >
-                  Siguiente
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          {/* La paginación compartida no se pinta con una sola página; el texto sí se conserva. */}
+          {totalPages > 1 ? (
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={(nextPage) =>
+                replacePaginationSearchParams(setSearchParams, { page: nextPage })
+              }
+            />
+          ) : (
+            <p className="pt-4 text-[13px] tabular-nums text-foreground-muted">
+              Página {page} de {totalPages}
+            </p>
+          )}
+        </section>
       )}
 
       <IngredientFormDialog
