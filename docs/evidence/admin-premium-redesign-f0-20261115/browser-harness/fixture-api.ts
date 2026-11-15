@@ -1,6 +1,11 @@
 import axios, { AxiosError } from 'axios'
 import { NOW_ISO, type FixtureCtx, type Handler, type Json } from './fx-util'
 import { dashboardData, handlePeople } from './fx-people'
+import { handleCatalog } from './fx-catalog'
+import { handleAssignments } from './fx-assignments'
+import { handleProgress } from './fx-progress'
+import { handleFeedbackRecaps } from './fx-feedback-recaps'
+import { handleEngagement } from './fx-engagement'
 
 // Transporte sintético: sin red, sin Firebase. Las lecturas se responden desde los fixtures,
 // las mutaciones devuelven éxito genérico sin cambiar estado y las rutas desconocidas dan 404 (con aviso en consola).
@@ -9,6 +14,11 @@ export const fixtureCalls: FixtureCtx[] = []
 const handlers: Handler[] = [
   ({ path, method }) => (method === 'get' && path === '/dashboard' ? dashboardData() : undefined),
   handlePeople,
+  handleCatalog,
+  handleAssignments,
+  handleProgress,
+  handleFeedbackRecaps,
+  handleEngagement,
 ]
 
 function envelope(config: unknown, data: unknown, status = 200) {
