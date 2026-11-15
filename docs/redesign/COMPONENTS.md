@@ -16,7 +16,7 @@ Ground rules for builders:
 
 ## Icons
 
-Los bocetos cargan los iconos Lucide desde CDN; en producción se usa `lucide-react`, ya instalado.
+Los bocetos sirven los iconos Lucide desde un fichero local generado a partir de `lucide-react`; en producción se usa `lucide-react`, ya instalado.
 
 ## Page skeleton
 
@@ -30,7 +30,7 @@ Los bocetos cargan los iconos Lucide desde CDN; en producción se usa `lucide-re
   <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
   <link rel="stylesheet" href="assets/system.css">
-  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/vendor/lucide-local.js" defer></script>
   <script src="assets/proto.js"></script>
 </head>
 <body data-page="feedback" data-crumbs='["Feedback"]'>

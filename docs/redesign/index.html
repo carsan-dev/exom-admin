@@ -9,7 +9,7 @@
   <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
   <link rel="stylesheet" href="assets/system.css">
   <link rel="stylesheet" href="assets/pages/index.css">
-  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/vendor/lucide-local.js" defer></script>
   <!-- proto.js without #app: no shell is built; it provides theme, dialogs, tabs and toasts -->
   <script src="assets/proto.js"></script>
   <script src="assets/pages/index.js" defer></script>
@@ -835,7 +835,7 @@
             <li><i data-lucide="circle-help"></i><span>Animación de overlays con <code>tw-animate-css</code> o con keyframes propios. Recomendado: propios, sin dependencia.</span></li>
             <li><i data-lucide="circle-help"></i><span>Subir tailwind-merge a v3 (pensado para Tailwind 4).</span></li>
             <li><i data-lucide="circle-help"></i><span>Reordenación por arrastre en builders con <code>@dnd-kit/sortable</code> (pequeña, de la misma familia ya instalada) o mantener solo flechas.</span></li>
-            <li><i data-lucide="circle-help"></i><span>Los bocetos cargan los iconos Lucide desde CDN; en producción se usa <code>lucide-react</code>, ya instalado.</span></li>
+            <li><i data-lucide="circle-help"></i><span>Los bocetos sirven los iconos Lucide desde un fichero local generado a partir de <code>lucide-react</code>; en producción se usa <code>lucide-react</code>, ya instalado.</span></li>
           </ol>
         </div>
 

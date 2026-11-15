@@ -2,7 +2,7 @@
  * EXOM Admin redesign - prototype runtime (vanilla JS, no build).
  *
  * Load in <head>, AFTER the deferred Lucide script:
- *   <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+ *   <script src="assets/vendor/lucide-local.js" defer></script>
  *   <script src="assets/proto.js"></script>
  *
  * It runs once immediately (theme / role / sidebar attributes, no flash) and
