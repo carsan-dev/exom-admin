@@ -59,6 +59,8 @@
   --destructive-foreground: #101111;
 
   --border: #272b25;
+  --border-strong: #363b32;
+  --lime-soft: color-mix(in srgb, #baf23a 10%, transparent);
   --input: #151715;
   --ring: #baf23a;
 
@@ -132,6 +134,8 @@
   --destructive-foreground: #ffffff;
 
   --border: #dddbce;
+  --border-strong: #c6c4b5;
+  --lime-soft: color-mix(in srgb, #baf23a 22%, transparent);
   --input: #f8f7f1;
   --ring: #3f5c00;
 
@@ -193,6 +197,8 @@
 
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-border-strong: var(--border-strong);
+  --color-lime-soft: var(--lime-soft);
   --color-ring: var(--ring);
 
   --color-brand-primary: var(--brand-primary);
@@ -355,10 +361,15 @@
   box-shadow: var(--shadow-overlay);
 }
 
-/* Bridge until F2: `border-input` is the control border (>=3:1 on field and page).
-   `--input` stays the field fill, so `bg-input` is unchanged. */
-.border-input {
-  border-color: var(--control-border);
+/* `border-input` is the control border (>=3:1 on field and page). The theme key
+   `--color-input` (field fill) also generates `.border-input{border-color:var(--input)}`;
+   this plain rule sits in the same utilities layer, later in source order, so it wins at
+   rest, while variants (`hover:`, `focus-visible:`, `aria-invalid:`, `disabled:`) have
+   higher specificity and override it. Replaces the unlayered F1 bridge rule. */
+@layer utilities {
+  .border-input {
+    border-color: var(--control-border);
+  }
 }
 
 /* ── Base styles ─────────────────────────────────────────────────────── */
