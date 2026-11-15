@@ -6,8 +6,15 @@ import { useApprovalStats } from '@/features/approval-requests/api'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { resolveNavGroups, type NavGroup, type NavItem } from './nav-model'
+import type { PendingCounts } from './use-pending-counts'
 
 const APPROVALS_ROUTE = '/approval-requests'
+
+function pendingFor(to: string, counts: PendingCounts | undefined): number | null {
+  if (to === '/feedback') return counts?.feedback ?? null
+  if (to === '/recaps') return counts?.recaps ?? null
+  return null
+}
 
 const TAB_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -70,7 +77,11 @@ function MoreLink({ item, count, onNavigate }: MoreLinkProps) {
   )
 }
 
-export function MobileTabbar() {
+interface MobileTabbarProps {
+  pendingCounts?: PendingCounts
+}
+
+export function MobileTabbar({ pendingCounts }: MobileTabbarProps) {
   const baseId = useId()
   const { pathname } = useLocation()
   const [moreOpen, setMoreOpen] = useState(false)
@@ -98,12 +109,25 @@ export function MobileTabbar() {
         aria-label="Navegación inferior"
         className="fixed inset-x-0 bottom-0 z-40 grid h-[calc(56px+env(safe-area-inset-bottom,0px))] grid-cols-5 border-t border-border bg-background-secondary pb-[env(safe-area-inset-bottom,0px)] md:hidden"
       >
-        {TAB_ITEMS.map(({ to, label, icon: Icon }) => (
-          <NavLink key={to} to={to} className={TAB_CLASS}>
-            <Icon aria-hidden="true" className={TAB_ICON_CLASS} />
-            <span className={TAB_TEXT_CLASS}>{label}</span>
-          </NavLink>
-        ))}
+        {TAB_ITEMS.map(({ to, label, icon: Icon }) => {
+          const count = pendingFor(to, pendingCounts)
+          return (
+            <NavLink key={to} to={to} className={TAB_CLASS}>
+              <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
+                <Icon aria-hidden="true" className={TAB_ICON_CLASS} />
+                {count !== null ? (
+                  <span
+                    aria-label={`${count} pendientes`}
+                    className="absolute -right-2.5 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center border border-border-strong bg-background-secondary px-1 text-[10px] font-semibold leading-none tabular-nums text-foreground"
+                  >
+                    {count}
+                  </span>
+                ) : null}
+              </span>
+              <span className={TAB_TEXT_CLASS}>{label}</span>
+            </NavLink>
+          )
+        })}
         <button
           ref={moreRef}
           type="button"
@@ -162,7 +186,11 @@ export function MobileTabbar() {
                   <ul aria-labelledby={group.label ? labelId : undefined}>
                     {group.items.map((item) => (
                       <li key={item.to}>
-                        <MoreLink item={item} count={null} onNavigate={closeMore} />
+                        <MoreLink
+                          item={item}
+                          count={pendingFor(item.to, pendingCounts)}
+                          onNavigate={closeMore}
+                        />
                       </li>
                     ))}
                   </ul>

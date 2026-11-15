@@ -6,10 +6,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useApprovalStats } from '@/features/approval-requests/api'
 import { BrandSymbol } from './brand-symbol'
 import { resolveNavGroups, type NavItem } from './nav-model'
+import type { PendingCounts } from './use-pending-counts'
 
 interface SidebarProps {
   isOpen: boolean
   onClose?: () => void
+  pendingCounts?: PendingCounts
 }
 
 interface SidebarLinkProps {
@@ -74,7 +76,7 @@ function SidebarLink({ item, count, isOpen, onClose }: SidebarLinkProps) {
   )
 }
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, pendingCounts }: SidebarProps) {
   const baseId = useId()
   const currentUserRole = useAuth((state) => state.user?.role)
   const approvalStatsQuery = useApprovalStats(currentUserRole === 'SUPER_ADMIN')
@@ -144,11 +146,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <SidebarLink
                       item={item}
                       count={
-                        item.to === '/approval-requests' &&
-                        currentUserRole === 'SUPER_ADMIN' &&
-                        pendingApprovals > 0
-                          ? pendingApprovals
-                          : null
+                        item.to === '/approval-requests'
+                          ? currentUserRole === 'SUPER_ADMIN' && pendingApprovals > 0
+                            ? pendingApprovals
+                            : null
+                          : item.to === '/feedback'
+                            ? (pendingCounts?.feedback ?? null)
+                            : item.to === '/recaps'
+                              ? (pendingCounts?.recaps ?? null)
+                              : null
                       }
                       isOpen={isOpen}
                       onClose={onClose}

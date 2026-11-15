@@ -23,6 +23,10 @@ vi.mock('@/features/approval-requests/api', () => ({
   }),
 }))
 
+vi.mock('./use-pending-counts', () => ({
+  usePendingCounts: () => ({ feedback: null, recaps: null }),
+}))
+
 vi.mock('./header', () => ({
   Header: ({ onMenuToggle }: { onMenuToggle: () => void }) => (
     <button type="button" onClick={onMenuToggle}>

@@ -8,12 +8,14 @@ import { useMediaQuery } from '@/hooks/use-media-query'
 import { Sidebar } from './sidebar'
 import { Header } from './header'
 import { MobileTabbar } from './mobile-tabbar'
+import { usePendingCounts } from './use-pending-counts'
 import { readSidebarExpanded, writeSidebarExpanded } from './sidebar-state'
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(readSidebarExpanded)
   const [showScrollTop, setShowScrollTop] = useState(false)
   const isDesktop = useMediaQuery('(min-width: 1024px)', true)
+  const pendingCounts = usePendingCounts()
   const mainRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -53,11 +55,11 @@ export function AppLayout() {
       <div className="flex min-h-screen min-h-[100svh] overflow-x-clip bg-background lg:h-screen lg:min-h-0 lg:overflow-hidden">
         {/* Sidebar: carril fijo en tablet (768-1023), preferencia guardada en escritorio */}
         <div className="hidden md:sticky md:top-0 md:flex md:h-svh md:self-start lg:static lg:h-auto lg:self-stretch">
-          <Sidebar isOpen={isDesktop && sidebarOpen} />
+          <Sidebar isOpen={isDesktop && sidebarOpen} pendingCounts={pendingCounts} />
         </div>
 
         {/* Barra inferior móvil (< md) */}
-        <MobileTabbar />
+        <MobileTabbar pendingCounts={pendingCounts} />
 
         {/* Main content */}
         <div className="relative flex min-h-[100svh] min-w-0 flex-1 flex-col overflow-x-hidden lg:min-h-0 lg:overflow-hidden">
