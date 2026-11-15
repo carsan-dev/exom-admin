@@ -13,6 +13,14 @@ export interface ConfirmDialogOptions {
 interface ConfirmDialogState {
   open: boolean
   options: ConfirmDialogOptions | null
+  /** Element focused when the question was asked; focus returns there after closing. */
+  returnFocusTo: HTMLElement | SVGElement | null
+}
+
+function focusedElement() {
+  const active = document.activeElement
+  if (active === document.body) return null
+  return active instanceof HTMLElement || active instanceof SVGElement ? active : null
 }
 
 /**
@@ -25,12 +33,14 @@ interface ConfirmDialogState {
  * - If the component unmounts while a confirmation is pending, the promise resolves `false`
  *   and no state update is attempted. Calls made after unmount resolve `false` at once.
  * - The dialog keeps its content after answering so it can play its exit animation.
+ * - Like the native dialog, focus returns afterwards to the element focused when `confirm()` was
+ *   called, unless the caller has already moved it elsewhere (see ConfirmDialog `returnFocusTo`).
  * - `confirm` has a stable identity.
  *
  * Render `dialog` somewhere in the component's output.
  */
 export function useConfirmDialog() {
-  const [state, setState] = useState<ConfirmDialogState>({ open: false, options: null })
+  const [state, setState] = useState<ConfirmDialogState>({ open: false, options: null, returnFocusTo: null })
   const resolverRef = useRef<((accepted: boolean) => void) | null>(null)
   const mountedRef = useRef(false)
 
@@ -59,7 +69,7 @@ export function useConfirmDialog() {
     if (resolverRef.current || !mountedRef.current) return Promise.resolve(false)
     return new Promise<boolean>((resolve) => {
       resolverRef.current = resolve
-      setState({ open: true, options })
+      setState({ open: true, options, returnFocusTo: focusedElement() })
     })
   }, [])
 
@@ -76,6 +86,7 @@ export function useConfirmDialog() {
       destructive={state.options.destructive}
       onConfirm={handleConfirm}
       onCancel={handleCancel}
+      returnFocusTo={state.returnFocusTo}
     />
   ) : null
 

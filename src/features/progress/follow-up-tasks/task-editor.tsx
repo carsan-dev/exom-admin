@@ -4,11 +4,23 @@ import { useAuth } from '@/hooks/use-auth'
 import { getApiErrorStatus } from '@/lib/api-utils'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import { createTask, getTask, taskError, taskKeys, uncertainResult, updateTask, useAssignees } from './api'
 import { civilDate, isClosed, TASK_PRIORITIES, TASK_STATUSES, TASK_TYPES, validCivilDate,
   type CreateTask, type Task, type TaskFields, type TaskRecord, type TaskStatus, type UpdateTask } from './types'
 
-export type NavigationGuard = () => boolean
+/**
+ * Guard registered by an open editor for leaving it through navigation or page controls.
+ * - `blocks()` is synchronous and side-effect free: true while leaving now would discard a draft or an
+ *   uncertain save, or interrupt a save in flight.
+ * - `confirmLeave()` asks at most once through the editor's ConfirmDialog and resolves true only if the
+ *   leave was accepted and the editor is still mounted, idle and in the state the question described.
+ *   With a save in flight it resolves false without asking; with nothing to lose it resolves true at once.
+ */
+export interface NavigationGuard {
+  blocks: () => boolean
+  confirmLeave: () => Promise<boolean>
+}
 interface EditorProps {
   clientId: string; identity: string; task: Task | null; onClose: () => void
   onGuard: (guard: NavigationGuard | null) => void
@@ -33,6 +45,10 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
   const [reading, setReading] = useState(false)
   const busy = useRef(false)
   const alive = useRef(true)
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
+  // Latest committed values, re-checked after an asynchronous confirmation is answered.
+  const latest = useRef({ frozen, conflict, server })
+  useEffect(() => { latest.current = { frozen, conflict, server } }, [frozen, conflict, server])
   const queryClient = useQueryClient()
   const assignees = useAssignees(identity, clientId)
   const eligible = assignees.data?.pages.flatMap((page) => page.data) ?? []
@@ -47,11 +63,18 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
     return () => { alive.current = false }
   }, [])
   useEffect(() => {
-    const guard = () => {
-      if (busy.current) return false
-      return !(dirty || frozen) || window.confirm(frozen
-        ? 'El resultado del guardado es incierto. ¿Cerrar el borrador? Comprueba el listado antes de crear otra tarea.'
-        : '¿Descartar los cambios de esta tarea sin guardar?')
+    const guard: NavigationGuard = {
+      blocks: () => busy.current || dirty || Boolean(frozen),
+      confirmLeave: async () => {
+        if (busy.current) return false
+        if (!(dirty || frozen)) return true
+        const asked = frozen
+        if (!(await confirm({ title: asked
+          ? 'El resultado del guardado es incierto. ¿Cerrar el borrador? Comprueba el listado antes de crear otra tarea.'
+          : '¿Descartar los cambios de esta tarea sin guardar?' }))) return false
+        // Leave only if no save started and this editor is still mounted, owned and in the asked state.
+        return !busy.current && alive.current && useAuth.getState().user?.id === identity && latest.current.frozen === asked
+      },
     }
     onGuard(guard)
     const beforeUnload = (event: BeforeUnloadEvent) => {
@@ -59,7 +82,7 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
     }
     window.addEventListener('beforeunload', beforeUnload)
     return () => { onGuard(null); window.removeEventListener('beforeunload', beforeUnload) }
-  }, [dirty, frozen, onGuard])
+  }, [dirty, frozen, onGuard, confirm, identity])
 
   function change<K extends keyof TaskFields>(key: K, value: TaskFields[K]) {
     setFields((current) => ({ ...current, [key]: value })); setDirty(true)
@@ -85,7 +108,11 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
       if (reassigned && !eligible.some((person) => person.id === fields.assigned_to_id)) {
         setError('Selecciona un responsable habilitado para este cliente.'); return
       }
-      if (nextStatus === 'CANCELLED' && !window.confirm('¿Cancelar esta tarea? Quedará en el historial y no podrá reabrirse.')) return
+      if (nextStatus === 'CANCELLED') {
+        if (!(await confirm({ title: '¿Cancelar esta tarea? Quedará en el historial y no podrá reabrirse.', destructive: true }))) return
+        // Nothing may have started, frozen or conflicted this editor while the question was open.
+        if (busy.current || !stillHere() || latest.current.frozen || latest.current.conflict) return
+      }
       const command = { ...fields, title: fields.title.trim(), description: fields.description?.trim() || null }
       if (!reassigned) delete command.assigned_to_id
       payload = task ? { ...command, expected_version: task.version, status: nextStatus } : { ...command, id }
@@ -106,17 +133,22 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
       }
     } finally { busy.current = false }
   }
-  function close() {
+  async function close() {
     if (busy.current) return
-    if ((dirty || frozen) && !window.confirm(frozen
-      ? 'El guardado puede haberse realizado. ¿Cerrar y comprobar el listado antes de crear otra tarea?'
-      : '¿Descartar los cambios sin guardar?')) return
+    if (dirty || frozen) {
+      const asked = frozen
+      if (!(await confirm({ title: asked
+        ? 'El guardado puede haberse realizado. ¿Cerrar y comprobar el listado antes de crear otra tarea?'
+        : '¿Descartar los cambios sin guardar?' }))) return
+      // Close only if no save started and the uncertain-result state is still the one the question described.
+      if (busy.current || !stillHere() || latest.current.frozen !== asked) return
+    }
     onClose()
   }
   function submit(event: FormEvent) { event.preventDefault(); void save() }
   const locked = closed || mutation.isPending || Boolean(frozen)
   const retained = task?.assigned_to_id && !eligible.some((person) => person.id === task.assigned_to_id)
-  return <Sheet open onOpenChange={(open) => { if (!open) close() }}>
+  return <><Sheet open onOpenChange={(open) => { if (!open) void close() }}>
     <SheetContent onCloseAutoFocus={(event) => { event.preventDefault(); onRestoreFocus() }} className="w-full overflow-y-auto sm:max-w-lg motion-reduce:transition-none motion-reduce:animate-none">
       <SheetHeader className="mb-6 pr-6 text-left">
         <SheetTitle>{task ? 'Detalle de tarea' : 'Nueva tarea'}</SheetTitle>
@@ -154,8 +186,10 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
         {frozen && <p className="text-sm">El contenido está bloqueado para reintentar exactamente el mismo identificador y payload.</p>}
         {conflict && <section aria-label="Versión del servidor" className="space-y-3 border-y py-3 text-sm">
           {server ? <><p>Servidor: versión {server.version} · {TASK_STATUSES[server.status]}</p><p>{server.title} · {TASK_TYPES[server.type]} · {civilDate(server.due_date)} · {TASK_PRIORITIES[server.priority]}</p><p className="whitespace-pre-wrap">{server.description || 'Sin descripción'}</p><p>Responsable: {server.assigned_to_id ?? 'Sin responsable'}</p>
-            <Button type="button" variant="outline" onClick={() => {
-              if (window.confirm('¿Descartar tu borrador y cargar la versión del servidor para revisarla?')) {
+            <Button type="button" variant="outline" onClick={async () => {
+              if (await confirm({ title: '¿Descartar tu borrador y cargar la versión del servidor para revisarla?' })) {
+                // Load only the version that was on screen when asked, if it is still the shown one.
+                if (busy.current || !stillHere() || latest.current.server !== server) return
                 onReload({ ...server, due_date: civilDate(server.due_date), assignee: server.assigned_to_id === task?.assigned_to_id ? task.assignee : eligible.find((person) => person.id === server.assigned_to_id) ?? null })
               }
             }}>Descartar borrador y cargar versión</Button></> : <p>Tu borrador sigue intacto. La versión actual aún no está disponible.</p>}
@@ -166,8 +200,8 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
           {task && !frozen && <><Button type="button" variant="outline" disabled={mutation.isPending || conflict} onClick={() => { void save('COMPLETED') }}>Completar tarea</Button>
             <Button type="button" variant="ghost" disabled={mutation.isPending || conflict} onClick={() => { void save('CANCELLED') }}>Cancelar tarea</Button></>}
         </div>}
-        <Button type="button" variant="outline" disabled={mutation.isPending} onClick={close}>Cerrar detalle</Button>
+        <Button type="button" variant="outline" disabled={mutation.isPending} onClick={() => { void close() }}>Cerrar detalle</Button>
       </form>
     </SheetContent>
-  </Sheet>
+  </Sheet>{confirmDialog}</>
 }

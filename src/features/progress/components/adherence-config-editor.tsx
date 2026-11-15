@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import { getApiErrorStatus } from '@/lib/api-utils'
 import { useAdherenceConfig, useUpdateAdherenceConfig } from '../api'
 import type { AdherencePolicyFields } from '../types'
@@ -56,9 +57,11 @@ export function AdherenceConfigEditor({ clientId }: { clientId: string }) {
     setDirtyEditor((current) => dirty ? editorKey : current === editorKey ? null : current)
   }, [editorKey])
 
-  function changeDate(nextDate: string) {
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
+
+  async function changeDate(nextDate: string) {
     if (nextDate === date) return
-    if (dirtyEditor === editorKey && !window.confirm('¿Descartar los cambios sin guardar y cambiar la fecha?')) return
+    if (dirtyEditor === editorKey && !(await confirm({ title: '¿Descartar los cambios sin guardar y cambiar la fecha?' }))) return
     setDate(nextDate)
   }
 
@@ -68,7 +71,7 @@ export function AdherenceConfigEditor({ clientId }: { clientId: string }) {
       <label className="block text-sm font-medium">
         Fecha de vigencia (UTC)
         <input className="mt-1 block rounded-md border p-2" type="date" min={utcTomorrow()} value={date}
-          onChange={(event) => changeDate(event.target.value)} />
+          onChange={(event) => { void changeDate(event.target.value) }} />
       </label>
       {adminId && clientId && validFutureDate(date)
         ? <PolicyEditor key={editorKey} adminId={adminId} clientId={clientId} date={date}
@@ -77,6 +80,7 @@ export function AdherenceConfigEditor({ clientId }: { clientId: string }) {
             <p role="alert">{!validFutureDate(date) ? 'Seleccione una fecha futura en UTC.' : 'La sesión no está validada o falta seleccionar un cliente.'}</p>
             <button type="button" disabled>Guardar configuración</button>
           </>}
+      {confirmDialog}
     </section>
   )
 }

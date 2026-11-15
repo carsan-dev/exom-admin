@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { act, render, renderHook, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ConfirmDialog } from './confirm-dialog'
 import { useConfirmDialog, type ConfirmDialogOptions } from './use-confirm-dialog'
 
@@ -290,5 +290,214 @@ describe('useConfirmDialog', () => {
 
     await waitFor(() => expect(onAnswer).toHaveBeenNthCalledWith(2, true))
     expect(onAnswer).toHaveBeenNthCalledWith(1, false)
+  })
+})
+
+/**
+ * Returns a waiter that settles once Radix has run the dialog's close auto-focus, which happens in
+ * a zero-delay timer after the content unmounts (right away in jsdom, after animationend otherwise).
+ */
+function closeAutoFocusRan(dialog: HTMLElement) {
+  const ran = vi.fn()
+  dialog.addEventListener('focusScope.autoFocusOnUnmount', ran, { once: true })
+  return () => waitFor(() => expect(ran).toHaveBeenCalledTimes(1))
+}
+
+// jsdom runs no CSS animations; report the overlay animation names so Presence keeps the
+// content mounted until `animationend` is dispatched by hand (same technique as dialog.test.tsx).
+function simulateOverlayAnimations() {
+  const realGetComputedStyle = window.getComputedStyle.bind(window)
+  return vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
+    const styles = realGetComputedStyle(element, pseudo)
+    const isScrim = element.classList.contains('anim-overlay-scrim')
+    const isPanel = element.classList.contains('anim-overlay-panel')
+    if (!isScrim && !isPanel) return styles
+    return new Proxy(styles, {
+      get(target, property) {
+        if (property === 'animationName') {
+          const closing = element.getAttribute('data-state') === 'closed'
+          if (isScrim) return closing ? 'overlay-fade-out' : 'overlay-fade-in'
+          return closing ? 'overlay-rise-out' : 'overlay-rise-in'
+        }
+        const value: unknown = Reflect.get(target, property, target)
+        return typeof value === 'function' ? value.bind(target) : value
+      },
+    })
+  })
+}
+
+function finishAnimation(element: Element, animationName: string) {
+  const event = new Event('animationend', { bubbles: true })
+  Object.defineProperty(event, 'animationName', { value: animationName })
+  act(() => {
+    element.dispatchEvent(event)
+  })
+}
+
+describe('useConfirmDialog focus restore', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('returns focus to the element that had it when asked, after cancel', async () => {
+    const user = userEvent.setup()
+    render(<Harness onAnswer={vi.fn()} />)
+    const opener = screen.getByRole('button', { name: 'Abrir' })
+
+    await user.click(opener)
+    const settled = closeAutoFocusRan(screen.getByRole('alertdialog'))
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+
+    await settled()
+    expect(opener).toHaveFocus()
+  })
+
+  it('returns focus to the element that had it when asked, after Escape', async () => {
+    const user = userEvent.setup()
+    render(<Harness onAnswer={vi.fn()} />)
+    const opener = screen.getByRole('button', { name: 'Abrir' })
+
+    await user.click(opener)
+    const settled = closeAutoFocusRan(screen.getByRole('alertdialog'))
+    await user.keyboard('{Escape}')
+
+    await settled()
+    expect(opener).toHaveFocus()
+  })
+
+  it('returns focus to the element that had it when asked, after accept', async () => {
+    const user = userEvent.setup()
+    const onAccepted = vi.fn()
+    render(<Harness onAnswer={vi.fn()} onAccepted={onAccepted} />)
+    const opener = screen.getByRole('button', { name: 'Abrir' })
+
+    await user.click(opener)
+    const settled = closeAutoFocusRan(screen.getByRole('alertdialog'))
+    await user.click(screen.getByRole('button', { name: 'Aceptar' }))
+
+    await settled()
+    expect(onAccepted).toHaveBeenCalledTimes(1)
+    expect(opener).toHaveFocus()
+  })
+
+  it('returns focus only after the exit animation has finished', async () => {
+    simulateOverlayAnimations()
+    const user = userEvent.setup()
+    render(<Harness onAnswer={vi.fn()} />)
+    const opener = screen.getByRole('button', { name: 'Abrir' })
+
+    await user.click(opener)
+    const content = screen.getByRole('alertdialog')
+    const overlay = document.querySelector('[data-slot="alert-dialog-overlay"]')
+    const settled = closeAutoFocusRan(content)
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(content).toHaveAttribute('data-state', 'closed')
+    expect(content).toBeInTheDocument()
+
+    finishAnimation(content, 'overlay-rise-out')
+    if (overlay) finishAnimation(overlay, 'overlay-fade-out')
+
+    await settled()
+    expect(content).not.toBeInTheDocument()
+    expect(opener).toHaveFocus()
+  })
+
+  it('does not force focus or throw when the opener left the document before closing', async () => {
+    const user = userEvent.setup()
+    const onAnswer = vi.fn()
+    const consoleError = vi.spyOn(console, 'error')
+
+    function RemovableOpener() {
+      const [shown, setShown] = useState(true)
+      const { confirm, dialog } = useConfirmDialog()
+      return (
+        <>
+          {shown ? (
+            <button type="button" onClick={async () => onAnswer(await confirm({ title: QUESTION }))}>
+              Abrir
+            </button>
+          ) : null}
+          <button type="button" onClick={() => setShown(false)}>Quitar</button>
+          {dialog}
+        </>
+      )
+    }
+
+    render(<RemovableOpener />)
+    const opener = screen.getByRole('button', { name: 'Abrir' })
+    await user.click(opener)
+    const openerFocus = vi.spyOn(opener, 'focus')
+    const settled = closeAutoFocusRan(screen.getByRole('alertdialog'))
+
+    // The modal blocks pointer interaction outside, so remove the opener programmatically.
+    act(() => {
+      screen.getByRole('button', { name: 'Quitar', hidden: true }).click()
+    })
+    expect(opener).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+
+    await settled()
+    expect(onAnswer).toHaveBeenCalledWith(false)
+    expect(openerFocus).not.toHaveBeenCalled()
+    expect(document.body).toHaveFocus()
+    expect(consoleError).not.toHaveBeenCalled()
+  })
+
+  it('keeps the focus the caller moved after accepting', async () => {
+    const user = userEvent.setup()
+    render(
+      <>
+        <Harness
+          onAnswer={vi.fn()}
+          onAccepted={() => screen.getByRole('button', { name: 'Siguiente paso', hidden: true }).focus()}
+        />
+        <button type="button">Siguiente paso</button>
+      </>,
+    )
+    const opener = screen.getByRole('button', { name: 'Abrir' })
+    const next = screen.getByRole('button', { name: 'Siguiente paso' })
+
+    await user.click(opener)
+    const openerFocus = vi.spyOn(opener, 'focus')
+    const settled = closeAutoFocusRan(screen.getByRole('alertdialog'))
+    await user.click(screen.getByRole('button', { name: 'Aceptar' }))
+
+    await settled()
+    expect(next).toHaveFocus()
+    expect(openerFocus).not.toHaveBeenCalled()
+  })
+
+  it('still resolves false when the host unmounts while pending, without forcing focus', async () => {
+    const user = userEvent.setup()
+    const onAnswer = vi.fn()
+    const onAccepted = vi.fn()
+    const consoleError = vi.spyOn(console, 'error')
+
+    function Host() {
+      const [mounted, setMounted] = useState(true)
+      return (
+        <>
+          <button type="button" onClick={() => setMounted(false)}>Desmontar</button>
+          {mounted ? <Harness onAnswer={onAnswer} onAccepted={onAccepted} /> : null}
+        </>
+      )
+    }
+
+    render(<Host />)
+    const opener = screen.getByRole('button', { name: 'Abrir' })
+    await user.click(opener)
+    const openerFocus = vi.spyOn(opener, 'focus')
+    const settled = closeAutoFocusRan(screen.getByRole('alertdialog'))
+
+    act(() => {
+      screen.getByRole('button', { name: 'Desmontar', hidden: true }).click()
+    })
+
+    await waitFor(() => expect(onAnswer).toHaveBeenCalledWith(false))
+    await settled()
+    expect(onAnswer).toHaveBeenCalledTimes(1)
+    expect(onAccepted).not.toHaveBeenCalled()
+    expect(openerFocus).not.toHaveBeenCalled()
+    expect(consoleError).not.toHaveBeenCalled()
   })
 })

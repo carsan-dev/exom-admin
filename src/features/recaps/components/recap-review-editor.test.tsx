@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { useAuth } from '@/hooks/use-auth'
+import { answerConfirmDialog } from '@/test/confirm-dialog'
 import { RecapReviewEditor } from './recap-review-editor'
 import type { RecapReviewRecord } from '../types'
 
@@ -23,7 +24,6 @@ beforeEach(() => {
   server = { ...record }
   api.get.mockReset(); api.put.mockReset(); api.post.mockReset(); dirty.mockReset()
   useAuth.setState({ user: { id: 'staff', email: 'staff@example.invalid', role: 'ADMIN', profile: null } })
-  vi.spyOn(window, 'confirm').mockReturnValue(true)
   api.get.mockImplementation(() => Promise.resolve(envelope(server)))
   api.put.mockImplementation((_url, body) => {
     server = { ...server, review_version: body.expected_version + 1, draft_coach_summary: body.coach_summary, draft_changes: body.changes, draft_next_week_goals: body.next_week_goals }
@@ -77,10 +77,11 @@ it.each([409, 403, 500])('error %s preserves draft/version, reads server and req
   expect(screen.getByText('Borrador: versión 3')).toBeInTheDocument()
   expect(screen.getByLabelText('Resumen del coach · borrador privado')).toHaveValue('Mi revisión nueva')
   expect(screen.getByRole('button', { name: 'Publicar revisión' })).toBeDisabled()
-  vi.mocked(window.confirm).mockReturnValueOnce(false)
   fireEvent.click(screen.getByRole('button', { name: 'Descartar borrador y cargar versión' }))
+  await answerConfirmDialog('Cancelar')
   expect(screen.getByLabelText('Resumen del coach · borrador privado')).toHaveValue('Mi revisión nueva')
   fireEvent.click(screen.getByRole('button', { name: 'Descartar borrador y cargar versión' }))
+  await answerConfirmDialog('Aceptar')
   expect(screen.getByLabelText('Resumen del coach · borrador privado')).toHaveValue('Cambio remoto')
   expect(api.put).toHaveBeenCalledTimes(1); expect(api.post).not.toHaveBeenCalled()
 })
@@ -122,6 +123,7 @@ it('publication conflict retains the saved local version and never overwrites ne
   expect(api.post).toHaveBeenCalledTimes(1)
   expect(api.post.mock.calls[0][1]).toEqual({ expected_version: 4, confirm: true })
   fireEvent.click(screen.getByRole('button', { name: 'Descartar borrador y cargar versión' }))
+  await answerConfirmDialog('Aceptar')
   expect(screen.getByText('Publicación de otra profesional')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Publicar revisión' })).toBeDisabled()
 })

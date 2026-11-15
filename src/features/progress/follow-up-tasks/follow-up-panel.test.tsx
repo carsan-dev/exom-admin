@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router'
 import { RecapsList } from '@/features/recaps/components/recaps-list'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAuth } from '@/hooks/use-auth'
+import { answerConfirmDialog, confirmDialogsShown, findConfirmDialog } from '@/test/confirm-dialog'
 import { FollowUpPanel } from './follow-up-panel'
 import { taskBase, taskError, taskKeys } from './api'
 import { FIXTURE_IDS as ids, fixtureAssignee, fixturePage, fixtureSummary, fixtureTask } from './fixtures'
@@ -44,7 +45,6 @@ beforeEach(() => {
   listed = [{ ...fixtureTask }]
   api.get.mockReset(); api.post.mockReset(); api.put.mockReset(); onGuard.mockReset()
   useAuth.setState({ user: { id: ids.staff, email: 'staff@example.invalid', role: 'ADMIN', profile: null } })
-  vi.spyOn(window, 'confirm').mockReturnValue(true)
   api.get.mockImplementation((url: string, options?: { params?: { page?: number; view?: string } }) => {
     if (url.endsWith('/summary')) return Promise.resolve(envelope(fixtureSummary))
     if (url.endsWith('/assignees')) return Promise.resolve(envelope(fixturePage([fixtureAssignee], options?.params?.page ?? 1)))
@@ -201,11 +201,12 @@ describe('Seguimiento: editor y operaciones', () => {
     mount(); await openNew(); fillNew()
     fireEvent.click(screen.getByRole('button', { name: 'Crear tarea' }))
     await screen.findByRole('button', { name: 'Reintentar mismo guardado' })
-    vi.mocked(window.confirm).mockReturnValueOnce(false)
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar detalle' }))
-    expect(window.confirm).toHaveBeenLastCalledWith('El guardado puede haberse realizado. ¿Cerrar y comprobar el listado antes de crear otra tarea?')
+    expect(await findConfirmDialog()).toHaveAccessibleName('El guardado puede haberse realizado. ¿Cerrar y comprobar el listado antes de crear otra tarea?')
+    await answerConfirmDialog('Cancelar')
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar detalle' }))
+    await answerConfirmDialog('Aceptar')
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(api.post).toHaveBeenCalledTimes(1)
   })
@@ -213,7 +214,6 @@ describe('Seguimiento: editor y operaciones', () => {
     ['create', 'pending'], ['create', 'rejected'],
     ['update', 'pending'], ['update', 'rejected'],
   ])('guardado confirmado %s cierra y restaura foco aunque refetch esté %s', async (operation, refetch) => {
-    vi.mocked(window.confirm).mockClear()
     mount()
     const opener = await screen.findByRole('button', { name: operation === 'create' ? 'Nueva tarea' : fixtureTask.title })
     opener.focus(); fireEvent.click(opener)
@@ -231,7 +231,7 @@ describe('Seguimiento: editor y operaciones', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(api.post).toHaveBeenCalledTimes(operation === 'create' ? 1 : 0)
     expect(api.put).toHaveBeenCalledTimes(operation === 'update' ? 1 : 0)
-    expect(window.confirm).not.toHaveBeenCalled()
+    expect(confirmDialogsShown()).toEqual([])
   })
   it.each(['client', 'identity', 'unmount'])('confirmación tardía tras %s no cierra un editor nuevo ni restaura foco antiguo', async (change) => {
     let finish: (value: unknown) => void = () => undefined
@@ -304,15 +304,16 @@ describe('Seguimiento: editor y operaciones', () => {
     expect(api.put).toHaveBeenCalledTimes(1)
     expect(api.put.mock.calls[0][1].expected_version).toBe(3)
     fireEvent.click(screen.getByRole('button', { name: 'Descartar borrador y cargar versión' }))
-    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('Descartar tu borrador'))
+    expect(await findConfirmDialog()).toHaveAccessibleName(expect.stringContaining('Descartar tu borrador'))
+    await answerConfirmDialog('Aceptar')
     await waitFor(() => expect(screen.getByLabelText('Título')).toHaveValue('Título actual del servidor'))
     expect(screen.getByLabelText('Fecha límite · UTC')).toHaveValue('2026-10-04')
     expect(api.put).toHaveBeenCalledTimes(1)
   })
   it('cancelación requiere confirmación secundaria; completar no envía mensajes ni modifica pautas', async () => {
     mount(); await openExisting()
-    vi.mocked(window.confirm).mockReturnValueOnce(false)
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar tarea' }))
+    await answerConfirmDialog('Cancelar')
     expect(api.put).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Completar tarea' }))
     await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1))
@@ -323,10 +324,14 @@ describe('Seguimiento: editor y operaciones', () => {
   it('registración de guarda protege descarte de borrador y se elimina al cerrar', async () => {
     mount(); await openNew(); fillNew()
     const guard = onGuard.mock.calls[onGuard.mock.calls.length - 1]?.[0]
-    vi.mocked(window.confirm).mockReturnValueOnce(false)
-    expect(guard()).toBe(false)
-    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('Descartar'))
+    expect(guard.blocks()).toBe(true)
+    const leave = guard.confirmLeave()
+    expect(await findConfirmDialog()).toHaveAccessibleName(expect.stringContaining('Descartar'))
+    await answerConfirmDialog('Cancelar')
+    await expect(leave).resolves.toBe(false)
+    expect(screen.getByLabelText('Título')).toHaveValue('Llamada sintética')
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar detalle' }))
+    await answerConfirmDialog('Aceptar')
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(onGuard).toHaveBeenLastCalledWith(null)
   })
@@ -379,7 +384,6 @@ describe('Seguimiento: editor y operaciones', () => {
 })
 
 describe('REST-T2E-FOCUS-01: cierre y propietario del foco', () => {
-  beforeEach(() => { vi.mocked(window.confirm).mockClear() })
   it.each(['Nueva tarea', fixtureTask.title])('Escape restaura el opener %s tras el cierre diferido real', async (name) => {
     mount()
     await screen.findByRole('button', { name: fixtureTask.title })
@@ -398,13 +402,14 @@ describe('REST-T2E-FOCUS-01: cierre y propietario del foco', () => {
     opener.focus(); await openNew(); fillNew()
     const titleInput = screen.getByLabelText('Título')
     titleInput.focus()
-    vi.mocked(window.confirm).mockReturnValueOnce(false)
     fireEvent.keyDown(document, { key: 'Escape' })
+    await answerConfirmDialog('Cancelar')
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(titleInput).toHaveValue('Llamada sintética')
     expect(titleInput).toHaveFocus()
     expect(api.post).not.toHaveBeenCalled()
     fireEvent.keyDown(document, { key: 'Escape' })
+    await answerConfirmDialog('Aceptar')
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     await waitFor(() => expect(opener).toHaveFocus())
   })
@@ -416,7 +421,7 @@ describe('REST-T2E-FOCUS-01: cierre y propietario del foco', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1))
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     await waitFor(() => expect(opener).toHaveFocus())
-    expect(window.confirm).not.toHaveBeenCalled()
+    expect(confirmDialogsShown()).toEqual([])
   })
   it('completar retira el opener y restaura Nueva tarea dentro del mismo cliente', async () => {
     api.put.mockImplementationOnce(() => {
@@ -446,6 +451,7 @@ describe('REST-T2E-FOCUS-01: cierre y propietario del foco', () => {
     const closed = vi.fn()
     screen.getByRole('dialog').addEventListener('focusScope.autoFocusOnUnmount', closed, { once: true })
     fireEvent.click(screen.getByRole('button', { name: 'Descartar borrador y cargar versión' }))
+    await answerConfirmDialog('Aceptar')
     await waitFor(() => expect(closed).toHaveBeenCalledTimes(1))
     expect(oldFocus).not.toHaveBeenCalled()
     await waitFor(() => expect(screen.getByLabelText('Título')).toHaveFocus())

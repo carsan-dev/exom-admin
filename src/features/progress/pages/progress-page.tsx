@@ -105,10 +105,22 @@ export function ProgressPage() {
   const taskGuard = useRef<NavigationGuard | null>(null)
   const registerTaskGuard = useCallback((guard: NavigationGuard | null) => { taskGuard.current = guard }, [])
 
+  // Without a data router there is no blocker, so the page's own controls consult the task editor.
+  // Nothing to lose: act at once. Otherwise act only after acceptance, on the target captured when
+  // asking, and only if the editor asked is still the registered one (not unmounted or changed).
+  function afterTaskGuard(action: () => void) {
+    const guard = dataRouter ? null : taskGuard.current
+    if (!guard?.blocks()) { action(); return }
+    void guard.confirmLeave().then((accepted) => { if (accepted && taskGuard.current === guard) action() })
+  }
+
   function handleClientSelect(id: string) {
-    if (!dataRouter && id !== clientId && taskGuard.current && !taskGuard.current()) return
-    updateParams({ clientId: id, date: getTodayStr(), historyPage: '1', trainingWindow: '0' })
-    setMetricsPage(1)
+    const select = () => {
+      updateParams({ clientId: id, date: getTodayStr(), historyPage: '1', trainingWindow: '0' })
+      setMetricsPage(1)
+    }
+    if (id === clientId) select()
+    else afterTaskGuard(select)
   }
 
   function handleDateSelect(date: string) {
@@ -154,7 +166,7 @@ export function ProgressPage() {
       {!clientId ? (
         <EmptyClientState />
       ) : (
-        <Tabs value={section} onValueChange={(value) => { if (dataRouter || !taskGuard.current || taskGuard.current()) updateParams({ section: value }) }} className="space-y-4">
+        <Tabs value={section} onValueChange={(value) => { afterTaskGuard(() => updateParams({ section: value })) }} className="space-y-4">
           {PERIOD_SECTIONS.includes(section) && <section aria-label="Contexto del cliente y periodo" className="space-y-2 border-y border-border py-3">
             <PeriodSelector label="Periodo de métricas y entrenamiento" value={period.preset} options={PROGRESS_PERIOD_OPTIONS}
               onChange={period.setPreset} custom={period.custom} onCustomChange={period.setCustomRange} error={period.error}

@@ -24,6 +24,31 @@ export interface ConfirmDialogProps {
   onConfirm: () => void
   /** Called by the cancel button and by Escape. There is no outside-click close. */
   onCancel: () => void
+  /**
+   * Element to give focus back to once the dialog has closed, normally the one focused when the
+   * question was asked. Needed because an imperatively opened dialog has no Trigger to return to.
+   */
+  returnFocusTo?: HTMLElement | SVGElement | null
+}
+
+/**
+ * Close auto-focus handler. Radix calls it when the content unmounts (after the exit animation,
+ * or at once when none runs), which is exactly when it would restore focus itself.
+ *
+ * Rule: focus goes back to `target` only while focus is lost, i.e. on <body> or still inside the
+ * closing dialog. If the caller's code after an accepted answer has already moved focus elsewhere,
+ * that choice is kept. A target that left the document or cannot take focus is skipped and
+ * Radix's default (focus the Trigger, of which there is none) runs unchanged.
+ */
+function restoreFocus(event: Event, target: HTMLElement | SVGElement | null | undefined) {
+  if (!target?.isConnected) return
+  const active = document.activeElement
+  const closing = event.currentTarget
+  const focusLost = !active || active === document.body || (closing instanceof Node && closing.contains(active))
+  if (!focusLost) return
+  target.focus()
+  // Only take over from Radix when focus really moved (a disabled target does not accept it).
+  if (document.activeElement === target) event.preventDefault()
 }
 
 /**
@@ -40,6 +65,7 @@ export function ConfirmDialog({
   destructive = false,
   onConfirm,
   onCancel,
+  returnFocusTo,
 }: ConfirmDialogProps) {
   return (
     <AlertDialog
@@ -49,7 +75,7 @@ export function ConfirmDialog({
         if (!nextOpen) onCancel()
       }}
     >
-      <AlertDialogContent>
+      <AlertDialogContent onCloseAutoFocus={(event) => restoreFocus(event, returnFocusTo)}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description !== undefined ? <AlertDialogDescription>{description}</AlertDialogDescription> : null}
