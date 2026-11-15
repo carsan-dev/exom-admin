@@ -164,7 +164,7 @@ export function AchievementsTable({
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{achievement.criteria_value}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={isAutomaticAchievement(achievement.criteria_type) ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700' : 'border-amber-500/20 bg-amber-500/10 text-amber-700'}>
+                  <Badge variant="outline" className={isAutomaticAchievement(achievement.criteria_type) ? 'border-status-success/30 bg-status-success-soft text-status-success' : 'border-status-warning/30 bg-status-warning-soft text-status-warning'}>
                     {getAchievementModeLabel(achievement.criteria_type)}
                   </Badge>
                 </TableCell>

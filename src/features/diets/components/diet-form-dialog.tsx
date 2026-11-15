@@ -1046,7 +1046,7 @@ export function DietFormDialog({
         </DialogHeader>
 
         {importIssues.length > 0 && (
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
+          <div className="rounded-lg border border-status-warning/30 bg-status-warning-soft p-3 text-sm text-status-warning">
             <div className="flex items-start gap-2">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
               <div className="space-y-1">

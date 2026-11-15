@@ -177,13 +177,13 @@ export function getTrainingAccentStyle(
 export function getTrainingTypeBadgeClass(type: string) {
   switch (getTrainingTypeKey(type)) {
     case 'fuerza':
-      return 'border-blue-500/30 bg-blue-500/10 text-blue-500'
+      return 'border-status-info/30 bg-status-info-soft text-status-info'
     case 'cardio':
-      return 'border-rose-500/30 bg-rose-500/10 text-rose-500'
+      return 'border-status-error/30 bg-status-error-soft text-status-error'
     case 'hiit':
-      return 'border-orange-500/30 bg-orange-500/10 text-orange-500'
+      return 'border-status-warning/30 bg-status-warning-soft text-status-warning'
     case 'flexibilidad':
-      return 'border-purple-500/30 bg-purple-500/10 text-purple-500'
+      return 'border-accent-line/30 bg-brand-soft text-accent-text'
     default:
       return 'border-border bg-muted text-muted-foreground'
   }

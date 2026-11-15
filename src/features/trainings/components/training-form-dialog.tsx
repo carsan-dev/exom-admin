@@ -531,7 +531,7 @@ function AccentColorField({ value, onChange, error, inputInstanceKey }: AccentCo
               className="group flex flex-col items-center gap-2 rounded-xl border border-border/70 bg-card px-2 py-3 transition-colors hover:border-brand-primary/50"
             >
               <span
-                className="h-8 w-8 rounded-full border border-white/20 shadow-sm"
+                className="h-8 w-8 rounded-full border border-foreground/20 shadow-sm"
                 style={{ backgroundColor: swatch }}
               />
               <span
@@ -710,7 +710,7 @@ export function TrainingFormDialog({
         </DialogHeader>
 
         {importIssues.length > 0 && (
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
+          <div className="rounded-lg border border-status-warning/30 bg-status-warning-soft p-3 text-sm text-status-warning">
             <div className="flex items-start gap-2">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
               <div className="space-y-1">

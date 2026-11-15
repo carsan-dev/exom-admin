@@ -321,7 +321,7 @@ export function ChallengeFormDialog({ open, onOpenChange, challenge, onSubmitted
             )}
 
             {!isManual && selectedRule && (
-              <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
+              <div className="rounded-xl border border-accent-line/30 bg-brand-soft p-4">
                 <p className="text-sm font-medium text-foreground">{selectedRule.label}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{selectedRule.description}</p>
               </div>

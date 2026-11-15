@@ -154,7 +154,7 @@ export function NotificationsList({
                     <div className="space-y-2">
                       <NotificationStatusBadge status={item.status} />
                       {item.status === 'SENT' && (
-                        <div className="flex items-center gap-1.5 text-xs text-green-700">
+                        <div className="flex items-center gap-1.5 text-xs text-status-success">
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           Registrada
                         </div>

@@ -58,13 +58,13 @@ export const MEASURE_UNIT_LABELS: Record<MeasureUnit, string> = {
 export function getMealTypeBadgeClass(type: string) {
   switch (type) {
     case 'BREAKFAST':
-      return 'border-amber-500/30 bg-amber-500/10 text-amber-600'
+      return 'border-status-warning/30 bg-status-warning-soft text-status-warning'
     case 'LUNCH':
-      return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600'
+      return 'border-status-success/30 bg-status-success-soft text-status-success'
     case 'SNACK':
-      return 'border-purple-500/30 bg-purple-500/10 text-purple-600'
+      return 'border-accent-line/30 bg-brand-soft text-accent-text'
     case 'DINNER':
-      return 'border-blue-500/30 bg-blue-500/10 text-blue-600'
+      return 'border-status-info/30 bg-status-info-soft text-status-info'
     default:
       return 'border-border bg-muted text-muted-foreground'
   }

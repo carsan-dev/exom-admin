@@ -69,7 +69,7 @@ function getProgressClass(variant: ReturnType<typeof getChallengeProgressVariant
 function getModeBadgeClass(challenge: ChallengeListItem) {
   return challenge.is_manual
     ? 'border-border bg-muted text-muted-foreground'
-    : 'border-violet-500/30 bg-violet-500/10 text-violet-600'
+    : 'border-accent-line/30 bg-brand-soft text-accent-text'
 }
 
 export function ChallengesTable({

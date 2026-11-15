@@ -106,11 +106,11 @@ export function FeedbackDetailDialog({ item, open, onOpenChange }: FeedbackDetai
             )}
             <div>
               {item.status === 'PENDING' ? (
-                <Badge variant="outline" className="border-yellow-400 text-yellow-700 bg-yellow-50">
+                <Badge variant="outline" className="border-status-warning/30 text-status-warning bg-status-warning-soft">
                   Pendiente
                 </Badge>
               ) : (
-                <Badge variant="outline" className="border-green-400 text-green-700 bg-green-50">
+                <Badge variant="outline" className="border-status-success/30 text-status-success bg-status-success-soft">
                   Revisado
                 </Badge>
               )}

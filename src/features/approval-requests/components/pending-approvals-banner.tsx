@@ -12,9 +12,9 @@ export function PendingApprovalsBanner() {
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-4 rounded-xl border border-status-warning/30 bg-status-warning-soft p-4 md:flex-row md:items-center md:justify-between">
       <div className="flex items-start gap-3">
-        <div className="rounded-full bg-amber-500/15 p-2 text-amber-700">
+        <div className="rounded-full bg-status-warning-soft p-2 text-status-warning">
           <ShieldAlert className="h-5 w-5" />
         </div>
         <div className="space-y-1">

@@ -846,7 +846,7 @@ export function TrainingsPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
+            <div className="rounded-lg border border-status-warning/30 bg-status-warning-soft p-3 text-sm text-status-warning">
               Las partes entre <span className="font-semibold">[MODIFICAR]</span> son obligatorias.
               Si no hay circuito, elimina el bloque <span className="font-semibold">CIRCUIT</span>.
               Si hay varios ejercicios, duplica bloques{' '}

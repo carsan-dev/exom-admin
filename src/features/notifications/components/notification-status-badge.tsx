@@ -15,7 +15,7 @@ export function NotificationStatusBadge({ status }: NotificationStatusBadgeProps
   }
 
   return (
-    <Badge variant="outline" className="border-green-400 bg-green-50 text-green-700">
+    <Badge variant="outline" className="border-status-success/30 bg-status-success-soft text-status-success">
       Enviada
     </Badge>
   )
