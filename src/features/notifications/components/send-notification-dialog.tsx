@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import { cn } from '@/lib/utils'
 import { useNotificationTemplates } from '@/features/notification-templates/api'
 import type { NotificationTemplate } from '@/features/notification-templates/types'
@@ -52,8 +53,13 @@ import {
   NOTIFICATION_ROUTE_VALUES,
   type NotificationRouteType,
 } from '../types'
+import { CharCounter } from './char-counter'
+import { PushPreview } from './push-preview'
 
 const ALL_CLIENTS_LIMIT = 200
+// Mirror the limits validated by `sendNotificationSchema` below (the schema prevails).
+const TITLE_MAX_LENGTH = 100
+const BODY_MAX_LENGTH = 500
 
 const sendNotificationSchema = z
   .object({
@@ -297,7 +303,11 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
     defaultValues,
   })
 
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
+
   const sendToAll = form.watch('sendToAll')
+  const titleValue = form.watch('title')
+  const bodyValue = form.watch('body')
   const clients = clientsQuery.data?.data ?? []
   const isSubmitting = sendNotification.isPending || sendToAllClients.isPending
   useUnsavedChanges('send-notification-form', open && (form.formState.isDirty || isSubmitting))
@@ -345,6 +355,19 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
   }
 
   const handleSubmit = form.handleSubmit(async (values) => {
+    if (values.sendToAll) {
+      const recipientCount = clients.length
+      const accepted = await confirm({
+        title: '¿Enviar la notificación a todos tus clientes?',
+        description:
+          recipientCount > 0
+            ? `Llegará a ${recipientCount} cliente${recipientCount === 1 ? '' : 's'} visibles de tu cartera.`
+            : 'Llegará a todos los clientes visibles de tu cartera.',
+        confirmLabel: 'Enviar a todos',
+      })
+      if (!accepted) return
+    }
+
     const payload = {
       title: values.title.trim(),
       body: values.body.trim(),
@@ -389,6 +412,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
   })
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
@@ -517,6 +541,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                         placeholder="Nuevo recordatorio"
                       />
                     </FormControl>
+                    <CharCounter label="título" count={titleValue.trim().length} max={TITLE_MAX_LENGTH} />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -562,10 +587,13 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                       className="flex w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                     />
                   </FormControl>
+                  <CharCounter label="cuerpo" count={bodyValue.trim().length} max={BODY_MAX_LENGTH} />
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <PushPreview title={titleValue} body={bodyValue} />
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -580,5 +608,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
         </Form>
       </DialogContent>
     </Dialog>
+    {confirmDialog}
+    </>
   )
 }
