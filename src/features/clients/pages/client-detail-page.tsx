@@ -141,7 +141,7 @@ export function ClientDetailPage() {
   const client = clientProfile.data
 
   return (
-    <div className="space-y-3 sm:space-y-5 [--muted-foreground:var(--foreground-secondary)]">
+    <div className="space-y-3 sm:space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button variant="ghost" asChild>
           <Link to={usersRoute}>

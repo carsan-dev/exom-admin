@@ -14,7 +14,7 @@ const dateFormatter = new Intl.DateTimeFormat('es-ES', {
 
 /** Read-only canonical presentation. Actions remain owned by the route. */
 export function ClientStreakCard({ streak, isLoading, action }: ClientStreakCardProps) {
-  return <section aria-label="Racha del cliente" className="space-y-6 rounded-lg bg-card p-4 sm:p-6 [--muted-foreground:var(--foreground-secondary)]">
+  return <section aria-label="Racha del cliente" className="space-y-6 rounded-lg bg-card p-4 sm:p-6">
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Racha del cliente</h2>
