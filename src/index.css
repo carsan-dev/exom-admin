@@ -332,6 +332,23 @@
   }
 }
 
+/* Skeleton shimmer: base colour with a highlight band sweeping across. At rest
+   (no animation, or reduced motion collapsing it to its end frame) the visible
+   third of the gradient is plain --skeleton-base. */
+@utility anim-skeleton {
+  background-color: var(--skeleton-base);
+  background-image: linear-gradient(
+    90deg,
+    var(--skeleton-base) 0%,
+    var(--skeleton-base) 40%,
+    var(--skeleton-hi) 50%,
+    var(--skeleton-base) 60%,
+    var(--skeleton-base) 100%
+  );
+  background-size: 300% 100%;
+  animation: skeleton-shimmer 1.2s linear infinite;
+}
+
 /* Registers the overlay shadow utility (the :root vars share its name, so it cannot
    be aliased through @theme). */
 @utility shadow-overlay {
