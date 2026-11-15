@@ -259,13 +259,17 @@
 }
 
 /* ── Base styles ─────────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  border-width: 0;
-  border-style: solid;
-  border-color: var(--border);
-  -webkit-tap-highlight-color: transparent;
+/* In @layer base so Tailwind border utilities (border, border-input, ...) can win.
+   Unlayered, this reset overrode every `border` utility and hid all borders. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-width: 0;
+    border-style: solid;
+    border-color: var(--border);
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 html {
