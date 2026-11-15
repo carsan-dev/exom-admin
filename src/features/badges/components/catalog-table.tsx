@@ -1,7 +1,7 @@
-import { AlertTriangle, ChevronLeft, ChevronRight, Pencil, Tags, Trash2 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Pencil, Tags, Trash2 } from 'lucide-react'
+import { EmptyState, ErrorState, Pagination } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Table,
   TableBody,
@@ -10,12 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Tag } from '@/components/ui/tag'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { SelectionBar } from '@/components/workspace/selection-bar'
 import { getApiErrorMessage } from '@/lib/api-utils'
 import { normalizeSearchText } from '@/lib/search'
-import { getTrainingAccentStyle } from '@/features/trainings/types'
 import { BadgesTableSkeleton } from './badges-table-skeleton'
-import type { CatalogItem, CatalogView } from './catalog'
+import { isValidCatalogColor, type CatalogItem, type CatalogView } from './catalog'
 
 const PAGE_SIZE = 10
 
@@ -29,6 +30,11 @@ export interface CatalogTableProps {
   selectedValues: Set<string>
   onSelectionChange: (values: Set<string>) => void
   onDeleteSelected: () => void
+}
+
+/** Stored colours are data: shown as a dot only when they are a valid #RRGGBB, never as a tint. */
+function getCatalogDotColor(color: string | undefined) {
+  return color && isValidCatalogColor(color) ? color : undefined
 }
 
 export function CatalogTable({
@@ -55,6 +61,7 @@ export function CatalogTable({
   const filteredKeys = filteredValues.map((item) => item.value)
   const allFilteredSelected = filteredKeys.length > 0 && filteredKeys.every((value) => selectedValues.has(value))
   const someFilteredSelected = filteredKeys.some((value) => selectedValues.has(value))
+  const titleId = `badges-catalog-${catalog.id}-title`
 
   if (catalog.isLoading) {
     return <BadgesTableSkeleton />
@@ -62,96 +69,85 @@ export function CatalogTable({
 
   if (catalog.isError) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-          <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-            <AlertTriangle className="h-8 w-8" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-semibold text-foreground">
-              No se ha podido cargar el catálogo
-            </h2>
-            <p className="max-w-xl text-sm text-muted-foreground">
-              {getApiErrorMessage(catalog.error, 'Intentalo de nuevo en unos segundos.')}
-            </p>
-          </div>
-          <Button onClick={() => catalog.refetch()}>Reintentar</Button>
-        </CardContent>
-      </Card>
+      <ErrorState
+        className="border-y border-border"
+        title="No se ha podido cargar el catálogo"
+        description={getApiErrorMessage(catalog.error, 'Intentalo de nuevo en unos segundos.')}
+        onRetry={() => catalog.refetch()}
+      />
     )
   }
 
   return (
-    <Card>
-      <CardHeader className="gap-2">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <CardTitle className="text-xl">{catalog.title}</CardTitle>
-            <CardDescription>{catalog.description}</CardDescription>
-          </div>
-          <Badge
-            variant="outline"
-            className="w-fit border-brand-soft/40 bg-brand-soft/10 text-accent-text"
+    <section aria-labelledby={titleId} className="space-y-4">
+      <div>
+        <div className="flex items-baseline gap-3">
+          <h2
+            id={titleId}
+            className="font-display text-lg font-bold uppercase leading-none text-foreground"
           >
+            {catalog.title}
+          </h2>
+          <span className="text-[13px] tabular-nums text-foreground-muted">
             {catalog.values.length}
-          </Badge>
+          </span>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {catalog.canDelete ? (
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">{selectedValues.size} seleccionados</p>
-            <Button variant="destructive" onClick={onDeleteSelected} disabled={selectedValues.size === 0}>
-              <Trash2 className="h-4 w-4" />
-              Eliminar seleccionados ({selectedValues.size})
-            </Button>
-          </div>
-        ) : null}
-        {filteredValues.length === 0 ? (
-          <div className="flex min-h-36 flex-col items-center justify-center gap-3 rounded-md border border-dashed border-border/70 p-6 text-center">
-            <Tags className="h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              {catalog.values.length === 0
-                ? 'Sin valores guardados.'
-                : `Sin resultados para "${search}".`}
-            </p>
-          </div>
-        ) : (
-          <TooltipProvider delayDuration={0}>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {catalog.canDelete ? (
-                    <TableHead className="w-12">
-                      <input
-                        type="checkbox"
-                        aria-label="Seleccionar todos los resultados filtrados"
-                        checked={allFilteredSelected}
-                        ref={(node) => { if (node) node.indeterminate = someFilteredSelected && !allFilteredSelected }}
-                        onChange={(event) => {
-                          const next = new Set(selectedValues)
-                          filteredKeys.forEach((value) => event.target.checked ? next.add(value) : next.delete(value))
-                          onSelectionChange(next)
-                        }}
-                        className="h-4 w-4 accent-brand-primary"
-                      />
-                    </TableHead>
-                  ) : null}
-                  <TableHead>Valor</TableHead>
-                  {catalog.supportsColor ? (
-                    <TableHead className="hidden w-52 sm:table-cell">Color</TableHead>
-                  ) : null}
-                  <TableHead className="hidden w-48 sm:table-cell">Origen</TableHead>
-                  <TableHead className="w-28 text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedValues.map((item) => (
-                  <TableRow key={item.value}>
+        <p className="mt-1 text-[13px] text-foreground-secondary">{catalog.description}</p>
+      </div>
+
+      {filteredValues.length === 0 ? (
+        <EmptyState
+          className="border-y border-border"
+          icon={<Tags />}
+          title={
+            catalog.values.length === 0
+              ? 'Sin valores guardados.'
+              : `Sin resultados para "${search}".`
+          }
+        />
+      ) : (
+        <TooltipProvider delayDuration={0}>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {catalog.canDelete ? (
+                  <TableHead className="w-11 md:w-12">
+                    <Checkbox
+                      aria-label="Seleccionar todos los resultados filtrados"
+                      checked={
+                        allFilteredSelected ? true : someFilteredSelected ? 'indeterminate' : false
+                      }
+                      onChange={(event) => {
+                        const next = new Set(selectedValues)
+                        filteredKeys.forEach((value) => event.target.checked ? next.add(value) : next.delete(value))
+                        onSelectionChange(next)
+                      }}
+                    />
+                  </TableHead>
+                ) : null}
+                <TableHead>Valor</TableHead>
+                {catalog.supportsColor ? (
+                  <TableHead className="hidden w-40 md:table-cell">Color</TableHead>
+                ) : null}
+                <TableHead className="hidden w-40 md:table-cell">Origen</TableHead>
+                <TableHead className="w-24 px-0 text-right md:w-28 md:px-3">
+                  {/* En móvil el rótulo no cabe: se mantiene para lectores de pantalla. */}
+                  <span className="sr-only md:not-sr-only">Acciones</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedValues.map((item) => {
+                const dotColor = catalog.supportsColor ? getCatalogDotColor(item.color) : undefined
+
+                return (
+                  <TableRow
+                    key={item.value}
+                    data-state={selectedValues.has(item.value) ? 'selected' : undefined}
+                  >
                     {catalog.canDelete ? (
                       <TableCell>
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           aria-label={`Seleccionar ${item.value}`}
                           checked={selectedValues.has(item.value)}
                           onChange={() => {
@@ -160,41 +156,44 @@ export function CatalogTable({
                             else next.add(item.value)
                             onSelectionChange(next)
                           }}
-                          className="h-4 w-4 accent-brand-primary"
                         />
                       </TableCell>
                     ) : null}
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="max-w-full border-border bg-muted text-foreground"
-                        style={catalog.supportsColor ? getTrainingAccentStyle(item.color) : undefined}
+                    <TableCell className="min-w-0">
+                      <Tag
+                        data-catalog-tag=""
+                        color={dotColor}
+                        className="h-auto min-h-6 max-w-full whitespace-normal py-1 text-foreground"
                       >
                         <span className="min-w-0 break-words">{item.value}</span>
-                      </Badge>
+                      </Tag>
                     </TableCell>
                     {catalog.supportsColor ? (
-                      <TableCell className="hidden sm:table-cell">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span
-                            className="h-5 w-5 rounded-full border border-border"
-                            style={{ backgroundColor: item.color }}
-                          />
-                          <span className="font-mono text-xs">{item.color}</span>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="flex items-center gap-2 text-foreground-muted">
+                          {dotColor ? (
+                            <span
+                              aria-hidden="true"
+                              className="size-3.5 flex-none border border-border-strong"
+                              style={{ backgroundColor: dotColor }}
+                            />
+                          ) : null}
+                          <span className="font-mono text-xs tabular-nums">{item.color}</span>
                         </div>
                       </TableCell>
                     ) : null}
-                    <TableCell className="hidden text-sm text-muted-foreground sm:table-cell">
+                    <TableCell className="hidden text-[13px] text-foreground-muted md:table-cell">
                       {catalog.badgeLabel}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end gap-1">
+                    <TableCell className="px-0 md:px-3">
+                      <div className="flex justify-end md:gap-1">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
                               type="button"
                               variant="ghost"
                               size="icon"
+                              className="h-11 w-11 md:h-8 md:w-8"
                               aria-label={`Editar ${item.value}`}
                               onClick={() => onEdit({ catalogId: catalog.id, value: item.value, color: item.color })}
                             >
@@ -211,7 +210,7 @@ export function CatalogTable({
                                 variant="ghost"
                                 size="icon"
                                 aria-label={`Borrar ${item.value}`}
-                                className="text-status-error hover:text-status-error"
+                                className="h-11 w-11 hover:text-destructive md:h-8 md:w-8"
                                 onClick={() => onDelete({ catalogId: catalog.id, value: item.value, color: item.color })}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -223,38 +222,47 @@ export function CatalogTable({
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TooltipProvider>
-        )}
+                )
+              })}
+            </TableBody>
+          </Table>
+        </TooltipProvider>
+      )}
 
-        {filteredValues.length > 0 ? (
-          <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              Página {currentPage} de {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Anterior
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage >= totalPages}
-              >
-                Siguiente
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+      {catalog.canDelete ? (
+        selectedValues.size > 0 ? (
+          <SelectionBar
+            count={selectedValues.size}
+            formatCount={(count) => `${count} seleccionados`}
+            onClear={() => onSelectionChange(new Set())}
+          >
+            <Button variant="destructive" size="sm" onClick={onDeleteSelected}>
+              <Trash2 className="h-4 w-4" />
+              Eliminar seleccionados ({selectedValues.size})
+            </Button>
+          </SelectionBar>
+        ) : (
+          // Sin selección la barra compartida no se pinta; el contador y la acción (deshabilitada) se conservan.
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[13px] tabular-nums text-foreground-muted">{selectedValues.size} seleccionados</p>
+            <Button variant="outline" size="sm" onClick={onDeleteSelected} disabled>
+              <Trash2 className="h-4 w-4" />
+              Eliminar seleccionados ({selectedValues.size})
+            </Button>
           </div>
-        ) : null}
-      </CardContent>
-    </Card>
+        )
+      ) : null}
+
+      {filteredValues.length > 0 ? (
+        totalPages > 1 ? (
+          <Pagination page={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+        ) : (
+          // La paginación compartida no se pinta con una sola página; el texto sí se conserva.
+          <p className="pt-4 text-[13px] tabular-nums text-foreground-muted">
+            Página {currentPage} de {totalPages}
+          </p>
+        )
+      ) : null}
+    </section>
   )
 }

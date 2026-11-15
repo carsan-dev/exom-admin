@@ -1,18 +1,16 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export function BadgesTableSkeleton() {
   return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-7 w-48" />
-        <Skeleton className="h-4 w-72" />
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <Skeleton key={index} className="h-12 w-full rounded-lg" />
-        ))}
-      </CardContent>
-    </Card>
+    <div role="status" aria-busy="true" className="divide-y divide-border border-y border-border">
+      <span className="sr-only">Cargando valores</span>
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} aria-hidden="true" className="flex items-center gap-3 py-3">
+          <Skeleton className="size-4" />
+          <Skeleton className="h-4 w-40 max-w-[50%]" />
+          <Skeleton className="ml-auto h-4 w-16" />
+        </div>
+      ))}
+    </div>
   )
 }

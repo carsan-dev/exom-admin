@@ -356,7 +356,7 @@ export function BadgesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div>
       <BadgesPageHeader />
 
       <Tabs value={activeCatalog} onValueChange={(value) => setActiveCatalog(value as CatalogId)}>

@@ -1,6 +1,5 @@
 import type { KeyboardEvent } from 'react'
 import { LoaderCircle } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -11,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { getTrainingAccentStyle } from '@/features/trainings/types'
+import { Tag } from '@/components/ui/tag'
 import { isValidCatalogColor, normalizeCatalogLabel, type CatalogItem } from './catalog'
 
 interface EditCatalogValueDialogProps {
@@ -77,9 +76,12 @@ export function EditCatalogValueDialog({
                 className="font-mono"
               />
             </div>
-            <Badge variant="outline" className="w-fit" style={getTrainingAccentStyle(draftColor)}>
+            <Tag
+              className="w-fit text-foreground"
+              color={isValidCatalogColor(draftColor) ? draftColor : undefined}
+            >
               {normalizeCatalogLabel(draftValue) || editingItem.value}
-            </Badge>
+            </Tag>
           </div>
         ) : null}
 
