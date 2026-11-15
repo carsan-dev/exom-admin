@@ -6,15 +6,19 @@ import { ProtectedRoute } from '@/features/auth/components/protected-route'
 import { AppLayout } from '@/components/layout/app-layout'
 import { LoginPage } from '@/features/auth/pages/login-page'
 import { Toaster } from '@/components/ui/sonner'
+import { RouteError } from '@/components/layout/route-error'
+import { NotFoundPage } from '@/components/layout/not-found-page'
 
 const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+    errorElement: <RouteError homeHref="/login" homeLabel="Ir al inicio de sesión" />,
   },
   {
     path: '/',
     element: <ProtectedRoute />,
+    errorElement: <RouteError />,
     children: [
       {
         path: 'onboarding',
@@ -44,6 +48,7 @@ const router = createBrowserRouter([
           { path: 'notifications', lazy: async () => ({ Component: (await import('@/features/notifications/pages/notifications-page')).NotificationsPage }) },
           { path: 'notification-templates', lazy: async () => ({ Component: (await import('@/features/notification-templates/pages/notification-templates-page')).NotificationTemplatesPage }) },
           { path: 'approval-requests', lazy: async () => ({ Component: (await import('@/features/approval-requests/pages/approval-requests-page')).ApprovalRequestsPage }) },
+          { path: '*', element: <NotFoundPage /> },
         ],
       },
     ],
