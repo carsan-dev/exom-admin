@@ -9,6 +9,7 @@ describe('ExerciseThumbnail', () => {
     expect(img).toHaveAttribute('src', 'https://media.example.test/s.jpg')
     expect(img).toHaveAttribute('loading', 'lazy')
     expect(img).toHaveAttribute('decoding', 'async')
+    expect(img).toHaveAttribute('referrerpolicy', 'no-referrer')
     expect(img).toHaveAttribute('width', '48')
     expect(img).toHaveAttribute('height', '36')
     expect(img).toHaveClass('object-cover')

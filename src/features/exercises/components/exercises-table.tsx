@@ -77,9 +77,15 @@ export function ExercisesTable({
 
             <TableCell className="text-center">
               {exercise.video_url ? (
-                <Video className="inline-block h-4 w-4 text-status-success" />
+                <>
+                  <Video className="inline-block h-4 w-4 text-status-success" aria-hidden="true" />
+                  <span className="sr-only">Con vídeo</span>
+                </>
               ) : (
-                <span className="text-xs text-muted-foreground">—</span>
+                <>
+                  <span aria-hidden="true" className="text-xs text-muted-foreground">—</span>
+                  <span className="sr-only">Sin vídeo</span>
+                </>
               )}
             </TableCell>
 

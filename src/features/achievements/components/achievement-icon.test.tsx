@@ -9,6 +9,7 @@ describe('AchievementIcon', () => {
     expect(img).toHaveAttribute('src', 'https://media.example.test/i.png')
     expect(img).toHaveAttribute('loading', 'lazy')
     expect(img).toHaveAttribute('decoding', 'async')
+    expect(img).toHaveAttribute('referrerpolicy', 'no-referrer')
     expect(img).toHaveAttribute('width', '36')
     expect(img).toHaveAttribute('height', '36')
   })

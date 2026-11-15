@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertTriangle, Check, ChevronsUpDown, SendHorizonal, X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -155,6 +155,10 @@ function getRouteTypeFromTemplate(route: string | null | undefined): Notificatio
   return 'home'
 }
 
+function formatClientCount(count: number) {
+  return `${count} cliente${count === 1 ? '' : 's'}`
+}
+
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -309,6 +313,9 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
   const titleValue = form.watch('title')
   const bodyValue = form.watch('body')
   const clients = clientsQuery.data?.data ?? []
+  // The list is capped at ALL_CLIENTS_LIMIT, so the real portfolio size is the response `total`.
+  const rawTotal: unknown = clientsQuery.data?.total
+  const totalClients = typeof rawTotal === 'number' && Number.isFinite(rawTotal) && rawTotal >= 0 ? rawTotal : null
   const isSubmitting = sendNotification.isPending || sendToAllClients.isPending
   useUnsavedChanges('send-notification-form', open && (form.formState.isDirty || isSubmitting))
   const clientsLoadError = clientsQuery.isError
@@ -328,6 +335,11 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
       form.reset(defaultValues)
     }
   }, [form, open])
+
+  const clientsErrorRef = useRef(clientsQuery.isError)
+  useEffect(() => {
+    clientsErrorRef.current = clientsQuery.isError
+  }, [clientsQuery.isError])
 
   useEffect(() => {
     if (clientsQuery.isError && sendToAll) {
@@ -356,16 +368,22 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
 
   const handleSubmit = form.handleSubmit(async (values) => {
     if (values.sendToAll) {
-      const recipientCount = clients.length
       const accepted = await confirm({
         title: '¿Enviar la notificación a todos tus clientes?',
         description:
-          recipientCount > 0
-            ? `Llegará a ${recipientCount} cliente${recipientCount === 1 ? '' : 's'} visibles de tu cartera.`
+          totalClients !== null && totalClients > 0
+            ? `Llegará a ${formatClientCount(totalClients)} visibles de tu cartera.`
             : 'Llegará a todos los clientes visibles de tu cartera.',
         confirmLabel: 'Enviar a todos',
       })
       if (!accepted) return
+
+      // The portfolio query may have failed while the confirmation was open, which unchecks
+      // "send to all": do not send with the stale value captured before the confirmation.
+      if (!form.getValues('sendToAll') || clientsErrorRef.current) {
+        toast.error('La cartera de clientes ya no está disponible. Revisa el formulario antes de enviar.')
+        return
+      }
     }
 
     const payload = {
@@ -414,7 +432,10 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent
+        disableOutsideClose
+        className="max-h-[90vh] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-2xl"
+      >
         <DialogHeader>
           <DialogTitle>Enviar notificación</DialogTitle>
           <DialogDescription>
@@ -490,7 +511,9 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                         {clientsLoadError
                           ? 'Corrige el problema de carga antes de enviar notificaciones.'
                           : clients.length > 0
-                          ? `Se enviará a ${clients.length} cliente${clients.length === 1 ? '' : 's'} visibles.`
+                          ? totalClients !== null && totalClients > 0
+                            ? `Se enviará a ${formatClientCount(totalClients)} visibles.`
+                            : 'Se enviará a todos los clientes visibles.'
                           : 'Ahora mismo no hay clientes visibles en tu cartera.'}
                       </FormDescription>
                     </div>
@@ -527,7 +550,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
               )}
             />
 
-            <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_220px]">
               <FormField
                 control={form.control}
                 name="title"

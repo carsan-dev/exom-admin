@@ -280,7 +280,7 @@ export function ChallengesPage() {
           </form>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-[13px] tabular-nums text-foreground-muted" aria-live="polite">
+            <p className="text-[13px] tabular-nums text-foreground-muted" aria-live="polite" aria-busy={!data}>
               {data ? `${data.total} reto${data.total === 1 ? '' : 's'} encontrado${data.total === 1 ? '' : 's'}` : 'Cargando resultados...'}
             </p>
 

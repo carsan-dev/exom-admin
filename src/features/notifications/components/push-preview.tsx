@@ -18,16 +18,16 @@ export function PushPreview({ title, body }: PushPreviewProps) {
   const trimmedBody = body.trim()
 
   return (
-    <div data-testid="push-preview" aria-hidden="true" className="space-y-2">
+    <div data-testid="push-preview" aria-hidden="true" className="min-w-0 space-y-2">
       <p className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Vista previa</p>
-      <div className="flex items-start gap-3 border border-border-strong bg-card p-3">
+      <div className="flex min-w-0 items-start gap-3 overflow-hidden border border-border-strong bg-card p-3">
         <span className="mt-0.5 flex size-8 flex-none items-center justify-center bg-brand-primary font-display text-xs font-extrabold text-primary-foreground">
           E
         </span>
         <div className="min-w-0 flex-1 space-y-0.5">
-          <div className="flex items-center justify-between gap-2 text-[11px] uppercase tracking-[0.06em] text-foreground-muted">
+          <div className="flex min-w-0 items-center justify-between gap-2 text-[11px] uppercase tracking-[0.06em] text-foreground-muted">
             <span>{PUSH_PREVIEW_APP_NAME}</span>
-            <span>ahora</span>
+            <span className="flex-none">ahora</span>
           </div>
           <p
             className={cn(

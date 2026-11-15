@@ -34,6 +34,7 @@ export function AchievementIcon({ name, url, className }: AchievementIconProps) 
       alt={`Icono de ${name}`}
       loading="lazy"
       decoding="async"
+      referrerPolicy="no-referrer"
       width={36}
       height={36}
       onError={() => setFailedUrl(url)}

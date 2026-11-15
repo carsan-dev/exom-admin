@@ -17,8 +17,15 @@ vi.mock('../api', () => ({
   useSendNotification: () => ({ mutateAsync: (...args: unknown[]) => sendMutate(...args), isPending: false }),
   useSendToAllClients: () => ({ mutateAsync: (...args: unknown[]) => sendAllMutate(...args), isPending: false }),
 }))
+let clientsResponse: { data: typeof clients; total?: number } = { data: clients, total: clients.length }
+let clientsFailed = false
 vi.mock('../../clients/api', () => ({
-  useClients: () => ({ data: { data: clients }, isLoading: false, isError: false, error: null }),
+  useClients: () => ({
+    data: clientsResponse,
+    isLoading: false,
+    isError: clientsFailed,
+    error: clientsFailed ? new Error('boom') : null,
+  }),
 }))
 vi.mock('@/features/notification-templates/api', () => ({
   useNotificationTemplates: () => ({ data: [] }),
@@ -28,12 +35,14 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), info: vi.fn(), error: vi.f
 function renderDialog() {
   const onOpenChange = vi.fn()
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  render(
+  // A fresh element per call: re-rendering the same element would bail out and skip the mocked hook.
+  const ui = () => (
     <QueryClientProvider client={client}>
       <SendNotificationDialog open onOpenChange={onOpenChange} />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   )
-  return { onOpenChange }
+  const { rerender } = render(ui())
+  return { onOpenChange, rerender: () => rerender(ui()) }
 }
 
 async function fillMessage(user: ReturnType<typeof userEvent.setup>) {
@@ -53,6 +62,8 @@ describe('SendNotificationDialog', () => {
       },
     )
     Element.prototype.scrollIntoView = vi.fn()
+    clientsResponse = { data: clients, total: clients.length }
+    clientsFailed = false
     sendMutate.mockReset()
     sendAllMutate.mockReset()
     sendMutate.mockResolvedValue({ status: 'SENT', error: null })
@@ -118,6 +129,59 @@ describe('SendNotificationDialog', () => {
       await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
     })
 
+    it('announces the real portfolio total, not the 200 loaded', async () => {
+      const user = userEvent.setup()
+      clientsResponse = {
+        data: Array.from({ length: 200 }, (_, index) => ({
+          id: `00000000-0000-4000-8000-${String(index).padStart(12, '0')}`,
+          email: `c${index}@example.test`,
+          profile: { first_name: `C${index}`, last_name: 'Test' },
+        })),
+        total: 350,
+      }
+      renderDialog()
+      expect(screen.getByText('Se enviará a 350 clientes visibles.')).toBeInTheDocument()
+      await fillMessage(user)
+      await user.click(screen.getByLabelText('Enviar a todos mis clientes'))
+      await user.click(screen.getByRole('button', { name: 'Enviar notificación' }))
+
+      const confirm = await screen.findByRole('alertdialog')
+      expect(within(confirm).getByText('Llegará a 350 clientes visibles de tu cartera.')).toBeInTheDocument()
+      expect(within(confirm).queryByText(/\b200\b/)).not.toBeInTheDocument()
+    })
+
+    it('uses a text without figure when the response has no usable total', async () => {
+      const user = userEvent.setup()
+      clientsResponse = { data: clients }
+      renderDialog()
+      expect(screen.getByText('Se enviará a todos los clientes visibles.')).toBeInTheDocument()
+      await fillMessage(user)
+      await user.click(screen.getByLabelText('Enviar a todos mis clientes'))
+      await user.click(screen.getByRole('button', { name: 'Enviar notificación' }))
+
+      const confirm = await screen.findByRole('alertdialog')
+      expect(within(confirm).getByText('Llegará a todos los clientes visibles de tu cartera.')).toBeInTheDocument()
+    })
+
+    it('aborts without calling the API when the clients query fails while the confirmation is open', async () => {
+      const user = userEvent.setup()
+      const { rerender } = renderDialog()
+      await fillMessage(user)
+      await user.click(screen.getByLabelText('Enviar a todos mis clientes'))
+      await user.click(screen.getByRole('button', { name: 'Enviar notificación' }))
+      const confirm = await screen.findByRole('alertdialog')
+
+      clientsFailed = true
+      rerender()
+      await waitFor(() => expect(screen.getByLabelText('Enviar a todos mis clientes')).not.toBeChecked())
+
+      await user.click(within(confirm).getByRole('button', { name: 'Enviar a todos' }))
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
+
+      expect(sendAllMutate).not.toHaveBeenCalled()
+      expect(sendMutate).not.toHaveBeenCalled()
+    })
+
     it('does not ask for confirmation when sending to specific recipients', async () => {
       const user = userEvent.setup()
       renderDialog()
@@ -164,12 +228,40 @@ describe('SendNotificationDialog', () => {
       const counter = screen.getByTestId('counter-título')
       expect(counter).toHaveTextContent('101/100')
       expect(counter).toHaveTextContent('límite superado')
-      expect(counter).toHaveAttribute('aria-live', 'polite')
+      expect(counter).not.toHaveAttribute('aria-live')
+      expect(screen.getByTestId('counter-status-título')).toHaveTextContent('Límite superado')
       expect(counter).toHaveClass('text-status-error')
 
       await user.click(screen.getByRole('button', { name: 'Enviar notificación' }))
       expect(await screen.findByText('El título no puede superar los 100 caracteres')).toBeInTheDocument()
       expect(sendMutate).not.toHaveBeenCalled()
+    })
+
+    it('announces the counter only when crossing thresholds, not on every keystroke', async () => {
+      const user = userEvent.setup()
+      renderDialog()
+      const status = screen.getByTestId('counter-status-título')
+      const title = screen.getByLabelText('Título')
+      expect(status).toHaveAttribute('role', 'status')
+      expect(status).toHaveTextContent('')
+
+      await user.click(title)
+      await user.paste('x'.repeat(89))
+      expect(status).toHaveTextContent('')
+
+      await user.type(title, 'y')
+      expect(status).toHaveTextContent('Quedan 10 caracteres')
+
+      await user.type(title, 'z')
+      expect(status).toHaveTextContent('Quedan 10 caracteres')
+
+      await user.paste('w'.repeat(10))
+      expect(status).toHaveTextContent('Límite superado')
+      await user.type(title, 'q')
+      expect(status).toHaveTextContent('Límite superado')
+
+      await user.keyboard('{Backspace>7/}')
+      expect(status).toHaveTextContent('Dentro del límite')
     })
 
     it('shows a dimmed fallback in the preview when empty and updates it live', async () => {

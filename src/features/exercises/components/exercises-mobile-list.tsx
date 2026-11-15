@@ -83,7 +83,14 @@ export function ExercisesMobileList({
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                 <TrainingUsageCell exercise={exercise} />
-                {exercise.video_url ? <Video className="h-4 w-4 text-status-success" aria-hidden="true" /> : null}
+                {exercise.video_url ? (
+                  <>
+                    <Video className="h-4 w-4 text-status-success" aria-hidden="true" />
+                    <span className="sr-only">Con vídeo</span>
+                  </>
+                ) : (
+                  <span className="sr-only">Sin vídeo</span>
+                )}
               </div>
             </div>
             <ExerciseRowActions

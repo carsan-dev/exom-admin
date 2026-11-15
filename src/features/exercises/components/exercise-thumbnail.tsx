@@ -33,6 +33,7 @@ export function ExerciseThumbnail({ name, url, className }: ExerciseThumbnailPro
       alt={`Miniatura de ${name}`}
       loading="lazy"
       decoding="async"
+      referrerPolicy="no-referrer"
       width={48}
       height={36}
       onError={() => setFailedUrl(url)}
