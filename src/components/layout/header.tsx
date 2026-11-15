@@ -11,7 +11,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Link } from 'react-router'
 import { Breadcrumbs } from './breadcrumbs'
+import { BrandSymbol } from './brand-symbol'
 
 interface HeaderProps {
   onMenuToggle: () => void
@@ -31,17 +33,31 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
   return (
     <header className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border bg-background px-3">
+      <Link
+        to="/dashboard"
+        aria-label="EXOM Admin, ir al Dashboard"
+        className="flex shrink-0 items-center gap-2 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus md:hidden"
+      >
+        <BrandSymbol />
+        <span
+          aria-hidden="true"
+          className="font-display text-[20px] font-bold uppercase leading-none tracking-wide text-foreground"
+        >
+          EXOM
+        </span>
+      </Link>
+
       <Button
         variant="ghost"
         size="icon"
         onClick={onMenuToggle}
         aria-label="Mostrar u ocultar el menú"
-        className="shrink-0"
+        className="hidden shrink-0 md:inline-flex"
       >
         <Menu aria-hidden="true" className="h-5 w-5" />
       </Button>
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 max-md:invisible">
         <Breadcrumbs />
       </div>
 

@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { Sidebar } from './sidebar'
 import { Header } from './header'
+import { MobileTabbar } from './mobile-tabbar'
 import { readSidebarExpanded, writeSidebarExpanded } from './sidebar-state'
 
 export function AppLayout() {
@@ -55,6 +56,9 @@ export function AppLayout() {
           <Sidebar isOpen={sidebarOpen} />
         </div>
 
+        {/* Barra inferior móvil (< md) */}
+        <MobileTabbar />
+
         {/* Mobile sidebar — overlay */}
         <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
           <SheetContent
@@ -83,7 +87,7 @@ export function AppLayout() {
           <main
             ref={mainRef}
             className={cn(
-              'min-w-0 max-w-full flex-1 bg-background p-3 sm:p-5 lg:overflow-y-auto lg:p-6 lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]',
+              'min-w-0 max-w-full flex-1 bg-background p-3 max-md:pb-[calc(56px+env(safe-area-inset-bottom,0px)+16px)] sm:p-5 lg:overflow-y-auto lg:p-6 lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]',
               showScrollTop ? 'pb-24 sm:pb-28' : null,
             )}
           >

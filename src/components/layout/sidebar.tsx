@@ -4,24 +4,8 @@ import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useApprovalStats } from '@/features/approval-requests/api'
+import { BrandSymbol } from './brand-symbol'
 import { resolveNavGroups, type NavItem } from './nav-model'
-
-const SYMBOL_PATH =
-  'M46 110C20 106 0 84 0 56C0 33 14 12 35 3C48-2 60 4 62 16C66 29 57 39 44 39C36 39 28 35 23 28C11 38 5 51 7 65C9 86 24 103 46 109Z'
-
-function BrandSymbol() {
-  return (
-    <svg
-      viewBox="0 0 120 112"
-      className="h-[19px] w-5 shrink-0"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path className="fill-foreground" d={SYMBOL_PATH} />
-      <path className="fill-brand-primary" transform="rotate(180 60 56)" d={SYMBOL_PATH} />
-    </svg>
-  )
-}
 
 interface SidebarProps {
   isOpen: boolean
@@ -48,8 +32,8 @@ function SidebarLink({ item, count, isOpen, onClose }: SidebarLinkProps) {
         'group relative flex h-11 w-full select-none items-center gap-3 whitespace-nowrap px-[18px] text-sm md:h-9',
         'transition-colors duration-(--dur-fast) ease-out',
         'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
-        'text-foreground-secondary hover:bg-background-surface hover:text-foreground',
-        'aria-[current=page]:bg-lime-soft aria-[current=page]:text-foreground',
+        'hover:bg-background-surface',
+        'aria-[current=page]:bg-lime-soft',
       )}
     >
       <>
@@ -57,7 +41,12 @@ function SidebarLink({ item, count, isOpen, onClose }: SidebarLinkProps) {
             aria-hidden="true"
             className="h-5 w-5 shrink-0 text-muted-foreground group-aria-[current=page]:text-accent-line"
           />
-          <span className={cn(isOpen ? 'min-w-0 flex-1 truncate' : 'sr-only')}>{label}</span>
+          <span
+            className={cn(
+              'text-foreground-secondary transition-colors duration-(--dur-fast) ease-out group-hover:text-foreground group-aria-[current=page]:text-foreground',
+              isOpen ? 'min-w-0 flex-1 truncate' : 'sr-only',
+            )}
+          >{label}</span>
           {count !== null ? (
             <span
               aria-label={`${count} pendientes`}

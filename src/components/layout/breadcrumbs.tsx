@@ -67,9 +67,11 @@ export function Breadcrumbs() {
               ) : (
                 <Link
                   to={to}
-                  className="text-muted-foreground transition-colors duration-(--dur-fast) ease-out hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                  className="group transition-colors duration-(--dur-fast) ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 >
-                  {label}
+                  <span className="text-muted-foreground transition-colors duration-(--dur-fast) ease-out group-hover:text-foreground">
+                    {label}
+                  </span>
                 </Link>
               )}
             </li>
