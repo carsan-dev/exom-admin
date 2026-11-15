@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Exclude mockups and evidence from automatic class detection */
+@source not "../docs";
+
 /* Dark mode via class on <html> */
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -29,81 +32,135 @@
 /* ── EXOM Design Tokens ──────────────────────────────────────────────── */
 :root {
   /* Dark mode (default) */
-  --background: #30271e;
-  --background-secondary: #423e35;
-  --background-surface: #503c04;
-  --background-darker: #0b1708;
+  --background: #101111;
+  --background-secondary: #151715;
+  --background-surface: #1b1e1b;
+  --background-darker: #0b0c0b;
 
-  --foreground: #f7e681;
-  --foreground-secondary: #e3bc18;
-  --foreground-muted: #888444;
-  --foreground-accent: #d3f858;
+  --foreground: #f2f1e9;
+  --foreground-secondary: #b7bcb3;
+  --foreground-muted: #8a9086;
+  --foreground-accent: #baf23a;
 
-  --card: #423e35;
-  --card-foreground: #f7e681;
-  --popover: #423e35;
-  --popover-foreground: #f7e681;
+  --card: #151715;
+  --card-foreground: #f2f1e9;
+  --popover: #1b1e1b;
+  --popover-foreground: #f2f1e9;
 
-  --primary: #c8e848;
-  --primary-foreground: #1a1410;
-  --secondary: #4a5b21;
-  --secondary-foreground: #f7e681;
-  --muted: #423e35;
-  --muted-foreground: #888444;
-  --accent: #4a5b21;
-  --accent-foreground: #d3f858;
-  --destructive: #f44336;
-  --destructive-foreground: #ffffff;
+  --primary: #baf23a;
+  --primary-foreground: #101111;
+  --secondary: #22261f;
+  --secondary-foreground: #f2f1e9;
+  --muted: #1b1e1b;
+  --muted-foreground: #8a9086;
+  --accent: #22261f;
+  --accent-foreground: #baf23a;
+  --destructive: #ff6b57;
+  --destructive-foreground: #101111;
 
-  --border: #1c3b00;
-  --input: #423e35;
-  --ring: #c8e848;
+  --border: #272b25;
+  --input: #151715;
+  --ring: #baf23a;
 
-  --radius: 0.5rem;
+  --radius: 0;
+
+  /* Motion durations */
+  --dur-press: 80ms;
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-enter: 240ms;
+  --dur-exit: 160ms;
 
   /* Brand palette */
-  --brand-primary: #c8e848;
-  --brand-secondary: #a2c809;
-  --brand-tertiary: #88a834;
-  --brand-soft: #4a5b21;
+  --brand-primary: #baf23a;
+  --brand-secondary: #baf23a;
+  --brand-tertiary: #baf23a;
+  --brand-soft: #22261f;
 
   /* Status */
-  --status-success: #4caf50;
-  --status-warning: #ffc107;
-  --status-error: #f44336;
-  --status-info: #2196f3;
+  --status-success: #5fd08a;
+  --status-warning: #f0b23e;
+  --status-error: #ff6b57;
+  --status-info: #7fb5d8;
+
+  /* Controls, accent usage and focus */
+  --control-border: #697160;
+  --control-border-hover: #8a9282;
+  --accent-text: #baf23a;
+  --accent-line: #baf23a;
+  --focus: #baf23a;
+
+  /* Soft status fills */
+  --status-success-soft: color-mix(in srgb, var(--status-success) 14%, transparent);
+  --status-warning-soft: color-mix(in srgb, var(--status-warning) 14%, transparent);
+  --status-error-soft: color-mix(in srgb, var(--status-error) 14%, transparent);
+  --status-info-soft: color-mix(in srgb, var(--status-info) 14%, transparent);
+  --status-neutral-soft: color-mix(in srgb, var(--foreground-muted) 14%, transparent);
+
+  /* Overlays and skeletons */
+  --scrim: rgb(9 10 9 / 0.72);
+  --shadow-overlay: 0 2px 4px rgb(0 0 0 / 0.3), 0 6px 12px rgb(0 0 0 / 0.42);
+  --skeleton-base: #1b1e1b;
+  --skeleton-hi: #242822;
 }
 
 .light {
-  --background: #f5f0e8;
-  --background-secondary: #ede8e0;
-  --background-surface: #e5e0d8;
-  --background-darker: #ffffff;
+  --background: #f2f1e9;
+  --background-secondary: #f8f7f1;
+  --background-surface: #ffffff;
+  --background-darker: #e9e7dc;
 
-  --foreground: #1a1410;
-  --foreground-secondary: #3d3520;
-  --foreground-muted: #6b6040;
-  --foreground-accent: #4a5b21;
+  --foreground: #101111;
+  --foreground-secondary: #454a42;
+  --foreground-muted: #5f645a;
+  --foreground-accent: #3f5c00;
 
-  --card: #ffffff;
-  --card-foreground: #1a1410;
+  --card: #f8f7f1;
+  --card-foreground: #101111;
   --popover: #ffffff;
-  --popover-foreground: #1a1410;
+  --popover-foreground: #101111;
 
-  --primary: #a2c809;
-  --primary-foreground: #ffffff;
-  --secondary: #ede8e0;
-  --secondary-foreground: #1a1410;
-  --muted: #ede8e0;
-  --muted-foreground: #6b6040;
-  --accent: #ede8e0;
-  --accent-foreground: #4a5b21;
-  --destructive: #dc2626;
+  --primary: #baf23a;
+  --primary-foreground: #101111;
+  --secondary: #ecebe2;
+  --secondary-foreground: #101111;
+  --muted: #ffffff;
+  --muted-foreground: #5f645a;
+  --accent: #ecebe2;
+  --accent-foreground: #3f5c00;
+  --destructive: #a8301c;
   --destructive-foreground: #ffffff;
 
-  --border: #d8d0c0;
-  --input: #ede8e0;
-  --ring: #a2c809;
+  --border: #dddbce;
+  --input: #f8f7f1;
+  --ring: #3f5c00;
+
+  --brand-primary: #baf23a;
+  --brand-secondary: #baf23a;
+  --brand-tertiary: #5a8a00;
+  --brand-soft: #ecebe2;
+
+  --status-success: #1a6b3c;
+  --status-warning: #7a4f00;
+  --status-error: #a8301c;
+  --status-info: #245f85;
+
+  --control-border: #80857a;
+  --control-border-hover: #646a5a;
+  --accent-text: #3f5c00;
+  --accent-line: #5a8a00;
+  --focus: #3f5c00;
+
+  --status-success-soft: color-mix(in srgb, var(--status-success) 12%, transparent);
+  --status-warning-soft: color-mix(in srgb, var(--status-warning) 12%, transparent);
+  --status-error-soft: color-mix(in srgb, var(--status-error) 12%, transparent);
+  --status-info-soft: color-mix(in srgb, var(--status-info) 12%, transparent);
+  --status-neutral-soft: color-mix(in srgb, var(--foreground-muted) 12%, transparent);
+
+  --scrim: rgb(9 10 9 / 0.44);
+  --shadow-overlay: 0 2px 4px rgb(16 17 17 / 0.08), 0 6px 12px rgb(16 17 17 / 0.16);
+  --skeleton-base: #e6e4d8;
+  --skeleton-hi: #efeee5;
 }
 
 /* ── Tailwind v4 theme mapping ───────────────────────────────────────── */
@@ -138,24 +195,61 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-brand-primary: #c8e848;
-  --color-brand-secondary: #a2c809;
-  --color-brand-tertiary: #88a834;
-  --color-brand-soft: #4a5b21;
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-tertiary: var(--brand-tertiary);
+  --color-brand-soft: var(--brand-soft);
 
-  --color-status-success: #4caf50;
-  --color-status-warning: #ffc107;
-  --color-status-error: #f44336;
-  --color-status-info: #2196f3;
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+  --color-status-info: var(--status-info);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-control-border: var(--control-border);
+  --color-control-border-hover: var(--control-border-hover);
+  --color-accent-text: var(--accent-text);
+  --color-accent-line: var(--accent-line);
+  --color-focus: var(--focus);
+  --color-status-success-soft: var(--status-success-soft);
+  --color-status-warning-soft: var(--status-warning-soft);
+  --color-status-error-soft: var(--status-error-soft);
+  --color-status-info-soft: var(--status-info-soft);
+  --color-status-neutral-soft: var(--status-neutral-soft);
+  --color-scrim: var(--scrim);
+  --color-skeleton-base: var(--skeleton-base);
+  --color-skeleton-hi: var(--skeleton-hi);
 
+  /* Radius 0 (D1). Names kept; rounded-full stays for pills and avatars. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
+
+  /* Shadow only on overlays (D1) */
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-overlay: var(--shadow-overlay);
+
+}
+
+/* Fonts and easing: emitted on :root only when referenced (no `static`, so the
+   default Tailwind palette is not dumped into the bundle). */
+@theme {
   --font-display: 'Barlow', 'Arial Narrow', sans-serif;
   --font-ui: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-sans: var(--font-ui);
+
+  --ease-out: cubic-bezier(0.22, 0.75, 0.18, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* ── Base styles ─────────────────────────────────────────────────────── */
@@ -221,8 +315,20 @@ button {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--brand-soft);
+}
+
+/* Reduced motion (D4): collapse transitions and animations to ~0. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
