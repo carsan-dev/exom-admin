@@ -97,6 +97,31 @@ describe('RecapDetailPage discard local comments confirmation', () => {
     expect(api.put).toHaveBeenCalledTimes(1); expect(api.post).not.toHaveBeenCalled()
   })
 
+  it('a newer saved version arriving while the question is open is not replaced by the stale one', async () => {
+    const user = userEvent.setup()
+    await reachLegacyRecovery()
+    const newer: RecapItem = { ...recap, admin_comments: 'Nota más reciente', client_feedback_text: 'Feedback más reciente', updated_at: '2026-10-06' }
+    let release: (value: unknown) => void = () => undefined
+    api.get.mockImplementationOnce(() => new Promise((resolve) => { release = resolve }))
+
+    // A second read is in flight when the question about the version on screen is asked.
+    await user.click(screen.getByRole('button', { name: 'Consultar comentarios guardados' }))
+    await user.click(screen.getByRole('button', { name: 'Descartar comentarios y cargar guardados' }))
+    expect(screen.getByRole('alertdialog', { name: QUESTION })).toBeInTheDocument()
+    await act(async () => { release(envelope(newer)) })
+    expect(await screen.findByText('Comentario guardado: Feedback más reciente')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Aceptar' }))
+
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
+    expect(screen.getByPlaceholderText(NOTE)).toHaveValue('Nota local')
+    expect(screen.getByPlaceholderText(FEEDBACK)).toHaveValue('Feedback local')
+    expect(screen.queryByDisplayValue('Nota guardada')).not.toBeInTheDocument()
+    expect(screen.getByText('Comentario guardado: Feedback más reciente')).toBeInTheDocument()
+    expect(screen.getByText(/Se conservan tus comentarios/)).toBeInTheDocument()
+    expect(api.put).toHaveBeenCalledTimes(1); expect(api.post).not.toHaveBeenCalled()
+  })
+
   it('an identity change while the question is open discards the question and applies nothing', async () => {
     const user = userEvent.setup()
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)

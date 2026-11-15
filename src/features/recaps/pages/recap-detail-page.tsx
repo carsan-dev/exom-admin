@@ -118,6 +118,8 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
   const [legacyError, setLegacyError] = useState('')
   const [legacyServer, setLegacyServer] = useState<typeof recapQuery.data>()
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
+  const latestLegacyServer = useRef(legacyServer)
+  useEffect(() => { latestLegacyServer.current = legacyServer }, [legacyServer])
 
   useEffect(() => {
     const data = recapQuery.data
@@ -477,8 +479,10 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
       }}>Consultar comentarios guardados</Button>
         {legacyServer && <><p className="whitespace-pre-wrap [overflow-wrap:anywhere]">Comentario guardado: {legacyServer.client_feedback_text || 'Sin comentario'}</p><Button variant="outline" onClick={async () => {
           if (!current()) return
-          // The identity may change while the question is open: re-check it after the answer.
+          // The identity or the saved version may change while the question is open: re-check both
+          // after the answer and load only the version that was on screen when asked.
           if (!(await confirm({ title: 'Descartar tus comentarios locales y cargar los guardados?' })) || !current()) return
+          if (latestLegacyServer.current !== legacyServer) return
           const note = legacyServer.admin_comments ?? ''; const feedback = legacyServer.client_feedback_text ?? ''
           setInternalNote(note); setClientFeedback(feedback); setBaseline({ note, feedback }); setLegacyError(''); setLegacyServer(undefined)
         }}>Descartar comentarios y cargar guardados</Button></>}

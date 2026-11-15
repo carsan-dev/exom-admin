@@ -9,7 +9,7 @@ const buttonVariants = cva(
     // Layout and type
     "relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none rounded-md border border-transparent text-sm font-semibold",
     // Motion: colour changes at --dur-fast, press scale at --dur-press
-    "[transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out)] active:scale-[0.98]",
+    "[transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98]",
     // Focus: outline, same as the other restyled controls
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
     // Disabled: quiet outline with muted text (no opacity, keeps text legible)

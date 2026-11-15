@@ -57,7 +57,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
           <span
             aria-hidden="true"
             className={cn(
-              'pointer-events-none block size-3.5 translate-x-0.5 rounded-full bg-foreground-secondary transition-[transform,background-color] duration-(--dur-base) ease-(--ease-out)',
+              'pointer-events-none block size-3.5 translate-x-0.5 rounded-full bg-foreground-secondary transition-[transform,translate,background-color] duration-(--dur-base) ease-(--ease-out)',
               isOn && 'translate-x-[18px] bg-primary-foreground',
               disabled && 'bg-muted-foreground'
             )}

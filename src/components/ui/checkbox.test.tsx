@@ -87,6 +87,42 @@ describe('Checkbox', () => {
     expect(onCheckedChange).toHaveBeenCalledWith(true)
   })
 
+  it('stays indeterminate after a click or Space when the parent keeps the prop', async () => {
+    const onCheckedChange = vi.fn()
+    render(
+      <Checkbox
+        aria-label="Todos"
+        checked="indeterminate"
+        onCheckedChange={onCheckedChange}
+      />
+    )
+    const box = screen.getByRole<HTMLInputElement>('checkbox')
+    expect(box.indeterminate).toBe(true)
+    await userEvent.click(box)
+    expect(onCheckedChange).toHaveBeenLastCalledWith(true)
+    expect(box.indeterminate).toBe(true)
+    expect(box).not.toBeChecked()
+    expect(box).toHaveAttribute('aria-checked', 'mixed')
+    expect(box).toBePartiallyChecked()
+    await userEvent.keyboard(' ')
+    expect(onCheckedChange).toHaveBeenCalledTimes(2)
+    expect(box.indeterminate).toBe(true)
+    expect(box).toHaveAttribute('aria-checked', 'mixed')
+  })
+
+  it('leaves the indeterminate state when the parent changes the prop after a click', async () => {
+    function Controlled() {
+      const [checked, setChecked] = useState<boolean | 'indeterminate'>('indeterminate')
+      return <Checkbox aria-label="Todos" checked={checked} onCheckedChange={setChecked} />
+    }
+    render(<Controlled />)
+    const box = screen.getByRole<HTMLInputElement>('checkbox')
+    await userEvent.click(box)
+    expect(box.indeterminate).toBe(false)
+    expect(box).toBeChecked()
+    expect(box).not.toHaveAttribute('aria-checked')
+  })
+
   it('does not set aria-checked mixed when not indeterminate', () => {
     render(<Checkbox aria-label="x" checked />)
     expect(screen.getByRole('checkbox')).not.toHaveAttribute('aria-checked')

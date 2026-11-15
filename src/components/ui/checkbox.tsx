@@ -39,8 +39,13 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           defaultChecked={checked === undefined ? defaultChecked : undefined}
           aria-checked={indeterminate ? 'mixed' : undefined}
           onChange={(event) => {
+            // The browser clears the DOM flag on activation; re-apply the prop so a parent that keeps
+            // 'indeterminate' (and therefore does not re-render the ref) still shows it. A new prop
+            // value re-runs the ref callback after this and wins.
+            const node = event.currentTarget
             onChange?.(event)
             onCheckedChange?.(event.target.checked)
+            node.indeterminate = indeterminate
           }}
           className={cn(
             'peer relative col-start-1 row-start-1 m-0 size-4 shrink-0 cursor-pointer appearance-none rounded-md border border-input bg-input transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) hover:border-control-border-hover checked:border-accent-line checked:bg-primary indeterminate:border-accent-line indeterminate:bg-primary focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:hover:border-border',
