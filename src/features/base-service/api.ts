@@ -170,6 +170,12 @@ export function isSourceChangedError(error: unknown) {
   return getApiErrorStatus(error) === 409 && getApiErrorCode(error) === SOURCE_CHANGED_CODE
 }
 
+export const EMPTY_PACKAGE_CODE = 'EMPTY_PACKAGE'
+
+export function isEmptyPackageError(error: unknown) {
+  return getApiErrorStatus(error) === 409 && getApiErrorCode(error) === EMPTY_PACKAGE_CODE
+}
+
 export function useResendDelivery() {
   const refresh = useRefreshBaseService()
   return useMutation({
