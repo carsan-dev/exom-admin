@@ -7,9 +7,10 @@ import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { Sidebar } from './sidebar'
 import { Header } from './header'
+import { readSidebarExpanded, writeSidebarExpanded } from './sidebar-state'
 
 export function AppLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(readSidebarExpanded)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [showScrollTop, setShowScrollTop] = useState(false)
   const mainRef = useRef<HTMLElement | null>(null)
@@ -71,7 +72,9 @@ export function AppLayout() {
           <Header
             onMenuToggle={() => {
               if (window.innerWidth >= 1024) {
-                setSidebarOpen((v) => !v)
+                const next = !sidebarOpen
+                setSidebarOpen(next)
+                writeSidebarExpanded(next)
               } else {
                 setMobileSidebarOpen((v) => !v)
               }

@@ -1,162 +1,173 @@
-import { Fragment } from 'react'
+import { useId } from 'react'
 import { NavLink } from 'react-router'
-import {
-  LayoutDashboard,
-  Users,
-  Dumbbell,
-  ClipboardList,
-  Apple,
-  UtensilsCrossed,
-  CalendarDays,
-  TrendingUp,
-  MessageSquare,
-  FileText,
-  Trophy,
-  Award,
-  Bell,
-  Settings,
-  ShieldCheck,
-  Tags,
-  type LucideIcon,
-} from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Badge } from '@/components/ui/badge'
-import { getUsersRoute } from '@/features/clients/types'
 import { useApprovalStats } from '@/features/approval-requests/api'
+import { resolveNavGroups, type NavItem } from './nav-model'
 
-interface NavItem {
-  to: string
-  label: string
-  icon: LucideIcon
-  superAdminOnly?: boolean
+const SYMBOL_PATH =
+  'M46 110C20 106 0 84 0 56C0 33 14 12 35 3C48-2 60 4 62 16C66 29 57 39 44 39C36 39 28 35 23 28C11 38 5 51 7 65C9 86 24 103 46 109Z'
+
+function BrandSymbol() {
+  return (
+    <svg
+      viewBox="0 0 120 112"
+      className="h-[19px] w-5 shrink-0"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path className="fill-foreground" d={SYMBOL_PATH} />
+      <path className="fill-brand-primary" transform="rotate(180 60 56)" d={SYMBOL_PATH} />
+    </svg>
+  )
 }
-
-const navItems: NavItem[] = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/clients', label: 'Clientes', icon: Users },
-  { to: '/exercises', label: 'Ejercicios', icon: Dumbbell },
-  { to: '/trainings', label: 'Entrenamientos', icon: ClipboardList },
-  { to: '/badges', label: 'Badges', icon: Tags },
-  { to: '/ingredients', label: 'Ingredientes', icon: Apple },
-  { to: '/diets', label: 'Dietas', icon: UtensilsCrossed },
-  { to: '/assignments', label: 'Asignaciones', icon: CalendarDays },
-  { to: '/progress', label: 'Progreso', icon: TrendingUp },
-  { to: '/feedback', label: 'Feedback', icon: MessageSquare },
-  { to: '/recaps', label: 'Recaps', icon: FileText },
-  { to: '/challenges', label: 'Retos', icon: Trophy },
-  { to: '/achievements', label: 'Logros', icon: Award },
-  { to: '/notifications', label: 'Notificaciones', icon: Bell },
-  { to: '/notification-templates', label: 'Plantillas', icon: Settings, superAdminOnly: true },
-  { to: '/approval-requests', label: 'Solicitudes', icon: ShieldCheck },
-]
 
 interface SidebarProps {
   isOpen: boolean
   onClose?: () => void
 }
 
+interface SidebarLinkProps {
+  item: NavItem
+  count: number | null
+  isOpen: boolean
+  onClose?: () => void
+}
+
+function SidebarLink({ item, count, isOpen, onClose }: SidebarLinkProps) {
+  const { to, label, icon: Icon } = item
+
+  const link = (
+    <NavLink
+      to={to}
+      onClick={onClose}
+      // Clases en cadena y estado activo por `aria-current`: en carril el enlace va
+      // dentro de `TooltipTrigger asChild`, que convierte en texto un `className` función.
+      className={cn(
+        'group relative flex h-11 w-full select-none items-center gap-3 whitespace-nowrap px-[18px] text-sm md:h-9',
+        'transition-colors duration-(--dur-fast) ease-out',
+        'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+        'text-foreground-secondary hover:bg-background-surface hover:text-foreground',
+        'aria-[current=page]:bg-lime-soft aria-[current=page]:text-foreground',
+      )}
+    >
+      <>
+          <Icon
+            aria-hidden="true"
+            className="h-5 w-5 shrink-0 text-muted-foreground group-aria-[current=page]:text-accent-line"
+          />
+          <span className={cn(isOpen ? 'min-w-0 flex-1 truncate' : 'sr-only')}>{label}</span>
+          {count !== null ? (
+            <span
+              aria-label={`${count} pendientes`}
+              className={cn(
+                'inline-flex h-5 min-w-5 items-center justify-center border border-border-strong px-1.5 text-[11px] font-semibold leading-none tabular-nums text-foreground',
+                isOpen ? 'ml-auto' : 'absolute left-7 top-1 h-4 min-w-4 px-1',
+              )}
+            >
+              {count}
+            </span>
+          ) : null}
+      </>
+    </NavLink>
+  )
+
+  if (isOpen) return link
+
+  return (
+    <Tooltip delayDuration={0}>
+      <TooltipTrigger asChild>{link}</TooltipTrigger>
+      <TooltipContent side="right">
+        <p>{count !== null ? `${label} (${count})` : label}</p>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const baseId = useId()
   const currentUserRole = useAuth((state) => state.user?.role)
   const approvalStatsQuery = useApprovalStats(currentUserRole === 'SUPER_ADMIN')
   const pendingApprovals = approvalStatsQuery.data?.pending ?? 0
-  const resolvedNavItems = navItems
-    .filter((item) => !item.superAdminOnly || currentUserRole === 'SUPER_ADMIN')
-    .map((item) =>
-      item.to === '/clients' && currentUserRole === 'SUPER_ADMIN'
-        ? { ...item, to: getUsersRoute(currentUserRole), label: 'Usuarios' }
-        : item,
-    )
+  const groups = resolveNavGroups(currentUserRole)
 
   return (
     <aside
+      data-state={isOpen ? 'expanded' : 'rail'}
       className={cn(
-        'flex flex-col h-full bg-background-secondary border-r border-border transition-[width] duration-300 overflow-hidden',
-        isOpen ? 'w-60' : 'w-16'
+        'flex h-full flex-col overflow-hidden border-r border-border bg-background-secondary',
+        'transition-[width] duration-(--dur-base) ease-out',
+        isOpen ? 'w-60' : 'w-14',
       )}
     >
-      {/* Logo */}
+      {/* Lockup */}
       <div
         className={cn(
-          'flex items-center h-16 border-b border-border shrink-0',
-          isOpen ? 'px-4 gap-2' : 'justify-center'
+          'flex h-[52px] shrink-0 items-center gap-2 whitespace-nowrap border-b border-border',
+          isOpen ? 'pl-[18px]' : 'justify-center',
         )}
       >
-        <span className="text-xl font-black tracking-widest text-accent-text">
-          {isOpen ? 'EXOM' : 'EX'}
-        </span>
-        {isOpen && <span className="text-xs text-muted-foreground font-medium uppercase">Admin</span>}
+        <BrandSymbol />
+        {isOpen ? (
+          <>
+            <span className="font-display text-[22px] font-bold uppercase leading-none tracking-wide text-foreground">
+              EXOM
+            </span>
+            <span className="pt-[3px] text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              Admin
+            </span>
+          </>
+        ) : null}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex flex-1 flex-col overflow-y-auto px-2 py-4">
-        {resolvedNavItems.map(({ to, label, icon: Icon }, index) => {
-          const approvalBadge = to === '/approval-requests' && currentUserRole === 'SUPER_ADMIN' && pendingApprovals > 0
-            ? pendingApprovals
-            : null
-
+      <nav
+        aria-label="Principal"
+        className="flex-1 overflow-y-auto overflow-x-hidden py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {groups.map((group, index) => {
+          const labelId = `${baseId}-${group.id}`
           return (
-          <Fragment key={to}>
-            {isOpen ? (
-              <NavLink
-                to={to}
-                onMouseDown={(event) => event.currentTarget.blur()}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  cn(
-                    'flex w-full select-none items-center rounded-none border-l-2 border-transparent px-3 py-2 text-left text-sm font-medium outline-none transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-0',
-                    'hover:bg-brand-soft/30 hover:text-foreground',
-                    index === 0 && 'rounded-t-md',
-                     index === resolvedNavItems.length - 1 && 'rounded-b-md',
-                    isActive && 'border-brand-primary bg-brand-primary/10 text-accent-text',
-                    !isActive && 'text-foreground/70'
-                  )
-                }
-              >
-                <span className="grid w-full min-w-0 grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-3">
-                  <span className="flex h-5 w-5 items-center justify-center">
-                    <Icon className="h-5 w-5 shrink-0" />
-                  </span>
-                  <span className="flex min-w-0 items-center justify-between gap-2">
-                    <span className="truncate whitespace-nowrap leading-none">{label}</span>
-                    {approvalBadge ? (
-                      <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
-                        {approvalBadge}
-                      </Badge>
-                    ) : null}
-                  </span>
-                </span>
-              </NavLink>
-            ) : (
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <NavLink
-                    to={to}
-                    onMouseDown={(event) => event.currentTarget.blur()}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        'flex h-10 w-full select-none items-center justify-center rounded-none px-0 text-sm font-medium outline-none transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-0',
-                        'hover:bg-brand-soft/30 hover:text-foreground',
-                        index === 0 && 'rounded-t-md',
-                          index === resolvedNavItems.length - 1 && 'rounded-b-md',
-                        isActive && 'bg-brand-primary/10 text-accent-text',
-                        !isActive && 'text-foreground/70'
-                      )
-                    }
-                  >
-                    <span className="grid w-full place-items-center">
-                      <Icon className="h-5 w-5 shrink-0" />
-                    </span>
-                  </NavLink>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p>{approvalBadge ? `${label} (${approvalBadge})` : label}</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </Fragment>
+            <div key={group.id} className={cn(index > 0 && 'mt-3')}>
+              {group.label ? (
+                <p
+                  id={labelId}
+                  className={cn(
+                    'flex h-7 items-center',
+                    isOpen
+                      ? 'whitespace-nowrap px-5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground'
+                      : 'justify-center',
+                  )}
+                >
+                  {isOpen ? (
+                    group.label
+                  ) : (
+                    <>
+                      <span className="sr-only">{group.label}</span>
+                      <span aria-hidden="true" className="h-px w-4 bg-border-strong" />
+                    </>
+                  )}
+                </p>
+              ) : null}
+              <ul aria-labelledby={group.label ? labelId : undefined}>
+                {group.items.map((item) => (
+                  <li key={item.to}>
+                    <SidebarLink
+                      item={item}
+                      count={
+                        item.to === '/approval-requests' &&
+                        currentUserRole === 'SUPER_ADMIN' &&
+                        pendingApprovals > 0
+                          ? pendingApprovals
+                          : null
+                      }
+                      isOpen={isOpen}
+                      onClose={onClose}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
           )
         })}
       </nav>
