@@ -22,10 +22,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast:
-            'group toast group-[.toaster]:border-border group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:shadow-lg',
-          description: 'group-[.toast]:text-muted-foreground',
-          actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
-          cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+            'group toast font-sans group-[.toaster]:!rounded-none group-[.toaster]:!border group-[.toaster]:!border-border-strong group-[.toaster]:!bg-background-surface group-[.toaster]:!text-foreground group-[.toaster]:shadow-overlay',
+          title: 'group-[.toast]:text-sm group-[.toast]:font-semibold group-[.toast]:text-foreground',
+          description: 'group-[.toast]:text-[13px] group-[.toast]:text-foreground-secondary',
+          success: 'group-[.toast]:[&_[data-icon]]:text-status-success',
+          error: 'group-[.toast]:[&_[data-icon]]:text-status-error',
+          warning: 'group-[.toast]:[&_[data-icon]]:text-status-warning',
+          info: 'group-[.toast]:[&_[data-icon]]:text-status-info',
+          actionButton:
+            'group-[.toast]:!rounded-none group-[.toast]:!bg-primary group-[.toast]:!text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+          cancelButton:
+            'group-[.toast]:!rounded-none group-[.toast]:!border group-[.toast]:!border-border-strong group-[.toast]:!bg-transparent group-[.toast]:!text-foreground-secondary',
+          closeButton:
+            'group-[.toast]:!rounded-none group-[.toast]:!border-border-strong group-[.toast]:!bg-background-surface group-[.toast]:!text-foreground-secondary',
         },
       }}
       {...props}
