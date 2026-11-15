@@ -318,7 +318,7 @@ exports[`ClientsPage characterization > ADMIN /clients empty with search 1`] = `
 </div>
 </div>
 </div>
-<output data-testid="location">/clients</output>"
+<output data-testid="location">/clients?clientsFilters=q%3Azzz</output>"
 `;
 
 exports[`ClientsPage characterization > ADMIN /clients empty without query 1`] = `

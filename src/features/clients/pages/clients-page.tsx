@@ -1,10 +1,8 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router'
 import {
   filtersToApiParams,
   type FilterOption,
   type FilterSectionConfig,
-  useListFilters,
 } from '@/components/filters'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { useAuth } from '@/hooks/use-auth'
@@ -40,6 +38,7 @@ import { AdminsTableSkeleton, ClientsTableSkeleton } from '../components/users-t
 import { UsersListEmptyCard } from '../components/users-list-empty-card'
 import { UsersListErrorCard } from '../components/users-list-error-card'
 import type { AdminUserListItem, Client } from '../types'
+import { useClientsSearchParams, useClientsUrlFilters } from '../use-clients-url-filters'
 
 const PAGE_SIZE = 10
 const USER_STATUS_OPTIONS: FilterOption[] = [
@@ -71,10 +70,7 @@ export function ClientsPage() {
   const currentUserId = currentUser?.id
   const isSuperAdmin = currentUserRole === 'SUPER_ADMIN'
 
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [clientSearch, setClientSearch] = useState('')
-  const [adminSearch, setAdminSearch] = useState('')
-  const [superAdminSearch, setSuperAdminSearch] = useState('')
+  const [searchParams, setSearchParams] = useClientsSearchParams()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [createAdminDialogOpen, setCreateAdminDialogOpen] = useState(false)
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false)
@@ -86,18 +82,6 @@ export function ClientsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<ManageableUser | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
-  const deferredClientSearch = useDeferredValue(clientSearch)
-  const deferredAdminSearch = useDeferredValue(adminSearch)
-  const deferredSuperAdminSearch = useDeferredValue(superAdminSearch)
-  const activeClientSearch = deferredClientSearch.trim()
-  const activeAdminSearch = deferredAdminSearch.trim()
-  const activeSuperAdminSearch = deferredSuperAdminSearch.trim()
-  const tabParam = getClientsTab(searchParams.get('tab'))
-  const activeTab = isSuperAdmin ? tabParam : 'clients'
-  const clientPage = getPageSearchParam(searchParams.get('clientsPage'))
-  const archive = searchParams.get('archive') === 'archived' ? 'archived' : 'visible'
-  const adminPage = getPageSearchParam(searchParams.get('adminsPage'))
-  const superAdminPage = getPageSearchParam(searchParams.get('superAdminsPage'))
   const clientSections = useMemo<FilterSectionConfig[]>(
     () => [
       {
@@ -146,9 +130,45 @@ export function ClientsPage() {
     ],
     []
   )
-  const clientFilters = useListFilters(clientSections)
-  const adminFilters = useListFilters(userSections)
-  const superAdminFilters = useListFilters(userSections)
+  const {
+    search: clientSearch,
+    setSearch: setClientSearch,
+    filters: clientFilters,
+  } = useClientsUrlFilters({ param: 'clientsFilters', sections: clientSections, searchParams, setSearchParams })
+  const {
+    search: adminSearch,
+    setSearch: setAdminSearch,
+    filters: adminFilters,
+  } = useClientsUrlFilters({
+    param: 'adminsFilters',
+    sections: userSections,
+    searchParams,
+    setSearchParams,
+    enabled: isSuperAdmin,
+  })
+  const {
+    search: superAdminSearch,
+    setSearch: setSuperAdminSearch,
+    filters: superAdminFilters,
+  } = useClientsUrlFilters({
+    param: 'superAdminsFilters',
+    sections: userSections,
+    searchParams,
+    setSearchParams,
+    enabled: isSuperAdmin,
+  })
+  const deferredClientSearch = useDeferredValue(clientSearch)
+  const deferredAdminSearch = useDeferredValue(adminSearch)
+  const deferredSuperAdminSearch = useDeferredValue(superAdminSearch)
+  const activeClientSearch = deferredClientSearch.trim()
+  const activeAdminSearch = deferredAdminSearch.trim()
+  const activeSuperAdminSearch = deferredSuperAdminSearch.trim()
+  const tabParam = getClientsTab(searchParams.get('tab'))
+  const activeTab = isSuperAdmin ? tabParam : 'clients'
+  const clientPage = getPageSearchParam(searchParams.get('clientsPage'))
+  const archive = searchParams.get('archive') === 'archived' ? 'archived' : 'visible'
+  const adminPage = getPageSearchParam(searchParams.get('adminsPage'))
+  const superAdminPage = getPageSearchParam(searchParams.get('superAdminsPage'))
   const clientFilterParams = filtersToApiParams(clientFilters.values, clientSections) as Partial<ClientsListParams>
   const adminFilterParams = filtersToApiParams(adminFilters.values, userSections) as Partial<UsersListParams>
   const superAdminFilterParams = filtersToApiParams(
