@@ -1,5 +1,7 @@
 export type DeliveryStatus = 'PENDING' | 'SENT' | 'FAILED'
 
+export type ServiceScope = 'TRAINING' | 'NUTRITION' | 'BOTH'
+
 export type ArchiveFilter = 'visible' | 'archived' | 'all'
 
 export interface BaseRoute {
@@ -23,6 +25,8 @@ export interface BaseSubscriber {
   email: string
   goal: string
   days_per_week: number
+  /** Absent in responses from an older API; read it through `getServiceScope`. */
+  service_scope?: ServiceScope
   notes: string | null
   is_archived: boolean
   archived_at: string | null
@@ -74,6 +78,8 @@ export interface BaseDelivery {
   snapshot_email: string
   snapshot_goal: string
   snapshot_days_per_week: number
+  /** Scope the delivery was created with; absent in responses from an older API. */
+  snapshot_service_scope?: ServiceScope
   snapshot_order_code: string
   files: BaseDeliveryFile[]
   requested_by_id: string | null
@@ -99,6 +105,7 @@ export interface CreateSubscriberPayload {
   email: string
   goal: string
   days_per_week: number
+  service_scope?: ServiceScope
   notes?: string | null
 }
 

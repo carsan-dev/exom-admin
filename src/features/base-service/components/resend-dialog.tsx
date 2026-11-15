@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getApiErrorMessage, isNotConfiguredError, isSourceChangedError, useBaseSubscriber, useResendDelivery } from '../api'
+import { getApiErrorMessage, isEmptyPackageError, isNotConfiguredError, isSourceChangedError, useBaseSubscriber, useResendDelivery } from '../api'
 import { Skeleton } from '@/components/ui/skeleton'
-import { canResendDelivery, getResendMessage, NOT_CONFIGURED_HELP, NOT_CONFIGURED_TITLE } from '../labels'
+import { canResendDelivery, EMPTY_PACKAGE_MESSAGE, getResendMessage, NOT_CONFIGURED_HELP, NOT_CONFIGURED_TITLE } from '../labels'
 import type { BaseDelivery } from '../types'
 
 interface ResendDialogProps {
@@ -72,7 +72,9 @@ export function ResendDialog({ delivery, pendingMonth, loadFailed = false, onRet
         setError(
           isNotConfiguredError(cause)
             ? `${NOT_CONFIGURED_TITLE} ${NOT_CONFIGURED_HELP}`
-            : getApiErrorMessage(cause, 'No se ha podido reenviar el mes. Inténtalo de nuevo.'),
+            : isEmptyPackageError(cause)
+              ? EMPTY_PACKAGE_MESSAGE
+              : getApiErrorMessage(cause, 'No se ha podido reenviar el mes. Inténtalo de nuevo.'),
         )
       }
     } finally {

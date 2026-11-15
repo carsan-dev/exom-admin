@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { canResendDelivery, getGoalLabel, getSendBlock } from '../labels'
+import { canResendDelivery, getGoalLabel, getSendBlock, getServiceScope, SERVICE_SCOPE_LABELS } from '../labels'
 import type { BaseRoute, BaseSubscriber } from '../types'
 import { useWideScreen } from '../use-wide-screen'
 import { DeliveryStatusBadge } from './delivery-status-badge'
@@ -46,6 +46,7 @@ export function SubscribersTable({
             <TableHead>Email</TableHead>
             <TableHead>Objetivo</TableHead>
             <TableHead>Días/semana</TableHead>
+            <TableHead>Servicio</TableHead>
             <TableHead>Último mes enviado</TableHead>
             <TableHead>Estado</TableHead>
             <TableHead>Acciones</TableHead>
@@ -64,6 +65,7 @@ export function SubscribersTable({
                 <TableCell className="text-muted-foreground">{subscriber.email}</TableCell>
                 <TableCell>{getGoalLabel(subscriber.goal)}</TableCell>
                 <TableCell>{subscriber.days_per_week}</TableCell>
+                <TableCell>{SERVICE_SCOPE_LABELS[getServiceScope(subscriber)]}</TableCell>
                 <TableCell>{subscriber.last_sent_month ?? '—'}</TableCell>
                 <TableCell>
                   <DeliveryStatusBadge status={subscriber.latest_delivery?.status ?? null} />

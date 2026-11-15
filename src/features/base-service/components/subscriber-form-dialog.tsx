@@ -17,7 +17,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { clearUnsavedChanges, useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { getApiErrorCode, getApiErrorMessages, isNotConfiguredError, useCreateSubscriber, useUpdateSubscriber } from '../api'
 import { buildUpdatePayload } from '../build-update-payload'
-import { getGoalLabel, NOT_CONFIGURED_HELP, NOT_CONFIGURED_TITLE } from '../labels'
+import {
+  getGoalLabel,
+  getServiceScope,
+  NOT_CONFIGURED_HELP,
+  NOT_CONFIGURED_TITLE,
+  SERVICE_SCOPE_LABELS,
+  SERVICE_SCOPES,
+} from '../labels'
 import { subscriberFormSchema, type SubscriberFormValues } from '../schemas'
 import type { BaseRoute, BaseSubscriber } from '../types'
 
@@ -26,7 +33,7 @@ const FORM_ID = 'base-service-subscriber-form'
 const DAYS_CHANGE_NOTE =
   'El cambio se aplica a partir del próximo mes que envíes. Los meses ya enviados se reenvían con los días que tenían.'
 
-const emptyValues: SubscriberFormValues = { name: '', email: '', goal: '', days_per_week: '', notes: '' }
+const emptyValues: SubscriberFormValues = { name: '', email: '', goal: '', days_per_week: '', service_scope: 'BOTH', notes: '' }
 
 function toFormValues(subscriber: BaseSubscriber | null): SubscriberFormValues {
   if (!subscriber) return emptyValues
@@ -35,6 +42,7 @@ function toFormValues(subscriber: BaseSubscriber | null): SubscriberFormValues {
     email: subscriber.email,
     goal: subscriber.goal,
     days_per_week: String(subscriber.days_per_week),
+    service_scope: getServiceScope(subscriber),
     notes: subscriber.notes ?? '',
   }
 }
@@ -116,6 +124,8 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
           email: values.email.trim(),
           goal: values.goal,
           days_per_week: Number(values.days_per_week),
+          // The API defaults to BOTH, so an older API never sees an unknown field for the default.
+          ...(values.service_scope !== 'BOTH' ? { service_scope: values.service_scope } : {}),
           ...(notes ? { notes } : {}),
         })
         toast.success('Suscriptor creado')
@@ -258,6 +268,31 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="service_scope"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Servicio contratado</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {SERVICE_SCOPES.map((scope) => (
+                        <SelectItem key={scope} value={scope}>
+                          {SERVICE_SCOPE_LABELS[scope]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
