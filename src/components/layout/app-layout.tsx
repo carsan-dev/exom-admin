@@ -3,8 +3,8 @@ import { Outlet } from 'react-router'
 import { ArrowUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
+import { useMediaQuery } from '@/hooks/use-media-query'
 import { Sidebar } from './sidebar'
 import { Header } from './header'
 import { MobileTabbar } from './mobile-tabbar'
@@ -12,8 +12,8 @@ import { readSidebarExpanded, writeSidebarExpanded } from './sidebar-state'
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(readSidebarExpanded)
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const isDesktop = useMediaQuery('(min-width: 1024px)', true)
   const mainRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -50,38 +50,23 @@ export function AppLayout() {
 
   return (
     <TooltipProvider>
-      <div className="flex min-h-screen min-h-[100svh] overflow-x-hidden bg-background lg:h-screen lg:min-h-0 lg:overflow-hidden">
-        {/* Desktop sidebar */}
-        <div className="hidden lg:flex">
-          <Sidebar isOpen={sidebarOpen} />
+      <div className="flex min-h-screen min-h-[100svh] overflow-x-clip bg-background lg:h-screen lg:min-h-0 lg:overflow-hidden">
+        {/* Sidebar: carril fijo en tablet (768-1023), preferencia guardada en escritorio */}
+        <div className="hidden md:sticky md:top-0 md:flex md:h-svh md:self-start lg:static lg:h-auto lg:self-stretch">
+          <Sidebar isOpen={isDesktop && sidebarOpen} />
         </div>
 
         {/* Barra inferior móvil (< md) */}
         <MobileTabbar />
 
-        {/* Mobile sidebar — overlay */}
-        <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
-          <SheetContent
-            side="left"
-            className="w-60 border-r border-border bg-background p-0 data-[state=closed]:duration-150 data-[state=open]:duration-200"
-            aria-describedby={undefined}
-          >
-            <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
-            <Sidebar isOpen={true} onClose={() => setMobileSidebarOpen(false)} />
-          </SheetContent>
-        </Sheet>
-
         {/* Main content */}
         <div className="relative flex min-h-[100svh] min-w-0 flex-1 flex-col overflow-x-hidden lg:min-h-0 lg:overflow-hidden">
           <Header
             onMenuToggle={() => {
-              if (window.innerWidth >= 1024) {
-                const next = !sidebarOpen
-                setSidebarOpen(next)
-                writeSidebarExpanded(next)
-              } else {
-                setMobileSidebarOpen((v) => !v)
-              }
+              if (!isDesktop) return
+              const next = !sidebarOpen
+              setSidebarOpen(next)
+              writeSidebarExpanded(next)
             }}
           />
           <main

@@ -52,7 +52,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         size="icon"
         onClick={onMenuToggle}
         aria-label="Mostrar u ocultar el menú"
-        className="hidden shrink-0 md:inline-flex"
+        className="hidden shrink-0 lg:inline-flex"
       >
         <Menu aria-hidden="true" className="h-5 w-5" />
       </Button>
