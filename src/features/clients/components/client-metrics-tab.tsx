@@ -151,7 +151,7 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-brand-primary" />
+                <Activity className="h-5 w-5 text-accent-text" />
                 <CardTitle className="text-xl">Últimas 10 métricas</CardTitle>
               </div>
               <CardDescription>Historial reciente de composición corporal y medidas</CardDescription>

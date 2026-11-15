@@ -102,7 +102,7 @@ export function FeedbackDetailDialog({ item, open, onOpenChange }: FeedbackDetai
               <span>{formatDate(item.assignment_date ?? item.created_at)}</span>
             </div>
             {item.feedback_kind === 'LAST_SET' && (
-              <Badge variant="outline" className="border-brand-primary/30 text-brand-primary">Última serie</Badge>
+              <Badge variant="outline" className="border-brand-primary/30 text-accent-text">Última serie</Badge>
             )}
             <div>
               {item.status === 'PENDING' ? (

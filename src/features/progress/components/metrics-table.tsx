@@ -59,7 +59,7 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-brand-primary" />
+                <Activity className="h-5 w-5 text-accent-text" />
                 <CardTitle className="text-xl">Historial de métricas</CardTitle>
               </div>
               <CardDescription>Todas las métricas corporales registradas</CardDescription>

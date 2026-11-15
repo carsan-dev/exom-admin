@@ -257,7 +257,7 @@ function DietTagsField({
           <Badge
             key={tag}
             variant="outline"
-            className="gap-1 border-brand-soft/40 bg-brand-soft/10 pr-1 text-brand-primary"
+            className="gap-1 border-brand-soft/40 bg-brand-soft/10 pr-1 text-accent-text"
           >
             {tag}
             <button

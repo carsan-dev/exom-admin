@@ -196,7 +196,7 @@ export function ImageUploadField({
       ) : isUploading ? (
         <div className="space-y-2 rounded-lg border border-border/60 bg-muted/50 p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Image className="h-4 w-4 animate-pulse text-brand-primary" />
+            <Image className="h-4 w-4 animate-pulse text-accent-text" />
             <span>Subiendo imagen... {progress ?? 0}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-border">

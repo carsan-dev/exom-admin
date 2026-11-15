@@ -415,7 +415,7 @@ export function ClientsPage() {
       return (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
+            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
               <Users className="h-8 w-8" />
             </div>
             <div className="space-y-2">
@@ -511,7 +511,7 @@ export function ClientsPage() {
       return (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
+            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
               <Users className="h-8 w-8" />
             </div>
             <div className="space-y-2">
@@ -609,7 +609,7 @@ export function ClientsPage() {
       return (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
+            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
               <Users className="h-8 w-8" />
             </div>
             <div className="space-y-2">
@@ -680,7 +680,7 @@ export function ClientsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Gestión de usuarios</p>
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-accent-text">Gestión de usuarios</p>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">{pageTitle}</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{pageDescription}</p>
@@ -729,19 +729,19 @@ export function ClientsPage() {
           <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-3">
             <TabsTrigger
               value="clients"
-              className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary"
+              className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text"
             >
               Clientes
             </TabsTrigger>
             <TabsTrigger
               value="admins"
-              className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary"
+              className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text"
             >
               Admins
             </TabsTrigger>
             <TabsTrigger
               value="super-admins"
-              className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary"
+              className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text"
             >
               Super Admins
             </TabsTrigger>

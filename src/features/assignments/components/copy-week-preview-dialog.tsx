@@ -61,7 +61,7 @@ export function CopyWeekPreviewDialog({
             <p className="mt-2 text-lg font-semibold text-foreground">{formatWeekRange(preview.source_week_start)}</p>
           </div>
           <div className="rounded-2xl border border-brand-primary/20 bg-brand-soft/10 p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.22em] text-brand-primary">Semana destino</p>
+            <p className="text-xs font-medium uppercase tracking-[0.22em] text-accent-text">Semana destino</p>
             <p className="mt-2 text-lg font-semibold text-foreground">{formatWeekRange(preview.target_week_start)}</p>
           </div>
         </div>
@@ -73,7 +73,7 @@ export function CopyWeekPreviewDialog({
           <Badge variant="outline" className="border-status-success/30 bg-status-success/10 text-status-success">
             {preview.summary.diet_days} días con dieta
           </Badge>
-          <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+          <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-accent-text">
             {preview.summary.rest_days} descansos
           </Badge>
           <Badge variant="outline" className="border-status-error/30 bg-status-error/10 text-status-error">
@@ -105,7 +105,7 @@ export function CopyWeekPreviewDialog({
                   </Badge>
                 )}
                 {day.is_rest_day && (
-                  <Badge variant="outline" className="gap-1 border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+                  <Badge variant="outline" className="gap-1 border-brand-primary/30 bg-brand-soft/20 text-accent-text">
                     <PauseCircle className="h-3 w-3" />
                     Descanso
                   </Badge>

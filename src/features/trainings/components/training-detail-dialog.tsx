@@ -203,7 +203,7 @@ export function TrainingDetailDialog({
                         className="space-y-2 rounded-lg border border-brand-soft/40 bg-brand-soft/10 p-3"
                       >
                         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                          <Repeat className="h-4 w-4 text-brand-primary" />
+                          <Repeat className="h-4 w-4 text-accent-text" />
                           <span>
                             {item.name ?? 'Circuito'} · {item.rounds} rondas
                           </span>
@@ -249,7 +249,7 @@ export function TrainingDetailDialog({
                             <Badge
                               key={mg}
                               variant="outline"
-                              className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary"
+                              className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-accent-text"
                             >
                               {mg}
                             </Badge>

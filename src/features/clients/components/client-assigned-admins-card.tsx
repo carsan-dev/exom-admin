@@ -97,7 +97,7 @@ export function ClientAssignedAdminsCard({ clientId, onManage }: ClientAssignedA
         </div>
 
         <div className="flex items-center gap-3">
-          <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-brand-primary">
+          <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-accent-text">
             {activeAdmins.length} admin{activeAdmins.length === 1 ? '' : 's'} activo{activeAdmins.length === 1 ? '' : 's'}
           </Badge>
           <Button type="button" variant="outline" onClick={onManage}>

@@ -81,7 +81,7 @@ function renderAssignedAdminsCount(client: Client) {
   }
 
   return (
-    <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-brand-primary">
+    <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-accent-text">
       {count} admin{count === 1 ? '' : 's'}
     </Badge>
   )
@@ -148,7 +148,7 @@ export function ClientsTable({
             <TableCell className="text-muted-foreground">{client.email}</TableCell>
             <TableCell>
               {client.profile?.level ? (
-                <Badge variant="outline" className="border-brand-soft/40 bg-brand-soft/10 text-brand-primary">
+                <Badge variant="outline" className="border-brand-soft/40 bg-brand-soft/10 text-accent-text">
                   {LEVEL_LABELS[client.profile.level]}
                 </Badge>
               ) : (

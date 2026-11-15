@@ -139,7 +139,7 @@ export function ChallengesTable({
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border/70 p-10 text-center">
-        <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
+        <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
           <Target className="h-8 w-8" />
         </div>
         <div className="space-y-2">
@@ -197,7 +197,7 @@ export function ChallengesTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+                    <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
                       {getChallengeTypeLabel(challenge.type)}
                     </Badge>
                   </TableCell>

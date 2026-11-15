@@ -216,9 +216,9 @@ export function VideoUploadField({
         <div className="space-y-2 rounded-lg border border-border/60 bg-muted/50 p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             {phase !== 'uploading' ? (
-              <Loader2 className="h-4 w-4 animate-spin text-brand-primary" />
+              <Loader2 className="h-4 w-4 animate-spin text-accent-text" />
             ) : (
-              <Play className="h-4 w-4 animate-pulse text-brand-primary" />
+              <Play className="h-4 w-4 animate-pulse text-accent-text" />
             )}
             <span>
               {phase === 'compressing'

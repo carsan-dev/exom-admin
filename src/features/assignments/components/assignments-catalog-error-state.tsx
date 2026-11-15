@@ -33,7 +33,7 @@ export function AssignmentsCatalogErrorState({
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="flex items-start gap-3">
             <div
-              className={hasErrors ? 'rounded-full bg-status-error/10 p-3 text-status-error' : 'rounded-full bg-brand-soft/10 p-3 text-brand-primary'}
+              className={hasErrors ? 'rounded-full bg-status-error/10 p-3 text-status-error' : 'rounded-full bg-brand-soft/10 p-3 text-accent-text'}
             >
               {hasLoading && !hasErrors ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <AlertTriangle className="h-5 w-5" />}
             </div>
@@ -69,7 +69,7 @@ export function AssignmentsCatalogErrorState({
           {affectedCatalogs.map((catalog) => {
             if (catalog.is_loading) {
               return (
-                <Badge key={catalog.key} variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+                <Badge key={catalog.key} variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-accent-text">
                   {catalog.label}: cargando
                 </Badge>
               )

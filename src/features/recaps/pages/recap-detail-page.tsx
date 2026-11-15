@@ -278,7 +278,7 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
         <CardContent className="flex flex-col gap-5 pt-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-brand-primary">Revisión de recap</p>
+              <p className="text-sm font-medium text-accent-text">Revisión de recap</p>
               <div>
                 <h1 className="text-3xl font-semibold text-foreground">{clientName}</h1>
                 <p className="text-sm text-muted-foreground">{recap.client.email}</p>
@@ -311,19 +311,19 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
 
       <Tabs defaultValue="training" className="space-y-4">
         <TabsList className="grid h-auto w-full grid-cols-2 gap-2 bg-transparent p-0 lg:grid-cols-5">
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="training">
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="training">
             Entreno
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="nutrition">
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="nutrition">
             Nutrición
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="recovery">
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="recovery">
             Recuperación
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="general">
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="general">
             General
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="improvement">
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="improvement">
             Mejora
           </TabsTrigger>
         </TabsList>
@@ -332,7 +332,7 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
           <RecapSectionCard
             title="Entrenos"
             description="Resumen del rendimiento y la percepción de la semana de entreno."
-            action={<Dumbbell className="h-5 w-5 text-brand-primary" />}
+            action={<Dumbbell className="h-5 w-5 text-accent-text" />}
           >
             <div className="grid gap-3 md:grid-cols-2">
               <DetailField label="Esfuerzo semanal" value={recap.training_effort?.toString() ?? 'No indicado'} />
@@ -354,7 +354,7 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
           <RecapSectionCard
             title="Nutrición"
             description="Calidad de alimentación, hidratación y observaciones nutricionales."
-            action={<Salad className="h-5 w-5 text-brand-primary" />}
+            action={<Salad className="h-5 w-5 text-accent-text" />}
           >
             <div className="grid gap-3 md:grid-cols-2">
               <DetailField label="Calidad de alimentación" value={formatRecapOption(recap.nutrition_quality)} />
@@ -372,7 +372,7 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
           <RecapSectionCard
             title="Recuperación y hábitos"
             description="Sueño, fatiga y molestias reportadas durante la semana."
-            action={<HeartPulse className="h-5 w-5 text-brand-primary" />}
+            action={<HeartPulse className="h-5 w-5 text-accent-text" />}
           >
             <div className="grid gap-3 md:grid-cols-2">
               <DetailField label="Horas de sueño" value={formatRecapOption(recap.sleep_hours_range)} />
@@ -408,7 +408,7 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
           <RecapSectionCard
             title="Sensaciones generales"
             description="Estado de ánimo, estrés y sensación global de la semana."
-            action={<MessageSquareText className="h-5 w-5 text-brand-primary" />}
+            action={<MessageSquareText className="h-5 w-5 text-accent-text" />}
           >
             <div className="grid gap-3 md:grid-cols-2">
               <DetailField label="Estado de ánimo" value={formatRecapOption(recap.mood)} />
@@ -426,7 +426,7 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
           <RecapSectionCard
             title="Ayúdanos a mejorar"
             description="Valoraciones del servicio y feedback abierto sobre la experiencia."
-            action={<Sparkles className="h-5 w-5 text-brand-primary" />}
+            action={<Sparkles className="h-5 w-5 text-accent-text" />}
           >
             <div className="grid gap-3 md:grid-cols-2">
               <DetailField

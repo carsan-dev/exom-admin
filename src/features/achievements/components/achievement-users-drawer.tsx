@@ -229,7 +229,7 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
                 </div>
                 <div className="rounded-xl border border-border/60 bg-background p-4">
                   <p className="text-sm text-muted-foreground">Página actual</p>
-                  <p className="mt-2 text-2xl font-semibold text-brand-primary">{users.length}</p>
+                  <p className="mt-2 text-2xl font-semibold text-accent-text">{users.length}</p>
                 </div>
               </div>
             </div>

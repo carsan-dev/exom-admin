@@ -74,7 +74,7 @@ export function ExerciseDetailDialog({ exercise, open, onOpenChange, onEdit, onD
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Grupos musculares</p>
               <div className="flex flex-wrap gap-1.5">
                 {exercise.muscle_groups.map((group) => (
-                  <Badge key={group} variant="outline" className="border-brand-soft/40 bg-brand-soft/10 text-brand-primary">
+                  <Badge key={group} variant="outline" className="border-brand-soft/40 bg-brand-soft/10 text-accent-text">
                     {group}
                   </Badge>
                 ))}

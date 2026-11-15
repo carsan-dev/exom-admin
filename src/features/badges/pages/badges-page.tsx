@@ -206,7 +206,7 @@ function CatalogTable({
           </div>
           <Badge
             variant="outline"
-            className="w-fit border-brand-soft/40 bg-brand-soft/10 text-brand-primary"
+            className="w-fit border-brand-soft/40 bg-brand-soft/10 text-accent-text"
           >
             {catalog.values.length}
           </Badge>
@@ -673,7 +673,7 @@ export function BadgesPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-accent-text">
             Catálogo
           </p>
           <div>

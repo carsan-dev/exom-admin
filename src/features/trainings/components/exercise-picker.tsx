@@ -372,7 +372,7 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                         <ChevronDown className="h-3 w-3" />
                       </Button>
                     </div>
-                    <Repeat className="h-4 w-4 text-brand-primary" />
+                    <Repeat className="h-4 w-4 text-accent-text" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground">
                         Circuito · {item.rounds} rondas
@@ -642,7 +642,7 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                           <Badge
                             key={mg}
                             variant="outline"
-                            className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary"
+                            className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-accent-text"
                           >
                             {mg}
                           </Badge>
@@ -798,7 +798,7 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
                           <Badge
                             key={mg}
                             variant="outline"
-                            className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary"
+                            className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-accent-text"
                           >
                             {mg}
                           </Badge>

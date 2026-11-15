@@ -88,7 +88,7 @@ function getStatusBadge(progressRate: number, isCompleted: boolean) {
   if (progressRate > 0) {
     return {
       label: 'En progreso',
-      className: 'border-brand-primary/20 bg-brand-soft/10 text-brand-primary',
+      className: 'border-brand-primary/20 bg-brand-soft/10 text-accent-text',
     }
   }
 
@@ -169,7 +169,7 @@ export function ChallengeProgressDrawer({ challenge, open, onOpenChange }: Chall
           <div className="mt-6 space-y-6">
             <div className="rounded-xl border border-border/70 bg-muted/20 p-5">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+                <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
                   {getChallengeTypeLabel(challenge.type)}
                 </Badge>
                 <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
@@ -192,7 +192,7 @@ export function ChallengeProgressDrawer({ challenge, open, onOpenChange }: Chall
                 </div>
                 <div className="rounded-xl border border-border/60 bg-background p-4">
                   <p className="text-sm text-muted-foreground">Ratio</p>
-                  <p className="mt-2 text-2xl font-semibold text-brand-primary">{detail?.completion_rate ?? 0}%</p>
+                  <p className="mt-2 text-2xl font-semibold text-accent-text">{detail?.completion_rate ?? 0}%</p>
                 </div>
               </div>
             </div>

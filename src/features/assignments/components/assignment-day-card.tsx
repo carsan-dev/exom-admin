@@ -61,7 +61,7 @@ export function AssignmentDayCard({
           </div>
 
           {isSelected && (
-            <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 px-2 py-0 text-[10px] text-brand-primary">
+            <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 px-2 py-0 text-[10px] text-accent-text">
               Selección
             </Badge>
           )}
@@ -86,7 +86,7 @@ export function AssignmentDayCard({
             </Badge>
           )}
           {day.is_rest_day && (
-            <Badge variant="outline" className="gap-1 border-brand-primary/30 bg-brand-soft/20 px-2 py-0 text-[10px] text-brand-primary">
+            <Badge variant="outline" className="gap-1 border-brand-primary/30 bg-brand-soft/20 px-2 py-0 text-[10px] text-accent-text">
               <PauseCircle className="h-3 w-3" />
               Descanso
             </Badge>
@@ -126,7 +126,7 @@ export function AssignmentDayCard({
         </div>
 
         {isSelected && (
-          <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+          <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-accent-text">
             Seleccionado
           </Badge>
         )}
@@ -151,7 +151,7 @@ export function AssignmentDayCard({
           </Badge>
         )}
         {day.is_rest_day && (
-          <Badge variant="outline" className="gap-1 border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+          <Badge variant="outline" className="gap-1 border-brand-primary/30 bg-brand-soft/20 text-accent-text">
             <PauseCircle className="h-3 w-3" />
             Descanso
           </Badge>

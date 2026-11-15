@@ -128,7 +128,7 @@ export function ApprovalRequestsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Aprobaciones</p>
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-accent-text">Aprobaciones</p>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">Solicitudes</h1>
             <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
@@ -139,7 +139,7 @@ export function ApprovalRequestsPage() {
           </div>
         </div>
 
-        <div className="rounded-full bg-brand-soft/10 p-3 text-brand-primary">
+        <div className="rounded-full bg-brand-soft/10 p-3 text-accent-text">
           <ShieldCheck className="h-6 w-6" />
         </div>
       </div>

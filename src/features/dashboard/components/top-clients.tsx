@@ -48,7 +48,7 @@ export function TopClients({ clients }: TopClientsProps) {
                   className="block rounded-xl border border-border/70 p-4 transition-colors hover:border-brand-primary/40"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-soft/20 text-sm font-semibold text-brand-primary">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-soft/20 text-sm font-semibold text-accent-text">
                       {index + 1}
                     </div>
 
