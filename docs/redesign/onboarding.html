@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bienvenido · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/login.css">
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body class="auth-body" data-auth="onboarding">
+<a class="skip-link" href="#auth-main">Saltar al contenido</a>
+<div class="auth-frame">
+
+  <div class="auth-brand">
+    <div class="auth-rules" aria-hidden="true"><span class="auth-rule r1"></span><span class="auth-rule r2"></span></div>
+    <span class="auth-mark" aria-hidden="true">E<span>X</span>OM</span>
+    <p class="auth-tagline">
+      <svg class="brand-symbol" viewBox="0 0 120 112" aria-hidden="true" focusable="false"><path class="half-a" d="M46 110C20 106 0 84 0 56C0 33 14 12 35 3C48-2 60 4 62 16C66 29 57 39 44 39C36 39 28 35 23 28C11 38 5 51 7 65C9 86 24 103 46 109Z"/><path class="half-b" transform="rotate(180 60 56)" d="M46 110C20 106 0 84 0 56C0 33 14 12 35 3C48-2 60 4 62 16C66 29 57 39 44 39C36 39 28 35 23 28C11 38 5 51 7 65C9 86 24 103 46 109Z"/></svg>
+      <span class="auth-band-word" aria-hidden="true">E<span>X</span>OM</span>
+      <span class="auth-tagline-text">Panel de administración EXOM</span>
+    </p>
+  </div>
+
+  <main class="auth-main" id="auth-main">
+    <div class="auth-col">
+      <h1 class="h1 auth-h1">Bienvenido</h1>
+      <p class="auth-lead">nerea.blanco@exom.app</p>
+      <p class="auth-lead">Completa tu perfil para continuar</p>
+
+      <form class="auth-form" id="onboarding-form" novalidate>
+        <div aria-live="polite">
+          <div class="banner banner-danger" role="alert" data-show="validation">
+            <i data-lucide="circle-alert"></i>
+            <span class="banner-text">Nombre y apellidos son obligatorios</span>
+          </div>
+          <div class="banner banner-danger" role="alert" data-show="error">
+            <i data-lucide="circle-alert"></i>
+            <span class="banner-text">Error al guardar el perfil. Inténtalo de nuevo.</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="first-name">Nombre</label>
+          <input class="input" id="first-name" name="firstName" type="text" placeholder="Tu nombre" autocomplete="given-name" autofocus required>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="last-name">Apellidos</label>
+          <input class="input" id="last-name" name="lastName" type="text" placeholder="Tus apellidos" autocomplete="family-name" required>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-arrow btn-block" type="submit" data-label="Continuar" data-loading-label="Guardando...">
+          <span class="btn-label">Continuar</span><i data-lucide="arrow-right"></i>
+        </button>
+      </form>
+
+      <p class="auth-foot-link">
+        <a class="auth-link" href="login.html" data-busy-disable>Cerrar sesión</a>
+        <span class="proposal-tag" title="Hoy no existe una salida desde esta pantalla">Propuesta</span>
+      </p>
+    </div>
+  </main>
+</div>
+<script src="assets/pages/login.js"></script>
+</body>
+</html>

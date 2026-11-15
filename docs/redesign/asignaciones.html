@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Asignaciones · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/asignaciones.css">
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/proto.js"></script>
+  <script src="assets/pages/asignaciones.js" defer></script>
+</head>
+<body data-page="asignaciones" data-group="Planificación" data-crumbs='["Asignaciones"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header as-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1">Asignaciones</h1>
+        <button class="client-pick" id="client-pick" type="button" data-open="#pop-client" aria-haspopup="dialog" aria-expanded="false" aria-label="Cliente: Lucía Martínez. Cambiar cliente">
+          <span class="avatar avatar-24" aria-hidden="true" data-cp-av>LM</span>
+          <span class="cp-name" data-cp-name>Lucía Martínez</span>
+          <i data-lucide="chevrons-up-down"></i>
+        </button>
+      </div>
+    </div>
+    <div class="ph-actions as-controls" data-needs-client>
+      <div class="segmented" role="group" aria-label="Vista del calendario">
+        <button class="seg-btn" type="button" aria-pressed="true" data-view="week">Semanal</button>
+        <button class="seg-btn" type="button" aria-pressed="false" data-view="month">Mensual</button>
+      </div>
+      <div class="period" role="group" aria-label="Periodo visible">
+        <button class="btn btn-ghost btn-icon" type="button" data-step="-1" aria-label="Semana anterior" data-tip="Anterior"><i data-lucide="chevron-left"></i></button>
+        <span class="period-label" id="period-label" aria-live="polite">16 – 22 nov 2026</span>
+        <button class="btn btn-ghost btn-icon" type="button" data-step="1" aria-label="Semana siguiente" data-tip="Siguiente"><i data-lucide="chevron-right"></i></button>
+      </div>
+      <span class="today-wrap">
+        <button class="btn btn-secondary btn-sm" type="button" data-today>Hoy</button>
+        <span class="proposal-tag">Propuesta</span>
+      </span>
+      <button class="btn btn-ghost btn-icon" type="button" data-open="#menu-more" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones" data-tip="Más"><i data-lucide="ellipsis"></i></button>
+    </div>
+  </header>
+
+  <!-- No client selected -->
+  <div data-v="noclient" hidden>
+    <div class="section">
+      <div class="empty">
+        <span class="empty-x" aria-hidden="true"></span>
+        <h2 class="empty-title">Selecciona un cliente para empezar</h2>
+        <p class="empty-text">Elige un cliente desde la barra superior para revisar su calendario, seleccionar varios días y planificar entrenamientos, dietas o descansos.</p>
+        <button class="btn btn-primary" type="button" data-pick-first>Cargar primer cliente</button>
+      </div>
+    </div>
+  </div>
+
+  <div data-v="default catalog" id="cal-wrap">
+    <!-- Status strip -->
+    <div class="as-strip" id="as-strip" data-show="data empty">
+      <div class="as-counts" id="as-counts" aria-label="Resumen del periodo"></div>
+      <span class="as-auto">
+        <span class="chip chip-success">Autoasignación activa desde 23 nov 2026 · indefinida</span>
+        <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#menu-auto" aria-haspopup="menu" aria-expanded="false" aria-label="Opciones de autoasignación"><i data-lucide="chevron-down"></i></button>
+      </span>
+      <button class="btn btn-ghost rir-btn" type="button" data-open="#sheet-rir" aria-haspopup="dialog" aria-expanded="false">
+        <i data-lucide="gauge"></i>
+        <span><b>Mesociclo de RIR</b> <span class="sep">·</span> <span class="rir-seq">3 → 2 → 1 → 0</span> <span class="sep">·</span> Semana 2 de 4</span>
+        <i data-lucide="chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- Catalog error banner -->
+    <div class="banner banner-warning as-banner" data-v="catalog" role="alert" hidden>
+      <i data-lucide="triangle-alert"></i>
+      <span class="banner-text"><b>Entrenamientos:</b> error · <b>Dietas:</b> sin elementos disponibles. Mientras tanto solo puedes marcar descansos.</span>
+      <span class="banner-actions">
+        <button class="btn btn-ghost btn-sm" type="button" data-loading-label="Reintentando..." data-retry-cat><i data-lucide="rotate-cw"></i>Reintentar entrenos</button>
+        <button class="btn btn-ghost btn-sm" type="button" data-loading-label="Reintentando..." data-retry-cat><i data-lucide="rotate-cw"></i>Reintentar dietas</button>
+      </span>
+    </div>
+
+    <!-- Empty period line -->
+    <p class="as-quiet" data-show="empty" hidden><i data-lucide="calendar-x-2"></i><span><b data-empty-title>Semana sin planificación.</b> Selecciona días y pulsa «Editar selección», o usa «+ Planificar» en un día concreto.</span></p>
+
+    <div id="cal" data-show="data empty" style="margin-top:0"></div>
+
+    <!-- Loading: skeleton of the week sheet -->
+    <div data-show="loading" aria-busy="true" aria-label="Cargando la semana" hidden>
+      <div class="as-strip" aria-hidden="true"><span class="sk-line" style="--w:280px"></span><span class="sk-line" style="--w:240px"></span><span class="sk-line" style="--w:260px;margin-left:auto"></span></div>
+      <div class="wk wk-sk" aria-hidden="true" id="wk-sk"></div>
+    </div>
+
+    <!-- Error -->
+    <div data-show="error" hidden>
+      <div class="section">
+        <div class="error-state" role="alert">
+          <i data-lucide="circle-alert"></i>
+          <h2 class="empty-title" data-err-title>No se ha podido cargar la semana</h2>
+          <p class="empty-text">Revisa la conexión y vuelve a intentarlo. La planificación guardada no se ha modificado.</p>
+          <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="as-hint caption" data-show="data empty" id="as-hint">
+      <span>Clic en un día para seleccionarlo · doble clic o Intro para editarlo directamente.</span>
+      <span class="proposal-tag">Propuesta</span>
+    </p>
+  </div>
+
+  <!-- Docked selection bar -->
+  <div class="selection-bar as-selbar" id="selbar" role="region" aria-label="Acciones de la selección" hidden>
+    <span class="selection-count" id="sel-count" aria-live="polite">2 días seleccionados</span>
+    <span class="sb-div" aria-hidden="true"></span>
+    <button class="btn btn-primary" type="button" data-open="#sheet-editor" data-editor="selection" aria-haspopup="dialog" id="sel-edit"><i data-lucide="pencil"></i><span class="sb-label-main">Editar selección</span></button>
+    <button class="btn btn-secondary btn-icon-m" type="button" data-open="#dlg-copy-sel" aria-haspopup="dialog" aria-label="Copiar selección"><i data-lucide="copy"></i><span class="sb-label">Copiar selección</span></button>
+    <button class="btn btn-danger btn-icon-m" type="button" data-open="#dlg-clear" aria-haspopup="dialog" aria-label="Limpiar días"><i data-lucide="eraser"></i><span class="sb-label">Limpiar días</span></button>
+    <button class="btn btn-ghost btn-icon-m" type="button" data-clear-sel aria-label="Limpiar selección"><i data-lucide="x"></i><span class="sb-label">Limpiar selección</span></button>
+  </div>
+
+</main>
+</div>
+
+<!-- ===================== Floating: client picker, menus ===================== -->
+<div class="popover" id="pop-client" role="dialog" aria-label="Seleccionar cliente" data-align="start" style="--w:320px" hidden>
+  <div class="popover-body">
+    <label class="input-icon"><span class="sr-only">Buscar cliente</span><i data-lucide="search"></i><input class="input" type="search" placeholder="Buscar cliente…" autocomplete="off" data-client-search></label>
+    <div class="opt-list" role="listbox" aria-label="Clientes" id="client-list"></div>
+  </div>
+</div>
+
+<div class="menu" id="menu-more" role="menu" aria-label="Más acciones" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-open="#dlg-copy-week" data-only-week><i data-lucide="copy"></i>Copiar semana</button>
+  <button class="menu-item" type="button" role="menuitem" data-select-all><i data-lucide="layers"></i>Seleccionar todos</button>
+</div>
+
+<div class="menu" id="menu-auto" role="menu" aria-label="Autoasignación" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-open="#sheet-editor" data-editor="rule"><i data-lucide="repeat"></i>Editar autoasignación</button>
+  <div class="menu-sep" role="separator"></div>
+  <button class="menu-item is-danger" type="button" role="menuitem" data-open="#dlg-deactivate"><i data-lucide="circle-stop"></i>Desactivar autoasignación</button>
+</div>
+
+<!-- ===================== Editor sheet ===================== -->
+<div class="overlay overlay-sheet" id="sheet-editor" data-static hidden>
+  <div class="sheet sheet-lg" role="dialog" aria-modal="true" aria-labelledby="ed-title" aria-describedby="ed-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="ed-title">Editar selección</h2>
+        <p class="ov-desc" id="ed-desc">Configura entrenamientos, dieta o descanso para cada día seleccionado.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body ed-body">
+      <div class="banner banner-warning" id="ed-rule-banner" style="margin:0 24px 16px" hidden>
+        <i data-lucide="repeat"></i>
+        <span class="banner-text"><b>Actualizando patrón activo.</b> Patrón actual: lunes, martes, miércoles, jueves, viernes y sábado. <span id="ed-rule-new">Patrón nuevo: lunes, martes, jueves, viernes y sábado.</span></span>
+      </div>
+      <div class="ed">
+        <aside class="ed-days" aria-label="Días seleccionados">
+          <span class="micro" id="ed-days-label">2 días seleccionados</span>
+          <div class="ed-daylist" id="ed-daylist" role="group" aria-labelledby="ed-days-label"></div>
+          <span class="ed-legend"><span class="dot" aria-hidden="true"></span>Ya existía</span>
+          <div class="ed-same" id="ed-same">
+            <label class="check"><input type="checkbox" id="ed-same-cb">Aplicar lo mismo a todos los días seleccionados</label>
+            <span class="proposal-tag">Propuesta</span>
+          </div>
+        </aside>
+        <div class="ed-main" id="ed-main"></div>
+      </div>
+    </div>
+    <div class="ov-foot ed-foot">
+      <span class="ov-foot-start" id="ed-foot-note"></span>
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-secondary" type="button" data-open="#dlg-preview" aria-haspopup="dialog"><i data-lucide="eye"></i>Vista previa</button>
+      <button class="btn btn-primary" type="button" id="ed-save" data-loading-label="Guardando...">Guardar planificación</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pattern removal confirm (replaces window.confirm) -->
+<div class="overlay" id="dlg-pattern" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="pt-t" aria-describedby="pt-d">
+    <div class="ov-head"><div class="ov-head-text"><h2 class="ov-title" id="pt-t">Actualizar autoasignación</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+    <div class="ov-body"><p class="prose-13" id="pt-d">El nuevo patrón elimina los días <b>miércoles</b>. ¿Confirmas la actualización?</p></div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="pt-ok" data-loading-label="Guardando...">Confirmar actualización</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== Client preview ===================== -->
+<div class="overlay" id="dlg-preview" hidden>
+  <div class="dialog dialog-lg" role="dialog" aria-modal="true" aria-labelledby="pv-t" aria-describedby="pv-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="pv-t">Vista previa cliente</h2>
+        <p class="ov-desc" id="pv-d">Revisa cómo quedará cada fecha seleccionada antes de confirmar la planificación.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body"><div class="pv-grid" id="pv-grid"></div></div>
+    <div class="ov-foot">
+      <span class="ov-foot-start">Entrenamiento detalla todos los asignados <span class="proposal-tag">Propuesta</span></span>
+      <button class="btn btn-secondary" type="button" data-close>Volver</button>
+      <button class="btn btn-primary" type="button" id="pv-confirm" data-loading-label="Guardando...">Confirmar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== Copy week (two steps) ===================== -->
+<div class="overlay" id="dlg-copy-week" data-static hidden>
+  <div class="dialog dialog-lg" role="dialog" aria-modal="true" aria-labelledby="cw-t" aria-describedby="cw-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="cw-t">Copiar semana</h2>
+        <p class="ov-desc" id="cw-d">Configura la semana destino y revisa la vista previa antes de sobrescribir su planificación. Usa lunes como fecha de referencia.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div id="cw-step1" class="cw-step-fields">
+        <div class="field">
+          <label class="field-label" for="cw-src">Semana origen</label>
+          <input class="input" id="cw-src" type="text" value="lun 16 nov 2026" disabled>
+          <p class="field-help" id="cw-src-range">16 – 22 nov 2026</p>
+        </div>
+        <div class="field" id="cw-dst-field">
+          <label class="field-label" for="cw-dst">Semana destino</label>
+          <input class="input" id="cw-dst" type="date" value="2026-11-23" aria-describedby="cw-dst-help">
+          <p class="field-help" id="cw-dst-help">23 – 29 nov 2026</p>
+        </div>
+      </div>
+      <div id="cw-step2" class="stack-16" hidden>
+        <div class="cw-weeks">
+          <div class="cw-week"><span class="micro">Semana origen</span><p class="h3" id="cw-o-range">16 – 22 nov 2026</p><div class="cw-pills" id="cw-o-pills"></div></div>
+          <div class="cw-week"><span class="micro">Semana destino</span><p class="h3" id="cw-d-range">23 – 29 nov 2026</p><div class="cw-pills" id="cw-d-pills"></div></div>
+        </div>
+        <div class="cw-grid" id="cw-grid"></div>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close id="cw-cancel">Cancelar</button>
+      <button class="btn btn-primary" type="button" id="cw-next">Ver vista previa</button>
+      <button class="btn btn-secondary" type="button" id="cw-back" hidden>Volver</button>
+      <button class="btn btn-primary" type="button" id="cw-confirm" data-loading-label="Copiando..." hidden>Confirmar copia</button>
+    </div>
+  </div>
+</div>
+
+<!-- Copy selection -->
+<div class="overlay" id="dlg-copy-sel" data-static hidden>
+  <div class="dialog dialog-md" role="dialog" aria-modal="true" aria-labelledby="cs-t" aria-describedby="cs-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="cs-t">Copiar selección</h2>
+        <p class="ov-desc" id="cs-d">Primer día seleccionado irá a fecha destino. Resto conservará distancia entre fechas. Destinos existentes serán sobrescritos.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body stack-16">
+      <div class="field" style="max-width:260px">
+        <label class="field-label" for="cs-date">Fecha destino inicial</label>
+        <input class="input" id="cs-date" type="date" value="2026-11-23">
+      </div>
+      <ul id="cs-list" class="ruled" style="border-top-color:var(--rule)"></ul>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="cs-ok" data-loading-label="Copiando...">Copiar 2 días</button>
+    </div>
+  </div>
+</div>
+
+<!-- Clear days -->
+<div class="overlay" id="dlg-clear" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="cl-t" aria-describedby="cl-d">
+    <div class="ov-head"><div class="ov-head-text"><h2 class="ov-title" id="cl-t">Limpiar días seleccionados</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+    <div class="ov-body"><p class="prose-13" id="cl-d">Se eliminarán las asignaciones de <b data-clear-n>2 días</b>. Esta acción no se puede deshacer.</p></div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" id="cl-ok" data-loading-label="Limpiando...">Limpiar días</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deactivate auto-assignment -->
+<div class="overlay" id="dlg-deactivate" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="da-t" aria-describedby="da-d">
+    <div class="ov-head"><div class="ov-head-text"><h2 class="ov-title" id="da-t">Desactivar autoasignación semanal</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+    <div class="ov-body stack-16">
+      <p class="prose-13" id="da-d">La regla dejará de generar nuevos entrenamientos, dietas o descansos para próximas semanas.</p>
+      <div class="banner banner-info"><i data-lucide="info"></i><span class="banner-text"><b>Las fechas automáticas pendientes se retirarán.</b> El histórico y los cambios manuales se mantienen. Podrás activar otro patrón cuando quieras.</span></div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" id="da-ok" data-loading-label="Desactivando...">Desactivar autoasignación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== RIR mesocycle sheet ===================== -->
+<div class="overlay overlay-sheet" id="sheet-rir" data-static hidden>
+  <div class="sheet sheet-md" role="dialog" aria-modal="true" aria-labelledby="rir-t" aria-describedby="rir-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="rir-t">Mesociclo de RIR</h2>
+        <p class="ov-desc" id="rir-d">Un ciclo común para todos los entrenamientos de este cliente. El RIR realizado por serie se conserva por separado.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body stack-24">
+      <div class="rir-status"><i data-lucide="gauge"></i><span>Última configuración desde <b>lun 9 nov</b>: <b>3 → 2 → 1 → 0 → repetir</b></span><span class="chip chip-neutral no-dot">Semana 2 de 4</span></div>
+
+      <details class="tech">
+        <summary><i data-lucide="chevron-right"></i>Objetivos por fecha del periodo visible</summary>
+        <ul class="ruled ruled-dates" style="margin-bottom:12px">
+          <li><span class="h3">lun 16 nov</span><span class="text-2"><span>Semana 2 de 4</span><span>RIR 2</span><span>Protegido</span></span></li>
+          <li><span class="h3">mar 17 nov</span><span class="text-2"><span>Semana 2 de 4</span><span>RIR 2</span></span></li>
+          <li><span class="h3">mié 18 nov</span><span class="text-2"><span>Semana 2 de 4</span><span>RIR 2</span></span></li>
+          <li><span class="h3">vie 20 nov</span><span class="text-2"><span>Semana 2 de 4</span><span>RIR 2</span></span></li>
+        </ul>
+      </details>
+
+      <div id="rir-edit" class="stack-24">
+        <div class="field-grid">
+          <div class="field">
+            <label class="field-label" for="rir-from">Aplicar desde</label>
+            <input class="input" id="rir-from" type="date" value="2026-11-16" min="2026-11-15">
+          </div>
+          <div class="field">
+            <label class="field-label" for="rir-start">Semana de inicio</label>
+            <input class="input" id="rir-start" type="date" value="2026-11-09">
+          </div>
+          <p class="field-help span-2" style="margin-top:-8px">Las fechas anteriores a «Aplicar desde» y los entrenamientos ya registrados quedan protegidos: su RIR no cambia.</p>
+        </div>
+
+        <label class="check"><input type="checkbox" id="rir-cancel">Cancelar solo el ciclo de RIR y volver al RIR fijo de cada ejercicio</label>
+
+        <div id="rir-cycle" class="stack-24">
+          <div class="field">
+            <label class="field-label" for="rir-load">Cargar propuesta de un entrenamiento</label>
+            <div class="row">
+              <select class="select" id="rir-load" style="max-width:320px">
+                <option value="">Seleccionar entrenamiento</option>
+                <option>Torso A</option>
+                <option>Pierna B</option>
+                <option>Full body C</option>
+                <option>Cardio suave</option>
+              </select>
+              <button class="btn btn-secondary" type="button" data-toast="Propuesta cargada" data-toast-tone="info" data-toast-desc="Se ha copiado la secuencia de Torso A. Revísala antes de confirmar.">Cargar propuesta</button>
+            </div>
+          </div>
+
+          <div><fieldset class="fieldset">
+            <legend class="field-label">Secuencia común</legend>
+            <div class="seq" id="rir-seq"></div>
+            <div class="row" style="margin-top:10px">
+              <button class="btn btn-ghost btn-sm" type="button" id="seq-add"><i data-lucide="plus"></i>Añadir semana</button>
+              <button class="btn btn-ghost btn-sm" type="button" id="seq-rm"><i data-lucide="minus"></i>Quitar última</button>
+            </div>
+            <p class="field-help">RIR entero de 0 a 10. Semanas de lunes a domingo; la secuencia se repite aunque no haya entrenamientos.</p>
+          </fieldset></div>
+
+          <div>
+            <p class="field-label" id="exc-l">Excepciones por ejercicio</p>
+            <div role="group" aria-labelledby="exc-l" style="border-top:1px solid var(--rule)">
+              <div class="exc-row"><span class="exc-name">Press de banca<span class="caption">Torso A</span></span>
+                <select class="select" aria-label="Excepción para Press de banca"><option selected>Heredar secuencia común</option><option>Secuencia propia</option><option>RIR fijo</option><option>Sin objetivo RIR</option></select><span></span></div>
+              <div class="exc-row"><span class="exc-name">Remo con barra<span class="caption">Torso A</span></span>
+                <select class="select" aria-label="Excepción para Remo con barra"><option>Heredar secuencia común</option><option>Secuencia propia</option><option selected>RIR fijo</option><option>Sin objetivo RIR</option></select>
+                <input class="input" type="number" min="0" max="10" value="2" aria-label="RIR fijo para Remo con barra"></div>
+              <div class="exc-row"><span class="exc-name">Sentadilla<span class="caption">Full body C</span></span>
+                <select class="select" aria-label="Excepción para Sentadilla"><option selected>Heredar secuencia común</option><option>Secuencia propia</option><option>RIR fijo</option><option>Sin objetivo RIR</option></select><span></span></div>
+              <div class="exc-row"><span class="exc-name">Elíptica<span class="caption">Cardio suave</span></span>
+                <select class="select" aria-label="Excepción para Elíptica"><option>Heredar secuencia común</option><option>Secuencia propia</option><option>RIR fijo</option><option selected>Sin objetivo RIR</option></select><span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section id="rir-preview" class="stack-12" hidden aria-labelledby="rir-pv-t">
+        <h3 class="h2" id="rir-pv-t">Vista previa del periodo visible</h3>
+        <div style="border-top:1px solid var(--rule)">
+          <div class="rir-prev-row"><span class="d">lun 16 nov</span><ul><li>Press de banca <span class="arrow">RIR 2 → 1</span></li><li>Remo con barra <span class="arrow">RIR 2 → 2</span></li></ul><span class="chip chip-neutral">Protegida, sin cambios</span></div>
+          <div class="rir-prev-row"><span class="d">mar 17 nov</span><ul><li>Sentadilla búlgara <span class="arrow">RIR 2 → 1</span></li><li>Peso muerto rumano <span class="arrow">RIR 2 → 1</span></li></ul><span class="chip chip-success">Se aplicará el cambio</span></div>
+          <div class="rir-prev-row"><span class="d">mié 18 nov</span><ul><li>Elíptica <span class="arrow">Sin objetivo RIR</span></li></ul><span class="chip chip-neutral">Protegida, sin cambios</span></div>
+          <div class="rir-prev-row"><span class="d">vie 20 nov</span><ul><li>Sentadilla <span class="arrow">RIR 2 → 1</span></li><li>Press militar <span class="arrow">RIR 2 → 1</span></li></ul><span class="chip chip-success">Se aplicará el cambio</span></div>
+        </div>
+      </section>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cerrar</button>
+      <button class="btn btn-secondary" type="button" id="rir-back" hidden>Volver a editar</button>
+      <button class="btn btn-primary" type="button" id="rir-review">Revisar fechas y objetivos</button>
+      <button class="btn btn-primary" type="button" id="rir-confirm" data-loading-label="Guardando…" hidden>Confirmar cambio de RIR</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ejercicios · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/catalogo.css">
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="ejercicios" data-group="Catálogo" data-crumbs='["Ejercicios"]' data-variants='[["filtered","vacío filtrado"]]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1">Ejercicios</h1>
+        <span class="ph-meta" data-show="data loading error">128 ejercicios</span>
+      </div>
+      <p class="ph-sub">Gestiona el catálogo completo de ejercicios. Crea, edita y adjunta vídeos instructivos para cada movimiento.</p>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-primary" type="button" data-open="#dlg-form" data-mode="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Nuevo ejercicio</button>
+    </div>
+  </header>
+
+  <div class="toolbar-row" data-show="data loading error">
+    <div class="toolbar" role="search" aria-label="Buscar y filtrar ejercicios">
+      <label class="input-icon">
+        <span class="sr-only">Buscar ejercicios</span>
+        <i data-lucide="search"></i>
+        <input class="input" type="search" placeholder="Buscar por nombre..." autocomplete="off">
+      </label>
+      <button class="btn btn-secondary" type="button" data-open="#filters-pop" aria-haspopup="dialog" aria-expanded="false"><i data-lucide="sliders-horizontal"></i>Filtros<span class="count" data-filter-count>2</span></button>
+      <span class="filter-chip">Nivel: <b>Intermedio</b><button type="button" data-remove-chip aria-label="Quitar filtro Nivel: Intermedio"><i data-lucide="x"></i></button></span>
+      <span class="filter-chip">Uso en entrenamientos: <b>Usados en entrenamientos</b><button type="button" data-remove-chip aria-label="Quitar filtro Uso en entrenamientos: Usados en entrenamientos"><i data-lucide="x"></i></button></span>
+      <button class="btn btn-ghost btn-sm clear-all" type="button" data-clear-chips>Limpiar todo</button>
+    </div>
+  </div>
+
+  <!-- DATA -->
+  <div data-show="data">
+    <div data-v-not="filtered">
+      <div class="table-wrap">
+        <table class="table table--stack" id="tbl-ex">
+          <caption class="sr-only">Listado de ejercicios, página 1 de 13</caption>
+          <thead>
+            <tr>
+              <th scope="col" aria-sort="ascending"><button class="th-sort" type="button">Nombre<i data-lucide="arrow-up-down"></i></button>
+                <span class="proposal-tag" data-tip="Miniatura del vídeo en la fila (hoy solo un icono en la columna Vídeo)" tabindex="0" style="margin-left:6px">Propuesta</span></th>
+              <th scope="col" class="p2">Grupos musculares</th>
+              <th scope="col" class="p3">Equipamiento</th>
+              <th scope="col" aria-sort="none"><button class="th-sort" type="button">Nivel<i data-lucide="arrow-up-down"></i></button></th>
+              <th scope="col" class="cell-num" aria-sort="none"><button class="th-sort" type="button">En entrenamientos<i data-lucide="arrow-up-down"></i></button></th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody id="ex-rows"></tbody>
+        </table>
+      </div>
+      <nav class="pagination" aria-label="Paginación">
+        <span class="pagination-label">Página 1 de 13</span>
+        <span class="pagination-actions">
+          <button class="btn btn-secondary btn-sm" type="button" disabled><i data-lucide="chevron-left"></i>Anterior</button>
+          <button class="btn btn-secondary btn-sm" type="button">Siguiente<i data-lucide="chevron-right"></i></button>
+        </span>
+      </nav>
+    </div>
+    <div data-v="filtered" class="section">
+      <div class="empty empty-compact">
+        <span class="empty-x" aria-hidden="true"></span>
+        <h2 class="empty-title">Sin resultados</h2>
+        <p class="empty-text">No se encontraron ejercicios con la búsqueda y filtros actuales.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div data-show="loading" aria-busy="true" aria-label="Cargando ejercicios">
+    <div class="table-wrap" aria-hidden="true">
+      <table class="table">
+        <thead><tr><th>Nombre</th><th class="p2">Grupos musculares</th><th class="p3">Equipamiento</th><th>Nivel</th><th class="cell-num">En entrenamientos</th><th class="cell-actions"></th></tr></thead>
+        <tbody id="ex-skeleton"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EMPTY -->
+  <div data-show="empty" class="section">
+    <div class="empty">
+      <span class="empty-x" aria-hidden="true"></span>
+      <h2 class="empty-title">Aún no hay ejercicios</h2>
+      <p class="empty-text">Crea el primer ejercicio para empezar a construir el catálogo que usarán tus clientes.</p>
+      <button class="btn btn-primary" type="button" data-open="#dlg-form" data-mode="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Crear primer ejercicio</button>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div data-show="error" class="section">
+    <div class="error-state" role="alert">
+      <i data-lucide="circle-alert"></i>
+      <h2 class="empty-title">No se ha podido cargar el catálogo</h2>
+      <p class="empty-text">Network Error. Comprueba tu conexión y vuelve a intentarlo.</p>
+      <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ===================== ROW MENU ===================== -->
+<div class="menu" id="row-menu" role="menu" aria-label="Acciones del ejercicio" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-open="#sheet-ex"><i data-lucide="eye"></i>Ver detalle</button>
+  <button class="menu-item" type="button" role="menuitem" data-open="#dlg-form" data-mode="edit"><i data-lucide="pencil"></i>Editar</button>
+  <button class="menu-item" type="button" role="menuitem" data-open="#dlg-form" data-mode="dup"><i data-lucide="copy"></i>Duplicar</button>
+  <div class="menu-sep" role="separator"></div>
+  <button class="menu-item is-danger" type="button" role="menuitem" data-open="#dlg-delete"><i data-lucide="trash-2"></i>Eliminar</button>
+</div>
+
+<!-- ===================== USAGE POPOVER ===================== -->
+<div class="popover" id="usage-pop" role="dialog" aria-labelledby="usage-title" style="--w:300px" hidden>
+  <div class="popover-head">
+    <h2 class="h3" id="usage-title">Usado en entrenamientos</h2>
+    <p class="caption" style="margin-top:2px" data-fill="name">Press de banca</p>
+  </div>
+  <div class="popover-body" style="padding-top:8px">
+    <ul class="usage-list" id="usage-list"></ul>
+  </div>
+</div>
+
+<!-- ===================== FILTERS POPOVER ===================== -->
+<div class="popover" id="filters-pop" role="dialog" aria-labelledby="filters-title" data-align="start" style="--w:460px" hidden>
+  <div class="popover-head">
+    <h2 class="h3" id="filters-title">Filtros del listado</h2>
+    <p class="caption" style="margin-top:2px">Selecciona uno o varios criterios.</p>
+  </div>
+  <div class="popover-body">
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Grupo muscular</legend>
+      <label class="input-icon filter-search"><span class="sr-only">Buscar grupo muscular</span><i data-lucide="search"></i><input class="input" type="search" placeholder="Buscar grupo muscular..."></label>
+      <div class="filter-options" id="f-muscles"></div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Equipamiento</legend>
+      <label class="input-icon filter-search"><span class="sr-only">Buscar equipamiento</span><i data-lucide="search"></i><input class="input" type="search" placeholder="Buscar equipamiento..."></label>
+      <div class="filter-options" id="f-equip"></div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Nivel</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox">Principiante</label>
+        <label class="check"><input type="checkbox" checked>Intermedio</label>
+        <label class="check"><input type="checkbox">Avanzado</label>
+      </div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Uso en entrenamientos</legend>
+      <div class="filter-options">
+        <label class="check"><input type="radio" name="f-usage">Todos</label>
+        <label class="check"><input type="radio" name="f-usage" checked>Usados en entrenamientos</label>
+        <label class="check"><input type="radio" name="f-usage">Sin entrenamientos</label>
+      </div>
+    </fieldset></div>
+  </div>
+  <div class="popover-foot">
+    <button class="btn btn-ghost btn-sm" type="button">Limpiar</button>
+    <button class="btn btn-primary btn-sm" type="button" data-close>Aplicar</button>
+  </div>
+</div>
+
+<!-- ===================== SHEET: DETALLE ===================== -->
+<div class="overlay overlay-sheet" id="sheet-ex" hidden>
+  <div class="sheet sheet-md" role="dialog" aria-modal="true" aria-labelledby="sx-title">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="sx-title" data-fill="name">Press de banca</h2>
+        <div class="d-meta" style="margin-top:8px"><span class="tag" id="sx-level">Intermedio</span><span id="sx-pending"></span></div>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div id="sx-video"></div>
+      <div class="d-block" style="margin-top:20px; border-top:0; padding-top:0">
+        <span class="micro">Grupos musculares</span>
+        <div class="tags" id="sx-muscles"></div>
+      </div>
+      <div class="d-block">
+        <span class="micro">Equipamiento</span>
+        <div class="tags" id="sx-equip"></div>
+      </div>
+      <div class="d-block">
+        <h3 class="h3">Técnica</h3>
+        <p class="d-text">Túmbate con los ojos bajo la barra, escápulas retraídas y pies firmes en el suelo. Baja la barra controlada hasta rozar el esternón y empuja en línea recta manteniendo los codos a unos 45° del torso.</p>
+      </div>
+      <div class="d-block">
+        <h3 class="h3">Errores comunes</h3>
+        <p class="d-text">Rebotar la barra en el pecho, despegar los glúteos del banco y abrir los codos a 90°, lo que carga el hombro.</p>
+      </div>
+      <div class="d-block">
+        <h3 class="h3">Explicación</h3>
+        <p class="d-text">Ejercicio básico de empuje horizontal. Prioriza un rango completo y una bajada de dos segundos antes de aumentar la carga.</p>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cerrar</button>
+      <button class="btn btn-secondary" type="button" data-close-also="#sheet-ex" data-open="#dlg-form" data-mode="dup"><i data-lucide="copy"></i>Duplicar</button>
+      <button class="btn btn-primary" type="button" data-close-also="#sheet-ex" data-open="#dlg-form" data-mode="edit"><i data-lucide="pencil"></i>Editar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: FORMULARIO ===================== -->
+<div class="overlay" id="dlg-form" data-static hidden>
+  <div class="dialog dialog-lg" role="dialog" aria-modal="true" aria-labelledby="fx-title">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="fx-title" data-t-new="Nuevo ejercicio" data-t-edit="Editar ejercicio" data-t-dup="Duplicar ejercicio">Nuevo ejercicio</h2>
+        <p class="ov-desc" data-mode-only="dup" hidden>Se copiará el contenido. Por seguridad, vuelve a adjuntar el vídeo y la miniatura.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-ex" data-validate novalidate data-success-toast="Ejercicio creado correctamente"
+            data-st-new="Ejercicio creado correctamente" data-st-edit="Ejercicio actualizado correctamente" data-st-dup="Ejercicio duplicado correctamente">
+        <div class="form-2col">
+          <div class="col">
+            <div class="row-name-level">
+              <div class="field">
+                <label class="field-label" for="fx-name">Nombre</label>
+                <input class="input" id="fx-name" name="name" required placeholder="Press de banca" autocomplete="off" data-error-required="El nombre es obligatorio" data-val-new="" data-val-edit="Press de banca" data-val-dup="Press de banca">
+              </div>
+              <div class="field">
+                <label class="field-label" for="fx-level">Nivel</label>
+                <select class="select" id="fx-level" name="level" data-val-new="Principiante" data-val-edit="Intermedio" data-val-dup="Intermedio"><option selected>Principiante</option><option>Intermedio</option><option>Avanzado</option></select>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field-label" id="fx-mg-l">Grupos musculares</span>
+              <div class="chipbox" role="group" aria-labelledby="fx-mg-l">
+                <span class="chip-set" data-mode-only="edit dup" hidden style="display:contents">
+                  <span class="tag tag-x">Pecho<button type="button" aria-label="Quitar Pecho"><i data-lucide="x"></i></button></span>
+                  <span class="tag tag-x">Tríceps<button type="button" aria-label="Quitar Tríceps"><i data-lucide="x"></i></button></span>
+                  <span class="tag tag-x">Hombros<button type="button" aria-label="Quitar Hombros"><i data-lucide="x"></i></button></span>
+                </span>
+                <span class="chipbox-empty" data-mode-only="new">Selecciona grupos musculares...</span>
+              </div>
+              <div class="chip-add">
+                <button class="btn btn-secondary btn-sm" type="button" data-open="#pop-muscles" aria-haspopup="dialog" aria-expanded="false">Opciones<i data-lucide="chevron-down"></i></button>
+                <label class="sr-only" for="fx-mg-other">Otro grupo muscular</label>
+                <input class="input input-sm" id="fx-mg-other" placeholder="Otro (Enter para añadir)" autocomplete="off">
+                <button class="btn btn-secondary btn-icon" type="button" aria-label="Añadir grupo muscular"><i data-lucide="plus"></i></button>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field-label" id="fx-eq-l">Equipamiento <span class="field-optional">Opcional</span></span>
+              <div class="chipbox" role="group" aria-labelledby="fx-eq-l">
+                <span class="chip-set" data-mode-only="edit dup" hidden style="display:contents">
+                  <span class="tag tag-x">Barra<button type="button" aria-label="Quitar Barra"><i data-lucide="x"></i></button></span>
+                  <span class="tag tag-x">Banco<button type="button" aria-label="Quitar Banco"><i data-lucide="x"></i></button></span>
+                </span>
+                <span class="chipbox-empty" data-mode-only="new">Selecciona equipamiento...</span>
+              </div>
+              <div class="chip-add">
+                <button class="btn btn-secondary btn-sm" type="button" data-open="#pop-equip" aria-haspopup="dialog" aria-expanded="false">Opciones<i data-lucide="chevron-down"></i></button>
+                <label class="sr-only" for="fx-eq-other">Otro equipamiento</label>
+                <input class="input input-sm" id="fx-eq-other" placeholder="Otro (Enter para añadir)" autocomplete="off">
+                <button class="btn btn-secondary btn-icon" type="button" aria-label="Añadir equipamiento"><i data-lucide="plus"></i></button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="fx-tech">Técnica <span class="field-optional">Opcional</span></label>
+              <textarea class="textarea" id="fx-tech" rows="3" maxlength="2000" data-count placeholder="Describe la técnica correcta..." aria-describedby="fx-tech-c" data-val-new="" data-val-edit="Túmbate con los ojos bajo la barra, escápulas retraídas y pies firmes en el suelo. Baja la barra controlada hasta rozar el esternón y empuja en línea recta." data-val-dup="Túmbate con los ojos bajo la barra, escápulas retraídas y pies firmes en el suelo. Baja la barra controlada hasta rozar el esternón y empuja en línea recta."></textarea>
+              <div class="field-foot"><span class="field-help" style="display:flex;gap:6px;align-items:center"><span class="proposal-tag" data-tip="Contador de caracteres (hoy no se muestra)" tabindex="0">Propuesta</span>Contador de caracteres</span><span class="field-count" id="fx-tech-c" aria-live="polite">0/2000</span></div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="fx-err">Errores comunes <span class="field-optional">Opcional</span></label>
+              <textarea class="textarea" id="fx-err" rows="3" maxlength="2000" data-count placeholder="Describe los errores más frecuentes..." aria-describedby="fx-err-c" data-val-new="" data-val-edit="Rebotar la barra en el pecho, despegar los glúteos del banco y abrir los codos a 90°." data-val-dup="Rebotar la barra en el pecho, despegar los glúteos del banco y abrir los codos a 90°."></textarea>
+              <div class="field-foot"><span></span><span class="field-count" id="fx-err-c" aria-live="polite">0/2000</span></div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="fx-exp">Explicación <span class="field-optional">Opcional</span></label>
+              <textarea class="textarea" id="fx-exp" rows="3" maxlength="2000" data-count placeholder="Explicación adicional del ejercicio..." aria-describedby="fx-exp-c"></textarea>
+              <div class="field-foot"><span></span><span class="field-count" id="fx-exp-c" aria-live="polite">0/2000</span></div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="field">
+              <span class="field-label" id="fx-video-l">Vídeo <span class="field-optional">Opcional</span></span>
+              <button class="upload" type="button" aria-labelledby="fx-video-l fx-video-t" data-mode-only="new dup">
+                <i data-lucide="film"></i>
+                <span class="upload-title" id="fx-video-t">Seleccionar vídeo</span>
+                <span class="upload-meta">MP4, MOV o WebM · Máx. 1 GB. Directo hasta 100 MB.</span>
+              </button>
+              <div class="upload-done" data-mode-only="edit" hidden>
+                <div class="media-frame"><span class="play"><i data-lucide="play"></i></span>
+                  <div class="media-bar"><span class="num">0:00 / 0:42</span><div class="progress" aria-hidden="true"><span style="--value:0%"></span></div><i data-lucide="volume-2"></i></div></div>
+                <div class="upload-file"><i data-lucide="link"></i><span>https://media.exom.app/exercises/press-de-banca.mp4</span><button class="btn btn-ghost btn-sm" type="button">Quitar</button></div>
+              </div>
+            </div>
+            <div class="field">
+              <span class="field-label"><span>Miniatura</span><span class="proposal-tag" data-tip="Hoy la etiqueta es «Thumbnail» y es una segunda zona de subida" tabindex="0">Propuesta</span></span>
+              <div class="thumb-auto">
+                <div class="media-frame" aria-hidden="true" data-mode-only="new dup"><i data-lucide="image"></i></div>
+                <div class="media-frame" aria-hidden="true" data-mode-only="edit" hidden style="border-style:solid;background:var(--surface-3)"><i data-lucide="image"></i></div>
+                <div class="stack-4">
+                  <p class="caption">Se genera automáticamente al subir el vídeo.</p>
+                  <button class="link-btn" type="button">Reemplazar</button>
+                  <p class="caption">JPG, PNG o WebP · Máx. 10 MB (se comprime automáticamente)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section class="states-strip" aria-labelledby="fx-states-t">
+          <span class="micro" id="fx-states-t">Estados de la subida de vídeo</span>
+          <div class="states-grid">
+            <div class="state-cell"><span class="micro">Reposo</span>
+              <div class="upload"><i data-lucide="film"></i><span class="upload-title">Seleccionar vídeo</span><span class="upload-meta">MP4, MOV o WebM · Máx. 1 GB. Directo hasta 100 MB.</span></div></div>
+            <div class="state-cell"><span class="micro">Comprimiendo</span>
+              <div class="upload is-busy"><div class="upload-line"><span>Comprimiendo vídeo... 42%</span><span class="spinner" aria-hidden="true"></span></div>
+                <div class="progress" role="progressbar" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100" aria-label="Compresión"><span style="--value:42%"></span></div>
+                <span class="upload-meta">sentadilla-frontal.mov · 486 MB</span></div></div>
+            <div class="state-cell"><span class="micro">Subiendo</span>
+              <div class="upload is-busy"><div class="upload-line"><span>Subiendo vídeo... 78%</span><span class="spinner" aria-hidden="true"></span></div>
+                <div class="progress" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100" aria-label="Subida"><span style="--value:78%"></span></div>
+                <span class="upload-meta">sentadilla-frontal.mp4 · 64 MB</span></div></div>
+            <div class="state-cell"><span class="micro">Listo</span>
+              <div class="upload-done"><div class="media-frame"><span class="play"><i data-lucide="play"></i></span></div>
+                <div class="upload-file"><i data-lucide="link"></i><span>https://media.exom.app/exercises/sentadilla-frontal.mp4</span><button class="btn btn-ghost btn-sm" type="button">Quitar</button></div></div></div>
+            <div class="state-cell"><span class="micro">Error</span>
+              <div class="upload is-error" role="alert"><i data-lucide="circle-alert"></i><span class="upload-title">Formato no válido. Acepta: mp4, mov, webm</span><span class="upload-meta">Selecciona otro archivo para volver a intentarlo.</span></div></div>
+            <div class="state-cell"><span class="micro">Confirmación pendiente</span>
+              <div class="upload is-busy"><div class="upload-line"><span>La transferencia terminó, pero falta confirmar la misma subida.</span></div>
+                <button class="btn btn-secondary btn-sm" type="button" style="align-self:flex-start;margin-top:6px"><i data-lucide="rotate-cw"></i>Reintentar confirmación</button></div></div>
+          </div>
+        </section>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="submit" form="form-ex" data-loading-label="Creando..." data-t-new="Crear ejercicio" data-t-edit="Guardar cambios" data-t-dup="Crear copia">Crear ejercicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- Opciones (grupos musculares / equipamiento) -->
+<div class="popover" id="pop-muscles" role="dialog" aria-label="Grupos musculares" data-align="start" style="--w:260px" hidden>
+  <div class="popover-body" style="max-height:240px"><div class="stack-4" id="opt-muscles"></div></div>
+</div>
+<div class="popover" id="pop-equip" role="dialog" aria-label="Equipamiento" data-align="start" style="--w:260px" hidden>
+  <div class="popover-body" style="max-height:240px"><div class="stack-4" id="opt-equip"></div></div>
+</div>
+
+<!-- ===================== DIALOG: ELIMINAR ===================== -->
+<div class="overlay" id="dlg-delete" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dx-title" aria-describedby="dx-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dx-title">Eliminar ejercicio</h2>
+        <p class="ov-desc" id="dx-desc">¿Eliminar <b data-fill="name">Press de banca</b>? El ejercicio dejará de estar disponible en el catálogo activo, pero sus datos se conservarán.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast-fill='"{name}" ha sido eliminado'><i data-lucide="trash-2"></i>Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var MUSCLES = ['Pecho', 'Espalda', 'Hombros', 'Bíceps', 'Tríceps', 'Cuádriceps', 'Isquiotibiales', 'Glúteos', 'Gemelos', 'Core', 'Antebrazos', 'Trapecio', 'Posterior'];
+  var EQUIP = ['Mancuernas', 'Barra', 'Máquina', 'Cable', 'Kettlebell', 'Banda elástica', 'Peso corporal', 'TRX', 'Banco', 'Barra EZ', 'Disco', 'Polea'];
+  var EX = [
+    { n: 'Press de banca', m: ['Pecho', 'Tríceps', 'Hombros'], e: ['Barra', 'Banco'], l: 'Intermedio', v: 1, u: ['Full Body Fuerza + Cardio', 'Torso empuje', 'Fuerza 5x5', 'Principiantes semana 1'], uc: 12 },
+    { n: 'Sentadilla con barra', m: ['Cuádriceps', 'Glúteos', 'Isquiotibiales', 'Core'], e: ['Barra'], l: 'Intermedio', v: 1, u: ['Full Body Fuerza + Cardio', 'Pierna y glúteo', 'Fuerza 5x5'], uc: 9 },
+    { n: 'Peso muerto rumano', m: ['Isquiotibiales', 'Glúteos'], e: ['Barra'], l: 'Avanzado', v: 1, u: ['Pierna y glúteo', 'Fuerza 5x5'], uc: 6, p: 'Edición pendiente de aprobación' },
+    { n: 'Dominadas', m: ['Espalda', 'Bíceps'], e: ['Peso corporal'], l: 'Avanzado', v: 1, u: ['Espalda y bíceps', 'Circuito metabólico'], uc: 4 },
+    { n: 'Remo con mancuerna', m: ['Espalda', 'Bíceps'], e: ['Mancuernas', 'Banco'], l: 'Principiante', v: 0, u: ['Full Body Fuerza + Cardio', 'Espalda y bíceps'], uc: 7 },
+    { n: 'Hip thrust', m: ['Glúteos', 'Isquiotibiales'], e: ['Barra', 'Banco', 'Disco'], l: 'Intermedio', v: 1, u: ['Pierna y glúteo', 'Full Body Fuerza + Cardio'], uc: 5 },
+    { n: 'Plancha frontal', m: ['Core'], e: ['Peso corporal'], l: 'Principiante', v: 1, u: ['Core y estabilidad', 'Movilidad matinal', 'HIIT 20 minutos'], uc: 11 },
+    { n: 'Face pull en polea', m: ['Hombros', 'Trapecio'], e: ['Polea'], l: 'Principiante', v: 0, u: [], uc: 0 },
+    { n: 'Curl con barra EZ', m: ['Bíceps', 'Antebrazos'], e: ['Barra EZ'], l: 'Principiante', v: 1, u: ['Espalda y bíceps'], uc: 3 },
+    { n: 'Elevación de gemelos en máquina', m: ['Gemelos'], e: [], l: 'Principiante', v: 0, u: [], uc: 0, p: 'Creación pendiente de aprobación' }
+  ];
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function tags(list, max) {
+    if (!list.length) return '<span class="muted-dash">—</span>';
+    var out = list.slice(0, max).map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('');
+    if (list.length > max) {
+      var rest = list.slice(max).join(', ');
+      out += '<span class="tag tag-more" tabindex="0" data-tip="' + esc(rest) + '" aria-label="' + (list.length - max) + ' más: ' + esc(rest) + '">+' + (list.length - max) + '</span>';
+    }
+    return '<span class="tags tags-nowrap">' + out + '</span>';
+  }
+  function pending(p) {
+    return p ? '<span class="chip chip-warning no-dot chip-pending" tabindex="0" data-tip="' + p + '"><i data-lucide="triangle-alert"></i>Pendiente</span>' : '';
+  }
+  var rows = EX.map(function (x, i) {
+    var thumb = x.v
+      ? '<span class="thumb" aria-hidden="true"><i data-lucide="play"></i></span>'
+      : '<span class="thumb is-empty" aria-hidden="true"></span>';
+    var usage = x.uc
+      ? '<span class="usage"><span class="num">' + x.uc + '</span><button class="btn btn-ghost btn-icon" type="button" data-open="#usage-pop" aria-haspopup="dialog" aria-expanded="false" aria-label="Ver entrenamientos que usan ' + esc(x.n) + '" data-ctx-name="' + esc(x.n) + '" data-usage="' + i + '"><i data-lucide="info"></i></button></span>'
+      : '<span class="usage-none">Sin asignar</span>';
+    return '<tr data-row-open class="row-link">' +
+      '<td class="cell-primary cell-clip"><div class="entity">' + thumb +
+        '<span class="entity-text"><span class="name-line"><button type="button" class="entity-name row-anchor" title="' + esc(x.n) + '" data-open="#sheet-ex" aria-haspopup="dialog" data-ctx-name="' + esc(x.n) + '" data-ex="' + i + '">' + esc(x.n) + '</button>' + pending(x.p) + '</span>' +
+        '</span></div></td>' +
+      '<td class="p2" data-label="Grupos musculares">' + tags(x.m, 2) + '</td>' +
+      '<td class="p3" data-label="Equipamiento">' + tags(x.e, 2) + '</td>' +
+      '<td class="st-inline" data-label="Nivel"><span class="tag">' + x.l + '</span></td>' +
+      '<td class="cell-num" data-label="En entrenamientos">' + usage + '</td>' +
+      '<td class="cell-actions"><span class="cell-actions-inner"><i data-lucide="chevron-right" class="row-chevron"></i>' +
+        '<button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Abrir menú de ' + esc(x.n) + '" data-ctx-name="' + esc(x.n) + '" data-ex="' + i + '"><i data-lucide="ellipsis"></i></button></span></td>' +
+    '</tr>';
+  }).join('');
+  document.getElementById('ex-rows').innerHTML = rows;
+
+  var sk = '';
+  for (var k = 0; k < 6; k++) {
+    sk += '<tr><td><div class="entity"><span class="sk-block" style="--h:32px;width:56px"></span><span class="sk-line" style="--w:' + (40 + k * 7 % 30) + '%"></span></div></td>' +
+      '<td class="p2"><span class="sk-line" style="--w:120px"></span></td><td class="p3"><span class="sk-line" style="--w:80px"></span></td>' +
+      '<td><span class="sk-line" style="--w:72px"></span></td><td class="cell-num"><span class="sk-line" style="--w:24px;margin-left:auto"></span></td><td class="cell-actions"></td></tr>';
+  }
+  document.getElementById('ex-skeleton').innerHTML = sk;
+
+  function checks(list, on) {
+    return list.map(function (m) { return '<label class="check"><input type="checkbox"' + (on.indexOf(m) > -1 ? ' checked' : '') + '>' + m + '</label>'; }).join('');
+  }
+  document.getElementById('f-muscles').innerHTML = checks(MUSCLES, []);
+  document.getElementById('f-equip').innerHTML = checks(EQUIP, []);
+  document.getElementById('opt-muscles').innerHTML = checks(MUSCLES, ['Pecho', 'Tríceps', 'Hombros']);
+  document.getElementById('opt-equip').innerHTML = checks(EQUIP, ['Barra', 'Banco']);
+
+  // Fill usage popover and detail sheet before proto opens them
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-usage]');
+    if (t) {
+      var x = EX[+t.getAttribute('data-usage')];
+      document.getElementById('usage-list').innerHTML = x.u.map(function (n) { return '<li><i data-lucide="clipboard-list" class="text-3"></i>' + esc(n) + '</li>'; }).join('') +
+        (x.uc > x.u.length ? '<li class="caption">y ' + (x.uc - x.u.length) + ' más</li>' : '');
+    }
+    var d = e.target.closest && e.target.closest('[data-ex]');
+    if (d) fillDetail(+d.getAttribute('data-ex'));
+  });
+  function fillDetail(i) {
+    {
+      var ex = EX[i];
+      document.getElementById('sx-title').textContent = ex.n;
+      document.getElementById('sx-level').textContent = ex.l;
+      document.getElementById('sx-pending').innerHTML = pending(ex.p);
+      document.getElementById('sx-muscles').innerHTML = ex.m.map(function (m) { return '<span class="tag">' + m + '</span>'; }).join('');
+      document.getElementById('sx-equip').innerHTML = ex.e.length ? ex.e.map(function (m) { return '<span class="tag">' + m + '</span>'; }).join('') : '<span class="caption">Sin equipamiento</span>';
+      document.getElementById('sx-video').innerHTML = ex.v
+        ? '<div class="media-frame"><span class="play"><i data-lucide="play"></i></span><div class="media-bar"><span class="num">0:00 / 0:42</span><div class="progress" aria-hidden="true"><span style="--value:0%"></span></div><i data-lucide="volume-2"></i></div></div>'
+        : '<div class="media-frame" style="border-style:dashed"><span class="stack-8" style="display:grid;justify-items:center"><i data-lucide="video-off"></i><span class="caption">Sin vídeo adjunto</span></span></div>';
+    }
+  }
+  fillDetail(0);
+})();
+</script>
+<script src="assets/pages/catalogo.js"></script>
+</body>
+</html>

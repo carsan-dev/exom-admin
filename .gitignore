@@ -47,3 +47,6 @@ dist-ssr
 # Local Pi skills
 /.pi/skills/
 /skills-lock.json
+
+# Local impeccable
+/.impeccable/

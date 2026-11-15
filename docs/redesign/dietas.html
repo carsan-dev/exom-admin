@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Dietas · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/catalogo.css">
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="dietas" data-group="Planificación" data-crumbs='["Dietas"]'
+      data-variants='[["filtered","vacío filtrado"],["drag","arrastre"],["upload","subida de imagen (editor)"],["import","importación (editor)"]]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1">Dietas</h1>
+        <span class="ph-meta" data-show="data loading error">31 dietas</span>
+      </div>
+      <p class="ph-sub">Gestiona el catálogo de planes nutricionales. Crea dietas con comidas e ingredientes.</p>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-secondary" type="button" data-import><i data-lucide="upload"></i>Importar</button>
+      <button class="btn btn-secondary btn-icon" type="button" data-open="#dlg-prompt" aria-haspopup="dialog" data-tip="Instrucciones y prompt de IA" aria-label="Ver instrucciones de importación"><i data-lucide="bot"></i></button>
+      <button class="btn btn-primary" type="button" data-open="#wb-diet" data-mode="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Nueva dieta</button>
+    </div>
+  </header>
+
+  <div class="cat-layout">
+    <nav class="rail" aria-label="Grupos del catálogo">
+      <div class="rail-head"><span class="micro">Grupos</span></div>
+      <ul class="rail-list" id="rail"></ul>
+    </nav>
+
+    <section class="cat-main" aria-labelledby="list-title">
+      <div class="list-head"><h2 class="list-title" id="list-title">Listado de dietas</h2></div>
+
+      <div class="toolbar-row" data-show="data loading error">
+        <div class="toolbar" role="search" aria-label="Buscar y filtrar dietas">
+          <label class="input-icon">
+            <span class="sr-only">Buscar dietas</span>
+            <i data-lucide="search"></i>
+            <input class="input" type="search" placeholder="Buscar por nombre..." autocomplete="off">
+          </label>
+          <button class="btn btn-secondary" type="button" data-open="#filters-pop" aria-haspopup="dialog" aria-expanded="false"><i data-lucide="sliders-horizontal"></i>Filtros<span class="count" data-filter-count>1</span></button>
+          <span class="filter-chip">Badges nutricionales: <b>Alto en proteína</b><button type="button" data-remove-chip aria-label="Quitar filtro Badges nutricionales: Alto en proteína"><i data-lucide="x"></i></button></span>
+          <button class="btn btn-ghost btn-sm clear-all" type="button" data-clear-chips>Limpiar todo</button>
+        </div>
+      </div>
+
+      <div data-show="data">
+        <div data-v-not="filtered">
+          <div class="table-wrap">
+            <table class="table table--stack tbl-dense" id="tbl-di" data-selectable>
+              <caption class="sr-only">Listado de dietas, página 1 de 4</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="cell-check has-grip"><label class="check"><input type="checkbox" data-select-all aria-label="Seleccionar página"></label></th>
+                  <th scope="col" aria-sort="ascending"><button class="th-sort" type="button">Nombre<i data-lucide="arrow-up-down"></i></button></th>
+                  <th scope="col" class="col-group">Grupo</th>
+                  <th scope="col">Comidas</th>
+                  <th scope="col" class="p2">Badges</th>
+                  <th scope="col" class="cell-num">Kcal totales</th>
+                  <th scope="col" class="p2">Macros</th>
+                  <th scope="col" class="q-860" aria-sort="none"><button class="th-sort" type="button">Actualizado<i data-lucide="arrow-up-down"></i></button></th>
+                  <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody id="di-rows"></tbody>
+            </table>
+          </div>
+          <div class="selection-bar is-docked" data-for="#tbl-di" hidden>
+            <span class="selection-count">2 seleccionados</span>
+            <span class="sel-sep" aria-hidden="true"></span>
+            <button class="btn btn-secondary btn-sm" type="button" data-open="#dlg-move" aria-haspopup="dialog"><i data-lucide="folder-input"></i>Mover a grupo</button>
+            <span class="spacer"></span>
+            <button class="btn btn-ghost btn-sm" type="button" data-clear-selection>Limpiar</button>
+          </div>
+          <nav class="pagination" aria-label="Paginación">
+            <span class="pagination-label">Página 1 de 4</span>
+            <span class="pagination-actions">
+              <button class="btn btn-secondary btn-sm" type="button" disabled><i data-lucide="chevron-left"></i>Anterior</button>
+              <button class="btn btn-secondary btn-sm" type="button">Siguiente<i data-lucide="chevron-right"></i></button>
+            </span>
+          </nav>
+        </div>
+        <div data-v="filtered" class="section">
+          <div class="empty empty-compact">
+            <span class="empty-x" aria-hidden="true"></span>
+            <h3 class="empty-title">Sin resultados</h3>
+            <p class="empty-text">No se encontraron dietas con la búsqueda y filtros actuales.</p>
+          </div>
+        </div>
+      </div>
+
+      <div data-show="loading" aria-busy="true" aria-label="Cargando dietas">
+        <div class="table-wrap" aria-hidden="true">
+          <table class="table tbl-dense"><thead><tr><th class="cell-check"></th><th>Nombre</th><th>Grupo</th><th>Comidas</th><th class="p2">Badges</th><th class="cell-num">Kcal totales</th><th class="p2">Macros</th><th class="q-860">Actualizado</th><th class="cell-actions"></th></tr></thead>
+            <tbody id="di-sk"></tbody></table>
+        </div>
+      </div>
+      <div data-show="empty" class="section">
+        <div class="empty">
+          <span class="empty-x" aria-hidden="true"></span>
+          <h3 class="empty-title">Aún no hay dietas</h3>
+          <p class="empty-text">Crea la primera dieta para empezar a asignarla a tus clientes.</p>
+          <button class="btn btn-primary" type="button" data-open="#wb-diet" data-mode="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Crear primera dieta</button>
+        </div>
+      </div>
+      <div data-show="error" class="section">
+        <div class="error-state" role="alert">
+          <i data-lucide="circle-alert"></i>
+          <h3 class="empty-title">No se ha podido cargar el catálogo</h3>
+          <p class="empty-text">Network Error. Comprueba tu conexión y vuelve a intentarlo.</p>
+          <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</main>
+</div>
+
+<!-- ===================== MENUS / POPOVERS ===================== -->
+<div class="menu" id="row-menu" role="menu" aria-label="Acciones de la dieta" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-open="#sheet-di"><i data-lucide="eye"></i>Ver detalle</button>
+  <button class="menu-item" type="button" role="menuitem" data-open="#wb-diet" data-mode="edit"><i data-lucide="pencil"></i>Editar</button>
+  <button class="menu-item" type="button" role="menuitem" data-open="#wb-diet" data-mode="dup"><i data-lucide="copy"></i>Duplicar</button>
+  <div class="menu-sep" role="separator"></div>
+  <button class="menu-item is-danger" type="button" role="menuitem" data-open="#dlg-delete"><i data-lucide="trash-2"></i>Eliminar</button>
+</div>
+<div class="menu" id="group-menu" role="menu" aria-label="Acciones del grupo" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-open="#dlg-group" data-mode="edit"><i data-lucide="pencil"></i>Renombrar</button>
+  <button class="menu-item is-danger" type="button" role="menuitem" data-open="#dlg-group-del"><i data-lucide="trash-2"></i>Eliminar</button>
+</div>
+
+<div class="popover" id="filters-pop" role="dialog" aria-labelledby="filters-title" data-align="start" style="--w:440px" hidden>
+  <div class="popover-head">
+    <h2 class="h3" id="filters-title">Filtros del listado</h2>
+    <p class="caption" style="margin-top:2px">Selecciona uno o varios criterios.</p>
+  </div>
+  <div class="popover-body">
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Tipo de comida</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox">Desayuno</label><label class="check"><input type="checkbox">Comida</label>
+        <label class="check"><input type="checkbox">Snack</label><label class="check"><input type="checkbox">Cena</label>
+      </div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Etiquetas</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox">Ayuno intermitente</label><label class="check"><input type="checkbox">Definición</label>
+        <label class="check"><input type="checkbox">Mantenimiento</label><label class="check"><input type="checkbox">Vegetariana</label><label class="check"><input type="checkbox">Volumen</label>
+      </div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Badges nutricionales</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox" checked>Alto en proteína</label><label class="check"><input type="checkbox">Bajo en calorías</label>
+        <label class="check"><input type="checkbox">Carbos</label><label class="check"><input type="checkbox">Fibra</label><label class="check"><input type="checkbox">Grasa</label>
+        <label class="check"><input type="checkbox">Proteína</label><label class="check"><input type="checkbox">Sin gluten</label><label class="check"><input type="checkbox">Vegano</label>
+      </div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Actualizada</legend>
+      <div class="field-grid">
+        <div class="field"><label class="field-label" for="f-from">Desde</label><input class="input" id="f-from" type="date"></div>
+        <div class="field"><label class="field-label" for="f-to">Hasta</label><input class="input" id="f-to" type="date"></div>
+      </div>
+    </fieldset></div>
+  </div>
+  <div class="popover-foot">
+    <button class="btn btn-ghost btn-sm" type="button">Limpiar</button>
+    <button class="btn btn-primary btn-sm" type="button" data-close>Aplicar</button>
+  </div>
+</div>
+
+<!-- ===================== DETAIL SHEET ===================== -->
+<div class="overlay overlay-sheet" id="sheet-di" hidden>
+  <div class="sheet sheet-md" role="dialog" aria-modal="true" aria-labelledby="sd-title">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="sd-title" data-fill="name">Dieta de definición</h2>
+        <div class="tags" style="margin-top:8px"><span class="tag">Definición</span></div>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="d-totals" role="group" aria-label="Macros totales">
+        <div><span class="micro">kcal</span><span class="fig">2.000</span></div>
+        <div><span class="micro">Proteína</span><span class="fig">150<span class="u">g</span></span></div>
+        <div><span class="micro">Carbos</span><span class="fig">200<span class="u">g</span></span></div>
+        <div><span class="micro">Grasa</span><span class="fig">70<span class="u">g</span></span></div>
+      </div>
+      <div class="row" style="margin:24px 0 4px;justify-content:space-between">
+        <span class="micro">Comidas (4)</span>
+        <span class="row" style="gap:6px"><span class="proposal-tag" tabindex="0" data-tip="Hoy se muestran códigos de unidad («palm», «tablespoon») y orden alfabético">Propuesta</span><span class="caption">Unidades en español, orden del editor</span></span>
+      </div>
+      <div class="d-meal">
+        <div class="d-meal-head"><span class="tag"><span class="dot" style="--c:var(--warning)"></span>Desayuno</span><span class="d-ex-name">Avena con yogur y fruta</span><span class="num">520 kcal</span></div>
+        <p class="caption" style="margin-top:6px">P 32 g · C 70 g · G 12 g</p>
+        <div class="tags" style="margin-top:8px"><span class="tag tag-c" style="--c:#8CCB68"><span class="dot"></span>Fibra</span></div>
+        <ul class="d-ing">
+          <li><span>Avena</span><span>80 g</span></li>
+          <li><span>Yogur griego</span><span>1 taza (240 g)</span></li>
+          <li><span>Arándanos</span><span>1 puñado (40 g)</span></li>
+        </ul>
+      </div>
+      <div class="d-meal">
+        <div class="d-meal-head"><span class="tag"><span class="dot" style="--c:var(--success)"></span>Almuerzo</span><span class="d-ex-name">Pollo con arroz y verduras</span><span class="num">680 kcal</span><span class="caption">1 variante</span></div>
+        <p class="caption" style="margin-top:6px">P 52 g · C 70 g · G 18 g</p>
+        <div class="tags" style="margin-top:8px"><span class="tag tag-c" style="--c:#C5E384"><span class="dot"></span>Alto en proteína</span></div>
+        <ul class="d-ing">
+          <li><span>Pechuga de pollo</span><span>2 palmas (220 g)</span></li>
+          <li><span>Arroz basmati</span><span>80 g</span></li>
+          <li><span>Brócoli</span><span>1 puñado (80 g)</span></li>
+          <li><span>Aceite de oliva</span><span>1 cucharada (10 g)</span></li>
+        </ul>
+        <div class="d-var">
+          <span class="micro">Variantes</span>
+          <div class="ruled-row"><span class="h3">Pollo con quinoa</span><span class="num secondary">650 kcal</span></div>
+          <ul class="d-ing"><li><span>Pechuga de pollo</span><span>2 palmas (220 g)</span></li><li><span>Quinoa</span><span>70 g</span></li></ul>
+        </div>
+      </div>
+      <div class="d-meal">
+        <div class="d-meal-head"><span class="tag"><span class="dot" style="--c:#9B7FCC"></span>Snack</span><span class="d-ex-name">Yogur griego con almendras</span><span class="num">240 kcal</span></div>
+        <ul class="d-ing"><li><span>Yogur griego</span><span>1 bol (170 g)</span></li><li><span>Almendras</span><span>1 puñado (15 g)</span></li></ul>
+      </div>
+      <div class="d-meal" style="border-bottom:0">
+        <div class="d-meal-head"><span class="tag"><span class="dot" style="--c:var(--info)"></span>Cena</span><span class="d-ex-name">Salmón con patata y brócoli</span><span class="num">500 kcal</span></div>
+        <ul class="d-ing"><li><span>Salmón</span><span>1 ración (150 g)</span></li><li><span>Patata</span><span>150 g</span></li><li><span>Brócoli</span><span>1 puñado (80 g)</span></li></ul>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cerrar</button>
+      <button class="btn btn-secondary" type="button" data-close-also="#sheet-di" data-open="#wb-diet" data-mode="dup"><i data-lucide="copy"></i>Duplicar</button>
+      <button class="btn btn-primary" type="button" data-close-also="#sheet-di" data-open="#wb-diet" data-mode="edit"><i data-lucide="pencil"></i>Editar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== BUILDER ===================== -->
+<div class="overlay overlay-wb" id="wb-diet" data-static hidden>
+  <div class="workbench" role="dialog" aria-modal="true" aria-labelledby="wbd-kind">
+    <button type="button" data-close hidden>Cerrar sin confirmar</button>
+    <header class="wb-top wb-top-diet">
+      <button class="btn btn-ghost btn-icon wb-close" type="button" data-open="#dlg-unsaved" data-wb-close aria-haspopup="dialog" aria-label="Cerrar el editor"><i data-lucide="x"></i></button>
+      <h2 class="wb-kind" id="wbd-kind" data-t-new="Nueva dieta" data-t-edit="Editar dieta" data-t-dup="Duplicar dieta" data-t-import="Importar dieta">Nueva dieta</h2>
+      <div class="wb-name field has-label">
+        <label class="wb-name-label" for="wbd-name">Nombre visible para el cliente</label>
+        <input class="input" id="wbd-name" placeholder="Ej. Dieta de definición" value="Dieta de definición" autocomplete="off" autofocus>
+      </div>
+      <div class="wb-sum"></div>
+      <div class="wb-actions">
+        <button class="btn btn-secondary btn-cancel" type="button" data-open="#dlg-unsaved" aria-haspopup="dialog">Cancelar</button>
+        <button class="btn btn-primary" type="button" id="wbd-submit" data-v-not="upload" data-t-new="Crear dieta" data-t-edit="Guardar cambios" data-t-dup="Crear copia" data-t-import="Crear dieta">Crear dieta</button>
+        <button class="btn btn-primary" type="button" data-v="upload" disabled>Subiendo imagen...</button>
+      </div>
+    </header>
+
+    <div class="wb-body is-2col">
+      <!-- LEFT: meals outline + totals + tags -->
+      <aside class="wb-col wb-side wb-left diet-left" id="wbd-left" aria-label="Estructura de la dieta">
+        <button class="macros-sum" type="button" data-collapse="#wbd-macros" aria-expanded="false" aria-controls="wbd-macros" aria-label="Macros totales y etiquetas internas: Kcal 2.000, P 150, C 200, G 70 g; suma de comidas 1.940">
+          <span><b>Kcal 2.000</b> · P 150 · C 200 · G 70 g</span>
+          <span class="warn"><i data-lucide="triangle-alert"></i>suma de comidas: 1.940</span>
+          <i data-lucide="chevron-down"></i>
+        </button>
+        <div class="wb-pad">
+          <div class="wb-h comidas-h"><h3 class="h2">Comidas (4)</h3></div>
+          <ul class="ml-list" id="wbd-meals" aria-label="Comidas de la dieta">
+            <li class="ml-row" data-movable data-name="Avena con yogur y fruta">
+              <button class="grip" type="button" aria-label="Arrastrar Avena con yogur y fruta"><i data-lucide="grip-vertical"></i></button>
+              <button class="ml-sel" type="button" aria-pressed="false"><span class="dot" style="--c:var(--warning)" aria-hidden="true"></span>
+                <span style="min-width:0"><span class="ml-type">Desayuno<span class="ml-kcal">520 kcal</span></span><span class="ml-name">Avena con yogur y fruta</span></span></button>
+              <span class="ml-tools"><button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Avena con yogur y fruta"><i data-lucide="chevron-up"></i></button><button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Avena con yogur y fruta"><i data-lucide="chevron-down"></i></button></span>
+            </li>
+            <li class="ml-row is-selected" data-movable data-name="Pollo con arroz y verduras">
+              <button class="grip" type="button" aria-label="Arrastrar Pollo con arroz y verduras"><i data-lucide="grip-vertical"></i></button>
+              <button class="ml-sel" type="button" aria-pressed="true"><span class="dot" style="--c:var(--success)" aria-hidden="true"></span>
+                <span style="min-width:0"><span class="ml-type">Almuerzo<span class="ml-kcal">680 kcal</span></span><span class="ml-name">Pollo con arroz y verduras</span></span></button>
+              <span class="ml-tools"><button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Pollo con arroz y verduras"><i data-lucide="chevron-up"></i></button><button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Pollo con arroz y verduras"><i data-lucide="chevron-down"></i></button></span>
+            </li>
+            <li class="ml-row" data-movable data-name="Yogur griego con almendras">
+              <button class="grip" type="button" aria-label="Arrastrar Yogur griego con almendras"><i data-lucide="grip-vertical"></i></button>
+              <button class="ml-sel" type="button" aria-pressed="false"><span class="dot" style="--c:#9B7FCC" aria-hidden="true"></span>
+                <span style="min-width:0"><span class="ml-type">Snack<span class="ml-kcal">240 kcal</span></span><span class="ml-name">Yogur griego con almendras</span></span></button>
+              <span class="ml-tools"><button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Yogur griego con almendras"><i data-lucide="chevron-up"></i></button><button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Yogur griego con almendras"><i data-lucide="chevron-down"></i></button></span>
+            </li>
+            <li class="ml-row" data-movable data-name="Salmón con patata y brócoli">
+              <button class="grip" type="button" aria-label="Arrastrar Salmón con patata y brócoli"><i data-lucide="grip-vertical"></i></button>
+              <button class="ml-sel" type="button" aria-pressed="false"><span class="dot" style="--c:var(--info)" aria-hidden="true"></span>
+                <span style="min-width:0"><span class="ml-type">Cena<span class="ml-kcal">500 kcal</span></span><span class="ml-name">Salmón con patata y brócoli</span></span></button>
+              <span class="ml-tools"><button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Salmón con patata y brócoli"><i data-lucide="chevron-up"></i></button><button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Salmón con patata y brócoli"><i data-lucide="chevron-down"></i></button></span>
+            </li>
+            <li class="ml-add-wrap"><button class="btn btn-ghost btn-sm ml-add" type="button"><i data-lucide="plus"></i>Agregar comida</button></li>
+          </ul>
+
+          <div class="wb-sec macros-panel" id="wbd-macros">
+            <div class="mt-head"><h3 class="h3">Macros totales</h3><button class="btn btn-ghost btn-sm" type="button" data-toast="Macros calculados desde las comidas" data-toast-tone="info"><i data-lucide="calculator"></i>Calcular desde comidas</button></div>
+            <p class="caption" style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><span class="proposal-tag" tabindex="0" data-tip="Comparación en vivo con la suma de las comidas (hoy solo existe el botón Calcular)">Propuesta</span>Comparado con la suma de comidas</p>
+            <div class="mt-row is-diff">
+              <label class="field-label" for="mt-kcal">Kcal</label>
+              <span class="input-unit"><input class="input" id="mt-kcal" type="number" step="1" placeholder="2000" value="2000"><span class="unit">kcal</span></span>
+              <span class="mt-sum"><i data-lucide="triangle-alert"></i>suma de comidas: 1.940</span>
+            </div>
+            <div class="mt-row is-diff">
+              <label class="field-label" for="mt-p">Proteína (g)</label>
+              <span class="input-unit" style="--unit-pad:28px"><input class="input" id="mt-p" type="number" step="0.1" placeholder="150" value="150"><span class="unit">g</span></span>
+              <span class="mt-sum"><i data-lucide="triangle-alert"></i>suma de comidas: 142,5</span>
+            </div>
+            <div class="mt-row is-diff">
+              <label class="field-label" for="mt-c">Carbos (g)</label>
+              <span class="input-unit" style="--unit-pad:28px"><input class="input" id="mt-c" type="number" step="0.1" placeholder="200" value="200"><span class="unit">g</span></span>
+              <span class="mt-sum"><i data-lucide="triangle-alert"></i>suma de comidas: 196</span>
+            </div>
+            <div class="mt-row">
+              <label class="field-label" for="mt-g">Grasa (g)</label>
+              <span class="input-unit" style="--unit-pad:28px"><input class="input" id="mt-g" type="number" step="0.1" placeholder="70" value="70"><span class="unit">g</span></span>
+              <span class="mt-sum"><i data-lucide="check"></i>suma de comidas: 70</span>
+            </div>
+
+          <div class="wb-sec">
+            <span class="field-label" id="wbd-tags-l" style="font-size:14px;font-weight:600;color:var(--ink)">Etiquetas internas</span>
+            <div class="chipbox" role="group" aria-labelledby="wbd-tags-l">
+              <span class="tag tag-x">Definición<button type="button" aria-label="Quitar Definición"><i data-lucide="x"></i></button></span>
+            </div>
+            <div class="chip-add">
+              <button class="btn btn-secondary btn-sm" type="button">Etiquetas existentes<i data-lucide="chevron-down"></i></button>
+              <label class="sr-only" for="wbd-newtag">Nueva etiqueta interna</label>
+              <input class="input input-sm" id="wbd-newtag" placeholder="Nueva etiqueta interna (Enter)" autocomplete="off">
+              <button class="btn btn-secondary btn-icon" type="button" aria-label="Añadir etiqueta interna"><i data-lucide="plus"></i></button>
+            </div>
+            <p class="field-help">Solo se usan en admin para identificar dietas por cliente, objetivo o etapa.</p>
+          </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT: selected meal -->
+      <section class="wb-col wb-center" aria-labelledby="wbd-meal-h">
+        <div class="wb-pad">
+          <div class="banner banner-warning" data-v="upload" style="margin-bottom:16px" role="status"><i data-lucide="loader"></i><span class="banner-text">Espera a que termine la subida de la imagen para seguir editando o guardar la dieta.</span></div>
+          <div class="banner banner-warning" data-v="import" style="margin-bottom:16px" role="status"><i data-lucide="triangle-alert"></i><span class="banner-text"><b>Revisa ingredientes no enlazados.</b> Puedes corregirlos manualmente con el selector de ingredientes antes de guardar.</span></div>
+          <div class="banner banner-info" data-mode-only="dup" hidden style="margin-bottom:16px"><i data-lucide="image-off"></i><span class="banner-text">Por seguridad, vuelve a adjuntar las imágenes de comidas.</span></div>
+
+          <h3 class="sr-only" id="wbd-meal-h">Comida seleccionada: Pollo con arroz y verduras</h3>
+          <div class="meal-head">
+            <div class="field field-type">
+              <label class="field-label" for="wbd-type">Tipo</label>
+              <select class="select" id="wbd-type"><option>Desayuno</option><option selected>Almuerzo</option><option>Snack</option><option>Cena</option></select>
+            </div>
+            <div class="field">
+              <label class="field-label" for="wbd-mname">Nombre de la comida</label>
+              <input class="input" id="wbd-mname" placeholder="Nombre de la comida" value="Pollo con arroz y verduras" required>
+            </div>
+            <button class="btn btn-ghost btn-icon" type="button" aria-label="Eliminar comida" data-tip="Eliminar comida" style="color:var(--ink-3)"><i data-lucide="trash-2"></i></button>
+          </div>
+
+          <div class="meal-tabs" data-tabs>
+            <div class="meal-tabbar">
+              <div class="tabs" role="tablist" aria-label="Versiones de la comida">
+                <button class="tab" type="button" role="tab" id="vt-main" aria-controls="vp-main" aria-selected="true">Principal</button>
+                <button class="tab" type="button" role="tab" id="vt-v1" aria-controls="vp-v1" aria-selected="false">Variante 1</button>
+              </div>
+              <button class="btn btn-ghost btn-sm tab-add" type="button"><i data-lucide="plus"></i>Añadir variante</button>
+            </div>
+            <p class="caption" style="margin:-8px 0 16px">Alternativas completas que el cliente podrá elegir en la app.</p>
+
+            <section id="vp-main" role="tabpanel" aria-labelledby="vt-main">
+              <div class="ed-sec">
+                <div class="ed-sec-head"><h4 class="h3">Macros de la comida <span class="field-optional">Opcional</span></h4>
+                  <button class="btn btn-ghost btn-sm" type="button" data-toast="Macros calculados desde los ingredientes" data-toast-tone="info"><i data-lucide="calculator"></i>Calcular desde ingredientes</button></div>
+                <div class="macro-grid-4">
+                  <div class="field"><label class="field-label" for="mm-k">Kcal</label><span class="input-unit"><input class="input" id="mm-k" type="number" placeholder="500" value="680"><span class="unit">kcal</span></span></div>
+                  <div class="field"><label class="field-label" for="mm-p">Proteína (g)</label><span class="input-unit" style="--unit-pad:28px"><input class="input" id="mm-p" type="number" step="0.1" placeholder="40" value="52"><span class="unit">g</span></span></div>
+                  <div class="field"><label class="field-label" for="mm-c">Carbos (g)</label><span class="input-unit" style="--unit-pad:28px"><input class="input" id="mm-c" type="number" step="0.1" placeholder="60" value="70"><span class="unit">g</span></span></div>
+                  <div class="field"><label class="field-label" for="mm-g">Grasa (g)</label><span class="input-unit" style="--unit-pad:28px"><input class="input" id="mm-g" type="number" step="0.1" placeholder="20" value="18"><span class="unit">g</span></span></div>
+                </div>
+              </div>
+
+              <div class="ed-sec">
+                <div class="ed-sec-head"><h4 class="h3">Imagen de la comida <span class="field-optional">Opcional</span></h4></div>
+                <div class="img-compact">
+                  <button class="upload" type="button" data-v-not="upload"><i data-lucide="image-plus"></i><span class="upload-title">Seleccionar imagen</span></button>
+                  <div class="upload is-busy" data-v="upload"><div class="upload-line"><span>Subiendo imagen... 64%</span><span class="spinner" aria-hidden="true"></span></div>
+                    <div class="progress" role="progressbar" aria-valuenow="64" aria-valuemin="0" aria-valuemax="100" aria-label="Subida de la imagen"><span style="--value:64%"></span></div></div>
+                  <p class="upload-meta">JPG, PNG o WebP · Máx. 10 MB (se comprime automáticamente)</p>
+                </div>
+              </div>
+
+              <div class="ed-sec">
+                <div class="ed-sec-head"><h4 class="h3" id="wbd-badges-l">Badges nutricionales <span class="field-optional">Opcional</span></h4></div>
+                <div class="chipbox" role="group" aria-labelledby="wbd-badges-l">
+                  <span class="tag tag-x tag-c" style="--c:#C5E384"><span class="dot"></span>Alto en proteína<button type="button" aria-label="Quitar Alto en proteína"><i data-lucide="x"></i></button></span>
+                  <span class="tag tag-x tag-c" style="--c:#8CCB68"><span class="dot"></span>Fibra<button type="button" aria-label="Quitar Fibra"><i data-lucide="x"></i></button></span>
+                </div>
+                <div class="chip-add">
+                  <button class="btn btn-secondary btn-sm" type="button">Opciones<i data-lucide="chevron-down"></i></button>
+                  <label class="sr-only" for="wbd-badge">Otro badge</label>
+                  <input class="input input-sm" id="wbd-badge" placeholder="Otro badge (Enter para añadir)" autocomplete="off">
+                  <button class="btn btn-secondary btn-icon" type="button" aria-label="Añadir badge"><i data-lucide="plus"></i></button>
+                </div>
+              </div>
+
+              <div class="ed-sec">
+                <div class="ed-sec-head"><h4 class="h3">Ingredientes <span class="caption" style="font-weight:400">4 ingredientes</span></h4></div>
+                <p class="field-help" style="margin:-4px 0 8px">Para medidas caseras, añade el equivalente en gramos para calcular macros correctamente.</p>
+                <div class="table-wrap">
+                  <table class="table ing-table">
+                    <caption class="sr-only">Ingredientes de Pollo con arroz y verduras</caption>
+                    <thead><tr>
+                      <th scope="col">Ingrediente</th>
+                      <th scope="col">Cantidad</th>
+                      <th scope="col">Unidad</th>
+                      <th scope="col">Equiv. gramos</th>
+                      <th scope="col" class="cell-num"><span class="row" style="gap:6px;justify-content:flex-end">kcal<span class="proposal-tag" tabindex="0" data-tip="kcal calculadas por fila (hoy no se muestran)">Propuesta</span></span></th>
+                      <th scope="col" class="cell-actions"><span class="sr-only">Quitar</span></th>
+                    </tr></thead>
+                    <tbody id="wbd-ings"></tbody>
+                  </table>
+                </div>
+                <div class="combo">
+                  <label class="input-icon">
+                    <span class="sr-only">Buscar ingrediente</span>
+                    <i data-lucide="search"></i>
+                    <input class="input" type="search" role="combobox" aria-expanded="true" aria-controls="wbd-combo" aria-autocomplete="list" placeholder="Buscar ingrediente..." value="pechuga" autocomplete="off">
+                  </label>
+                  <div class="combo-list" role="listbox" id="wbd-combo" aria-label="Ingredientes del catálogo">
+                    <div class="combo-opt" role="option" aria-disabled="true" aria-selected="false"><span><span class="ing-name">Pechuga de pollo</span><span class="ing-sub" style="display:block">165 kcal · P 31 · C 0 · G 3,6</span></span><span class="caption">Ya añadido</span></div>
+                    <div class="combo-opt is-active" role="option" aria-selected="false" tabindex="-1"><span><span class="ing-name">Pechuga de pavo</span><span class="ing-sub" style="display:block">104 kcal · P 24 · C 0 · G 1</span></span><i data-lucide="plus" class="text-3"></i></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section id="vp-v1" role="tabpanel" aria-labelledby="vt-v1" hidden>
+              <div class="ed-sec">
+                <div class="field" style="max-width:520px">
+                  <label class="field-label" for="v1-name">Nombre de la variante</label>
+                  <input class="input" id="v1-name" value="Pollo con quinoa">
+                </div>
+              </div>
+              <div class="ed-sec">
+                <div class="ed-sec-head"><h4 class="h3">Macros de la variante</h4><button class="btn btn-ghost btn-sm" type="button"><i data-lucide="calculator"></i>Calcular desde ingredientes</button></div>
+                <div class="macro-grid-4">
+                  <div class="field"><label class="field-label" for="v1-k">Kcal</label><span class="input-unit"><input class="input" id="v1-k" type="number" value="650"><span class="unit">kcal</span></span></div>
+                  <div class="field"><label class="field-label" for="v1-p">Proteína (g)</label><span class="input-unit" style="--unit-pad:28px"><input class="input" id="v1-p" type="number" value="50"><span class="unit">g</span></span></div>
+                  <div class="field"><label class="field-label" for="v1-c">Carbos (g)</label><span class="input-unit" style="--unit-pad:28px"><input class="input" id="v1-c" type="number" value="62"><span class="unit">g</span></span></div>
+                  <div class="field"><label class="field-label" for="v1-g">Grasa (g)</label><span class="input-unit" style="--unit-pad:28px"><input class="input" id="v1-g" type="number" value="19"><span class="unit">g</span></span></div>
+                </div>
+              </div>
+              <div class="ed-sec"><div class="ed-sec-head"><h4 class="h3">Imagen de la variante <span class="field-optional">Opcional</span></h4></div>
+                <div class="img-compact"><button class="upload" type="button"><i data-lucide="image-plus"></i><span class="upload-title">Seleccionar imagen</span></button><p class="upload-meta">JPG, PNG o WebP · Máx. 10 MB (se comprime automáticamente)</p></div></div>
+              <div class="ed-sec"><div class="ed-sec-head"><h4 class="h3">Ingredientes <span class="caption" style="font-weight:400">2 ingredientes</span></h4>
+                <button class="btn btn-ghost btn-sm" type="button" style="color:var(--danger)"><i data-lucide="trash-2"></i>Quitar variante</button></div>
+                <ul class="d-ing"><li><span>Pechuga de pollo</span><span>2 palmas (220 g)</span></li><li><span>Quinoa</span><span>70 g</span></li></ul></div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOGS ===================== -->
+<div class="overlay" id="dlg-unsaved" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="du-title" aria-describedby="du-desc">
+    <div class="ov-head"><div class="ov-head-text">
+      <h2 class="ov-title" id="du-title">Hay cambios sin guardar</h2>
+      <p class="ov-desc" id="du-desc">Si sales ahora perderás los cambios introducidos. Guarda o cancela la edición para conservarlos.</p>
+    </div></div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close autofocus>Permanecer</button>
+      <button class="btn btn-danger" type="button" data-close data-close-also="#wb-diet">Salir sin guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-delete" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dd-title" aria-describedby="dd-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dd-title">Eliminar dieta</h2>
+        <p class="ov-desc" id="dd-desc">¿Eliminar <b data-fill="name">Dieta de definición</b>? La dieta dejará de estar disponible para asignaciones.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast-fill='"{name}" ha sido eliminada'><i data-lucide="trash-2"></i>Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-group" data-static hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dg-title" aria-describedby="dg-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dg-title" data-t-new="Crear grupo" data-t-edit="Renombrar grupo">Crear grupo</h2>
+        <p class="ov-desc" id="dg-desc">Nombre único, entre 1 y 100 caracteres.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-group" data-validate novalidate data-success-toast="Grupo guardado">
+        <div class="field"><label class="field-label" for="dg-name">Nombre</label>
+          <input class="input" id="dg-name" required maxlength="100" autocomplete="off" data-fill="name" data-error-required="Escribe un nombre para el grupo."></div>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="submit" form="form-group" data-t-new="Crear" data-t-edit="Guardar">Crear</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-group-del" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dgd-title" aria-describedby="dgd-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dgd-title">Eliminar grupo</h2>
+        <p class="ov-desc" id="dgd-desc">Se eliminará “<span data-fill="name">Volumen</span>”. Su contenido permanecerá intacto y quedará sin grupo.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast="Grupo eliminado"><i data-lucide="trash-2"></i>Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-move" data-static hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dm-title" aria-describedby="dm-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dm-title">Mover a grupo</h2>
+        <p class="ov-desc" id="dm-desc" data-sel-n="#tbl-di" data-sel-tpl="Se moverán {n} elementos seleccionados.">Se moverán 2 elementos seleccionados.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="field"><label class="field-label" for="dm-group">Grupo</label>
+        <select class="select" id="dm-group"><option>Sin grupo</option><option selected>Definición</option><option>Volumen</option><option>Mantenimiento</option></select></div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-toast="2 elementos movidos">Mover</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-prompt" hidden>
+  <div class="dialog dialog-md" role="dialog" aria-modal="true" aria-labelledby="dp-title">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dp-title">Prompt para generar JSON compatible</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body stack-16">
+      <ul class="ruled">
+        <li class="ruled-row"><span class="h3">Número de comidas</span></li>
+        <li class="ruled-row"><span class="h3">Variantes</span></li>
+        <li class="ruled-row"><span class="h3">Catálogo</span></li>
+        <li class="ruled-row"><span class="h3">Medidas visuales</span></li>
+      </ul>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button"><i data-lucide="copy"></i>Copiar plantilla</button>
+      <button class="btn btn-primary" type="button"><i data-lucide="copy"></i>Copiar con catálogo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var GROUPS = [['Definición', 9], ['Volumen', 8], ['Mantenimiento', 6]];
+  var MT = { D: ['Desayuno', 'var(--warning)'], A: ['Almuerzo', 'var(--success)'], S: ['Snack', '#9B7FCC'], C: ['Cena', 'var(--info)'] };
+  var BADGE = { 'Alto en proteína': '#C5E384', 'Bajo en calorías': '#7FB5D8', 'Carbos': '#E5BE58', 'Fibra': '#8CCB68', 'Grasa': '#D76C5E', 'Proteína': '#A9C85D', 'Sin gluten': '#9B7FCC', 'Vegano': '#2A6A35' };
+  var DI = [
+    ['Dieta de definición', 'Definición', 'DASC', ['Alto en proteína', 'Bajo en calorías'], ['Definición'], 2000, [150, 200, 70], '14/11/2026'],
+    ['Volumen limpio', 'Volumen', 'DASCS', ['Alto en proteína'], ['Volumen'], 2800, [180, 340, 80], '13/11/2026'],
+    ['Mantenimiento oficina', 'Mantenimiento', 'DASC', ['Fibra', 'Sin gluten'], ['Mantenimiento'], 2200, [130, 250, 75], '12/11/2026'],
+    ['Vegetariana 2.000', null, 'DASC', ['Vegano', 'Fibra', 'Proteína'], ['Vegetariana'], 2000, [110, 240, 70], '11/11/2026', 'Edición pendiente de aprobación'],
+    ['Ayuno 16/8', 'Definición', 'ASC', ['Bajo en calorías'], ['Ayuno intermitente', 'Definición'], 1700, [140, 150, 60], '09/11/2026'],
+    ['Definición 2.200', 'Definición', 'DASCS', ['Alto en proteína'], ['Definición'], 2200, [190, 200, 70], '07/11/2026'],
+    ['Volumen sin gluten', 'Volumen', 'DASCS', ['Sin gluten', 'Carbos'], ['Volumen'], 3000, [170, 380, 90], '04/11/2026'],
+    ['Mantenimiento fin de semana', 'Mantenimiento', 'DAC', [], ['Mantenimiento'], null, null, '30/10/2026'],
+    ['Recomposición', null, 'DASC', ['Proteína'], [], 2300, [170, 230, 75], '27/10/2026'],
+    ['Postentreno tarde', 'Volumen', 'DASC', ['Carbos'], ['Volumen'], 2600, [160, 320, 70], '22/10/2026']
+  ];
+  var params = new URLSearchParams(location.search);
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+
+  var railHTML = '<li class="rail-item"><button class="rail-btn" type="button" aria-pressed="true" data-group="Todos"><i data-lucide="layers"></i><span class="rail-name">Todos</span><span class="rail-count">31</span></button></li>';
+  GROUPS.forEach(function (g, i) {
+    railHTML += '<li class="rail-item has-more' + (i === GROUPS.length - 1 ? ' is-last-group' : '') + '" data-drop="' + (g[0] === 'Volumen' ? '1' : '') + '">' +
+      '<button class="rail-btn" type="button" aria-pressed="false" data-group="' + g[0] + '"><i data-lucide="folder"></i><span class="rail-name">' + g[0] + '</span><span class="rail-count">' + g[1] + '</span></button>' +
+      '<button class="btn btn-ghost btn-icon rail-more" type="button" data-open="#group-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones del grupo ' + g[0] + '" data-ctx-name="' + g[0] + '"><i data-lucide="ellipsis"></i></button></li>';
+  });
+  railHTML += '<li class="rail-item"><button class="rail-btn" type="button" aria-pressed="false" data-group="Sin grupo" data-tip="Filtrar o soltar aquí"><i data-lucide="folder-minus"></i><span class="rail-name">Sin grupo</span><span class="rail-count">8</span></button></li>';
+  railHTML += '<li class="rail-item"><button class="btn btn-ghost btn-sm rail-new" type="button" data-open="#dlg-group" data-mode="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Nuevo grupo</button></li>';
+  document.getElementById('rail').innerHTML = railHTML;
+
+  var preSel = params.get('sel') !== '0';
+  document.getElementById('di-rows').innerHTML = DI.map(function (x, i) {
+    var meals = x[2].split('');
+    var names = meals.map(function (m) { return MT[m][0]; }).join(', ');
+    var mealCell = '<span class="meal-count" tabindex="0" data-tip="' + names + '" aria-label="' + meals.length + ' comidas: ' + names + '"><span class="num">' + meals.length + '</span><span class="type-dots" aria-hidden="true">' +
+      meals.map(function (m) { return '<span class="dot" style="--c:' + MT[m][1] + '"></span>'; }).join('') + '</span></span>';
+    var badges = x[3].length ? '<span class="tags">' + '<span class="tag tag-c" style="--c:' + BADGE[x[3][0]] + '"><span class="dot"></span>' + x[3][0] + '</span>' +
+      (x[3].length > 1 ? '<span class="tag tag-more" tabindex="0" data-tip="' + x[3].slice(1).join(', ') + '" aria-label="' + (x[3].length - 1) + ' más: ' + x[3].slice(1).join(', ') + '">+' + (x[3].length - 1) + '</span>' : '') + '</span>' : '<span class="muted-dash">—</span>';
+    var pend = x[8] ? '<span class="chip chip-warning no-dot chip-pending" tabindex="0" data-tip="' + x[8] + '"><i data-lucide="triangle-alert"></i>Pendiente</span>' : '';
+    var sel = preSel && (i === 1 || i === 6);
+    return '<tr data-row-open class="row-link"' + (i === 1 ? ' data-drag-tr="1"' : '') + '>' +
+      '<td class="cell-check has-grip"><span class="check-grip"><label class="check"><input type="checkbox" data-select-row aria-label="Seleccionar ' + esc(x[0]) + '"' + (sel ? ' checked' : '') + '></label>' +
+        '<button class="grip" type="button" aria-label="Mover ' + esc(x[0]) + '" data-tip="Arrastra a un grupo"><i data-lucide="grip-vertical"></i></button></span></td>' +
+      '<td class="cell-primary cell-clip"><span class="entity-text"><span class="name-line"><button type="button" class="entity-name row-anchor" title="' + esc(x[0]) + '" data-open="#sheet-di" aria-haspopup="dialog" data-ctx-name="' + esc(x[0]) + '">' + esc(x[0]) + '</button>' + pend + '</span>' +
+        (x[4].length ? '<span class="row-tags"><span class="sr-only">Etiquetas: </span>' + x[4].join(' · ') + '</span>' : '') + '</span></td>' +
+      '<td class="col-group" data-label="Grupo">' + (x[1] ? '<span class="group-name">' + x[1] + '</span>' : '<span class="caption">Sin grupo</span>') + '</td>' +
+      '<td data-label="Comidas">' + mealCell + '</td>' +
+      '<td class="p2" data-label="Badges">' + badges + '</td>' +
+      '<td class="cell-num" data-label="Kcal totales"><span class="nowrap">' + (x[5] ? fmt(x[5]) + ' kcal' : '<span class="muted-dash">—</span>') + '</span></td>' +
+      '<td class="p2" data-label="Macros"><span class="nowrap num">' + (x[6] ? 'P ' + x[6][0] + ' · C ' + x[6][1] + ' · G ' + x[6][2] + '<span class="u">g</span>' : '<span class="muted-dash">—</span>') + '</span></td>' +
+      '<td class="cell-date q-860" data-label="Actualizado"><span>' + x[7] + '</span></td>' +
+      '<td class="cell-actions"><span class="cell-actions-inner"><i data-lucide="chevron-right" class="row-chevron"></i>' +
+        '<button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Abrir menú de ' + esc(x[0]) + '" data-ctx-name="' + esc(x[0]) + '"><i data-lucide="ellipsis"></i></button></span></td></tr>';
+  }).join('');
+  var sk = '';
+  for (var k = 0; k < 6; k++) sk += '<tr><td class="cell-check"><span class="sk-block" style="--h:16px;width:16px"></span></td><td><span class="sk-line" style="--w:' + (110 + k * 31 % 70) + 'px"></span></td><td><span class="sk-line" style="--w:72px"></span></td><td><span class="sk-line" style="--w:48px"></span></td><td class="p2"><span class="sk-line" style="--w:90px"></span></td><td><span class="sk-line" style="--w:56px;margin-left:auto"></span></td><td class="p2"><span class="sk-line" style="--w:110px"></span></td><td class="q-860"><span class="sk-line" style="--w:72px"></span></td><td class="cell-actions"></td></tr>';
+  document.getElementById('di-sk').innerHTML = sk;
+
+  // Ingredient rows of the selected meal
+  var UNITS = ['Gramos (g)', 'Mililitros (ml)', 'Unidades', 'Cucharada', 'Cucharadita', 'Puñado', 'Rebanada', 'Palma', 'Puño', 'Cucharón', 'Loncha', 'Vaso', 'Taza', 'Bol', 'Dedo', 'Pizca', 'Ración', 'Al gusto'];
+  var ING = [
+    ['Pechuga de pollo', 'P 31 · C 0 · G 3,6 por 100 g', 2, 'Palma', 220, 363],
+    ['Arroz basmati', 'P 8,1 · C 77 · G 0,9 por 100 g', 80, 'Gramos (g)', 80, 279],
+    ['Brócoli', 'P 2,8 · C 6,6 · G 0,4 por 100 g', 1, 'Puñado', null, null],
+    ['Aceite de oliva', 'P 0 · C 0 · G 100 por 100 g', 1, 'Cucharada', 10, 88]
+  ];
+  document.getElementById('wbd-ings').innerHTML = ING.map(function (x, i) {
+    var id = 'ing' + i;
+    var isG = x[3] === 'Gramos (g)';
+    var err = x[4] === null && !isG;
+    return '<tr>' +
+      '<td class="cell-ing"><span class="ing-name">' + x[0] + '</span><span class="ing-sub" style="display:block">' + x[1] + '</span></td>' +
+      '<td class="w-qty" data-label="Cantidad"><label class="sr-only" for="' + id + 'q">Cantidad de ' + x[0] + '</label><input class="input" id="' + id + 'q" type="number" min="0.1" step="0.1" value="' + x[2] + '" style="text-align:right"></td>' +
+      '<td class="w-unit" data-label="Unidad"><label class="sr-only" for="' + id + 'u">Unidad de ' + x[0] + '</label><select class="select" id="' + id + 'u">' + UNITS.map(function (u) { return '<option' + (u === x[3] ? ' selected' : '') + '>' + u + '</option>'; }).join('') + '</select></td>' +
+      '<td class="w-g' + (err ? ' is-invalid' : '') + '" data-label="Equiv. gramos"><label class="sr-only" for="' + id + 'g">Equivalente en gramos de ' + x[0] + '</label>' +
+        '<span class="input-unit" style="--unit-pad:26px"><input class="input" id="' + id + 'g" type="number" min="0" step="0.1"' + (x[4] !== null ? ' value="' + x[4] + '"' : '') + (isG ? ' disabled' : '') + (err ? ' aria-invalid="true" aria-describedby="' + id + 'e"' : '') + '><span class="unit">g</span></span>' +
+        (err ? '<p class="cell-err" id="' + id + 'e"><i data-lucide="circle-alert"></i>Indica el equivalente en gramos</p>' : '') + '</td>' +
+      '<td class="cell-num w-kcal cell-kcal" data-label="kcal">' + (x[5] !== null ? '<span class="num">' + x[5] + '</span>' : '<span class="muted-dash">—</span>') + '</td>' +
+      '<td class="cell-actions cell-x"><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Quitar ' + x[0] + '"><i data-lucide="x"></i></button></td></tr>';
+  }).join('');
+
+  function selectGroup(name) {
+    document.querySelectorAll('.rail-btn').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-group') === name)); });
+    document.getElementById('list-title').textContent = name === 'Todos' ? 'Listado de dietas' : 'Dietas · ' + name;
+    document.querySelectorAll('#tbl-di .col-group').forEach(function (c) { c.classList.toggle('is-hidden-col', name !== 'Todos'); });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.rail-btn');
+    if (b) selectGroup(b.getAttribute('data-group'));
+    var m = e.target.closest && e.target.closest('.ml-sel');
+    if (m) {
+      document.querySelectorAll('#wbd-meals .ml-row').forEach(function (r) {
+        var on = r.contains(m); r.classList.toggle('is-selected', on); r.querySelector('.ml-sel').setAttribute('aria-pressed', String(on));
+      });
+    }
+    var imp = e.target.closest && e.target.closest('[data-import]');
+    if (imp) {
+      Catalog.applyVariant('import');
+      Catalog.applyMode(document.getElementById('wb-diet'), 'import');
+      var opener = document.createElement('button');
+      opener.type = 'button'; opener.hidden = true; opener.setAttribute('data-open', '#wb-diet');
+      document.body.appendChild(opener); opener.click(); opener.remove();
+      Proto.toast('Dieta importada con avisos. Revisa ingredientes no enlazados.', 'warning');
+    }
+  });
+  if (params.get('group')) selectGroup(params.get('group'));
+
+  document.addEventListener('variantchange', function (e) {
+    var drag = e.detail.variant === 'drag';
+    document.querySelectorAll('.rail-item[data-drop="1"]').forEach(function (li) { li.classList.toggle('is-drop', drag); });
+    document.querySelectorAll('[data-drag-tr]').forEach(function (tr) { tr.classList.toggle('is-dragging', drag); });
+    var wb = document.getElementById('wb-diet');
+    if (e.detail.variant === 'import') Catalog.applyMode(wb, 'import');
+    else if (wb.getAttribute('data-mode') === 'import') Catalog.applyMode(wb, 'new');
+    // Upload in progress: the whole editor is locked
+    var up = e.detail.variant === 'upload';
+    wb.querySelectorAll('.wb-body input, .wb-body select, .wb-body textarea, .wb-body button').forEach(function (el) {
+      if (up) { if (!el.disabled) { el.disabled = true; el.setAttribute('data-up-lock', ''); } }
+      else if (el.hasAttribute('data-up-lock')) { el.disabled = false; el.removeAttribute('data-up-lock'); }
+    });
+  });
+  document.getElementById('wbd-submit').addEventListener('click', function () {
+    var c = document.querySelector('#wb-diet > .workbench > [data-close]'); if (c) c.click();
+    var mode = document.getElementById('wb-diet').getAttribute('data-mode');
+    Proto.toast(mode === 'edit' ? 'Dieta actualizada correctamente' : mode === 'dup' ? 'Dieta duplicada correctamente' : 'Dieta creada correctamente', 'success');
+  });
+})();
+</script>
+<script src="assets/pages/catalogo.js"></script>
+</body>
+</html>

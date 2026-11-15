@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Solicitudes · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/solicitudes.css">
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="solicitudes" data-crumbs='["Solicitudes"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1">Solicitudes</h1>
+        <span class="ph-meta" data-role="super"><span data-show="data loading">3 pendientes</span></span>
+      </div>
+      <p class="ph-sub" data-text-super="Revisa las acciones sensibles pendientes, compara el estado actual con el cambio propuesto y decide si deben ejecutarse." data-text-admin="Consulta el estado de tus solicitudes, revisa rechazos o fallos y cancela las que ya no quieras mantener pendientes.">Revisa las acciones sensibles pendientes, compara el estado actual con el cambio propuesto y decide si deben ejecutarse.</p>
+    </div>
+  </header>
+
+  <div data-role="admin">
+    <div class="banner banner-warning rq-banner" data-show="data">
+      <i data-lucide="clock"></i>
+      <span class="banner-text"><b>Tienes 2 solicitudes pendientes de aprobación</b><span>Puedes revisar el motivo de la solicitud, cancelar una pendiente o ver por qué fue rechazada o falló.</span></span>
+    </div>
+  </div>
+
+  <div class="rq-filters" data-show="data empty">
+    <div class="tabs" role="tablist" aria-label="Estado de la solicitud" id="rq-tabs">
+      <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="rq-panel" data-status="PENDING">Pendientes <span class="tab-count" data-text-super="3" data-text-admin="2">3</span></button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="rq-panel" data-status="APPROVED" tabindex="-1">Aprobadas <span class="tab-count" data-text-super="2" data-text-admin="1">2</span></button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="rq-panel" data-status="REJECTED" tabindex="-1">Rechazadas <span class="tab-count" data-text-super="1" data-text-admin="0">1</span></button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="rq-panel" data-status="FAILED" tabindex="-1">Fallidas <span class="tab-count" data-text-super="1" data-text-admin="1">1</span></button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="rq-panel" data-status="ALL" tabindex="-1">Todas <span class="tab-count" data-text-super="7" data-text-admin="4">7</span></button>
+    </div>
+    <label class="sr-only" for="rq-resource">Tipo de recurso</label>
+    <select class="select" id="rq-resource">
+      <option value="">Todos los recursos</option>
+      <option>Entrenamientos</option>
+      <option>Dietas</option>
+      <option>Ejercicios</option>
+      <option>Ingredientes</option>
+      <option>Comidas</option>
+      <option>Retos</option>
+      <option>Logros</option>
+      <option>Notificaciones</option>
+    </select>
+  </div>
+
+  <!-- ============ DATA ============ -->
+  <section id="rq-panel" role="tabpanel" aria-label="Solicitudes" data-show="data">
+    <div class="table-wrap" id="rq-table-wrap">
+      <table class="table table--stack">
+        <caption class="sr-only">Solicitudes de aprobación</caption>
+        <thead><tr>
+          <th scope="col" data-role="super">Solicitante</th>
+          <th scope="col">Acción</th>
+          <th scope="col" class="p3">Recurso</th>
+          <th scope="col">Estado</th>
+          <th scope="col" class="p2">Fecha <span class="proposal-tag" title="Hoy solo se muestra la fecha relativa">Propuesta</span></th>
+          <th scope="col" class="cell-actions"><span class="sr-only">Detalle</span></th>
+        </tr></thead>
+        <tbody id="rq-rows"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="rq-filtered-empty" hidden>
+      <span class="empty-x" aria-hidden="true"></span>
+      <h2 class="empty-title">No hay solicitudes que coincidan con los filtros actuales.</h2>
+    </div>
+  </section>
+
+  <!-- ============ LOADING (table skeleton) ============ -->
+  <div data-show="loading" aria-busy="true" aria-label="Cargando solicitudes...">
+    <div class="tabs" aria-hidden="true" style="margin-bottom:8px;gap:24px;height:45px;align-items:center"><span class="sk-line" style="--w:96px"></span><span class="sk-line" style="--w:80px"></span><span class="sk-line" style="--w:88px"></span><span class="sk-line" style="--w:64px"></span><span class="sk-line" style="--w:48px"></span></div>
+    <div class="table-wrap" aria-hidden="true">
+      <table class="table">
+        <thead><tr><th data-role="super">Solicitante</th><th>Acción</th><th class="p3">Recurso</th><th>Estado</th><th class="p2">Fecha</th></tr></thead>
+        <tbody>
+          <tr><td data-role="super"><span class="row-12"><span class="sk-circle"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:110px"></span><span class="sk-line" style="--w:150px"></span></span></span></td><td><span class="stack-8"><span class="sk-line" style="--w:160px"></span><span class="sk-line" style="--w:80px"></span></span></td><td class="p3"><span class="sk-line" style="--w:120px"></span></td><td><span class="sk-line" style="--w:84px"></span></td><td class="p2"><span class="stack-8"><span class="sk-line" style="--w:90px"></span><span class="sk-line" style="--w:110px"></span></span></td></tr>
+          <tr><td data-role="super"><span class="row-12"><span class="sk-circle"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:96px"></span><span class="sk-line" style="--w:140px"></span></span></span></td><td><span class="stack-8"><span class="sk-line" style="--w:140px"></span><span class="sk-line" style="--w:70px"></span></span></td><td class="p3"><span class="sk-line" style="--w:150px"></span></td><td><span class="sk-line" style="--w:84px"></span></td><td class="p2"><span class="stack-8"><span class="sk-line" style="--w:90px"></span><span class="sk-line" style="--w:110px"></span></span></td></tr>
+          <tr><td data-role="super"><span class="row-12"><span class="sk-circle"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:120px"></span><span class="sk-line" style="--w:160px"></span></span></span></td><td><span class="stack-8"><span class="sk-line" style="--w:120px"></span><span class="sk-line" style="--w:90px"></span></span></td><td class="p3"><span class="sk-line" style="--w:110px"></span></td><td><span class="sk-line" style="--w:84px"></span></td><td class="p2"><span class="stack-8"><span class="sk-line" style="--w:90px"></span><span class="sk-line" style="--w:110px"></span></span></td></tr>
+          <tr><td data-role="super"><span class="row-12"><span class="sk-circle"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:100px"></span><span class="sk-line" style="--w:130px"></span></span></span></td><td><span class="stack-8"><span class="sk-line" style="--w:150px"></span><span class="sk-line" style="--w:76px"></span></span></td><td class="p3"><span class="sk-line" style="--w:130px"></span></td><td><span class="sk-line" style="--w:84px"></span></td><td class="p2"><span class="stack-8"><span class="sk-line" style="--w:90px"></span><span class="sk-line" style="--w:110px"></span></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ EMPTY ============ -->
+  <section class="section" data-show="empty" aria-label="Solicitudes">
+    <div class="empty">
+      <span class="empty-x" aria-hidden="true"></span>
+      <h2 class="empty-title">No hay solicitudes que coincidan con los filtros actuales.</h2>
+    </div>
+  </section>
+
+  <!-- ============ ERROR ============ -->
+  <section class="section" data-show="error" aria-label="Solicitudes">
+    <div class="error-state" role="alert">
+      <i data-lucide="circle-alert"></i>
+      <h2 class="empty-title">No se pudieron cargar las solicitudes</h2>
+      <div class="row" style="margin-top:20px">
+        <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..." style="margin-top:0"><i data-lucide="rotate-cw"></i>Reintentar</button>
+        <span class="proposal-tag" title="Hoy el error no tiene reintento">Propuesta</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<!-- ============ DETAIL SHEET ============ -->
+<div class="overlay overlay-sheet" id="req-sheet" hidden>
+  <div class="sheet sheet-lg rq-sheet" role="dialog" aria-modal="true" aria-labelledby="rq-title" aria-describedby="rq-desc">
+    <div class="ov-head">
+      <div class="ov-head-text" id="rq-head"></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body" id="rq-body"></div>
+
+    <div class="rq-reject" id="rq-reject" hidden>
+      <div class="field">
+        <label class="field-label" for="rq-reason">Motivo de rechazo</label>
+        <textarea class="textarea" id="rq-reason" rows="3" placeholder="Explica claramente por qué se rechaza la acción."></textarea>
+      </div>
+      <div class="rq-reject-actions">
+        <button class="btn btn-secondary" type="button" id="rq-reject-hide">Ocultar rechazo</button>
+        <button class="btn btn-danger is-solid" type="button" id="rq-reject-ok">Confirmar rechazo</button>
+      </div>
+    </div>
+
+    <div class="ov-foot" id="rq-foot">
+      <span data-foot="super-pending" style="display:contents">
+        <button class="btn btn-secondary btn-lg" type="button" id="rq-reject-open" aria-expanded="false" aria-controls="rq-reject"><i data-lucide="x"></i>Rechazar</button>
+        <button class="btn btn-primary btn-lg" type="button" data-open="#dlg-approve" aria-haspopup="dialog"><i data-lucide="check"></i>Aprobar y ejecutar</button>
+      </span>
+      <span data-foot="admin-pending" style="display:contents">
+        <button class="btn btn-danger btn-lg" type="button" id="rq-cancel" data-loading-label="Cancelando...">Cancelar solicitud</button>
+      </span>
+      <span data-foot="resolved" style="display:contents">
+        <button class="btn btn-secondary btn-lg" type="button" data-close>Cerrar</button>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Approve confirmation (replaces window.confirm, same copy) -->
+<div class="overlay" id="dlg-approve" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dlg-approve-t" aria-describedby="dlg-approve-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-approve-t">¿Seguro que quieres ejecutar esta acción aprobada?</h2>
+        <p class="ov-desc" id="dlg-approve-d" data-fill="summary"></p>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="dlg-approve-ok" data-loading-label="Ejecutando...">Aprobar y ejecutar</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/pages/solicitudes.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+/* ==========================================================================
+   recaps.html - weekly recaps list. Page-only layout on top of system.css.
+   ========================================================================== */
+
+
+/* ---------- Period summary block (same pattern as feedback.html) ---------- */
+.stats { border-top: 1px solid var(--rule-strong); padding-top: 12px; }
+.stats-head { display: flex; align-items: center; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; margin-bottom: 12px; }
+.stats-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 16px; min-width: 0; }
+.stats-range { margin: 0; }
+.period { display: flex; align-items: center; gap: 10px; }
+.period .field-label { margin: 0; }
+.period .select { width: 192px; height: 32px; }
+.stats .ledger { border-top-color: var(--rule); }
+.stats .ledger.cols-5 { --cols: 5; }
+.stats .ledger-cell { padding: 10px 20px; min-height: 64px; justify-content: center; }
+.stats .ledger-cell .fig { font-size: 24px; line-height: 28px; margin-top: 2px; }
+.stats .ledger-cell .ledger-sub { display: none; }
+.stats-note { margin-top: 8px; }
+.stats-toggle { display: none; }
+@media (max-width: 1023px) {
+  .stats .ledger.cols-5 { --cols: 2; }
+  .stats .ledger.cols-5 > .ledger-cell:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 767px) {
+  .stats { padding-top: 0; }
+  .stats-toggle {
+    display: flex; align-items: center; gap: 8px; width: 100%; min-height: 48px;
+    font-size: 14px; font-weight: 600; text-align: left; color: var(--ink);
+  }
+  .stats-toggle .lucide { margin-left: auto; color: var(--ink-3); transition: transform var(--dur-base) var(--ease-out); }
+  .stats-toggle[aria-expanded="true"] .lucide { transform: rotate(180deg); }
+  .stats-toggle .tg-count { color: var(--warning); }
+  .stats-toggle .tg-sep { color: var(--ink-3); font-weight: 400; }
+  .stats.is-collapsed .stats-body { display: none; }
+  .period { width: 100%; }
+  .period .select { flex: 1 1 auto; width: auto; }
+  .stats .ledger-cell .fig { font-size: 24px; }
+}
+
+/* ---------- List ---------- */
+.list-block { margin-top: 40px; border-top: 1px solid var(--rule-strong); padding-top: 16px; }
+.rc-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; margin-bottom: 16px; }
+.rc-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; min-width: 0; }
+.rc-filter { display: flex; align-items: center; gap: 10px; }
+.rc-filter .field-label { margin: 0; }
+.rc-filter .select { width: 240px; }
+
+.rc-comment { display: block; max-width: 48ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rc-comment.is-empty { color: var(--ink-3); }
+.table .cell-week { white-space: nowrap; }
+.rc-steps.is-empty { color: var(--ink-3); }
+
+@media (max-width: 767px) {
+  .list-block { margin-top: 24px; }
+  .rc-toolbar, .rc-filters { flex-direction: column; align-items: stretch; }
+  .rc-filter { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .rc-filter .select { width: 100%; height: 44px; }
+  .rc-toolbar .segmented { width: 100%; }
+  .rc-toolbar .seg-btn { flex: 1 1 0; height: 36px; }
+  .rc-comment { max-width: none; }
+}

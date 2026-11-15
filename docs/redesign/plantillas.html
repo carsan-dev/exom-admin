@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Plantillas · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/plantillas.css">
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/proto.js"></script>
+  <script src="assets/pages/plantillas.js" defer></script>
+</head>
+<body data-page="plantillas" data-group="Comunicación" data-crumbs='["Plantillas"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <h1 class="h1">Plantillas de notificaciones</h1>
+      <p class="ph-sub" data-role="super">Edita automáticas existentes y crea plantillas manuales para envíos puntuales.</p>
+      <p class="ph-sub" data-role="admin">Solo super admins pueden cambiar plantillas.</p>
+    </div>
+    <div class="ph-actions" data-role="super">
+      <button class="btn btn-primary" type="button" data-open="#dlg-new" aria-haspopup="dialog"><i data-lucide="plus"></i>Nueva plantilla</button>
+    </div>
+  </header>
+
+  <!-- ADMIN: no permission -->
+  <div class="section" data-role="admin">
+    <div class="empty"><span class="empty-x" aria-hidden="true"></span>
+      <h2 class="empty-title">No tienes permisos para modificar plantillas.</h2>
+      <p class="empty-text">Solo super admins pueden cambiar plantillas. Puedes seguir usando las plantillas guardadas al enviar una notificación.</p>
+      <a class="btn btn-secondary" href="notificaciones.html"><i data-lucide="bell"></i>Ir a Notificaciones</a></div>
+  </div>
+
+  <div data-role="super">
+    <div class="banner banner-info tp-info" data-show="data empty">
+      <i data-lucide="info"></i>
+      <span class="banner-text">Las plantillas automáticas dependen de un evento del sistema. Una plantilla nueva creada aquí es manual: queda disponible al enviar una notificación desde el historial.</span>
+    </div>
+
+    <!-- DATA / EMPTY -->
+    <div class="tp-md" data-show="data empty">
+      <section class="tp-list-col" aria-labelledby="tp-list-t">
+        <h2 class="sr-only" id="tp-list-t">Plantillas</h2>
+        <div class="toolbar tp-toolbar" role="search" aria-label="Buscar y filtrar plantillas">
+          <label class="input-icon"><span class="sr-only">Buscar plantillas</span><i data-lucide="search"></i><input class="input input-sm" type="search" placeholder="Nombre, categoría o texto" autocomplete="off" data-tp-search></label>
+          <button class="btn btn-secondary btn-sm" type="button" data-open="#pop-filters" aria-haspopup="dialog" aria-expanded="false"><i data-lucide="sliders-horizontal"></i>Filtros<span class="count" data-tp-fcount hidden>0</span></button>
+        </div>
+        <p class="caption tp-visible" aria-live="polite" data-tp-visible>12 visibles de 18</p>
+        <ul class="tp-list" id="tp-list" aria-label="Plantillas"></ul>
+      </section>
+
+      <section class="tp-editor" id="tp-editor" aria-labelledby="tp-name" tabindex="-1"></section>
+    </div>
+
+    <!-- LOADING -->
+    <div class="tp-md" data-show="loading" aria-busy="true" aria-label="Cargando plantillas" hidden>
+      <div class="tp-list-col" aria-hidden="true">
+        <span class="sk-line" style="--w:100%;height:32px"></span>
+        <ul class="tp-list" style="margin-top:28px">
+          <li class="tp-sk"><span class="sk-line" style="--w:60%"></span><span class="sk-line" style="--w:85%;margin-top:8px"></span></li>
+          <li class="tp-sk"><span class="sk-line" style="--w:50%"></span><span class="sk-line" style="--w:75%;margin-top:8px"></span></li>
+          <li class="tp-sk"><span class="sk-line" style="--w:66%"></span><span class="sk-line" style="--w:80%;margin-top:8px"></span></li>
+          <li class="tp-sk"><span class="sk-line" style="--w:45%"></span><span class="sk-line" style="--w:70%;margin-top:8px"></span></li>
+          <li class="tp-sk"><span class="sk-line" style="--w:58%"></span><span class="sk-line" style="--w:82%;margin-top:8px"></span></li>
+        </ul>
+      </div>
+      <div class="tp-editor tp-editor-sk" aria-hidden="true">
+        <div class="tp-ed-body stack-24">
+          <span class="sk-line lg" style="--w:40%"></span>
+          <span class="sk-line" style="--w:70%"></span>
+          <span class="sk-block" style="--h:36px"></span>
+          <span class="sk-block" style="--h:120px"></span>
+          <span class="sk-block" style="--h:80px"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ERROR -->
+    <div data-show="error" hidden>
+      <div class="section"><div class="error-state" role="alert"><i data-lucide="circle-alert"></i>
+        <h2 class="empty-title">No se pudieron cargar las plantillas</h2>
+        <p class="empty-text">Comprueba la conexión y vuelve a intentarlo.</p>
+        <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button></div></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- Filters popover (category counts live here) -->
+<div class="popover" id="pop-filters" role="dialog" aria-labelledby="pf-t" data-align="start" style="--w:400px" hidden>
+  <div class="popover-head"><h2 class="h3" id="pf-t">Filtros del listado</h2><p class="caption">Selecciona uno o varios criterios.</p></div>
+  <div class="popover-body">
+    <div class="filter-group"><fieldset class="fieldset"><legend class="micro">Categoría</legend>
+      <div class="filter-options tp-cat-opts" id="tp-cat-opts"></div></fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset"><legend class="micro">Entrega</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox" data-f-del="manual">Manual</label>
+        <label class="check"><input type="checkbox" data-f-del="event">Por evento</label>
+        <label class="check"><input type="checkbox" data-f-del="schedule">Programada</label>
+      </div></fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset"><legend class="micro">Origen</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox" data-f-org="auto">Automática</label>
+        <label class="check"><input type="checkbox" data-f-org="manual">Manual</label>
+      </div></fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset"><legend class="micro">Estado</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox" data-f-st="on">Activa</label>
+        <label class="check"><input type="checkbox" data-f-st="off">Pausada</label>
+      </div></fieldset></div>
+  </div>
+  <div class="popover-foot">
+    <button class="btn btn-ghost btn-sm" type="button" data-f-clear>Limpiar</button>
+    <button class="btn btn-primary btn-sm" type="button" data-close>Aplicar</button>
+  </div>
+</div>
+
+<!-- Unsaved changes guard (PROPOSAL: also on template switch) -->
+<div class="overlay" id="dlg-unsaved" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="un-t" aria-describedby="un-d">
+    <div class="ov-head"><div class="ov-head-text"><h2 class="ov-title" id="un-t">Hay cambios sin guardar</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+    <div class="ov-body"><p class="prose-13" id="un-d">Si sales ahora perderás los cambios introducidos. Guarda o cancela la edición para conservarlos.</p></div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Permanecer</button>
+      <button class="btn btn-danger" type="button" id="un-leave">Salir sin guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Restore default -->
+<div class="overlay" id="dlg-restore" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="rs-t" aria-describedby="rs-d">
+    <div class="ov-head"><div class="ov-head-text"><h2 class="ov-title" id="rs-t">Restaurar texto por defecto</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+    <div class="ov-body stack-8"><p class="prose-13" id="rs-d">¿Restaurar "<b data-tp-fill>Recordatorio de entreno</b>" a su texto por defecto?</p><p class="caption">Se perderán el título, el cuerpo y la ruta personalizados.</p></div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="rs-ok" data-loading-label="Restaurando...">Restaurar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete manual template -->
+<div class="overlay" id="dlg-del" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dt-t" aria-describedby="dt-d">
+    <div class="ov-head"><div class="ov-head-text"><h2 class="ov-title" id="dt-t">Eliminar plantilla</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+    <div class="ov-body stack-8"><p class="prose-13" id="dt-d">¿Eliminar la plantilla manual "<b data-tp-fill>Felicitación semanal</b>"?</p><p class="caption">Dejará de aparecer como plantilla rápida al enviar notificaciones. Esta acción no se puede deshacer.</p></div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" id="dt-ok" data-loading-label="Eliminando...">Eliminar plantilla</button>
+    </div>
+  </div>
+</div>
+
+<!-- New manual template -->
+<div class="overlay" id="dlg-new" data-static hidden>
+  <div class="dialog dialog-md" role="dialog" aria-modal="true" aria-labelledby="nw-t" aria-describedby="nw-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="nw-t">Nueva plantilla manual</h2>
+        <p class="ov-desc" id="nw-d">Crea un texto reutilizable para enviar notificaciones puntuales desde el panel.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-new" class="stack-16" data-validate data-success-toast="Plantilla creada" novalidate>
+        <div class="field-grid">
+          <div class="field"><label class="field-label" for="nw-name">Nombre</label><input class="input" id="nw-name" maxlength="120" required data-error-required="El nombre es obligatorio"></div>
+          <div class="field"><label class="field-label" for="nw-cat">Categoría</label><input class="input" id="nw-cat" maxlength="80" value="Manual"></div>
+        </div>
+        <div class="field"><label class="field-label" for="nw-desc">Descripción <span class="field-optional">Opcional</span></label><input class="input" id="nw-desc" maxlength="240" placeholder="Uso recomendado de esta plantilla"></div>
+        <div class="field-grid">
+          <div class="field"><label class="field-label" for="nw-title">Título</label><input class="input" id="nw-title" maxlength="120" required data-error-required="Título y cuerpo son obligatorios"></div>
+          <div class="field"><label class="field-label" for="nw-route">Pantalla de destino <span class="proposal-tag">Propuesta</span></label><input class="input" id="nw-route" placeholder="/recap"><p class="field-help">Ruta de la app; debe empezar por / o quedar vacía.</p></div>
+        </div>
+        <div class="field"><label class="field-label" for="nw-body">Cuerpo</label><textarea class="textarea" id="nw-body" rows="4" maxlength="500" required data-count data-error-required="Título y cuerpo son obligatorios"></textarea>
+          <div class="field-foot"><span></span><span class="field-count" aria-live="polite">0/500</span></div></div>
+        <div>
+          <label class="check"><input type="checkbox" checked>Disponible al enviar</label>
+          <p class="field-help" style="padding-left:26px">Si está pausada, no aparecerá como plantilla rápida en envío manual.</p>
+        </div>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="submit" form="form-new" data-loading-label="Creando...">Crear plantilla</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+/* 404.html - quiet not-found state (proposal). */
+.nf-page { display: grid; min-height: calc(100dvh - var(--header-h)); }
+.nf {
+  display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); align-items: center; gap: 64px;
+  align-self: center; justify-self: center; width: 100%; max-width: 880px; padding: 48px 0;
+}
+.nf-x { position: relative; width: 240px; aspect-ratio: 1; }
+.nf-x::before, .nf-x::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 141.4%; height: 1px; background: var(--rule-hover);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.nf-x::after { transform: translate(-50%, -50%) rotate(-45deg); }
+.nf-flag { margin-top: 16px; }
+.nf-title { font-size: 44px; }
+.nf-line { margin-top: 16px; max-width: 42ch; font-size: 14px; line-height: 22px; color: var(--ink-2); }
+.nf .btn { margin-top: 24px; }
+@media (max-width: 767px) {
+  .nf-page { min-height: calc(100dvh - var(--header-h) - var(--tabbar-h)); }
+  .nf { grid-template-columns: minmax(0, 1fr); gap: 32px; padding: 24px 0; }
+  .nf-x { width: 120px; }
+  .nf-title { font-size: 34px; }
+  .nf .btn { width: 100%; }
+}
