@@ -1,5 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Pagination } from '@/components/page'
 
 interface PaginationBarProps {
   page: number
@@ -9,21 +8,20 @@ interface PaginationBarProps {
 }
 
 export function PaginationBar({ page, totalPages, onPrevious, onNext }: PaginationBarProps) {
-  return (
-    <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-muted-foreground">
+  // El listado siempre indica en qué página está, también cuando solo hay una.
+  if (totalPages <= 1) {
+    return (
+      <p className="pt-4 text-[13px] tabular-nums text-foreground-muted">
         Página {page} de {totalPages}
       </p>
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={onPrevious} disabled={page === 1}>
-          <ChevronLeft className="h-4 w-4" />
-          Anterior
-        </Button>
-        <Button variant="outline" onClick={onNext} disabled={page >= totalPages}>
-          Siguiente
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
+    )
+  }
+
+  return (
+    <Pagination
+      page={page}
+      totalPages={totalPages}
+      onPageChange={(nextPage) => (nextPage < page ? onPrevious() : onNext())}
+    />
   )
 }

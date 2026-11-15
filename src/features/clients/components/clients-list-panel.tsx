@@ -1,8 +1,9 @@
 import { FilterToolbar, type FilterSectionConfig, type UseListFiltersResult } from '@/components/filters'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState } from '@/components/page'
 import type { Client, Role } from '../types'
 import { ClientsTable } from './clients-table'
 import { PaginationBar } from './pagination-bar'
+import { UsersListSection } from './users-list-section'
 
 interface ClientsListPanelProps {
   title: string
@@ -48,12 +49,8 @@ export function ClientsListPanel({
   onNext,
 }: ClientsListPanelProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <UsersListSection title={title} description={description}>
+      <div className="space-y-4">
         <FilterToolbar
           search={search}
           onSearchChange={onSearchChange}
@@ -63,9 +60,10 @@ export function ClientsListPanel({
         />
 
         {clients.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            No se encontraron clientes con la búsqueda y filtros actuales.
-          </p>
+          <EmptyState
+            className="border-y border-border"
+            title="No se encontraron clientes con la búsqueda y filtros actuales."
+          />
         ) : (
           <ClientsTable
             actionDialogOpen={actionDialogOpen}
@@ -81,7 +79,7 @@ export function ClientsListPanel({
         )}
 
         <PaginationBar page={page} totalPages={totalPages} onPrevious={onPrevious} onNext={onNext} />
-      </CardContent>
-    </Card>
+      </div>
+    </UsersListSection>
   )
 }

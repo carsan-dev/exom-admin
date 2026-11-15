@@ -1,8 +1,9 @@
 import { FilterToolbar, type FilterSectionConfig, type UseListFiltersResult } from '@/components/filters'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState } from '@/components/page'
 import type { AdminUserListItem } from '../types'
 import { AdminsTable } from './admins-table'
 import { PaginationBar } from './pagination-bar'
+import { UsersListSection } from './users-list-section'
 
 interface AdminsListPanelProps {
   title: string
@@ -44,12 +45,8 @@ export function AdminsListPanel({
   onNext,
 }: AdminsListPanelProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <UsersListSection title={title} description={description}>
+      <div className="space-y-4">
         <FilterToolbar
           search={search}
           onSearchChange={onSearchChange}
@@ -59,7 +56,7 @@ export function AdminsListPanel({
         />
 
         {admins.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">{noResultsMessage}</p>
+          <EmptyState className="border-y border-border" title={noResultsMessage} />
         ) : (
           <AdminsTable
             admins={admins}
@@ -72,7 +69,7 @@ export function AdminsListPanel({
         )}
 
         <PaginationBar page={page} totalPages={totalPages} onPrevious={onPrevious} onNext={onNext} />
-      </CardContent>
-    </Card>
+      </div>
+    </UsersListSection>
   )
 }

@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { SegmentedControl } from '@/components/ui/segmented'
 
 export type ClientsArchiveFilter = 'visible' | 'archived'
 
@@ -7,15 +7,19 @@ interface ClientsArchiveToggleProps {
   onSelect: (value: ClientsArchiveFilter) => void
 }
 
+const ARCHIVE_OPTIONS: { value: ClientsArchiveFilter; label: string }[] = [
+  { value: 'visible', label: 'Listado principal' },
+  { value: 'archived', label: 'Archivados' },
+]
+
 export function ClientsArchiveToggle({ archive, onSelect }: ClientsArchiveToggleProps) {
   return (
-    <div className="flex gap-2" role="group" aria-label="Visibilidad de clientes">
-      {(['visible', 'archived'] as const).map((value) => (
-        <Button key={value} variant={archive === value ? 'default' : 'outline'} aria-pressed={archive === value}
-          onClick={() => onSelect(value)}>
-          {value === 'visible' ? 'Listado principal' : 'Archivados'}
-        </Button>
-      ))}
-    </div>
+    <SegmentedControl
+      aria-label="Visibilidad de clientes"
+      value={archive}
+      onValueChange={onSelect}
+      options={ARCHIVE_OPTIONS}
+      className="max-w-full flex-wrap"
+    />
   )
 }
