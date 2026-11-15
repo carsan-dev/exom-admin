@@ -1,7 +1,8 @@
-import { Flame, Trophy } from 'lucide-react'
+import { Flame } from 'lucide-react'
 import { Link } from 'react-router'
+import { EmptyState } from '@/components/page'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
 import { getClientDetailRoute } from '@/features/clients/types'
 import type { TopClient } from '../types'
@@ -9,6 +10,8 @@ import type { TopClient } from '../types'
 interface TopClientsProps {
   clients: TopClient[]
 }
+
+const WEEK_DAYS = 7
 
 function getInitials(name: string) {
   return name
@@ -23,61 +26,67 @@ export function TopClients({ clients }: TopClientsProps) {
   const currentUserRole = useAuth((state) => state.user?.role)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Trophy className="h-5 w-5 text-status-warning" />
+    <section aria-labelledby="dashboard-top-title" className="min-w-0">
+      <div className="mb-3 space-y-1 border-b border-border-strong pb-3">
+        <h2
+          id="dashboard-top-title"
+          className="font-display text-xl font-extrabold uppercase leading-none text-foreground"
+        >
           Top clientes
-        </CardTitle>
-        <CardDescription>Ranking semanal por días de entrenamiento completados.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {clients.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
-            Aún no hay entrenamientos completados esta semana.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {clients.map((client, index) => {
-              const progressWidth = `${Math.min((client.completedDays / 7) * 100, 100)}%`
+        </h2>
+        <p className="text-[13px] leading-5 text-foreground-secondary">
+          Ranking semanal por días de entrenamiento completados.
+        </p>
+      </div>
 
-              return (
-                <Link
-                  key={client.clientId}
-                  to={getClientDetailRoute(client.clientId, currentUserRole)}
-                  className="block rounded-xl border border-border/70 p-4 transition-colors hover:border-brand-primary/40"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-soft/20 text-sm font-semibold text-accent-text">
-                      {index + 1}
-                    </div>
+      {clients.length === 0 ? (
+        <EmptyState className="pb-10 pt-8" title="Aún no hay entrenamientos completados esta semana." />
+      ) : (
+        <ol className="divide-y divide-border">
+          {clients.map((client, index) => (
+            <li key={client.clientId}>
+              <Link
+                to={getClientDetailRoute(client.clientId, currentUserRole)}
+                className="flex min-h-11 items-center gap-3 py-3 transition-colors hover:bg-muted/40"
+              >
+                <span className="w-5 flex-none text-center font-display text-lg font-extrabold tabular-nums text-foreground-muted">
+                  {index + 1}
+                </span>
 
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={client.clientAvatar ?? undefined} alt={client.clientName} />
-                      <AvatarFallback>{getInitials(client.clientName)}</AvatarFallback>
-                    </Avatar>
+                <Avatar className="size-8">
+                  <AvatarImage src={client.clientAvatar ?? undefined} alt={client.clientName} />
+                  <AvatarFallback className="text-xs">{getInitials(client.clientName)}</AvatarFallback>
+                </Avatar>
 
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">{client.clientName}</p>
-                      <div className="mt-2 h-2 rounded-full bg-muted">
-                        <div className="h-2 rounded-full bg-brand-primary" style={{ width: progressWidth }} />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-                    <span className="text-muted-foreground">{client.completedDays}/7 días completados</span>
-                    <span className="inline-flex items-center gap-1 font-medium text-status-warning">
-                      <Flame className="h-4 w-4" />
-                      {client.currentStreak} días
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="truncate text-sm font-medium text-foreground">{client.clientName}</p>
+                  <div className="flex items-center gap-2">
+                    <span aria-hidden="true" className="flex flex-none gap-0.5">
+                      {Array.from({ length: WEEK_DAYS }).map((_, day) => (
+                        <i
+                          key={day}
+                          className={cn(
+                            'block h-1.5 w-3 flex-none',
+                            day < Math.min(client.completedDays, WEEK_DAYS) ? 'bg-brand-primary' : 'bg-border',
+                          )}
+                        />
+                      ))}
+                    </span>
+                    <span className="min-w-0 text-xs text-foreground-muted">
+                      {client.completedDays}/7 días completados
                     </span>
                   </div>
-                </Link>
-              )
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                </div>
+
+                <span className="inline-flex flex-none items-center gap-1 text-sm font-medium tabular-nums text-status-warning">
+                  <Flame aria-hidden="true" className="size-4" />
+                  {client.currentStreak} días
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
   )
 }
