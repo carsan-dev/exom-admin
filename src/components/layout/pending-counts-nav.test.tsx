@@ -56,7 +56,9 @@ describe('contadores de Feedback y Recaps', () => {
     renderSidebar(COUNTS, false)
 
     const link = screen.getByRole('link', { name: /Feedback/ })
-    expect(badge(link, '5 pendientes')).toBeInTheDocument()
+    const dot = badge(link, '5 pendientes')
+    expect(dot).toHaveClass('size-1.5', 'rounded-full')
+    expect(dot).toBeEmptyDOMElement()
     await userEvent.hover(link)
     expect((await screen.findAllByText('Feedback (5)')).length).toBeGreaterThan(0)
   })

@@ -47,4 +47,12 @@ describe('NotFoundPage', () => {
 
     expect(router.state.location.pathname).toBe('/dashboard')
   })
+
+  it('«Volver» sin historial previo navega al inicio', async () => {
+    const router = renderAt('/no-existe')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Volver' }))
+
+    expect(router.state.location.pathname).toBe('/dashboard')
+  })
 })

@@ -91,11 +91,16 @@ export function Header({ onMenuToggle }: HeaderProps) {
               <span className="hidden text-[13px] font-semibold sm:block">{fullName}</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-60">
             <DropdownMenuLabel>
               <div className="flex flex-col">
                 <span>{fullName}</span>
-                <span className="text-xs font-normal text-muted-foreground">{user?.email}</span>
+                <span
+                  title={user?.email}
+                  className="truncate text-xs font-normal normal-case tracking-normal text-muted-foreground"
+                >
+                  {user?.email}
+                </span>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

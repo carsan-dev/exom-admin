@@ -1,4 +1,4 @@
-import { act, render, renderHook, screen } from '@testing-library/react'
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router'
@@ -143,5 +143,19 @@ describe('AppLayout responsive', () => {
     await user.click(screen.getByRole('button', { name: 'alternar-menu' }))
     expect(aside).toHaveAttribute('data-state', 'expanded')
     expect(window.localStorage.getItem(SIDEBAR_STORAGE_KEY)).toBe('expanded')
+  })
+
+  it('el relleno inferior de main deja libre la barra inferior hasta md, con y sin «Volver arriba»', () => {
+    const { container } = renderLayout()
+    const main = container.querySelector('main')
+    if (!main) throw new Error('main no encontrado')
+    const bar = 'calc(56px+env(safe-area-inset-bottom,0px)+16px)'
+    expect(main).toHaveClass(`pb-[${bar}]`, `sm:pb-[${bar}]`, 'md:pb-5')
+
+    main.scrollTop = 400
+    fireEvent.scroll(main)
+    const withTop = 'calc(56px+env(safe-area-inset-bottom,0px)+76px)'
+    expect(main).toHaveClass(`pb-[${withTop}]`, `sm:pb-[${withTop}]`, 'md:pb-28')
+    expect(main).not.toHaveClass(`pb-[${bar}]`, `sm:pb-[${bar}]`, 'md:pb-5', 'pb-24')
   })
 })

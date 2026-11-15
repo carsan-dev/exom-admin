@@ -74,9 +74,9 @@ export function AppLayout() {
           <main
             ref={mainRef}
             className={cn(
-              'min-w-0 max-w-full flex-1 bg-background p-3 max-md:pb-[calc(56px+env(safe-area-inset-bottom,0px)+16px)] sm:p-5 lg:overflow-y-auto lg:p-6 lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]',
+              'min-w-0 max-w-full flex-1 bg-background p-3 pb-[calc(56px+env(safe-area-inset-bottom,0px)+16px)] sm:p-5 sm:pb-[calc(56px+env(safe-area-inset-bottom,0px)+16px)] md:pb-5 lg:overflow-y-auto lg:p-6 lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]',
               showScrollTop
-                ? 'pb-24 max-md:pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] sm:pb-28'
+                ? 'pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] sm:pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] md:pb-28'
                 : null,
             )}
           >
@@ -85,7 +85,7 @@ export function AppLayout() {
 
           {showScrollTop ? (
             // Por encima de la barra inferior móvil y, si está, del aviso de versión.
-            <div className="fixed bottom-4 right-4 z-50 flex max-md:bottom-[calc(56px+env(safe-area-inset-bottom,0px)+16px)] sm:bottom-6 sm:right-6 [body:has([data-version-banner])_&]:bottom-24 max-md:[body:has([data-version-banner])_&]:bottom-[calc(56px+env(safe-area-inset-bottom,0px)+132px)]">
+            <div className="fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px)+16px)] right-4 z-50 flex sm:right-6 md:bottom-6 [body:has([data-version-banner])_&]:bottom-[calc(56px+env(safe-area-inset-bottom,0px)+132px)] md:[body:has([data-version-banner])_&]:bottom-24">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button

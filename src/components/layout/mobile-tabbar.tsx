@@ -2,6 +2,7 @@ import { useId, useRef, useState } from 'react'
 import { NavLink, matchPath, useLocation } from 'react-router'
 import { FileText, LayoutDashboard, Menu, MessageSquare, TrendingUp } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
+import { useMediaQuery } from '@/hooks/use-media-query'
 import { useApprovalStats } from '@/features/approval-requests/api'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
@@ -28,7 +29,7 @@ const TAB_CLASS = cn(
   'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
 )
 
-// El color va en los hijos: un `text-*` directo sobre un <a> pierde frente al estilo en línea de index.html.
+// El color va en los hijos y no en el <a>/<button>: así enlaces y «Más» comparten exactamente las mismas clases.
 const TAB_TEXT_CLASS =
   'text-muted-foreground transition-colors duration-(--dur-fast) ease-out group-hover:text-foreground group-aria-[current=page]:text-foreground group-data-[current=true]:text-foreground group-aria-expanded:text-foreground'
 
@@ -85,6 +86,14 @@ export function MobileTabbar({ pendingCounts }: MobileTabbarProps) {
   const baseId = useId()
   const { pathname } = useLocation()
   const [moreOpen, setMoreOpen] = useState(false)
+  const isMdUp = useMediaQuery('(min-width: 768px)', false)
+  const [wasMdUp, setWasMdUp] = useState(isMdUp)
+  if (wasMdUp !== isMdUp) {
+    // Al pasar a >= md la barra se oculta: se cierra el panel y no se reabre al volver.
+    setWasMdUp(isMdUp)
+    if (isMdUp) setMoreOpen(false)
+  }
+  const sheetOpen = moreOpen && !isMdUp
   const moreRef = useRef<HTMLButtonElement | null>(null)
   const role = useAuth((state) => state.user?.role)
   const approvalStatsQuery = useApprovalStats(role === 'SUPER_ADMIN')
@@ -133,7 +142,7 @@ export function MobileTabbar({ pendingCounts }: MobileTabbarProps) {
           ref={moreRef}
           type="button"
           aria-haspopup="dialog"
-          aria-expanded={moreOpen}
+          aria-expanded={sheetOpen}
           data-current={!onTabRoute ? 'true' : undefined}
           onClick={() => setMoreOpen(true)}
           className={TAB_CLASS}
@@ -143,7 +152,7 @@ export function MobileTabbar({ pendingCounts }: MobileTabbarProps) {
         </button>
       </nav>
 
-      <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+      <Sheet open={sheetOpen} onOpenChange={setMoreOpen}>
         <SheetContent
           side="bottom"
           className="flex max-h-[85svh] flex-col gap-0 p-0"

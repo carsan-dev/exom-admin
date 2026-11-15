@@ -34,7 +34,7 @@ export function VersionUpdateBanner() {
       {/* Con la barra inferior móvil presente, el aviso se coloca justo encima de ella. */}
       <div
         data-version-banner=""
-        className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-3xl flex-col gap-3 border border-border-strong bg-background-surface p-3 shadow-overlay max-md:[body:has([data-mobile-tabbar])_&]:bottom-[calc(56px+env(safe-area-inset-bottom,0px)+12px)] sm:flex-row sm:items-center sm:justify-between"
+        className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-3xl flex-col gap-3 border border-border-strong bg-background-surface p-3 shadow-overlay [body:has([data-mobile-tabbar])_&]:bottom-[calc(56px+env(safe-area-inset-bottom,0px)+12px)] md:[body:has([data-mobile-tabbar])_&]:bottom-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <p className="text-sm text-foreground">Nueva versión disponible. Recarga la página para aplicar los cambios.</p>
         <Button type="button" size="sm" className="shrink-0" onClick={handleReload}>

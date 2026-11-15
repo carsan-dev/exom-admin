@@ -38,29 +38,34 @@ function SidebarLink({ item, count, isOpen, onClose }: SidebarLinkProps) {
         'aria-[current=page]:bg-lime-soft',
       )}
     >
-      <>
-          <Icon
-            aria-hidden="true"
-            className="h-5 w-5 shrink-0 text-muted-foreground group-aria-[current=page]:text-accent-line"
-          />
+      <Icon
+        aria-hidden="true"
+        className="h-5 w-5 shrink-0 text-muted-foreground group-aria-[current=page]:text-accent-line"
+      />
+      <span
+        className={cn(
+          'text-foreground-secondary transition-colors duration-(--dur-fast) ease-out group-hover:text-foreground group-aria-[current=page]:text-foreground',
+          isOpen ? 'min-w-0 flex-1 truncate' : 'sr-only',
+        )}
+      >
+        {label}
+      </span>
+      {count !== null ? (
+        isOpen ? (
           <span
-            className={cn(
-              'text-foreground-secondary transition-colors duration-(--dur-fast) ease-out group-hover:text-foreground group-aria-[current=page]:text-foreground',
-              isOpen ? 'min-w-0 flex-1 truncate' : 'sr-only',
-            )}
-          >{label}</span>
-          {count !== null ? (
-            <span
-              aria-label={`${count} pendientes`}
-              className={cn(
-                'inline-flex h-5 min-w-5 items-center justify-center border border-border-strong px-1.5 text-[11px] font-semibold leading-none tabular-nums text-foreground',
-                isOpen ? 'ml-auto' : 'absolute left-7 top-1 h-4 min-w-4 px-1',
-              )}
-            >
-              {count}
-            </span>
-          ) : null}
-      </>
+            aria-label={`${count} pendientes`}
+            className="ml-auto inline-flex h-5 min-w-5 items-center justify-center border border-border-strong px-1.5 text-[11px] font-semibold leading-none tabular-nums text-foreground"
+          >
+            {count}
+          </span>
+        ) : (
+          <span
+            role="img"
+            aria-label={`${count} pendientes`}
+            className="absolute left-[30px] top-2 size-1.5 rounded-full bg-accent-line"
+          />
+        )
+      ) : null}
     </NavLink>
   )
 

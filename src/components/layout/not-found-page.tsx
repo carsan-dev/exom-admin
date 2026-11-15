@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 
 export interface NotFoundPageProps {
@@ -9,6 +9,7 @@ export interface NotFoundPageProps {
 
 export function NotFoundPage({ homeHref = '/dashboard', homeLabel = 'Ir al Dashboard' }: NotFoundPageProps) {
   const navigate = useNavigate()
+  const location = useLocation()
 
   return (
     <section
@@ -30,7 +31,11 @@ export function NotFoundPage({ homeHref = '/dashboard', homeLabel = 'Ir al Dashb
         <Button asChild>
           <Link to={homeHref}>{homeLabel}</Link>
         </Button>
-        <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+        <Button type="button" variant="outline" onClick={() => {
+            // La clave `default` marca la primera entrada del historial: sin anterior, ir a inicio.
+            if (location.key === 'default') navigate(homeHref)
+            else navigate(-1)
+          }}>
           Volver
         </Button>
       </div>
