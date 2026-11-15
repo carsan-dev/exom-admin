@@ -1,17 +1,12 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, ChevronLeft, ChevronRight, Plus, Users } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import {
-  FilterToolbar,
   filtersToApiParams,
   type FilterOption,
   type FilterSectionConfig,
   useListFilters,
 } from '@/components/filters'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { useAuth } from '@/hooks/use-auth'
 import {
   buildPaginationSearchParams,
@@ -26,9 +21,12 @@ import {
   useAllUsers,
   useClients,
 } from '../api'
-import { AdminsTable } from '../components/admins-table'
+import { AdminsListPanel } from '../components/admins-list-panel'
 import { ChangeRoleDialog } from '../components/change-role-dialog'
-import { ClientsTable } from '../components/clients-table'
+import { ClientsArchiveToggle } from '../components/clients-archive-toggle'
+import { ClientsListPanel } from '../components/clients-list-panel'
+import { ClientsPageHeader } from '../components/clients-page-header'
+import { ClientsTabsBar } from '../components/clients-tabs-bar'
 import { ArchiveClientDialog } from '../components/archive-client-dialog'
 import { DeleteClientDialog } from '../components/delete-client-dialog'
 import { ClientDeletionsPanel } from '../components/client-deletions-panel'
@@ -38,6 +36,9 @@ import { EditUserDialog } from '../components/edit-user-dialog'
 import { ManageClientAssignmentsDialog } from '../components/manage-client-assignments-dialog'
 import { ToggleUserStatusDialog } from '../components/toggle-user-status-dialog'
 import { UnlockDialog } from '../components/unlock-dialog'
+import { AdminsTableSkeleton, ClientsTableSkeleton } from '../components/users-table-skeletons'
+import { UsersListEmptyCard } from '../components/users-list-empty-card'
+import { UsersListErrorCard } from '../components/users-list-error-card'
 import type { AdminUserListItem, Client } from '../types'
 
 const PAGE_SIZE = 10
@@ -56,78 +57,6 @@ const ASSIGNMENT_STATE_OPTIONS: FilterOption[] = [
   { value: 'UNASSIGNED', label: 'Sin admins' },
 ]
 
-function ClientsTableSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-7 w-40" />
-        <Skeleton className="h-4 w-72" />
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div
-            key={index}
-            className="grid gap-4 rounded-xl border border-border/60 p-4 lg:grid-cols-[2fr_1.4fr_1fr_1fr_1fr_1fr_1.7fr]"
-          >
-            {Array.from({ length: 7 }).map((__, columnIndex) => (
-              <Skeleton key={columnIndex} className="h-10 w-full" />
-            ))}
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  )
-}
-
-function AdminsTableSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-7 w-40" />
-        <Skeleton className="h-4 w-72" />
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div
-            key={index}
-            className="grid gap-4 rounded-xl border border-border/60 p-4 lg:grid-cols-[2fr_1.4fr_1fr_1fr_1fr_1.8fr]"
-          >
-            {Array.from({ length: 6 }).map((__, columnIndex) => (
-              <Skeleton key={columnIndex} className="h-10 w-full" />
-            ))}
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  )
-}
-
-interface PaginationBarProps {
-  page: number
-  totalPages: number
-  onPrevious: () => void
-  onNext: () => void
-}
-
-function PaginationBar({ page, totalPages, onPrevious, onNext }: PaginationBarProps) {
-  return (
-    <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-muted-foreground">
-        Página {page} de {totalPages}
-      </p>
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={onPrevious} disabled={page === 1}>
-          <ChevronLeft className="h-4 w-4" />
-          Anterior
-        </Button>
-        <Button variant="outline" onClick={onNext} disabled={page >= totalPages}>
-          Siguiente
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  )
-}
 
 type ManageableUser = Client | AdminUserListItem
 type ClientsTab = 'clients' | 'admins' | 'super-admins'
@@ -378,6 +307,7 @@ export function ClientsPage() {
     setManageAssignmentsDialogOpen(true)
   }
 
+
   const renderClientsPanel = () => {
     const emptyTitle = isSuperAdmin ? 'Todavía no hay clientes registrados' : 'Aún no tienes clientes asignados'
     const emptyDescription = isSuperAdmin
@@ -394,90 +324,53 @@ export function ClientsPage() {
 
     if (clientsQuery.isError) {
       return (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-            <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-              <AlertTriangle className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">No se ha podido cargar el listado</h2>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                {getApiErrorMessage(clientsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
-              </p>
-            </div>
-            <Button onClick={() => clientsQuery.refetch()}>Reintentar</Button>
-          </CardContent>
-        </Card>
+        <UsersListErrorCard
+          title="No se ha podido cargar el listado"
+          message={getApiErrorMessage(clientsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
+          onRetry={() => clientsQuery.refetch()}
+        />
       )
     }
 
     if (clients.length === 0 && !hasClientQuery) {
       return (
-        <Card className="border-dashed border-border/70">
-          <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
-              <Users className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">{emptyTitle}</h2>
-              <p className="max-w-xl text-sm text-muted-foreground">{emptyDescription}</p>
-            </div>
-            <Button onClick={() => setCreateDialogOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Crear primer cliente
-            </Button>
-          </CardContent>
-        </Card>
+        <UsersListEmptyCard
+          title={emptyTitle}
+          description={emptyDescription}
+          actionLabel="Crear primer cliente"
+          onAction={() => setCreateDialogOpen(true)}
+        />
       )
     }
 
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">{archive === 'archived' ? 'Clientes archivados' : 'Listado de clientes'}</CardTitle>
-          <CardDescription>{tableDescription}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <FilterToolbar
-            search={clientSearch}
-            onSearchChange={setClientSearch}
-            searchPlaceholder="Buscar por nombre o email..."
-            sections={clientSections}
-            filters={clientFilters}
-          />
-
-          {clients.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No se encontraron clientes con la búsqueda y filtros actuales.
-            </p>
-          ) : (
-            <ClientsTable
-              actionDialogOpen={unlockDialogOpen || changeRoleDialogOpen || toggleStatusDialogOpen || manageAssignmentsDialogOpen || archiveDialogOpen || deleteDialogOpen}
-              onDelete={(client) => { setSelectedClient(client); setDeleteDialogOpen(true) }}
-              onArchive={(client) => { setSelectedClient(client); setArchiveDialogOpen(true) }}
-              clients={clients}
-              currentUserRole={currentUserRole}
-              onUnlock={handleUnlock}
-              onChangeRole={handleChangeRole}
-              onManageAssignments={handleManageAssignments}
-              onToggleStatus={handleToggleStatus}
-            />
-          )}
-
-          <PaginationBar
-            page={clientPage}
-            totalPages={clientTotalPages}
-            onPrevious={() =>
-              updateSearchParams({ clientsPage: Math.max(1, clientPage - 1) })
-            }
-            onNext={() =>
-              updateSearchParams({
-                clientsPage: Math.min(clientTotalPages, clientPage + 1),
-              })
-            }
-          />
-        </CardContent>
-      </Card>
+      <ClientsListPanel
+        title={archive === 'archived' ? 'Clientes archivados' : 'Listado de clientes'}
+        description={tableDescription}
+        search={clientSearch}
+        onSearchChange={setClientSearch}
+        sections={clientSections}
+        filters={clientFilters}
+        clients={clients}
+        currentUserRole={currentUserRole}
+        actionDialogOpen={unlockDialogOpen || changeRoleDialogOpen || toggleStatusDialogOpen || manageAssignmentsDialogOpen || archiveDialogOpen || deleteDialogOpen}
+        onDelete={(client) => { setSelectedClient(client); setDeleteDialogOpen(true) }}
+        onArchive={(client) => { setSelectedClient(client); setArchiveDialogOpen(true) }}
+        onUnlock={handleUnlock}
+        onChangeRole={handleChangeRole}
+        onManageAssignments={handleManageAssignments}
+        onToggleStatus={handleToggleStatus}
+        page={clientPage}
+        totalPages={clientTotalPages}
+        onPrevious={() =>
+          updateSearchParams({ clientsPage: Math.max(1, clientPage - 1) })
+        }
+        onNext={() =>
+          updateSearchParams({
+            clientsPage: Math.min(clientTotalPages, clientPage + 1),
+          })
+        }
+      />
     )
   }
 
@@ -490,89 +383,49 @@ export function ClientsPage() {
 
     if (adminsQuery.isError) {
       return (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-            <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-              <AlertTriangle className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">No se ha podido cargar el listado de admins</h2>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                {getApiErrorMessage(adminsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
-              </p>
-            </div>
-            <Button onClick={() => adminsQuery.refetch()}>Reintentar</Button>
-          </CardContent>
-        </Card>
+        <UsersListErrorCard
+          title="No se ha podido cargar el listado de admins"
+          message={getApiErrorMessage(adminsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
+          onRetry={() => adminsQuery.refetch()}
+        />
       )
     }
 
     if (admins.length === 0 && !hasAdminQuery) {
       return (
-        <Card className="border-dashed border-border/70">
-          <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
-              <Users className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">Todavía no hay admins registrados</h2>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                Crea el primer admin para delegar la gestión diaria del panel y de las carteras de clientes.
-              </p>
-            </div>
-            <Button onClick={() => setCreateAdminDialogOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Crear primer admin
-            </Button>
-          </CardContent>
-        </Card>
+        <UsersListEmptyCard
+          title="Todavía no hay admins registrados"
+          description="Crea el primer admin para delegar la gestión diaria del panel y de las carteras de clientes."
+          actionLabel="Crear primer admin"
+          onAction={() => setCreateAdminDialogOpen(true)}
+        />
       )
     }
 
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Listado de admins</CardTitle>
-          <CardDescription>
-            Gestiona altas, edición, desbloqueos, cambios de rol y estado de acceso del equipo administrador.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <FilterToolbar
-            search={adminSearch}
-            onSearchChange={setAdminSearch}
-            searchPlaceholder="Buscar por nombre o email..."
-            sections={userSections}
-            filters={adminFilters}
-          />
-
-          {admins.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No se encontraron admins con la búsqueda y filtros actuales.
-            </p>
-          ) : (
-            <AdminsTable
-              admins={admins}
-              currentUserId={currentUserId}
-              onEdit={handleEditUser}
-              onUnlock={handleUnlock}
-              onChangeRole={handleChangeRole}
-              onToggleStatus={handleToggleStatus}
-            />
-          )}
-
-          <PaginationBar
-            page={adminPage}
-            totalPages={adminTotalPages}
-            onPrevious={() => updateSearchParams({ adminsPage: Math.max(1, adminPage - 1) })}
-            onNext={() =>
-              updateSearchParams({
-                adminsPage: Math.min(adminTotalPages, adminPage + 1),
-              })
-            }
-          />
-        </CardContent>
-      </Card>
+      <AdminsListPanel
+        title="Listado de admins"
+        description="Gestiona altas, edición, desbloqueos, cambios de rol y estado de acceso del equipo administrador."
+        noResultsMessage="No se encontraron admins con la búsqueda y filtros actuales."
+        search={adminSearch}
+        onSearchChange={setAdminSearch}
+        sections={userSections}
+        filters={adminFilters}
+        admins={admins}
+        currentUserId={currentUserId}
+        onEdit={handleEditUser}
+        onUnlock={handleUnlock}
+        onChangeRole={handleChangeRole}
+        onToggleStatus={handleToggleStatus}
+        page={adminPage}
+        totalPages={adminTotalPages}
+        onPrevious={() => updateSearchParams({ adminsPage: Math.max(1, adminPage - 1) })}
+        onNext={() =>
+          updateSearchParams({
+            adminsPage: Math.min(adminTotalPages, adminPage + 1),
+          })
+        }
+      />
     )
   }
 
@@ -586,138 +439,81 @@ export function ClientsPage() {
 
     if (superAdminsQuery.isError) {
       return (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-            <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-              <AlertTriangle className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">
-                No se ha podido cargar el listado de super admins
-              </h2>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                {getApiErrorMessage(superAdminsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
-              </p>
-            </div>
-            <Button onClick={() => superAdminsQuery.refetch()}>Reintentar</Button>
-          </CardContent>
-        </Card>
+        <UsersListErrorCard
+          title="No se ha podido cargar el listado de super admins"
+          message={getApiErrorMessage(superAdminsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
+          onRetry={() => superAdminsQuery.refetch()}
+        />
       )
     }
 
     if (superAdmins.length === 0 && !hasSuperAdminQuery) {
       return (
-        <Card className="border-dashed border-border/70">
-          <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
-              <Users className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">Todavía no hay super admins adicionales</h2>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                Para crear uno nuevo, da de alta primero un admin y después promuévelo a super admin desde la gestión de roles.
-              </p>
-            </div>
-            <Button onClick={() => setCreateAdminDialogOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Crear admin base
-            </Button>
-          </CardContent>
-        </Card>
+        <UsersListEmptyCard
+          title="Todavía no hay super admins adicionales"
+          description="Para crear uno nuevo, da de alta primero un admin y después promuévelo a super admin desde la gestión de roles."
+          actionLabel="Crear admin base"
+          onAction={() => setCreateAdminDialogOpen(true)}
+        />
       )
     }
 
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Listado de super admins</CardTitle>
-          <CardDescription>
-            Puedes editar, desbloquear, cambiar el rol o reactivar otros super admins. Tu propia cuenta queda protegida frente a degradaciones o bajas accidentales.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <FilterToolbar
-            search={superAdminSearch}
-            onSearchChange={setSuperAdminSearch}
-            searchPlaceholder="Buscar por nombre o email..."
-            sections={userSections}
-            filters={superAdminFilters}
-          />
-
-          {superAdmins.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No se encontraron super admins con la búsqueda y filtros actuales.
-            </p>
-          ) : (
-            <AdminsTable
-              admins={superAdmins}
-              currentUserId={currentUserId}
-              onEdit={handleEditUser}
-              onUnlock={handleUnlock}
-              onChangeRole={handleChangeRole}
-              onToggleStatus={handleToggleStatus}
-            />
-          )}
-
-          <PaginationBar
-            page={superAdminPage}
-            totalPages={superAdminTotalPages}
-            onPrevious={() =>
-              updateSearchParams({ superAdminsPage: Math.max(1, superAdminPage - 1) })
-            }
-            onNext={() =>
-              updateSearchParams({
-                superAdminsPage: Math.min(superAdminTotalPages, superAdminPage + 1),
-              })
-            }
-          />
-        </CardContent>
-      </Card>
+      <AdminsListPanel
+        title="Listado de super admins"
+        description="Puedes editar, desbloquear, cambiar el rol o reactivar otros super admins. Tu propia cuenta queda protegida frente a degradaciones o bajas accidentales."
+        noResultsMessage="No se encontraron super admins con la búsqueda y filtros actuales."
+        search={superAdminSearch}
+        onSearchChange={setSuperAdminSearch}
+        sections={userSections}
+        filters={superAdminFilters}
+        admins={superAdmins}
+        currentUserId={currentUserId}
+        onEdit={handleEditUser}
+        onUnlock={handleUnlock}
+        onChangeRole={handleChangeRole}
+        onToggleStatus={handleToggleStatus}
+        page={superAdminPage}
+        totalPages={superAdminTotalPages}
+        onPrevious={() =>
+          updateSearchParams({ superAdminsPage: Math.max(1, superAdminPage - 1) })
+        }
+        onNext={() =>
+          updateSearchParams({
+            superAdminsPage: Math.min(superAdminTotalPages, superAdminPage + 1),
+          })
+        }
+      />
     )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-accent-text">Gestión de usuarios</p>
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">{pageTitle}</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{pageDescription}</p>
-          </div>
-          <p className="text-sm text-muted-foreground">{pageCountLabel}</p>
-        </div>
+      <ClientsPageHeader
+        title={pageTitle}
+        description={pageDescription}
+        countLabel={pageCountLabel}
+        createLabel={isSuperAdmin && activeTab !== 'clients' ? 'Nuevo admin' : 'Nuevo cliente'}
+        onCreate={() => {
+          if (isSuperAdmin && activeTab !== 'clients') {
+            setCreateAdminDialogOpen(true)
+            return
+          }
 
-        <Button
-          onClick={() => {
-            if (isSuperAdmin && activeTab !== 'clients') {
-              setCreateAdminDialogOpen(true)
-              return
-            }
-
-            setCreateDialogOpen(true)
-          }}
-          className="lg:self-start"
-        >
-          <Plus className="h-4 w-4" />
-          {isSuperAdmin && activeTab !== 'clients' ? 'Nuevo admin' : 'Nuevo cliente'}
-        </Button>
-      </div>
+          setCreateDialogOpen(true)
+        }}
+      />
 
       {activeTab === 'clients' && (
-        <div className="flex gap-2" role="group" aria-label="Visibilidad de clientes">
-          {(['visible', 'archived'] as const).map((value) => (
-            <Button key={value} variant={archive === value ? 'default' : 'outline'} aria-pressed={archive === value}
-              onClick={() => setSearchParams((current) => {
-                const next = new URLSearchParams(current)
-                next.set('archive', value)
-                next.delete('clientsPage')
-                return next
-              }, { replace: true })}>
-              {value === 'visible' ? 'Listado principal' : 'Archivados'}
-            </Button>
-          ))}
-        </div>
+        <ClientsArchiveToggle
+          archive={archive}
+          onSelect={(value) => setSearchParams((current) => {
+            const next = new URLSearchParams(current)
+            next.set('archive', value)
+            next.delete('clientsPage')
+            return next
+          }, { replace: true })}
+        />
       )}
 
       {isSuperAdmin ? (
@@ -726,26 +522,7 @@ export function ClientsPage() {
           onValueChange={(value) => updateSearchParams({ tab: value as ClientsTab })}
           className="space-y-4"
         >
-          <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-3">
-            <TabsTrigger
-              value="clients"
-              className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text"
-            >
-              Clientes
-            </TabsTrigger>
-            <TabsTrigger
-              value="admins"
-              className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text"
-            >
-              Admins
-            </TabsTrigger>
-            <TabsTrigger
-              value="super-admins"
-              className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text"
-            >
-              Super Admins
-            </TabsTrigger>
-          </TabsList>
+          <ClientsTabsBar />
 
           <TabsContent value="clients">{renderClientsPanel()}</TabsContent>
           <TabsContent value="admins">{renderAdminsPanel()}</TabsContent>
