@@ -56,12 +56,12 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         <Check
           aria-hidden="true"
           strokeWidth={3}
-          className="pointer-events-none col-start-1 row-start-1 size-3 text-primary-foreground opacity-0 peer-checked:opacity-100 peer-indeterminate:hidden peer-disabled:text-muted-foreground"
+          className="pointer-events-none relative col-start-1 row-start-1 size-3 text-primary-foreground opacity-0 peer-checked:opacity-100 peer-indeterminate:hidden peer-disabled:text-muted-foreground"
         />
         <Minus
           aria-hidden="true"
           strokeWidth={3}
-          className="pointer-events-none col-start-1 row-start-1 hidden size-3 text-primary-foreground peer-indeterminate:block peer-disabled:text-muted-foreground"
+          className="pointer-events-none relative col-start-1 row-start-1 hidden size-3 text-primary-foreground peer-indeterminate:block peer-disabled:text-muted-foreground"
         />
       </span>
     )
