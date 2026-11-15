@@ -25,10 +25,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
             'group toast font-sans group-[.toaster]:!rounded-none group-[.toaster]:!border group-[.toaster]:!border-border-strong group-[.toaster]:!bg-background-surface group-[.toaster]:!text-foreground group-[.toaster]:shadow-overlay',
           title: 'group-[.toast]:text-sm group-[.toast]:font-semibold group-[.toast]:text-foreground',
           description: 'group-[.toast]:text-[13px] group-[.toast]:text-foreground-secondary',
-          success: 'group-[.toast]:[&_[data-icon]]:text-status-success',
-          error: 'group-[.toast]:[&_[data-icon]]:text-status-error',
-          warning: 'group-[.toast]:[&_[data-icon]]:text-status-warning',
-          info: 'group-[.toast]:[&_[data-icon]]:text-status-info',
+          success: '[&_[data-icon]]:text-status-success',
+          error: '[&_[data-icon]]:text-status-error',
+          warning: '[&_[data-icon]]:text-status-warning',
+          info: '[&_[data-icon]]:text-status-info',
           actionButton:
             'group-[.toast]:!rounded-none group-[.toast]:!bg-primary group-[.toast]:!text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
           cancelButton:
