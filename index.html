@@ -26,12 +26,15 @@
         overscroll-behavior: none;
       }
 
-      a,
-      a:visited,
-      a:hover,
-      a:active {
-        color: inherit;
-        text-decoration: none;
+      /* En capa base: sin capa ganaría a las utilidades de color de Tailwind en cualquier enlace. */
+      @layer base {
+        a,
+        a:visited,
+        a:hover,
+        a:active {
+          color: inherit;
+          text-decoration: none;
+        }
       }
     </style>
     <title>EXOM Admin</title>
