@@ -237,8 +237,6 @@
   --shadow-lg: none;
   --shadow-xl: none;
   --shadow-2xl: none;
-  --shadow-overlay: var(--shadow-overlay);
-
 }
 
 /* Fonts and easing: emitted on :root only when referenced (no `static`, so the
@@ -250,6 +248,94 @@
 
   --ease-out: cubic-bezier(0.22, 0.75, 0.18, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Overlay motion (D4): own keyframes driven by Radix data-state, no tw-animate-css.
+   CSS animations (not transitions) so Radix Presence waits for animationend on exit.
+   Under prefers-reduced-motion the global rule below shrinks durations to 0.01ms,
+   so animationend still fires and the overlay unmounts normally. */
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+}
+@keyframes overlay-fade-out {
+  to { opacity: 0; }
+}
+@keyframes overlay-rise-in {
+  from { opacity: 0; transform: translate(var(--ov-x, 0), var(--ov-y, 8px)); }
+}
+@keyframes overlay-rise-out {
+  to { opacity: 0; transform: translate(var(--ov-x, 0), var(--ov-y, 8px)); }
+}
+@keyframes overlay-pop-in {
+  from { opacity: 0; transform: scale(0.98); }
+}
+@keyframes overlay-pop-out {
+  to { opacity: 0; transform: scale(0.98); }
+}
+@keyframes skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+/* Scrim: fade. */
+@utility anim-overlay-scrim {
+  &[data-state='open'] {
+    animation: overlay-fade-in var(--dur-enter) var(--ease-out) backwards;
+  }
+  &[data-state='closed'] {
+    animation: overlay-fade-out var(--dur-exit) var(--ease-out) forwards;
+  }
+}
+
+/* Dialog / alert-dialog / sheet content: fade + short translate. Direction through
+   --ov-x / --ov-y (dialog: 8px up from below; sheet: 16px from its own side). */
+@utility anim-overlay-panel {
+  &[data-state='open'] {
+    animation: overlay-rise-in var(--dur-enter) var(--ease-out) backwards;
+  }
+  &[data-state='closed'] {
+    animation: overlay-rise-out var(--dur-exit) var(--ease-out) forwards;
+  }
+}
+@utility anim-overlay-from-top {
+  --ov-x: 0;
+  --ov-y: -16px;
+}
+@utility anim-overlay-from-bottom {
+  --ov-x: 0;
+  --ov-y: 16px;
+}
+@utility anim-overlay-from-left {
+  --ov-x: -16px;
+  --ov-y: 0;
+}
+@utility anim-overlay-from-right {
+  --ov-x: 16px;
+  --ov-y: 0;
+}
+
+/* Menus, popovers, select, tooltip: fade + scale .98 from the trigger origin.
+   Tooltip states are delayed-open / instant-open, hence :not(closed). */
+@utility anim-overlay-pop {
+  transform-origin: var(
+    --radix-popover-content-transform-origin,
+    var(
+      --radix-dropdown-menu-content-transform-origin,
+      var(--radix-select-content-transform-origin, var(--radix-tooltip-content-transform-origin, center))
+    )
+  );
+  &:not([data-state='closed']) {
+    animation: overlay-pop-in var(--dur-fast) var(--ease-out) backwards;
+  }
+  &[data-state='closed'] {
+    animation: overlay-pop-out var(--dur-fast) var(--ease-out) forwards;
+  }
+}
+
+/* Registers the overlay shadow utility (the :root vars share its name, so it cannot
+   be aliased through @theme). */
+@utility shadow-overlay {
+  box-shadow: var(--shadow-overlay);
 }
 
 /* Bridge until F2: `border-input` is the control border (>=3:1 on field and page).
