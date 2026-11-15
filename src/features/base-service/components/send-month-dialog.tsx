@@ -2,8 +2,15 @@ import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getApiErrorMessage, isNotConfiguredError, useSendMonth } from '../api'
-import { formatRoute, NOT_CONFIGURED_HELP, NOT_CONFIGURED_TITLE } from '../labels'
+import { getApiErrorMessage, isEmptyPackageError, isNotConfiguredError, useSendMonth } from '../api'
+import {
+  EMPTY_PACKAGE_MESSAGE,
+  formatRoute,
+  getServiceScope,
+  NOT_CONFIGURED_HELP,
+  NOT_CONFIGURED_TITLE,
+  SERVICE_SCOPE_LABELS,
+} from '../labels'
 import type { BaseSubscriber } from '../types'
 
 interface SendMonthDialogProps {
@@ -17,6 +24,7 @@ export function SendMonthDialog({ subscriber, open, onOpenChange }: SendMonthDia
   const [error, setError] = useState<string | null>(null)
   const inFlight = useRef(false)
   const month = subscriber?.next_month ?? 1
+  const scope = subscriber ? getServiceScope(subscriber) : 'BOTH'
 
   const close = (value: boolean) => {
     if (inFlight.current) return
@@ -36,7 +44,9 @@ export function SendMonthDialog({ subscriber, open, onOpenChange }: SendMonthDia
       setError(
         isNotConfiguredError(cause)
           ? `${NOT_CONFIGURED_TITLE} ${NOT_CONFIGURED_HELP}`
-          : getApiErrorMessage(cause, 'No se ha podido enviar el mes. Inténtalo de nuevo.'),
+          : isEmptyPackageError(cause)
+            ? EMPTY_PACKAGE_MESSAGE
+            : getApiErrorMessage(cause, 'No se ha podido enviar el mes. Inténtalo de nuevo.'),
       )
     } finally {
       inFlight.current = false
@@ -61,13 +71,15 @@ export function SendMonthDialog({ subscriber, open, onOpenChange }: SendMonthDia
             </dd>
             <dt className="text-muted-foreground">Ruta</dt>
             <dd>{formatRoute(subscriber.goal, subscriber.days_per_week)}</dd>
+            <dt className="text-muted-foreground">Servicio</dt>
+            <dd>{SERVICE_SCOPE_LABELS[scope]}</dd>
             <dt className="text-muted-foreground">Mes</dt>
             <dd>Mes {month}</dd>
             <dt className="text-muted-foreground">Adjuntos</dt>
             <dd>
               <ul className="list-disc pl-4">
-                <li>Bloque de entrenamiento del mes {month}</li>
-                <li>Guía de nutrición del mes {month}</li>
+                {scope !== 'NUTRITION' && <li>Bloque de entrenamiento del mes {month}</li>}
+                {scope !== 'TRAINING' && <li>Guía de nutrición del mes {month}</li>}
                 {month === 1 && <li>Guía de inicio</li>}
               </ul>
             </dd>

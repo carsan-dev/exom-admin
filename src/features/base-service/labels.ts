@@ -1,4 +1,4 @@
-import type { BaseDelivery, BaseRoute, BaseSubscriber, DeliveryStatus } from './types'
+import type { BaseDelivery, BaseRoute, BaseSubscriber, DeliveryStatus, ServiceScope } from './types'
 
 const GOAL_LABELS: Record<string, string> = {
   'perder-grasa': 'Perder grasa',
@@ -15,9 +15,28 @@ export function getGoalLabel(goal: string) {
   return words ? words.charAt(0).toUpperCase() + words.slice(1) : goal
 }
 
+export const SERVICE_SCOPES: ServiceScope[] = ['BOTH', 'TRAINING', 'NUTRITION']
+
+export const SERVICE_SCOPE_LABELS: Record<ServiceScope, string> = {
+  BOTH: 'Entrenamiento y nutrición',
+  TRAINING: 'Solo entrenamiento',
+  NUTRITION: 'Solo nutrición',
+}
+
+/** A response from an older API may omit the scope; it then means both. */
+export function getServiceScope(source: { service_scope?: ServiceScope }): ServiceScope {
+  return source.service_scope ?? 'BOTH'
+}
+
+export function getDeliveryServiceScope(delivery: { snapshot_service_scope?: ServiceScope }): ServiceScope {
+  return delivery.snapshot_service_scope ?? 'BOTH'
+}
+
 export function formatRoute(goal: string, days: number) {
   return `${getGoalLabel(goal)} · ${days} ${days === 1 ? 'día' : 'días'}/semana`
 }
+
+export const EMPTY_PACKAGE_MESSAGE = 'No hay material de este mes para el servicio contratado'
 
 export const DELIVERY_STATUS_LABELS: Record<DeliveryStatus, string> = {
   PENDING: 'Enviando…',

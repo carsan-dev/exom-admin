@@ -3,7 +3,16 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getApiErrorMessage, useBaseDeliveries, useBaseSubscriber } from '../api'
-import { canResendDelivery, formatDateTime, formatRoute, getAmbiguityWarning, getSendFailureExplanation } from '../labels'
+import {
+  canResendDelivery,
+  formatDateTime,
+  formatRoute,
+  getAmbiguityWarning,
+  getDeliveryServiceScope,
+  getSendFailureExplanation,
+  getServiceScope,
+  SERVICE_SCOPE_LABELS,
+} from '../labels'
 import type { BaseDelivery, BaseSubscriber } from '../types'
 import { ArchiveSubscriberDialog } from './archive-subscriber-dialog'
 import { DeliveryStatusBadge } from './delivery-status-badge'
@@ -53,6 +62,8 @@ function DeliveryItem({
         <dd className="text-foreground">{formatDateTime(delivery.requested_at)}</dd>
         <dt>Enviado</dt>
         <dd className="text-foreground">{formatDateTime(delivery.sent_at)}</dd>
+        <dt>Servicio de este envío</dt>
+        <dd className="text-foreground">{SERVICE_SCOPE_LABELS[getDeliveryServiceScope(delivery)]}</dd>
         {emailDiffers && (
           <>
             <dt>Enviado a</dt>
@@ -164,6 +175,8 @@ export function SubscriberDetailDialog({ subscriberId, onClose, onEdit }: Subscr
                     Cambiar
                   </Button>
                 </dd>
+                <dt className="text-muted-foreground">Servicio contratado</dt>
+                <dd>{SERVICE_SCOPE_LABELS[getServiceScope(subscriber)]}</dd>
                 <dt className="text-muted-foreground">Notas</dt>
                 <dd className="whitespace-pre-wrap break-words">{subscriber.notes ?? '—'}</dd>
                 <dt className="text-muted-foreground">Alta</dt>
