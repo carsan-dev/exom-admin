@@ -3,14 +3,18 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const SheetConsumer = ({ children }: { children: React.ReactNode }) => {
+// Inline body overflow lock (059fbd4), kept alongside Radix's own counted scroll lock.
+// It renders nothing and lives inside Content: wrapping the Portal children instead hid
+// Overlay and Content from Radix Presence (no ref), so they unmounted without their
+// data-state=closed exit animation.
+const SheetConsumer = () => {
   React.useEffect(() => {
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = ''
     }
   }, [])
-  return <>{children}</>
+  return null
 }
 
 const Sheet = DialogPrimitive.Root
@@ -24,8 +28,9 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
+    data-slot="sheet-overlay"
     className={cn(
-      'fixed inset-0 z-50 bg-black/60 anim-overlay-scrim',
+      'fixed inset-0 z-50 bg-scrim anim-overlay-scrim',
       className
     )}
     {...props}
@@ -51,30 +56,30 @@ const SheetContent = React.forwardRef<
   SheetContentProps
 >(({ side = 'right', className, children, ...props }, ref) => (
   <SheetPortal>
-    <SheetConsumer>
-      <SheetOverlay />
-      <DialogPrimitive.Content
+    <SheetOverlay />
+    <DialogPrimitive.Content
       ref={ref}
+      data-slot="sheet-content"
       className={cn(
-        'fixed z-50 gap-4 bg-background-secondary p-6 shadow-lg anim-overlay-panel',
+        'fixed z-50 gap-4 border-border-strong bg-background-surface p-6 text-foreground shadow-overlay anim-overlay-panel',
         sheetVariants[side],
         className
       )}
       {...props}
     >
+      <SheetConsumer />
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+      <DialogPrimitive.Close className="absolute right-3 top-3 inline-flex size-9 items-center justify-center text-foreground-secondary transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-background-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none sm:right-4 sm:top-4">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
-    </SheetConsumer>
   </SheetPortal>
 ))
 SheetContent.displayName = DialogPrimitive.Content.displayName
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex flex-col space-y-2 text-center sm:text-left', className)} {...props} />
+  <div className={cn('flex flex-col space-y-1 pr-8 text-left', className)} {...props} />
 )
 SheetHeader.displayName = 'SheetHeader'
 
@@ -92,7 +97,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-lg font-semibold text-foreground', className)}
+    className={cn('text-lg font-semibold leading-6 text-foreground', className)}
     {...props}
   />
 ))
@@ -104,7 +109,7 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-muted-foreground', className)}
+    className={cn('text-[13px] leading-5 text-foreground-secondary', className)}
     {...props}
   />
 ))
