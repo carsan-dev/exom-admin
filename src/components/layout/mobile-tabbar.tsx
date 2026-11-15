@@ -107,6 +107,7 @@ export function MobileTabbar({ pendingCounts }: MobileTabbarProps) {
     <>
       <nav
         aria-label="Navegación inferior"
+        data-mobile-tabbar=""
         className="fixed inset-x-0 bottom-0 z-40 grid h-[calc(56px+env(safe-area-inset-bottom,0px))] grid-cols-5 border-t border-border bg-background-secondary pb-[env(safe-area-inset-bottom,0px)] md:hidden"
       >
         {TAB_ITEMS.map(({ to, label, icon: Icon }) => {
