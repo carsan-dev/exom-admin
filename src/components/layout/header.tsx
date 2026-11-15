@@ -30,33 +30,49 @@ export function Header({ onMenuToggle }: HeaderProps) {
     : 'Administrador'
 
   return (
-    <header className="flex items-center h-16 px-4 border-b border-border bg-background shrink-0 gap-4">
-      {/* Hamburger */}
-      <Button variant="ghost" size="icon" onClick={onMenuToggle} className="shrink-0">
-        <Menu className="h-5 w-5" />
+    <header className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border bg-background px-3">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onMenuToggle}
+        aria-label="Mostrar u ocultar el menú"
+        className="shrink-0"
+      >
+        <Menu aria-hidden="true" className="h-5 w-5" />
       </Button>
 
-      {/* Breadcrumbs */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <Breadcrumbs />
       </div>
 
-      {/* Right actions */}
-      <div className="flex items-center gap-2 shrink-0">
-        {/* Theme toggle */}
-        <Button variant="ghost" size="icon" onClick={toggleTheme} title="Cambiar tema">
-          {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      <div className="flex shrink-0 items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          title="Cambiar tema"
+          aria-label={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+        >
+          {theme === 'dark' ? (
+            <Sun aria-hidden="true" className="h-5 w-5" />
+          ) : (
+            <Moon aria-hidden="true" className="h-5 w-5" />
+          )}
         </Button>
 
         {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 h-auto px-2 py-1">
-              <Avatar className="h-8 w-8">
+            <Button
+              variant="ghost"
+              aria-label={`Menú de usuario: ${fullName}`}
+              className="h-10 gap-2 px-2 py-0"
+            >
+              <Avatar className="h-7 w-7">
                 <AvatarImage src={user?.profile?.avatar_url ?? undefined} alt={fullName} />
-                <AvatarFallback>{initials}</AvatarFallback>
+                <AvatarFallback className="text-[11px]">{initials}</AvatarFallback>
               </Avatar>
-              <span className="hidden sm:block text-sm font-medium">{fullName}</span>
+              <span className="hidden text-[13px] font-semibold sm:block">{fullName}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
