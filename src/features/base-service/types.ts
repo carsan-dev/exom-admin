@@ -105,7 +105,7 @@ export interface CreateSubscriberPayload {
   email: string
   goal: string
   days_per_week: number
-  service_scope: ServiceScope
+  service_scope?: ServiceScope
   notes?: string | null
 }
 

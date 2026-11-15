@@ -99,7 +99,7 @@ describe('Servicio contratado: create form', () => {
     ])
   })
 
-  it('always sends the scope, BOTH when untouched', async () => {
+  it('omits the scope from the body when BOTH, the API default', async () => {
     api.post.mockResolvedValue(envelope(makeSubscriber({ id: 's9' })))
     const { user, dialog } = await openCreate()
     await fillRequired(user, dialog)
@@ -110,20 +110,24 @@ describe('Servicio contratado: create form', () => {
       email: 'marta@example.com',
       goal: 'perder-grasa',
       days_per_week: 4,
-      service_scope: 'BOTH',
     })
+    const body = api.post.mock.calls[0][1]
+    expect(body).not.toHaveProperty('service_scope')
   })
 
-  it('sends the chosen scope', async () => {
+  it.each([
+    ['Solo nutrición', 'NUTRITION'],
+    ['Solo entrenamiento', 'TRAINING'],
+  ])('sends the scope when %s is chosen', async (label, value) => {
     api.post.mockResolvedValue(envelope(makeSubscriber({ id: 's9' })))
     const { user, dialog } = await openCreate()
     await fillRequired(user, dialog)
-    await pick(user, 'Servicio contratado', 'Solo nutrición')
+    await pick(user, 'Servicio contratado', label)
     await user.click(within(dialog).getByRole('button', { name: 'Crear suscriptor' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1))
     expect(api.post).toHaveBeenCalledWith(
       `${BASE_URL}/subscribers`,
-      expect.objectContaining({ service_scope: 'NUTRITION', days_per_week: 4, goal: 'perder-grasa' }),
+      expect.objectContaining({ service_scope: value, days_per_week: 4, goal: 'perder-grasa' }),
     )
   })
 })
@@ -144,6 +148,16 @@ describe('Servicio contratado: edit form', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Guardar cambios' }))
     await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1))
     expect(api.patch).toHaveBeenCalledWith(`${BASE_URL}/subscribers/s1`, { service_scope: 'TRAINING' })
+  })
+
+  it('sends BOTH explicitly when going back from a narrower scope', async () => {
+    backend.subscribers = [makeSubscriber({ service_scope: 'TRAINING' })]
+    api.patch.mockResolvedValue(envelope(makeSubscriber()))
+    const { user, dialog } = await openEdit()
+    await pick(user, 'Servicio contratado', 'Entrenamiento y nutrición')
+    await user.click(within(dialog).getByRole('button', { name: 'Guardar cambios' }))
+    await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1))
+    expect(api.patch).toHaveBeenCalledWith(`${BASE_URL}/subscribers/s1`, { service_scope: 'BOTH' })
   })
 
   it('omits the scope from the PATCH when another field changes and the scope stays', async () => {
@@ -233,5 +247,20 @@ describe('Servicio contratado: send month dialog', () => {
     expect(alert).toHaveTextContent('No hay material de este mes para el servicio contratado')
     expect(alert).not.toHaveTextContent('Paquete vacío')
     expect(screen.getByRole('dialog', { name: 'Enviar mes 1' })).toBeInTheDocument()
+  })
+})
+
+describe('Servicio contratado: resend dialog', () => {
+  it('maps 409 EMPTY_PACKAGE on resend to the same clear message', async () => {
+    backend.deliveries = { s1: [makeDelivery({ id: 'd1', month: 1, status: 'SENT' })] }
+    api.post.mockRejectedValue(axiosError(409, { message: 'Paquete vacío', code: 'EMPTY_PACKAGE' }))
+    const { user, detail } = await openDetail()
+    await user.click(await within(detail).findByRole('button', { name: 'Reenviar mes 1' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Reenviar mes 1' })
+    await waitFor(() => expect(within(dialog).getByRole('button', { name: 'Reenviar mes 1' })).toBeEnabled())
+    await user.click(within(dialog).getByRole('button', { name: 'Reenviar mes 1' }))
+    const alert = await within(dialog).findByRole('alert')
+    expect(alert).toHaveTextContent('No hay material de este mes para el servicio contratado')
+    expect(alert).not.toHaveTextContent('Paquete vacío')
   })
 })

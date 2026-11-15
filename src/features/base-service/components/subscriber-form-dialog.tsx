@@ -124,7 +124,8 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
           email: values.email.trim(),
           goal: values.goal,
           days_per_week: Number(values.days_per_week),
-          service_scope: values.service_scope,
+          // The API defaults to BOTH, so an older API never sees an unknown field for the default.
+          ...(values.service_scope !== 'BOTH' ? { service_scope: values.service_scope } : {}),
           ...(notes ? { notes } : {}),
         })
         toast.success('Suscriptor creado')
