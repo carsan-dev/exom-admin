@@ -1,4 +1,4 @@
-import { parseISO } from 'date-fns'
+import { getLeadingEmptyCells } from './month-grid-layout'
 import { AssignmentDayCard } from './assignment-day-card'
 import type { AssignmentDay } from '../types'
 
@@ -29,7 +29,7 @@ export function AssignmentsMonthGrid({
   const orderedDays = [...days].sort(compareByDate)
   const firstVisibleDay = orderedDays[0]
   const leadingEmptyCells = firstVisibleDay
-    ? (parseISO(firstVisibleDay.date).getUTCDay() + 6) % 7
+    ? getLeadingEmptyCells(firstVisibleDay.date)
     : 0
   const totalCells = leadingEmptyCells + orderedDays.length
   const trailingEmptyCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7)
