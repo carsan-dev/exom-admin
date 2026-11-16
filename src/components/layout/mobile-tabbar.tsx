@@ -1,6 +1,6 @@
 import { useId, useRef, useState } from 'react'
 import { NavLink, matchPath, useLocation } from 'react-router'
-import { FileText, LayoutDashboard, Menu, MessageSquare, TrendingUp } from 'lucide-react'
+import { FileText, LayoutDashboard, Menu, MessageSquare, Search, TrendingUp } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { useApprovalStats } from '@/features/approval-requests/api'
@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
 import { cn } from '@/lib/utils'
 import { resolveNavGroups, type NavGroup, type NavItem } from './nav-model'
 import type { PendingCounts } from './use-pending-counts'
+import { useGlobalSearch } from './global-search-context'
 
 const APPROVALS_ROUTE = '/approval-requests'
 
@@ -39,6 +40,13 @@ const TAB_ICON_CLASS = cn(
   'group-aria-[current=page]:text-accent-line group-data-[current=true]:text-accent-line',
 )
 
+const MORE_ITEM_CLASS = cn(
+  'group flex h-11 w-full select-none items-center gap-3 whitespace-nowrap px-4 text-sm',
+  'transition-colors duration-(--dur-fast) ease-out',
+  'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+  'hover:bg-background-secondary',
+)
+
 interface MoreLinkProps {
   item: NavItem
   count: number | null
@@ -51,13 +59,7 @@ function MoreLink({ item, count, onNavigate }: MoreLinkProps) {
     <NavLink
       to={to}
       onClick={onNavigate}
-      className={cn(
-        'group flex h-11 w-full select-none items-center gap-3 whitespace-nowrap px-4 text-sm',
-        'transition-colors duration-(--dur-fast) ease-out',
-        'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
-        'hover:bg-background-secondary',
-        'aria-[current=page]:bg-lime-soft',
-      )}
+      className={cn(MORE_ITEM_CLASS, 'aria-[current=page]:bg-lime-soft')}
     >
       <Icon
         aria-hidden="true"
@@ -95,6 +97,8 @@ export function MobileTabbar({ pendingCounts }: MobileTabbarProps) {
   }
   const sheetOpen = moreOpen && !isMdUp
   const moreRef = useRef<HTMLButtonElement | null>(null)
+  const searchHandoffRef = useRef(false)
+  const search = useGlobalSearch()
   const role = useAuth((state) => state.user?.role)
   const approvalStatsQuery = useApprovalStats(role === 'SUPER_ADMIN')
   const pendingApprovals = approvalStatsQuery.data?.pending ?? 0
@@ -111,6 +115,13 @@ export function MobileTabbar({ pendingCounts }: MobileTabbarProps) {
     .filter((group) => group.items.length > 0)
 
   const closeMore = () => setMoreOpen(false)
+
+  const openSearchFromMore = () => {
+    if (!search) return
+    searchHandoffRef.current = true
+    setMoreOpen(false)
+    search.openSearch(moreRef.current)
+  }
 
   return (
     <>
@@ -159,6 +170,11 @@ export function MobileTabbar({ pendingCounts }: MobileTabbarProps) {
           onCloseAutoFocus={(event) => {
             // Sin Trigger, Radix no sabe a dónde devolver el foco: se lo damos a «Más».
             event.preventDefault()
+            if (searchHandoffRef.current) {
+              // «Buscar» cerró el panel: el foco ya está en el buscador y volverá a «Más» al cerrarlo.
+              searchHandoffRef.current = false
+              return
+            }
             moreRef.current?.focus()
           }}
         >
@@ -170,15 +186,32 @@ export function MobileTabbar({ pendingCounts }: MobileTabbarProps) {
             aria-label="Todas las secciones"
             className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain py-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))]"
           >
-            {approvals ? (
+            {search || approvals ? (
               <ul>
-                <li>
-                  <MoreLink
-                    item={approvals}
-                    count={role === 'SUPER_ADMIN' && pendingApprovals > 0 ? pendingApprovals : null}
-                    onNavigate={closeMore}
-                  />
-                </li>
+                {search ? (
+                  <li>
+                    <button
+                      type="button"
+                      aria-haspopup="dialog"
+                      onClick={openSearchFromMore}
+                      className={cn(MORE_ITEM_CLASS, 'text-left')}
+                    >
+                      <Search aria-hidden="true" className="h-5 w-5 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 truncate text-foreground-secondary transition-colors duration-(--dur-fast) ease-out group-hover:text-foreground">
+                        Buscar
+                      </span>
+                    </button>
+                  </li>
+                ) : null}
+                {approvals ? (
+                  <li>
+                    <MoreLink
+                      item={approvals}
+                      count={role === 'SUPER_ADMIN' && pendingApprovals > 0 ? pendingApprovals : null}
+                      onNavigate={closeMore}
+                    />
+                  </li>
+                ) : null}
               </ul>
             ) : null}
             {restGroups.map((group) => {

@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios'
-import { harnessFailProfile } from './boot'
+import { harnessClientsDelay, harnessClientsFail, harnessFailProfile } from './boot'
 import { NOW_ISO, type FixtureCtx, type Handler, type Json } from './fx-util'
 import { dashboardData, handlePeople } from './fx-people'
 import { handleCatalog } from './fx-catalog'
@@ -37,6 +37,12 @@ export const api = axios.create({ adapter: async (config) => {
   fixtureCalls.push(ctx)
   if (harnessFailProfile && method === 'put' && path === '/profile/me') {
     throw new AxiosError('Synthetic failure', 'FIXTURE', config, undefined, { ...(envelope(config, null) as object), status: 500, data: { message: 'Synthetic failure', statusCode: 500 } } as never)
+  }
+  if (method === 'get' && path === '/admin/clients') {
+    if (harnessClientsDelay > 0) await new Promise((resolve) => setTimeout(resolve, harnessClientsDelay))
+    if (harnessClientsFail) {
+      throw new AxiosError('Synthetic failure', 'FIXTURE', config, undefined, { ...(envelope(config, null) as object), status: 500, data: { message: 'Synthetic failure', statusCode: 500 } } as never)
+    }
   }
   if (method !== 'get') return envelope(config, { message: 'ok (fixture)', success: true }) as never
   for (const handler of handlers) {
