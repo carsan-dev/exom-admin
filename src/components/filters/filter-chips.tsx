@@ -29,7 +29,7 @@ export function FilterChips({ chips, activeCount, onClear }: FilterChipsProps) {
             className="grid size-6 place-items-center text-muted-foreground transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-focus"
             aria-label={`Quitar filtro ${chip.label}`}
           >
-            <X className="h-3 w-3" />
+            <X aria-hidden="true" className="h-3 w-3" />
           </button>
         </Badge>
       ))}

@@ -91,7 +91,7 @@ export function AssignmentPreviewDialog({
                 <div className="border border-border-strong bg-lime-soft p-5">
                   <div className="flex items-start gap-3">
                     <div className="text-accent-text">
-                      <PauseCircle className="h-5 w-5" />
+                      <PauseCircle aria-hidden="true" className="h-5 w-5" />
                     </div>
                     <div className="space-y-1">
                       <p className="text-lg font-semibold text-foreground">Día de descanso</p>
@@ -107,7 +107,7 @@ export function AssignmentPreviewDialog({
                     <div className="border border-border bg-card p-5">
                       <div className="flex items-start gap-3">
                         <div className="text-status-info">
-                          <Dumbbell className="h-5 w-5" />
+                          <Dumbbell aria-hidden="true" className="h-5 w-5" />
                         </div>
                         <div>
                           <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Entrenamiento</p>
@@ -159,7 +159,7 @@ export function AssignmentPreviewDialog({
                     <div className="border border-border bg-card p-5">
                       <div className="flex items-start gap-3">
                         <div className="text-status-success">
-                          <Apple className="h-5 w-5" />
+                          <Apple aria-hidden="true" className="h-5 w-5" />
                         </div>
                         <div>
                           <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Plan nutricional</p>

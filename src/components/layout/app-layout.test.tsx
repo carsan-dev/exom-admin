@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { AppLayout } from './app-layout'
+import { VersionUpdateBanner } from './version-update-banner'
 import { SIDEBAR_STORAGE_KEY } from './sidebar-state'
 
 vi.mock('@/hooks/use-auth', () => ({
@@ -17,6 +18,10 @@ vi.mock('@/features/approval-requests/api', () => ({
 
 vi.mock('./use-pending-counts', () => ({
   usePendingCounts: () => ({ feedback: null, recaps: null }),
+}))
+
+vi.mock('@/hooks/use-version-checker', () => ({
+  useVersionChecker: () => ({ isUpdateAvailable: true }),
 }))
 
 vi.mock('./header', () => ({
@@ -159,6 +164,31 @@ describe('AppLayout responsive', () => {
     // lg:p-6 anularía md:pb-28 en lg: la reserva se repite con la variante lg (RDS-F5-A11Y-01).
     expect(main).toHaveClass('lg:p-6', 'lg:pb-28')
     expect(main).not.toHaveClass(`pb-[${bar}]`, `sm:pb-[${bar}]`, 'md:pb-5', 'pb-24')
+  })
+
+  it('con el aviso de versión montado, main reserva su alto además de la barra y «Volver arriba» (RDS-F5-A11Y-04)', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <AppLayout />
+        <VersionUpdateBanner />
+      </MemoryRouter>,
+    )
+    expect(container.querySelector('[data-version-banner]')).not.toBeNull()
+    const main = container.querySelector('main')
+    if (!main) throw new Error('main no encontrado')
+    const withBanner = 'calc(56px+env(safe-area-inset-bottom,0px)+192px)'
+    expect(main).toHaveClass(
+      `[body:has([data-version-banner])_&]:pb-[${withBanner}]`,
+      'md:[body:has([data-version-banner])_&]:pb-40',
+      'lg:[body:has([data-version-banner])_&]:scroll-pb-40',
+    )
+
+    main.scrollTop = 400
+    fireEvent.scroll(main)
+    expect(main).toHaveClass(
+      `[body:has([data-version-banner])_&]:pb-[${withBanner}]`,
+      'md:[body:has([data-version-banner])_&]:pb-40',
+    )
   })
 })
 

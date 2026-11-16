@@ -459,7 +459,7 @@ function ResultsView({ query, role, variant, screens, actions, clients, isEmpty,
               aria-hidden="true"
               className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'pointer-events-none ml-auto h-8 px-2.5 text-[13px]')}
             >
-              <RotateCw />
+              <RotateCw aria-hidden="true" />
               Reintentar
             </span>
           </CommandItem>

@@ -34,7 +34,7 @@ export function TrainingFormGeneralFields({
         control={form.control}
         name="name"
         render={({ field }) => (
-          <FormItem>
+          <FormItem required>
             <FormLabel>Nombre</FormLabel>
             <FormControl>
               <Input placeholder="Ej. Full Body Fuerza + Cardio" {...field} />
@@ -66,7 +66,7 @@ export function TrainingFormGeneralFields({
           control={form.control}
           name="level"
           render={({ field }) => (
-            <FormItem>
+            <FormItem required>
               <FormLabel>Nivel</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>

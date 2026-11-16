@@ -111,7 +111,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
               className="text-status-error focus:text-status-error"
               onClick={() => logout()}
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut aria-hidden="true" className="mr-2 h-4 w-4" />
               Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuContent>

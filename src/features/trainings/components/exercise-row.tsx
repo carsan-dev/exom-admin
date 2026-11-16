@@ -49,7 +49,7 @@ export function ExerciseRow({
             disabled={index === 0}
             aria-label={`Subir ${exercise?.name ?? 'ejercicio'}`}
           >
-            <ChevronUp className="h-4 w-4" />
+            <ChevronUp aria-hidden="true" className="h-4 w-4" />
           </Button>
           <Button
             type="button"
@@ -60,7 +60,7 @@ export function ExerciseRow({
             disabled={index === count - 1}
             aria-label={`Bajar ${exercise?.name ?? 'ejercicio'}`}
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown aria-hidden="true" className="h-4 w-4" />
           </Button>
         </div>
 
@@ -92,7 +92,7 @@ export function ExerciseRow({
           onClick={onRemove}
           aria-label={`Quitar ${exercise?.name ?? 'ejercicio'}`}
         >
-          <X className="h-4 w-4" />
+          <X aria-hidden="true" className="h-4 w-4" />
         </Button>
       </div>
 

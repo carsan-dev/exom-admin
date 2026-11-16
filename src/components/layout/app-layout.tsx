@@ -102,6 +102,14 @@ export function AppLayout() {
                 showScrollTop
                   ? 'pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] sm:pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] md:pb-28 lg:pb-28'
                   : null,
+                // Aviso de versión (RDS-F5-A11Y-04), alto según su marcado: borde 2 + p-3 24 + texto
+                // text-sm en 2 líneas 40 + gap-3 12 + botón sm 36 ≈ 114 px apilado (< sm; hasta ~134 con
+                // 3 líneas a 320 px) y ≈ 62 px en fila (md+). Por debajo de md va 12 px sobre la barra
+                // inferior y «Volver arriba» sube a +132..176 px: se reservan 192 px sobre la barra, como
+                // el scroll-padding-bottom de `html` en index.css. En md+ va a 12 px del borde (tapa hasta
+                // ~74 px) y «Volver arriba» sube a 96..144 px: 160 px (pb-40, igual que lg:scroll-pb-40).
+                // El selector con :has tiene más especificidad que pb-*/sm:pb-*/md:pb-*/lg:p-6/lg:pb-28.
+                '[body:has([data-version-banner])_&]:pb-[calc(56px+env(safe-area-inset-bottom,0px)+192px)] md:[body:has([data-version-banner])_&]:pb-40',
               )}
             >
               <Outlet />
@@ -119,7 +127,7 @@ export function AppLayout() {
                       aria-label="Volver arriba"
                       className="h-11 w-11 rounded-full border border-black/10 bg-primary text-primary-foreground shadow-xl shadow-black/25 sm:h-12 sm:w-12"
                     >
-                      <ArrowUp className="h-4 w-4" />
+                      <ArrowUp aria-hidden="true" className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="left">Volver arriba</TooltipContent>

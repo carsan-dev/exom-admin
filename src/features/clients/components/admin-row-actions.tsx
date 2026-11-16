@@ -27,12 +27,12 @@ export function AdminRowActions({
   return (
     <div className={cn('flex flex-wrap gap-2', className)}>
       <Button variant="outline" size="sm" className="max-md:h-11" onClick={() => onEdit(admin)}>
-        <Pencil className="h-4 w-4" />
+        <Pencil aria-hidden="true" className="h-4 w-4" />
         Editar
       </Button>
       {admin.is_locked && (
         <Button variant="outline" size="sm" className="max-md:h-11" onClick={() => onUnlock(admin)}>
-          <Unlock className="h-4 w-4" />
+          <Unlock aria-hidden="true" className="h-4 w-4" />
           Desbloquear
         </Button>
       )}
@@ -43,7 +43,7 @@ export function AdminRowActions({
         onClick={() => onChangeRole(admin)}
         disabled={isOwnAccount}
       >
-        <ShieldCheck className="h-4 w-4" />
+        <ShieldCheck aria-hidden="true" className="h-4 w-4" />
         Cambiar rol
       </Button>
       <Button
@@ -53,7 +53,7 @@ export function AdminRowActions({
         onClick={() => onToggleStatus(admin)}
         disabled={isOwnAccount}
       >
-        {admin.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+        {admin.is_active ? <UserX aria-hidden="true" className="h-4 w-4" /> : <UserCheck aria-hidden="true" className="h-4 w-4" />}
         {admin.is_active ? 'Dar de baja' : 'Reactivar'}
       </Button>
     </div>

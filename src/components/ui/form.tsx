@@ -52,12 +52,13 @@ const useFormField = () => {
 
   const fieldState = getFieldState(fieldContext.name, formState)
 
-  const { id, hasDescription, hasMessage } = itemContext
+  const { id, hasDescription, hasMessage, required } = itemContext
 
   return {
     id,
     hasDescription,
     hasMessage,
+    required,
     name: fieldContext.name,
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
@@ -71,6 +72,8 @@ type FormItemContextValue = {
   /** Si FormDescription / FormMessage están montados: FormControl solo referencia ids existentes. */
   hasDescription: boolean
   hasMessage: boolean
+  /** Campo obligatorio según el esquema: asterisco en FormLabel y aria-required en FormControl (RDS-F5-A11Y-15). */
+  required: boolean
   setHasDescription: (mounted: boolean) => void
   setHasMessage: (mounted: boolean) => void
 }
@@ -79,14 +82,14 @@ const FormItemContext = React.createContext<FormItemContextValue | null>(null)
 
 const FormItem = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & { required?: boolean }
+>(({ className, required = false, ...props }, ref) => {
   const id = React.useId()
   const [hasDescription, setHasDescription] = React.useState(false)
   const [hasMessage, setHasMessage] = React.useState(false)
   const value = React.useMemo(
-    () => ({ id, hasDescription, hasMessage, setHasDescription, setHasMessage }),
-    [id, hasDescription, hasMessage]
+    () => ({ id, hasDescription, hasMessage, required, setHasDescription, setHasMessage }),
+    [id, hasDescription, hasMessage, required]
   )
 
   return (
@@ -101,13 +104,14 @@ const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField()
+  const { error, formItemId, required } = useFormField()
 
   return (
     <Label
       ref={ref}
       className={cn(error && "text-destructive", className)}
       htmlFor={formItemId}
+      required={required}
       {...props}
     />
   )
@@ -118,8 +122,15 @@ const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   React.ComponentPropsWithoutRef<typeof Slot>
 >(({ ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId, hasDescription, hasMessage } =
-    useFormField()
+  const {
+    error,
+    formItemId,
+    formDescriptionId,
+    formMessageId,
+    hasDescription,
+    hasMessage,
+    required,
+  } = useFormField()
   // Solo ids presentes en el DOM: un idref colgante es un error de ARIA (RDS-F5-A11Y-14).
   const describedBy =
     [hasDescription ? formDescriptionId : null, error && hasMessage ? formMessageId : null]
@@ -132,6 +143,7 @@ const FormControl = React.forwardRef<
       id={formItemId}
       aria-describedby={describedBy}
       aria-invalid={!!error}
+      aria-required={required || undefined}
       {...props}
     />
   )

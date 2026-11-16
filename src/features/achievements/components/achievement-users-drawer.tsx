@@ -183,7 +183,7 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
         ) : detailQuery.isError ? (
           <div className="mt-6 flex flex-col items-center gap-4 rounded-xl border border-status-error/20 p-8 text-center">
             <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-              <AlertTriangle className="h-8 w-8" />
+              <AlertTriangle aria-hidden="true" className="h-8 w-8" />
             </div>
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-foreground">No se pudo cargar el detalle</h3>

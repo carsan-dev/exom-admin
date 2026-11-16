@@ -184,7 +184,7 @@ function TrainingMultiSelect({
             }}
             className="flex items-center gap-2 border border-border px-3 py-2"
           >
-            <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" />
+            <GripVertical aria-hidden="true" className="h-4 w-4 cursor-grab text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground">{position + 1}</span>
             <span className="min-w-0 flex-1 truncate text-sm font-medium">{training.name}</span>
             {training.is_active === false && (
@@ -206,8 +206,8 @@ function TrainingMultiSelect({
                 <SelectItem value="NEVER">Nunca</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="button" variant="ghost" size="icon" disabled={disabled} onClick={() => onChange(value.filter((id) => id !== training.id))}>
-              <X className="h-4 w-4" />
+            <Button type="button" variant="ghost" size="icon" disabled={disabled} onClick={() => onChange(value.filter((id) => id !== training.id))} aria-label={`Quitar ${training.name}`}>
+              <X aria-hidden="true" className="h-4 w-4" />
             </Button>
           </div>
         ))}
@@ -459,7 +459,7 @@ export function AssignmentEditorDialog({
                 <div className="space-y-3 border border-dashed border-border-strong p-4">
                   <div className="flex items-start gap-3">
                     <div className="text-accent-text">
-                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTriangle aria-hidden="true" className="h-4 w-4" />
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-foreground">
@@ -489,13 +489,13 @@ export function AssignmentEditorDialog({
                   <div className="flex flex-wrap gap-2">
                     {!canUseTrainingCatalog && (
                       <Button type="button" variant="outline" onClick={onRetryTrainings}>
-                        <RefreshCw className="h-4 w-4" />
+                        <RefreshCw aria-hidden="true" className="h-4 w-4" />
                         Reintentar entrenos
                       </Button>
                     )}
                     {!canUseDietCatalog && (
                       <Button type="button" variant="outline" onClick={onRetryDiets}>
-                        <RefreshCw className="h-4 w-4" />
+                        <RefreshCw aria-hidden="true" className="h-4 w-4" />
                         Reintentar dietas
                       </Button>
                     )}
@@ -843,7 +843,7 @@ export function AssignmentEditorDialog({
                     }
                   }}
                 >
-                  <Eye className="h-4 w-4" />
+                  <Eye aria-hidden="true" className="h-4 w-4" />
                   Vista previa
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>

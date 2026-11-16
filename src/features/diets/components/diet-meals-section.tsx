@@ -78,7 +78,7 @@ export function DietMealsSection({
       </div>
 
       <Button type="button" variant="outline" size="sm" className="w-full max-md:h-11" onClick={onAddMeal}>
-        <Plus className="h-4 w-4" />
+        <Plus aria-hidden="true" className="h-4 w-4" />
         Agregar comida
       </Button>
     </div>

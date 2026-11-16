@@ -102,7 +102,7 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                   {progress.exercises_completed.map((ex, i) => (
                     <li key={i} className="space-y-1 text-sm">
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-status-success shrink-0" />
+                        <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 text-status-success shrink-0" />
                         <span title={ex.exercise_id}>
                           {ex.exercise_name ?? 'Ejercicio eliminado'}
                         </span>
@@ -145,7 +145,7 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                 <ul className="space-y-1 pl-6">
                   {progress.meals_completed_details.map((meal, i) => (
                     <li key={i} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-status-success shrink-0" />
+                      <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 text-status-success shrink-0" />
                       <span title={meal.meal_id}>{meal.meal_name ?? 'Comida eliminada'}</span>
                     </li>
                   ))}
@@ -160,7 +160,7 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
             {progress.notes && (
               <div className="space-y-3 border-t border-border pt-4">
                 <div className="flex items-center gap-2">
-                  <StickyNote className="h-4 w-4 text-foreground-muted" />
+                  <StickyNote aria-hidden="true" className="h-4 w-4 text-foreground-muted" />
                   <span className="text-sm font-semibold text-foreground">Nota del cliente</span>
                 </div>
                 <p className="whitespace-pre-wrap break-words border-l-2 border-border-strong pl-3 text-sm text-foreground">{progress.notes}</p>
@@ -170,7 +170,7 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                     htmlFor="training-note-reply"
                     className="flex items-center gap-2 text-sm font-semibold text-foreground"
                   >
-                    <MessageSquareReply className="h-4 w-4 text-accent-text" />
+                    <MessageSquareReply aria-hidden="true" className="h-4 w-4 text-accent-text" />
                     Respuesta para el cliente
                   </label>
                   <textarea

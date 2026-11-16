@@ -163,12 +163,12 @@ export function TemplateEditorForm({
           onClick={handleResetOrDelete}
           disabled={isBusy || (selectedTemplate.is_system && !selectedTemplate.customized)}
         >
-          {selectedTemplate.is_system ? <RotateCcw className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+          {selectedTemplate.is_system ? <RotateCcw aria-hidden="true" className="h-4 w-4" /> : <Trash2 aria-hidden="true" className="h-4 w-4" />}
           {selectedTemplate.is_system ? 'Restaurar defecto' : 'Eliminar plantilla'}
         </Button>
 
         <Button type="submit" disabled={isBusy || !hasChanges}>
-          <Save className="h-4 w-4" />
+          <Save aria-hidden="true" className="h-4 w-4" />
           {isSaving ? 'Guardando...' : 'Guardar cambios'}
         </Button>
       </div>

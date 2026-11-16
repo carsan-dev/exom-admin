@@ -174,10 +174,11 @@ interface RecipientsMultiSelectProps {
   disabled?: boolean
   isLoading?: boolean
   onChange: (ids: string[]) => void
-  // Reenviados por FormControl: etiqueta (`id`), mensaje de error y estado inválido del disparador.
+  // Reenviados por FormControl: etiqueta (`id`), mensaje de error, estado inválido y obligatorio del disparador.
   id?: string
   'aria-describedby'?: string
   'aria-invalid'?: boolean
+  'aria-required'?: boolean
 }
 
 function RecipientsMultiSelect({
@@ -189,6 +190,7 @@ function RecipientsMultiSelect({
   id,
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
 }: RecipientsMultiSelectProps) {
   const [open, setOpen] = useState(false)
 
@@ -229,11 +231,12 @@ function RecipientsMultiSelect({
             aria-expanded={open}
             aria-describedby={ariaDescribedBy}
             aria-invalid={ariaInvalid || undefined}
+            aria-required={ariaRequired || undefined}
             className="w-full justify-between"
             disabled={disabled}
           >
             <span className="truncate text-left">{label}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <ChevronsUpDown aria-hidden="true" className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
 
@@ -254,7 +257,7 @@ function RecipientsMultiSelect({
                       value={`${displayName} ${client.email}`}
                       onSelect={() => toggleClient(client.id)}
                     >
-                      <Check className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
+                      <Check aria-hidden="true" className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
                       <Avatar className="mr-2 h-6 w-6">
                         <AvatarImage src={client.profile?.avatar_url ?? undefined} alt={displayName} />
                         <AvatarFallback className="text-[10px]">{getInitials(displayName)}</AvatarFallback>
@@ -289,8 +292,9 @@ function RecipientsMultiSelect({
                   className="rounded-full p-0.5 hover:bg-brand-soft/20"
                   onClick={() => removeClient(client.id)}
                   disabled={disabled}
+                  aria-label={`Quitar ${displayName}`}
                 >
-                  <X className="h-3 w-3" />
+                  <X aria-hidden="true" className="h-3 w-3" />
                 </button>
               </Badge>
             )
@@ -490,7 +494,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
 
         {clientsLoadError ? (
           <div className="flex items-start gap-3 rounded-xl border border-status-error/30 bg-status-error/5 p-4 text-sm text-status-error">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="space-y-1">
               <p className="font-medium">No se pudo cargar la cartera de clientes</p>
               <p>{clientsLoadError}</p>
@@ -538,7 +542,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
               control={form.control}
               name="user_ids"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required={!sendToAll}>
                   <FormLabel>Destinatarios</FormLabel>
                   <FormControl>
                     <RecipientsMultiSelect
@@ -566,7 +570,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                 control={form.control}
                 name="title"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Título</FormLabel>
                     <FormControl>
                       <input
@@ -585,7 +589,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                 control={form.control}
                 name="type"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Tipo / ruta</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
@@ -611,7 +615,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
               control={form.control}
               name="body"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Cuerpo</FormLabel>
                   <FormControl>
                     <textarea
@@ -634,7 +638,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                 Cancelar
               </Button>
               <Button type="submit" disabled={isSubmitting || isClientsUnavailable}>
-                <SendHorizonal className="h-4 w-4" />
+                <SendHorizonal aria-hidden="true" className="h-4 w-4" />
                 {isSubmitting ? 'Enviando...' : 'Enviar notificación'}
               </Button>
             </DialogFooter>

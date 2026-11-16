@@ -458,7 +458,7 @@ export function AssignmentsPage() {
   if (clients.length === 0) {
     return (
       <AssignmentsEmptyState
-        icon={<Users className="h-8 w-8" />}
+        icon={<Users aria-hidden="true" className="h-8 w-8" />}
         title={isSuperAdmin ? 'Todavía no hay clientes registrados' : 'Todavía no tienes clientes asignados'}
         description={
           isSuperAdmin
@@ -504,7 +504,7 @@ export function AssignmentsPage() {
 
       {!selectedClientId ? (
         <AssignmentsEmptyState
-          icon={<CalendarDays className="h-8 w-8" />}
+          icon={<CalendarDays aria-hidden="true" className="h-8 w-8" />}
           title="Selecciona un cliente para empezar"
           description="Elige un cliente desde la barra superior para revisar su calendario, seleccionar varios días y planificar entrenamientos, dietas o descansos."
           actionLabel="Cargar primer cliente"

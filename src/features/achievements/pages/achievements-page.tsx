@@ -129,7 +129,7 @@ export function AchievementsPage() {
         description="Crea logros para premiar hitos medibles, define su meta de desbloqueo y mantén separada esta gestión del objetivo principal del cliente."
         actions={
           <Button onClick={() => setCreateOpen(true)} className="max-md:h-11">
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Nuevo logro
           </Button>
         }

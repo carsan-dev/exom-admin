@@ -119,7 +119,7 @@ export function ChallengeFormDialog({ open, onOpenChange, challenge, onSubmitted
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Título</FormLabel>
                   <FormControl>
                     <Input placeholder="Completa 4 entrenos esta semana" {...field} />
@@ -133,7 +133,7 @@ export function ChallengeFormDialog({ open, onOpenChange, challenge, onSubmitted
               control={form.control}
               name="description"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
                     <textarea
@@ -153,7 +153,7 @@ export function ChallengeFormDialog({ open, onOpenChange, challenge, onSubmitted
                 control={form.control}
                 name="type"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Tipo</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
@@ -268,7 +268,7 @@ export function ChallengeFormDialog({ open, onOpenChange, challenge, onSubmitted
                 control={form.control}
                 name="unit"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Unidad</FormLabel>
                     <FormControl>
                       <Input placeholder="días, comidas, registros..." {...field} />
@@ -284,7 +284,7 @@ export function ChallengeFormDialog({ open, onOpenChange, challenge, onSubmitted
                 control={form.control}
                 name="rule_key"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Regla automática</FormLabel>
                     <Select
                       value={field.value ?? '__none__'}

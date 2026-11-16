@@ -91,7 +91,7 @@ export function DietTagsField({
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline" size="sm" className="sm:w-auto max-md:h-11">
               Etiquetas existentes
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown aria-hidden="true" className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -103,7 +103,7 @@ export function DietTagsField({
             <DropdownMenuSeparator />
             {tagsQuery.isLoading ? (
               <div className="flex items-center gap-2 px-2 py-2 text-xs text-muted-foreground">
-                <LoaderCircle className="h-3 w-3 animate-spin" />
+                <LoaderCircle aria-hidden="true" className="h-3 w-3 animate-spin" />
                 Cargando etiquetas...
               </div>
             ) : tagsQuery.isError ? (
@@ -140,6 +140,7 @@ export function DietTagsField({
               }
             }}
             placeholder="Nueva etiqueta interna (Enter)"
+            aria-label="Nueva etiqueta interna"
             className="h-8 text-sm"
           />
           <Button

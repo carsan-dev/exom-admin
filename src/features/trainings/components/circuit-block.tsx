@@ -72,7 +72,7 @@ export function CircuitBlock({
             disabled={index === 0}
             aria-label={`Subir ${item.name || 'circuito'}`}
           >
-            <ChevronUp className="h-4 w-4" />
+            <ChevronUp aria-hidden="true" className="h-4 w-4" />
           </Button>
           <Button
             type="button"
@@ -83,7 +83,7 @@ export function CircuitBlock({
             disabled={index === count - 1}
             aria-label={`Bajar ${item.name || 'circuito'}`}
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown aria-hidden="true" className="h-4 w-4" />
           </Button>
         </div>
         <Repeat className="mt-2 h-4 w-4 flex-none text-accent-text" aria-hidden="true" />
@@ -101,7 +101,7 @@ export function CircuitBlock({
           onClick={onRemove}
           aria-label={`Quitar ${item.name || "circuito"}`}
         >
-          <X className="h-4 w-4" />
+          <X aria-hidden="true" className="h-4 w-4" />
         </Button>
       </div>
 
@@ -163,7 +163,7 @@ export function CircuitBlock({
           className="my-2 w-full max-md:h-11"
           onClick={onAddExercise}
         >
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
           Agregar ejercicio al circuito
         </Button>
       </div>

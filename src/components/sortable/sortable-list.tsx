@@ -194,7 +194,7 @@ export function SortableHandle({ label }: { label: string }) {
       {...listeners}
       aria-label={label}
     >
-      <GripVertical className="h-4 w-4" />
+      <GripVertical aria-hidden="true" className="h-4 w-4" />
     </Button>
   )
 }

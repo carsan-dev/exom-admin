@@ -213,7 +213,7 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
 
               {request.resource_deleted ? (
                 <div className="flex items-start gap-3 rounded-xl border border-status-warning/30 bg-status-warning-soft p-4 text-sm text-status-warning">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
                   <p>Este recurso ya no existe en el estado actual del sistema.</p>
                 </div>
               ) : null}

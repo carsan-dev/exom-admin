@@ -5,6 +5,7 @@ import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RequiredMark } from '@/components/ui/label'
 import { AuthBrandPanel } from '../components/auth-brand-panel'
 import { useDocumentTitle } from '@/components/layout/use-document-title'
 
@@ -78,6 +79,7 @@ export function OnboardingPage() {
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground" htmlFor="firstName">
                 Nombre
+                <RequiredMark />
               </label>
               <Input
                 id="firstName"
@@ -100,6 +102,7 @@ export function OnboardingPage() {
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground" htmlFor="lastName">
                 Apellidos
+                <RequiredMark />
               </label>
               <Input
                 id="lastName"

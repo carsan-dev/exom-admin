@@ -99,7 +99,7 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
             title="Aún no hay métricas corporales registradas para este cliente."
             action={
               <Button size="sm" onClick={openCreateDialog}>
-                <Plus className="h-4 w-4" />
+                <Plus aria-hidden="true" className="h-4 w-4" />
                 Añadir métricas
               </Button>
             }
@@ -153,7 +153,7 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
             <p className="mt-1 text-[13px] leading-5 text-foreground-secondary">Historial reciente de composición corporal y medidas</p>
           </div>
           <Button size="sm" onClick={openCreateDialog}>
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Añadir métricas
           </Button>
         </div>
@@ -211,7 +211,7 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
                       aria-label={`Editar métricas del ${tableDateFormatter.format(new Date(metric.date))}`}
                       onClick={() => openEditDialog(metric)}
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil aria-hidden="true" className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>

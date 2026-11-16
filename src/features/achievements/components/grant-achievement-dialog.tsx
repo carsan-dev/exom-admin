@@ -129,7 +129,7 @@ export function GrantAchievementDialog({ achievement, open, onOpenChange, onGran
         ) : clientsQuery.isError ? (
           <div className="flex flex-col items-center gap-4 rounded-xl border border-status-error/20 p-8 text-center">
             <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-              <AlertTriangle className="h-8 w-8" />
+              <AlertTriangle aria-hidden="true" className="h-8 w-8" />
             </div>
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-foreground">No se pudieron cargar los clientes</h3>
@@ -142,7 +142,7 @@ export function GrantAchievementDialog({ achievement, open, onOpenChange, onGran
         ) : clients.length === 0 ? (
           <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border/70 p-8 text-center">
             <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
-              <Users className="h-8 w-8" />
+              <Users aria-hidden="true" className="h-8 w-8" />
             </div>
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-foreground">No hay clientes visibles</h3>
@@ -154,7 +154,7 @@ export function GrantAchievementDialog({ achievement, open, onOpenChange, onGran
         ) : (
           <div className="space-y-4">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -191,7 +191,7 @@ export function GrantAchievementDialog({ achievement, open, onOpenChange, onGran
                         <Button variant={isSelected ? 'outline' : 'secondary'} onClick={() => toggleClient(client.id)}>
                           {isSelected ? (
                             <>
-                              <Check className="h-4 w-4" />
+                              <Check aria-hidden="true" className="h-4 w-4" />
                               Seleccionado
                             </>
                           ) : (

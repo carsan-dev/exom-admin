@@ -173,7 +173,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
           className="h-7 w-full text-xs max-md:h-11"
           onClick={() => setPickerOpen(true)}
         >
-          <Plus className="h-3 w-3" />
+          <Plus aria-hidden="true" className="h-3 w-3" />
           Agregar ingrediente
         </Button>
       )}

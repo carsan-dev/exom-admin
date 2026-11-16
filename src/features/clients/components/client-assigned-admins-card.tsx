@@ -70,7 +70,7 @@ export function ClientAssignedAdminsCard({ clientId, onManage }: ClientAssignedA
           </div>
 
           <Button type="button" variant="outline" onClick={() => void assignmentsQuery.refetch()}>
-            <RefreshCcw className="h-4 w-4" />
+            <RefreshCcw aria-hidden="true" className="h-4 w-4" />
             Reintentar
           </Button>
         </div>
@@ -93,7 +93,7 @@ export function ClientAssignedAdminsCard({ clientId, onManage }: ClientAssignedA
             {activeAdmins.length} admin{activeAdmins.length === 1 ? '' : 's'} activo{activeAdmins.length === 1 ? '' : 's'}
           </StatusChip>
           <Button type="button" variant="outline" onClick={onManage}>
-            <Users className="h-4 w-4" />
+            <Users aria-hidden="true" className="h-4 w-4" />
             Gestionar admins
           </Button>
         </div>
@@ -102,7 +102,7 @@ export function ClientAssignedAdminsCard({ clientId, onManage }: ClientAssignedA
       {activeAdmins.length === 0 ? (
         <div className="border-t border-border">
           <EmptyState
-            icon={<UserPlus />}
+            icon={<UserPlus aria-hidden="true" />}
             title="Sin admins asignados"
             description="Este cliente está actualmente sin cartera asignada. Puedes dejarlo así si está pausado o volver a asignarlo cuando retome actividad."
           />

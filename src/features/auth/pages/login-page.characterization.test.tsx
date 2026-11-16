@@ -267,3 +267,22 @@ describe('LoginPage (caracterización)', () => {
     expect(await screen.findByText('Pantalla dashboard')).toBeInTheDocument()
   })
 })
+
+describe('LoginPage: campos obligatorios (RDS-F5-A11Y-15)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    ctx.state = { error: null, isLoading: false, isAuthenticated: false }
+  })
+
+  it('email y contraseña son obligatorios con marca visible oculta a lectores', () => {
+    renderPage()
+
+    const email = screen.getByRole('textbox', { name: 'Email' })
+    const password = screen.getByLabelText('Contraseña')
+    expect(email).toBeRequired()
+    expect(password).toBeRequired()
+    for (const label of ['Email', 'Contraseña']) {
+      expect(screen.getByText(label).querySelector('[data-required-mark]')).toHaveAttribute('aria-hidden', 'true')
+    }
+  })
+})

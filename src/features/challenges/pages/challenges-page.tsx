@@ -178,7 +178,7 @@ export function ChallengesPage() {
         description="Crea objetivos principales y retos semanales, asígnalos por cliente o globalmente y revisa el progreso visible desde el panel admin."
         actions={
           <Button onClick={() => setCreateOpen(true)} className="max-md:h-11">
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Nuevo reto
           </Button>
         }

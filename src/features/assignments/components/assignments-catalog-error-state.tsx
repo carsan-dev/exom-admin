@@ -60,13 +60,13 @@ export function AssignmentsCatalogErrorState({
         <div className="flex flex-wrap gap-2">
           {(availability.trainings.is_error || availability.trainings.is_loading) && (
             <Button type="button" variant="outline" onClick={onRetryTrainings}>
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw aria-hidden="true" className="h-4 w-4" />
               Reintentar entrenos
             </Button>
           )}
           {(availability.diets.is_error || availability.diets.is_loading) && (
             <Button type="button" variant="outline" onClick={onRetryDiets}>
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw aria-hidden="true" className="h-4 w-4" />
               Reintentar dietas
             </Button>
           )}

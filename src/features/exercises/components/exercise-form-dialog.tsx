@@ -205,7 +205,7 @@ function MultiSelectField({
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline" size="sm" className="flex-none max-md:h-11">
               Opciones
-              <ChevronDown className="ml-1 h-3 w-3" />
+              <ChevronDown aria-hidden="true" className="ml-1 h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="max-h-60 overflow-y-auto w-48">
@@ -226,6 +226,7 @@ function MultiSelectField({
           onChange={(e) => setCustomInput(e.target.value)}
           onKeyDown={handleCustomKeyDown}
           placeholder="Otro (Enter para añadir)"
+          aria-label={`Otro valor para ${label.toLocaleLowerCase('es')}`}
           className="h-8 text-sm"
         />
         <Button
@@ -361,7 +362,7 @@ export function ExerciseFormDialog({
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
                       <Input placeholder="Press de banca" {...field} />
@@ -375,7 +376,7 @@ export function ExerciseFormDialog({
                 control={form.control}
                 name="level"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nivel</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>

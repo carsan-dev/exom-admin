@@ -149,7 +149,7 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Nombre</FormLabel>
                   <FormControl>
                     <Input placeholder="Primer entreno completado" {...field} />
@@ -163,7 +163,7 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
               control={form.control}
               name="description"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
                     <textarea
@@ -197,7 +197,7 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
                 control={form.control}
                 name="criteria_type"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Regla</FormLabel>
                     <FormDescription>
                       Define qué se mide para desbloquear el logro. `CUSTOM` queda reservado para otorgación manual y no reemplaza el objetivo principal del cliente.
@@ -225,7 +225,7 @@ export function AchievementFormDialog({ open, onOpenChange, achievement, onSubmi
                 control={form.control}
                 name="criteria_value"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Meta</FormLabel>
                     <FormDescription>
                       {getAchievementGoalHelp(criteriaType)}

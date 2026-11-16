@@ -25,7 +25,7 @@ export function ResourceApprovalIndicator({ pendingActions, className }: Resourc
           variant="outline"
           className={cn('gap-1 border-status-warning/30 bg-status-warning-soft text-status-warning', className)}
         >
-          <AlertTriangle className="h-3 w-3" />
+          <AlertTriangle aria-hidden="true" className="h-3 w-3" />
           Pendiente
         </Badge>
       </TooltipTrigger>

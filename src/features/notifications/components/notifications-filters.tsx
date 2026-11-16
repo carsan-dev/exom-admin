@@ -46,11 +46,12 @@ export function NotificationsFilters({
       </div>
 
       <div className="relative min-w-0 md:min-w-[260px] md:max-w-md md:flex-1">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Buscar por título o cuerpo"
+          aria-label="Buscar notificaciones por título o cuerpo"
           className="pl-9"
         />
       </div>

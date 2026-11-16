@@ -422,7 +422,7 @@ export function NotificationTemplatesPage() {
         description="Edita automáticas existentes y crea plantillas manuales para envíos puntuales."
         actions={
           <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Nueva plantilla
           </Button>
         }

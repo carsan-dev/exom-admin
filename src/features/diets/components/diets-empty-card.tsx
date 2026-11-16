@@ -10,12 +10,12 @@ export function DietsEmptyCard({ onCreate }: DietsEmptyCardProps) {
   return (
     <EmptyState
       className="border-y border-border"
-      icon={<UtensilsCrossed />}
+      icon={<UtensilsCrossed aria-hidden="true" />}
       title="Aún no hay dietas"
       description="Crea la primera dieta para empezar a asignarla a tus clientes."
       action={
         <Button onClick={onCreate}>
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
           Crear primera dieta
         </Button>
       }

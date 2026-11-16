@@ -48,7 +48,7 @@ export function CircuitExerciseRow({
             disabled={nestedIndex === 0}
             aria-label={`Subir ${exercise?.name ?? 'ejercicio'}`}
           >
-            <ChevronUp className="h-4 w-4" />
+            <ChevronUp aria-hidden="true" className="h-4 w-4" />
           </Button>
           <Button
             type="button"
@@ -59,7 +59,7 @@ export function CircuitExerciseRow({
             disabled={nestedIndex === count - 1}
             aria-label={`Bajar ${exercise?.name ?? 'ejercicio'}`}
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown aria-hidden="true" className="h-4 w-4" />
           </Button>
         </div>
         <span className="text-xs font-medium tabular-nums text-muted-foreground max-md:hidden">{nestedIndex + 1}</span>
@@ -74,7 +74,7 @@ export function CircuitExerciseRow({
           onClick={onRemove}
           aria-label={`Quitar ${exercise?.name ?? "ejercicio"}`}
         >
-          <X className="h-4 w-4" />
+          <X aria-hidden="true" className="h-4 w-4" />
         </Button>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

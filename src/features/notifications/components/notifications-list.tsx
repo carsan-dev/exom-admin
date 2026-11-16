@@ -70,7 +70,7 @@ export function NotificationsList({
     return (
       <EmptyState
         className="border-y border-border"
-        icon={<Bell />}
+        icon={<Bell aria-hidden="true" />}
         title={
           hasActiveFilters
             ? 'No hay notificaciones que coincidan con los filtros seleccionados'

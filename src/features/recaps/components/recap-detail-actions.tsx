@@ -14,7 +14,7 @@ export function RecapDetailBackLink({ backTo, backLabel }: RecapDetailBackLinkPr
   return (
     <Button variant="ghost" asChild>
       <Link to={backTo}>
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft aria-hidden="true" className="h-4 w-4" />
         {backLabel}
       </Link>
     </Button>
@@ -47,13 +47,13 @@ export function RecapDetailActions({
       <RecapPrintableSummary model={printModel} disabled={hasUnsavedChanges} />
       {!recap.archived_at && recap.status !== 'DRAFT' && (
         <Button onClick={onReview} disabled={!canSubmitReview}>
-          <CheckCircle2 className="h-4 w-4" />
+          <CheckCircle2 aria-hidden="true" className="h-4 w-4" />
           {reviewPending ? 'Guardando...' : reviewButtonLabel}
         </Button>
       )}
       {recap.status === 'REVIEWED' && !recap.archived_at && (
         <Button variant="outline" disabled={hasUnsavedChanges} onClick={onArchiveClick}>
-          <Archive className="h-4 w-4" />
+          <Archive aria-hidden="true" className="h-4 w-4" />
           Archivar recap
         </Button>
       )}

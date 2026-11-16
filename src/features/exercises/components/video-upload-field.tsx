@@ -207,7 +207,7 @@ export function VideoUploadField({
               disabled={disabled || isUploading}
               className="self-start sm:self-center"
             >
-              <X className="h-3 w-3" />
+              <X aria-hidden="true" className="h-3 w-3" />
               Quitar
             </Button>
           </div>
@@ -216,9 +216,9 @@ export function VideoUploadField({
         <div className="space-y-2 rounded-lg border border-border/60 bg-muted/50 p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             {phase !== 'uploading' ? (
-              <Loader2 className="h-4 w-4 animate-spin text-accent-text" />
+              <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin text-accent-text" />
             ) : (
-              <Play className="h-4 w-4 animate-pulse text-accent-text" />
+              <Play aria-hidden="true" className="h-4 w-4 animate-pulse text-accent-text" />
             )}
             <span>
               {phase === 'compressing'
@@ -245,7 +245,7 @@ export function VideoUploadField({
           disabled={disabled || directUploadFile.isPending || uploadFile.isPending}
           className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border/70 bg-muted/30 px-4 py-6 text-center transition-colors hover:border-brand-primary/50 hover:bg-brand-soft/5 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Upload className="h-8 w-8 text-muted-foreground" />
+          <Upload aria-hidden="true" className="h-8 w-8 text-muted-foreground" />
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">Seleccionar vídeo</p>
             <p className="text-xs text-muted-foreground">MP4, MOV o WebM · Máx. 1 GB. Directo hasta 100 MB.</p>

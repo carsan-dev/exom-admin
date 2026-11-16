@@ -90,7 +90,7 @@ export function AchievementsTable({
     return (
       <EmptyState
         className="border-y border-border"
-        icon={<Trophy />}
+        icon={<Trophy aria-hidden="true" />}
         title={hasActiveFilters ? 'Ningún logro coincide con los filtros' : 'Todavía no hay logros creados'}
         description={
           hasActiveFilters

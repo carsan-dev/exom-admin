@@ -12,7 +12,7 @@ export function PermissionsNotice() {
       />
       <EmptyState
         className="border-y border-border"
-        icon={<ShieldOff />}
+        icon={<ShieldOff aria-hidden="true" />}
         title="No tienes permisos para modificar plantillas."
         description="Puedes seguir usando las plantillas guardadas al enviar una notificación."
         action={

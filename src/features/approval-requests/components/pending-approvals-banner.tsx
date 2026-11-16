@@ -15,7 +15,7 @@ export function PendingApprovalsBanner() {
     <div className="flex flex-col gap-4 rounded-xl border border-status-warning/30 bg-status-warning-soft p-4 md:flex-row md:items-center md:justify-between">
       <div className="flex items-start gap-3">
         <div className="rounded-full bg-status-warning-soft p-2 text-status-warning">
-          <ShieldAlert className="h-5 w-5" />
+          <ShieldAlert aria-hidden="true" className="h-5 w-5" />
         </div>
         <div className="space-y-1">
           <p className="font-medium text-foreground">

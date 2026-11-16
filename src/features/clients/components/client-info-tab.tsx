@@ -43,7 +43,7 @@ export function ClientInfoTab({ profile, clientId }: ClientInfoTabProps) {
             title="Este cliente todavía no tiene datos de perfil ampliados."
             action={
               <Button size="sm" variant="outline" onClick={() => setEditProfileOpen(true)}>
-                <Pencil className="mr-2 h-4 w-4" />
+                <Pencil aria-hidden="true" className="mr-2 h-4 w-4" />
                 Añadir datos
               </Button>
             }
@@ -82,7 +82,7 @@ export function ClientInfoTab({ profile, clientId }: ClientInfoTabProps) {
             <p className="mt-1 text-[13px] leading-5 text-foreground-secondary">Motivación y foco actual del cliente</p>
           </div>
           <Button size="sm" variant="outline" onClick={() => setEditProfileOpen(true)}>
-            <Pencil className="mr-2 h-4 w-4" />
+            <Pencil aria-hidden="true" className="mr-2 h-4 w-4" />
             Editar datos
           </Button>
         </div>

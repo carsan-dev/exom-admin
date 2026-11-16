@@ -90,6 +90,7 @@ export function AccentColorField({
           value={value ?? ''}
           onChange={(event) => onChange(event.target.value || null)}
           placeholder="#C5E384"
+          aria-label="Color visual en hexadecimal"
         />
 
         <Button type="button" variant="outline" onClick={() => onChange(null)} disabled={!value}>

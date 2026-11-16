@@ -52,3 +52,18 @@ describe('CreateClientDialog', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 })
+
+describe('CreateClientDialog: campos obligatorios (RDS-F5-A11Y-15)', () => {
+  it('expone aria-required solo en los campos que exige el esquema', () => {
+    render(<CreateClientDialog open onOpenChange={vi.fn()} />)
+
+    expect(screen.getByRole('textbox', { name: 'Nombre' })).toBeRequired()
+    expect(screen.getByRole('textbox', { name: 'Apellido' })).toBeRequired()
+    expect(screen.getByRole('textbox', { name: 'Email' })).toBeRequired()
+    expect(screen.getByRole('combobox', { name: 'Método de contraseña' })).toBeRequired()
+    expect(screen.getByRole('textbox', { name: 'Objetivo principal' })).not.toBeRequired()
+    expect(screen.getByRole('combobox', { name: 'Nivel' })).not.toBeRequired()
+    expect(screen.getByText('Nombre').querySelector('[data-required-mark]')).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.getByText('Nivel').querySelector('[data-required-mark]')).toBeNull()
+  })
+})

@@ -110,7 +110,7 @@ export function BadgesField({
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline" size="sm" className="h-7 text-xs flex-none max-md:h-11">
               Opciones
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown aria-hidden="true" className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="max-h-60 w-48 overflow-y-auto">
@@ -135,6 +135,7 @@ export function BadgesField({
             }
           }}
           placeholder="Otro badge (Enter para añadir)"
+          aria-label="Otro badge nutricional"
           className="h-7 text-xs"
         />
         <Button

@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RequiredMark } from '@/components/ui/label'
 import { auth } from '@/lib/firebase'
 import { AuthBrandPanel } from '../components/auth-brand-panel'
 import { useDocumentTitle } from '@/components/layout/use-document-title'
@@ -144,6 +145,7 @@ export function LoginPage() {
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground" htmlFor="email">
                     Email
+                    <RequiredMark />
                   </label>
                   <Input
                     id="email"
@@ -166,6 +168,7 @@ export function LoginPage() {
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-foreground" htmlFor="password">
                       Contraseña
+                      <RequiredMark />
                     </label>
                     <div className="relative">
                       <Input
@@ -186,7 +189,7 @@ export function LoginPage() {
                         aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                         className="absolute right-0 top-0 grid h-11 w-11 place-items-center text-foreground-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
                       >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPassword ? <EyeOff aria-hidden="true" className="h-4 w-4" /> : <Eye aria-hidden="true" className="h-4 w-4" />}
                       </button>
                     </div>
                     {errors.password && (

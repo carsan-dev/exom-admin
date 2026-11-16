@@ -38,7 +38,7 @@ export function VersionUpdateBanner() {
       >
         <p className="text-sm text-foreground">Nueva versión disponible. Recarga la página para aplicar los cambios.</p>
         <Button type="button" size="sm" className="shrink-0" onClick={handleReload}>
-          <RefreshCw className="size-4" />
+          <RefreshCw aria-hidden="true" className="size-4" />
           Recargar
         </Button>
       </div>

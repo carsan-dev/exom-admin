@@ -12,7 +12,7 @@ export function TrainingUsageCell({ exercise }: { exercise: Exercise }) {
   if (!exercise.is_used_in_training) {
     return (
       <span className="inline-flex items-center gap-1 text-xs text-status-error">
-        <X className="h-4 w-4" />
+        <X aria-hidden="true" className="h-4 w-4" />
         Sin asignar
       </span>
     )
@@ -30,14 +30,14 @@ export function TrainingUsageCell({ exercise }: { exercise: Exercise }) {
             className="h-7 w-7 p-0"
             aria-label={`Ver entrenamientos que usan ${exercise.name}`}
           >
-            <Info className="h-4 w-4" />
+            <Info aria-hidden="true" className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-72">
           <p className="mb-2 font-medium">Usado en entrenamientos</p>
           {usage.isLoading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
               Cargando...
             </div>
           ) : usage.isError ? (

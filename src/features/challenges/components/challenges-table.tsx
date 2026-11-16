@@ -85,7 +85,7 @@ export function ChallengesTable({
     return (
       <EmptyState
         className="border-y border-border"
-        icon={<Target />}
+        icon={<Target aria-hidden="true" />}
         title={hasActiveFilters ? 'Ningún reto coincide con los filtros' : 'Todavía no hay retos creados'}
         description={
           hasActiveFilters

@@ -98,7 +98,7 @@ export function CatalogTable({
       {filteredValues.length === 0 ? (
         <EmptyState
           className="border-y border-border"
-          icon={<Tags />}
+          icon={<Tags aria-hidden="true" />}
           title={
             catalog.values.length === 0
               ? 'Sin valores guardados.'
@@ -197,7 +197,7 @@ export function CatalogTable({
                               aria-label={`Editar ${item.value}`}
                               onClick={() => onEdit({ catalogId: catalog.id, value: item.value, color: item.color })}
                             >
-                              <Pencil className="h-4 w-4" />
+                              <Pencil aria-hidden="true" className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>Editar</TooltipContent>
@@ -213,7 +213,7 @@ export function CatalogTable({
                                 className="h-11 w-11 text-destructive hover:text-destructive md:h-8 md:w-8"
                                 onClick={() => onDelete({ catalogId: catalog.id, value: item.value, color: item.color })}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 aria-hidden="true" className="h-4 w-4" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>Borrar</TooltipContent>
@@ -238,7 +238,7 @@ export function CatalogTable({
             className="bottom-[calc(56px+env(safe-area-inset-bottom,0px)+12px)] flex-wrap max-md:overflow-x-visible md:bottom-4 [&>div]:min-w-0 [&>div]:shrink [&>div]:flex-wrap"
           >
             <Button variant="destructive" size="sm" onClick={onDeleteSelected}>
-              <Trash2 className="h-4 w-4" />
+              <Trash2 aria-hidden="true" className="h-4 w-4" />
               Eliminar seleccionados ({selectedValues.size})
             </Button>
           </SelectionBar>
@@ -247,7 +247,7 @@ export function CatalogTable({
           <div className="mt-3 flex min-h-13 flex-wrap items-center justify-between gap-3">
             <p className="text-[13px] tabular-nums text-foreground-muted">{selectedValues.size} seleccionados</p>
             <Button variant="outline" size="sm" onClick={onDeleteSelected} disabled>
-              <Trash2 className="h-4 w-4" />
+              <Trash2 aria-hidden="true" className="h-4 w-4" />
               Eliminar seleccionados ({selectedValues.size})
             </Button>
           </div>

@@ -67,7 +67,7 @@ export function MealVariantsEditor({
           className="h-7 text-xs max-md:h-11"
           onClick={addVariant}
         >
-          <Plus className="h-3 w-3" />
+          <Plus aria-hidden="true" className="h-3 w-3" />
           Añadir variante
         </Button>
       </div>
@@ -85,7 +85,7 @@ export function MealVariantsEditor({
               control={form.control}
               name={`meals.${mealIndex}.variants.${variantIndex}.name`}
               render={({ field }) => (
-                <FormItem className="min-w-0 flex-1">
+                <FormItem required className="min-w-0 flex-1">
                   <FormControl>
                     <Input placeholder="Nombre de la variante" className="h-9 text-sm" {...field} />
                   </FormControl>
@@ -101,7 +101,7 @@ export function MealVariantsEditor({
               onClick={() => removeVariant(variantIndex)}
               aria-label={`Quitar variante ${variantIndex + 1}`}
             >
-              <X className="h-4 w-4" />
+              <X aria-hidden="true" className="h-4 w-4" />
             </Button>
           </div>
 

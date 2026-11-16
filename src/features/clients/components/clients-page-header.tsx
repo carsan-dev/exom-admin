@@ -23,7 +23,7 @@ export function ClientsPageHeader({ title, description, countLabel, createLabel,
       }
       actions={
         <Button onClick={onCreate} className="max-md:h-11">
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
           {createLabel}
         </Button>
       }

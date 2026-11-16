@@ -92,7 +92,7 @@ export function EditCatalogValueDialog({
           <Button onClick={onSave} disabled={saveDisabled}>
             {isPending ? (
               <>
-                <LoaderCircle className="h-4 w-4 animate-spin" />
+                <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" />
                 Guardando...
               </>
             ) : (

@@ -109,6 +109,7 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Nuevo tipo (Enter)"
+          aria-label="Nuevo tipo de entrenamiento"
           className="h-8 text-sm"
         />
         <Button
@@ -126,7 +127,7 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
 
       {trainingTypesQuery.isLoading ? (
         <div className="flex items-center gap-2 rounded-md border border-dashed border-border/70 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-          <LoaderCircle className="h-3 w-3 animate-spin" />
+          <LoaderCircle aria-hidden="true" className="h-3 w-3 animate-spin" />
           Cargando tipos existentes...
         </div>
       ) : trainingTypesQuery.isError ? (
@@ -173,7 +174,7 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
                   }`}
                   style={isSelected ? catalogStyle : undefined}
                 >
-                  {isSelected && <Check className="h-3 w-3" />}
+                  {isSelected && <Check aria-hidden="true" className="h-3 w-3" />}
                   {getTrainingTypeLabel(type)}
                 </button>
               )

@@ -37,7 +37,7 @@ function CollapsibleSection({ title, content }: CollapsibleSectionProps) {
         className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
       >
         {title}
-        {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        {open ? <ChevronUp aria-hidden="true" className="h-4 w-4 text-muted-foreground" /> : <ChevronDown aria-hidden="true" className="h-4 w-4 text-muted-foreground" />}
       </button>
       {open && (
         <div className="border-t border-border/60 px-4 py-3">
@@ -112,7 +112,7 @@ export function ExerciseDetailDialog({ exercise, open, onOpenChange, onEdit, onD
             </div>
           ) : (
             <div className="flex items-center gap-2 rounded-lg border border-dashed border-border/60 px-4 py-3 text-sm text-muted-foreground">
-              <Video className="h-4 w-4" />
+              <Video aria-hidden="true" className="h-4 w-4" />
               Sin vídeo adjunto
             </div>
           )}
@@ -137,7 +137,7 @@ export function ExerciseDetailDialog({ exercise, open, onOpenChange, onEdit, onD
                   onDuplicate(exercise)
                 }}
               >
-                <Copy className="h-4 w-4" />
+                <Copy aria-hidden="true" className="h-4 w-4" />
                 Duplicar
               </Button>
             )}
@@ -148,7 +148,7 @@ export function ExerciseDetailDialog({ exercise, open, onOpenChange, onEdit, onD
                   onEdit(exercise)
                 }}
               >
-                <Edit className="h-4 w-4" />
+                <Edit aria-hidden="true" className="h-4 w-4" />
                 Editar
               </Button>
             )}
