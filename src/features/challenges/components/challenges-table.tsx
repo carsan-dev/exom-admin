@@ -69,7 +69,7 @@ function getProgressClass(variant: ReturnType<typeof getChallengeProgressVariant
 function getModeBadgeClass(challenge: ChallengeListItem) {
   return challenge.is_manual
     ? 'border-border bg-muted text-muted-foreground'
-    : 'border-violet-500/30 bg-violet-500/10 text-violet-600'
+    : 'border-accent-line/30 bg-brand-soft text-accent-text'
 }
 
 export function ChallengesTable({
@@ -139,7 +139,7 @@ export function ChallengesTable({
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border/70 p-10 text-center">
-        <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
+        <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
           <Target className="h-8 w-8" />
         </div>
         <div className="space-y-2">
@@ -197,7 +197,7 @@ export function ChallengesTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+                    <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
                       {getChallengeTypeLabel(challenge.type)}
                     </Badge>
                   </TableCell>

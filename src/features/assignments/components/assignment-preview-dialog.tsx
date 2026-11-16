@@ -78,7 +78,7 @@ export function AssignmentPreviewDialog({
                     </Badge>
                   )}
                   {day.is_rest_day && (
-                    <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+                    <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-accent-text">
                       Descanso
                     </Badge>
                   )}
@@ -90,7 +90,7 @@ export function AssignmentPreviewDialog({
               {day.is_rest_day ? (
                 <div className="rounded-2xl border border-brand-primary/25 bg-brand-soft/10 p-5">
                   <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-brand-soft/20 p-3 text-brand-primary">
+                    <div className="rounded-full bg-brand-soft/20 p-3 text-accent-text">
                       <PauseCircle className="h-5 w-5" />
                     </div>
                     <div className="space-y-1">
@@ -121,7 +121,7 @@ export function AssignmentPreviewDialog({
                         <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-status-info">
                           {getTrainingTypeLabel(day.training.type)}
                         </Badge>
-                        <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+                        <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-accent-text">
                           {LEVEL_LABELS[day.training.level]}
                         </Badge>
                       </div>

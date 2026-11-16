@@ -98,7 +98,7 @@ function getAdminStatus(isSelected: boolean, wasAssigned: boolean) {
   if (isSelected) {
     return {
       label: 'Se añade',
-      className: 'border-brand-primary/30 bg-brand-soft/10 text-brand-primary',
+      className: 'border-brand-primary/30 bg-brand-soft/10 text-accent-text',
       actionLabel: 'Quitar',
       actionVariant: 'outline' as const,
     }
@@ -231,7 +231,7 @@ export function ManageClientAssignmentsDialog({
           </div>
         ) : hasNoAdminsAvailable ? (
           <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border/70 p-8 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
+            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
               <Users className="h-8 w-8" />
             </div>
             <div className="space-y-2">
@@ -263,7 +263,7 @@ export function ManageClientAssignmentsDialog({
                     {selectedAdminIds.length} admin{selectedAdminIds.length === 1 ? '' : 's'} activo{selectedAdminIds.length === 1 ? '' : 's'} tras guardar
                   </p>
                 </div>
-                <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-brand-primary">
+                <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-accent-text">
                   {hasChanges ? 'Cambios pendientes' : 'Sin cambios'}
                 </Badge>
               </div>

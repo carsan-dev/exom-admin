@@ -217,7 +217,7 @@ function TemplateVariables({ template }: { template: NotificationTemplate }) {
       <div className="space-y-2">
         {template.variables.map((variable) => (
           <div key={variable} className="rounded-lg border border-border bg-muted/20 p-3">
-            <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+            <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
               {`{${variable}}`}
             </Badge>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -242,7 +242,7 @@ function DeliveryInfo({ template }: { template: NotificationTemplate }) {
   return (
     <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+        <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
           {typeLabel}
         </Badge>
         <p className="text-sm font-medium text-foreground">{delivery.label}</p>
@@ -937,7 +937,7 @@ export function NotificationTemplatesPage() {
                             className={cn(
                               'text-[10px]',
                               template.is_system
-                                ? 'border-brand-primary/20 bg-brand-soft/10 text-brand-primary'
+                                ? 'border-brand-primary/20 bg-brand-soft/10 text-accent-text'
                                 : 'border-border bg-muted text-muted-foreground',
                             )}
                           >
@@ -976,7 +976,7 @@ export function NotificationTemplatesPage() {
                       <CardDescription>{selectedTemplate.description}</CardDescription>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+                      <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
                         {selectedTemplate.category}
                       </Badge>
                       <Badge variant="outline" className="border-border bg-muted text-muted-foreground">

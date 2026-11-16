@@ -7,22 +7,22 @@ function getStatusStyles(status: ApprovalStatus) {
   switch (status) {
     case 'PENDING':
       return {
-        className: 'border-amber-500/20 bg-amber-500/10 text-amber-700',
+        className: 'border-status-warning/30 bg-status-warning-soft text-status-warning',
         icon: Clock3,
       }
     case 'APPROVED':
       return {
-        className: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700',
+        className: 'border-status-success/30 bg-status-success-soft text-status-success',
         icon: CheckCircle2,
       }
     case 'REJECTED':
       return {
-        className: 'border-rose-500/20 bg-rose-500/10 text-rose-700',
+        className: 'border-status-error/30 bg-status-error-soft text-status-error',
         icon: XCircle,
       }
     case 'FAILED':
       return {
-        className: 'border-orange-500/20 bg-orange-500/10 text-orange-700',
+        className: 'border-status-warning/30 bg-status-warning-soft text-status-warning',
         icon: AlertTriangle,
       }
   }

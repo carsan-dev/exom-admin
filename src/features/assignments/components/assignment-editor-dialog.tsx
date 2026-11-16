@@ -456,7 +456,7 @@ export function AssignmentEditorDialog({
               {(catalogAvailability.is_loading || catalogAvailability.has_error || catalogAvailability.has_empty_catalogs) && (
                 <div className="space-y-3 rounded-2xl border border-dashed border-border/70 bg-background/60 p-4">
                   <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-brand-soft/10 p-3 text-brand-primary">
+                    <div className="rounded-full bg-brand-soft/10 p-3 text-accent-text">
                       <AlertTriangle className="h-4 w-4" />
                     </div>
                     <div className="space-y-1">
@@ -521,7 +521,7 @@ export function AssignmentEditorDialog({
                             {field.original_date}
                           </Badge>
                           {field.assignment_id && (
-                            <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+                            <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-accent-text">
                               Ya existía
                             </Badge>
                           )}

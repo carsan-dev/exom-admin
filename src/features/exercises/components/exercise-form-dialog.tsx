@@ -178,7 +178,7 @@ function MultiSelectField({
           <Badge
             key={item}
             variant="outline"
-            className="gap-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary pr-1"
+            className="gap-1 border-brand-soft/40 bg-brand-soft/10 text-accent-text pr-1"
           >
             {item}
             <button

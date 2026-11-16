@@ -83,7 +83,7 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
             {/* Entrenamiento */}
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <Dumbbell className="h-4 w-4 text-brand-primary" />
+                <Dumbbell className="h-4 w-4 text-accent-text" />
                 <span className="text-sm font-medium">Entrenamiento</span>
                 <Badge variant={progress.training_completed ? 'default' : 'secondary'}>
                   {progress.training_completed ? 'Completado' : 'No completado'}
@@ -170,7 +170,7 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                     htmlFor="training-note-reply"
                     className="flex items-center gap-2 text-sm font-medium"
                   >
-                    <MessageSquareReply className="h-4 w-4 text-brand-primary" />
+                    <MessageSquareReply className="h-4 w-4 text-accent-text" />
                     Respuesta para el cliente
                   </label>
                   <textarea

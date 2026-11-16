@@ -66,7 +66,7 @@ export function ChallengesStatsCards({ summary, isLoading, isError, isFetching, 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Objetivos principales</CardTitle>
-          <Target className="h-4 w-4 text-brand-primary" />
+          <Target className="h-4 w-4 text-accent-text" />
         </CardHeader>
         <CardContent>
           <p className="text-2xl font-bold text-foreground">{summary?.main_goal ?? 0}</p>
@@ -76,7 +76,7 @@ export function ChallengesStatsCards({ summary, isLoading, isError, isFetching, 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Retos automáticos</CardTitle>
-          <WandSparkles className="h-4 w-4 text-primary" />
+          <WandSparkles className="h-4 w-4 text-accent-text" />
         </CardHeader>
         <CardContent>
           <p className="text-2xl font-bold text-foreground">{summary?.automatic ?? 0}</p>

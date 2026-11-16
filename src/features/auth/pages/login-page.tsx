@@ -82,7 +82,7 @@ export function LoginPage() {
         {/* Logo */}
         <div className="flex flex-col items-center gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-4xl font-black tracking-widest text-brand-primary">EXOM</span>
+            <span className="text-4xl font-black tracking-widest text-accent-text">EXOM</span>
           </div>
           <p className="text-sm text-muted-foreground">Panel de administración EXOM</p>
         </div>
@@ -178,7 +178,7 @@ export function LoginPage() {
                     type="button"
                     onClick={() => void handleForgotPassword()}
                     disabled={isSendingReset}
-                    className="text-xs text-brand-primary hover:text-brand-secondary transition-colors"
+                    className="text-xs text-accent-text hover:text-foreground transition-colors"
                   >
                     {isSendingReset ? 'Enviando enlace...' : '¿Has olvidado tu contraseña?'}
                   </button>

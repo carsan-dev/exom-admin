@@ -74,7 +74,7 @@ export function AchievementsStatsCards({ summary, isLoading, isError, isFetching
             <CardTitle className="text-sm font-medium text-muted-foreground">
               {CRITERIA_TYPE_LABELS[type] ?? type}
             </CardTitle>
-            <Award className="h-4 w-4 text-brand-primary" />
+            <Award className="h-4 w-4 text-accent-text" />
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-foreground">{count}</p>

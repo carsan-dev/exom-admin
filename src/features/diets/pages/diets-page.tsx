@@ -531,7 +531,7 @@ export function DietsPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-accent-text">
             Catálogo
           </p>
           <div>
@@ -607,7 +607,7 @@ export function DietsPage() {
       ) : total === 0 && !hasQuery ? (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
+            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
               <UtensilsCrossed className="h-8 w-8" />
             </div>
             <div className="space-y-2">
@@ -742,7 +742,7 @@ export function DietsPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
+          <div className="rounded-lg border border-status-warning/30 bg-status-warning-soft p-3 text-sm text-status-warning">
             Si quieres 4 comidas, dilo en el objetivo. Si quieres variantes, dilo por comida. Si
             no quieres variantes, ChatGPT debe devolver <span className="font-semibold">variants: []</span>.
             Usa solo ingredientes del catálogo incluido.

@@ -98,7 +98,7 @@ export function MetricVisual({ series, period, chartPeriod, compact = false, sel
       {metric.count === 1 && <p className="text-sm text-muted-foreground">Una observación no permite establecer una tendencia.</p>}
     </div>)
 
-  return <section className="min-w-0 space-y-5 rounded-lg border bg-card p-4 sm:p-6 [--muted-foreground:var(--foreground-secondary)]" aria-labelledby={`${id}-title`}>
+  return <section className="min-w-0 space-y-5 rounded-lg border bg-card p-4 sm:p-6" aria-labelledby={`${id}-title`}>
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div className="space-y-1">
         <h2 id={`${id}-title`} className="text-xl font-semibold">{metric.label} · {metric.unit}</h2>

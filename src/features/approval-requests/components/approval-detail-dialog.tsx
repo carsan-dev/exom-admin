@@ -244,7 +244,7 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
                 </div>
 
                 {request.resource_deleted ? (
-                  <div className="mt-4 flex items-start gap-3 rounded-xl border border-orange-500/20 bg-orange-500/5 p-4 text-sm text-orange-700">
+                  <div className="mt-4 flex items-start gap-3 rounded-xl border border-status-warning/30 bg-status-warning-soft p-4 text-sm text-status-warning">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                     <p>Este recurso ya no existe en el estado actual del sistema.</p>
                   </div>
@@ -308,14 +308,14 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
             ) : null}
 
             {request.status === 'REJECTED' && request.rejection_reason ? (
-              <section className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4 text-sm text-rose-700">
+              <section className="rounded-xl border border-status-error/30 bg-status-error-soft p-4 text-sm text-status-error">
                 <p className="font-medium">Motivo de rechazo</p>
                 <p className="mt-1">{request.rejection_reason}</p>
               </section>
             ) : null}
 
             {request.status === 'FAILED' && request.failure_reason ? (
-              <section className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4 text-sm text-orange-700">
+              <section className="rounded-xl border border-status-warning/30 bg-status-warning-soft p-4 text-sm text-status-warning">
                 <p className="font-medium">La ejecución aprobada falló</p>
                 <p className="mt-1">{request.failure_reason}</p>
               </section>

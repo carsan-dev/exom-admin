@@ -85,7 +85,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           isOpen ? 'px-4 gap-2' : 'justify-center'
         )}
       >
-        <span className="text-xl font-black tracking-widest text-brand-primary">
+        <span className="text-xl font-black tracking-widest text-accent-text">
           {isOpen ? 'EXOM' : 'EX'}
         </span>
         {isOpen && <span className="text-xs text-muted-foreground font-medium uppercase">Admin</span>}
@@ -111,7 +111,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     'hover:bg-brand-soft/30 hover:text-foreground',
                     index === 0 && 'rounded-t-md',
                      index === resolvedNavItems.length - 1 && 'rounded-b-md',
-                    isActive && 'border-brand-primary bg-brand-primary/10 text-brand-primary',
+                    isActive && 'border-brand-primary bg-brand-primary/10 text-accent-text',
                     !isActive && 'text-foreground/70'
                   )
                 }
@@ -123,7 +123,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   <span className="flex min-w-0 items-center justify-between gap-2">
                     <span className="truncate whitespace-nowrap leading-none">{label}</span>
                     {approvalBadge ? (
-                      <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+                      <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
                         {approvalBadge}
                       </Badge>
                     ) : null}
@@ -143,7 +143,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         'hover:bg-brand-soft/30 hover:text-foreground',
                         index === 0 && 'rounded-t-md',
                           index === resolvedNavItems.length - 1 && 'rounded-b-md',
-                        isActive && 'bg-brand-primary/10 text-brand-primary',
+                        isActive && 'bg-brand-primary/10 text-accent-text',
                         !isActive && 'text-foreground/70'
                       )
                     }

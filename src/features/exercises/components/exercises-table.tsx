@@ -113,7 +113,7 @@ export function ExercisesTable({
             <TableCell>
               <div className="flex flex-wrap gap-1">
                 {exercise.muscle_groups.slice(0, 2).map((group) => (
-                  <Badge key={group} variant="outline" className="border-brand-soft/40 bg-brand-soft/10 text-brand-primary text-xs">
+                  <Badge key={group} variant="outline" className="border-brand-soft/40 bg-brand-soft/10 text-accent-text text-xs">
                     {group}
                   </Badge>
                 ))}

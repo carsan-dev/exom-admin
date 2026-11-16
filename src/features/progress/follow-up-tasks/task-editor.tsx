@@ -117,7 +117,7 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
   const locked = closed || mutation.isPending || Boolean(frozen)
   const retained = task?.assigned_to_id && !eligible.some((person) => person.id === task.assigned_to_id)
   return <Sheet open onOpenChange={(open) => { if (!open) close() }}>
-    <SheetContent onCloseAutoFocus={(event) => { event.preventDefault(); onRestoreFocus() }} className="w-full overflow-y-auto sm:max-w-lg motion-reduce:transition-none motion-reduce:animate-none [--muted-foreground:var(--foreground-secondary)]">
+    <SheetContent onCloseAutoFocus={(event) => { event.preventDefault(); onRestoreFocus() }} className="w-full overflow-y-auto sm:max-w-lg motion-reduce:transition-none motion-reduce:animate-none">
       <SheetHeader className="mb-6 pr-6 text-left">
         <SheetTitle>{task ? 'Detalle de tarea' : 'Nueva tarea'}</SheetTitle>
         <SheetDescription>Tarea interna del equipo. Completarla no cambia pautas ni envía mensajes.</SheetDescription>

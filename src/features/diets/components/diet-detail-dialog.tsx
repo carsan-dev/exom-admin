@@ -194,7 +194,7 @@ export function DietDetailDialog({
                 <Badge
                   key={tag}
                   variant="outline"
-                  className="border-brand-soft/40 bg-brand-soft/10 text-brand-primary text-xs"
+                  className="border-brand-soft/40 bg-brand-soft/10 text-accent-text text-xs"
                 >
                   {tag}
                 </Badge>

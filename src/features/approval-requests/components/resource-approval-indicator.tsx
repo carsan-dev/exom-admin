@@ -23,7 +23,7 @@ export function ResourceApprovalIndicator({ pendingActions, className }: Resourc
       <TooltipTrigger asChild>
         <Badge
           variant="outline"
-          className={cn('gap-1 border-amber-500/20 bg-amber-500/10 text-amber-700', className)}
+          className={cn('gap-1 border-status-warning/30 bg-status-warning-soft text-status-warning', className)}
         >
           <AlertTriangle className="h-3 w-3" />
           Pendiente

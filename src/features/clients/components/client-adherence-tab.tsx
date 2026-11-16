@@ -227,7 +227,7 @@ function ConfigForm({ clientId, config, effectiveDate, changeDate, loadDate, rel
     {!validDate && <p role="alert">La vigencia debe ser una fecha futura UTC válida.</p>}
     {message && <p role={mutation.isError || conflict ? 'alert' : 'status'} className="text-sm">{message}</p>}
     {conflict && <Button variant="outline" disabled={pending} onClick={reload}>Recargar versión conservando borrador</Button>}
-    <Button className="text-[#30271e]" disabled={pending || !values || !validDate || !validVersion || conflict} onClick={save}>{mutation.isPending ? 'Guardando…' : 'Guardar configuración futura'}</Button>
+    <Button disabled={pending || !values || !validDate || !validVersion || conflict} onClick={save}>{mutation.isPending ? 'Guardando…' : 'Guardar configuración futura'}</Button>
   </div>
 }
 function Settings({ clientId }: { clientId: string }) {
@@ -265,7 +265,7 @@ function AdherenceContent({ clientId }: { clientId: string }) {
     void query.refetch()
     if (previous) void previousQuery.refetch()
   }
-  return <div className="space-y-5 [--muted-foreground:var(--foreground-secondary)]">
+  return <div className="space-y-5">
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Adherencia</h2>
       <div className="flex flex-wrap items-end gap-3">

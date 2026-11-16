@@ -141,7 +141,7 @@ export function ProgressPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-3 sm:space-y-5 [--muted-foreground:var(--foreground-secondary)] [--primary-foreground:#30271e] [&_button]:duration-150 [&_button]:motion-reduce:transition-none">
+    <div className="mx-auto max-w-7xl space-y-3 sm:space-y-5 [&_button]:duration-150 [&_button]:motion-reduce:transition-none">
       <TaskRouteGuard guard={taskGuard} />
       <div className="flex min-w-0 flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Progreso</h1>

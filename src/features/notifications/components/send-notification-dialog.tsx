@@ -261,7 +261,7 @@ function RecipientsMultiSelect({
               <Badge
                 key={client.id}
                 variant="outline"
-                className="gap-1 border-brand-primary/20 bg-brand-soft/10 pr-1 text-brand-primary"
+                className="gap-1 border-brand-primary/20 bg-brand-soft/10 pr-1 text-accent-text"
               >
                 <span className="max-w-[180px] truncate">{displayName}</span>
                 <button

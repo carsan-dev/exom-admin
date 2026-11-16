@@ -76,7 +76,7 @@ export function AssignmentsToolbar({
       <CardContent className="min-w-0 space-y-5 p-4 sm:p-6">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div className="space-y-2">
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Planificación de asignaciones</p>
+            <p className="text-sm font-medium uppercase tracking-[0.24em] text-accent-text">Planificación de asignaciones</p>
             <div>
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">Asignaciones</h2>
               <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -179,7 +179,7 @@ export function AssignmentsToolbar({
               <Badge variant="outline" className="border-status-success/30 bg-status-success/10 text-status-success">
                 {summary.diet_days} días con dieta
               </Badge>
-              <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+              <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-accent-text">
                 {summary.rest_days} descansos
               </Badge>
               <Badge variant="outline" className="border-border/70 bg-background text-foreground">

@@ -109,7 +109,7 @@ export function AchievementsTable({
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border/70 p-10 text-center">
-        <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
+        <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
           <Trophy className="h-8 w-8" />
         </div>
         <div className="space-y-2">
@@ -158,13 +158,13 @@ export function AchievementsTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+                  <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
                     {getAchievementRuleLabel(achievement.criteria_type, achievement.rule_config)}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{achievement.criteria_value}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={isAutomaticAchievement(achievement.criteria_type) ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700' : 'border-amber-500/20 bg-amber-500/10 text-amber-700'}>
+                  <Badge variant="outline" className={isAutomaticAchievement(achievement.criteria_type) ? 'border-status-success/30 bg-status-success-soft text-status-success' : 'border-status-warning/30 bg-status-warning-soft text-status-warning'}>
                     {getAchievementModeLabel(achievement.criteria_type)}
                   </Badge>
                 </TableCell>

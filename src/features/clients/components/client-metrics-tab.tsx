@@ -95,7 +95,7 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
     return (
       <>
         <Card>
-          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6 [--muted-foreground:var(--foreground-secondary)] [--primary-foreground:#30271e]">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
             <p className="text-sm text-muted-foreground">
               Aún no hay métricas corporales registradas para este cliente.
             </p>
@@ -118,7 +118,7 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
   const summary = summarize(metrics)
 
   return (
-    <div className="space-y-4 [--muted-foreground:var(--foreground-secondary)] [--primary-foreground:#30271e]">
+    <div className="space-y-4">
       <section aria-label="Resumen de últimas mediciones" className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
@@ -151,7 +151,7 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-brand-primary" />
+                <Activity className="h-5 w-5 text-accent-text" />
                 <CardTitle className="text-xl">Últimas 10 métricas</CardTitle>
               </div>
               <CardDescription>Historial reciente de composición corporal y medidas</CardDescription>

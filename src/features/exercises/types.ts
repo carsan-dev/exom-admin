@@ -49,7 +49,7 @@ export function getLevelBadgeClass(level: string) {
     case 'PRINCIPIANTE':
       return 'border-status-success/30 bg-status-success/10 text-status-success'
     case 'INTERMEDIO':
-      return 'border-amber-500/30 bg-amber-500/10 text-amber-600'
+      return 'border-status-warning/30 bg-status-warning-soft text-status-warning'
     case 'AVANZADO':
       return 'border-status-error/30 bg-status-error/10 text-status-error'
     default:

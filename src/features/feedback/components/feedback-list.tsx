@@ -118,7 +118,7 @@ export function FeedbackList({ clientId, status, page, onPageChange, onSelect }:
                 <TableCell className="text-muted-foreground">
                   <div>{item.exercise?.name ?? '—'}</div>
                   {item.feedback_kind === 'LAST_SET' && (
-                    <Badge variant="outline" className="mt-1 border-brand-primary/30 text-brand-primary">
+                    <Badge variant="outline" className="mt-1 border-brand-primary/30 text-accent-text">
                       Última serie
                     </Badge>
                   )}
@@ -138,11 +138,11 @@ export function FeedbackList({ clientId, status, page, onPageChange, onSelect }:
                 </TableCell>
                 <TableCell>
                   {item.status === 'PENDING' ? (
-                    <Badge variant="outline" className="border-yellow-400 text-yellow-700 bg-yellow-50">
+                    <Badge variant="outline" className="border-status-warning/30 text-status-warning bg-status-warning-soft">
                       Pendiente
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="border-green-400 text-green-700 bg-green-50">
+                    <Badge variant="outline" className="border-status-success/30 text-status-success bg-status-success-soft">
                       Revisado
                     </Badge>
                   )}

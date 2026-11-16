@@ -154,7 +154,7 @@ export function IngredientsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Catálogo</p>
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-accent-text">Catálogo</p>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">Ingredientes</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -192,7 +192,7 @@ export function IngredientsPage() {
       ) : total === 0 && !hasActiveQuery ? (
         <Card className="border-dashed border-border/70">
           <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
+            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
               <Apple className="h-8 w-8" />
             </div>
             <div className="space-y-2">

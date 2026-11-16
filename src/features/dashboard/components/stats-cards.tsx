@@ -19,7 +19,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       description: `${stats.totalClients} clientes visibles`,
       icon: Users,
       to: usersRoute,
-      valueClassName: 'text-brand-primary',
+      valueClassName: 'text-accent-text',
     },
     {
       title: 'Recaps pendientes',

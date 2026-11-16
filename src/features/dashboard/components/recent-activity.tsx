@@ -96,7 +96,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
                         locale: es,
                       })}
                     </p>
-                    <Link className="text-sm font-medium text-brand-primary hover:underline" to={getActivityLink(item, usersRoute)}>
+                    <Link className="text-sm font-medium text-accent-text hover:underline" to={getActivityLink(item, usersRoute)}>
                       Ver todos
                     </Link>
                   </div>

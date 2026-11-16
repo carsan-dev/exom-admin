@@ -92,7 +92,7 @@ export function AdminsTable({
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate font-medium text-foreground">{getUserDisplayName(admin)}</p>
                       {isOwnAccount && (
-                        <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-brand-primary">
+                        <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-accent-text">
                           Tú
                         </Badge>
                       )}
@@ -103,7 +103,7 @@ export function AdminsTable({
               </TableCell>
               <TableCell className="text-muted-foreground">{admin.email}</TableCell>
               <TableCell>
-                <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-brand-primary">
+                <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-accent-text">
                   {ROLE_LABELS[admin.role]}
                 </Badge>
               </TableCell>

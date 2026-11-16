@@ -141,7 +141,7 @@ export function ClientDetailPage() {
   const client = clientProfile.data
 
   return (
-    <div className="space-y-3 sm:space-y-5 [--muted-foreground:var(--foreground-secondary)]">
+    <div className="space-y-3 sm:space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button variant="ghost" asChild>
           <Link to={usersRoute}>
@@ -195,16 +195,16 @@ export function ClientDetailPage() {
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList aria-label="Secciones del cliente" className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 [&_button]:min-h-11 [&_button]:shrink-0 [&_button]:text-foreground [&_button]:data-[state=active]:text-foreground! sm:flex-wrap">
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="info">
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="info">
             Info general
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="metrics">
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="metrics">
             Métricas
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="streak">
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="streak">
             Racha
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-brand-primary" value="adherence">
+          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="adherence">
             Adherencia
           </TabsTrigger>
         </TabsList>
