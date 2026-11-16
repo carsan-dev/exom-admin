@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { FigureStrip } from '@/components/page'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Streak } from '../types'
 
@@ -14,22 +15,27 @@ const dateFormatter = new Intl.DateTimeFormat('es-ES', {
 
 /** Read-only canonical presentation. Actions remain owned by the route. */
 export function ClientStreakCard({ streak, isLoading, action }: ClientStreakCardProps) {
-  return <section aria-label="Racha del cliente" className="space-y-6 rounded-lg bg-card p-4 sm:p-6">
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Racha del cliente</h2>
-        <p className="max-w-prose text-sm text-muted-foreground">Racha actual y mejor récord registrado, en días. Estos contadores no se filtran por el periodo de métricas.</p>
-      </div>
-      {!isLoading && streak && action}
+  return <section aria-label="Racha del cliente" className="space-y-6">
+    <div className="space-y-2">
+      <h2 className="text-xl font-semibold leading-7 text-foreground">Racha del cliente</h2>
+      <p className="max-w-prose text-sm text-foreground-secondary">Racha actual y mejor récord registrado, en días. Estos contadores no se filtran por el periodo de métricas.</p>
     </div>
     {isLoading ? <Skeleton className="h-24 w-full" /> : !streak ?
-      <p className="text-sm">{streak === null ? 'El cliente todavía no tiene una racha registrada.' : 'Racha no disponible.'} No equivale a una racha de cero días.</p> : <>
-        <dl className="grid gap-6 border-y border-border py-5 sm:grid-cols-3">
-          <div><dt className="text-sm text-muted-foreground">Racha actual</dt><dd className="mt-2 text-2xl font-semibold tabular-nums">{streak.current_days} días</dd></div>
-          <div><dt className="text-sm text-muted-foreground">Mejor récord</dt><dd className="mt-2 text-2xl font-semibold tabular-nums">{streak.longest_days} días</dd></div>
-          <div><dt className="text-sm text-muted-foreground">Última actividad · UTC</dt><dd className="mt-2 text-base font-medium">{streak.last_active_date ? dateFormatter.format(new Date(streak.last_active_date)) : 'Fecha no disponible'}</dd></div>
+      <p className="max-w-prose text-sm text-foreground-secondary">{streak === null ? 'El cliente todavía no tiene una racha registrada.' : 'Racha no disponible.'} No equivale a una racha de cero días.</p> : <>
+        <FigureStrip
+          aria-label="Contadores de racha"
+          className="lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-2"
+          items={[
+            { label: 'Racha actual', value: `${streak.current_days} días` },
+            { label: 'Mejor récord', value: `${streak.longest_days} días` },
+          ]}
+        />
+        <dl aria-label="Última actividad" className="border-b border-border-strong px-5 pb-4">
+          <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Última actividad · UTC</dt>
+          <dd className="mt-2 text-base font-medium text-foreground">{streak.last_active_date ? dateFormatter.format(new Date(streak.last_active_date)) : 'Fecha no disponible'}</dd>
         </dl>
-        <p className="max-w-prose text-sm text-muted-foreground">No se dispone del historial de rachas ni de los motivos de interrupción. La última actividad no permite reconstruir qué ocurrió en los días anteriores.</p>
+        <p className="max-w-prose text-sm text-foreground-secondary">No se dispone del historial de rachas ni de los motivos de interrupción. La última actividad no permite reconstruir qué ocurrió en los días anteriores.</p>
+        {action ? <div className="flex flex-wrap items-center gap-2">{action}</div> : null}
       </>}
   </section>
 }

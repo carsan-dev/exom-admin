@@ -31,17 +31,17 @@ export function ProgressPhotosWorkspace({ sessions, olderId, newerId, selectedVi
     { label: 'Fecha posterior', value: newerId, other: older, onChange: onNewerChange },
   ]
 
-  return <section aria-label="Espacio de comparación de fotos" className="min-w-0 space-y-5 rounded-lg border bg-card p-4 sm:p-6">
+  return <section aria-label="Espacio de comparación de fotos" className="min-w-0 space-y-5 rounded-md border border-border-strong bg-card p-4 sm:p-6">
     <div className="space-y-2">
-      <h2 className="text-lg font-semibold">Comparador</h2>
-      <p className="max-w-prose text-sm text-muted-foreground">Elige dos sesiones de fechas civiles distintas. La vista seleccionada se mantiene en ambas columnas. Las imágenes se muestran completas, sin recorte.</p>
-      <p className="text-sm">Contexto de captura: no proporcionado</p>
-      <p className="max-w-prose text-sm text-muted-foreground">No hay datos sobre postura, iluminación o distancia. Estas condiciones pueden variar; las fotos no permiten establecer por sí solas cambios físicos.</p>
+      <h2 className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Comparador</h2>
+      <p className="max-w-prose text-sm text-foreground-muted">Elige dos sesiones de fechas civiles distintas. La vista seleccionada se mantiene en ambas columnas. Las imágenes se muestran completas, sin recorte.</p>
+      <p className="text-sm text-foreground">Contexto de captura: no proporcionado</p>
+      <p className="max-w-prose text-sm text-foreground-muted">No hay datos sobre postura, iluminación o distancia. Estas condiciones pueden variar; las fotos no permiten establecer por sí solas cambios físicos.</p>
     </div>
     <div className="grid gap-3 sm:grid-cols-2">
-      {controls.map((control) => <label key={control.label} className="min-w-0 text-sm font-medium">{control.label}
+      {controls.map((control) => <label key={control.label} className="min-w-0 text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">{control.label}
         <select aria-label={control.label} value={control.value} onChange={(event) => control.onChange(event.target.value)}
-          className="mt-1 block min-h-11 w-full rounded-md border bg-background p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          className="mt-1 block min-h-11 w-full rounded-md border border-border-strong bg-background p-2 text-sm normal-case tracking-normal text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <option value="">Seleccionar otra fecha</option>
           {sessions.map((session) => <option key={session.id} value={session.id} disabled={session.id !== control.value && session.session_date === control.other?.session_date}>
             {formatDate(session.session_date)} · sesión {session.id.slice(0, 8)}
@@ -49,32 +49,32 @@ export function ProgressPhotosWorkspace({ sessions, olderId, newerId, selectedVi
         </select>
       </label>)}
     </div>
-    {!comparison && <p role="status" className="rounded-md bg-muted/50 p-3 text-sm">Una sola fecha disponible para esta selección. Crea o consulta una sesión de otra fecha para comparar dos fechas distintas.</p>}
+    {!comparison && <p role="status" className="border-l-2 border-status-info pl-3 text-sm text-foreground">Una sola fecha disponible para esta selección. Crea o consulta una sesión de otra fecha para comparar dos fechas distintas.</p>}
     <fieldset className="min-w-0 space-y-2">
-      <legend className="text-sm font-medium">Vista comparada</legend>
+      <legend className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Vista comparada</legend>
       <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
         {views.map(({ value, label: viewLabel }) => <Button key={value} type="button" variant={value === selectedView ? 'default' : 'outline'}
           className="h-auto min-h-11 whitespace-normal motion-reduce:transition-none" aria-pressed={value === selectedView} onClick={() => onViewChange(value)}>{viewLabel}</Button>)}
       </div>
     </fieldset>
-    <p role="status" aria-live="polite" className="text-sm font-medium">Vista seleccionada: {label} · {displayed.filter((session) => session.photos.some((photo) => photo.state === 'ACTIVE' && photo.view === selectedView)).length} de {displayed.length} sesiones con esta vista</p>
+    <p role="status" aria-live="polite" className="text-sm font-medium text-foreground">Vista seleccionada: {label} · {displayed.filter((session) => session.photos.some((photo) => photo.state === 'ACTIVE' && photo.view === selectedView)).length} de {displayed.length} sesiones con esta vista</p>
     <div className="grid items-start gap-5 md:grid-cols-2">
       {displayed.map((session, index) => {
         const photo = session.photos.find((photo) => photo.view === selectedView && photo.state === 'ACTIVE')
         const available = views.filter((view) => session.photos.some((photo) => photo.state === 'ACTIVE' && photo.view === view.value))
         return <article key={session.id} aria-label={`Sesión del ${formatDate(session.session_date)}`} className="min-w-0 space-y-3">
-          <header className="space-y-1 border-b pb-3">
-            <h3 className="text-base font-semibold"><time dateTime={session.session_date}>{formatDate(session.session_date)}</time></h3>
-            <p className="text-sm text-muted-foreground">{comparison ? index === 0 ? 'Fecha anterior' : 'Fecha posterior' : 'Sesión seleccionada'} · {available.length} / 4 vistas disponibles</p>
-            <p className="text-sm">{session.is_complete && available.length === 4 ? 'Sesión completa' : 'Sesión pendiente de completar o confirmar'}</p>
+          <header className="space-y-1 border-b border-border pb-3">
+            <h3 className="font-display text-lg font-extrabold uppercase leading-none text-foreground"><time dateTime={session.session_date}>{formatDate(session.session_date)}</time></h3>
+            <p className="text-sm text-foreground-muted">{comparison ? index === 0 ? 'Fecha anterior' : 'Fecha posterior' : 'Sesión seleccionada'} · {available.length} / 4 vistas disponibles</p>
+            <p className={`inline-flex w-fit max-w-full items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${session.is_complete && available.length === 4 ? 'border-status-success/40 bg-status-success-soft text-status-success' : 'border-status-warning/40 bg-status-warning-soft text-status-warning'}`}>{session.is_complete && available.length === 4 ? 'Sesión completa' : 'Sesión pendiente de completar o confirmar'}</p>
           </header>
           {photo ? <ProgressPhotosImage key={`${session.id}:${photo.id}:${photo.image_url}`} src={photo.image_url} alt={`${label} del ${formatDate(session.session_date)}`}
-            onEnlarge={(trigger) => onEnlarge(photo, label, session.session_date, trigger)} /> : <div className="flex aspect-[3/4] max-h-[34rem] items-center justify-center rounded-md border border-dashed bg-muted/20 p-6 text-center">
-            <div className="space-y-2"><p role="status" className="text-sm font-medium">Vista {label} no disponible en esta fecha.</p><p className="text-sm text-muted-foreground">No se ha proporcionado una foto activa de esta vista. No se sustituye por otra imagen.</p></div>
+            onEnlarge={(trigger) => onEnlarge(photo, label, session.session_date, trigger)} /> : <div className="flex aspect-[3/4] max-h-[34rem] items-center justify-center rounded-md border border-dashed border-border-strong bg-muted/20 p-6 text-center">
+            <div className="space-y-2"><p role="status" className="text-sm font-medium">Vista {label} no disponible en esta fecha.</p><p className="text-sm text-foreground-muted">No se ha proporcionado una foto activa de esta vista. No se sustituye por otra imagen.</p></div>
           </div>}
-          <details key={`${session.id}:${selectedView}`} className="border-t pt-3 text-sm">
-            <summary className="cursor-pointer rounded-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Metadatos de {label} · {formatDate(session.session_date)}</summary>
-            <dl className="mt-3 space-y-2 break-words text-muted-foreground">
+          <details key={`${session.id}:${selectedView}`} className="border-t border-border pt-3 text-sm">
+            <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Metadatos de {label} · {formatDate(session.session_date)}</summary>
+            <dl className="mt-3 space-y-2 break-words text-foreground-muted">
               <div><dt className="font-medium text-foreground">Identificador de sesión</dt><dd>{session.id}</dd></div>
               <div><dt className="font-medium text-foreground">Formato del archivo</dt><dd>{photo?.content_type || 'No proporcionado'}</dd></div>
               <div><dt className="font-medium text-foreground">Tamaño del archivo</dt><dd>{photo && Number.isFinite(photo.bytes) && photo.bytes >= 0 ? `${new Intl.NumberFormat('es-ES').format(photo.bytes)} bytes` : 'No proporcionado'}</dd></div>
@@ -84,6 +84,6 @@ export function ProgressPhotosWorkspace({ sessions, olderId, newerId, selectedVi
         </article>
       })}
     </div>
-    <p className="text-xs text-muted-foreground">Opciones limitadas a las sesiones consultadas. Recorre el historial para cargar otras fechas; las dos sesiones seleccionadas se conservan.</p>
+    <p className="text-xs text-foreground-muted">Opciones limitadas a las sesiones consultadas. Recorre el historial para cargar otras fechas; las dos sesiones seleccionadas se conservan.</p>
   </section>
 }

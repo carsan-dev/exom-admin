@@ -10,7 +10,7 @@ export function TrainingInfo({ label, children }: { label: string; children: Rea
   useEffect(() => () => clearTimeout(closeTimer.current), [])
   return <Popover open={open} onOpenChange={setOpen}>
     <PopoverTrigger asChild>
-      <button type="button" aria-label={`Información sobre ${label}`} className="-my-2 -mr-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+      <button type="button" aria-label={`Información sobre ${label}`} className="-my-2 -mr-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-foreground-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
         onPointerEnter={(event) => { if (event.pointerType !== 'touch') { cancelClose(); setOpen(true) } }}
         onPointerLeave={scheduleClose} onFocus={() => { cancelClose(); setOpen(true) }} onBlur={scheduleClose}
         onClick={(event) => { event.preventDefault(); cancelClose(); setOpen(true) }}>

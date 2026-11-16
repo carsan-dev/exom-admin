@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useClients } from '../../clients/api'
 import { getUserDisplayName } from '../../clients/types'
+import { EmptyState } from '@/components/page'
 import { cn } from '@/lib/utils'
 
 const ALL_CLIENTS_LIMIT = 200
@@ -47,7 +48,7 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
           role="combobox"
           aria-label={selectedName ? `Cliente: ${selectedName}` : 'Seleccionar cliente'}
           aria-expanded={open}
-          className="w-full justify-between sm:w-[280px]"
+          className="h-11 w-full justify-between sm:w-[280px] md:h-10"
         >
           {selectedClientId && selected ? (
             <div className="flex items-center gap-2 truncate">
@@ -114,16 +115,11 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
 
 export function EmptyClientState() {
   return (
-    <div className="flex flex-col items-center justify-center h-[50vh] gap-4 text-center">
-      <div className="rounded-full bg-muted p-6">
-        <User className="h-10 w-10 text-muted-foreground" />
-      </div>
-      <div className="space-y-1">
-        <p className="text-lg font-medium text-foreground">Selecciona un cliente</p>
-        <p className="text-sm text-muted-foreground">
-          Elige un cliente en el selector de arriba para ver su progreso detallado
-        </p>
-      </div>
-    </div>
+    <EmptyState
+      className="py-16"
+      icon={<User />}
+      title="Selecciona un cliente"
+      description="Elige un cliente en el selector de arriba para ver su progreso detallado"
+    />
   )
 }

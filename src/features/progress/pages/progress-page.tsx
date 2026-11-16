@@ -1,4 +1,6 @@
 import { UNSAFE_DataRouterContext, useSearchParams } from 'react-router'
+import { PageHeader } from '@/components/page'
+import { useMediaQuery } from '@/hooks/use-media-query'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { PeriodSelector, rangeLengthDays, usePeriodParam, type PeriodPreset } from '@/components/period'
@@ -29,6 +31,28 @@ const TRAINING_MAX_DAYS = 366
 const METRIC_SELECTION_PARAMS = { group: 'metric_group', metric: 'metric', compare: 'compare' } as const
 const METRIC_SELECTION_FIELDS = ['group', 'metric', 'compare'] as const
 
+/** Section order; the rail leaves a gap before the groups starting at Métricas, Adherencia and Seguimiento. */
+const SECTION_TABS = [
+  { value: 'dashboard', label: 'Dashboard' },
+  { value: 'resumen', label: 'Resumen' },
+  { value: 'metricas', label: 'Métricas' },
+  { value: 'fotos', label: 'Fotos' },
+  { value: 'entrenamiento', label: 'Entrenamiento' },
+  { value: 'adherencia', label: 'Adherencia' },
+  { value: 'racha', label: 'Racha' },
+  { value: 'seguimiento', label: 'Seguimiento' },
+] as const
+const SECTION_GROUP_STARTS: readonly string[] = ['metricas', 'adherencia', 'seguimiento']
+/** Below lg a single scrolling row with the shared underline; from lg a sticky vertical rail. */
+const SECTION_LIST_CLASS = [
+  'h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 sm:flex-wrap',
+  '[&_button]:min-h-11 [&_button]:shrink-0 [&_button]:rounded-md',
+  'lg:sticky lg:top-4 lg:flex lg:flex-col lg:flex-nowrap lg:items-stretch lg:gap-0 lg:overflow-visible lg:border-b-0',
+  'lg:[&>[data-slot=tabs-indicator]]:hidden lg:[&_button]:justify-start lg:[&_button]:px-3',
+  'lg:[&_button]:border-l-2 lg:[&_button]:border-transparent lg:[&_button]:data-[state=active]:border-primary',
+  'lg:[&_button]:data-[state=active]:bg-lime-soft',
+].join(' ')
+
 function getTodayStr() {
   return new Date().toISOString().split('T')[0]
 }
@@ -43,6 +67,7 @@ function getWeekStart(dateStr: string) {
 }
 
 export function ProgressPage() {
+  const railLayout = useMediaQuery('(min-width: 1024px)')
   const [searchParams, setSearchParams] = useSearchParams()
   const clientId = searchParams.get('clientId') ?? ''
   const selectedDate = searchParams.get('date') ?? getTodayStr()
@@ -153,38 +178,41 @@ export function ProgressPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-3 sm:space-y-5 [&_button]:duration-150 [&_button]:motion-reduce:transition-none">
+    <div className="mx-auto max-w-7xl [&_button]:duration-150 [&_button]:motion-reduce:transition-none">
       <TaskRouteGuard guard={taskGuard} />
-      <div className="flex min-w-0 flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Progreso</h1>
-        <div className="min-w-0 flex-1 sm:flex-none">
-          <span className="sr-only">Cliente:</span>
-          <ClientSelector selectedClientId={clientId} onSelect={handleClientSelect} />
-        </div>
-      </div>
+      <PageHeader
+        title="Progreso"
+        className="mb-4 md:mb-6"
+        actions={
+          <div className="w-full min-w-0 sm:w-auto">
+            <span className="sr-only">Cliente:</span>
+            <ClientSelector selectedClientId={clientId} onSelect={handleClientSelect} />
+          </div>
+        }
+      />
 
       {!clientId ? (
         <EmptyClientState />
       ) : (
-        <Tabs value={section} onValueChange={(value) => { afterTaskGuard(() => updateParams({ section: value })) }} className="space-y-4">
+        <Tabs
+          value={section}
+          orientation={railLayout ? 'vertical' : 'horizontal'}
+          onValueChange={(value) => { afterTaskGuard(() => updateParams({ section: value })) }}
+          className="flex min-w-0 flex-col gap-4 lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:items-start lg:gap-x-12"
+        >
+          <TabsList aria-label="Secciones de progreso" className={SECTION_LIST_CLASS}>
+            {SECTION_TABS.map(({ value, label }) => (
+              <TabsTrigger key={value} value={value} className={SECTION_GROUP_STARTS.includes(value) ? 'lg:mt-5' : undefined}>{label}</TabsTrigger>
+            ))}
+          </TabsList>
+
+          <div className="min-w-0 space-y-4">
           {PERIOD_SECTIONS.includes(section) && <section aria-label="Contexto del cliente y periodo" className="space-y-2 border-y border-border py-3">
             <PeriodSelector label="Periodo de métricas y entrenamiento" value={period.preset} options={PROGRESS_PERIOD_OPTIONS}
               onChange={period.setPreset} custom={period.custom} onCustomChange={period.setCustomRange} error={period.error}
               range={range} previousRange={previousRange} effectivePreset={period.effectivePreset} />
             <p className="max-w-prose text-sm text-muted-foreground">Se aplica a Métricas y Entrenamiento · fechas UTC. Resumen usa la semana del día seleccionado; Adherencia y Fotos tienen su propia consulta. Racha muestra los contadores registrados.</p>
           </section>}
-          <div>
-          <TabsList aria-label="Secciones de progreso" className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 [&_button]:min-h-11 [&_button]:shrink-0 sm:flex-wrap [&_button]:rounded-md [&_button]:data-[state=active]:bg-brand-soft/10 [&_button]:data-[state=active]:text-foreground [&_button]:data-[state=active]:shadow-none">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="resumen">Resumen</TabsTrigger>
-            <TabsTrigger value="metricas">Métricas</TabsTrigger>
-            <TabsTrigger value="fotos">Fotos</TabsTrigger>
-            <TabsTrigger value="entrenamiento">Entrenamiento</TabsTrigger>
-            <TabsTrigger value="adherencia">Adherencia</TabsTrigger>
-            <TabsTrigger value="racha">Racha</TabsTrigger>
-            <TabsTrigger value="seguimiento">Seguimiento</TabsTrigger>
-          </TabsList>
-          </div>
 
           <TabsContent value="dashboard" className="pt-2"><ProgressDashboard key={clientId} clientId={clientId} /></TabsContent>
 
@@ -269,6 +297,7 @@ export function ProgressPage() {
             <StreakSection key={clientId} clientId={clientId} streak={clientData?.streak} isLoading={profileLoading} />
             <Button variant="outline" onClick={() => updateParams({ section: 'resumen' })}>Consultar actividad diaria en Resumen</Button>
           </TabsContent>
+          </div>
         </Tabs>
       )}
     </div>

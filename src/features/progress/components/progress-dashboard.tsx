@@ -26,7 +26,13 @@ const DASHBOARD_PERIOD_OPTIONS: readonly PeriodPreset[] = ['7d', '30d']
 const DASHBOARD_PERIOD_KEYS: PeriodParamKeys = { period: 'dashboard_period', from: 'dashboard_from', to: 'dashboard_to' }
 const adherencePercent = (global: { status: string; ratio: number | null } | undefined) =>
   global?.status === 'evaluable' && global.ratio !== null && Number.isFinite(global.ratio) ? global.ratio * 100 : null
-const linkClass = 'inline-flex min-h-11 items-center gap-1 rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+const linkClass = 'inline-flex min-h-11 items-center gap-1 rounded-sm text-sm font-medium text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+const headingClass = 'font-display text-xl font-extrabold uppercase leading-none text-foreground'
+const labelClass = 'text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted'
+const cellClass = '-ml-px -mt-px min-w-0 space-y-1 border-l border-t border-border px-5 pb-[18px] pt-4'
+const figureClass = 'font-display text-3xl font-extrabold uppercase leading-none tabular-nums text-foreground break-words sm:text-4xl'
+const sentenceClass = 'text-base font-medium leading-snug text-foreground-secondary break-words'
+const alertClass = 'min-w-0 space-y-1 border-l-2 pl-3'
 
 export function ProgressDashboard({ clientId }: { clientId: string }) {
   const [params] = useSearchParams()
@@ -70,33 +76,33 @@ export function ProgressDashboard({ clientId }: { clientId: string }) {
   const low = report && recent?.status === 'low' && recent.end < report.today && recent.end < today
   return <section aria-label="Dashboard del cliente" className="min-w-0 space-y-6">
     <header className="flex flex-wrap items-baseline justify-between gap-2">
-      <h2 className="text-xl font-semibold">Una mirada al progreso</h2>
-      <p className="text-sm text-muted-foreground">Actualizado a {displayDate(today)} · UTC</p>
+      <h2 className="font-display text-2xl font-extrabold uppercase leading-none text-foreground">Una mirada al progreso</h2>
+      <p className="text-sm text-foreground-muted">Actualizado a {displayDate(today)} · UTC</p>
       <PeriodSelector className="w-full" label="Periodo del dashboard" value={period.preset} options={DASHBOARD_PERIOD_OPTIONS} onChange={period.setPreset}
         custom={period.custom} onCustomChange={period.setCustomRange} error={period.error} range={period.range} previousRange={previousRange} effectivePreset={period.effectivePreset} />
     </header>
-    <section aria-label="Estado y cobertura" className="space-y-4 border-y border-border py-4">
-      <dl className="grid grid-cols-2 gap-x-5 gap-y-4 lg:grid-cols-4">
-        <div className="min-w-0 space-y-1"><dt className="text-sm text-muted-foreground">Peso actual</dt><dd>
+    <section aria-label="Estado y cobertura" className="space-y-4">
+      <dl className="grid grid-cols-2 overflow-hidden border-y border-border-strong lg:grid-cols-4">
+        <div className={cellClass}><dt className={labelClass}>Peso actual</dt><dd>
           <QueryContent query={historical} label="el peso histórico">
             {weight?.last?.quality === 'complete' && weight.last.value !== null && Number.isFinite(weight.last.value)
-              ? <><p className="text-3xl font-semibold tabular-nums">{number.format(weight.last.value)} kg</p><p className="text-xs text-muted-foreground">Registro: {displayDate(weight.last.date)}</p><p className="mt-2 text-sm">{weight.change !== null && weight.count > 1 ? <><strong className="font-medium tabular-nums">{weight.change > 0 ? '+' : ''}{number.format(weight.change)} kg</strong> desde inicio</> : 'Cambio no comparable'}</p>
+              ? <><p className={figureClass}>{number.format(weight.last.value)} kg</p><p className="text-xs text-muted-foreground">Registro: {displayDate(weight.last.date)}</p><p className="mt-2 text-sm">{weight.change !== null && weight.count > 1 ? <><strong className="font-medium tabular-nums">{weight.change > 0 ? '+' : ''}{number.format(weight.change)} kg</strong> desde inicio</> : 'Cambio no comparable'}</p>
                 <p className="text-sm tabular-nums text-muted-foreground">{chart.isPending ? 'Cambio en el periodo: cargando…' : chart.isError ? 'Cambio en el periodo no disponible' : `Cambio en el periodo: ${periodWeightChange === null ? 'Sin datos en el periodo' : `${periodWeightChange > 0 ? '+' : ''}${number.format(periodWeightChange)} kg`}`}</p></>
               : <p className="text-sm">Sin registros de peso</p>}
           </QueryContent>
         </dd></div>
-        <div className="min-w-0 space-y-1"><dt className="text-sm text-muted-foreground">Adherencia global</dt><dd>
+        <div className={cellClass}><dt className={labelClass}>Adherencia global</dt><dd>
           <QueryContent query={adherence} label="la adherencia">
-            <p className="text-3xl font-semibold tabular-nums">{global?.status === 'evaluable' && global.ratio !== null ? `${number.format(global.ratio * 100)} %` : global?.status === 'not_applicable' ? 'Sin componentes evaluables' : 'Información insuficiente'}</p>
+            <p className={global?.status === 'evaluable' && global.ratio !== null ? figureClass : sentenceClass}>{global?.status === 'evaluable' && global.ratio !== null ? `${number.format(global.ratio * 100)} %` : global?.status === 'not_applicable' ? 'Sin componentes evaluables' : 'Información insuficiente'}</p>
             {!previousAdherence.isPending && adherencePercent(global) !== null && <DeltaBadge current={adherencePercent(global)} previous={previousGlobal} polarity="higher-is-better" unit="p. p." />}
             <p className="text-xs text-muted-foreground">{periodLabel} · solo días cerrados</p>
           </QueryContent>
         </dd></div>
-        <div className="min-w-0 space-y-1"><dt className="text-sm text-muted-foreground">{weekly?.training_days_assigned !== undefined ? 'Días de entrenamiento esta semana' : 'Entrenamientos esta semana'}</dt><dd>
-          <QueryContent query={week} label="la semana"><p className="text-2xl font-semibold tabular-nums">{!weekly ? 'Semana no disponible' : (weekly.training_days_assigned ?? weekly.trainings_assigned) === 0 ? 'Sin pauta esta semana' : weekly.training_days_assigned !== undefined && weekly.training_days_completed !== undefined ? `${weekly.training_days_completed} / ${weekly.training_days_assigned}` : `${weekly.trainings_completed} / ${weekly.trainings_assigned}`}</p></QueryContent>
+        <div className={cellClass}><dt className={labelClass}>{weekly?.training_days_assigned !== undefined ? 'Días de entrenamiento esta semana' : 'Entrenamientos esta semana'}</dt><dd>
+          <QueryContent query={week} label="la semana"><p className={!weekly || (weekly.training_days_assigned ?? weekly.trainings_assigned) === 0 ? sentenceClass : figureClass}>{!weekly ? 'Semana no disponible' : (weekly.training_days_assigned ?? weekly.trainings_assigned) === 0 ? 'Sin pauta esta semana' : weekly.training_days_assigned !== undefined && weekly.training_days_completed !== undefined ? `${weekly.training_days_completed} / ${weekly.training_days_assigned}` : `${weekly.trainings_completed} / ${weekly.trainings_assigned}`}</p></QueryContent>
         </dd></div>
-        <div className="min-w-0 space-y-1"><dt className="text-sm text-muted-foreground">Días de dieta esta semana</dt><dd>
-          <QueryContent query={week} label="los días de dieta"><p className="text-2xl font-semibold tabular-nums">{weekly?.diet_days_assigned === undefined || weekly.diet_days_completed === undefined ? 'Días de dieta no disponibles' : weekly.diet_days_assigned === 0 ? 'Sin pauta esta semana' : `${weekly.diet_days_completed} / ${weekly.diet_days_assigned}`}</p></QueryContent>
+        <div className={cellClass}><dt className={labelClass}>Días de dieta esta semana</dt><dd>
+          <QueryContent query={week} label="los días de dieta"><p className={weekly?.diet_days_assigned === undefined || weekly.diet_days_completed === undefined || weekly.diet_days_assigned === 0 ? sentenceClass : figureClass}>{weekly?.diet_days_assigned === undefined || weekly.diet_days_completed === undefined ? 'Días de dieta no disponibles' : weekly.diet_days_assigned === 0 ? 'Sin pauta esta semana' : `${weekly.diet_days_completed} / ${weekly.diet_days_assigned}`}</p></QueryContent>
         </dd></div>
       </dl>
       <p className="text-xs text-muted-foreground">Semana UTC completa: {displayDate(weekStart)} – {displayDate(weekEnd)}. La programación futura cuenta en la semana, no genera alertas ni penaliza la adherencia cerrada.</p>
@@ -109,24 +115,24 @@ export function ProgressDashboard({ clientId }: { clientId: string }) {
     </section>
     <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(18rem,1fr)]">
     <section aria-label="Evolución del periodo" className="order-2 min-w-0 space-y-4 xl:order-1">
-      <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className="text-lg font-semibold">Evolución · {periodLabel.toLowerCase()}</h2><p className="text-sm text-muted-foreground">{displayDate(from)} – {displayDate(periodTo)} · UTC</p></div>
+      <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className={headingClass}>Evolución · {periodLabel.toLowerCase()}</h2><p className="text-sm text-muted-foreground">{displayDate(from)} – {displayDate(periodTo)} · UTC</p></div>
       <QueryContent query={chart} label="la evolución del peso">{chartData ? <MetricVisual compact series={chartData.series.filter((item) => item.key === 'weight_kg')} period={`${displayDate(from)} – ${displayDate(periodTo)}`} chartPeriod={`${displayDate(chartData.chart_from)} – ${displayDate(chartData.chart_to)}`} /> : <p className="text-sm">Evolución del peso no disponible.</p>}</QueryContent>
       <Link className={linkClass} to={href('metricas', { period: 'custom', from, to: periodTo, historyPage: '1' })}>Ver métricas de este periodo <ArrowUpRight size={14} aria-hidden="true" /></Link>
       <QueryContent query={adherence} label="la evolución de adherencia">{report ? <AdherenceEvolution days={report.days} /> : <p className="text-sm">Evolución de adherencia no disponible.</p>}</QueryContent>
     </section>
       <div className="order-1 min-w-0 space-y-5 xl:order-2">
-      <section aria-label="Próximos pasos" className="min-w-0 space-y-2"><h2 className="text-lg font-semibold">Próximos pasos</h2><NextTaskSummary query={summary} /><Link className={linkClass} to={href('seguimiento')}>Abrir seguimiento <ArrowUpRight size={14} aria-hidden="true" /></Link></section>
+      <section aria-label="Próximos pasos" className="min-w-0 space-y-2"><h2 className={headingClass}>Próximos pasos</h2><NextTaskSummary query={summary} /><Link className={linkClass} to={href('seguimiento')}>Abrir seguimiento <ArrowUpRight size={14} aria-hidden="true" /></Link></section>
       <section aria-label="Alertas importantes" className="min-w-0 space-y-3">
-        <h2 className="text-lg font-semibold">Alertas importantes</h2>
-        <QueryContent query={summary} label="las alertas de tareas">{overdue.length > 0 && <div><h3 className="text-sm font-medium">Tareas y revisiones vencidas</h3><ul>{overdue.map((task) => task && <li key={task.id}><Link className={linkClass} to={href('seguimiento')}>{task.title} · {task.due_date}</Link></li>)}</ul><p className="text-xs text-muted-foreground">Próximas acciones vencidas; consulta el resto de tareas en Seguimiento.</p></div>}</QueryContent>
+        <h2 className={headingClass}>Alertas importantes</h2>
+        <QueryContent query={summary} label="las alertas de tareas">{overdue.length > 0 && <div className={`${alertClass} border-destructive`}><h3 className="text-sm font-semibold">Tareas y revisiones vencidas</h3><ul>{overdue.map((task) => task && <li key={task.id}><Link className={linkClass} to={href('seguimiento')}>{task.title} · {task.due_date}</Link></li>)}</ul><p className="text-xs text-muted-foreground">Próximas acciones vencidas; consulta el resto de tareas en Seguimiento.</p></div>}</QueryContent>
         <QueryContent query={recaps} label="los recaps pendientes">
-          {submitted.length > 0 && <div><h3 className="text-sm font-medium">Recaps enviados pendientes de revisión</h3><ul>{submitted.map((recap) => <li key={recap.id}><Link className={linkClass} to={`/recaps/${recap.id}?returnTo=${encodeURIComponent(href('dashboard'))}`}>Recap · {recap.week_start_date.slice(0, 10)} – {recap.week_end_date.slice(0, 10)}</Link></li>)}</ul></div>}
+          {submitted.length > 0 && <div className={`${alertClass} border-border-strong`}><h3 className="text-sm font-semibold">Recaps enviados pendientes de revisión</h3><ul>{submitted.map((recap) => <li key={recap.id}><Link className={linkClass} to={`/recaps/${recap.id}?returnTo=${encodeURIComponent(href('dashboard'))}`}>Recap · {recap.week_start_date.slice(0, 10)} – {recap.week_end_date.slice(0, 10)}</Link></li>)}</ul></div>}
           {recaps.data && recaps.data.totalPages > 1 && <Link className={linkClass} to={href('seguimiento')}>Consultar todos los recaps en Seguimiento</Link>}
         </QueryContent>
         <QueryContent query={adherence} label="las alertas de adherencia">
-          {low && recent && <div><h3 className="text-sm font-medium">Baja adherencia global</h3><Link className={linkClass} to={href('adherencia', { adherence_start: recent.start, adherence_end: recent.end })}>Revisar los siete días cerrados · umbral individual del servidor</Link></div>}
-          {closedDays.length > 0 && <div><h3 className="text-sm font-medium">Días cerrados sin completar · {closedDays.length}</h3><details><summary className={`${linkClass} cursor-pointer`}>Ver días con entrenamiento o dieta pendientes</summary><ul>{closedDays.map((day) => <li key={day.date}><Link className={linkClass} to={href('adherencia', { adherence_start: day.date, adherence_end: day.date })}>{day.date} · {day.calendar === 'partial' ? 'Cumplimiento parcial' : 'Sin cumplimiento registrado'}</Link></li>)}</ul></details></div>}
-          {!low && closedDays.length === 0 && report && <p className="text-sm text-muted-foreground">Sin avisos de incumplimiento en los días cerrados disponibles. No acredita cobertura completa.</p>}
+          {low && recent && <div className={`${alertClass} border-status-warning`}><h3 className="text-sm font-semibold">Baja adherencia global</h3><Link className={linkClass} to={href('adherencia', { adherence_start: recent.start, adherence_end: recent.end })}>Revisar los siete días cerrados · umbral individual del servidor</Link></div>}
+          {closedDays.length > 0 && <div className={`${alertClass} border-status-warning`}><h3 className="text-sm font-semibold">Días cerrados sin completar · {closedDays.length}</h3><details><summary className={`${linkClass} cursor-pointer`}>Ver días con entrenamiento o dieta pendientes</summary><ul>{closedDays.map((day) => <li key={day.date}><Link className={linkClass} to={href('adherencia', { adherence_start: day.date, adherence_end: day.date })}>{day.date} · {day.calendar === 'partial' ? 'Cumplimiento parcial' : 'Sin cumplimiento registrado'}</Link></li>)}</ul></details></div>}
+          {!low && closedDays.length === 0 && report && <p className="text-sm text-foreground-muted">Sin avisos de incumplimiento en los días cerrados disponibles. No acredita cobertura completa.</p>}
         </QueryContent>
       </section>
     </div>

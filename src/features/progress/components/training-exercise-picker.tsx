@@ -23,7 +23,7 @@ export function TrainingExercisePicker({ clientId, from, to, selected, onSelect 
   return <Popover open={open} onOpenChange={setOpen}>
     <PopoverTrigger asChild>
       <Button variant="outline" role="combobox" aria-label="Ejercicio para evolución de cargas" aria-expanded={open} aria-controls={listId}
-        className="h-auto min-h-10 w-full justify-between gap-2 text-left">
+        className="h-auto min-h-11 w-full justify-between gap-2 text-left md:min-h-10">
         <span className="min-w-0 whitespace-normal break-words">{selected?.exercise_name || 'Selecciona un ejercicio'}</span>
         <ChevronsUpDown className="h-4 w-4 shrink-0" aria-hidden="true" />
       </Button>
