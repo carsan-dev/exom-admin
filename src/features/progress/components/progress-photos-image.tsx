@@ -20,7 +20,7 @@ export function ProgressPhotosImage({ src, alt, enlarged, onEnlarge }: ProgressP
     onLoad={() => setLoaded(true)} onError={() => setFailed(true)}
     className={enlarged ? 'max-h-[60svh] w-full object-contain' : 'aspect-[3/4] max-h-[34rem] w-full object-contain'} />
 
-  return <div ref={container} tabIndex={-1} className="relative overflow-hidden rounded-md bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+  return <div ref={container} tabIndex={-1} className="relative overflow-hidden rounded-md border border-border-strong bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
     {failed ? <div className="flex min-h-64 flex-col items-center justify-center gap-3 p-6 text-center">
       <p role="alert" className="text-sm">No se pudo cargar la imagen. La foto sigue registrada en la sesión.</p>
       <Button type="button" variant="outline" className="motion-reduce:transition-none" aria-label={`Reintentar imagen ${alt}`} onClick={() => {
@@ -30,11 +30,11 @@ export function ProgressPhotosImage({ src, alt, enlarged, onEnlarge }: ProgressP
         container.current?.focus()
       }}><RefreshCw className="h-4 w-4" />Reintentar imagen</Button>
     </div> : <>
-      {!loaded && <span role="status" className="absolute left-3 top-3 rounded bg-background px-2 py-1 text-xs">Cargando imagen…</span>}
+      {!loaded && <span role="status" className="absolute left-3 top-3 rounded bg-background px-2 py-1 text-xs text-foreground-muted">Cargando imagen…</span>}
       {onEnlarge ? <button type="button" aria-label={`Ampliar ${alt}`} onClick={(event) => onEnlarge(event.currentTarget)}
         className="block w-full text-left transition-colors duration-150 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none">
         {image}
-        <span className="flex items-center justify-center gap-2 border-t p-3 text-sm"><Maximize2 className="h-4 w-4" />Ampliar imagen</span>
+        <span className="flex min-h-11 items-center justify-center gap-2 border-t border-border p-3 text-sm text-foreground"><Maximize2 className="h-4 w-4" />Ampliar imagen</span>
       </button> : image}
     </>}
   </div>
