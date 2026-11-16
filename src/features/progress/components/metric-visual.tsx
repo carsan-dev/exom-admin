@@ -128,7 +128,7 @@ export function MetricVisual({ series, period, chartPeriod, compact = false, sel
     {!compact && observationSummary}
     <div className="flex flex-wrap items-center justify-between gap-3">
       <h3 className="text-sm font-semibold text-foreground">Observaciones del histórico · {metric.unit}</h3>
-      {!rating(metric.unit) && plotted.length > 0 && <ChartScaleSelect value={scale} onValueChange={setScale} />}
+      {!rating(metric.unit) && plotted.length > 0 && <div className="[&_button[role=combobox]]:min-h-11 md:[&_button[role=combobox]]:min-h-10"><ChartScaleSelect value={scale} onValueChange={setScale} /></div>}
     </div>
     {!compact && <p className="text-sm text-foreground-muted">Ventana gráfica: {chartPeriod}. No estimamos valores entre fechas; solo se muestran observaciones completas. Las líneas son una guía visual entre ellas; los registros incompletos interrumpen la guía.</p>}
     {plotted.length === 0 ? <p className="rounded-md border border-border bg-muted p-4 text-sm text-foreground">Sin observaciones completas en esta página del histórico. Consulta otra página o selecciona otra medición.</p> :

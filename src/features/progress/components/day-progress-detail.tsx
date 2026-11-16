@@ -163,7 +163,7 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                   <StickyNote className="h-4 w-4 text-foreground-muted" />
                   <span className="text-sm font-semibold text-foreground">Nota del cliente</span>
                 </div>
-                <blockquote className="whitespace-pre-wrap break-words border-l-2 border-border-strong pl-3 text-sm text-foreground">{progress.notes}</blockquote>
+                <p className="whitespace-pre-wrap break-words border-l-2 border-border-strong pl-3 text-sm text-foreground">{progress.notes}</p>
 
                 <div className="space-y-2">
                   <label

@@ -45,10 +45,11 @@ const SECTION_TABS = [
 const SECTION_GROUP_STARTS: readonly string[] = ['metricas', 'adherencia', 'seguimiento']
 /** Below lg a single scrolling row with the shared underline; from lg a sticky vertical rail. */
 const SECTION_LIST_CLASS = [
-  'h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0',
+  'h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 sm:flex-wrap',
   '[&_button]:min-h-11 [&_button]:shrink-0 [&_button]:rounded-md',
-  'lg:sticky lg:top-4 lg:flex lg:flex-col lg:items-stretch lg:gap-0 lg:overflow-visible lg:border-b-0',
+  'lg:sticky lg:top-4 lg:flex lg:flex-col lg:flex-nowrap lg:items-stretch lg:gap-0 lg:overflow-visible lg:border-b-0',
   'lg:[&>[data-slot=tabs-indicator]]:hidden lg:[&_button]:justify-start lg:[&_button]:px-3',
+  'lg:[&_button]:border-l-2 lg:[&_button]:border-transparent lg:[&_button]:data-[state=active]:border-primary',
   'lg:[&_button]:data-[state=active]:bg-lime-soft',
 ].join(' ')
 

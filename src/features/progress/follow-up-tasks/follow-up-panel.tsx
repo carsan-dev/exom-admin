@@ -49,7 +49,7 @@ function ClientTasks({ clientId, identity, onGuard }: PanelProps & { identity: s
     <div className="space-y-1"><h2 className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Seguimiento</h2><p className="text-sm text-foreground-secondary">Tareas internas del equipo. El vencimiento se consulta en UTC, independientemente del periodo de métricas.</p></div>
     <NextTaskSummary query={summary} />
     <Tabs defaultValue="tasks" className="space-y-4">
-      <TabsList aria-label="Organización de seguimiento"><TabsTrigger value="tasks">Tareas</TabsTrigger><TabsTrigger value="recaps">Recaps</TabsTrigger></TabsList>
+      <TabsList aria-label="Organización de seguimiento" className="max-md:h-auto max-md:[&_button]:min-h-11"><TabsTrigger value="tasks">Tareas</TabsTrigger><TabsTrigger value="recaps">Recaps</TabsTrigger></TabsList>
       <TabsContent value="recaps"><RecapsList clientId={clientId} archived={false} page={recapPage} onPageChange={setRecapPage} returnTo={`${location.pathname}${location.search}`} /></TabsContent>
       <TabsContent value="tasks" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">

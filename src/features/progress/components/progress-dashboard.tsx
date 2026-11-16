@@ -31,6 +31,7 @@ const headingClass = 'font-display text-xl font-extrabold uppercase leading-none
 const labelClass = 'text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted'
 const cellClass = '-ml-px -mt-px min-w-0 space-y-1 border-l border-t border-border px-5 pb-[18px] pt-4'
 const figureClass = 'font-display text-3xl font-extrabold uppercase leading-none tabular-nums text-foreground break-words sm:text-4xl'
+const sentenceClass = 'text-base font-medium leading-snug text-foreground-secondary break-words'
 const alertClass = 'min-w-0 space-y-1 border-l-2 pl-3'
 
 export function ProgressDashboard({ clientId }: { clientId: string }) {
@@ -92,16 +93,16 @@ export function ProgressDashboard({ clientId }: { clientId: string }) {
         </dd></div>
         <div className={cellClass}><dt className={labelClass}>Adherencia global</dt><dd>
           <QueryContent query={adherence} label="la adherencia">
-            <p className={figureClass}>{global?.status === 'evaluable' && global.ratio !== null ? `${number.format(global.ratio * 100)} %` : global?.status === 'not_applicable' ? 'Sin componentes evaluables' : 'Información insuficiente'}</p>
+            <p className={global?.status === 'evaluable' && global.ratio !== null ? figureClass : sentenceClass}>{global?.status === 'evaluable' && global.ratio !== null ? `${number.format(global.ratio * 100)} %` : global?.status === 'not_applicable' ? 'Sin componentes evaluables' : 'Información insuficiente'}</p>
             {!previousAdherence.isPending && adherencePercent(global) !== null && <DeltaBadge current={adherencePercent(global)} previous={previousGlobal} polarity="higher-is-better" unit="p. p." />}
             <p className="text-xs text-muted-foreground">{periodLabel} · solo días cerrados</p>
           </QueryContent>
         </dd></div>
         <div className={cellClass}><dt className={labelClass}>{weekly?.training_days_assigned !== undefined ? 'Días de entrenamiento esta semana' : 'Entrenamientos esta semana'}</dt><dd>
-          <QueryContent query={week} label="la semana"><p className={figureClass}>{!weekly ? 'Semana no disponible' : (weekly.training_days_assigned ?? weekly.trainings_assigned) === 0 ? 'Sin pauta esta semana' : weekly.training_days_assigned !== undefined && weekly.training_days_completed !== undefined ? `${weekly.training_days_completed} / ${weekly.training_days_assigned}` : `${weekly.trainings_completed} / ${weekly.trainings_assigned}`}</p></QueryContent>
+          <QueryContent query={week} label="la semana"><p className={!weekly || (weekly.training_days_assigned ?? weekly.trainings_assigned) === 0 ? sentenceClass : figureClass}>{!weekly ? 'Semana no disponible' : (weekly.training_days_assigned ?? weekly.trainings_assigned) === 0 ? 'Sin pauta esta semana' : weekly.training_days_assigned !== undefined && weekly.training_days_completed !== undefined ? `${weekly.training_days_completed} / ${weekly.training_days_assigned}` : `${weekly.trainings_completed} / ${weekly.trainings_assigned}`}</p></QueryContent>
         </dd></div>
         <div className={cellClass}><dt className={labelClass}>Días de dieta esta semana</dt><dd>
-          <QueryContent query={week} label="los días de dieta"><p className={figureClass}>{weekly?.diet_days_assigned === undefined || weekly.diet_days_completed === undefined ? 'Días de dieta no disponibles' : weekly.diet_days_assigned === 0 ? 'Sin pauta esta semana' : `${weekly.diet_days_completed} / ${weekly.diet_days_assigned}`}</p></QueryContent>
+          <QueryContent query={week} label="los días de dieta"><p className={weekly?.diet_days_assigned === undefined || weekly.diet_days_completed === undefined || weekly.diet_days_assigned === 0 ? sentenceClass : figureClass}>{weekly?.diet_days_assigned === undefined || weekly.diet_days_completed === undefined ? 'Días de dieta no disponibles' : weekly.diet_days_assigned === 0 ? 'Sin pauta esta semana' : `${weekly.diet_days_completed} / ${weekly.diet_days_assigned}`}</p></QueryContent>
         </dd></div>
       </dl>
       <p className="text-xs text-muted-foreground">Semana UTC completa: {displayDate(weekStart)} – {displayDate(weekEnd)}. La programación futura cuenta en la semana, no genera alertas ni penaliza la adherencia cerrada.</p>

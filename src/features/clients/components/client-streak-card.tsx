@@ -24,13 +24,16 @@ export function ClientStreakCard({ streak, isLoading, action }: ClientStreakCard
       <p className="max-w-prose text-sm text-foreground-secondary">{streak === null ? 'El cliente todavía no tiene una racha registrada.' : 'Racha no disponible.'} No equivale a una racha de cero días.</p> : <>
         <FigureStrip
           aria-label="Contadores de racha"
-          className="lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3"
+          className="lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-2"
           items={[
             { label: 'Racha actual', value: `${streak.current_days} días` },
             { label: 'Mejor récord', value: `${streak.longest_days} días` },
-            { label: 'Última actividad · UTC', value: streak.last_active_date ? dateFormatter.format(new Date(streak.last_active_date)) : 'Fecha no disponible' },
           ]}
         />
+        <dl aria-label="Última actividad" className="border-b border-border-strong px-5 pb-4">
+          <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Última actividad · UTC</dt>
+          <dd className="mt-2 text-base font-medium text-foreground">{streak.last_active_date ? dateFormatter.format(new Date(streak.last_active_date)) : 'Fecha no disponible'}</dd>
+        </dl>
         <p className="max-w-prose text-sm text-foreground-secondary">No se dispone del historial de rachas ni de los motivos de interrupción. La última actividad no permite reconstruir qué ocurrió en los días anteriores.</p>
         {action ? <div className="flex flex-wrap items-center gap-2">{action}</div> : null}
       </>}
