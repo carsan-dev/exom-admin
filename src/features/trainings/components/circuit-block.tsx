@@ -48,32 +48,34 @@ export function CircuitBlock({
   onAddExercise,
 }: CircuitBlockProps) {
   return (
-    <div className="rounded-lg border border-brand-soft/40 bg-brand-soft/10 p-3 space-y-3">
-      <div className="flex items-center gap-2">
-        <div className="flex flex-col gap-0.5">
+    <div className="space-y-3 py-4">
+      <div className="flex items-start gap-2">
+        <div className="flex flex-none gap-0.5 md:flex-col">
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-5 w-5 p-0"
+            className="size-8 p-0 max-md:size-11"
             onClick={onMoveUp}
             disabled={index === 0}
+            aria-label={`Subir ${item.name || 'circuito'}`}
           >
-            <ChevronUp className="h-3 w-3" />
+            <ChevronUp className="h-4 w-4" />
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-5 w-5 p-0"
+            className="size-8 p-0 max-md:size-11"
             onClick={onMoveDown}
             disabled={index === count - 1}
+            aria-label={`Bajar ${item.name || 'circuito'}`}
           >
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-4 w-4" />
           </Button>
         </div>
-        <Repeat className="h-4 w-4 text-accent-text" />
-        <div className="flex-1 min-w-0">
+        <Repeat className="mt-2 h-4 w-4 flex-none text-accent-text" aria-hidden="true" />
+        <div className="min-w-0 flex-1 pt-1">
           <p className="text-sm font-semibold text-foreground">Circuito · {item.rounds} rondas</p>
           <p className="text-xs text-muted-foreground">
             {item.exercises.length} ejercicio{item.exercises.length !== 1 ? 's' : ''}
@@ -83,15 +85,16 @@ export function CircuitBlock({
           type="button"
           variant="ghost"
           size="sm"
-          className="h-7 w-7 p-0 text-muted-foreground hover:text-status-error"
+          className="size-8 flex-none p-0 text-muted-foreground hover:text-status-error max-md:size-11"
           onClick={onRemove}
+          aria-label={`Quitar ${item.name || "circuito"}`}
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-3">
-        <div className="space-y-1">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="col-span-2 space-y-1 sm:col-span-1">
           <label className="text-xs text-muted-foreground">Nombre</label>
           <Input
             value={item.name}
@@ -123,7 +126,7 @@ export function CircuitBlock({
         </div>
       </div>
 
-      <div className="space-y-2 rounded-md border border-border/60 bg-background/60 p-2">
+      <div className="ml-4 divide-y divide-border border-y border-l border-border pl-3 md:ml-10">
         {item.exercises.map((nested, nestedIndex) => (
           <CircuitExerciseRow
             key={`${nested.exercise_id}-${nestedIndex}`}
@@ -142,7 +145,7 @@ export function CircuitBlock({
           type="button"
           variant="outline"
           size="sm"
-          className="w-full"
+          className="my-2 w-full max-md:h-11"
           onClick={onAddExercise}
         >
           <Plus className="h-4 w-4" />

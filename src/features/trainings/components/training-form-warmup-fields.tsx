@@ -11,12 +11,10 @@ interface TrainingFormWarmupFieldsProps {
 
 export function TrainingFormWarmupFields({ form, sectionRef }: TrainingFormWarmupFieldsProps) {
   return (
-    <div ref={sectionRef} className="space-y-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Calentamiento y vuelta a la calma
-      </p>
+    <div ref={sectionRef} className="min-w-0 space-y-4">
+      <p className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Calentamiento y vuelta a la calma</p>
 
-      <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
         <FormField
           control={form.control}
           name="warmup_description"

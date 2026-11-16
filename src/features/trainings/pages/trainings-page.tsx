@@ -436,6 +436,7 @@ export function TrainingsPage() {
             count={selectedIds.size}
             disabled={organizationPending}
             onMove={() => setMoveDialogOpen(true)}
+            onClear={() => setSelectedIds(new Set())}
           />
         )}
         <CatalogGroupDialog

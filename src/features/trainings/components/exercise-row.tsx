@@ -1,10 +1,9 @@
 import type { ComponentProps } from 'react'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Tag } from '@/components/ui/tag'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
-import { getLevelBadgeClass, LEVEL_LABELS, type Exercise } from '../../exercises/types'
+import { LEVEL_LABELS, type Exercise } from '../../exercises/types'
 import type { TrainingItemFormValues } from '../schemas'
 import { PrescriptionFields } from './prescription-fields'
 import { TimedPrescriptionEditor } from './timed-prescription-editor'
@@ -35,58 +34,49 @@ export function ExerciseRow({
   onTimedChange,
 }: ExerciseRowProps) {
   return (
-    <div className="rounded-lg border border-border/70 bg-muted/30 p-3 space-y-3">
+    <div className="space-y-3 py-4">
       {/* Row: order controls + exercise name + delete */}
-      <div className="flex items-center gap-2">
-        <div className="flex flex-col gap-0.5">
+      <div className="flex items-start gap-2">
+        <div className="flex flex-none gap-0.5 md:flex-col">
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+            className="size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11"
             onClick={onMoveUp}
             disabled={index === 0}
+            aria-label={`Subir ${exercise?.name ?? 'ejercicio'}`}
           >
-            <ChevronUp className="h-3 w-3" />
+            <ChevronUp className="h-4 w-4" />
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+            className="size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11"
             onClick={onMoveDown}
             disabled={index === count - 1}
+            aria-label={`Bajar ${exercise?.name ?? 'ejercicio'}`}
           >
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-4 w-4" />
           </Button>
         </div>
 
-        <span className="text-xs font-medium text-muted-foreground w-5 text-center">
+        <span className="w-5 flex-none pt-2 text-center text-xs font-medium tabular-nums text-muted-foreground max-md:hidden">
           {index + 1}
         </span>
 
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate text-foreground">
+        <div className="min-w-0 flex-1 pt-1">
+          <p className="break-words text-sm font-medium text-foreground [overflow-wrap:anywhere]">
             {exercise?.name ?? (
               <span className="text-muted-foreground italic">Ejercicio no encontrado</span>
             )}
           </p>
           {exercise && (
-            <div className="flex flex-wrap gap-1 mt-0.5">
-              <Badge
-                variant="outline"
-                className={cn('text-xs h-4 px-1', getLevelBadgeClass(exercise.level))}
-              >
-                {LEVEL_LABELS[exercise.level]}
-              </Badge>
+            <div className="mt-1.5 flex flex-wrap gap-1">
+              <Tag>{LEVEL_LABELS[exercise.level]}</Tag>
               {exercise.muscle_groups.slice(0, 2).map((mg) => (
-                <Badge
-                  key={mg}
-                  variant="outline"
-                  className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-accent-text"
-                >
-                  {mg}
-                </Badge>
+                <Tag key={mg}>{mg}</Tag>
               ))}
             </div>
           )}
@@ -96,15 +86,16 @@ export function ExerciseRow({
           type="button"
           variant="ghost"
           size="sm"
-          className="h-7 w-7 p-0 text-muted-foreground hover:text-status-error flex-none"
+          className="size-8 flex-none p-0 text-muted-foreground hover:text-status-error max-md:size-11"
           onClick={onRemove}
+          aria-label={`Quitar ${exercise?.name ?? 'ejercicio'}`}
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Prescription fields */}
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-5">
         <div className="space-y-1">
           <label className="text-xs text-muted-foreground">Series</label>
           <Input
@@ -149,7 +140,7 @@ export function ExerciseRow({
           </p>
         </div>
       </div>
-      <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+      <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground max-md:min-h-11">
         <input
           type="checkbox"
           checked={item.request_set_tracking}

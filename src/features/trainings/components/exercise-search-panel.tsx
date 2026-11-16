@@ -1,9 +1,9 @@
 import { Search } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Tag } from '@/components/ui/tag'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
-import { getLevelBadgeClass, LEVEL_LABELS, type Exercise } from '../../exercises/types'
+import { LEVEL_LABELS, type Exercise } from '../../exercises/types'
 import type { TrainingItemFormValues } from '../schemas'
 
 interface ExerciseSearchPanelProps {
@@ -26,7 +26,7 @@ export function ExerciseSearchPanel({
   onCancel,
 }: ExerciseSearchPanelProps) {
   return (
-    <div className="rounded-lg border border-border/70 bg-background p-3 space-y-2">
+    <div className="space-y-2 border border-border-strong bg-background-surface p-3">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -45,7 +45,7 @@ export function ExerciseSearchPanel({
           {search ? `No hay resultados para "${search}"` : 'No hay ejercicios disponibles'}
         </p>
       ) : (
-        <div className="max-h-48 overflow-y-auto space-y-1">
+        <div className="max-h-64 divide-y divide-border overflow-y-auto">
           {filteredExercises.map((exercise) => {
             const selectedCount = value.reduce((count, item) => {
               if (item.kind === 'EXERCISE') {
@@ -63,26 +63,15 @@ export function ExerciseSearchPanel({
                 type="button"
                 onClick={() => onAdd(exercise.id)}
                 className={cn(
-                  'w-full flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-muted cursor-pointer'
+                  'flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-muted max-md:min-h-11'
                 )}
               >
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate text-foreground">{exercise.name}</p>
                   <div className="flex flex-wrap gap-1 mt-0.5">
-                    <Badge
-                      variant="outline"
-                      className={cn('text-xs h-4 px-1', getLevelBadgeClass(exercise.level))}
-                    >
-                      {LEVEL_LABELS[exercise.level]}
-                    </Badge>
+                    <Tag>{LEVEL_LABELS[exercise.level]}</Tag>
                     {exercise.muscle_groups.slice(0, 2).map((mg) => (
-                      <Badge
-                        key={mg}
-                        variant="outline"
-                        className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-accent-text"
-                      >
-                        {mg}
-                      </Badge>
+                      <Tag key={mg}>{mg}</Tag>
                     ))}
                   </div>
                 </div>

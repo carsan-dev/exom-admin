@@ -245,7 +245,7 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
   }
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-4">
       <ExercisePickerHeader
         exerciseCount={exerciseCount}
         trackedCount={trackedCount}
@@ -255,7 +255,7 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
 
       {/* Exercise list */}
       {value.length > 0 && (
-        <div className="space-y-2">
+        <div className="divide-y divide-border border-y border-border">
           {value.map((item, index) => {
             if (item.kind === 'CIRCUIT') {
               return (

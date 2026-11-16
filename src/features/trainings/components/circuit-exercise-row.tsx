@@ -34,45 +34,48 @@ export function CircuitExerciseRow({
   onTimedChange,
 }: CircuitExerciseRowProps) {
   return (
-    <div className="space-y-2 rounded-md border border-border/60 bg-muted/20 p-2">
+    <div className="space-y-2 py-3">
       <div className="flex items-center gap-2">
-        <div className="flex gap-0.5">
+        <div className="flex flex-none gap-0.5">
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0"
+            className="size-8 p-0 max-md:size-11"
             onClick={() => onMove(-1)}
             disabled={nestedIndex === 0}
+            aria-label={`Subir ${exercise?.name ?? 'ejercicio'}`}
           >
-            <ChevronUp className="h-3 w-3" />
+            <ChevronUp className="h-4 w-4" />
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0"
+            className="size-8 p-0 max-md:size-11"
             onClick={() => onMove(1)}
             disabled={nestedIndex === count - 1}
+            aria-label={`Bajar ${exercise?.name ?? 'ejercicio'}`}
           >
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-4 w-4" />
           </Button>
         </div>
-        <span className="text-xs font-medium text-muted-foreground">{nestedIndex + 1}</span>
-        <p className="flex-1 truncate text-sm font-medium text-foreground">
+        <span className="text-xs font-medium tabular-nums text-muted-foreground max-md:hidden">{nestedIndex + 1}</span>
+        <p className="min-w-0 flex-1 break-words text-sm font-medium text-foreground [overflow-wrap:anywhere]">
           {exercise?.name ?? 'Ejercicio no encontrado'}
         </p>
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className="h-7 w-7 p-0 text-muted-foreground hover:text-status-error"
+          className="size-8 flex-none p-0 text-muted-foreground hover:text-status-error max-md:size-11"
           onClick={onRemove}
+          aria-label={`Quitar ${exercise?.name ?? "ejercicio"}`}
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-4 w-4" />
         </Button>
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {nested.measure_type === 'SECONDS' && (
           <TimedPrescriptionEditor
             total={nested.target_value}
@@ -104,7 +107,7 @@ export function CircuitExerciseRow({
           />
         </div>
       </div>
-      <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+      <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground max-md:min-h-11">
         <input
           type="checkbox"
           checked={nested.request_set_tracking}

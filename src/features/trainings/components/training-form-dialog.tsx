@@ -5,9 +5,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { clearUnsavedChanges, useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Form } from '@/components/ui/form'
 import { Separator } from '@/components/ui/separator'
+import { Workbench } from '@/components/workspace/workbench'
 import { isApprovalPendingError } from '@/lib/api-utils'
 import { getApiErrorMessage, useCreateTraining, useUpdateTraining } from '../api'
 import { trainingSchema, type TrainingFormValues } from '../schemas'
@@ -28,6 +28,8 @@ interface TrainingFormDialogProps {
   importIssues?: string[]
   onSaved?: () => void
 }
+
+const FORM_ID = 'training-form-dialog'
 
 const defaultValues: TrainingFormValues = {
   name: '',
@@ -164,44 +166,49 @@ export function TrainingFormDialog({
   )
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        disableOutsideClose
-        ref={dialogContentRef}
-        className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6"
-      >
-        <TrainingFormHeader
-          title={dialogTitle}
-          description={dialogDescription}
-          importIssues={importIssues}
+    <Workbench
+      open={open}
+      onOpenChange={onOpenChange}
+      title={dialogTitle}
+      description={dialogDescription}
+      disableOutsideClose
+      footer={
+        <TrainingFormFooter
+          formId={FORM_ID}
+          isPending={isPending}
+          isEditing={isEditing}
+          isDuplicate={isDuplicate}
+          onCancel={() => onOpenChange(false)}
         />
+      }
+    >
+      <div ref={dialogContentRef} className="mx-auto w-full min-w-0 max-w-7xl px-4 py-6 md:px-8 md:py-8">
+        <TrainingFormHeader importIssues={importIssues} />
 
         <Form {...form}>
-          <form onSubmit={handleSubmit} className="min-w-0 space-y-5">
-            <TrainingFormGeneralFields
-              form={form}
-              sectionRef={generalSectionRef}
-              colorInputInstanceKey={colorInputInstanceKey}
-            />
+          <form id={FORM_ID} onSubmit={handleSubmit} className="min-w-0">
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,27rem)_minmax(0,1fr)] lg:gap-0">
+              <div className="min-w-0 space-y-8 lg:pr-10">
+                <TrainingFormGeneralFields
+                  form={form}
+                  sectionRef={generalSectionRef}
+                  colorInputInstanceKey={colorInputInstanceKey}
+                />
 
-            <Separator />
+                <Separator />
 
-            <TrainingFormWarmupFields form={form} sectionRef={warmupSectionRef} />
+                <TrainingFormWarmupFields form={form} sectionRef={warmupSectionRef} />
+              </div>
 
-            <Separator />
+              <div className="min-w-0 space-y-8 border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+                <TrainingFormExercisesSection form={form} sectionRef={exercisesSectionRef} />
 
-            <TrainingFormExercisesSection form={form} sectionRef={exercisesSectionRef} />
-
-            <RirProposalEditor form={form} />
-            <TrainingFormFooter
-              isPending={isPending}
-              isEditing={isEditing}
-              isDuplicate={isDuplicate}
-              onCancel={() => onOpenChange(false)}
-            />
+                <RirProposalEditor form={form} />
+              </div>
+            </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </Workbench>
   )
 }

@@ -35,7 +35,7 @@ export function AiImportPromptDialog({
 }: AiImportPromptDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-y-auto sm:max-w-3xl">
+      <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader className="pr-8">
           <DialogTitle>Prompt para generar JSON compatible</DialogTitle>
           <DialogDescription>

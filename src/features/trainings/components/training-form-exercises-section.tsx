@@ -15,7 +15,7 @@ export function TrainingFormExercisesSection({
   sectionRef,
 }: TrainingFormExercisesSectionProps) {
   return (
-    <div ref={sectionRef}>
+    <div ref={sectionRef} className="min-w-0">
       <FormField
         control={form.control}
         name="items"

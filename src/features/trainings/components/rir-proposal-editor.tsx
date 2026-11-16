@@ -10,10 +10,10 @@ export function RirProposalEditor({ form }: { form: UseFormReturn<TrainingFormVa
   const sequence = useWatch({ control: form.control, name: 'rir_proposal' })
   const items = useWatch({ control: form.control, name: 'items' })
   return (
-    <section className="space-y-4 rounded-xl border border-border p-5">
+    <section className="min-w-0 space-y-4 border-t border-border pt-8">
       <div>
-        <h3 className="font-semibold">Propuesta de mesociclo de RIR</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Propuesta de mesociclo de RIR</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
           Plantilla opcional para cargar al asignar a un cliente. Editarla conserva los ciclos ya
           activados y el RIR fijo de los ejercicios.
         </p>

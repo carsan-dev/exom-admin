@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button'
-import { DialogFooter } from '@/components/ui/dialog'
 
 interface TrainingFormFooterProps {
   isPending: boolean
   isEditing: boolean
   isDuplicate: boolean
   onCancel: () => void
+  /** Id del `<form>`: las acciones viven en el pie del Workbench, fuera del formulario. */
+  formId: string
 }
 
 export function TrainingFormFooter({
@@ -13,13 +14,14 @@ export function TrainingFormFooter({
   isEditing,
   isDuplicate,
   onCancel,
+  formId,
 }: TrainingFormFooterProps) {
   return (
-    <DialogFooter>
-      <Button type="button" variant="outline" onClick={onCancel}>
+    <>
+      <Button type="button" variant="outline" onClick={onCancel} className="max-md:h-11">
         Cancelar
       </Button>
-      <Button type="submit" disabled={isPending}>
+      <Button type="submit" form={formId} disabled={isPending} className="max-md:h-11">
         {isPending
           ? isEditing
             ? 'Guardando...'
@@ -32,6 +34,6 @@ export function TrainingFormFooter({
               ? 'Crear copia'
               : 'Crear entrenamiento'}
       </Button>
-    </DialogFooter>
+    </>
   )
 }

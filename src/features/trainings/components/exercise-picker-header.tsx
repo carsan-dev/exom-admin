@@ -12,10 +12,10 @@ export function ExercisePickerHeader({
   onSetAllTracking,
 }: ExercisePickerHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
-      <p className="text-sm font-medium leading-none">Ejercicios</p>
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <p className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Ejercicios</p>
       {exerciseCount > 0 && (
-        <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground max-md:min-h-11">
           <input
             type="checkbox"
             checked={allTracked}

@@ -1,17 +1,24 @@
 import { Button } from '@/components/ui/button'
+import { SelectionBar } from '@/components/workspace/selection-bar'
 
 interface TrainingsSelectionBarProps {
   count: number
   disabled: boolean
   onMove: () => void
+  onClear: () => void
 }
 
-export function TrainingsSelectionBar({ count, disabled, onMove }: TrainingsSelectionBarProps) {
+export function TrainingsSelectionBar({ count, disabled, onMove, onClear }: TrainingsSelectionBarProps) {
   return (
-    <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 rounded-full border bg-card p-2 shadow-lg">
-      <Button disabled={disabled} onClick={onMove}>
+    <SelectionBar
+      count={count}
+      onClear={onClear}
+      aria-label="Acciones de selección de entrenamientos"
+      className="fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px)+12px)] left-4 right-4 z-40 mt-0 w-auto max-md:overflow-x-visible md:bottom-6 md:left-1/2 md:right-auto md:w-auto md:min-w-96 md:-translate-x-1/2"
+    >
+      <Button disabled={disabled} onClick={onMove} className="max-md:h-11">
         Mover a grupo ({count})
       </Button>
-    </div>
+    </SelectionBar>
   )
 }

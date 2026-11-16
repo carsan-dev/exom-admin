@@ -1,9 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useId } from 'react'
 import {
   FilterToolbar,
   type FilterSectionConfig,
   type UseListFiltersResult,
 } from '@/components/filters'
+import { EmptyState } from '@/components/page'
 import type { SortDir } from '@/lib/sort-search-params'
 import type { CatalogValueWithColor, Training } from '../types'
 import { TrainingsPaginationBar } from './trainings-pagination-bar'
@@ -62,53 +63,56 @@ export function TrainingsListPanel({
   onPreviousPage,
   onNextPage,
 }: TrainingsListPanelProps) {
+  const titleId = useId()
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">{title}</CardTitle>
-        <CardDescription>
+    <section aria-labelledby={titleId} className="min-w-0 space-y-4">
+      <div>
+        <h2 id={titleId} className="font-display text-lg font-bold uppercase leading-none text-foreground">
+          {title}
+        </h2>
+        <p className="mt-1 text-[13px] text-foreground-secondary">
           Vista paginada del catálogo con búsqueda y acciones por entrenamiento
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <FilterToolbar
-          search={search}
-          onSearchChange={onSearchChange}
-          searchPlaceholder="Buscar por nombre..."
-          sections={sections}
-          filters={filters}
-        />
+        </p>
+      </div>
 
-        {trainings.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            No se encontraron entrenamientos con la búsqueda y filtros actuales.
-          </p>
-        ) : (
-          <TrainingsTable
-            trainings={trainings}
-            approvalById={approvalById}
-            onView={onView}
-            onEdit={onEdit}
-            onDuplicate={onDuplicate}
-            onDelete={onDelete}
-            selectedIds={selectedIds}
-            onSelectionChange={onSelectionChange}
-            sortBy={sortBy}
-            sortDir={sortDir}
-            onSortChange={onSortChange}
-            movementDisabled={movementDisabled}
-            trainingTypeColors={trainingTypeColors}
-          />
-        )}
+      <FilterToolbar
+        search={search}
+        onSearchChange={onSearchChange}
+        searchPlaceholder="Buscar por nombre..."
+        sections={sections}
+        filters={filters}
+      />
 
-        {/* Pagination */}
-        <TrainingsPaginationBar
-          page={page}
-          totalPages={totalPages}
-          onPrevious={onPreviousPage}
-          onNext={onNextPage}
+      {trainings.length === 0 ? (
+        <EmptyState
+          className="border-y border-border"
+          title="No se encontraron entrenamientos con la búsqueda y filtros actuales."
         />
-      </CardContent>
-    </Card>
+      ) : (
+        <TrainingsTable
+          trainings={trainings}
+          approvalById={approvalById}
+          onView={onView}
+          onEdit={onEdit}
+          onDuplicate={onDuplicate}
+          onDelete={onDelete}
+          selectedIds={selectedIds}
+          onSelectionChange={onSelectionChange}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSortChange={onSortChange}
+          movementDisabled={movementDisabled}
+          trainingTypeColors={trainingTypeColors}
+        />
+      )}
+
+      <TrainingsPaginationBar
+        page={page}
+        totalPages={totalPages}
+        onPrevious={onPreviousPage}
+        onNext={onNextPage}
+      />
+    </section>
   )
 }

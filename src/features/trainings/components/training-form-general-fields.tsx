@@ -27,10 +27,8 @@ export function TrainingFormGeneralFields({
   colorInputInstanceKey,
 }: TrainingFormGeneralFieldsProps) {
   return (
-    <div ref={sectionRef} className="space-y-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Información general
-      </p>
+    <div ref={sectionRef} className="min-w-0 space-y-4">
+      <p className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
 
       <FormField
         control={form.control}
@@ -46,7 +44,7 @@ export function TrainingFormGeneralFields({
         )}
       />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
         <FormField
           control={form.control}
           name="types"
@@ -108,7 +106,7 @@ export function TrainingFormGeneralFields({
         )}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="estimated_duration_min"
