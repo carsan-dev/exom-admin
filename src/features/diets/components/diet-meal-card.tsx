@@ -1,6 +1,7 @@
 import { useWatch, type UseFormReturn } from 'react-hook-form'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
 import { ImageUploadField } from '@/components/uploads/image-upload-field'
+import { SortableHandle } from '@/components/sortable'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -52,6 +53,7 @@ export function DietMealCard({
     <div className="min-w-0 space-y-4 py-5">
       {/* Meal header */}
       <div className="flex items-start gap-2">
+        <SortableHandle label={`Reordenar comida ${mealLabel}`} />
         <div className="flex flex-none flex-col gap-0.5">
           <Button
             type="button"

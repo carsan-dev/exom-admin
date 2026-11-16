@@ -12,7 +12,7 @@ import { ExerciseAddActions } from './exercise-add-actions'
 import { ExercisePickerHeader } from './exercise-picker-header'
 import { ExerciseRow } from './exercise-row'
 import { ExerciseSearchPanel } from './exercise-search-panel'
-import { SortableItem, SortableList } from './sortable-list'
+import { SortableItem, SortableList } from '@/components/sortable'
 
 /**
  * Client-only keys for the rows, kept outside the form value (the schema and the payload

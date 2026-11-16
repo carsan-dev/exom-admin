@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { LEVEL_LABELS, type Exercise } from '../../exercises/types'
 import type { TrainingItemFormValues } from '../schemas'
 import { PrescriptionFields } from './prescription-fields'
-import { SortableHandle } from './sortable-list'
+import { SortableHandle } from '@/components/sortable'
 import { TimedPrescriptionEditor } from './timed-prescription-editor'
 
 interface ExerciseRowProps {

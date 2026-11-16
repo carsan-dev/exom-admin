@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import type { Exercise } from '../../exercises/types'
 import type { TrainingCircuitExerciseFormValues, TrainingItemFormValues } from '../schemas'
 import { CircuitExerciseRow } from './circuit-exercise-row'
-import { SortableHandle, SortableItem, SortableList } from './sortable-list'
+import { SortableHandle, SortableItem, SortableList } from '@/components/sortable'
 import type { TimedPrescriptionEditor } from './timed-prescription-editor'
 
 interface CircuitBlockProps {

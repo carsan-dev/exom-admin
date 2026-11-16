@@ -1,6 +1,7 @@
-import type { RefObject } from 'react'
+import { useCallback, useMemo, type RefObject } from 'react'
 import type { FieldArrayWithId, UseFormReturn } from 'react-hook-form'
 import { Plus } from 'lucide-react'
+import { SortableItem, SortableList } from '@/components/sortable'
 import { Button } from '@/components/ui/button'
 import type { DietFormValues } from '../schemas'
 import { DietMealCard } from './diet-meal-card'
@@ -30,6 +31,17 @@ export function DietMealsSection({
   onCalculateMacrosAtPath,
   onUploadingChange,
 }: DietMealsSectionProps) {
+  // Ids estables de useFieldArray: no forman parte del valor del formulario ni del payload.
+  const mealIds = useMemo(() => mealFields.map((mealField) => mealField.id), [mealFields])
+  const getMealLabel = useCallback(
+    (id: string) => {
+      const index = mealIds.indexOf(id)
+      const name = index >= 0 ? form.getValues(`meals.${index}.name`)?.trim() : ''
+      return `la comida ${name || index + 1}`
+    },
+    [form, mealIds]
+  )
+
   return (
     <div ref={sectionRef} className="min-w-0 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
@@ -45,21 +57,24 @@ export function DietMealsSection({
       </div>
 
       <div className="divide-y divide-border border-y border-border">
-        {mealFields.map((mealField, mealIndex) => (
-          <DietMealCard
-            key={mealField.id}
-            form={form}
-            mealIndex={mealIndex}
-            mealFieldId={mealField.id}
-            mealCount={mealFields.length}
-            isBusy={isBusy}
-            onMove={onMove}
-            onRemove={onRemove}
-            onCalculateMealMacros={onCalculateMealMacros}
-            onCalculateMacrosAtPath={onCalculateMacrosAtPath}
-            onUploadingChange={onUploadingChange}
-          />
-        ))}
+        <SortableList ids={mealIds} getLabel={getMealLabel} onReorder={onMove}>
+          {mealFields.map((mealField, mealIndex) => (
+            <SortableItem key={mealField.id} id={mealField.id} disabled={isBusy}>
+              <DietMealCard
+                form={form}
+                mealIndex={mealIndex}
+                mealFieldId={mealField.id}
+                mealCount={mealFields.length}
+                isBusy={isBusy}
+                onMove={onMove}
+                onRemove={onRemove}
+                onCalculateMealMacros={onCalculateMealMacros}
+                onCalculateMacrosAtPath={onCalculateMacrosAtPath}
+                onUploadingChange={onUploadingChange}
+              />
+            </SortableItem>
+          ))}
+        </SortableList>
       </div>
 
       <Button type="button" variant="outline" size="sm" className="w-full max-md:h-11" onClick={onAddMeal}>

@@ -127,6 +127,8 @@ const SortableHandleContext = createContext<SortableHandleBinding | null>(null)
 interface SortableItemProps {
   id: string
   className?: string
+  /** Turns the drag off (e.g. while the surrounding form is busy). */
+  disabled?: boolean
   children: ReactNode
 }
 
@@ -134,7 +136,7 @@ interface SortableItemProps {
  * A movable row. Only the handle rendered inside it (`SortableHandle`) starts a drag;
  * the rest of the row keeps native touch scrolling and field editing.
  */
-export function SortableItem({ id, className, children }: SortableItemProps) {
+export function SortableItem({ id, className, disabled, children }: SortableItemProps) {
   const {
     attributes,
     listeners,
@@ -143,7 +145,7 @@ export function SortableItem({ id, className, children }: SortableItemProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id })
+  } = useSortable({ id, disabled })
 
   const style: CSSProperties = {
     transform: transform ? `translate3d(0, ${Math.round(transform.y)}px, 0)` : undefined,

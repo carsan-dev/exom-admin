@@ -1554,8 +1554,25 @@ exports[`DietsPage characterization > imports a JSON file into the builder with 
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Comidas (1)</p>
 </div>
 <div class="divide-y divide-border border-y border-border">
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="min-w-0 space-y-4 py-5">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar comida Desayuno importado">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none flex-col gap-0.5">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" disabled="" aria-label="Subir comida Desayuno importado">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -1861,6 +1878,10 @@ exports[`DietsPage characterization > imports a JSON file into the builder with 
 </svg>Añadir variante</button>
 </div>
 </div>
+</div>
+</div>
+<div id="DndDescribedBy-N" style="display: none;">Para reordenar, pulsa Espacio o Intro para coger el elemento, usa las flechas arriba y abajo para moverlo y pulsa Espacio o Intro para soltarlo. Pulsa Escape para cancelar.</div>
+<div id="DndLiveRegion-N" style="position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;" role="status" aria-live="assertive" aria-atomic="true">
 </div>
 </div>
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 w-full max-md:h-11" type="button">
@@ -3285,8 +3306,25 @@ exports[`DietsPage characterization > opens the builder from the empty state 1`]
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Comidas (1)</p>
 </div>
 <div class="divide-y divide-border border-y border-border">
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="min-w-0 space-y-4 py-5">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar comida 1">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none flex-col gap-0.5">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" disabled="" aria-label="Subir comida 1">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -3461,6 +3499,10 @@ exports[`DietsPage characterization > opens the builder from the empty state 1`]
 </svg>Añadir variante</button>
 </div>
 </div>
+</div>
+</div>
+<div id="DndDescribedBy-N" style="display: none;">Para reordenar, pulsa Espacio o Intro para coger el elemento, usa las flechas arriba y abajo para moverlo y pulsa Espacio o Intro para soltarlo. Pulsa Escape para cancelar.</div>
+<div id="DndLiveRegion-N" style="position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;" role="status" aria-live="assertive" aria-atomic="true">
 </div>
 </div>
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 w-full max-md:h-11" type="button">
@@ -4084,8 +4126,25 @@ exports[`DietsPage characterization > opens the builder from the header (create)
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Comidas (1)</p>
 </div>
 <div class="divide-y divide-border border-y border-border">
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="min-w-0 space-y-4 py-5">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar comida 1">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none flex-col gap-0.5">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" disabled="" aria-label="Subir comida 1">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -4260,6 +4319,10 @@ exports[`DietsPage characterization > opens the builder from the header (create)
 </svg>Añadir variante</button>
 </div>
 </div>
+</div>
+</div>
+<div id="DndDescribedBy-N" style="display: none;">Para reordenar, pulsa Espacio o Intro para coger el elemento, usa las flechas arriba y abajo para moverlo y pulsa Espacio o Intro para soltarlo. Pulsa Escape para cancelar.</div>
+<div id="DndLiveRegion-N" style="position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;" role="status" aria-live="assertive" aria-atomic="true">
 </div>
 </div>
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 w-full max-md:h-11" type="button">
@@ -5940,8 +6003,25 @@ exports[`DietsPage characterization > opens the duplicate builder from the row m
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Comidas (2)</p>
 </div>
 <div class="divide-y divide-border border-y border-border">
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="min-w-0 space-y-4 py-5">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar comida Avena con fruta">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none flex-col gap-0.5">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" disabled="" aria-label="Subir comida Avena con fruta">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -6199,8 +6279,26 @@ exports[`DietsPage characterization > opens the duplicate builder from the row m
 </div>
 </div>
 </div>
+</div>
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="min-w-0 space-y-4 py-5">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar comida Pollo con arroz">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none flex-col gap-0.5">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" aria-label="Subir comida Pollo con arroz">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -6514,6 +6612,10 @@ exports[`DietsPage characterization > opens the duplicate builder from the row m
 </svg>Añadir variante</button>
 </div>
 </div>
+</div>
+</div>
+<div id="DndDescribedBy-N" style="display: none;">Para reordenar, pulsa Espacio o Intro para coger el elemento, usa las flechas arriba y abajo para moverlo y pulsa Espacio o Intro para soltarlo. Pulsa Escape para cancelar.</div>
+<div id="DndLiveRegion-N" style="position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;" role="status" aria-live="assertive" aria-atomic="true">
 </div>
 </div>
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 w-full max-md:h-11" type="button">
@@ -7148,8 +7250,25 @@ exports[`DietsPage characterization > opens the edit builder from the row menu >
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Comidas (2)</p>
 </div>
 <div class="divide-y divide-border border-y border-border">
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="min-w-0 space-y-4 py-5">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar comida Avena con fruta">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none flex-col gap-0.5">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" disabled="" aria-label="Subir comida Avena con fruta">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -7407,8 +7526,26 @@ exports[`DietsPage characterization > opens the edit builder from the row menu >
 </div>
 </div>
 </div>
+</div>
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="min-w-0 space-y-4 py-5">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar comida Pollo con arroz">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none flex-col gap-0.5">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" aria-label="Subir comida Pollo con arroz">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -7722,6 +7859,10 @@ exports[`DietsPage characterization > opens the edit builder from the row menu >
 </svg>Añadir variante</button>
 </div>
 </div>
+</div>
+</div>
+<div id="DndDescribedBy-N" style="display: none;">Para reordenar, pulsa Espacio o Intro para coger el elemento, usa las flechas arriba y abajo para moverlo y pulsa Espacio o Intro para soltarlo. Pulsa Escape para cancelar.</div>
+<div id="DndLiveRegion-N" style="position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;" role="status" aria-live="assertive" aria-atomic="true">
 </div>
 </div>
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 w-full max-md:h-11" type="button">
