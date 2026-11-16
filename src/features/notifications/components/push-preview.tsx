@@ -7,13 +7,22 @@ export const PUSH_PREVIEW_BODY_FALLBACK = 'El mensaje aparecerá aquí'
 interface PushPreviewProps {
   title: string
   body: string
+  /** Shown when the title is empty. Defaults to the notification composer wording. */
+  titleFallback?: string
+  /** Shown when the body is empty. Defaults to the notification composer wording. */
+  bodyFallback?: string
 }
 
 /**
  * Decorative look-alike of an OS push notification, updated live. Hidden from assistive
  * technology because the form fields already carry the same content.
  */
-export function PushPreview({ title, body }: PushPreviewProps) {
+export function PushPreview({
+  title,
+  body,
+  titleFallback = PUSH_PREVIEW_TITLE_FALLBACK,
+  bodyFallback = PUSH_PREVIEW_BODY_FALLBACK,
+}: PushPreviewProps) {
   const trimmedTitle = title.trim()
   const trimmedBody = body.trim()
 
@@ -35,7 +44,7 @@ export function PushPreview({ title, body }: PushPreviewProps) {
               trimmedTitle ? 'text-foreground' : 'text-foreground-muted',
             )}
           >
-            {trimmedTitle || PUSH_PREVIEW_TITLE_FALLBACK}
+            {trimmedTitle || titleFallback}
           </p>
           <p
             className={cn(
@@ -43,7 +52,7 @@ export function PushPreview({ title, body }: PushPreviewProps) {
               trimmedBody ? 'text-foreground-secondary' : 'text-foreground-muted',
             )}
           >
-            {trimmedBody || PUSH_PREVIEW_BODY_FALLBACK}
+            {trimmedBody || bodyFallback}
           </p>
         </div>
       </div>

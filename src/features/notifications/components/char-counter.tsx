@@ -6,6 +6,8 @@ interface CharCounterProps {
   label: string
   count: number
   max: number
+  /** Optional text shown after `N/max` (e.g. " caracteres"). */
+  unit?: string
 }
 
 type CounterTier = 'ok' | 'near' | 'over'
@@ -27,7 +29,7 @@ function getAnnouncement(previous: CounterTier, next: CounterTier, remaining: nu
  * a separate `sr-only` status region announces only when the count crosses a threshold:
  * reaching 90 %, exceeding the limit, or getting back within it.
  */
-export function CharCounter({ label, count, max }: CharCounterProps) {
+export function CharCounter({ label, count, max, unit = '' }: CharCounterProps) {
   const isOver = count > max
   const tier = getTier(count, max)
   const [announced, setAnnounced] = useState<{ tier: CounterTier; text: string }>({ tier, text: '' })
@@ -47,7 +49,7 @@ export function CharCounter({ label, count, max }: CharCounterProps) {
       >
         <span className="sr-only">Caracteres del {label}: </span>
         <span>
-          {count}/{max}
+          {count}/{max}{unit}
         </span>
         {isOver ? <span className="sr-only"> (límite superado)</span> : null}
       </p>

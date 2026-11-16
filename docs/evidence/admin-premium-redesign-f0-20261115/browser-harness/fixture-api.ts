@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios'
+import { harnessFailProfile } from './boot'
 import { NOW_ISO, type FixtureCtx, type Handler, type Json } from './fx-util'
 import { dashboardData, handlePeople } from './fx-people'
 import { handleCatalog } from './fx-catalog'
@@ -10,6 +11,8 @@ import { handleEngagement } from './fx-engagement'
 // Transporte sintético: sin red, sin Firebase. Las lecturas se responden desde los fixtures,
 // las mutaciones devuelven éxito genérico sin cambiar estado y las rutas desconocidas dan 404 (con aviso en consola).
 export const fixtureCalls: FixtureCtx[] = []
+// F4-F: registro de peticiones accesible desde CDP.
+;(window as unknown as { __fixtureCalls: FixtureCtx[] }).__fixtureCalls = fixtureCalls
 
 const handlers: Handler[] = [
   ({ path, method }) => (method === 'get' && path === '/dashboard' ? dashboardData() : undefined),
@@ -32,6 +35,9 @@ export const api = axios.create({ adapter: async (config) => {
   const body: Json = typeof config.data === 'string' && config.data ? JSON.parse(config.data) as Json : {}
   const ctx: FixtureCtx = { method, path, params, body }
   fixtureCalls.push(ctx)
+  if (harnessFailProfile && method === 'put' && path === '/profile/me') {
+    throw new AxiosError('Synthetic failure', 'FIXTURE', config, undefined, { ...(envelope(config, null) as object), status: 500, data: { message: 'Synthetic failure', statusCode: 500 } } as never)
+  }
   if (method !== 'get') return envelope(config, { message: 'ok (fixture)', success: true }) as never
   for (const handler of handlers) {
     const result = handler(ctx)

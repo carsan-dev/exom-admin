@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { AuthUser } from '../../../../src/types/auth'
-import { harnessAuth, harnessRole } from './boot'
+import { harnessAuth, harnessAuthError, harnessRole } from './boot'
 import { SESSION_USERS } from './fx-people'
 
 const profile = { ...SESSION_USERS[harnessRole] }
@@ -18,9 +18,9 @@ export const useAuth = create<FixtureAuthStore>((set) => ({
   user: harnessAuth === 'none' ? null : user,
   isAuthenticated: harnessAuth !== 'none',
   isLoading: false,
-  error: null,
+  error: harnessAuthError === 'blocked' ? 'ACCOUNT_BLOCKED' : null,
   initialize: () => () => undefined,
-  login: async () => undefined,
+  login: async () => { if (harnessAuthError === 'invalid') set({ error: 'Credenciales inválidas' }) },
   loginWithGoogle: async () => undefined,
   logout: async () => { set({ user: null, isAuthenticated: false }) },
   clearError: () => set({ error: null }),

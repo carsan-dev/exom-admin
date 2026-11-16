@@ -20,7 +20,7 @@ export type HarnessAuth = 'session' | 'none' | 'noprofile'
 const STORE_KEY = 'exom-harness-flags'
 const query = new URLSearchParams(window.location.search)
 const saved = JSON.parse(sessionStorage.getItem(STORE_KEY) ?? '{}') as Record<string, string>
-for (const key of ['__role', '__theme', '__auth']) {
+for (const key of ['__role', '__theme', '__auth', '__authError', '__fail']) {
   const value = query.get(key)
   if (value) saved[key] = value
 }
@@ -29,3 +29,7 @@ sessionStorage.setItem(STORE_KEY, JSON.stringify(saved))
 export const harnessRole: HarnessRole = saved.__role === 'ADMIN' ? 'ADMIN' : 'SUPER_ADMIN'
 export const harnessAuth: HarnessAuth = saved.__auth === 'none' || saved.__auth === 'noprofile' ? saved.__auth : 'session'
 if (saved.__theme === 'light' || saved.__theme === 'dark') localStorage.setItem('exom-admin-theme', saved.__theme)
+
+// F4-F: estados de error de login/onboarding. __authError=blocked (cuenta bloqueada 423) | invalid (login falla); __fail=profile (PUT /profile/me da 500).
+export const harnessAuthError: 'blocked' | 'invalid' | null = saved.__authError === 'blocked' || saved.__authError === 'invalid' ? saved.__authError : null
+export const harnessFailProfile: boolean = saved.__fail === 'profile'

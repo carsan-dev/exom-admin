@@ -4,13 +4,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { sendPasswordResetEmail } from 'firebase/auth'
-import { Eye, EyeOff, AlertCircle, Lock } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, AlertCircle, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { auth } from '@/lib/firebase'
+import { AuthBrandPanel } from '../components/auth-brand-panel'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -76,61 +76,70 @@ export function LoginPage() {
   const isBlocked = error === 'ACCOUNT_BLOCKED'
   const isUnauthorized = error === 'UNAUTHORIZED'
 
-  return (
-    <div className="flex min-h-screen min-h-[100svh] items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md space-y-8">
-        {/* Logo */}
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-4xl font-black tracking-widest text-accent-text">EXOM</span>
-          </div>
-          <p className="text-sm text-muted-foreground">Panel de administración EXOM</p>
-        </div>
+  const focusRing =
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus'
 
-        {/* Blocked state */}
-        {isBlocked ? (
-          <Card className="border-status-warning/50 bg-background-surface">
-            <CardContent className="pt-6 flex flex-col items-center gap-4 text-center">
-              <div className="rounded-full bg-status-warning/10 p-4">
-                <Lock className="h-8 w-8 text-status-warning" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground text-lg">Cuenta bloqueada</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Tu cuenta ha sido desactivada. Contacta con el administrador del sistema.
-                </p>
-              </div>
-              <div className="flex gap-2 w-full">
-                <Button variant="outline" className="flex-1" onClick={clearError}>
-                  Volver
-                </Button>
-                <Button className="flex-1" asChild>
+  return (
+    <div className="grid min-h-screen min-h-[100svh] grid-cols-1 grid-rows-[96px_minmax(0,1fr)] bg-background lg:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] lg:grid-rows-1">
+      <a
+        href="#auth-main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:outline-2 focus:outline-focus"
+      >
+        Saltar al contenido
+      </a>
+
+      <AuthBrandPanel />
+
+      <main
+        id="auth-main"
+        className="flex min-w-0 items-start justify-center px-4 py-8 md:px-5 md:py-10 lg:items-center lg:px-8 lg:py-12"
+      >
+        <div className="w-full max-w-[380px]">
+          {/* Blocked state */}
+          {isBlocked ? (
+            <section aria-labelledby="blocked-title">
+              <Lock className="mb-5 h-6 w-6 text-status-warning" aria-hidden="true" />
+              <h1
+                id="blocked-title"
+                className="font-display text-[38px] font-extrabold uppercase leading-[0.92] text-foreground md:text-[44px]"
+              >
+                Cuenta bloqueada
+              </h1>
+              <p className="mt-3 max-w-[34ch] text-sm leading-[22px] text-foreground-secondary">
+                Tu cuenta ha sido desactivada. Contacta con el administrador del sistema.
+              </p>
+              <div className="mt-8 flex flex-col gap-2">
+                <Button size="lg" className="h-11 w-full" asChild>
                   <a href="mailto:soporte@exom.app">Contactar entrenador</a>
                 </Button>
+                <Button variant="secondary" size="lg" className="h-11 w-full" onClick={clearError}>
+                  Volver
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="border-border">
-            <CardHeader className="pb-0">
-              <h2 className="text-xl font-semibold text-foreground">Iniciar sesión</h2>
-            </CardHeader>
-            <CardContent className="pt-4 space-y-4">
-              {/* General error */}
-              {error && !isBlocked && (
-                <div className="flex items-center gap-2 rounded-md border border-status-error/30 bg-status-error/10 p-3 text-sm text-status-error">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <span>
-                    {isUnauthorized
-                      ? 'Acceso no autorizado. Solo administradores pueden entrar.'
-                      : error}
-                  </span>
-                </div>
-              )}
+            </section>
+          ) : (
+            <>
+              <h1 className="font-display text-[38px] font-extrabold uppercase leading-[0.92] text-foreground md:text-[44px]">
+                Iniciar sesión
+              </h1>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-1">
+              <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+                {/* General error */}
+                {error && !isBlocked && (
+                  <div
+                    role="alert"
+                    className="flex items-start gap-2 border border-status-error/30 bg-status-error-soft p-3 text-sm text-status-error"
+                  >
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span>
+                      {isUnauthorized
+                        ? 'Acceso no autorizado. Solo administradores pueden entrar.'
+                        : error}
+                    </span>
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground" htmlFor="email">
                     Email
                   </label>
@@ -139,6 +148,8 @@ export function LoginPage() {
                     type="email"
                     placeholder="admin@exom.app"
                     autoComplete="email"
+                    inputMode="email"
+                    className="h-11"
                     {...register('email')}
                   />
                   {errors.email && (
@@ -146,69 +157,70 @@ export function LoginPage() {
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-foreground" htmlFor="password">
-                    Contraseña
-                  </label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      autoComplete="current-password"
-                      className="pr-10"
-                      {...register('password')}
-                    />
+                <div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-foreground" htmlFor="password">
+                      Contraseña
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        className="h-11 pr-12"
+                        {...register('password')}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-controls="password"
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        className="absolute right-0 top-0 grid h-11 w-11 place-items-center text-foreground-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-xs text-status-error">{errors.password.message}</p>
+                    )}
+                  </div>
+
+                  <div className="mt-2.5 flex justify-end">
                     <button
                       type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      tabIndex={-1}
+                      onClick={() => void handleForgotPassword()}
+                      disabled={isSendingReset}
+                      className={`relative text-[13px] font-semibold leading-5 text-accent-text underline decoration-transparent underline-offset-[3px] transition-[text-decoration-color,color] hover:decoration-current disabled:text-foreground-muted after:absolute after:-inset-x-1 after:-inset-y-3 after:content-[''] ${focusRing}`}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {isSendingReset ? 'Enviando enlace...' : '¿Has olvidado tu contraseña?'}
                     </button>
                   </div>
-                  {errors.password && (
-                    <p className="text-xs text-status-error">{errors.password.message}</p>
-                  )}
                 </div>
 
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => void handleForgotPassword()}
-                    disabled={isSendingReset}
-                    className="text-xs text-accent-text hover:text-foreground transition-colors"
-                  >
-                    {isSendingReset ? 'Enviando enlace...' : '¿Has olvidado tu contraseña?'}
-                  </button>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" size="lg" className="mt-7 h-11 w-full" disabled={isLoading}>
                   {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+                  {!isLoading && <ArrowRight aria-hidden="true" />}
                 </Button>
               </form>
 
               {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs text-muted-foreground">
-                  <span className="bg-card px-2">O continúa con</span>
-                </div>
+              <div className="mb-5 mt-7 flex items-center gap-3 text-xs leading-4 text-foreground-muted">
+                <span aria-hidden="true" className="h-px flex-1 bg-border-strong" />
+                <span>O continúa con</span>
+                <span aria-hidden="true" className="h-px flex-1 bg-border-strong" />
               </div>
 
               {/* Social buttons */}
-              <div className="grid grid-cols-2 gap-3">
+              <div>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   type="button"
                   disabled={isLoading}
                   onClick={() => loginWithGoogle()}
-                  className="gap-2"
+                  className="h-11 w-full gap-2"
                 >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4">
+                  <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true" focusable="false">
                     <path
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                       fill="#4285F4"
@@ -228,23 +240,11 @@ export function LoginPage() {
                   </svg>
                   Google
                 </Button>
-                <Button
-                  variant="outline"
-                  type="button"
-                  disabled={isLoading}
-                  className="gap-2 opacity-50 cursor-not-allowed"
-                  title="Próximamente"
-                >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-                  </svg>
-                  Apple
-                </Button>
               </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+            </>
+          )}
+        </div>
+      </main>
     </div>
   )
 }
