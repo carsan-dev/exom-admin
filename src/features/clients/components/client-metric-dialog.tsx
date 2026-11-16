@@ -119,7 +119,7 @@ export function ClientMetricDialog({ clientId, metric, open, onOpenChange }: Cli
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+      <DialogContent disableOutsideClose className="max-h-[90vh] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Editar métricas' : 'Añadir métricas'}</DialogTitle>
           <DialogDescription>

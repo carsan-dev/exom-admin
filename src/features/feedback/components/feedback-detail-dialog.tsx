@@ -1,185 +1,86 @@
-import { useEffect, useState } from 'react'
-import { Badge } from '@/components/ui/badge'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { getApiErrorMessage } from '@/lib/api-utils'
-import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
-import { toast } from 'sonner'
-import { useRespondFeedback } from '../api'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { FeedbackItem } from '../types'
-
-function getClientName(item: FeedbackItem) {
-  const { profile } = item.client
-  if (profile?.first_name || profile?.last_name) {
-    return `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim()
-  }
-  return item.client.email
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  })
-}
-
-function getExpiredMediaLabel(item: FeedbackItem) {
-  return item.media_type === 'VIDEO' ? 'El vídeo ya no está disponible' : 'La imagen ya no está disponible'
-}
+import { FeedbackDetailView } from './feedback-detail-view'
 
 interface FeedbackDetailDialogProps {
   item: FeedbackItem | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  draft: string
+  onDraftChange: (value: string) => void
+  onRespond: (item: FeedbackItem, response: string) => void
+  isResponding: boolean
+  /** Posición del elemento en la lista cargada (1-based) y tamaño de la lista; 0 si no está en ella. */
+  position: number
+  total: number
+  onPrevious?: () => void
+  onNext?: () => void
 }
 
-export function FeedbackDetailDialog({ item, open, onOpenChange }: FeedbackDetailDialogProps) {
-  const [response, setResponse] = useState('')
-  const { mutate: respond, isPending } = useRespondFeedback()
-  useUnsavedChanges('feedback-response', open && Boolean(response.trim() || isPending))
-
-  useEffect(() => {
-    setResponse('')
-  }, [item?.id, open])
-
-  function handleRespond() {
-    if (!item || !response.trim()) return
-    respond(
-      { id: item.id, admin_response: response.trim() },
-      {
-        onSuccess: () => {
-          toast.success('Respuesta enviada correctamente')
-          setResponse('')
-          onOpenChange(false)
-        },
-        onError: (error) => {
-          toast.error(getApiErrorMessage(error, 'No se ha podido enviar la respuesta'))
-        },
-      },
-    )
-  }
-
-  function handleOpenChange(open: boolean) {
-    if (!open) setResponse('')
-    onOpenChange(open)
-  }
-
+/** Detalle por debajo de lg: diálogo con navegación Anterior/Siguiente por la lista cargada. */
+export function FeedbackDetailDialog({
+  item,
+  open,
+  onOpenChange,
+  draft,
+  onDraftChange,
+  onRespond,
+  isResponding,
+  position,
+  total,
+  onPrevious,
+  onNext,
+}: FeedbackDetailDialogProps) {
   if (!item) return null
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] min-w-0 max-w-2xl grid-cols-[minmax(0,1fr)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Detalle de feedback</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-            <div>
-              <span className="text-muted-foreground">Cliente: </span>
-              <span className="font-medium">{getClientName(item)}</span>
-            </div>
-            {item.exercise && (
-              <div>
-                <span className="text-muted-foreground">Ejercicio: </span>
-                <span className="font-medium">{item.exercise.name}</span>
-              </div>
-            )}
-            {item.training && (
-              <div>
-                <span className="text-muted-foreground">Entrenamiento: </span>
-                <span className="font-medium">{item.training.name}</span>
-              </div>
-            )}
-            <div>
-              <span className="text-muted-foreground">Fecha programada: </span>
-              <span>{formatDate(item.assignment_date ?? item.created_at)}</span>
-            </div>
-            {item.feedback_kind === 'LAST_SET' && (
-              <Badge variant="outline" className="border-brand-primary/30 text-accent-text">Última serie</Badge>
-            )}
-            <div>
-              {item.status === 'PENDING' ? (
-                <Badge variant="outline" className="border-status-warning/30 text-status-warning bg-status-warning-soft">
-                  Pendiente
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="border-status-success/30 text-status-success bg-status-success-soft">
-                  Revisado
-                </Badge>
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-lg overflow-hidden bg-muted">
-            {item.media_url ? (
-              item.media_type === 'IMAGE' ? (
-                <img
-                  src={item.media_url}
-                  alt="Feedback media"
-                  className="w-full max-h-[400px] object-contain"
-                />
-              ) : (
-                <video
-                  src={item.media_url}
-                  controls
-                  className="w-full max-h-[400px]"
-                />
-              )
-            ) : (
-              <div className="flex min-h-56 items-center justify-center px-6 py-10 text-center text-sm text-muted-foreground">
-                <div className="space-y-1">
-                  <p className="font-medium text-foreground">{getExpiredMediaLabel(item)}</p>
-                  <p>
-                    {item.media_deleted_at
-                      ? `Se eliminó automáticamente el ${formatDate(item.media_deleted_at)} según la política de retención.`
-                      : 'Se eliminó automáticamente según la política de retención.'}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {item.notes && (
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Notas del cliente</p>
-              <p className="text-sm text-muted-foreground rounded-lg bg-muted px-3 py-2">
-                {item.notes}
-              </p>
-            </div>
+        <div className="flex items-center gap-1 border-b border-border pb-3">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label="Feedback anterior"
+            disabled={!onPrevious}
+            onClick={onPrevious}
+            className="size-11 md:size-9"
+          >
+            <ChevronUp aria-hidden="true" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label="Feedback siguiente"
+            disabled={!onNext}
+            onClick={onNext}
+            className="size-11 md:size-9"
+          >
+            <ChevronDown aria-hidden="true" />
+          </Button>
+          {position > 0 && (
+            <span aria-live="polite" className="px-2 text-xs tabular-nums text-foreground-muted">
+              {position} de {total}
+            </span>
           )}
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Respuesta del admin</p>
-            {item.admin_response ? (
-              <p className="text-sm text-muted-foreground rounded-lg bg-muted px-3 py-2">
-                {item.admin_response}
-              </p>
-            ) : (
-              <div className="space-y-2">
-                <textarea
-                  placeholder="Escribe tu respuesta o comentario..."
-                  value={response}
-                  onChange={(e) => setResponse(e.target.value)}
-                  rows={3}
-                  className="flex w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-                />
-                <Button
-                  onClick={handleRespond}
-                  disabled={isPending || !response.trim()}
-                >
-                  {isPending ? 'Enviando...' : 'Responder'}
-                </Button>
-              </div>
-            )}
-          </div>
         </div>
+
+        <FeedbackDetailView
+          key={item.id}
+          item={item}
+          draft={draft}
+          onDraftChange={onDraftChange}
+          onRespond={onRespond}
+          isResponding={isResponding}
+          titleAs="h3"
+        />
       </DialogContent>
     </Dialog>
   )

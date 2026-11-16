@@ -1,24 +1,27 @@
 import type { ReactNode } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 interface RecapSectionCardProps {
   title: string
   description: string
   action?: ReactNode
+  /** Sin filete superior: para el primer bloque bajo una fila de pestañas. */
+  flush?: boolean
   children: ReactNode
 }
 
-export function RecapSectionCard({ title, description, action, children }: RecapSectionCardProps) {
+/** Sección con filete superior y título de sección; sustituye a la tarjeta enmarcada. */
+export function RecapSectionCard({ title, description, action, flush = false, children }: RecapSectionCardProps) {
   return (
-    <Card className="border-border/70">
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <CardTitle className="text-lg">{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+    <section className={cn('min-w-0', !flush && 'border-t border-border pt-6')}>
+      <div className="mb-4 flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <h3 className="font-display text-xl font-extrabold uppercase leading-none text-foreground">{title}</h3>
+          <p className="text-[13px] leading-5 text-foreground-secondary">{description}</p>
         </div>
         {action}
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
+      </div>
+      {children}
+    </section>
   )
 }

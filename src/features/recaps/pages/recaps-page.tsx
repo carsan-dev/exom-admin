@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router'
+import { PageHeader } from '@/components/page'
 import { PeriodStatsHeader } from '@/components/stats/period-stats-header'
 import { useStatsPeriod } from '@/components/stats/use-stats-period'
 import { RecapsFilters } from '../components/recaps-filters'
@@ -77,12 +78,12 @@ export function RecapsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">Recaps semanales</h1>
-        <p className="text-sm text-muted-foreground">
-          Revisa recaps enviados o ya revisados, comenta cada caso y archiva los ya resueltos.
-        </p>
-      </div>
+      <PageHeader
+        className="mb-6 md:mb-6"
+        eyebrow="Seguimiento"
+        title="Recaps semanales"
+        description="Revisa recaps enviados o ya revisados, comenta cada caso y archiva los ya resueltos."
+      />
 
       <div className="space-y-4">
         <PeriodStatsHeader period={statsPeriod} filtered={Boolean(clientId)} />

@@ -2,8 +2,8 @@ import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Dumbbell, FileText, MessageSquare, UserPlus } from 'lucide-react'
 import { Link } from 'react-router'
+import { EmptyState } from '@/components/page'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/hooks/use-auth'
 import { getUsersRoute } from '@/features/clients/types'
 import type { RecentActivityItem } from '../types'
@@ -52,60 +52,70 @@ export function RecentActivity({ items }: RecentActivityProps) {
   const usersRoute = getUsersRoute(currentUserRole)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Actividad reciente</CardTitle>
-        <CardDescription>Últimos movimientos relevantes de tus clientes.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {items.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
-            Todavía no hay actividad reciente para mostrar.
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {items.map((item) => {
-              const Icon = getActivityIcon(item.type)
+    <section aria-labelledby="dashboard-activity-title" className="min-w-0">
+      <div className="mb-3 space-y-1 border-b border-border-strong pb-3">
+        <h2
+          id="dashboard-activity-title"
+          className="font-display text-xl font-extrabold uppercase leading-none text-foreground"
+        >
+          Actividad reciente
+        </h2>
+        <p className="text-[13px] leading-5 text-foreground-secondary">
+          Últimos movimientos relevantes de tus clientes.
+        </p>
+      </div>
 
-              return (
-                <div
-                  key={item.id}
-                  className="flex flex-col gap-3 rounded-xl border border-border/70 p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-11 w-11">
-                      <AvatarImage src={item.clientAvatar ?? undefined} alt={item.clientName} />
-                      <AvatarFallback>{getInitials(item.clientName)}</AvatarFallback>
-                    </Avatar>
+      {items.length === 0 ? (
+        <EmptyState
+          className="pb-10 pt-8"
+          title="Todavía no hay actividad reciente para mostrar."
+        />
+      ) : (
+        <ul className="divide-y divide-border">
+          {items.map((item) => {
+            const Icon = getActivityIcon(item.type)
 
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                        <span className="rounded-full bg-muted p-1.5 text-muted-foreground">
-                          <Icon className="h-3.5 w-3.5" />
-                        </span>
-                        {item.clientName}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+            return (
+              <li
+                key={item.id}
+                className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+              >
+                <div className="flex min-w-0 items-start gap-3">
+                  <Avatar className="size-8">
+                    <AvatarImage src={item.clientAvatar ?? undefined} alt={item.clientName} />
+                    <AvatarFallback className="text-xs">{getInitials(item.clientName)}</AvatarFallback>
+                  </Avatar>
+
+                  <div className="min-w-0 space-y-0.5">
+                    <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground">
+                      <Icon aria-hidden="true" className="size-3.5 flex-none text-foreground-muted" />
+                      <span className="min-w-0 break-words">{item.clientName}</span>
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
-                    <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(item.createdAt), {
-                        addSuffix: true,
-                        locale: es,
-                      })}
+                    <p className="break-words text-[13px] leading-5 text-foreground-secondary">
+                      {item.description}
                     </p>
-                    <Link className="text-sm font-medium text-accent-text hover:underline" to={getActivityLink(item, usersRoute)}>
-                      Ver todos
-                    </Link>
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+                <div className="flex flex-none items-center justify-between gap-4 pl-11 sm:flex-col sm:items-end sm:gap-1 sm:pl-0">
+                  <p className="text-xs tabular-nums text-foreground-muted">
+                    {formatDistanceToNow(new Date(item.createdAt), {
+                      addSuffix: true,
+                      locale: es,
+                    })}
+                  </p>
+                  <Link
+                    className="inline-flex min-h-11 items-center text-sm font-medium text-accent-text hover:underline md:min-h-0"
+                    to={getActivityLink(item, usersRoute)}
+                  >
+                    Ver todos
+                  </Link>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </section>
   )
 }
