@@ -54,19 +54,19 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
 
   return (
     <>
-      <Card>
+      <Card className="border-border shadow-none">
         <CardHeader>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-accent-text" />
-                <CardTitle className="text-xl">Historial de métricas</CardTitle>
+                <CardTitle className="font-display text-xl font-extrabold uppercase leading-none">Historial de métricas</CardTitle>
               </div>
               <CardDescription>Todas las métricas corporales registradas</CardDescription>
               {/* GET /admin/clients/:id/metrics only paginates; it accepts no from/to range. */}
-              <p className="mt-1 text-xs text-muted-foreground">Muestra todas las mediciones, sin filtrar por periodo.</p>
+              <p className="mt-1 text-xs text-foreground-muted">Muestra todas las mediciones, sin filtrar por periodo.</p>
             </div>
-            <Button size="sm" onClick={openCreateDialog}>
+            <Button size="sm" className="min-h-11 md:min-h-8" onClick={openCreateDialog}>
               <Plus className="h-4 w-4" />
               Añadir métricas
             </Button>
@@ -85,10 +85,10 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
             <Button variant="outline" onClick={() => void refetch()}>Reintentar historial</Button>
           </div>
         ) : !data || data.data.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sin métricas registradas</p>
+          <p className="text-sm text-foreground-muted">Sin métricas registradas</p>
         ) : (
           <>
-            <p className="mb-3 text-sm text-muted-foreground">Registros corporales y edición. Desplaza la tabla para consultar todas las medidas y acciones.</p>
+            <p className="mb-3 text-sm text-foreground-muted">Registros corporales y edición. Desplaza la tabla para consultar todas las medidas y acciones.</p>
             <div className="overflow-x-auto rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" role="region" aria-label="Historial corporal desplazable" tabIndex={0}>
               <Table>
                 <caption className="sr-only">Historial de métricas corporales y acciones</caption>
@@ -140,6 +140,8 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
                         <Button
                           variant="ghost"
                           size="icon"
+                    className="min-h-11 min-w-11 md:min-h-10 md:min-w-10"
+                          className="min-h-11 min-w-11 md:min-h-10 md:min-w-10"
                           aria-label={`Editar métricas del ${tableDateFormatter.format(new Date(metric.date))}`}
                           onClick={() => openEditDialog(metric)}
                         >
@@ -152,14 +154,15 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
               </Table>
             </div>
             {data.totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4">
-                <p className="text-sm text-muted-foreground">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+                <p className="text-[13px] tabular-nums text-foreground-muted">
                   Página {data.page} de {data.totalPages} ({data.total} registros)
                 </p>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="icon"
+                    className="min-h-11 min-w-11 md:min-h-10 md:min-w-10"
                     aria-label="Página anterior de métricas"
                     disabled={page <= 1}
                     onClick={() => onPageChange(page - 1)}
@@ -169,6 +172,7 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
                   <Button
                     variant="outline"
                     size="icon"
+                    className="min-h-11 min-w-11 md:min-h-10 md:min-w-10"
                     aria-label="Página siguiente de métricas"
                     disabled={page >= data.totalPages}
                     onClick={() => onPageChange(page + 1)}
