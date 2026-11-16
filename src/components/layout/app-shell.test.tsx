@@ -59,7 +59,7 @@ const SUPER_ADMIN_NAV: Array<[string, string]> = [
   ['Servicio base', '/base-service'],
   ['Ejercicios', '/exercises'],
   ['Entrenamientos', '/trainings'],
-  ['Badges', '/badges'],
+  ['Etiquetas', '/badges'],
   ['Ingredientes', '/ingredients'],
   ['Dietas', '/diets'],
   ['Asignaciones', '/assignments'],
