@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Plus } from 'lucide-react'
+import { Info, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   type FilterOption,
@@ -8,9 +8,9 @@ import {
 } from '@/components/filters'
 import { useAuth } from '@/hooks/use-auth'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
+import { EmptyState, PageHeader } from '@/components/page'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import {
   getApiErrorMessage,
@@ -247,33 +247,32 @@ export function NotificationTemplatesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-foreground">Plantillas de notificaciones</h1>
-          <p className="text-sm text-muted-foreground">
-            Edita automáticas existentes y crea plantillas manuales para envíos puntuales.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(categoryCounts).map(([category, count]) => (
-              <Badge key={category} variant="outline" className="border-border bg-muted text-muted-foreground">
-                {category}: {count}
-              </Badge>
-            ))}
-          </div>
+    <div>
+      <PageHeader
+        title="Plantillas de notificaciones"
+        description="Edita automáticas existentes y crea plantillas manuales para envíos puntuales."
+        actions={
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" />
             Nueva plantilla
           </Button>
-        </div>
+        }
+      />
+
+      <div className="mb-6 flex items-start gap-3 border border-status-info/30 bg-status-info-soft p-3 text-[13px] leading-5 text-foreground-secondary">
+        <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-info" />
+        <p>
+          Las plantillas automáticas dependen de un evento del sistema. Una plantilla nueva creada aquí es manual:
+          queda disponible al enviar una notificación desde el historial.
+        </p>
       </div>
 
-      <div className="rounded-lg border border-brand-primary/15 bg-brand-soft/10 p-4 text-sm text-muted-foreground">
-        Las plantillas automáticas dependen de un evento del sistema. Una plantilla nueva creada aquí es manual:
-        queda disponible al enviar una notificación desde el historial.
+      <div className="mb-4 flex flex-wrap gap-2">
+        {Object.entries(categoryCounts).map(([category, count]) => (
+          <Badge key={category} variant="outline" className="rounded-none border-border-strong text-foreground-secondary">
+            {category}: {count}
+          </Badge>
+        ))}
       </div>
 
       {templatesQuery.isLoading ? <LoadingState /> : null}
@@ -283,7 +282,7 @@ export function NotificationTemplatesPage() {
       ) : null}
 
       {!templatesQuery.isLoading && !templatesQuery.isError ? (
-        <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="grid border-t border-border-strong xl:grid-cols-[360px_minmax(0,1fr)]">
           <TemplateList
             filteredTemplates={filteredTemplates}
             templates={templates}
@@ -295,7 +294,7 @@ export function NotificationTemplatesPage() {
             filters={filters}
           />
 
-          <Card>
+          <div className="min-w-0 xl:pl-8">
             {selectedTemplate ? (
               <TemplateEditorForm
                 selectedTemplate={selectedTemplate}
@@ -308,11 +307,9 @@ export function NotificationTemplatesPage() {
                 handleResetOrDelete={handleResetOrDelete}
               />
             ) : (
-              <CardContent className="p-6 text-sm text-muted-foreground">
-                Selecciona una plantilla para editarla.
-              </CardContent>
+              <EmptyState title="Selecciona una plantilla para editarla." />
             )}
-          </Card>
+          </div>
         </div>
       ) : null}
 

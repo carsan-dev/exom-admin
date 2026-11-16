@@ -98,6 +98,7 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
                 onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
                 maxLength={120}
                 disabled={createTemplate.isPending}
+                className="max-md:h-11"
               />
             </div>
 
@@ -109,6 +110,7 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
                 onChange={(event) => setDraft((current) => ({ ...current, category: event.target.value }))}
                 maxLength={80}
                 disabled={createTemplate.isPending}
+                className="max-md:h-11"
               />
             </div>
           </div>
@@ -122,7 +124,8 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
               maxLength={240}
               disabled={createTemplate.isPending}
               placeholder="Uso recomendado de esta plantilla"
-            />
+                className="max-md:h-11"
+              />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_220px]">
@@ -134,6 +137,7 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
                 onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
                 maxLength={120}
                 disabled={createTemplate.isPending}
+                className="max-md:h-11"
               />
             </div>
 
@@ -146,6 +150,7 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
                 maxLength={160}
                 disabled={createTemplate.isPending}
                 placeholder="/recap"
+                className="max-md:h-11"
               />
             </div>
           </div>
@@ -159,22 +164,22 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
               maxLength={500}
               rows={5}
               disabled={createTemplate.isPending}
-              className="flex min-h-28 w-full resize-y rounded-lg border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex min-h-28 w-full resize-y rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground"
             />
           </div>
 
-          <div className="flex items-start gap-3 rounded-lg border border-border p-3">
+          <div className="flex items-start gap-3 border border-border p-3 max-md:min-h-11">
             <input
               id="new-template-enabled"
               type="checkbox"
               checked={draft.enabled}
               onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))}
               disabled={createTemplate.isPending}
-              className="mt-1 h-4 w-4 rounded border-input"
+              className="mt-0.5 size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-md:size-6"
             />
             <div className="space-y-1">
               <Label htmlFor="new-template-enabled">Disponible al enviar</Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-[13px] leading-5 text-foreground-secondary">
                 Si está pausada, no aparecerá como plantilla rápida en envío manual.
               </p>
             </div>

@@ -78,19 +78,19 @@ export function ScheduleEditor({ template }: { template: NotificationTemplate })
   }
 
   return (
-    <div className="space-y-4 rounded-lg border border-border bg-muted/20 p-4">
-      <div className="flex items-start gap-3">
+    <div className="space-y-4 border border-border bg-background-surface p-4">
+      <div className="flex items-start gap-3 max-md:min-h-11">
         <input
           id={`schedule-enabled-${template.key}`}
           type="checkbox"
           checked={draft.enabled}
           onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))}
           disabled={updateSchedule.isPending}
-          className="mt-1 h-4 w-4 rounded border-input"
+          className="mt-0.5 size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-md:size-6"
         />
         <div className="space-y-1">
           <Label htmlFor={`schedule-enabled-${template.key}`}>Programación activa</Label>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[13px] leading-5 text-foreground-secondary">
             Si está pausada, el horario no se ejecuta aunque el texto de la plantilla siga activo.
           </p>
         </div>
@@ -105,6 +105,7 @@ export function ScheduleEditor({ template }: { template: NotificationTemplate })
             onChange={(event) => setDraft((current) => ({ ...current, timezone: event.target.value }))}
             disabled={updateSchedule.isPending}
             placeholder="Europe/Madrid"
+            className="max-md:h-11"
           />
         </div>
 
@@ -118,7 +119,7 @@ export function ScheduleEditor({ template }: { template: NotificationTemplate })
                 setDraft((current) => ({ ...current, weekday: Number(event.target.value) }))
               }
               disabled={updateSchedule.isPending}
-              className="flex h-10 w-full rounded-lg border border-input bg-input px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:h-11"
             >
               {weekdayOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -130,7 +131,7 @@ export function ScheduleEditor({ template }: { template: NotificationTemplate })
         ) : null}
       </div>
 
-      <div className={cn('grid gap-3', kind === 'meal_daily' ? 'sm:grid-cols-2' : 'sm:grid-cols-[220px]')}>
+      <div className={cn('grid gap-3', kind === 'meal_daily' ? 'grid-cols-2 md:grid-cols-4' : 'sm:grid-cols-[220px]')}>
         {timeLabels.map((label, index) => (
           <div key={label} className="space-y-2">
             <Label htmlFor={`schedule-time-${template.key}-${index}`}>{label}</Label>
@@ -140,13 +141,14 @@ export function ScheduleEditor({ template }: { template: NotificationTemplate })
               value={draft.times[index] ?? ''}
               onChange={(event) => handleTimeChange(index, event.target.value)}
               disabled={updateSchedule.isPending}
+              className="max-md:h-11"
             />
           </div>
         ))}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-foreground-muted">
           El cambio se aplica en la siguiente comprobación del programador.
         </p>
         <Button type="button" onClick={handleSave} disabled={updateSchedule.isPending || !hasChanges}>

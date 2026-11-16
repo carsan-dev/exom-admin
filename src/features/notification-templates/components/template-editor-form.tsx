@@ -2,7 +2,6 @@ import type { Dispatch, FormEvent, SetStateAction } from 'react'
 import { RotateCcw, Save, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { formatUpdatedAt, normalizeRoute, type TemplateDraft } from '../template-helpers'
@@ -33,43 +32,43 @@ export function TemplateEditorForm({
   handleResetOrDelete,
 }: TemplateEditorFormProps) {
   return (
-    <form onSubmit={handleSubmit}>
-      <CardHeader className="gap-3">
+    <form onSubmit={handleSubmit} className="flex min-w-0 flex-col">
+      <div className="space-y-3 py-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-2">
-            <CardTitle className="text-xl">{selectedTemplate.name}</CardTitle>
-            <CardDescription>{selectedTemplate.description}</CardDescription>
+          <div className="min-w-0 space-y-1">
+            <h2 className="text-xl font-semibold leading-7 text-foreground">{selectedTemplate.name}</h2>
+            <p className="text-[13px] leading-5 text-foreground-secondary">{selectedTemplate.description}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
+            <Badge variant="outline" className="rounded-none border-accent-line/40 bg-lime-soft text-accent-text">
               {selectedTemplate.category}
             </Badge>
-            <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
+            <Badge variant="outline" className="rounded-none border-border-strong text-foreground-secondary">
               {selectedTemplate.is_system ? 'Automática' : 'Manual'}
             </Badge>
-            <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
+            <Badge variant="outline" className="rounded-none border-border-strong text-foreground-secondary">
               {selectedTemplate.customized ? 'Editada' : 'Por defecto'}
             </Badge>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-foreground-muted">
           Último cambio: {formatUpdatedAt(selectedTemplate.updated_at)}
         </p>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-5">
-        <div className="flex items-start gap-3">
+      <div className="space-y-6 pb-6">
+        <div className="flex items-start gap-3 max-md:min-h-11">
           <input
             id="template-enabled"
             type="checkbox"
             checked={draft.enabled}
             onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))}
             disabled={isBusy}
-            className="mt-1 h-4 w-4 rounded border-input"
+            className="mt-0.5 size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-md:size-6"
           />
           <div className="space-y-1">
             <Label htmlFor="template-enabled">Activa</Label>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-[13px] leading-5 text-foreground-secondary">
               {selectedTemplate.is_system
                 ? 'Al pausar, el evento automático no enviará nada.'
                 : 'Al pausar, no aparecerá como plantilla rápida al enviar.'}
@@ -77,7 +76,7 @@ export function TemplateEditorForm({
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <div className="space-y-2">
             <Label htmlFor="template-title">Título</Label>
             <Input
@@ -86,6 +85,7 @@ export function TemplateEditorForm({
               onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
               disabled={isBusy}
               maxLength={120}
+              className="max-md:h-11"
             />
           </div>
 
@@ -97,6 +97,7 @@ export function TemplateEditorForm({
               onChange={(event) => setDraft((current) => ({ ...current, route: event.target.value }))}
               disabled={isBusy}
               placeholder="/trainings"
+              className="max-md:h-11"
             />
           </div>
         </div>
@@ -110,48 +111,48 @@ export function TemplateEditorForm({
             disabled={isBusy}
             maxLength={500}
             rows={5}
-            className="flex min-h-28 w-full resize-y rounded-lg border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex min-h-28 w-full resize-y rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground"
           />
-          <p className="text-xs text-muted-foreground">{draft.body.length}/500 caracteres</p>
+          <p className="text-xs text-foreground-muted">{draft.body.length}/500 caracteres</p>
         </div>
 
-        <div className="space-y-2 border-t border-border pt-4">
-          <Label>Cuándo se envía</Label>
+        <div className="space-y-3 border-t border-border pt-5">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Cuándo se envía</h3>
           <DeliveryInfo template={selectedTemplate} />
           <ScheduleEditor template={selectedTemplate} />
         </div>
 
-        <div className="space-y-2 border-t border-border pt-4">
-          <Label>Variables</Label>
+        <div className="space-y-3 border-t border-border pt-5">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Variables</h3>
           <TemplateVariables template={selectedTemplate} />
         </div>
 
-        <div className="space-y-2 border-t border-border pt-4">
-          <Label>Vista previa</Label>
-          <div className="space-y-1 rounded-lg border border-border bg-muted/30 p-3">
-            <p className="text-sm font-medium text-foreground">{draft.title || 'Sin título'}</p>
-            <p className="text-sm text-muted-foreground">{draft.body || 'Sin cuerpo'}</p>
-            <p className="text-xs text-muted-foreground">{normalizeRoute(draft.route) ?? 'Sin ruta'}</p>
+        <div className="space-y-3 border-t border-border pt-5">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Vista previa</h3>
+          <div className="space-y-1 border border-border-strong bg-card p-3">
+            <p className="text-sm font-semibold text-foreground">{draft.title || 'Sin título'}</p>
+            <p className="text-[13px] leading-[18px] text-foreground-secondary">{draft.body || 'Sin cuerpo'}</p>
+            <p className="text-xs text-foreground-muted">{normalizeRoute(draft.route) ?? 'Sin ruta'}</p>
           </div>
         </div>
+      </div>
 
-        <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleResetOrDelete}
-            disabled={isBusy || (selectedTemplate.is_system && !selectedTemplate.customized)}
-          >
-            {selectedTemplate.is_system ? <RotateCcw className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
-            {selectedTemplate.is_system ? 'Restaurar defecto' : 'Eliminar plantilla'}
-          </Button>
+      <div className="sticky bottom-0 z-[3] flex flex-col-reverse gap-2 border-t border-border-strong bg-background py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:flex-row sm:items-center sm:justify-between">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleResetOrDelete}
+          disabled={isBusy || (selectedTemplate.is_system && !selectedTemplate.customized)}
+        >
+          {selectedTemplate.is_system ? <RotateCcw className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+          {selectedTemplate.is_system ? 'Restaurar defecto' : 'Eliminar plantilla'}
+        </Button>
 
-          <Button type="submit" disabled={isBusy || !hasChanges}>
-            <Save className="h-4 w-4" />
-            {isSaving ? 'Guardando...' : 'Guardar cambios'}
-          </Button>
-        </div>
-      </CardContent>
+        <Button type="submit" disabled={isBusy || !hasChanges}>
+          <Save className="h-4 w-4" />
+          {isSaving ? 'Guardando...' : 'Guardar cambios'}
+        </Button>
+      </div>
     </form>
   )
 }
