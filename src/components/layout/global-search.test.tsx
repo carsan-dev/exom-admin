@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { act, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
@@ -33,7 +33,7 @@ interface ClientsResult {
 }
 
 const mocks = vi.hoisted(() => ({
-  role: 'SUPER_ADMIN' as 'SUPER_ADMIN' | 'ADMIN',
+  role: 'SUPER_ADMIN' as 'SUPER_ADMIN' | 'ADMIN' | undefined,
   mode: 'ready' as 'ready' | 'loading' | 'error',
   params: [] as Array<{ page?: number; limit?: number; search?: string; archive?: string }>,
   clients: [] as Array<{
@@ -637,7 +637,7 @@ describe('buscador global: clientes', () => {
     await advance(250)
 
     const dialog = getDialog()
-    expect(within(dialog).getByRole('alert')).toHaveTextContent('No se pudieron buscar clientes')
+    expect(within(dialog).getByRole('status')).toHaveTextContent(/No se pudieron buscar clientes/)
     const retry = within(within(dialog).getByRole('group', { name: 'Clientes' })).getByRole('option')
     expect(retry).toHaveTextContent('Reintentar')
     expect(mocks.refetch).not.toHaveBeenCalled()
@@ -753,5 +753,120 @@ describe('buscador global: móvil', () => {
 
     expect(queryDialog()).not.toBeInTheDocument()
     await waitFor(() => expect(more).toHaveFocus())
+  })
+})
+
+describe('buscador global: atajo, rol, anuncios y ruta en móvil', () => {
+  it('sin rol no aparecen «Plantillas» ni «Nueva plantilla» y no revienta', async () => {
+    const user = userEvent.setup()
+    renderSearch()
+    mocks.role = undefined
+    await user.keyboard('{Control>}k{/Control}')
+
+    const names = getOptions().map((option) => option.textContent ?? '')
+    expect(names.length).toBeGreaterThan(0)
+    expect(names.some((name) => name.includes('Plantillas'))).toBe(false)
+    expect(names.some((name) => name.includes('Nueva plantilla'))).toBe(false)
+  })
+
+  it('Alt Gr (Ctrl + Alt) + K no abre', async () => {
+    const user = userEvent.setup()
+    renderSearch()
+
+    await user.keyboard('{Control>}{Alt>}k{/Alt}{/Control}')
+
+    expect(queryDialog()).not.toBeInTheDocument()
+  })
+
+  it('Ctrl Shift K no abre', async () => {
+    const user = userEvent.setup()
+    renderSearch()
+
+    await user.keyboard('{Control>}{Shift>}k{/Shift}{/Control}')
+
+    expect(queryDialog()).not.toBeInTheDocument()
+  })
+
+  it('un evento con repeat no alterna el buscador', async () => {
+    const user = userEvent.setup()
+    renderSearch()
+    await user.keyboard('{Control>}k{/Control}')
+    expect(getDialog()).toBeInTheDocument()
+
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'k', ctrlKey: true, repeat: true })
+
+    expect(getDialog()).toBeInTheDocument()
+  })
+
+  it('anuncia «Buscando clientes…» durante la carga, sin recuento', async () => {
+    const user = setupWithFakeTimers()
+    mocks.mode = 'loading'
+    renderSearch()
+    await user.keyboard('{Control>}k{/Control}')
+
+    await user.type(getCombobox(), 'sergio')
+    await advance(250)
+
+    const status = within(getDialog()).getByRole('status')
+    expect(status).toHaveTextContent(/^Buscando clientes…$/)
+    expect(within(getDialog()).getAllByRole('status')).toHaveLength(1)
+  })
+
+  it('en error anuncia el recuento y el fallo; sin filas, solo el fallo', async () => {
+    const user = setupWithFakeTimers()
+    mocks.mode = 'error'
+    renderSearch()
+    await user.keyboard('{Control>}k{/Control}')
+
+    await user.type(getCombobox(), 'notif')
+    await advance(250)
+    expect(within(getDialog()).getByRole('status')).toHaveTextContent(
+      /^\d+ resultados? · No se pudieron buscar clientes$/,
+    )
+
+    await user.clear(getCombobox())
+    await user.type(getCombobox(), 'zzz')
+    await advance(250)
+    const status = within(getDialog()).getByRole('status')
+    expect(status).toHaveTextContent(/^No se pudieron buscar clientes$/)
+    expect(status).not.toHaveTextContent(/Sin resultados/)
+  })
+
+  it('la opción de reintento tiene un nombre accesible claro', async () => {
+    const user = setupWithFakeTimers()
+    mocks.mode = 'error'
+    renderSearch()
+    await user.keyboard('{Control>}k{/Control}')
+
+    await user.type(getCombobox(), 'sergio')
+    await advance(250)
+
+    expect(
+      within(getDialog()).getByRole('option', { name: 'Reintentar la búsqueda de clientes' }),
+    ).toBeInTheDocument()
+    expect(within(getDialog()).queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('las acciones muestran la ruta en escritorio y no en móvil', async () => {
+    const user = userEvent.setup()
+    renderSearch()
+    await user.keyboard('{Control>}k{/Control}')
+    expect(within(getDialog()).getByText('/recaps?status=SUBMITTED')).toBeInTheDocument()
+  })
+
+  it('en móvil las acciones no muestran la ruta', async () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    }))
+    const user = userEvent.setup()
+    renderSearch()
+    await user.keyboard('{Control>}k{/Control}')
+
+    const dialog = getDialog()
+    expect(within(dialog).getByRole('option', { name: /Ver recaps enviados/ })).toBeInTheDocument()
+    expect(within(dialog).queryByText('/recaps?status=SUBMITTED')).not.toBeInTheDocument()
   })
 })

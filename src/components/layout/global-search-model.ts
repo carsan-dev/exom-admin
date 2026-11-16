@@ -115,6 +115,18 @@ export function formatResultCount(count: number) {
   return `${count} resultados`
 }
 
+export type ClientsAnnouncementStatus = 'off' | 'loading' | 'error' | 'ready'
+
+/** Live-region text: loading and error of the clients search never read as a plain count. */
+export function formatAnnouncement(count: number, clientsStatus: ClientsAnnouncementStatus) {
+  if (clientsStatus === 'loading') return 'Buscando clientes…'
+  if (clientsStatus === 'error') {
+    const failure = 'No se pudieron buscar clientes'
+    return count === 0 ? failure : `${formatResultCount(count)} · ${failure}`
+  }
+  return formatResultCount(count)
+}
+
 export function getClientDetailPath(clientId: string, role: string | undefined) {
   return `${getUsersRoute(role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'ADMIN')}/${clientId}`
 }

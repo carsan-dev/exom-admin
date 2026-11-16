@@ -36,7 +36,7 @@ import {
   CLIENT_SEARCH_MIN_LENGTH,
   filterEntries,
   findMatch,
-  formatResultCount,
+  formatAnnouncement,
   getActionEntries,
   getClientDetailPath,
   getClientsListLabel,
@@ -94,7 +94,7 @@ export function GlobalSearchProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (!(event.ctrlKey || event.metaKey) || event.altKey) return
+      if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey || event.repeat) return
       if (typeof event.key !== 'string' || event.key.toLowerCase() !== 'k') return
 
       if (open) {
@@ -214,7 +214,7 @@ function SearchPalette({ variant, onClose }: SearchPaletteProps) {
   const screens = useMemo(() => filterEntries(getNavigationEntries(role), trimmed), [role, trimmed])
   const actions = useMemo(() => filterEntries(getActionEntries(role), trimmed), [role, trimmed])
   const clientCount = clients.status === 'ready' ? clients.items.length : 0
-  const announcement = formatResultCount(screens.length + actions.length + clientCount)
+  const announcement = formatAnnouncement(screens.length + actions.length + clientCount, clients.status)
   const isEmpty =
     screens.length === 0 &&
     actions.length === 0 &&
@@ -239,9 +239,9 @@ function SearchPalette({ variant, onClose }: SearchPaletteProps) {
       loop
       vimBindings={false}
       label="Buscar"
-      // Skeleton colors equal to the panel/sheet background would be invisible: use the mockup's
-      // surface-3 (--secondary) and rule-strong (--border-strong), scoped to the search only.
-      className="h-auto min-h-0 flex-1 rounded-none bg-transparent text-foreground [--skeleton-base:var(--secondary)] [--skeleton-hi:var(--border-strong)]"
+      // Skeleton colors close to the panel/sheet background are invisible: use lighter tokens,
+      // scoped to the search only (base border-strong, sweep control-border).
+      className="h-auto min-h-0 flex-1 rounded-none bg-transparent text-foreground [--skeleton-base:var(--border-strong)] [--skeleton-hi:var(--control-border)]"
     >
       {isDesktop ? (
         <div className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border px-4 focus-within:shadow-[inset_0_-1px_0_var(--focus)] [&_[cmdk-input-wrapper]]:h-full [&_[cmdk-input-wrapper]]:min-w-0 [&_[cmdk-input-wrapper]]:flex-1 [&_[cmdk-input-wrapper]]:gap-3 [&_[cmdk-input-wrapper]]:border-0 [&_[cmdk-input-wrapper]]:px-0 [&_[cmdk-input-wrapper]_svg]:mr-0 [&_[cmdk-input-wrapper]_svg]:text-muted-foreground [&_[cmdk-input-wrapper]_svg]:opacity-100">
@@ -444,9 +444,14 @@ function ResultsView({ query, role, variant, screens, actions, clients, isEmpty,
 
       {clients.status === 'error' ? (
         <CommandGroup heading="Clientes" className={GROUP_CLASS}>
-          <CommandItem value="clients:retry" onSelect={clients.retry} className={cn(row, 'pr-3')}>
+          <CommandItem
+            value="clients:retry"
+            aria-label="Reintentar la búsqueda de clientes"
+            onSelect={clients.retry}
+            className={cn(row, 'pr-3')}
+          >
             <CircleAlert aria-hidden="true" className="text-status-error!" />
-            <span role="alert" className="min-w-0 truncate">
+            <span className="min-w-0 truncate">
               No se pudieron buscar clientes
             </span>
             <span
