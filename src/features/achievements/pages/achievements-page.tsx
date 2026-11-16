@@ -3,8 +3,9 @@ import { useSearchParams } from 'react-router'
 import { useAuth } from '@/hooks/use-auth'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
+import { Plus } from 'lucide-react'
+import { PageHeader } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -121,20 +122,22 @@ export function AchievementsPage() {
 
   return (
     <div className="space-y-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-foreground">Gestión de logros</h1>
-            <p className="text-sm text-muted-foreground">
-              Crea logros para premiar hitos medibles, define su meta de desbloqueo y mantén separada esta gestión del objetivo principal del cliente.
-            </p>
-          </div>
+      <PageHeader
+        className="mb-6 md:mb-6"
+        eyebrow="Motivación"
+        title="Gestión de logros"
+        description="Crea logros para premiar hitos medibles, define su meta de desbloqueo y mantén separada esta gestión del objetivo principal del cliente."
+        actions={
+          <Button onClick={() => setCreateOpen(true)} className="max-md:h-11">
+            <Plus className="h-4 w-4" />
+            Nuevo logro
+          </Button>
+        }
+      />
 
-          <Button onClick={() => setCreateOpen(true)}>Nuevo logro</Button>
-        </div>
-
-        <div className="rounded-xl border border-brand-primary/15 bg-brand-soft/10 p-4 text-sm text-muted-foreground">
-          Los <span className="font-medium text-foreground">logros</span> premian hitos desbloqueables. El <span className="font-medium text-foreground">objetivo principal</span> sigue viviéndose en retos (`MAIN_GOAL`) y no debe mezclarse con la meta de un logro.
-        </div>
+      <p className="border-l border-border-strong pl-4 text-sm text-foreground-secondary">
+        Los <span className="font-medium text-foreground">logros</span> premian hitos desbloqueables. El <span className="font-medium text-foreground">objetivo principal</span> sigue viviéndose en retos (`MAIN_GOAL`) y no debe mezclarse con la meta de un logro.
+      </p>
 
       <AchievementsStatsCards
         summary={data?.summary}
@@ -144,20 +147,21 @@ export function AchievementsPage() {
         onRetry={() => void achievementsQuery.refetch()}
       />
 
-      <Card>
-        <CardContent className="space-y-4 p-6">
+      <section aria-label="Filtros de logros">
+        <div className="space-y-4">
           <form onSubmit={handleSearchSubmit} className="space-y-4">
-            <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:items-end">
+            <div className="grid gap-4 md:grid-cols-2 md:items-end xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
               <div className="space-y-2">
                 <Label htmlFor="achievement-search">Buscar</Label>
                 <div className="flex gap-2">
                   <Input
                     id="achievement-search"
+                    className="max-md:h-11"
                     value={searchDraft}
                     onChange={(event) => setSearchDraft(event.target.value)}
                     placeholder="Nombre o descripción"
                   />
-                  <Button type="submit" variant="outline">
+                  <Button type="submit" variant="outline" className="max-md:h-11">
                     Buscar
                   </Button>
                 </div>
@@ -169,7 +173,7 @@ export function AchievementsPage() {
                   value={criteriaType}
                   onValueChange={(value) => updateSearchParams({ criteria_type: value as CriteriaType | 'ALL', page: 1 })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="max-md:h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -186,18 +190,18 @@ export function AchievementsPage() {
           </form>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-[13px] tabular-nums text-foreground-muted" aria-live="polite" aria-busy={!data}>
               {data ? `${data.total} logro${data.total === 1 ? '' : 's'} encontrado${data.total === 1 ? '' : 's'}` : 'Cargando resultados...'}
             </p>
 
             {hasActiveFilters && (
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="max-md:h-11">
                 Limpiar filtros
               </Button>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <AchievementsTable
         items={items}

@@ -1,6 +1,5 @@
-import { AlertTriangle, Award, Trophy } from 'lucide-react'
+import { FigureStrip } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { AchievementSummary } from '../types'
 import { CRITERIA_TYPE_LABELS } from '../types'
@@ -16,16 +15,17 @@ interface AchievementsStatsCardsProps {
 export function AchievementsStatsCards({ summary, isLoading, isError, isFetching, onRetry }: AchievementsStatsCardsProps) {
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        role="status"
+        aria-busy="true"
+        className="grid grid-cols-2 gap-px border-y border-border-strong lg:grid-cols-4"
+      >
+        <span className="sr-only">Cargando resumen de logros</span>
         {Array.from({ length: 4 }).map((_, index) => (
-          <Card key={index}>
-            <CardHeader className="pb-2">
-              <Skeleton className="h-4 w-28" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-16" />
-            </CardContent>
-          </Card>
+          <div key={index} aria-hidden="true" className="space-y-3 px-5 pb-[18px] pt-4">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-9 w-16" />
+          </div>
         ))}
       </div>
     )
@@ -33,22 +33,20 @@ export function AchievementsStatsCards({ summary, isLoading, isError, isFetching
 
   if (isError) {
     return (
-      <Card className="border-status-error/30">
-        <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-          <div className="space-y-1">
-            <CardTitle className="text-base">No se pudo cargar el resumen</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Reintenta para recuperar el total de logros y la distribución por tipo de criterio.
-            </p>
-          </div>
-          <AlertTriangle className="h-5 w-5 text-status-error" />
-        </CardHeader>
-        <CardContent>
-          <Button size="sm" variant="outline" onClick={onRetry} disabled={isFetching}>
-            {isFetching ? 'Reintentando...' : 'Reintentar'}
-          </Button>
-        </CardContent>
-      </Card>
+      <div
+        role="alert"
+        className="flex flex-col gap-3 border-y border-border-strong px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div className="space-y-1">
+          <p className="text-base font-semibold text-foreground">No se pudo cargar el resumen</p>
+          <p className="text-[13px] text-foreground-secondary">
+            Reintenta para recuperar el total de logros y la distribución por tipo de criterio.
+          </p>
+        </div>
+        <Button size="sm" variant="outline" onClick={onRetry} disabled={isFetching} className="max-md:h-11">
+          {isFetching ? 'Reintentando...' : 'Reintentar'}
+        </Button>
+      </div>
     )
   }
 
@@ -57,30 +55,12 @@ export function AchievementsStatsCards({ summary, isLoading, isError, isFetching
     .slice(0, 3)
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Total logros</CardTitle>
-          <Trophy className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{summary?.total ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      {criteriaEntries.map(([type, count]) => (
-        <Card key={type}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {CRITERIA_TYPE_LABELS[type] ?? type}
-            </CardTitle>
-            <Award className="h-4 w-4 text-accent-text" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-foreground">{count}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <FigureStrip
+      aria-label="Resumen de logros"
+      items={[
+        { label: 'Total logros', value: summary?.total ?? 0 },
+        ...criteriaEntries.map(([type, count]) => ({ label: CRITERIA_TYPE_LABELS[type] ?? type, value: count })),
+      ]}
+    />
   )
 }

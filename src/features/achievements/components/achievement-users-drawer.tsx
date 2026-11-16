@@ -12,6 +12,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import {
   getApiErrorMessage,
   useAchievementDetail,
@@ -51,6 +52,7 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([])
   const revokeAchievement = useRevokeAchievement()
   const recomputeAchievements = useRecomputeAchievements()
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   useEffect(() => {
     if (!open) {
@@ -74,8 +76,16 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
   const selectedUserSet = new Set(selectedUserIds)
   const canRecompute = achievement ? isAutomaticAchievement(achievement.criteria_type) : false
 
-  const handleRevoke = async (userId: string) => {
+  const handleRevoke = async (userId: string, userName: string) => {
     if (!achievement) return
+
+    const accepted = await confirm({
+      title: `¿Revocar el logro «${achievement.name}» a ${userName}?`,
+      description: 'El cliente dejará de tener este logro desbloqueado.',
+      confirmLabel: 'Revocar',
+      destructive: true,
+    })
+    if (!accepted) return
 
     try {
       await revokeAchievement.mutateAsync({ id: achievement.id, user_id: userId })
@@ -98,6 +108,14 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
   const handleRecomputeVisible = async () => {
     if (!achievement || !canRecompute) return
 
+    const accepted = await confirm({
+      title: `¿Recalcular el logro «${achievement.name}» para toda la cartera visible?`,
+      description:
+        'Se revisarán todos los clientes visibles del admin actual y se sincronizarán los logros otorgados y revocados.',
+      confirmLabel: 'Recalcular',
+    })
+    if (!accepted) return
+
     try {
       const result = await recomputeAchievements.mutateAsync({
         values: {
@@ -117,6 +135,14 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
 
   const handleRecomputeSelected = async () => {
     if (!achievement || !canRecompute || selectedUserIds.length === 0) return
+
+    const selectedCount = selectedUserIds.length
+    const accepted = await confirm({
+      title: `¿Recalcular el logro «${achievement.name}» para ${selectedCount} cliente${selectedCount === 1 ? ' seleccionado' : 's seleccionados'}?`,
+      description: 'Solo se revisarán los clientes seleccionados y se sincronizarán sus logros otorgados y revocados.',
+      confirmLabel: 'Recalcular',
+    })
+    if (!accepted) return
 
     try {
       const result = await recomputeAchievements.mutateAsync({
@@ -138,6 +164,7 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
   }
 
   return (
+    <>
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-2xl">
         <SheetHeader>
@@ -277,7 +304,7 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => void handleRevoke(row.user_id)}
+                          onClick={() => void handleRevoke(row.user_id, getAchievementUserDisplayName(row.user))}
                           disabled={revokeAchievement.isPending}
                         >
                           Revocar
@@ -308,5 +335,7 @@ export function AchievementUsersDrawer({ achievement, open, onOpenChange }: Achi
         )}
       </SheetContent>
     </Sheet>
+    {confirmDialog}
+    </>
   )
 }

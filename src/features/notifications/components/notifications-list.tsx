@@ -1,35 +1,11 @@
-import { AlertTriangle, Bell, CheckCircle2 } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import { Bell } from 'lucide-react'
+import { EmptyState, ErrorState, Pagination } from '@/components/page'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { useMediaQuery } from '@/hooks/use-media-query'
 import { useNotificationHistory } from '../api'
-import { NotificationStatusBadge } from './notification-status-badge'
-import { getNotificationRecipientName, type NotificationStatusFilter } from '../types'
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
-}
-
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((value) => value[0])
-    .join('')
-    .toUpperCase()
-}
+import type { NotificationStatusFilter } from '../types'
+import { NotificationsDesktopTable } from './notifications-desktop-table'
+import { NotificationsMobileList } from './notifications-mobile-list'
 
 interface NotificationsListProps {
   recipientId?: string
@@ -39,6 +15,23 @@ interface NotificationsListProps {
   onPageChange: (page: number) => void
 }
 
+function NotificationsListSkeleton() {
+  return (
+    <div role="status" aria-busy="true" className="divide-y divide-border border-y border-border">
+      <span className="sr-only">Cargando historial de notificaciones</span>
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} aria-hidden="true" className="flex items-start gap-3 py-4">
+          <Skeleton className="size-9 flex-none" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-4 w-64 max-w-[60%]" />
+            <Skeleton className="h-3 w-96 max-w-[85%]" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function NotificationsList({
   recipientId,
   status,
@@ -46,7 +39,9 @@ export function NotificationsList({
   page,
   onPageChange,
 }: NotificationsListProps) {
-  const { data, isLoading, isError } = useNotificationHistory(
+  // Tabla desde md; lista apilada por debajo. Solo se monta una variante.
+  const isDesktop = useMediaQuery('(min-width: 768px)', true)
+  const { data, isLoading, isError, refetch } = useNotificationHistory(
     recipientId || undefined,
     status,
     search,
@@ -54,38 +49,16 @@ export function NotificationsList({
   )
 
   if (isLoading) {
-    return (
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Destinatario</TableHead>
-              <TableHead>Título</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Fecha</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Array.from({ length: 5 }).map((_, index) => (
-              <TableRow key={index}>
-                {Array.from({ length: 4 }).map((_, cellIndex) => (
-                  <TableCell key={cellIndex}>
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    )
+    return <NotificationsListSkeleton />
   }
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-40 rounded-lg border text-sm text-muted-foreground">
-        Error al cargar el historial de notificaciones. Intenta de nuevo.
-      </div>
+      <ErrorState
+        className="border-y border-border"
+        title="Error al cargar el historial de notificaciones. Intenta de nuevo."
+        onRetry={() => void refetch()}
+      />
     )
   }
 
@@ -95,103 +68,23 @@ export function NotificationsList({
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-44 gap-3 rounded-lg border">
-        <Bell className="h-8 w-8 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground text-center px-4">
-          {hasActiveFilters
+      <EmptyState
+        className="border-y border-border"
+        icon={<Bell />}
+        title={
+          hasActiveFilters
             ? 'No hay notificaciones que coincidan con los filtros seleccionados'
-            : 'Todavía no has enviado notificaciones desde el panel'}
-        </p>
-      </div>
+            : 'Todavía no has enviado notificaciones desde el panel'
+        }
+      />
     )
   }
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Destinatario</TableHead>
-              <TableHead>Título</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Fecha</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.map((item) => {
-              const recipientName = getNotificationRecipientName(item.recipient)
+      {isDesktop ? <NotificationsDesktopTable items={items} /> : <NotificationsMobileList items={items} />}
 
-              return (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9 border border-border/60">
-                        <AvatarImage src={item.recipient.profile?.avatar_url ?? undefined} alt={recipientName} />
-                        <AvatarFallback>{getInitials(recipientName)}</AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0">
-                        <p className="truncate font-medium text-foreground">{recipientName}</p>
-                        <p className="truncate text-sm text-muted-foreground">{item.recipient.email}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="space-y-1 max-w-xl">
-                      <p className="font-medium text-foreground">{item.title}</p>
-                      <p className="text-sm text-muted-foreground">{item.body}</p>
-                      {item.error && (
-                        <div className="flex items-start gap-2 text-sm text-status-error">
-                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                          <span>{item.error}</span>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="space-y-2">
-                      <NotificationStatusBadge status={item.status} />
-                      {item.status === 'SENT' && (
-                        <div className="flex items-center gap-1.5 text-xs text-status-success">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          Registrada
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell className="text-sm text-muted-foreground">
-                    {formatDate(item.created_at)}
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </div>
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            Página {page} de {totalPages}
-          </span>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
-              Anterior
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={page >= totalPages}
-              onClick={() => onPageChange(page + 1)}
-            >
-              Siguiente
-            </Button>
-          </div>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
     </div>
   )
 }

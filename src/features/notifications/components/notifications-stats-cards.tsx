@@ -1,6 +1,5 @@
-import { AlertTriangle, BellRing, CalendarClock, TriangleAlert } from 'lucide-react'
+import { FigureStrip } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useNotificationStats, type NotificationStatsParams } from '../api'
 
@@ -9,16 +8,17 @@ export function NotificationsStatsCards({ params }: { params?: NotificationStats
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div
+        role="status"
+        aria-busy="true"
+        className="grid grid-cols-2 gap-px border-y border-border-strong lg:grid-cols-3"
+      >
+        <span className="sr-only">Cargando resumen de notificaciones</span>
         {Array.from({ length: 3 }).map((_, index) => (
-          <Card key={index}>
-            <CardHeader className="pb-2">
-              <Skeleton className="h-4 w-32" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-16" />
-            </CardContent>
-          </Card>
+          <div key={index} aria-hidden="true" className="space-y-3 px-5 pb-[18px] pt-4">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-9 w-16" />
+          </div>
         ))}
       </div>
     )
@@ -26,58 +26,31 @@ export function NotificationsStatsCards({ params }: { params?: NotificationStats
 
   if (isError) {
     return (
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="border-status-error/30 sm:col-span-3">
-          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-            <div className="space-y-1">
-              <CardTitle className="text-base">No se pudo cargar el resumen</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Reintenta para recuperar las estadísticas de tus notificaciones.
-              </p>
-            </div>
-            <AlertTriangle className="h-5 w-5 text-status-error" />
-          </CardHeader>
-          <CardContent>
-            <Button size="sm" variant="outline" onClick={() => void refetch()} disabled={isFetching}>
-              {isFetching ? 'Reintentando...' : 'Reintentar'}
-            </Button>
-          </CardContent>
-        </Card>
+      <div
+        role="alert"
+        className="flex flex-col gap-3 border-y border-border-strong px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div className="space-y-1">
+          <p className="text-base font-semibold text-foreground">No se pudo cargar el resumen</p>
+          <p className="text-[13px] text-foreground-secondary">
+            Reintenta para recuperar las estadísticas de tus notificaciones.
+          </p>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => void refetch()} disabled={isFetching} className="max-md:h-11">
+          {isFetching ? 'Reintentando...' : 'Reintentar'}
+        </Button>
       </div>
     )
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Total enviadas</CardTitle>
-          <BellRing className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">{stats?.total ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Enviadas hoy</CardTitle>
-          <CalendarClock className="h-4 w-4 text-status-info" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{stats?.today ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Fallidas</CardTitle>
-          <TriangleAlert className="h-4 w-4 text-status-error" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{stats?.failed ?? 0}</p>
-        </CardContent>
-      </Card>
-    </div>
+    <FigureStrip
+      aria-label="Resumen de notificaciones"
+      items={[
+        { label: 'Total enviadas', value: stats?.total ?? 0 },
+        { label: 'Enviadas hoy', value: stats?.today ?? 0 },
+        { label: 'Fallidas', value: stats?.failed ?? 0, tone: (stats?.failed ?? 0) > 0 ? 'danger' : 'default' },
+      ]}
+    />
   )
 }

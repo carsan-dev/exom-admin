@@ -1,6 +1,5 @@
-import { AlertTriangle, CalendarDays, Globe, Target, WandSparkles } from 'lucide-react'
+import { FigureStrip } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { ChallengeSummary } from '../types'
 
@@ -15,16 +14,17 @@ interface ChallengesStatsCardsProps {
 export function ChallengesStatsCards({ summary, isLoading, isError, isFetching, onRetry }: ChallengesStatsCardsProps) {
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div
+        role="status"
+        aria-busy="true"
+        className="grid grid-cols-2 gap-px border-y border-border-strong lg:grid-cols-5"
+      >
+        <span className="sr-only">Cargando resumen de retos</span>
         {Array.from({ length: 5 }).map((_, index) => (
-          <Card key={index}>
-            <CardHeader className="pb-2">
-              <Skeleton className="h-4 w-28" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-16" />
-            </CardContent>
-          </Card>
+          <div key={index} aria-hidden="true" className="space-y-3 px-5 pb-[18px] pt-4">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-9 w-16" />
+          </div>
         ))}
       </div>
     )
@@ -32,76 +32,33 @@ export function ChallengesStatsCards({ summary, isLoading, isError, isFetching, 
 
   if (isError) {
     return (
-      <Card className="border-status-error/30">
-        <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-          <div className="space-y-1">
-            <CardTitle className="text-base">No se pudo cargar el resumen</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Reintenta para recuperar el total, los retos semanales, los automáticos y el alcance global.
-            </p>
-          </div>
-          <AlertTriangle className="h-5 w-5 text-status-error" />
-        </CardHeader>
-        <CardContent>
-          <Button size="sm" variant="outline" onClick={onRetry} disabled={isFetching}>
-            {isFetching ? 'Reintentando...' : 'Reintentar'}
-          </Button>
-        </CardContent>
-      </Card>
+      <div
+        role="alert"
+        className="flex flex-col gap-3 border-y border-border-strong px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div className="space-y-1">
+          <p className="text-base font-semibold text-foreground">No se pudo cargar el resumen</p>
+          <p className="text-[13px] text-foreground-secondary">
+            Reintenta para recuperar el total, los retos semanales, los automáticos y el alcance global.
+          </p>
+        </div>
+        <Button size="sm" variant="outline" onClick={onRetry} disabled={isFetching} className="max-md:h-11">
+          {isFetching ? 'Reintentando...' : 'Reintentar'}
+        </Button>
+      </div>
     )
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Retos semanales</CardTitle>
-          <CalendarDays className="h-4 w-4 text-status-warning" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{summary?.weekly ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Objetivos principales</CardTitle>
-          <Target className="h-4 w-4 text-accent-text" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{summary?.main_goal ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Retos automáticos</CardTitle>
-          <WandSparkles className="h-4 w-4 text-accent-text" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{summary?.automatic ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Alcance global</CardTitle>
-          <Globe className="h-4 w-4 text-status-info" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{summary?.global ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Total retos</CardTitle>
-          <Target className="h-4 w-4 text-status-success" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{summary?.total ?? 0}</p>
-        </CardContent>
-      </Card>
-    </div>
+    <FigureStrip
+      aria-label="Resumen de retos"
+      items={[
+        { label: 'Retos semanales', value: summary?.weekly ?? 0 },
+        { label: 'Objetivos principales', value: summary?.main_goal ?? 0 },
+        { label: 'Retos automáticos', value: summary?.automatic ?? 0 },
+        { label: 'Alcance global', value: summary?.global ?? 0 },
+        { label: 'Total retos', value: summary?.total ?? 0 },
+      ]}
+    />
   )
 }

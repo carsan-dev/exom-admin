@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router'
+import { Plus } from 'lucide-react'
+import { PageHeader } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
@@ -170,16 +171,18 @@ export function ChallengesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-foreground">Gestión de retos</h1>
-          <p className="text-sm text-muted-foreground">
-            Crea objetivos principales y retos semanales, asígnalos por cliente o globalmente y revisa el progreso visible desde el panel admin.
-          </p>
-        </div>
-
-        <Button onClick={() => setCreateOpen(true)}>Nuevo reto</Button>
-      </div>
+      <PageHeader
+        className="mb-6 md:mb-6"
+        eyebrow="Motivación"
+        title="Gestión de retos"
+        description="Crea objetivos principales y retos semanales, asígnalos por cliente o globalmente y revisa el progreso visible desde el panel admin."
+        actions={
+          <Button onClick={() => setCreateOpen(true)} className="max-md:h-11">
+            <Plus className="h-4 w-4" />
+            Nuevo reto
+          </Button>
+        }
+      />
 
       <ChallengesStatsCards
         summary={data?.summary}
@@ -189,20 +192,21 @@ export function ChallengesPage() {
         onRetry={() => void challengesQuery.refetch()}
       />
 
-      <Card>
-        <CardContent className="space-y-4 p-6">
+      <section aria-label="Filtros de retos">
+        <div className="space-y-4">
           <form onSubmit={handleSearchSubmit} className="space-y-4">
-            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_repeat(4,minmax(0,1fr))] xl:items-end">
-              <div className="space-y-2">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.5fr)_repeat(4,minmax(0,1fr))] xl:items-end">
+              <div className="space-y-2 md:col-span-2 xl:col-span-1">
                 <Label htmlFor="challenge-search">Buscar</Label>
                 <div className="flex gap-2">
                   <Input
                     id="challenge-search"
+                    className="max-md:h-11"
                     value={searchDraft}
                     onChange={(event) => setSearchDraft(event.target.value)}
                     placeholder="Título o descripción"
                   />
-                  <Button type="submit" variant="outline">
+                  <Button type="submit" variant="outline" className="max-md:h-11">
                     Buscar
                   </Button>
                 </div>
@@ -211,7 +215,7 @@ export function ChallengesPage() {
               <div className="space-y-2">
                 <Label>Tipo</Label>
                 <Select value={type} onValueChange={(value) => updateSearchParams({ type: value as ChallengeType | 'ALL', page: 1 })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="max-md:h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -228,7 +232,7 @@ export function ChallengesPage() {
               <div className="space-y-2">
                 <Label>Modo</Label>
                 <Select value={source} onValueChange={(value) => updateSearchParams({ source: value as ChallengeSourceFilter, page: 1 })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="max-md:h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -244,7 +248,7 @@ export function ChallengesPage() {
               <div className="space-y-2">
                 <Label>Alcance</Label>
                 <Select value={scope} onValueChange={(value) => updateSearchParams({ scope: value as ChallengeScopeFilter, page: 1 })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="max-md:h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -260,7 +264,7 @@ export function ChallengesPage() {
               <div className="space-y-2">
                 <Label>Estado</Label>
                 <Select value={completionStatus} onValueChange={(value) => updateSearchParams({ status: value as ChallengeCompletionFilter, page: 1 })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="max-md:h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -276,18 +280,18 @@ export function ChallengesPage() {
           </form>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-[13px] tabular-nums text-foreground-muted" aria-live="polite" aria-busy={!data}>
               {data ? `${data.total} reto${data.total === 1 ? '' : 's'} encontrado${data.total === 1 ? '' : 's'}` : 'Cargando resultados...'}
             </p>
 
             {hasActiveFilters && (
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="max-md:h-11">
                 Limpiar filtros
               </Button>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <ChallengesTable
         items={items}

@@ -62,7 +62,7 @@ export function AppLayout() {
         <MobileTabbar pendingCounts={pendingCounts} />
 
         {/* Main content */}
-        <div className="relative flex min-h-[100svh] min-w-0 flex-1 flex-col overflow-x-hidden lg:min-h-0 lg:overflow-hidden">
+        <div className="relative flex min-h-[100svh] min-w-0 flex-1 flex-col overflow-x-clip lg:min-h-0 lg:overflow-hidden">
           <Header
             onMenuToggle={() => {
               if (!isDesktop) return

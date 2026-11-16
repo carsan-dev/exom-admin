@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
+import { PageHeader } from '@/components/page'
 import { Button } from '@/components/ui/button'
 import { PeriodStatsHeader } from '@/components/stats/period-stats-header'
 import { useStatsPeriod } from '@/components/stats/use-stats-period'
@@ -77,16 +78,17 @@ export function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold text-foreground">Notificaciones</h1>
-          <p className="text-sm text-muted-foreground">
-            Envía recordatorios a tu cartera y controla el historial de entregas desde un único lugar.
-          </p>
-        </div>
-
-        <Button onClick={() => setIsDialogOpen(true)}>Enviar notificación</Button>
-      </div>
+      <PageHeader
+        className="mb-6 md:mb-6"
+        eyebrow="Comunicación"
+        title="Notificaciones"
+        description="Envía recordatorios a tu cartera y controla el historial de entregas desde un único lugar."
+        actions={
+          <Button onClick={() => setIsDialogOpen(true)} className="max-md:h-11">
+            Enviar notificación
+          </Button>
+        }
+      />
 
       <div className="space-y-4">
         <PeriodStatsHeader period={statsPeriod} filtered={Boolean(recipientId)} filterLabel="Destinatario filtrado" />
