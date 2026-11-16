@@ -27,7 +27,7 @@ interface EditorProps {
   onReload: (task: Task) => void
   onRestoreFocus: () => void
 }
-const fieldClass = 'mt-1 block min-h-11 w-full rounded-md border border-input bg-background p-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+const fieldClass = 'mt-1 block min-h-11 w-full rounded-md border border-input bg-background p-2 text-sm font-normal normal-case tracking-normal text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
 
 export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReload, onRestoreFocus }: EditorProps) {
   const [id] = useState(() => task?.id ?? crypto.randomUUID())
@@ -151,29 +151,29 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
   return <><Sheet open onOpenChange={(open) => { if (!open) void close() }}>
     <SheetContent onCloseAutoFocus={(event) => { event.preventDefault(); onRestoreFocus() }} className="w-full overflow-y-auto sm:max-w-lg motion-reduce:transition-none motion-reduce:animate-none">
       <SheetHeader className="mb-6 pr-6 text-left">
-        <SheetTitle>{task ? 'Detalle de tarea' : 'Nueva tarea'}</SheetTitle>
+        <SheetTitle className="font-display text-xl font-extrabold uppercase leading-none">{task ? 'Detalle de tarea' : 'Nueva tarea'}</SheetTitle>
         <SheetDescription>Tarea interna del equipo. Completarla no cambia pautas ni envía mensajes.</SheetDescription>
       </SheetHeader>
       <form onSubmit={submit} className="space-y-4">
-        {task && <p className="text-sm text-muted-foreground">Versión {task.version} · {TASK_STATUSES[task.status]}</p>}
+        {task && <p className="text-sm text-foreground-muted">Versión {task.version} · {TASK_STATUSES[task.status]}</p>}
         {closed && <p role="status" className="text-sm">Esta tarea está cerrada. El historial no se puede editar ni reabrir.</p>}
         <fieldset disabled={locked} className="space-y-4 disabled:opacity-70">
-          <label className="block text-sm font-medium">Título<input className={fieldClass} value={fields.title} required maxLength={160} onChange={(event) => change('title', event.target.value)} /></label>
-          <label className="block text-sm font-medium">Tipo<select className={fieldClass} value={fields.type} onChange={(event) => change('type', event.target.value as TaskFields['type'])}>
+          <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Título<input className={fieldClass} value={fields.title} required maxLength={160} onChange={(event) => change('title', event.target.value)} /></label>
+          <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Tipo<select className={fieldClass} value={fields.type} onChange={(event) => change('type', event.target.value as TaskFields['type'])}>
             {Object.entries(TASK_TYPES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select></label>
-          <label className="block text-sm font-medium">Descripción (opcional)<textarea className={fieldClass} rows={3} maxLength={3000} value={fields.description ?? ''} onChange={(event) => change('description', event.target.value)} /></label>
-          <label className="block text-sm font-medium">Responsable<select className={fieldClass} value={fields.assigned_to_id ?? ''} onChange={(event) => change('assigned_to_id', event.target.value)}>
+          <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Descripción (opcional)<textarea className={fieldClass} rows={3} maxLength={3000} value={fields.description ?? ''} onChange={(event) => change('description', event.target.value)} /></label>
+          <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Responsable<select className={fieldClass} value={fields.assigned_to_id ?? ''} onChange={(event) => change('assigned_to_id', event.target.value)}>
             <option value="">Selecciona un responsable</option>
             {retained && <option value={task.assigned_to_id ?? ''} disabled>{task.assignee?.display_name ?? 'Responsable anterior'} · asignación conservada</option>}
             {eligible.map((person) => <option value={person.id} key={person.id}>{person.display_name ?? `Profesional ${person.id}`}</option>)}
           </select></label>
-          {retained && <p className="text-sm text-muted-foreground">El responsable anterior se conserva. Para cambiarlo, selecciona uno habilitado; no se elimina automáticamente.</p>}
-          <label className="block text-sm font-medium">Fecha límite · UTC<input className={fieldClass} type="date" required value={fields.due_date} onChange={(event) => change('due_date', event.target.value)} /></label>
-          <label className="block text-sm font-medium">Prioridad<select className={fieldClass} value={fields.priority} onChange={(event) => change('priority', event.target.value as TaskFields['priority'])}>
+          {retained && <p className="text-sm text-foreground-muted">El responsable anterior se conserva. Para cambiarlo, selecciona uno habilitado; no se elimina automáticamente.</p>}
+          <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Fecha límite · UTC<input className={fieldClass} type="date" required value={fields.due_date} onChange={(event) => change('due_date', event.target.value)} /></label>
+          <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Prioridad<select className={fieldClass} value={fields.priority} onChange={(event) => change('priority', event.target.value as TaskFields['priority'])}>
             {Object.entries(TASK_PRIORITIES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select></label>
-          {task && !closed ? <label className="block text-sm font-medium">Estado<select className={fieldClass} value={status} onChange={(event) => { setStatus(event.target.value as TaskStatus); setDirty(true) }}>
+          {task && !closed ? <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Estado<select className={fieldClass} value={status} onChange={(event) => { setStatus(event.target.value as TaskStatus); setDirty(true) }}>
             <option value="PENDING">Pendiente</option><option value="IN_PROGRESS">En progreso</option>
           </select></label> : <p className="text-sm">Estado: {TASK_STATUSES[status]}</p>}
         </fieldset>
@@ -184,7 +184,7 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
         </div>}
         {error && <p role="alert" className="text-sm text-status-error">{error}</p>}
         {frozen && <p className="text-sm">El contenido está bloqueado para reintentar exactamente el mismo identificador y payload.</p>}
-        {conflict && <section aria-label="Versión del servidor" className="space-y-3 border-y py-3 text-sm">
+        {conflict && <section aria-label="Versión del servidor" className="space-y-3 border-y border-border-strong py-3 text-sm">
           {server ? <><p>Servidor: versión {server.version} · {TASK_STATUSES[server.status]}</p><p>{server.title} · {TASK_TYPES[server.type]} · {civilDate(server.due_date)} · {TASK_PRIORITIES[server.priority]}</p><p className="whitespace-pre-wrap">{server.description || 'Sin descripción'}</p><p>Responsable: {server.assigned_to_id ?? 'Sin responsable'}</p>
             <Button type="button" variant="outline" onClick={async () => {
               if (await confirm({ title: '¿Descartar tu borrador y cargar la versión del servidor para revisarla?' })) {
@@ -195,7 +195,7 @@ export function TaskEditor({ clientId, identity, task, onClose, onGuard, onReloa
             }}>Descartar borrador y cargar versión</Button></> : <p>Tu borrador sigue intacto. La versión actual aún no está disponible.</p>}
           <Button type="button" variant="outline" disabled={reading} onClick={() => { void readServer() }}>Consultar versión del servidor</Button>
         </section>}
-        {!closed && <div className="flex flex-wrap gap-2 border-t pt-4">
+        {!closed && <div className="flex flex-wrap gap-2 border-t border-border pt-4">
           <Button type="submit" disabled={mutation.isPending || conflict}>{mutation.isPending ? 'Guardando…' : frozen ? 'Reintentar mismo guardado' : task ? 'Guardar cambios' : 'Crear tarea'}</Button>
           {task && !frozen && <><Button type="button" variant="outline" disabled={mutation.isPending || conflict} onClick={() => { void save('COMPLETED') }}>Completar tarea</Button>
             <Button type="button" variant="ghost" disabled={mutation.isPending || conflict} onClick={() => { void save('CANCELLED') }}>Cancelar tarea</Button></>}
