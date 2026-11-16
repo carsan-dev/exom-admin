@@ -1,38 +1,9 @@
-﻿import { Copy, Eye, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
-import { SortableTableHead } from '@/components/sortable-table-head'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { cn } from '@/lib/utils'
+﻿import { useMediaQuery } from '@/hooks/use-media-query'
 import type { SortDir } from '@/lib/sort-search-params'
-import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
-import { formatUpdatedAt } from '../../ingredients/types'
-import {
-  getDietBadgeColorMap,
-  getDietNutritionalBadgeStyle,
-  getMealTypeBadgeClass,
-  type DietCatalogValueWithColor,
-  type Diet,
-} from '../types'
-import { CatalogDragHandle } from '../../catalog-groups/components/catalog-drag-handle'
-
-interface DietApprovalSummary {
-  pending_approval_actions: string[]
-}
+import { getDietBadgeColorMap, type DietCatalogValueWithColor, type Diet } from '../types'
+import { DietsDesktopTable } from './diets-desktop-table'
+import type { DietApprovalSummary } from './diet-row-parts'
+import { DietsMobileList } from './diets-mobile-list'
 
 interface DietsTableProps {
   diets: Diet[]
@@ -50,7 +21,42 @@ interface DietsTableProps {
   nutritionalBadgeColors?: DietCatalogValueWithColor[]
 }
 
-export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplicate, onDelete, selectedIds = new Set(), onSelectionChange, movementDisabled, sortBy, sortDir = 'asc', onSortChange = () => {}, nutritionalBadgeColors }: DietsTableProps) {
+/** Props comunes de las dos variantes (tabla y lista apilada). */
+export interface DietsListViewProps {
+  diets: Diet[]
+  approvalById: Record<string, DietApprovalSummary>
+  onView: (diet: Diet) => void
+  onEdit: (diet: Diet) => void
+  onDuplicate: (diet: Diet) => void
+  onDelete: (diet: Diet) => void
+  selectedIds: Set<string>
+  allSelected: boolean
+  onToggleAll: () => void
+  onToggle: (id: string) => void
+  movementDisabled?: boolean
+  sortBy?: string
+  sortDir: SortDir
+  onSortChange: (field: string) => void
+  badgeColorMap: Map<string, string>
+}
+
+export function DietsTable({
+  diets,
+  approvalById = {},
+  onView,
+  onEdit,
+  onDuplicate,
+  onDelete,
+  selectedIds = new Set(),
+  onSelectionChange,
+  movementDisabled,
+  sortBy,
+  sortDir = 'asc',
+  onSortChange = () => {},
+  nutritionalBadgeColors,
+}: DietsTableProps) {
+  // Tabla desde md; lista apilada por debajo. Solo se monta una variante.
+  const isDesktop = useMediaQuery('(min-width: 768px)', true)
   const badgeColorMap = getDietBadgeColorMap(nutritionalBadgeColors)
   const allSelected = diets.length > 0 && diets.every((item) => selectedIds.has(item.id))
   const toggleAll = () => {
@@ -63,149 +69,28 @@ export function DietsTable({ diets, approvalById = {}, onView, onEdit, onDuplica
   }
   const toggle = (id: string) => {
     const next = new Set(selectedIds)
-    if (next.has(id)) next.delete(id); else next.add(id)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
     onSelectionChange?.(next)
   }
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-20"><input type="checkbox" aria-label="Seleccionar página" checked={allSelected} onChange={toggleAll} /></TableHead>
-          <SortableTableHead field="name" label="Nombre" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
-          <TableHead>Grupo</TableHead>
-          <TableHead className="text-center">Comidas</TableHead>
-          <TableHead className="hidden lg:table-cell">Etiquetas</TableHead>
-          <TableHead className="hidden md:table-cell">Kcal totales</TableHead>
-          <TableHead className="hidden lg:table-cell">Macros (P/C/G)</TableHead>
-          <SortableTableHead field="updated_at" label="Actualizado" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden md:table-cell" />
-          <TableHead className="text-right">Acciones</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {diets.map((diet) => {
-          const mealTypes = diet.meals.map((m) => m.type)
-          const nutritionalBadges = Array.from(new Set(diet.meals.flatMap((meal) => meal.nutritional_badges ?? [])))
-          const mealsCount = diet.meals_count ?? diet.meals.length
-          return (
-            <TableRow key={diet.id}>
-              <TableCell><div className="flex items-center gap-1"><input type="checkbox" aria-label={`Seleccionar ${diet.name}`} checked={selectedIds.has(diet.id)} onChange={() => toggle(diet.id)} /><CatalogDragHandle id={diet.id} label={diet.name} disabled={movementDisabled} /></div></TableCell>
-              <TableCell className="font-medium text-foreground max-w-[200px] truncate">
-                <div className="space-y-2">
-                  <p className="truncate">{diet.name}</p>
-                  <ResourceApprovalIndicator pendingActions={approvalById[diet.id]?.pending_approval_actions ?? []} />
-                </div>
-              </TableCell>
 
-              <TableCell>{diet.group ? <Badge variant="outline">{diet.group.name}</Badge> : <span className="text-xs text-muted-foreground">Sin grupo</span>}</TableCell>
+  const viewProps: DietsListViewProps = {
+    diets,
+    approvalById,
+    onView,
+    onEdit,
+    onDuplicate,
+    onDelete,
+    selectedIds,
+    allSelected,
+    onToggleAll: toggleAll,
+    onToggle: toggle,
+    movementDisabled,
+    sortBy,
+    sortDir,
+    onSortChange,
+    badgeColorMap,
+  }
 
-              <TableCell className="text-center">
-                <div className="flex flex-wrap justify-center gap-1">
-                  {mealTypes.slice(0, 3).map((type, i) => (
-                    <Badge
-                      key={`${type}-${i}`}
-                      variant="outline"
-                      className={cn('text-xs px-1.5 py-0 font-medium', getMealTypeBadgeClass(type))}
-                    >
-                      {diet.meals[i].name.length > 10 ? diet.meals[i].name.slice(0, 10) + '…' : diet.meals[i].name}
-                    </Badge>
-                  ))}
-                  {mealsCount > 3 && (
-                    <Badge variant="outline" className="text-xs px-1.5 py-0 border-border bg-muted text-muted-foreground">
-                      +{mealsCount - 3}
-                    </Badge>
-                  )}
-                  {mealsCount === 0 && (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                  {nutritionalBadges.slice(0, 2).map((badge) => (
-                    <Badge
-                      key={badge}
-                      variant="outline"
-                      className="text-xs px-1.5 py-0 border-border bg-muted text-muted-foreground"
-                      style={getDietNutritionalBadgeStyle(badge, badgeColorMap)}
-                    >
-                      {badge}
-                    </Badge>
-                  ))}
-                </div>
-              </TableCell>
-
-              <TableCell className="hidden lg:table-cell">
-                <div className="flex flex-wrap gap-1">
-                  {(diet.tags ?? []).slice(0, 2).map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="outline"
-                      className="border-brand-soft/40 bg-brand-soft/10 text-accent-text text-xs"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                  {(diet.tags ?? []).length > 2 && (
-                    <Badge variant="outline" className="border-border bg-muted text-muted-foreground text-xs">
-                      +{diet.tags.length - 2}
-                    </Badge>
-                  )}
-                  {(diet.tags ?? []).length === 0 && (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </div>
-              </TableCell>
-
-              <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                {diet.total_calories != null ? `${diet.total_calories} kcal` : '—'}
-              </TableCell>
-
-              <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
-                {diet.total_protein_g != null || diet.total_carbs_g != null || diet.total_fat_g != null ? (
-                  <span>
-                    P {diet.total_protein_g ?? '—'}g · C {diet.total_carbs_g ?? '—'}g · G {diet.total_fat_g ?? '—'}g
-                  </span>
-                ) : (
-                  '—'
-                )}
-              </TableCell>
-
-              <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                {formatUpdatedAt(diet.updated_at)}
-              </TableCell>
-
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Abrir menú</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onView(diet)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver detalle
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEdit(diet)}>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Editar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDuplicate(diet)}>
-                      <Copy className="mr-2 h-4 w-4" />
-                      Duplicar
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => onDelete(diet)}
-                      className="text-status-error focus:text-status-error"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Eliminar
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          )
-        })}
-      </TableBody>
-    </Table>
-  )
+  return isDesktop ? <DietsDesktopTable {...viewProps} /> : <DietsMobileList {...viewProps} />
 }

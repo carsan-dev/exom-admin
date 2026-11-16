@@ -70,9 +70,9 @@ export function TrainingDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
+      <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] grid-cols-[minmax(0,1fr)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
         <DialogHeader>
-          <DialogTitle className="pr-8">{training.name}</DialogTitle>
+          <DialogTitle className="pr-8 [overflow-wrap:anywhere]">{training.name}</DialogTitle>
         </DialogHeader>
 
         <div className="min-w-0 space-y-4">

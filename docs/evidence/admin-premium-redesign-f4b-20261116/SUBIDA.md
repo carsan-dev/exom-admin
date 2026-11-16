@@ -28,9 +28,13 @@ git push -u origin feat/admin-rediseno-f4a-listas
 git push -u origin feat/admin-rediseno-f4b-seguimiento
 ```
 
+```bash
+git push -u origin feat/admin-rediseno-f4c-builders
+```
+
 ## 2. Qué decirle al agente después
 
-> Ramas subidas. Abre las PR a develop en cadena (F0 → F1 → F2 → F3 → F4a → F4b), espera a CI en cada una y haz merge con merge commit cuando esté verde; si sale rojo, reintenta si es inestabilidad o corrígelo.
+> Ramas subidas. Abre las PR a develop en cadena (F0 → F1 → F2 → F3 → F4a → F4b → F4c), espera a CI en cada una y haz merge con merge commit cuando esté verde; si sale rojo, reintenta si es inestabilidad o corrígelo.
 
 ## 3. PR propuestas
 
@@ -42,6 +46,7 @@ git push -u origin feat/admin-rediseno-f4b-seguimiento
 | F3 | `feat(admin): shell del rediseño premium (F3)` | `feat/admin-rediseno-f3-shell` | `0f6596f` | `docs/evidence/admin-premium-redesign-f3…` |
 | F4a | `feat(admin): listas del rediseño premium (F4, lote A)` | `feat/admin-rediseno-f4a-listas` | `eb7659c` | `docs/evidence/admin-premium-redesign-f4a…` |
 | F4b | `feat(admin): seguimiento del rediseño premium (F4, lote B)` | `feat/admin-rediseno-f4b-seguimiento` | HEAD tras el commit de evidencias (`git rev-parse HEAD` en esa rama; el código es `62ff0a0`) | `docs/evidence/admin-premium-redesign-f4b…` |
+| F4c | `feat(admin): builders del rediseño premium (F4, lote C)` | `feat/admin-rediseno-f4c-builders` | HEAD tras el commit de evidencias (`git rev-parse HEAD` en esa rama; el código es `0cf860f`) | `docs/evidence/admin-premium-redesign-f4c…` |
 
 ## 4. Notas
 

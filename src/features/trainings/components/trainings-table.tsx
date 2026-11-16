@@ -1,41 +1,9 @@
-﻿import { Copy, Eye, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
-import { SortableTableHead } from '@/components/sortable-table-head'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { cn } from '@/lib/utils'
+﻿import { useMediaQuery } from '@/hooks/use-media-query'
 import type { SortDir } from '@/lib/sort-search-params'
-import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
-import {
-  getCatalogColorMap,
-  getTrainingAccentStyle,
-  getTrainingTypeCatalogStyle,
-  getTrainingTypeBadgeClass,
-  getTrainingTypeLabel,
-  resolveTrainingTypes,
-  type CatalogValueWithColor,
-  type Training,
-} from '../types'
-import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
-import { CatalogDragHandle } from '../../catalog-groups/components/catalog-drag-handle'
-
-interface TrainingApprovalSummary {
-  pending_approval_actions: string[]
-}
+import { getCatalogColorMap, type CatalogValueWithColor, type Training } from '../types'
+import { TrainingsDesktopTable } from './trainings-desktop-table'
+import type { TrainingApprovalSummary } from './training-row-parts'
+import { TrainingsMobileList } from './trainings-mobile-list'
 
 interface TrainingsTableProps {
   trainings: Training[]
@@ -53,6 +21,25 @@ interface TrainingsTableProps {
   trainingTypeColors?: CatalogValueWithColor[]
 }
 
+/** Props comunes de las dos variantes (tabla y lista apilada). */
+export interface TrainingsListViewProps {
+  trainings: Training[]
+  approvalById: Record<string, TrainingApprovalSummary>
+  onView: (training: Training) => void
+  onEdit: (training: Training) => void
+  onDuplicate: (training: Training) => void
+  onDelete: (training: Training) => void
+  selectedIds: Set<string>
+  allSelected: boolean
+  onToggleAll: () => void
+  onToggle: (id: string) => void
+  movementDisabled?: boolean
+  sortBy?: string
+  sortDir: SortDir
+  onSortChange: (field: string) => void
+  colorMap: Map<string, string>
+}
+
 export function TrainingsTable({
   trainings,
   approvalById = {},
@@ -68,7 +55,9 @@ export function TrainingsTable({
   onSortChange = () => {},
   trainingTypeColors,
 }: TrainingsTableProps) {
-  const trainingTypeColorMap = getCatalogColorMap(trainingTypeColors)
+  // Tabla desde md; lista apilada por debajo. Solo se monta una variante.
+  const isDesktop = useMediaQuery('(min-width: 768px)', true)
+  const colorMap = getCatalogColorMap(trainingTypeColors)
   const allSelected = trainings.length > 0 && trainings.every((item) => selectedIds.has(item.id))
   const toggleAll = () => {
     const next = new Set(selectedIds)
@@ -80,167 +69,28 @@ export function TrainingsTable({
   }
   const toggle = (id: string) => {
     const next = new Set(selectedIds)
-    if (next.has(id)) next.delete(id); else next.add(id)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
     onSelectionChange?.(next)
   }
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-20"><div className="flex items-center"><input type="checkbox" aria-label="Seleccionar página" checked={allSelected} onChange={toggleAll} /><span className="sr-only">Mover</span></div></TableHead>
-          <SortableTableHead field="name" label="Nombre" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
-          <TableHead>Grupo</TableHead>
-          <TableHead>Tipos</TableHead>
-          <SortableTableHead field="level" label="Nivel" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
-          <TableHead className="text-center">Ejercicios</TableHead>
-          <SortableTableHead field="estimated_duration_min" label="Duración" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden md:table-cell" />
-          <SortableTableHead field="estimated_calories" label="Calorías" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden md:table-cell" />
-          <TableHead className="hidden lg:table-cell">Etiquetas</TableHead>
-          <TableHead className="text-right">Acciones</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {trainings.map((training) => {
-          const trainingTypes = resolveTrainingTypes(training)
-          const accentStyle = getTrainingAccentStyle(training.accentColor)
 
-          return (
-            <TableRow key={training.id}>
-              <TableCell><div className="flex items-center gap-1"><input type="checkbox" aria-label={`Seleccionar ${training.name}`} checked={selectedIds.has(training.id)} onChange={() => toggle(training.id)} /><CatalogDragHandle id={training.id} label={training.name} disabled={movementDisabled} /></div></TableCell>
-              <TableCell className="max-w-[200px] font-medium text-foreground truncate">
-                <div className="flex items-start gap-2">
-                  {training.accentColor ? (
-                    <span
-                      className="mt-1 h-2.5 w-2.5 flex-none rounded-full border border-white/20"
-                      style={{ backgroundColor: training.accentColor }}
-                    />
-                  ) : null}
-                  <div className="min-w-0 space-y-2">
-                    <p className="truncate">{training.name}</p>
-                    <ResourceApprovalIndicator
-                      pendingActions={approvalById[training.id]?.pending_approval_actions ?? []}
-                    />
-                  </div>
-                </div>
-              </TableCell>
+  const viewProps: TrainingsListViewProps = {
+    trainings,
+    approvalById,
+    onView,
+    onEdit,
+    onDuplicate,
+    onDelete,
+    selectedIds,
+    allSelected,
+    onToggleAll: toggleAll,
+    onToggle: toggle,
+    movementDisabled,
+    sortBy,
+    sortDir,
+    onSortChange,
+    colorMap,
+  }
 
-              <TableCell>{training.group ? <Badge variant="outline">{training.group.name}</Badge> : <span className="text-xs text-muted-foreground">Sin grupo</span>}</TableCell>
-
-              <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {trainingTypes.slice(0, 2).map((type) => (
-                    (() => {
-                      const catalogStyle = getTrainingTypeCatalogStyle(type, trainingTypeColorMap)
-                      const badgeStyle = accentStyle ?? catalogStyle
-
-                      return (
-                        <Badge
-                          key={type}
-                          variant="outline"
-                          className={cn('font-medium', !badgeStyle && getTrainingTypeBadgeClass(type))}
-                          style={badgeStyle}
-                        >
-                          {getTrainingTypeLabel(type)}
-                        </Badge>
-                      )
-                    })()
-                  ))}
-                  {trainingTypes.length > 2 && (
-                    <Badge
-                      variant="outline"
-                      className="border-border bg-muted text-muted-foreground text-xs"
-                    >
-                      +{trainingTypes.length - 2}
-                    </Badge>
-                  )}
-                  {trainingTypes.length === 0 && (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <Badge
-                  variant="outline"
-                  className={cn('font-medium', getLevelBadgeClass(training.level))}
-                >
-                  {LEVEL_LABELS[training.level]}
-                </Badge>
-              </TableCell>
-
-              <TableCell className="text-center text-sm text-muted-foreground">
-                {training.exercises_count ?? training.exercises.length}
-              </TableCell>
-
-              <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
-                {training.estimated_duration_min ? `${training.estimated_duration_min} min` : '—'}
-              </TableCell>
-
-              <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
-                {training.estimated_calories ? `${training.estimated_calories} kcal` : '—'}
-              </TableCell>
-
-              <TableCell className="hidden lg:table-cell">
-                <div className="flex flex-wrap gap-1">
-                  {training.tags.slice(0, 2).map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="outline"
-                      className="border-border bg-muted text-muted-foreground text-xs"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                  {training.tags.length > 2 && (
-                    <Badge
-                      variant="outline"
-                      className="border-border bg-muted text-muted-foreground text-xs"
-                    >
-                      +{training.tags.length - 2}
-                    </Badge>
-                  )}
-                  {training.tags.length === 0 && (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </div>
-              </TableCell>
-
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Abrir menú</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onView(training)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver detalle
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEdit(training)}>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Editar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDuplicate(training)}>
-                      <Copy className="mr-2 h-4 w-4" />
-                      Duplicar
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => onDelete(training)}
-                      className="text-status-error focus:text-status-error"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Eliminar
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          )
-        })}
-      </TableBody>
-    </Table>
-  )
+  return isDesktop ? <TrainingsDesktopTable {...viewProps} /> : <TrainingsMobileList {...viewProps} />
 }

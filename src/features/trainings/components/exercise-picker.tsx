@@ -1,18 +1,49 @@
-import { TimedPrescriptionEditor } from './timed-prescription-editor'
 import { useMemo, useState } from 'react'
-import { ChevronDown, ChevronUp, Plus, Repeat, Search, X } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
 import { normalizeSearchText } from '@/lib/search'
-import { getLevelBadgeClass, LEVEL_LABELS } from '../../exercises/types'
 import { useExercisesList } from '../api'
 import {
   parsePrescriptionInput,
   type TrainingCircuitExerciseFormValues,
   type TrainingItemFormValues,
 } from '../schemas'
+import { moveKey, reorderCircuitExercises, reorderTrainingItems } from '../reorder-training-items'
+import { CircuitBlock } from './circuit-block'
+import { ExerciseAddActions } from './exercise-add-actions'
+import { ExercisePickerHeader } from './exercise-picker-header'
+import { ExerciseRow } from './exercise-row'
+import { ExerciseSearchPanel } from './exercise-search-panel'
+import { SortableItem, SortableList } from '@/components/sortable'
+
+/**
+ * Client-only keys for the rows, kept outside the form value (the schema and the payload
+ * carry no such field). They follow the rows through every move made here, and are
+ * rebuilt when the structure changes from outside (form reset, import, another training).
+ */
+interface RowKeys {
+  signature: string
+  items: string[]
+  nested: string[][]
+}
+
+let rowKeySequence = 0
+const nextRowKey = () => `row-${++rowKeySequence}`
+
+const signatureOf = (value: TrainingItemFormValues[]) =>
+  value
+    .map((item) =>
+      item.kind === 'CIRCUIT'
+        ? `C[${item.exercises.map((exercise) => exercise.exercise_id).join(',')}]`
+        : `E:${item.exercise_id}`
+    )
+    .join('|')
+
+const createRowKeys = (value: TrainingItemFormValues[]): RowKeys => ({
+  signature: signatureOf(value),
+  items: value.map(() => nextRowKey()),
+  nested: value.map((item) =>
+    item.kind === 'CIRCUIT' ? item.exercises.map(() => nextRowKey()) : []
+  ),
+})
 
 interface ExercisePickerProps {
   value: TrainingItemFormValues[]
@@ -20,84 +51,22 @@ interface ExercisePickerProps {
   error?: string
 }
 
-interface PrescriptionFieldsProps {
-  measureType: 'REPS' | 'SECONDS'
-  targetValue?: number | null
-  targetValueMin?: number | null
-  targetValueMax?: number | null
-  targetRir?: number | null
-  legacyValue: string
-  onMeasureTypeChange: (value: 'REPS' | 'SECONDS') => void
-  onTargetInputChange: (value: string) => void
-  onTargetRirChange: (value: number | null) => void
-}
-
-function PrescriptionFields({
-  measureType,
-  targetValue,
-  targetValueMin,
-  targetValueMax,
-  targetRir,
-  legacyValue,
-  onMeasureTypeChange,
-  onTargetInputChange,
-  onTargetRirChange,
-}: PrescriptionFieldsProps) {
-  const targetInput =
-    targetValue != null
-      ? String(targetValue)
-      : targetValueMin != null && targetValueMax != null
-        ? `${targetValueMin}-${targetValueMax}`
-        : legacyValue
-
-  return (
-    <>
-      <div className="space-y-1">
-        <label className="text-xs text-muted-foreground">Tipo de objetivo</label>
-        <select
-          value={measureType}
-          onChange={(event) => onMeasureTypeChange(event.target.value as 'REPS' | 'SECONDS')}
-          className="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground"
-        >
-          <option value="REPS">Repeticiones</option>
-          <option value="SECONDS">Tiempo</option>
-        </select>
-      </div>
-      <div className={measureType === 'SECONDS' ? 'hidden' : 'space-y-1'}>
-        <label className="text-xs text-muted-foreground">
-          {measureType === 'SECONDS' ? 'Segundos objetivo' : 'Repeticiones objetivo'}
-        </label>
-        <Input
-          type="text"
-          value={targetInput}
-          placeholder="Ej. 8 o 8-10"
-          onChange={(event) => onTargetInputChange(event.target.value)}
-          className="h-8 text-sm"
-        />
-      </div>
-      <div className="space-y-1">
-        <label className="text-xs text-muted-foreground">RIR objetivo (opcional)</label>
-        <Input
-          type="number"
-          min={0}
-          max={10}
-          step={1}
-          value={targetRir ?? ''}
-          onChange={(event) =>
-            onTargetRirChange(event.target.value === '' ? null : Number(event.target.value))
-          }
-          className="h-8 text-sm"
-        />
-      </div>
-    </>
-  )
-}
-
 export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) {
   const [search, setSearch] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)
   const [targetCircuitIndex, setTargetCircuitIndex] = useState<number | null>(null)
   const exercisesQuery = useExercisesList()
+  const [storedKeys, setStoredKeys] = useState<RowKeys>(() => createRowKeys(value))
+  let rowKeys = storedKeys
+  if (storedKeys.signature !== signatureOf(value)) {
+    rowKeys = createRowKeys(value)
+    setStoredKeys(rowKeys)
+  }
+
+  const commit = (next: TrainingItemFormValues[], keys: Pick<RowKeys, 'items' | 'nested'>) => {
+    setStoredKeys({ signature: signatureOf(next), ...keys })
+    onChange(next)
+  }
   const allExercises = useMemo(() => exercisesQuery.data?.data ?? [], [exercisesQuery.data?.data])
   const trackedCount = value.reduce(
     (count, item) =>
@@ -162,7 +131,12 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
         }
         return { ...item, exercises: [...item.exercises, newExercise] }
       })
-      onChange(updated)
+      commit(updated, {
+        items: rowKeys.items,
+        nested: rowKeys.nested.map((keys, index) =>
+          index === targetCircuitIndex ? [...keys, nextRowKey()] : keys
+        ),
+      })
       setSearch('')
       setPickerOpen(false)
       setTargetCircuitIndex(null)
@@ -183,42 +157,55 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
       request_set_tracking: allTracked,
       rest_seconds: 60,
     }
-    onChange([...value, newItem])
+    commit([...value, newItem], {
+      items: [...rowKeys.items, nextRowKey()],
+      nested: [...rowKeys.nested, []],
+    })
     setSearch('')
     setPickerOpen(false)
   }
 
   const addCircuit = () => {
-    onChange([
-      ...value,
-      {
-        kind: 'CIRCUIT',
-        order: value.length,
-        name: 'Circuito',
-        rounds: 3,
-        rest_between_rounds_seconds: 60,
-        exercises: [],
-      },
-    ])
+    commit(
+      [
+        ...value,
+        {
+          kind: 'CIRCUIT',
+          order: value.length,
+          name: 'Circuito',
+          rounds: 3,
+          rest_between_rounds_seconds: 60,
+          exercises: [],
+        },
+      ],
+      { items: [...rowKeys.items, nextRowKey()], nested: [...rowKeys.nested, []] }
+    )
   }
 
   const removeExercise = (index: number) => {
     const updated = value.filter((_, i) => i !== index).map((ex, i) => ({ ...ex, order: i }))
-    onChange(updated)
+    commit(updated, {
+      items: rowKeys.items.filter((_, i) => i !== index),
+      nested: rowKeys.nested.filter((_, i) => i !== index),
+    })
+  }
+
+  // Arrows and drag and drop share the same reorder, so the saved order is identical.
+  const reorderItems = (from: number, to: number) => {
+    commit(reorderTrainingItems(value, from, to), {
+      items: moveKey(rowKeys.items, from, to),
+      nested: moveKey(rowKeys.nested, from, to),
+    })
   }
 
   const moveUp = (index: number) => {
     if (index === 0) return
-    const updated = [...value]
-    ;[updated[index - 1], updated[index]] = [updated[index], updated[index - 1]]
-    onChange(updated.map((ex, i) => ({ ...ex, order: i })))
+    reorderItems(index, index - 1)
   }
 
   const moveDown = (index: number) => {
     if (index === value.length - 1) return
-    const updated = [...value]
-    ;[updated[index], updated[index + 1]] = [updated[index + 1], updated[index]]
-    onChange(updated.map((ex, i) => ({ ...ex, order: i })))
+    reorderItems(index, index + 1)
   }
 
   const updateField = (index: number, field: string, fieldValue: unknown) => {
@@ -292,564 +279,186 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
   }
 
   const removeCircuitExercise = (circuitIndex: number, exerciseIndex: number) => {
-    onChange(
+    commit(
       value.map((item, index) => {
         if (index !== circuitIndex || item.kind !== 'CIRCUIT') return item
         return {
           ...item,
           exercises: item.exercises.filter((_, nestedIndex) => nestedIndex !== exerciseIndex),
         }
-      })
+      }),
+      {
+        items: rowKeys.items,
+        nested: rowKeys.nested.map((keys, index) =>
+          index === circuitIndex
+            ? keys.filter((_, nestedIndex) => nestedIndex !== exerciseIndex)
+            : keys
+        ),
+      }
+    )
+  }
+
+  // Circuit arrows and drag and drop share the same reorder (no `order` inside circuits).
+  const reorderCircuit = (circuitIndex: number, from: number, to: number) => {
+    const circuit = value[circuitIndex]
+    const moves =
+      circuit?.kind === 'CIRCUIT' && reorderCircuitExercises(circuit, from, to) !== circuit
+    commit(
+      value.map((item, index) =>
+        index === circuitIndex && item.kind === 'CIRCUIT'
+          ? reorderCircuitExercises(item, from, to)
+          : item
+      ),
+      {
+        items: rowKeys.items,
+        nested: moves
+          ? rowKeys.nested.map((keys, index) =>
+              index === circuitIndex ? moveKey(keys, from, to) : keys
+            )
+          : rowKeys.nested,
+      }
     )
   }
 
   const moveCircuitExercise = (circuitIndex: number, exerciseIndex: number, direction: -1 | 1) => {
-    onChange(
-      value.map((item, index) => {
-        if (index !== circuitIndex || item.kind !== 'CIRCUIT') return item
-        const nextIndex = exerciseIndex + direction
-        if (nextIndex < 0 || nextIndex >= item.exercises.length) return item
-        const exercises = [...item.exercises]
-        ;[exercises[exerciseIndex], exercises[nextIndex]] = [
-          exercises[nextIndex],
-          exercises[exerciseIndex],
-        ]
-        return { ...item, exercises }
-      })
-    )
+    reorderCircuit(circuitIndex, exerciseIndex, exerciseIndex + direction)
+  }
+
+  const itemLabel = (key: string) => {
+    const index = rowKeys.items.indexOf(key)
+    const item = value[index]
+    if (!item) return 'elemento'
+    if (item.kind === 'CIRCUIT') return `circuito ${item.name || index + 1}`
+    return exercisesById.get(item.exercise_id)?.name ?? 'ejercicio'
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium leading-none">Ejercicios</p>
-        {exerciseCount > 0 && (
-          <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-            <input
-              type="checkbox"
-              checked={allTracked}
-              ref={(node) => {
-                if (node) node.indeterminate = trackedCount > 0 && !allTracked
-              }}
-              onChange={(event) => setAllTracking(event.target.checked)}
-              className="h-4 w-4 rounded border-border accent-brand-primary"
-            />
-            Solicitar registro en todos
-          </label>
-        )}
-      </div>
+    <div className="min-w-0 space-y-4">
+      <ExercisePickerHeader
+        exerciseCount={exerciseCount}
+        trackedCount={trackedCount}
+        allTracked={allTracked}
+        onSetAllTracking={setAllTracking}
+      />
 
       {/* Exercise list */}
       {value.length > 0 && (
-        <div className="space-y-2">
-          {value.map((item, index) => {
-            if (item.kind === 'CIRCUIT') {
-              return (
-                <div
-                  key={`circuit-${index}`}
-                  className="rounded-lg border border-brand-soft/40 bg-brand-soft/10 p-3 space-y-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="flex flex-col gap-0.5">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-5 w-5 p-0"
-                        onClick={() => moveUp(index)}
-                        disabled={index === 0}
-                      >
-                        <ChevronUp className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-5 w-5 p-0"
-                        onClick={() => moveDown(index)}
-                        disabled={index === value.length - 1}
-                      >
-                        <ChevronDown className="h-3 w-3" />
-                      </Button>
-                    </div>
-                    <Repeat className="h-4 w-4 text-accent-text" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground">
-                        Circuito · {item.rounds} rondas
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.exercises.length} ejercicio{item.exercises.length !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-7 p-0 text-muted-foreground hover:text-status-error"
-                      onClick={() => removeExercise(index)}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">Nombre</label>
-                      <Input
-                        value={item.name}
-                        onChange={(e) => updateField(index, 'name', e.target.value)}
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">Rondas</label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={item.rounds}
-                        onChange={(e) =>
-                          updateField(index, 'rounds', parseInt(e.target.value) || 1)
-                        }
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">
-                        Descanso entre rondas (s)
-                      </label>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={item.rest_between_rounds_seconds}
-                        onChange={(e) =>
-                          updateField(
-                            index,
-                            'rest_between_rounds_seconds',
-                            parseInt(e.target.value) || 0
-                          )
-                        }
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 rounded-md border border-border/60 bg-background/60 p-2">
-                    {item.exercises.map((nested, nestedIndex) => {
-                      const exercise = exercisesById.get(nested.exercise_id)
-                      return (
-                        <div
-                          key={`${nested.exercise_id}-${nestedIndex}`}
-                          className="space-y-2 rounded-md border border-border/60 bg-muted/20 p-2"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="flex gap-0.5">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0"
-                                onClick={() => moveCircuitExercise(index, nestedIndex, -1)}
-                                disabled={nestedIndex === 0}
-                              >
-                                <ChevronUp className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0"
-                                onClick={() => moveCircuitExercise(index, nestedIndex, 1)}
-                                disabled={nestedIndex === item.exercises.length - 1}
-                              >
-                                <ChevronDown className="h-3 w-3" />
-                              </Button>
-                            </div>
-                            <span className="text-xs font-medium text-muted-foreground">
-                              {nestedIndex + 1}
-                            </span>
-                            <p className="flex-1 truncate text-sm font-medium text-foreground">
-                              {exercise?.name ?? 'Ejercicio no encontrado'}
-                            </p>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 w-7 p-0 text-muted-foreground hover:text-status-error"
-                              onClick={() => removeCircuitExercise(index, nestedIndex)}
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                            {nested.measure_type === 'SECONDS' && (
-                              <TimedPrescriptionEditor
-                                total={nested.target_value}
-                                minimum={nested.target_value_min}
-                                maximum={nested.target_value_max}
-                                config={nested.timed_config}
-                                onChange={(patch) =>
-                                  onChange(
-                                    value.map((v, j) =>
-                                      j === index && v.kind === 'CIRCUIT'
-                                        ? {
-                                            ...v,
-                                            exercises: v.exercises.map((e, k) =>
-                                              k === nestedIndex
-                                                ? {
-                                                    ...e,
-                                                    ...patch,
-                                                    reps_or_duration:
-                                                      String(
-                                                        patch.target_value ?? patch.target_value_min
-                                                      ) + 's',
-                                                  }
-                                                : e
-                                            ),
-                                          }
-                                        : v
-                                    )
-                                  )
-                                }
-                              />
-                            )}
-                            <PrescriptionFields
-                              measureType={nested.measure_type}
-                              targetValue={nested.target_value}
-                              targetValueMin={nested.target_value_min}
-                              targetValueMax={nested.target_value_max}
-                              targetRir={nested.target_rir}
-                              legacyValue={nested.reps_or_duration}
-                              onMeasureTypeChange={(next) =>
-                                updateCircuitExercise(index, nestedIndex, 'measure_type', next)
-                              }
-                              onTargetInputChange={(next) =>
-                                updateCircuitExercisePrescription(index, nestedIndex, next)
-                              }
-                              onTargetRirChange={(next) =>
-                                updateCircuitExercise(index, nestedIndex, 'target_rir', next)
-                              }
-                            />
-                            <div className="space-y-1">
-                              <label className="text-xs text-muted-foreground">
-                                Descanso tras ejercicio (s)
-                              </label>
-                              <Input
-                                type="number"
-                                min={0}
-                                value={nested.rest_seconds}
-                                onChange={(e) =>
-                                  updateCircuitExercise(
-                                    index,
-                                    nestedIndex,
-                                    'rest_seconds',
-                                    parseInt(e.target.value) || 0
-                                  )
-                                }
-                                className="h-8 text-sm"
-                              />
-                            </div>
-                          </div>
-                          <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-                            <input
-                              type="checkbox"
-                              checked={nested.request_set_tracking}
-                              onChange={(event) =>
-                                updateCircuitExercise(
-                                  index,
-                                  nestedIndex,
-                                  'request_set_tracking',
-                                  event.target.checked
-                                )
-                              }
-                              className="h-4 w-4 accent-brand-primary"
-                            />
-                            Solicitar rendimiento real en cada ronda
-                          </label>
-                        </div>
-                      )
-                    })}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => {
-                        setTargetCircuitIndex(index)
-                        setPickerOpen(true)
-                      }}
-                    >
-                      <Plus className="h-4 w-4" />
-                      Agregar ejercicio al circuito
-                    </Button>
-                  </div>
-                </div>
-              )
-            }
-
-            const exercise = exercisesById.get(item.exercise_id)
-
-            return (
-              <div
-                key={`${item.exercise_id}-${index}`}
-                className="rounded-lg border border-border/70 bg-muted/30 p-3 space-y-3"
-              >
-                {/* Row: order controls + exercise name + delete */}
-                <div className="flex items-center gap-2">
-                  <div className="flex flex-col gap-0.5">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
-                      onClick={() => moveUp(index)}
-                      disabled={index === 0}
-                    >
-                      <ChevronUp className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
-                      onClick={() => moveDown(index)}
-                      disabled={index === value.length - 1}
-                    >
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </div>
-
-                  <span className="text-xs font-medium text-muted-foreground w-5 text-center">
-                    {index + 1}
-                  </span>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate text-foreground">
-                      {exercise?.name ?? (
-                        <span className="text-muted-foreground italic">
-                          Ejercicio no encontrado
-                        </span>
-                      )}
-                    </p>
-                    {exercise && (
-                      <div className="flex flex-wrap gap-1 mt-0.5">
-                        <Badge
-                          variant="outline"
-                          className={cn('text-xs h-4 px-1', getLevelBadgeClass(exercise.level))}
-                        >
-                          {LEVEL_LABELS[exercise.level]}
-                        </Badge>
-                        {exercise.muscle_groups.slice(0, 2).map((mg) => (
-                          <Badge
-                            key={mg}
-                            variant="outline"
-                            className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-accent-text"
-                          >
-                            {mg}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 text-muted-foreground hover:text-status-error flex-none"
-                    onClick={() => removeExercise(index)}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-
-                {/* Prescription fields */}
-                <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">
-                  <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">Series</label>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={item.sets}
-                      onChange={(e) => updateField(index, 'sets', parseInt(e.target.value) || 1)}
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                  {item.measure_type === 'SECONDS' && (
-                    <TimedPrescriptionEditor
-                      total={item.target_value}
-                      minimum={item.target_value_min}
-                      maximum={item.target_value_max}
-                      config={item.timed_config}
-                      onChange={(patch) =>
+        <SortableList ids={rowKeys.items} getLabel={itemLabel} onReorder={reorderItems}>
+          <div className="divide-y divide-border border-y border-border">
+            {value.map((item, index) => {
+              const rowKey = rowKeys.items[index]
+              if (item.kind === 'CIRCUIT') {
+                return (
+                  <SortableItem key={rowKey} id={rowKey}>
+                    <CircuitBlock
+                      item={item}
+                      index={index}
+                      count={value.length}
+                      exercisesById={exercisesById}
+                      nestedKeys={rowKeys.nested[index]}
+                      onMoveUp={() => moveUp(index)}
+                      onMoveDown={() => moveDown(index)}
+                      onRemove={() => removeExercise(index)}
+                      onUpdateField={(field, fieldValue) => updateField(index, field, fieldValue)}
+                      onMoveNested={(nestedIndex, direction) =>
+                        moveCircuitExercise(index, nestedIndex, direction)
+                      }
+                      onReorderNested={(from, to) => reorderCircuit(index, from, to)}
+                      onRemoveNested={(nestedIndex) => removeCircuitExercise(index, nestedIndex)}
+                      onUpdateNested={(nestedIndex, field, fieldValue) =>
+                        updateCircuitExercise(index, nestedIndex, field, fieldValue)
+                      }
+                      onNestedPrescriptionChange={(nestedIndex, raw) =>
+                        updateCircuitExercisePrescription(index, nestedIndex, raw)
+                      }
+                      onNestedTimedChange={(nestedIndex, patch) =>
                         onChange(
                           value.map((v, j) =>
-                            j === index && v.kind === 'EXERCISE'
+                            j === index && v.kind === 'CIRCUIT'
                               ? {
                                   ...v,
-                                  ...patch,
-                                  reps_or_duration:
-                                    String(patch.target_value ?? patch.target_value_min) + 's',
+                                  exercises: v.exercises.map((e, k) =>
+                                    k === nestedIndex
+                                      ? {
+                                          ...e,
+                                          ...patch,
+                                          reps_or_duration:
+                                            String(patch.target_value ?? patch.target_value_min) +
+                                            's',
+                                        }
+                                      : e
+                                  ),
                                 }
                               : v
                           )
                         )
                       }
+                      onAddExercise={() => {
+                        setTargetCircuitIndex(index)
+                        setPickerOpen(true)
+                      }}
                     />
-                  )}
-                  <PrescriptionFields
-                    measureType={item.measure_type}
-                    targetValue={item.target_value}
-                    targetValueMin={item.target_value_min}
-                    targetValueMax={item.target_value_max}
-                    targetRir={item.target_rir}
-                    legacyValue={item.reps_or_duration}
-                    onMeasureTypeChange={(next) => updateField(index, 'measure_type', next)}
-                    onTargetInputChange={(next) => updateExercisePrescription(index, next)}
-                    onTargetRirChange={(next) => updateField(index, 'target_rir', next)}
-                  />
-                  <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">
-                      Descanso entre series (s)
-                    </label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={item.rest_seconds}
-                      onChange={(e) =>
-                        updateField(index, 'rest_seconds', parseInt(e.target.value) || 0)
-                      }
-                      className="h-8 text-sm"
-                    />
-                    <p className="text-[11px] leading-tight text-muted-foreground">
-                      Tiempo de descanso entre cada serie del ejercicio
-                    </p>
-                  </div>
-                </div>
-                <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={item.request_set_tracking}
-                    onChange={(event) =>
-                      updateField(index, 'request_set_tracking', event.target.checked)
+                  </SortableItem>
+                )
+              }
+
+              return (
+                <SortableItem key={rowKey} id={rowKey}>
+                  <ExerciseRow
+                    item={item}
+                    index={index}
+                    count={value.length}
+                    exercise={exercisesById.get(item.exercise_id)}
+                    onMoveUp={() => moveUp(index)}
+                    onMoveDown={() => moveDown(index)}
+                    onRemove={() => removeExercise(index)}
+                    onUpdateField={(field, fieldValue) => updateField(index, field, fieldValue)}
+                    onPrescriptionChange={(raw) => updateExercisePrescription(index, raw)}
+                    onTimedChange={(patch) =>
+                      onChange(
+                        value.map((v, j) =>
+                          j === index && v.kind === 'EXERCISE'
+                            ? {
+                                ...v,
+                                ...patch,
+                                reps_or_duration:
+                                  String(patch.target_value ?? patch.target_value_min) + 's',
+                              }
+                            : v
+                        )
+                      )
                     }
-                    className="h-4 w-4 accent-brand-primary"
                   />
-                  Solicitar rendimiento real en cada serie
-                </label>
-              </div>
-            )
-          })}
-        </div>
+                </SortableItem>
+              )
+            })}
+          </div>
+        </SortableList>
       )}
 
       {/* Add exercise */}
       {pickerOpen ? (
-        <div className="rounded-lg border border-border/70 bg-background p-3 space-y-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              autoFocus
-              placeholder="Buscar ejercicio..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 h-8 text-sm"
-            />
-          </div>
-
-          {exercisesQuery.isLoading ? (
-            <p className="text-xs text-muted-foreground py-2 text-center">Cargando ejercicios...</p>
-          ) : filteredExercises.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-2 text-center">
-              {search ? `No hay resultados para "${search}"` : 'No hay ejercicios disponibles'}
-            </p>
-          ) : (
-            <div className="max-h-48 overflow-y-auto space-y-1">
-              {filteredExercises.map((exercise) => {
-                const selectedCount = value.reduce((count, item) => {
-                  if (item.kind === 'EXERCISE') {
-                    return count + (item.exercise_id === exercise.id ? 1 : 0)
-                  }
-
-                  return (
-                    count +
-                    item.exercises.filter((nested) => nested.exercise_id === exercise.id).length
-                  )
-                }, 0)
-
-                return (
-                  <button
-                    key={exercise.id}
-                    type="button"
-                    onClick={() => addExercise(exercise.id)}
-                    className={cn(
-                      'w-full flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-muted cursor-pointer'
-                    )}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate text-foreground">{exercise.name}</p>
-                      <div className="flex flex-wrap gap-1 mt-0.5">
-                        <Badge
-                          variant="outline"
-                          className={cn('text-xs h-4 px-1', getLevelBadgeClass(exercise.level))}
-                        >
-                          {LEVEL_LABELS[exercise.level]}
-                        </Badge>
-                        {exercise.muscle_groups.slice(0, 2).map((mg) => (
-                          <Badge
-                            key={mg}
-                            variant="outline"
-                            className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-accent-text"
-                          >
-                            {mg}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    {selectedCount > 0 && (
-                      <span className="text-xs text-muted-foreground flex-none">
-                        Añadido {selectedCount} vez{selectedCount !== 1 ? 'es' : ''}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="w-full text-muted-foreground"
-            onClick={() => {
-              setPickerOpen(false)
-              setSearch('')
-              setTargetCircuitIndex(null)
-            }}
-          >
-            Cancelar
-          </Button>
-        </div>
+        <ExerciseSearchPanel
+          search={search}
+          onSearchChange={setSearch}
+          isLoading={exercisesQuery.isLoading}
+          filteredExercises={filteredExercises}
+          value={value}
+          onAdd={addExercise}
+          onCancel={() => {
+            setPickerOpen(false)
+            setSearch('')
+            setTargetCircuitIndex(null)
+          }}
+        />
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={() => {
-              setTargetCircuitIndex(null)
-              setPickerOpen(true)
-            }}
-          >
-            <Plus className="h-4 w-4" />
-            Agregar ejercicio
-          </Button>
-          <Button type="button" variant="outline" size="sm" className="w-full" onClick={addCircuit}>
-            <Repeat className="h-4 w-4" />
-            Agregar circuito
-          </Button>
-        </div>
+        <ExerciseAddActions
+          onAddExercise={() => {
+            setTargetCircuitIndex(null)
+            setPickerOpen(true)
+          }}
+          onAddCircuit={addCircuit}
+        />
       )}
 
       {error && <p className="text-xs text-status-error">{error}</p>}
