@@ -21,7 +21,7 @@ function GroupCard({ group, active, onSelect, onEdit, onDelete, disabled }: {
           <span className="truncate font-medium">{group.name}</span>
         </button>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="h-7 w-7 p-0" aria-label={`Acciones de la carpeta ${group.name}`}><MoreHorizontal aria-hidden="true" className="h-4 w-4" /></Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onEdit}><Pencil className="mr-2 h-4 w-4" />Renombrar</DropdownMenuItem>
             <DropdownMenuItem className="text-status-error" onClick={onDelete}><Trash2 className="mr-2 h-4 w-4" />Eliminar</DropdownMenuItem>

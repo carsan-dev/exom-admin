@@ -60,7 +60,7 @@ exports[`RecapDetailPage characterization > DRAFT status 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -112,7 +112,7 @@ exports[`RecapDetailPage characterization > DRAFT status 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -161,7 +161,7 @@ exports[`RecapDetailPage characterization > DRAFT status 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -262,7 +262,7 @@ exports[`RecapDetailPage characterization > REVIEWED 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -314,7 +314,7 @@ exports[`RecapDetailPage characterization > REVIEWED 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -362,7 +362,7 @@ exports[`RecapDetailPage characterization > REVIEWED 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -608,7 +608,7 @@ exports[`RecapDetailPage characterization > REVIEWED archived 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -660,7 +660,7 @@ exports[`RecapDetailPage characterization > REVIEWED archived 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -709,7 +709,7 @@ exports[`RecapDetailPage characterization > REVIEWED archived 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -970,7 +970,7 @@ exports[`RecapDetailPage characterization > REVIEWED with a private review draft
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -1022,7 +1022,7 @@ exports[`RecapDetailPage characterization > REVIEWED with a private review draft
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -1067,7 +1067,7 @@ exports[`RecapDetailPage characterization > REVIEWED with a private review draft
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -1318,7 +1318,7 @@ exports[`RecapDetailPage characterization > SUBMITTED pending review 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -1370,7 +1370,7 @@ exports[`RecapDetailPage characterization > SUBMITTED pending review 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -1418,7 +1418,7 @@ exports[`RecapDetailPage characterization > SUBMITTED pending review 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -1678,7 +1678,7 @@ exports[`RecapDetailPage characterization > archive confirmation dialog open 1`]
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -1730,7 +1730,7 @@ exports[`RecapDetailPage characterization > archive confirmation dialog open 1`]
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -1778,7 +1778,7 @@ exports[`RecapDetailPage characterization > archive confirmation dialog open 1`]
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -2053,7 +2053,7 @@ exports[`RecapDetailPage characterization > archive in progress 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -2105,7 +2105,7 @@ exports[`RecapDetailPage characterization > archive in progress 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -2153,7 +2153,7 @@ exports[`RecapDetailPage characterization > archive in progress 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -2414,7 +2414,7 @@ exports[`RecapDetailPage characterization > background refresh failure keeps the
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -2470,7 +2470,7 @@ exports[`RecapDetailPage characterization > background refresh failure keeps the
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -2518,7 +2518,7 @@ exports[`RecapDetailPage characterization > background refresh failure keeps the
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -2779,7 +2779,7 @@ exports[`RecapDetailPage characterization > draft editor error then server versi
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -2831,7 +2831,7 @@ exports[`RecapDetailPage characterization > draft editor error then server versi
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -2885,7 +2885,7 @@ exports[`RecapDetailPage characterization > draft editor error then server versi
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -3148,7 +3148,7 @@ exports[`RecapDetailPage characterization > draft editor saved enables the publi
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -3200,7 +3200,7 @@ exports[`RecapDetailPage characterization > draft editor saved enables the publi
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -3245,7 +3245,7 @@ exports[`RecapDetailPage characterization > draft editor saved enables the publi
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -3580,7 +3580,7 @@ exports[`RecapDetailPage characterization > legacy review discard confirmation d
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -3632,7 +3632,7 @@ exports[`RecapDetailPage characterization > legacy review discard confirmation d
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -3686,7 +3686,7 @@ exports[`RecapDetailPage characterization > legacy review discard confirmation d
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -3960,7 +3960,7 @@ exports[`RecapDetailPage characterization > legacy review lost response then sav
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -4012,7 +4012,7 @@ exports[`RecapDetailPage characterization > legacy review lost response then sav
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -4064,7 +4064,7 @@ exports[`RecapDetailPage characterization > legacy review lost response then sav
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -4325,7 +4325,7 @@ exports[`RecapDetailPage characterization > legacy review lost response then sav
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -4377,7 +4377,7 @@ exports[`RecapDetailPage characterization > legacy review lost response then sav
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -4431,7 +4431,7 @@ exports[`RecapDetailPage characterization > legacy review lost response then sav
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -4692,7 +4692,7 @@ exports[`RecapDetailPage characterization > legacy review with unsaved edits dis
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -4744,7 +4744,7 @@ exports[`RecapDetailPage characterization > legacy review with unsaved edits dis
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -4792,7 +4792,7 @@ exports[`RecapDetailPage characterization > legacy review with unsaved edits dis
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -5082,7 +5082,7 @@ exports[`RecapDetailPage characterization > review version unavailable 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -5134,7 +5134,7 @@ exports[`RecapDetailPage characterization > review version unavailable 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -5187,7 +5187,7 @@ exports[`RecapDetailPage characterization > review version unavailable 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -5448,7 +5448,7 @@ exports[`RecapDetailPage characterization > several versions with draft and publ
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -5500,7 +5500,7 @@ exports[`RecapDetailPage characterization > several versions with draft and publ
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -5545,7 +5545,7 @@ exports[`RecapDetailPage characterization > several versions with draft and publ
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -5830,7 +5830,7 @@ exports[`RecapDetailPage characterization > tab general 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Sensaciones generales</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Sensaciones generales</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Estado de ánimo, estrés y sensación global de la semana.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square-text h-5 w-5 shrink-0 text-accent-text">
@@ -5880,7 +5880,7 @@ exports[`RecapDetailPage characterization > tab general 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -5928,7 +5928,7 @@ exports[`RecapDetailPage characterization > tab general 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -6197,7 +6197,7 @@ exports[`RecapDetailPage characterization > tab improvement 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Ayúdanos a mejorar</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Ayúdanos a mejorar</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Valoraciones del servicio y feedback abierto sobre la experiencia.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles h-5 w-5 shrink-0 text-accent-text">
@@ -6242,7 +6242,7 @@ exports[`RecapDetailPage characterization > tab improvement 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -6290,7 +6290,7 @@ exports[`RecapDetailPage characterization > tab improvement 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -6553,7 +6553,7 @@ exports[`RecapDetailPage characterization > tab nutrition 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Nutrición</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Nutrición</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Calidad de alimentación, hidratación y observaciones nutricionales.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-salad h-5 w-5 shrink-0 text-accent-text">
@@ -6605,7 +6605,7 @@ exports[`RecapDetailPage characterization > tab nutrition 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -6653,7 +6653,7 @@ exports[`RecapDetailPage characterization > tab nutrition 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -6918,7 +6918,7 @@ exports[`RecapDetailPage characterization > tab recovery 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Recuperación y hábitos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Recuperación y hábitos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Sueño, fatiga y molestias reportadas durante la semana.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart-pulse h-5 w-5 shrink-0 text-accent-text">
@@ -6965,7 +6965,7 @@ exports[`RecapDetailPage characterization > tab recovery 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -7013,7 +7013,7 @@ exports[`RecapDetailPage characterization > tab recovery 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -7282,7 +7282,7 @@ exports[`RecapDetailPage characterization > tabs with empty lists > improvement 
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Ayúdanos a mejorar</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Ayúdanos a mejorar</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Valoraciones del servicio y feedback abierto sobre la experiencia.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles h-5 w-5 shrink-0 text-accent-text">
@@ -7324,7 +7324,7 @@ exports[`RecapDetailPage characterization > tabs with empty lists > improvement 
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -7372,7 +7372,7 @@ exports[`RecapDetailPage characterization > tabs with empty lists > improvement 
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -7637,7 +7637,7 @@ exports[`RecapDetailPage characterization > tabs with empty lists > recovery 1`]
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Recuperación y hábitos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Recuperación y hábitos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Sueño, fatiga y molestias reportadas durante la semana.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart-pulse h-5 w-5 shrink-0 text-accent-text">
@@ -7681,7 +7681,7 @@ exports[`RecapDetailPage characterization > tabs with empty lists > recovery 1`]
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -7729,7 +7729,7 @@ exports[`RecapDetailPage characterization > tabs with empty lists > recovery 1`]
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -7990,7 +7990,7 @@ exports[`RecapDetailPage characterization > tabs with empty lists > training 1`]
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -8042,7 +8042,7 @@ exports[`RecapDetailPage characterization > tabs with empty lists > training 1`]
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -8090,7 +8090,7 @@ exports[`RecapDetailPage characterization > tabs with empty lists > training 1`]
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -8351,7 +8351,7 @@ exports[`RecapDetailPage characterization > version conflict: remote version mov
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -8403,7 +8403,7 @@ exports[`RecapDetailPage characterization > version conflict: remote version mov
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -8452,7 +8452,7 @@ exports[`RecapDetailPage characterization > version conflict: remote version mov
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>
@@ -8713,7 +8713,7 @@ exports[`RecapDetailPage characterization > with progress returnTo 1`] = `
 <section class="min-w-0">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenos</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Resumen del rendimiento y la percepción de la semana de entreno.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell h-5 w-5 shrink-0 text-accent-text">
@@ -8765,7 +8765,7 @@ exports[`RecapDetailPage characterization > with progress returnTo 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión compartible</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
 </div>
 </div>
@@ -8813,7 +8813,7 @@ exports[`RecapDetailPage characterization > with progress returnTo 1`] = `
 <section class="min-w-0 border-t border-border pt-6">
 <div class="mb-4 flex min-w-0 items-start justify-between gap-3">
 <div class="min-w-0 space-y-1">
-<h3 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h3>
+<h2 class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Revisión del admin</h2>
 <p class="text-[13px] leading-5 text-foreground-secondary">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
 </div>
 </div>

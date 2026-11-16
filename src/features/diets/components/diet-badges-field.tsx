@@ -96,9 +96,10 @@ export function BadgesField({
               <button
                 type="button"
                 onClick={() => remove(badge)}
+                aria-label={`Quitar ${badge}`}
                 className="ml-0.5 rounded-full hover:text-status-error"
               >
-                <X className="h-2.5 w-2.5" />
+                <X aria-hidden="true" className="h-2.5 w-2.5" />
               </button>
             </Badge>
           ))}
@@ -143,8 +144,9 @@ export function BadgesField({
           className="h-7 text-xs flex-none"
           onClick={add}
           disabled={!normalizeBadgeLabel(input) || hasBadge(input)}
+          aria-label="Añadir badge"
         >
-          <Plus className="h-3 w-3" />
+          <Plus aria-hidden="true" className="h-3 w-3" />
         </Button>
       </div>
     </div>

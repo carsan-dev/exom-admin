@@ -203,6 +203,21 @@ describe('SendNotificationDialog', () => {
     })
   })
 
+  describe('recipients accessibility (RDS-F5-01)', () => {
+    it('labels the recipients combobox and links it to the error after an empty submit', async () => {
+      const user = userEvent.setup()
+      renderDialog()
+      const recipients = screen.getByRole('combobox', { name: 'Destinatarios' })
+      expect(recipients).not.toHaveAttribute('aria-invalid', 'true')
+
+      await fillMessage(user)
+      await user.click(screen.getByRole('button', { name: 'Enviar notificación' }))
+
+      await waitFor(() => expect(recipients).toHaveAttribute('aria-invalid', 'true'))
+      expect(recipients).toHaveAccessibleDescription(/Selecciona al menos un destinatario/)
+    })
+  })
+
   describe('P9 counters and push preview', () => {
     it('shows N/100 and N/500 counters that follow what is typed', async () => {
       const user = userEvent.setup()

@@ -159,3 +159,55 @@ describe('AppLayout responsive', () => {
     expect(main).not.toHaveClass(`pb-[${bar}]`, `sm:pb-[${bar}]`, 'md:pb-5', 'pb-24')
   })
 })
+
+describe('AppLayout accesibilidad (RDS-F5-01)', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    media.matches = true
+    media.listeners.clear()
+    installMatchMedia()
+    document.title = 'EXOM Admin'
+  })
+  afterEach(() => {
+    window.localStorage.clear()
+    Reflect.deleteProperty(window, 'matchMedia')
+  })
+
+  function renderAt(path: string) {
+    return render(
+      <MemoryRouter initialEntries={[path]}>
+        <AppLayout />
+      </MemoryRouter>,
+    )
+  }
+
+  it('«Saltar al contenido» es el primer tabulable y lleva el foco a main', async () => {
+    const user = userEvent.setup()
+    renderAt('/dashboard')
+
+    await user.tab()
+    const skip = screen.getByRole('link', { name: 'Saltar al contenido' })
+    expect(skip).toHaveFocus()
+    expect(skip).toHaveAttribute('href', '#contenido')
+
+    await user.keyboard('{Enter}')
+    const main = screen.getByRole('main')
+    expect(main).toHaveAttribute('id', 'contenido')
+    expect(main).toHaveAttribute('tabindex', '-1')
+    expect(main).toHaveFocus()
+  })
+
+  it.each([
+    ['/dashboard', 'Dashboard · EXOM Admin'],
+    ['/clients', 'Clientes · EXOM Admin'],
+    ['/trainings', 'Entrenamientos · EXOM Admin'],
+    ['/notification-templates', 'Plantillas · EXOM Admin'],
+    ['/clients/abc', 'Detalle de cliente · EXOM Admin'],
+    ['/recaps/7ec00000', 'Detalle de recap · EXOM Admin'],
+    ['/no-existe', 'Página no encontrada · EXOM Admin'],
+    ['/dashboard/sobra', 'Página no encontrada · EXOM Admin'],
+  ])('el título del documento en %s es «%s»', (path, title) => {
+    renderAt(path)
+    expect(document.title).toBe(title)
+  })
+})

@@ -108,6 +108,16 @@ describe('ChallengesPage', () => {
     expect(screen.getByText('Página 1 de 2')).toBeInTheDocument()
   })
 
+  it('names every filter select after its visible label (RDS-F5-01)', async () => {
+    mockApi(() => ({ data: [baseChallenge], total: 1, totalPages: 1 }))
+    renderPage()
+
+    expect(await screen.findByText('Completa 4 entrenos esta semana')).toBeInTheDocument()
+    for (const name of ['Tipo', 'Modo', 'Alcance', 'Estado']) {
+      expect(screen.getByRole('combobox', { name })).toBeInTheDocument()
+    }
+  })
+
   it('shows the figures of the summary strip with their labels', async () => {
     mockApi(() => ({ data: [baseChallenge], total: 1, totalPages: 1 }))
     renderPage()

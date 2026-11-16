@@ -78,9 +78,10 @@ export function DietTagsField({
             <button
               type="button"
               onClick={() => remove(tag)}
+              aria-label={`Quitar ${tag}`}
               className="ml-0.5 rounded-full p-0.5 hover:bg-brand-soft/20"
             >
-              <X className="h-2.5 w-2.5" />
+              <X aria-hidden="true" className="h-2.5 w-2.5" />
             </button>
           </Badge>
         ))}
@@ -147,8 +148,9 @@ export function DietTagsField({
             size="sm"
             onClick={() => add()}
             disabled={!normalizeDietTagLabel(input) || hasTag(input)}
+            aria-label="Añadir etiqueta interna"
           >
-            <Plus className="h-3 w-3" />
+            <Plus aria-hidden="true" className="h-3 w-3" />
           </Button>
         </div>
       </div>

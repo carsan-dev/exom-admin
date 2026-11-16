@@ -173,7 +173,7 @@ export function AchievementsPage() {
                   value={criteriaType}
                   onValueChange={(value) => updateSearchParams({ criteria_type: value as CriteriaType | 'ALL', page: 1 })}
                 >
-                  <SelectTrigger className="max-md:h-11">
+                  <SelectTrigger aria-label="Tipo de criterio" className="max-md:h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

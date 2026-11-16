@@ -174,6 +174,10 @@ interface RecipientsMultiSelectProps {
   disabled?: boolean
   isLoading?: boolean
   onChange: (ids: string[]) => void
+  // Reenviados por FormControl: etiqueta (`id`), mensaje de error y estado inválido del disparador.
+  id?: string
+  'aria-describedby'?: string
+  'aria-invalid'?: boolean
 }
 
 function RecipientsMultiSelect({
@@ -182,6 +186,9 @@ function RecipientsMultiSelect({
   disabled,
   isLoading,
   onChange,
+  id,
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
 }: RecipientsMultiSelectProps) {
   const [open, setOpen] = useState(false)
 
@@ -217,8 +224,11 @@ function RecipientsMultiSelect({
           <Button
             type="button"
             variant="outline"
+            id={id}
             role="combobox"
             aria-expanded={open}
+            aria-describedby={ariaDescribedBy}
+            aria-invalid={ariaInvalid || undefined}
             className="w-full justify-between"
             disabled={disabled}
           >

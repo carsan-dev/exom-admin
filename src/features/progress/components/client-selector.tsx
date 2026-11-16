@@ -53,7 +53,7 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
           {selectedClientId && selected ? (
             <div className="flex items-center gap-2 truncate">
               <Avatar className="h-5 w-5">
-                <AvatarImage src={selected.profile?.avatar_url ?? undefined} />
+                <AvatarImage src={selected.profile?.avatar_url ?? undefined} alt="" />
                 <AvatarFallback className="text-[10px]">{getInitials(selectedName)}</AvatarFallback>
               </Avatar>
               <span className="truncate">{selectedName}</span>
@@ -93,7 +93,7 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
                       )}
                     />
                     <Avatar className="mr-2 h-6 w-6">
-                      <AvatarImage src={client.profile?.avatar_url ?? undefined} />
+                      <AvatarImage src={client.profile?.avatar_url ?? undefined} alt="" />
                       <AvatarFallback className="text-[10px]">
                         {getInitials(displayName)}
                       </AvatarFallback>

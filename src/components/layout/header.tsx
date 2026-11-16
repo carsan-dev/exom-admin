@@ -37,7 +37,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
       <Link
         to="/dashboard"
         aria-label="EXOM Admin, ir al Dashboard"
-        className="flex shrink-0 items-center gap-2 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus md:hidden"
+        className="flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus md:hidden"
       >
         <BrandSymbol />
         <span

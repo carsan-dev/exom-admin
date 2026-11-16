@@ -372,6 +372,20 @@ describe('TrainingFormDialog characterization', () => {
     expect(snapBody()).toMatchSnapshot()
   })
 
+  it('names the icon-only type buttons and links the exercises error to its group (RDS-F5-01)', async () => {
+    renderDialog()
+    await settled()
+    expect(screen.getByRole('button', { name: 'Añadir tipo' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Quitar Fuerza' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Añadir etiqueta' })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Crear entrenamiento' }))
+    await screen.findByText('Agrega al menos un ejercicio o circuito')
+    expect(screen.getByRole('group', { name: 'Ejercicios' })).toHaveAccessibleDescription(
+      'Agrega al menos un ejercicio o circuito',
+    )
+  })
+
   it('shows validation errors on submit and the pending footer', async () => {
     const { onOpenChange } = renderDialog()
     await settled()

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { clearUnsavedChanges, useUnsavedChanges } from '@/hooks/use-unsaved-changes'
@@ -126,6 +126,8 @@ function MultiSelectField({
   error,
 }: MultiSelectFieldProps) {
   const [customInput, setCustomInput] = useState('')
+  const labelId = useId()
+  const errorId = useId()
 
   const hasOption = (option: string) => {
     const optionKey = getOptionKey(option)
@@ -167,8 +169,13 @@ function MultiSelectField({
   }
 
   return (
-    <div className="space-y-2">
-      <p className="text-sm font-medium leading-none">{label}</p>
+    <div
+      role="group"
+      aria-labelledby={labelId}
+      aria-describedby={error ? errorId : undefined}
+      className="space-y-2"
+    >
+      <p id={labelId} className="text-sm font-medium leading-none">{label}</p>
 
       <div className="flex flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2 min-h-10">
         {value.length === 0 && (
@@ -184,9 +191,10 @@ function MultiSelectField({
             <button
               type="button"
               onClick={() => remove(item)}
+              aria-label={`Quitar ${item}`}
               className="ml-0.5 rounded-full hover:bg-brand-soft/20 p-0.5"
             >
-              <X className="h-2.5 w-2.5" />
+              <X aria-hidden="true" className="h-2.5 w-2.5" />
             </button>
           </Badge>
         ))}
@@ -226,12 +234,13 @@ function MultiSelectField({
           size="sm"
           onClick={addCustom}
           disabled={!normalizeOptionLabel(customInput) || hasOption(customInput)}
+          aria-label={`Añadir a ${label.toLocaleLowerCase('es')}`}
         >
-          <Plus className="h-3 w-3" />
+          <Plus aria-hidden="true" className="h-3 w-3" />
         </Button>
       </div>
 
-      {error && <p className="text-xs text-status-error">{error}</p>}
+      {error && <p id={errorId} className="text-xs text-status-error">{error}</p>}
     </div>
   )
 }

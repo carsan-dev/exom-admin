@@ -93,9 +93,10 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
               <button
                 type="button"
                 onClick={() => remove(type)}
+                aria-label={`Quitar ${getTrainingTypeLabel(type)}`}
                 className="ml-1 rounded-full p-0.5 hover:bg-foreground/10"
               >
-                <X className="h-2.5 w-2.5" />
+                <X aria-hidden="true" className="h-2.5 w-2.5" />
               </button>
             </Badge>
           ))
@@ -116,8 +117,9 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
           size="sm"
           onClick={() => add()}
           disabled={!normalizeTrainingTypeLabel(input) || hasType(input)}
+          aria-label="Añadir tipo"
         >
-          <Plus className="h-3 w-3" />
+          <Plus aria-hidden="true" className="h-3 w-3" />
         </Button>
       </div>
 

@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   TRAINING_ACCENT_SWATCHES,
+  getTrainingAccentSoftTextColor,
   getTrainingAccentStyle,
   normalizeTrainingAccentColor,
 } from '../types'
@@ -38,7 +39,7 @@ export function AccentColorField({
               previewStyle ?? {
                 borderColor: 'rgba(197, 227, 132, 0.24)',
                 backgroundColor: 'rgba(197, 227, 132, 0.08)',
-                color: '#C5E384',
+                color: getTrainingAccentSoftTextColor('#C5E384'),
               }
             }
           >

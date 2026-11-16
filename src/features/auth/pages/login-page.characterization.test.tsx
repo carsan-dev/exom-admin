@@ -101,6 +101,27 @@ describe('LoginPage (caracterización)', () => {
     expect(ctx.login).not.toHaveBeenCalled()
   })
 
+  it('marca los campos con error con aria-invalid y los enlaza a su mensaje (RDS-F5-01)', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    const email = screen.getByLabelText('Email')
+    const password = screen.getByLabelText('Contraseña')
+    expect(email).not.toHaveAttribute('aria-invalid', 'true')
+
+    await user.click(screen.getByRole('button', { name: 'Iniciar sesión' }))
+
+    await waitFor(() => expect(email).toHaveAttribute('aria-invalid', 'true'))
+    expect(email).toHaveAccessibleDescription('Email inválido')
+    expect(password).toHaveAttribute('aria-invalid', 'true')
+    expect(password).toHaveAccessibleDescription('Mínimo 6 caracteres')
+  })
+
+  it('pone el título del documento de inicio de sesión (RDS-F5-01)', () => {
+    document.title = 'EXOM Admin'
+    renderPage()
+    expect(document.title).toBe('Iniciar sesión · EXOM Admin')
+  })
+
   it('el botón de Google llama al inicio de sesión con Google', async () => {
     const user = userEvent.setup()
     renderPage()

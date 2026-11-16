@@ -105,6 +105,15 @@ describe('ExercisesPage', () => {
     expect(screen.getByText('Página 1 de 1')).toBeInTheDocument()
   })
 
+  it('names the search field and the usage select (RDS-F5-01)', async () => {
+    mockApi(() => ({ data: [baseExercise], total: 1, totalPages: 1 }))
+    renderPage()
+
+    expect(await screen.findByText('Press de banca')).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Uso en entrenamientos' })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Buscar por nombre...' })).toHaveAttribute('aria-label', 'Buscar por nombre...')
+  })
+
   it('shows the error state and retries the same query', async () => {
     let fail = true
     mockApi(() => (fail ? Object.assign(new AxiosError('boom'), { response: { status: 404 } }) : { data: [baseExercise], total: 1, totalPages: 1 }))

@@ -32,7 +32,7 @@ export function ExercisesFiltersBar({
       <div className="flex flex-col gap-2 md:w-64 md:flex-none">
         <span className="text-xs font-medium text-muted-foreground">Uso en entrenamientos</span>
         <Select value={trainingUsage} onValueChange={onTrainingUsageChange}>
-          <SelectTrigger>
+          <SelectTrigger aria-label="Uso en entrenamientos">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

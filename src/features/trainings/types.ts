@@ -149,6 +149,11 @@ export function getTrainingAccentTextColor(color: string | null | undefined) {
   return luminance >= 0.62 ? DARK_PREVIEW_TEXT : LIGHT_PREVIEW_TEXT
 }
 
+/** Texto sobre el relleno suave del acento: legible en ambos temas (WCAG 1.4.3). */
+export function getTrainingAccentSoftTextColor(color: string) {
+  return `color-mix(in srgb, ${color}, var(--foreground) var(--training-accent-text-mix))`
+}
+
 export function getTrainingAccentStyle(
   color: string | null | undefined,
   variant: 'soft' | 'solid' = 'soft'
@@ -170,7 +175,7 @@ export function getTrainingAccentStyle(
   return {
     borderColor: rgba(normalizedColor, 0.3),
     backgroundColor: rgba(normalizedColor, 0.12),
-    color: normalizedColor,
+    color: getTrainingAccentSoftTextColor(normalizedColor),
   }
 }
 

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { auth } from '@/lib/firebase'
 import { AuthBrandPanel } from '../components/auth-brand-panel'
+import { useDocumentTitle } from '@/components/layout/use-document-title'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -24,6 +25,7 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [isSendingReset, setIsSendingReset] = useState(false)
+  useDocumentTitle('Iniciar sesión')
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -150,10 +152,13 @@ export function LoginPage() {
                     autoComplete="email"
                     inputMode="email"
                     className="h-11"
+                    aria-required="true"
+                    aria-invalid={errors.email ? true : undefined}
+                    aria-describedby={errors.email ? 'email-error' : undefined}
                     {...register('email')}
                   />
                   {errors.email && (
-                    <p className="text-xs text-status-error">{errors.email.message}</p>
+                    <p id="email-error" className="text-xs text-status-error">{errors.email.message}</p>
                   )}
                 </div>
 
@@ -169,6 +174,9 @@ export function LoginPage() {
                         placeholder="••••••••"
                         autoComplete="current-password"
                         className="h-11 pr-12"
+                        aria-required="true"
+                        aria-invalid={errors.password ? true : undefined}
+                        aria-describedby={errors.password ? 'password-error' : undefined}
                         {...register('password')}
                       />
                       <button
@@ -182,7 +190,7 @@ export function LoginPage() {
                       </button>
                     </div>
                     {errors.password && (
-                      <p className="text-xs text-status-error">{errors.password.message}</p>
+                      <p id="password-error" className="text-xs text-status-error">{errors.password.message}</p>
                     )}
                   </div>
 

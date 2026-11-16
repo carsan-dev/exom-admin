@@ -91,7 +91,7 @@ export function DietMealCard({
               <FormItem className="w-full flex-none md:w-36">
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="h-9 text-xs">
+                    <SelectTrigger aria-label={`Tipo de la comida ${mealIndex + 1}`} className="h-9 text-xs">
                       <SelectValue placeholder="Tipo" />
                     </SelectTrigger>
                   </FormControl>
