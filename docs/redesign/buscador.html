@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Buscador global (P13) · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/buscador.css">
+  <script src="assets/vendor/lucide-local.js" defer></script>
+  <script src="assets/pages/buscador.js"></script>
+</head>
+<body>
+
+<header class="bs-top">
+  <a class="bs-back" href="index.html"><i data-lucide="arrow-right" class="bs-back-ic"></i>Rediseño de EXOM Admin</a>
+  <span class="proposal-tag">Propuesta P13</span>
+  <span class="spacer"></span>
+  <button class="btn btn-ghost btn-icon" type="button" data-theme-toggle aria-label="Cambiar tema">
+    <i data-lucide="sun" class="theme-icon-dark"></i><i data-lucide="moon" class="theme-icon-light"></i>
+  </button>
+</header>
+
+<main class="bs-main" id="main">
+
+  <!-- 1. Cabecera -->
+  <section class="bs-intro" aria-labelledby="bs-title">
+    <h1 class="h1" id="bs-title">Buscador global (P13)</h1>
+    <p class="ph-sub">Una paleta de comandos para saltar a cualquier pantalla del panel, lanzar una acción de navegación o abrir la ficha de un cliente sin recorrer el menú. Se abre con <span class="kbd">Ctrl</span> <span class="kbd">K</span> desde cualquier pantalla, solo navega (no muta datos) y reutiliza únicamente lo que ya existe: las rutas del menú y el listado de clientes con búsqueda.</p>
+
+    <h2 class="h2 bs-dec-title">Decisiones para aprobar</h2>
+    <dl class="dl bs-dec">
+      <dt>D-a · Alcance</dt>
+      <dd>«Ir a» (todas las pantallas del menú, filtradas por rol) + «Acciones» + «Clientes».</dd>
+      <dt>D-b · Acciones</dt>
+      <dd>Solo navegación a rutas existentes, sin mutaciones: «Nueva plantilla» (solo SUPER_ADMIN), «Enviar notificación», «Ver solicitudes pendientes», «Ver feedback pendiente» y «Ver recaps enviados». La URL que abre cada una está en las anotaciones del primer marco.</dd>
+      <dt>D-c · Clientes</dt>
+      <dd>Búsqueda con el endpoint de lista existente (<code class="bs-code">GET /admin/clients</code> acepta <code class="bs-code">search</code> y <code class="bs-code">limit</code>): debounce de 250 ms, mínimo 2 caracteres, máximo 5 resultados y «Ver todos en Usuarios» al final. Al elegir uno se abre su detalle. Sin endpoints nuevos.</dd>
+      <dt>D-d · Atajo</dt>
+      <dd><span class="kbd">Ctrl</span> <span class="kbd">K</span> / <span class="kbd">⌘</span> <span class="kbd">K</span>. Sin atajo de una sola tecla (no choca con escribir en formularios).</dd>
+      <dt>D-e · Móvil</dt>
+      <dd>Entrada «Buscar» como primer elemento del panel «Más» de la barra inferior; se abre como hoja a pantalla completa.</dd>
+    </dl>
+  </section>
+
+  <!-- 2. Escritorio -->
+  <section class="bs-sec" aria-labelledby="bs-desk-t">
+    <div class="section-head">
+      <div>
+        <h2 class="h2" id="bs-desk-t">Escritorio (1440) · paleta abierta sobre el Dashboard</h2>
+        <p class="section-sub">Este marco es interactivo y sigue el tema de la página: escribe para filtrar, <span class="kbd">↑</span> <span class="kbd">↓</span> <span class="kbd">↵</span> <span class="kbd">Esc</span> funcionan y <span class="kbd">Ctrl</span> <span class="kbd">K</span> / <span class="kbd">⌘</span> <span class="kbd">K</span> la abre y cierra.</p>
+      </div>
+      <div class="bs-seg" role="group" aria-label="Rol de la demostración">
+        <button type="button" data-bs-role="super" aria-pressed="true">SUPER_ADMIN</button>
+        <button type="button" data-bs-role="admin" aria-pressed="false">ADMIN</button>
+      </div>
+    </div>
+    <div class="bs-scrollx">
+      <div class="bf bf-desk" id="live-desk" data-desk data-live data-pal='{"p":"live","q":"pro","role":"super","clients":"ok","active":0}'></div>
+    </div>
+    <p class="bs-status caption" id="live-status" role="status" aria-live="polite">Enter sobre una fila mostraría aquí a dónde navega (demostración, no abre nada).</p>
+
+    <div class="bs-notes">
+      <div class="bs-note">
+        <h3 class="micro">Disparador</h3>
+        <p>Cabecera de 52 px, a la derecha y antes del conmutador de tema. Botón de 32 px con aspecto de campo en reposo: lupa, «Buscar…» y chip de atajo. Windows y Linux: <span class="kbd">Ctrl K</span>. macOS: <span class="kbd">⌘ K</span>.</p>
+      </div>
+      <div class="bs-note">
+        <h3 class="micro">Panel</h3>
+        <p>Centrado, ancho máximo 640 px, a ~15vh del borde superior. Esquinas rectas, filete de 1 px fuerte, fondo de superficie y sin sombra pesada; el resto de la pantalla se atenúa con el velo del sistema.</p>
+      </div>
+      <div class="bs-note">
+        <h3 class="micro">Fila de resultado</h3>
+        <p>Mínimo 44 px, mismo icono Lucide que la barra lateral, etiqueta y texto secundario a la derecha (grupo o ruta). Fila activa: fondo lima suave y filete lima de 2 px a la izquierda, como el carril de Progreso. La coincidencia va en negrita, no solo en color.</p>
+      </div>
+      <div class="bs-note">
+        <h3 class="micro">Pie de teclas</h3>
+        <p><span class="kbd">↑↓</span> navegar · <span class="kbd">↵</span> abrir · <span class="kbd">Esc</span> cerrar. A la derecha, el recuento («3 resultados») que se anuncia en la región en vivo.</p>
+      </div>
+      <div class="bs-note">
+        <h3 class="micro">Clientes</h3>
+        <p><code class="bs-code">GET /admin/clients?search=…&amp;limit=5</code>, endpoint existente. Elegir uno abre <code class="bs-code">/users/:id</code> (SUPER_ADMIN) o <code class="bs-code">/clients/:id</code> (ADMIN). «Ver todos en Usuarios» abre el listado (<code class="bs-code">/users</code> o <code class="bs-code">/clients</code>).</p>
+      </div>
+      <div class="bs-note bs-note-wide">
+        <h3 class="micro">Acciones y su destino</h3>
+        <table class="bs-table">
+          <thead><tr><th scope="col">Acción</th><th scope="col">Abre</th><th scope="col">Rol</th></tr></thead>
+          <tbody>
+            <tr><td>Nueva plantilla</td><td><code class="bs-code">/notification-templates</code></td><td>SUPER_ADMIN</td></tr>
+            <tr><td>Enviar notificación</td><td><code class="bs-code">/notifications</code></td><td>Todos</td></tr>
+            <tr><td>Ver solicitudes pendientes</td><td><code class="bs-code">/approval-requests?status=PENDING</code></td><td>Todos</td></tr>
+            <tr><td>Ver feedback pendiente</td><td><code class="bs-code">/feedback?status=PENDING</code></td><td>Todos</td></tr>
+            <tr><td>Ver recaps enviados</td><td><code class="bs-code">/recaps?status=SUBMITTED</code></td><td>Todos</td></tr>
+          </tbody>
+        </table>
+        <p class="caption bs-note-foot">Las cinco rutas existen en <code class="bs-code">src/App.tsx</code>. Hoy los diálogos de «Enviar notificación» y «Nueva plantilla» se abren con estado local, sin parámetro de URL: la acción lleva a la pantalla; abrir el diálogo directamente sería un parámetro nuevo solo de front, sin API.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Estados -->
+  <section class="bs-sec" aria-labelledby="bs-states-t">
+    <div class="section-head">
+      <div>
+        <h2 class="h2" id="bs-states-t">Estados de la paleta (tema oscuro)</h2>
+        <p class="section-sub">Pantallas y acciones son locales e instantáneas; solo «Clientes» depende de la red.</p>
+      </div>
+    </div>
+    <div class="bs-states">
+      <figure class="bs-state">
+        <div class="bf bf-mini" data-theme="dark" inert><div data-pal='{"p":"sa","q":"","role":"super","clients":"ok","active":0,"fade":true,"maxScreens":6}'></div></div>
+        <figcaption><span class="tag">a</span><b>Recién abierta, sin texto</b><p class="caption">«Ir a» con las pantallas en el orden de la barra lateral y «Acciones» debajo; se muestran 6 pantallas y la lista se desvanece al final (vista recortada: en real se desplaza, 22 resultados).</p></figcaption>
+      </figure>
+      <figure class="bs-state">
+        <div class="bf bf-mini" data-theme="dark" inert><div data-pal='{"p":"sb","q":"pro","role":"super","clients":"ok","active":0}'></div></div>
+        <figcaption><span class="tag">b</span><b>Consulta «pro»</b><p class="caption">«Ir a» → Progreso; «Acciones» no aparece al no haber coincidencias; «Clientes» con 2 filas (iniciales y correo) y «Ver todos en Usuarios».</p></figcaption>
+      </figure>
+      <figure class="bs-state">
+        <div class="bf bf-mini" data-theme="dark" inert><div data-pal='{"p":"sc","q":"plant","role":"super","clients":"ok","active":0}'></div></div>
+        <figcaption><span class="tag">c</span><b>Consulta «plant» como SUPER_ADMIN</b><p class="caption">Plantillas aparece en «Ir a» y «Nueva plantilla» en «Acciones».</p></figcaption>
+      </figure>
+      <figure class="bs-state">
+        <div class="bf bf-mini" data-theme="dark" inert><div data-pal='{"p":"sd","q":"plant","role":"admin","clients":"ok","active":0}'></div></div>
+        <figcaption><span class="tag">d</span><b>Misma consulta como ADMIN</b><p class="caption">Los destinos sin permiso no aparecen: ni Plantillas ni «Nueva plantilla». No se muestran filas desactivadas.</p></figcaption>
+      </figure>
+      <figure class="bs-state">
+        <div class="bf bf-mini" data-theme="dark" inert><div data-pal='{"p":"se","q":"pro","role":"super","clients":"loading","active":0}'></div></div>
+        <figcaption><span class="tag">e</span><b>Cargando clientes</b><p class="caption">Esqueleto bajo «Clientes» mientras pantallas y acciones ya están listadas (son locales).</p></figcaption>
+      </figure>
+      <figure class="bs-state">
+        <div class="bf bf-mini" data-theme="dark" inert><div data-pal='{"p":"sf","q":"xyz","role":"super","clients":"ok","active":0}'></div></div>
+        <figcaption><span class="tag">f</span><b>Sin resultados</b><p class="caption">Mensaje con la consulta entre comillas y una pista; el recuento anunciado es «Sin resultados».</p></figcaption>
+      </figure>
+      <figure class="bs-state">
+        <div class="bf bf-mini" data-theme="dark" inert><div data-pal='{"p":"sg","q":"pro","role":"super","clients":"error","active":0}'></div></div>
+        <figcaption><span class="tag">g</span><b>Error al buscar clientes</b><p class="caption">Fila en línea con «Reintentar»; pantallas y acciones siguen siendo utilizables.</p></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 4. Tema claro -->
+  <section class="bs-sec" aria-labelledby="bs-light-t">
+    <div class="section-head">
+      <div>
+        <h2 class="h2" id="bs-light-t">Tema claro</h2>
+        <p class="section-sub">La misma paleta abierta con la consulta «pro», con los tokens del tema claro (el lima solo como relleno y filete, nunca como texto).</p>
+      </div>
+    </div>
+    <div class="bs-scrollx">
+      <div class="bf bf-desk" data-desk data-theme="light" inert data-pal='{"p":"light","q":"pro","role":"super","clients":"ok","active":0}'></div>
+    </div>
+  </section>
+
+  <!-- 5. Móvil -->
+  <section class="bs-sec" aria-labelledby="bs-mob-t">
+    <div class="section-head">
+      <div>
+        <h2 class="h2" id="bs-mob-t">Móvil (390)</h2>
+        <p class="section-sub">No hay disparador en la cabecera: la entrada es el primer elemento del panel «Más» de la barra inferior. Se abre como hoja a pantalla completa: campo arriba con «Cancelar» (objetivos de 44 px), filas de 48 px a todo el ancho, sin pie de teclas y con el margen de zona segura abajo.</p>
+      </div>
+    </div>
+
+    <h3 class="micro bs-row-label">Tema oscuro</h3>
+    <div class="bs-phones">
+      <figure class="bs-phone">
+        <div class="bf bf-m" data-theme="dark" inert data-more></div>
+        <figcaption><span class="tag">1</span><b>Panel «Más»</b> <span class="proposal-tag">Propuesta</span><p class="caption">«Buscar» va primero, antes de «Solicitudes», resaltado como propuesta.</p></figcaption>
+      </figure>
+      <figure class="bs-phone">
+        <div class="bf bf-m" data-theme="dark" inert data-palm='{"p":"md1","q":"","role":"super","clients":"ok","active":0,"fade":true}'></div>
+        <figcaption><span class="tag">2</span><b>Hoja, sin texto</b><p class="caption">«Ir a» y «Acciones»; la lista se desplaza.</p></figcaption>
+      </figure>
+      <figure class="bs-phone">
+        <div class="bf bf-m" data-theme="dark" inert data-palm='{"p":"md2","q":"pro","role":"super","clients":"ok","active":0}'></div>
+        <figcaption><span class="tag">3</span><b>Hoja, consulta «pro»</b><p class="caption">Mismos grupos y filas que en escritorio, a 48 px.</p></figcaption>
+      </figure>
+    </div>
+
+    <h3 class="micro bs-row-label">Tema claro</h3>
+    <div class="bs-phones">
+      <figure class="bs-phone">
+        <div class="bf bf-m" data-theme="light" inert data-more></div>
+        <figcaption><span class="tag">1</span><b>Panel «Más»</b></figcaption>
+      </figure>
+      <figure class="bs-phone">
+        <div class="bf bf-m" data-theme="light" inert data-palm='{"p":"ml1","q":"","role":"super","clients":"ok","active":0,"fade":true}'></div>
+        <figcaption><span class="tag">2</span><b>Hoja, sin texto</b></figcaption>
+      </figure>
+      <figure class="bs-phone">
+        <div class="bf bf-m" data-theme="light" inert data-palm='{"p":"ml2","q":"pro","role":"super","clients":"ok","active":0}'></div>
+        <figcaption><span class="tag">3</span><b>Hoja, consulta «pro»</b></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 6. Accesibilidad -->
+  <section class="bs-sec" aria-labelledby="bs-a11y-t">
+    <div class="section-head"><div><h2 class="h2" id="bs-a11y-t">Accesibilidad y teclado</h2></div></div>
+    <dl class="dl bs-spec">
+      <dt>Contenedor</dt><dd><code class="bs-code">role="dialog"</code> modal con nombre accesible «Buscador». El foco queda atrapado dentro mientras está abierta.</dd>
+      <dt>Campo</dt><dd><code class="bs-code">role="combobox"</code> con <code class="bs-code">aria-controls</code> apuntando a un <code class="bs-code">listbox</code>; <code class="bs-code">aria-expanded="true"</code> y <code class="bs-code">aria-autocomplete="list"</code>.</dd>
+      <dt>Grupos</dt><dd>Cada grupo («Ir a», «Acciones», «Clientes») es un <code class="bs-code">role="group"</code> etiquetado por su título; las filas son <code class="bs-code">role="option"</code>.</dd>
+      <dt>Fila activa</dt><dd>El foco real se queda en el campo; la fila activa se indica con <code class="bs-code">aria-activedescendant</code> y <code class="bs-code">aria-selected="true"</code>. Además del color, lleva filete de 2 px y la coincidencia va en negrita.</dd>
+      <dt>Atajo</dt><dd><span class="kbd">Ctrl</span> <span class="kbd">K</span> / <span class="kbd">⌘</span> <span class="kbd">K</span> abre y cierra desde cualquier pantalla, salvo mientras se escribe dentro de otro diálogo.</dd>
+      <dt>Cierre</dt><dd><span class="kbd">Esc</span> cierra y devuelve el foco al disparador (en móvil, al elemento «Buscar» de «Más» o al botón «Más»). «Cancelar» hace lo mismo.</dd>
+      <dt>Anuncios</dt><dd>Región en vivo cortés (<code class="bs-code">aria-live="polite"</code>): «3 resultados», «1 resultado» o «Sin resultados». El esqueleto de clientes se marca <code class="bs-code">aria-busy</code>; el error de clientes usa <code class="bs-code">role="alert"</code>.</dd>
+      <dt>Movimiento</dt><dd>Con <code class="bs-code">prefers-reduced-motion</code> no hay animación de entrada ni de desplazamiento; el esqueleto queda estático.</dd>
+      <dt>Contraste y objetivos</dt><dd>Texto con los tokens del sistema en ambos temas; filas de 44 px (escritorio) y 48 px (móvil); «Cancelar» de 44 px.</dd>
+    </dl>
+  </section>
+
+  <!-- 7. Fuera de alcance -->
+  <section class="bs-sec" aria-labelledby="bs-out-t">
+    <div class="section-head"><div><h2 class="h2" id="bs-out-t">Fuera de alcance y dependencias</h2></div></div>
+    <ul class="bs-out">
+      <li><b>Buscar ejercicios, dietas, entrenamientos, feedback o recaps por texto.</b> Exige endpoints de búsqueda que hoy no existen. No se incluye; sería <span class="tag">BLOCKED</span> en exom-api según RDS-F4B-03.</li>
+      <li><b>Historial de búsquedas recientes.</b> No se incluye.</li>
+      <li><b>Ranking difuso.</b> Solo coincidencia por prefijo o subcadena, sin tildes ni mayúsculas.</li>
+      <li><b>Endpoints nuevos.</b> Ninguno: pantallas y acciones son locales; clientes reutiliza el listado existente.</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="bs-foot caption">Rediseño de EXOM Admin · Boceto RDS-F4B-U1 · Clientes, correos y cifras: datos de demostración ficticios.</footer>
+
+</body>
+</html>
