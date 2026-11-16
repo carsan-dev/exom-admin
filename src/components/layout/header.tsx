@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Link } from 'react-router'
 import { Breadcrumbs } from './breadcrumbs'
 import { BrandSymbol } from './brand-symbol'
+import { GlobalSearchTrigger } from './global-search'
 
 interface HeaderProps {
   onMenuToggle: () => void
@@ -62,6 +63,8 @@ export function Header({ onMenuToggle }: HeaderProps) {
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
+        <GlobalSearchTrigger className="hidden md:inline-flex" />
+
         <Button
           variant="ghost"
           size="icon"
