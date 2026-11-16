@@ -51,7 +51,7 @@ export function CopySelectionDialog({
             <label htmlFor="copy-selection-target" className="text-sm font-medium">Fecha destino inicial</label>
             <Input id="copy-selection-target" type="date" value={copyTargetDate} onChange={(event) => onTargetDateChange(event.target.value)} />
           </div>
-          <div className="space-y-2">
+          <div className="border-t border-border">
             {preview.map(({ day, targetDate, existingTarget }) => {
               const trainingNames = (day.trainings?.length ? day.trainings : day.training ? [day.training] : [])
                 .map((training) => `${training.name}${training.is_active === false ? ' (retirado)' : ''}`)
@@ -59,10 +59,10 @@ export function CopySelectionDialog({
               const sourceLabel = day.is_rest_day ? 'Descanso' : [trainingNames, day.diet?.name].filter(Boolean).join(' + ') || 'Vacío (limpiará destino)'
               const targetBusy = Boolean(existingTarget && (existingTarget.training || existingTarget.diet || existingTarget.is_rest_day))
               return (
-                <div key={day.date} className="rounded-lg border border-border/70 p-3 text-sm">
-                  <p className="font-medium">{day.date} → {targetDate}</p>
-                  <p className="text-muted-foreground">{sourceLabel}</p>
-                  <p className={targetBusy ? 'text-status-warning' : 'text-muted-foreground'}>
+                <div key={day.date} className="border-b border-border py-3 text-sm">
+                  <p className="font-semibold tabular-nums">{day.date} → {targetDate}</p>
+                  <p className="text-foreground-muted">{sourceLabel}</p>
+                  <p className={targetBusy ? 'text-status-warning' : 'text-foreground-muted'}>
                     {targetBusy ? 'Destino ocupado: será sobrescrito' : existingTarget ? 'Destino vacío' : 'Destino fuera del período visible; se sobrescribirá si está ocupado'}
                   </p>
                 </div>

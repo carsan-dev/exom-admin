@@ -5,6 +5,7 @@ import { CalendarDays, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/use-auth'
 import { useSearchParams } from 'react-router'
+import { cn } from '@/lib/utils'
 import {
   buildCatalogAvailability,
   getApiErrorMessage,
@@ -454,7 +455,7 @@ export function AssignmentsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={cn('space-y-6', selectedDates.length > 0 && 'pb-28')}>
       <AssignmentsToolbar
         clients={clients}
         selectedClientId={selectedClientId}
@@ -485,7 +486,6 @@ export function AssignmentsPage() {
         onClearSelection={handleClearSelection}
       />
 
-      {selectedClientId && days.length > 0 && <RirCyclePanel key={selectedClientId} clientId={selectedClientId} from={days[0].date} to={days[days.length - 1].date} trainings={trainings} />}
       {!selectedClientId ? (
         <AssignmentsEmptyState
           icon={<CalendarDays className="h-8 w-8" />}
@@ -531,6 +531,8 @@ export function AssignmentsPage() {
           )}
         </>
       )}
+
+      {selectedClientId && days.length > 0 && <RirCyclePanel key={selectedClientId} clientId={selectedClientId} from={days[0].date} to={days[days.length - 1].date} trainings={trainings} />}
 
       {selectedClientId && (
         <>

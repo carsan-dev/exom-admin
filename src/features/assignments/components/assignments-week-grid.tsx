@@ -15,7 +15,7 @@ export function AssignmentsWeekGrid({
   onToggleDay,
 }: AssignmentsWeekGridProps) {
   return (
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
+    <div className="grid border-t border-border md:grid-cols-7 md:border-t-0">
       {days.map((day) => (
         <AssignmentDayCard
           key={day.date}

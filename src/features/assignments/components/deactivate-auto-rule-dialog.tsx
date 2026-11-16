@@ -34,14 +34,14 @@ export function DeactivateAutoRuleDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-foreground">
+        <div className="border border-status-warning bg-status-warning-soft p-4 text-sm text-foreground">
           <div className="flex items-start gap-3">
-            <div className="rounded-full bg-status-warning/10 p-2 text-status-warning">
-              <Repeat2 className="h-4 w-4" />
+            <div className="text-status-warning">
+              <Repeat2 aria-hidden="true" className="h-4 w-4" />
             </div>
             <div className="space-y-1">
               <p className="font-medium">Las fechas automáticas pendientes se retirarán.</p>
-              <p className="text-muted-foreground">
+              <p className="text-foreground-secondary">
                 El histórico y los cambios manuales se mantienen. Podrás activar otro patrón cuando quieras.
               </p>
             </div>
