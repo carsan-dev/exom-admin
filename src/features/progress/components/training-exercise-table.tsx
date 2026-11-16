@@ -22,39 +22,39 @@ export function TrainingExerciseTable({ clientId, from, to }: { clientId: string
   const exerciseLabels = Object.fromEntries(exercises.map((item, index) => [item.exercise_id,
     item.exercise_name?.trim() || `Nombre no disponible · Ref. ${exerciseCursors.length}.${index + 1}`]))
 
-  return <section aria-label="Resumen de ejercicios" className="space-y-4 rounded-lg border bg-card p-4 sm:p-6">
+  return <section aria-label="Resumen de ejercicios" className="space-y-4 rounded-lg border border-border bg-card p-4 sm:p-6">
     <div className="space-y-1">
-      <h2 className="text-xl font-semibold">Ejercicios</h2>
-      <p className="max-w-prose text-sm text-muted-foreground">Resumen del periodo por ejercicio, incluidos los que no tienen métricas. Selecciona «Todos» para consultar también registros sin nombre.</p>
+      <h2 className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Ejercicios</h2>
+      <p className="max-w-prose text-sm text-foreground-secondary">Resumen del periodo por ejercicio, incluidos los que no tienen métricas. Selecciona «Todos» para consultar también registros sin nombre.</p>
     </div>
     <div className="grid gap-3 sm:grid-cols-[180px_minmax(0,360px)]">
-      <label className="space-y-2 text-sm font-medium">Mostrar ejercicios
+      <label className="space-y-2 text-xs font-medium uppercase tracking-[0.08em] text-foreground-muted">Mostrar ejercicios
         <select aria-label="Mostrar ejercicios" value={identification} onChange={(event) => setIdentification(event.target.value === 'all' ? 'all' : 'identified')}
-          className="block h-10 w-full rounded-md border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          className="block min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm normal-case tracking-normal text-foreground md:min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <option value="identified">Identificados</option><option value="all">Todos</option>
         </select>
       </label>
-      <label className="space-y-2 text-sm font-medium">Buscar ejercicios
+      <label className="space-y-2 text-xs font-medium uppercase tracking-[0.08em] text-foreground-muted">Buscar ejercicios
         <Input type="search" aria-label="Buscar ejercicios" placeholder="Escribe el nombre de un ejercicio…" maxLength={120} value={search}
-          onChange={(event) => setSearch(event.target.value)} className="border-input bg-background" />
+          onChange={(event) => setSearch(event.target.value)} className="min-h-11 border-input bg-background text-sm normal-case tracking-normal md:min-h-10" />
       </label>
     </div>
     {waiting || overview.isPending ? <p role="status">Buscando ejercicios…</p> : overview.isError ? <div role="alert">
       {getApiErrorStatus(overview.error) === 413 ? 'Reduce el intervalo de fechas para buscar ejercicios.' : 'No se pudieron cargar los ejercicios.'}
-      {getApiErrorStatus(overview.error) !== 413 && <Button variant="outline" onClick={() => void overview.refetch()}>Reintentar ejercicios</Button>}
+      {getApiErrorStatus(overview.error) !== 413 && <Button variant="outline" className="min-h-11 md:min-h-9" onClick={() => void overview.refetch()}>Reintentar ejercicios</Button>}
     </div> : exercises.length === 0 ? <div className="space-y-3 rounded-md bg-muted p-4">
-      <p className="text-sm text-muted-foreground">{identification === 'identified' ? 'No hay ejercicios identificados para esta consulta.' : 'Sin ejercicios registrados para esta consulta.'}</p>
-      {identification === 'identified' && <Button variant="outline" onClick={() => setIdentification('all')}>Mostrar todos</Button>}
-    </div> : <details open className="border-t pt-3">
-      <summary className="cursor-pointer rounded-sm py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <p className="text-sm text-foreground-muted">{identification === 'identified' ? 'No hay ejercicios identificados para esta consulta.' : 'Sin ejercicios registrados para esta consulta.'}</p>
+      {identification === 'identified' && <Button variant="outline" className="min-h-11 md:min-h-9" onClick={() => setIdentification('all')}>Mostrar todos</Button>}
+    </div> : <details open className="border-t border-border-strong pt-3">
+      <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-sm text-sm font-medium text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         Ver métricas de {exercises.length} ejercicios · página {exerciseCursors.length}
       </summary>
-      <p className="mb-3 text-xs text-muted-foreground">PR: registro de peso y repeticiones devuelto por el histórico. Su peso no es una carga media. Volumen: kg·reps; las series por tiempo no suman volumen.</p>
+      <p className="mb-3 text-xs text-foreground-muted">PR: registro de peso y repeticiones devuelto por el histórico. Su peso no es una carga media. Volumen: kg·reps; las series por tiempo no suman volumen.</p>
       <div role="region" tabIndex={0} aria-label="Tabla de ejercicios desplazable" className="overflow-x-auto rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-        <table className="w-full min-w-[800px] text-left text-sm tabular-nums [&_td]:px-3 [&_td]:py-3 [&_td]:align-top [&_thead_th]:px-3 [&_thead_th]:pb-3">
+        <table className="w-full min-w-[800px] text-left text-sm tabular-nums [&_td]:px-3 [&_td]:py-3 [&_td]:align-top [&_thead_th]:px-3 [&_thead_th]:pb-3 [&_thead_th]:text-xs [&_thead_th]:uppercase [&_thead_th]:tracking-[0.08em] [&_thead_th]:text-foreground-muted">
           <caption className="sr-only">Resumen de ejercicios del periodo</caption>
-          <thead><tr><th scope="col">Ejercicio</th><th scope="col">Peso del PR (kg)</th><th scope="col">Máx. reps o segundos</th><th scope="col">Series</th><th scope="col">RIR</th><th scope="col">Volumen (kg·reps)</th><th scope="col">PR</th></tr></thead>
-          <tbody>{exercises.map((item) => <tr key={item.exercise_id} className="border-t">
+          <thead><tr className="border-b border-border-strong"><th scope="col">Ejercicio</th><th scope="col">Peso del PR (kg)</th><th scope="col">Máx. reps o segundos</th><th scope="col">Series</th><th scope="col">RIR</th><th scope="col">Volumen (kg·reps)</th><th scope="col">PR</th></tr></thead>
+          <tbody>{exercises.map((item) => <tr key={item.exercise_id} className="border-t border-border">
             <th scope="row" className="min-w-56 max-w-80 whitespace-normal break-words px-3 py-3 align-top font-medium">{exerciseLabels[item.exercise_id]}<NameSourceTag source={item.name_source} /></th>
             <td>{value(item.pr?.weight_kg, ' kg')}</td>
             <td>{item.max_seconds !== null ? value(item.max_seconds, ' s') : value(item.max_reps, ' reps')}</td>
@@ -64,11 +64,11 @@ export function TrainingExerciseTable({ clientId, from, to }: { clientId: string
         </table>
       </div>
     </details>}
-    {!waiting && !overview.isError && exercises.some((item) => !item.exercise_name) && <p className="text-sm text-muted-foreground">Conservamos las series y cargas aunque el nombre original no esté disponible. Las referencias distinguen los ejercicios de esta página; no son sus nombres.</p>}
-    {(exerciseCursors.length > 1 || overview.data?.next_cursor) && <div className="flex flex-wrap gap-2">
-      <Button variant="outline" disabled={waiting || overview.isPending || exerciseCursors.length === 1}
+    {!waiting && !overview.isError && exercises.some((item) => !item.exercise_name) && <p className="text-sm text-foreground-muted">Conservamos las series y cargas aunque el nombre original no esté disponible. Las referencias distinguen los ejercicios de esta página; no son sus nombres.</p>}
+    {(exerciseCursors.length > 1 || overview.data?.next_cursor) && <div className="flex flex-wrap gap-2 border-t border-border pt-4">
+      <Button variant="outline" className="min-h-11 md:min-h-9" disabled={waiting || overview.isPending || exerciseCursors.length === 1}
         onClick={() => setExerciseCursorState({ scope: filterScope, cursors: exerciseCursors.slice(0, -1) })}>Ejercicios anteriores</Button>
-      <Button variant="outline" disabled={waiting || overview.isPending || overview.isError || !overview.data?.next_cursor}
+      <Button variant="outline" className="min-h-11 md:min-h-9" disabled={waiting || overview.isPending || overview.isError || !overview.data?.next_cursor}
         onClick={() => { const nextCursor = overview.data?.next_cursor; if (nextCursor) setExerciseCursorState({ scope: filterScope, cursors: [...exerciseCursors, nextCursor] }) }}>Más ejercicios</Button>
     </div>}
   </section>
