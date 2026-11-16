@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import type { Exercise } from '../../exercises/types'
 import type { TrainingCircuitExerciseFormValues, TrainingItemFormValues } from '../schemas'
 import { CircuitExerciseRow } from './circuit-exercise-row'
+import { SortableHandle, SortableItem, SortableList } from './sortable-list'
 import type { TimedPrescriptionEditor } from './timed-prescription-editor'
 
 interface CircuitBlockProps {
@@ -12,11 +13,14 @@ interface CircuitBlockProps {
   index: number
   count: number
   exercisesById: Map<string, Exercise>
+  /** Stable client keys of `item.exercises`, same length and order. */
+  nestedKeys: string[]
   onMoveUp: () => void
   onMoveDown: () => void
   onRemove: () => void
   onUpdateField: (field: string, fieldValue: unknown) => void
   onMoveNested: (nestedIndex: number, direction: -1 | 1) => void
+  onReorderNested: (from: number, to: number) => void
   onRemoveNested: (nestedIndex: number) => void
   onUpdateNested: <K extends keyof TrainingCircuitExerciseFormValues>(
     nestedIndex: number,
@@ -36,20 +40,28 @@ export function CircuitBlock({
   index,
   count,
   exercisesById,
+  nestedKeys,
   onMoveUp,
   onMoveDown,
   onRemove,
   onUpdateField,
   onMoveNested,
+  onReorderNested,
   onRemoveNested,
   onUpdateNested,
   onNestedPrescriptionChange,
   onNestedTimedChange,
   onAddExercise,
 }: CircuitBlockProps) {
+  const nestedLabel = (key: string) => {
+    const nested = item.exercises[nestedKeys.indexOf(key)]
+    return (nested && exercisesById.get(nested.exercise_id)?.name) ?? 'ejercicio'
+  }
+
   return (
     <div className="space-y-3 py-4">
       <div className="flex items-start gap-2">
+        <SortableHandle label={`Reordenar circuito ${item.name || index + 1}`} />
         <div className="flex flex-none gap-0.5 md:flex-col">
           <Button
             type="button"
@@ -127,20 +139,23 @@ export function CircuitBlock({
       </div>
 
       <div className="ml-4 divide-y divide-border border-y border-l border-border pl-3 md:ml-10">
-        {item.exercises.map((nested, nestedIndex) => (
-          <CircuitExerciseRow
-            key={`${nested.exercise_id}-${nestedIndex}`}
-            nested={nested}
-            nestedIndex={nestedIndex}
-            count={item.exercises.length}
-            exercise={exercisesById.get(nested.exercise_id)}
-            onMove={(direction) => onMoveNested(nestedIndex, direction)}
-            onRemove={() => onRemoveNested(nestedIndex)}
-            onUpdate={(field, fieldValue) => onUpdateNested(nestedIndex, field, fieldValue)}
-            onPrescriptionChange={(raw) => onNestedPrescriptionChange(nestedIndex, raw)}
-            onTimedChange={(patch) => onNestedTimedChange(nestedIndex, patch)}
-          />
-        ))}
+        <SortableList ids={nestedKeys} getLabel={nestedLabel} onReorder={onReorderNested}>
+          {item.exercises.map((nested, nestedIndex) => (
+            <SortableItem key={nestedKeys[nestedIndex]} id={nestedKeys[nestedIndex]}>
+              <CircuitExerciseRow
+                nested={nested}
+                nestedIndex={nestedIndex}
+                count={item.exercises.length}
+                exercise={exercisesById.get(nested.exercise_id)}
+                onMove={(direction) => onMoveNested(nestedIndex, direction)}
+                onRemove={() => onRemoveNested(nestedIndex)}
+                onUpdate={(field, fieldValue) => onUpdateNested(nestedIndex, field, fieldValue)}
+                onPrescriptionChange={(raw) => onNestedPrescriptionChange(nestedIndex, raw)}
+                onTimedChange={(patch) => onNestedTimedChange(nestedIndex, patch)}
+              />
+            </SortableItem>
+          ))}
+        </SortableList>
         <Button
           type="button"
           variant="outline"

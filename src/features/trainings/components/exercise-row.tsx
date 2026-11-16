@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { LEVEL_LABELS, type Exercise } from '../../exercises/types'
 import type { TrainingItemFormValues } from '../schemas'
 import { PrescriptionFields } from './prescription-fields'
+import { SortableHandle } from './sortable-list'
 import { TimedPrescriptionEditor } from './timed-prescription-editor'
 
 interface ExerciseRowProps {
@@ -37,6 +38,7 @@ export function ExerciseRow({
     <div className="space-y-3 py-4">
       {/* Row: order controls + exercise name + delete */}
       <div className="flex items-start gap-2">
+        <SortableHandle label={`Reordenar ${exercise?.name ?? 'ejercicio'}`} />
         <div className="flex flex-none gap-0.5 md:flex-col">
           <Button
             type="button"

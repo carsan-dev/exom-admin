@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import type { Exercise } from '../../exercises/types'
 import type { TrainingCircuitExerciseFormValues } from '../schemas'
 import { PrescriptionFields } from './prescription-fields'
+import { SortableHandle } from './sortable-list'
 import { TimedPrescriptionEditor } from './timed-prescription-editor'
 
 interface CircuitExerciseRowProps {
@@ -36,6 +37,7 @@ export function CircuitExerciseRow({
   return (
     <div className="space-y-2 py-3">
       <div className="flex items-center gap-2">
+        <SortableHandle label={`Reordenar ${exercise?.name ?? 'ejercicio'}`} />
         <div className="flex flex-none gap-0.5">
           <Button
             type="button"

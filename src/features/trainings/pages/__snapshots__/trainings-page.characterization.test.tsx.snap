@@ -1707,8 +1707,25 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 <input class="h-4 w-4 rounded border-border accent-brand-primary" type="checkbox">Solicitar registro en todos</label>
 </div>
 <div class="divide-y divide-border border-y border-border">
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="space-y-3 py-4">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar Sentadilla goblet">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none gap-0.5 md:flex-col">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" disabled="" aria-label="Subir Sentadilla goblet">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -1770,8 +1787,26 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 <label class="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground max-md:min-h-11">
 <input class="h-4 w-4 accent-brand-primary" type="checkbox">Solicitar rendimiento real en cada serie</label>
 </div>
+</div>
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="space-y-3 py-4">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar ejercicio">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none gap-0.5 md:flex-col">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" aria-label="Subir ejercicio">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -1830,6 +1865,10 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 <label class="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground max-md:min-h-11">
 <input class="h-4 w-4 accent-brand-primary" type="checkbox">Solicitar rendimiento real en cada serie</label>
 </div>
+</div>
+</div>
+<div id="DndDescribedBy-N" style="display: none;">Para reordenar, pulsa Espacio o Intro para coger el elemento, usa las flechas arriba y abajo para moverlo y pulsa Espacio o Intro para soltarlo. Pulsa Escape para cancelar.</div>
+<div id="DndLiveRegion-N" style="position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;" role="status" aria-live="assertive" aria-atomic="true">
 </div>
 <div class="grid gap-2 pt-1 sm:grid-cols-2">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 w-full max-md:h-11" type="button">
@@ -6064,8 +6103,25 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 <input class="h-4 w-4 rounded border-border accent-brand-primary" type="checkbox">Solicitar registro en todos</label>
 </div>
 <div class="divide-y divide-border border-y border-border">
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="space-y-3 py-4">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar Sentadilla goblet">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none gap-0.5 md:flex-col">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" disabled="" aria-label="Subir Sentadilla goblet">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -6127,8 +6183,26 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 <label class="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground max-md:min-h-11">
 <input class="h-4 w-4 accent-brand-primary" type="checkbox">Solicitar rendimiento real en cada serie</label>
 </div>
+</div>
+<div data-sortable-item="" class="motion-reduce:transition-none!">
 <div class="space-y-3 py-4">
 <div class="flex items-start gap-2">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 flex-none p-0 text-muted-foreground hover:text-foreground max-md:size-11 cursor-grab" type="button" style="touch-action: none;" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-N" aria-label="Reordenar Press banca">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
 <div class="flex flex-none gap-0.5 md:flex-col">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border border-transparent text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-card [&amp;[aria-haspopup][aria-expanded=true]]:bg-background-surface [&amp;[aria-haspopup][aria-expanded=true]]:text-foreground disabled:border-transparent rounded-md size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11" type="button" aria-label="Subir Press banca">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up h-4 w-4">
@@ -6189,6 +6263,10 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 <label class="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground max-md:min-h-11">
 <input class="h-4 w-4 accent-brand-primary" type="checkbox">Solicitar rendimiento real en cada serie</label>
 </div>
+</div>
+</div>
+<div id="DndDescribedBy-N" style="display: none;">Para reordenar, pulsa Espacio o Intro para coger el elemento, usa las flechas arriba y abajo para moverlo y pulsa Espacio o Intro para soltarlo. Pulsa Escape para cancelar.</div>
+<div id="DndLiveRegion-N" style="position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;" role="status" aria-live="assertive" aria-atomic="true">
 </div>
 <div class="grid gap-2 pt-1 sm:grid-cols-2">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 w-full max-md:h-11" type="button">
