@@ -20,10 +20,10 @@ const statuses = {
   completed: { label: 'Completado', icon: Check, color: 'bg-status-success/10 text-foreground' },
   partial: { label: 'Parcialmente completado', icon: Minus, color: 'bg-status-warning/10 text-foreground' },
   missed: { label: 'No completado', icon: X, color: 'bg-status-error/10 text-foreground' },
-  rest: { label: 'Día de descanso', icon: Moon, color: 'bg-muted text-foreground' },
+  rest: { label: 'Día de descanso', icon: Moon, color: 'bg-muted text-foreground-secondary' },
   pending: { label: 'Pendiente', icon: Clock, color: 'bg-background text-foreground' },
-  unassigned: { label: 'Sin asignaciones', icon: Minus, color: 'bg-background text-muted-foreground' },
-  unknown: { label: 'Sin registro', icon: CircleHelp, color: 'bg-background text-muted-foreground' },
+  unassigned: { label: 'Sin asignaciones', icon: Minus, color: 'bg-background text-foreground-muted' },
+  unknown: { label: 'Sin registro', icon: CircleHelp, color: 'bg-background text-foreground-muted' },
 } as const
 
 function getDayStatus(day: CalendarDay | undefined) {
@@ -44,19 +44,19 @@ export function ProgressCalendar({ year, month, days, isLoading, selectedDate, o
   const previous = () => onMonthChange(month === 1 ? year - 1 : year, month === 1 ? 12 : month - 1)
   const next = () => onMonthChange(month === 12 ? year + 1 : year, month === 12 ? 1 : month + 1)
 
-  return <section aria-label="Calendario de actividad" className="min-w-0 space-y-4 rounded-lg bg-card p-4 sm:p-6">
+  return <section aria-label="Calendario de actividad" className="min-w-0 space-y-4">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <h2 className="text-lg font-semibold">Calendario de actividad</h2>
+      <h2 className="font-display text-lg font-extrabold uppercase leading-7 text-foreground">Calendario de actividad</h2>
       <div className="flex items-center gap-2">
-        <Button aria-label="Mes anterior" variant="outline" size="icon" onClick={previous}><ChevronLeft aria-hidden="true" /></Button>
-        <span aria-live="polite" className="w-32 text-center text-sm font-medium">{MONTH_NAMES[month - 1]} {year}</span>
-        <Button aria-label="Mes siguiente" variant="outline" size="icon" onClick={next}><ChevronRight aria-hidden="true" /></Button>
+        <Button aria-label="Mes anterior" variant="ghost" size="icon" onClick={previous}><ChevronLeft aria-hidden="true" /></Button>
+        <span aria-live="polite" className="w-32 text-center text-sm font-semibold text-foreground">{MONTH_NAMES[month - 1]} {year}</span>
+        <Button aria-label="Mes siguiente" variant="ghost" size="icon" onClick={next}><ChevronRight aria-hidden="true" /></Button>
       </div>
     </div>
-    <p className="text-sm text-muted-foreground">Selecciona un día para consultar ejercicios, comidas y notas. Sin registro no significa incumplimiento.</p>
+    <p className="text-sm text-foreground-secondary">Selecciona un día para consultar ejercicios, comidas y notas. Sin registro no significa incumplimiento.</p>
     {isLoading ? <Skeleton className="h-72 w-full" /> : <>
       <div className="grid grid-cols-7 gap-1 sm:gap-2">
-        {DAY_NAMES.map((name) => <span key={name} className="py-1 text-center text-xs text-muted-foreground">{name}</span>)}
+        {DAY_NAMES.map((name) => <span key={name} className="py-1 text-center text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">{name}</span>)}
         {Array.from({ length: firstWeekday }, (_, i) => <span key={`blank-${i}`} />)}
         {dates.map((date, i) => {
           const { label, icon: Icon, color } = getDayStatus(daysByDate.get(date))
@@ -66,19 +66,19 @@ export function ProgressCalendar({ year, month, days, isLoading, selectedDate, o
           return <button key={date} type="button" aria-label={`${date} · ${label}${trainingCount}`} title={`${label}${trainingCount}`}
             aria-pressed={date === selectedDate} onClick={() => onDateSelect(date)}
             className={cn('flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-md border border-border text-sm tabular-nums transition-colors duration-150 motion-reduce:transition-none hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', color,
-              date === selectedDate && 'border-brand-primary ring-2 ring-brand-primary ring-offset-1')}>
+              date === selectedDate && 'border-brand-primary bg-lime-soft ring-2 ring-brand-primary ring-offset-1')}>
             <span>{i + 1}</span><Icon aria-hidden="true" className="h-3.5 w-3.5" />
           </button>
         })}
       </div>
-      <p role="status" className="text-sm font-medium">Selección: {selectedDate} · {selectedStatus.label}</p>
+      <p role="status" className="text-sm font-semibold text-foreground">Selección: {selectedDate} · {selectedStatus.label}</p>
     </>}
-    <ul aria-label="Leyenda de actividad" className="flex flex-wrap gap-x-4 gap-y-2 border-t pt-4 text-xs text-muted-foreground">
+    <ul aria-label="Leyenda de actividad" className="flex flex-wrap gap-x-4 gap-y-2 border-t border-border-strong pt-4 text-xs text-foreground-muted">
       {Object.values(statuses).map(({ label, icon: Icon }) => <li key={label} className="flex items-center gap-1.5"><Icon aria-hidden="true" className="h-3.5 w-3.5" />{label}</li>)}
     </ul>
-    <details className="border-t pt-3">
-      <summary className="cursor-pointer rounded text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Ver historial del mes en lista</summary>
-      <ul className="mt-3 max-h-72 overflow-y-auto divide-y">
+    <details className="border-t border-border pt-3">
+      <summary className="flex min-h-11 cursor-pointer items-center rounded text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Ver historial del mes en lista</summary>
+      <ul className="mt-3 max-h-72 overflow-y-auto divide-y divide-border">
         {!isLoading && dates.map((date) => <li key={date}><button type="button" aria-pressed={selectedDate === date} onClick={() => onDateSelect(date)} className="flex min-h-11 w-full flex-wrap items-center justify-between gap-2 rounded px-2 py-2 text-left text-sm tabular-nums hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><span>{date}</span><span>{getDayStatus(daysByDate.get(date)).label}</span></button></li>)}
       </ul>
     </details>

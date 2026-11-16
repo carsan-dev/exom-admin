@@ -29,19 +29,19 @@ export function ProgressOverviewCards({ streak, weekSummary, isLoading, onStreak
       : 'Sin comidas asignadas' },
   ] : []
 
-  return <section aria-label="Resumen semanal" className="space-y-4 border-b border-border pb-6">
+  return <section aria-label="Resumen semanal" className="space-y-5">
     <div className="space-y-1">
-      <h2 className="text-xl font-semibold">Actividad de la semana</h2>
-      <p className="text-sm text-muted-foreground">{weekSummary && weekEnd ? `Semana del ${weekSummary.week_start} al ${weekEnd.toISOString().slice(0, 10)} · UTC` : 'Resumen semanal no disponible'}</p>
-      <p className="max-w-prose text-sm text-muted-foreground">Semana del día seleccionado, de lunes a domingo. Completados sobre asignados; no es el veredicto de Adherencia de siete días cerrados.</p>
+      <h2 className="font-display text-xl font-extrabold uppercase leading-7 text-foreground">Actividad de la semana</h2>
+      <p className="text-sm text-foreground-secondary">{weekSummary && weekEnd ? `Semana del ${weekSummary.week_start} al ${weekEnd.toISOString().slice(0, 10)} · UTC` : 'Resumen semanal no disponible'}</p>
+      <p className="max-w-prose text-sm text-foreground-muted">Semana del día seleccionado, de lunes a domingo. Completados sobre asignados; no es el veredicto de Adherencia de siete días cerrados.</p>
     </div>
-    <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-      <dl className="grid gap-4 sm:grid-cols-2">
-        {observations.map(({ label, value }) => <div key={label} className="space-y-2"><dt className="text-sm text-muted-foreground">{label}</dt><dd className="text-lg font-semibold tabular-nums">{value}</dd></div>)}
+    <div className="grid overflow-hidden border-y border-border-strong lg:grid-cols-[2fr_1fr]">
+      <dl className="grid sm:grid-cols-2">
+        {observations.map(({ label, value }) => <div key={label} className="-ml-px -mt-px min-w-0 space-y-3 border-l border-t border-border px-5 pb-[18px] pt-4"><dt className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">{label}</dt><dd className="text-base font-semibold leading-6 tabular-nums text-foreground">{value}</dd></div>)}
       </dl>
-      <div className="space-y-2 lg:border-l lg:pl-6">
-        <p className="text-sm font-medium">{streak ? `Racha actual: ${streak.current_days} días` : streak === null ? 'Sin racha registrada' : 'Racha no disponible'}</p>
-        <p className="text-sm text-muted-foreground">Última actividad: {streak?.last_active_date ? dateFormatter.format(new Date(streak.last_active_date)) : 'Fecha no disponible'}</p>
+      <div className="flex min-w-0 flex-col items-start gap-2 border-t border-border px-5 pb-[18px] pt-4 lg:border-l">
+        <p className="text-base font-semibold leading-6 text-foreground">{streak ? `Racha actual: ${streak.current_days} días` : streak === null ? 'Sin racha registrada' : 'Racha no disponible'}</p>
+        <p className="text-sm text-foreground-muted">Última actividad: {streak?.last_active_date ? dateFormatter.format(new Date(streak.last_active_date)) : 'Fecha no disponible'}</p>
         {onStreakSelect && <Button variant="outline" size="sm" onClick={onStreakSelect}>Ver racha</Button>}
       </div>
     </div>
