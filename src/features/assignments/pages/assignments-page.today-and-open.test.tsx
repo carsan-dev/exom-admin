@@ -67,7 +67,6 @@ function datesFrom(start: string, count: number) {
 
 // Monday 2026-03-02 .. Sunday 2026-03-08 (today = Wednesday 2026-03-04).
 const weekOfToday = datesFrom('2026-03-02', 7)
-const weekAfter = datesFrom('2026-03-09', 7)
 const marchDates = datesFrom('2026-03-01', 31)
 const aprilDates = datesFrom('2026-04-01', 30)
 
@@ -182,7 +181,6 @@ describe('AssignmentsPage today button, current-day mark and direct editing', ()
       await waitFor(() => expect(searchParams().get('date')).toBe('2026-03-11'))
       await userEvent.click(screen.getByRole('button', { name: 'Hoy' }))
       await waitFor(() => expect(searchParams().get('date')).toBe('2026-03-04'))
-      expect(weekAfter).toHaveLength(7)
     })
 
     it('is disabled while no client is selected', async () => {

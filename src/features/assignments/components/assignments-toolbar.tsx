@@ -105,7 +105,7 @@ export function AssignmentsToolbar({
         <div className="min-w-0 space-y-2 max-md:w-full md:w-72">
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted">Cliente</p>
           <Select value={selectedClientId || ''} onValueChange={onClientChange}>
-            <SelectTrigger>
+            <SelectTrigger className="max-md:h-11">
               <SelectValue placeholder="Selecciona un cliente" />
             </SelectTrigger>
             <SelectContent>
@@ -131,17 +131,17 @@ export function AssignmentsToolbar({
 
         <div className="min-w-0 space-y-2 max-md:w-full">
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted">Periodo visible</p>
-          <div className="flex items-center gap-2 max-md:justify-between">
-            <Button variant="outline" onClick={onPreviousPeriod} disabled={!selectedClientId || isBusy}>
+          <div className="flex flex-wrap items-center gap-2 md:flex-nowrap">
+            <Button variant="outline" className="max-md:flex-1" onClick={onPreviousPeriod} disabled={!selectedClientId || isBusy}>
               <ChevronLeft className="h-4 w-4" />
               Anterior
             </Button>
-            <p className="min-w-40 text-center text-sm font-semibold tabular-nums text-foreground max-md:min-w-0 max-md:flex-1">{periodLabel}</p>
-            <Button variant="outline" onClick={onNextPeriod} disabled={!selectedClientId || isBusy}>
+            <p className="text-center text-sm font-semibold tabular-nums text-foreground max-md:order-first max-md:w-full md:min-w-40">{periodLabel}</p>
+            <Button variant="outline" className="max-md:flex-1" onClick={onNextPeriod} disabled={!selectedClientId || isBusy}>
               Siguiente
               <ChevronRight className="h-4 w-4" />
             </Button>
-            <Button variant="outline" onClick={onToday} disabled={!selectedClientId || isBusy}>
+            <Button variant="outline" className="max-md:flex-1" onClick={onToday} disabled={!selectedClientId || isBusy}>
               Hoy
             </Button>
           </div>
@@ -179,6 +179,7 @@ export function AssignmentsToolbar({
       <SelectionBar
         count={selectionCount}
         onClear={onClearSelection}
+        clearDisabled={isBusy}
         formatCount={(count) => `${count} seleccionados`}
         aria-label="Acciones de la selección"
         className="fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px)+12px)] left-4 right-4 z-40 mt-0 w-auto flex-wrap max-md:overflow-x-visible md:bottom-6 md:left-1/2 md:right-auto md:w-auto md:min-w-96 md:-translate-x-1/2"

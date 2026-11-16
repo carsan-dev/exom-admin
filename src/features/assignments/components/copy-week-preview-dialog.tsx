@@ -83,9 +83,9 @@ export function CopyWeekPreviewDialog({
 
         <Separator />
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {preview.days.map((day) => (
-            <div key={day.target_date} className="border border-border bg-card p-4">
+            <div key={day.target_date} className="min-w-0 border border-border bg-card p-3">
               <div className="space-y-1">
                 <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">{formatDay(day.target_date)}</p>
                 <p className="text-sm text-muted-foreground">Se copia desde {formatDay(day.source_date)}</p>
@@ -120,9 +120,9 @@ export function CopyWeekPreviewDialog({
 
               <div className="mt-4 space-y-3 text-sm">
                 {day.training && (
-                  <div className="border border-border p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Entrenamiento</p>
-                    <p className="mt-1 font-medium text-foreground">
+                  <div className="border border-border p-2.5">
+                    <p className="text-[11px] font-medium uppercase tracking-normal text-muted-foreground">Entrenamiento</p>
+                    <p className="mt-1 break-words font-medium text-foreground">
                       {(day.trainings.length ? day.trainings : [day.training])
                         .map((training) => `${training.name}${training.is_active === false ? ' (retirado)' : ''}`)
                         .join(' · ')}
@@ -131,15 +131,15 @@ export function CopyWeekPreviewDialog({
                 )}
 
                 {day.diet && (
-                  <div className="border border-border p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Plan nutricional</p>
-                    <p className="mt-1 font-medium text-foreground">{day.diet.name}</p>
+                  <div className="border border-border p-2.5">
+                    <p className="text-[11px] font-medium uppercase tracking-normal text-muted-foreground">Plan nutricional</p>
+                    <p className="mt-1 break-words font-medium text-foreground">{day.diet.name}</p>
                   </div>
                 )}
 
                 {day.is_rest_day && (
-                  <div className="border border-border-strong bg-lime-soft p-3">
-                    <p className="font-medium text-foreground">Día de descanso</p>
+                  <div className="border border-border-strong bg-lime-soft p-2.5">
+                    <p className="break-words font-medium text-foreground">Día de descanso</p>
                   </div>
                 )}
 

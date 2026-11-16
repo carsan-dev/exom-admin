@@ -651,7 +651,7 @@ export function AssignmentEditorDialog({
                                   onValueChange={(value) => dietField.onChange(value === CLEAR_SELECTION_VALUE ? null : value)}
                                 >
                                   <FormControl>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="[&>span>span>span:nth-child(n+2)]:hidden">
                                       <SelectValue placeholder="Selecciona una dieta" />
                                     </SelectTrigger>
                                   </FormControl>
