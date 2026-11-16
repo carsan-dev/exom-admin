@@ -45,6 +45,12 @@ describe('campos solo con placeholder', () => {
     )
   })
 
+  it('selector nativo del color visual del entrenamiento (RDS-F5-A11Y-24)', () => {
+    const { container } = render(<AccentColorField value={null} onChange={vi.fn()} />)
+    const picker = container.querySelector('input[type="color"]')
+    expect(picker).toHaveAccessibleName('Selector de color visual')
+  })
+
   it('nuevo tipo y nueva etiqueta de entrenamiento', () => {
     withQuery(
       <>

@@ -80,6 +80,7 @@ export function AccentColorField({
           <input
             key={inputInstanceKey}
             type="color"
+            aria-label="Selector de color visual"
             value={normalizedColor ?? '#C5E384'}
             onChange={(event) => onChange(event.target.value)}
             className="h-9 w-full cursor-pointer rounded border-0 bg-transparent"

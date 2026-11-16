@@ -41,6 +41,31 @@ function TestForm({ withDescription, withMessage }: { withDescription: boolean; 
   )
 }
 
+function TwoDescriptionsForm({ showSecond }: { showSecond: boolean }) {
+  const form = useForm<Values>({ defaultValues: { name: '' } })
+
+  return (
+    <Form {...form}>
+      <form>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre</FormLabel>
+              <FormControl>
+                <input {...field} />
+              </FormControl>
+              <FormDescription>Primera ayuda</FormDescription>
+              {showSecond ? <FormDescription className="sr-only">Segunda ayuda</FormDescription> : null}
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  )
+}
+
 /** Cada id de aria-describedby debe existir en el documento (RDS-F5-A11Y-14). */
 function describedByIds(element: HTMLElement): string[] {
   return (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean)
@@ -74,6 +99,17 @@ describe('FormControl aria-describedby', () => {
     expect(input).toHaveAttribute('aria-invalid', 'true')
     expectNoDanglingIds(input)
     expect(input).toHaveAccessibleDescription('Campo obligatorio')
+  })
+
+  it('con dos FormDescription, desmontar una no deja de referenciar la otra (H-3)', () => {
+    const { rerender } = render(<TwoDescriptionsForm showSecond />)
+    const input = screen.getByLabelText('Nombre')
+    expect(describedByIds(input)).toHaveLength(1)
+
+    rerender(<TwoDescriptionsForm showSecond={false} />)
+    expect(screen.getByText('Primera ayuda')).toBeInTheDocument()
+    expectNoDanglingIds(input)
+    expect(input).toHaveAccessibleDescription('Primera ayuda')
   })
 
   it('con error sin FormMessage no deja el id del mensaje colgante', async () => {

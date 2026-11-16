@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { RequiredMark } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -103,6 +104,8 @@ interface MultiSelectFieldProps {
   options: readonly string[]
   placeholder: string
   error?: string
+  /** Obligatorio según el esquema: asterisco visible y descripción oculta (el rol group no admite aria-required). */
+  required?: boolean
 }
 
 function normalizeOptionLabel(option: string) {
@@ -124,10 +127,14 @@ function MultiSelectField({
   options,
   placeholder,
   error,
+  required = false,
 }: MultiSelectFieldProps) {
   const [customInput, setCustomInput] = useState('')
   const labelId = useId()
   const errorId = useId()
+  const requiredId = useId()
+  const describedBy =
+    [error ? errorId : null, required ? requiredId : null].filter(Boolean).join(' ') || undefined
 
   const hasOption = (option: string) => {
     const optionKey = getOptionKey(option)
@@ -172,10 +179,18 @@ function MultiSelectField({
     <div
       role="group"
       aria-labelledby={labelId}
-      aria-describedby={error ? errorId : undefined}
+      aria-describedby={describedBy}
       className="space-y-2"
     >
-      <p id={labelId} className="text-sm font-medium leading-none">{label}</p>
+      <p id={labelId} className="text-sm font-medium leading-none">
+        {label}
+        {required ? <RequiredMark /> : null}
+      </p>
+      {required ? (
+        <span id={requiredId} hidden>
+          Campo obligatorio
+        </span>
+      ) : null}
 
       <div className="flex flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2 min-h-10">
         {value.length === 0 && (
@@ -407,6 +422,7 @@ export function ExerciseFormDialog({
                   <FormControl>
                     <MultiSelectField
                       label="Grupos musculares"
+                      required
                       value={field.value}
                       onChange={field.onChange}
                       options={muscleGroupOptions}

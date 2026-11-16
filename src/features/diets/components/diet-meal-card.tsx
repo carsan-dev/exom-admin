@@ -295,6 +295,7 @@ export function DietMealCard({
           <FormItem>
             <FormControl>
               <IngredientPicker
+                required
                 value={field.value}
                 onChange={field.onChange}
                 error={getFirstErrorMessage(form.formState.errors.meals?.[mealIndex]?.ingredients)}

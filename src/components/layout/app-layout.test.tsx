@@ -155,11 +155,15 @@ describe('AppLayout responsive', () => {
     const main = container.querySelector('main')
     if (!main) throw new Error('main no encontrado')
     const bar = 'calc(56px+env(safe-area-inset-bottom,0px)+16px)'
-    expect(main).toHaveClass(`pb-[${bar}]`, `sm:pb-[${bar}]`, 'md:pb-5')
+    const withTop = 'calc(56px+env(safe-area-inset-bottom,0px)+76px)'
+    // RDS-F5-A11Y-02: por debajo de md la reserva de «Volver arriba» es fija. El botón se monta
+    // después de desplazar y, con la página en su desplazamiento máximo, el último foco quedaba
+    // bajo él; reservarlo desde el inicio deja ese foco siempre por encima.
+    expect(main).toHaveClass(`pb-[${withTop}]`, `sm:pb-[${withTop}]`, 'md:pb-5')
+    expect(main).not.toHaveClass(`pb-[${bar}]`, `sm:pb-[${bar}]`)
 
     main.scrollTop = 400
     fireEvent.scroll(main)
-    const withTop = 'calc(56px+env(safe-area-inset-bottom,0px)+76px)'
     expect(main).toHaveClass(`pb-[${withTop}]`, `sm:pb-[${withTop}]`, 'md:pb-28')
     // lg:p-6 anularía md:pb-28 en lg: la reserva se repite con la variante lg (RDS-F5-A11Y-01).
     expect(main).toHaveClass('lg:p-6', 'lg:pb-28')

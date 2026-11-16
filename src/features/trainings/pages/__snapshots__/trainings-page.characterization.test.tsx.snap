@@ -1502,8 +1502,11 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
-<div class="space-y-2">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item" id="ID">Tipos<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<div role="group" aria-labelledby="ID" aria-describedby="ID" class="space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-2.5 w-2.5" aria-hidden="true">
@@ -1633,7 +1636,7 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </div>
 <div class="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)_auto]">
 <label class="flex items-center justify-center rounded-md border border-input bg-input p-1">
-<input class="h-9 w-full cursor-pointer rounded border-0 bg-transparent" type="color" value="#C5E384">
+<input aria-label="Selector de color visual" class="h-9 w-full cursor-pointer rounded border-0 bg-transparent" type="color" value="#C5E384">
 </label>
 <input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="#C5E384" aria-label="Color visual en hexadecimal" value="">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none rounded-md border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-10 px-4 py-2" type="button" disabled="">Limpiar</button>
@@ -1764,8 +1767,10 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </div>
 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-5">
 <div class="space-y-1">
-<label class="text-xs text-muted-foreground">Series</label>
-<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" min="1" type="number" value="3">
+<label for="ID" class="text-xs text-muted-foreground">Series<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" id="ID" aria-required="true" min="1" type="number" value="3">
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">Tipo de objetivo</label>
@@ -1775,8 +1780,10 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </select>
 </div>
 <div class="space-y-1">
-<label class="text-xs text-muted-foreground">Repeticiones objetivo</label>
-<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Ej. 8 o 8-10" type="text" value="10">
+<label for="ID" class="text-xs text-muted-foreground">Repeticiones objetivo<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" id="ID" aria-required="true" placeholder="Ej. 8 o 8-10" type="text" value="10">
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">RIR objetivo (opcional)</label>
@@ -1842,8 +1849,10 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </div>
 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-5">
 <div class="space-y-1">
-<label class="text-xs text-muted-foreground">Series</label>
-<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" min="1" type="number" value="3">
+<label for="ID" class="text-xs text-muted-foreground">Series<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" id="ID" aria-required="true" min="1" type="number" value="3">
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">Tipo de objetivo</label>
@@ -1853,8 +1862,10 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </select>
 </div>
 <div class="space-y-1">
-<label class="text-xs text-muted-foreground">Repeticiones objetivo</label>
-<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Ej. 8 o 8-10" type="text" value="10">
+<label for="ID" class="text-xs text-muted-foreground">Repeticiones objetivo<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" id="ID" aria-required="true" placeholder="Ej. 8 o 8-10" type="text" value="10">
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">RIR objetivo (opcional)</label>
@@ -3257,8 +3268,11 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
-<div class="space-y-2">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item" id="ID">Tipos<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<div role="group" aria-labelledby="ID" aria-describedby="ID" class="space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-2.5 w-2.5" aria-hidden="true">
@@ -3388,7 +3402,7 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 </div>
 <div class="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)_auto]">
 <label class="flex items-center justify-center rounded-md border border-input bg-input p-1">
-<input class="h-9 w-full cursor-pointer rounded border-0 bg-transparent" type="color" value="#C5E384">
+<input aria-label="Selector de color visual" class="h-9 w-full cursor-pointer rounded border-0 bg-transparent" type="color" value="#C5E384">
 </label>
 <input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="#C5E384" aria-label="Color visual en hexadecimal" value="">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none rounded-md border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-10 px-4 py-2" type="button" disabled="">Limpiar</button>
@@ -4025,8 +4039,11 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
-<div class="space-y-2">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item" id="ID">Tipos<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<div role="group" aria-labelledby="ID" aria-describedby="ID" class="space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-2.5 w-2.5" aria-hidden="true">
@@ -4156,7 +4173,7 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 </div>
 <div class="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)_auto]">
 <label class="flex items-center justify-center rounded-md border border-input bg-input p-1">
-<input class="h-9 w-full cursor-pointer rounded border-0 bg-transparent" type="color" value="#C5E384">
+<input aria-label="Selector de color visual" class="h-9 w-full cursor-pointer rounded border-0 bg-transparent" type="color" value="#C5E384">
 </label>
 <input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="#C5E384" aria-label="Color visual en hexadecimal" value="">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none rounded-md border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-10 px-4 py-2" type="button" disabled="">Limpiar</button>
@@ -5889,8 +5906,11 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
-<div class="space-y-2">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item" id="ID">Tipos<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<div role="group" aria-labelledby="ID" aria-describedby="ID" class="space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-2.5 w-2.5" aria-hidden="true">
@@ -6033,7 +6053,7 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 <div class="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)_auto]">
 <label class="flex items-center justify-center rounded-md border border-input bg-input p-1">
-<input class="h-9 w-full cursor-pointer rounded border-0 bg-transparent" type="color" value="#C5E384">
+<input aria-label="Selector de color visual" class="h-9 w-full cursor-pointer rounded border-0 bg-transparent" type="color" value="#C5E384">
 </label>
 <input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="#C5E384" aria-label="Color visual en hexadecimal" value="#C5E384">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none rounded-md border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-10 px-4 py-2" type="button">Limpiar</button>
@@ -6172,8 +6192,10 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-5">
 <div class="space-y-1">
-<label class="text-xs text-muted-foreground">Series</label>
-<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" min="1" type="number" value="3">
+<label for="ID" class="text-xs text-muted-foreground">Series<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" id="ID" aria-required="true" min="1" type="number" value="3">
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">Tipo de objetivo</label>
@@ -6183,8 +6205,10 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </select>
 </div>
 <div class="space-y-1">
-<label class="text-xs text-muted-foreground">Repeticiones objetivo</label>
-<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Ej. 8 o 8-10" type="text" value="10">
+<label for="ID" class="text-xs text-muted-foreground">Repeticiones objetivo<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" id="ID" aria-required="true" placeholder="Ej. 8 o 8-10" type="text" value="10">
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">RIR objetivo (opcional)</label>
@@ -6252,8 +6276,10 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-5">
 <div class="space-y-1">
-<label class="text-xs text-muted-foreground">Series</label>
-<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" min="1" type="number" value="3">
+<label for="ID" class="text-xs text-muted-foreground">Series<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" id="ID" aria-required="true" min="1" type="number" value="3">
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">Tipo de objetivo</label>
@@ -6263,8 +6289,10 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </select>
 </div>
 <div class="space-y-1">
-<label class="text-xs text-muted-foreground">Repeticiones objetivo</label>
-<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Ej. 8 o 8-10" type="text" value="10">
+<label for="ID" class="text-xs text-muted-foreground">Repeticiones objetivo<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" id="ID" aria-required="true" placeholder="Ej. 8 o 8-10" type="text" value="10">
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">RIR objetivo (opcional)</label>

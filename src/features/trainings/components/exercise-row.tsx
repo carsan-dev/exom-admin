@@ -1,8 +1,9 @@
-import type { ComponentProps } from 'react'
+import { useId, type ComponentProps } from 'react'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RequiredMark } from '@/components/ui/label'
 import { LEVEL_LABELS, type Exercise } from '../../exercises/types'
 import type { TrainingItemFormValues } from '../schemas'
 import { PrescriptionFields } from './prescription-fields'
@@ -34,6 +35,8 @@ export function ExerciseRow({
   onPrescriptionChange,
   onTimedChange,
 }: ExerciseRowProps) {
+  const setsId = useId()
+
   return (
     <div className="space-y-3 py-4">
       {/* Row: order controls + exercise name + delete */}
@@ -99,8 +102,13 @@ export function ExerciseRow({
       {/* Prescription fields */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-5">
         <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Series</label>
+          <label htmlFor={setsId} className="text-xs text-muted-foreground">
+            Series
+            <RequiredMark />
+          </label>
           <Input
+            id={setsId}
+            aria-required="true"
             type="number"
             min={1}
             value={item.sets}

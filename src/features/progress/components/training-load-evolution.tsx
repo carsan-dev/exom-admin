@@ -82,7 +82,8 @@ export function TrainingLoadEvolution({ clientId, from, to, measure: controlledM
           <div role="img" aria-label={`${metric.label} (${metric.unit}), ${points.length} observaciones. Valores disponibles en la tabla siguiente.`} className="h-64 min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               {/* Recharts retains active payload internally; a new observation context must start without hover. */}
-              <ScatterChart key={JSON.stringify([clientId, exerciseId, from, to, cursors, measure, sets])}
+              {/* RDS-F5-A11Y-20: el nombre lo da el contenedor role="img"; recharts marca cada símbolo con role="img" sin nombre. */}
+              <ScatterChart key={JSON.stringify([clientId, exerciseId, from, to, cursors, measure, sets])} aria-hidden="true"
                 margin={{ top: 12, right: 16, bottom: 8, left: 0 }}>
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
                 <XAxis dataKey="timestamp" type="number" name="Fecha" scale="time" domain={['dataMin', 'dataMax']}

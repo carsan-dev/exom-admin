@@ -1735,9 +1735,12 @@ exports[`DietsPage characterization > imports a JSON file into the builder with 
 </div>
 </div>
 <div class="space-y-2">
-<div role="group" aria-label="Ingredientes" class="min-w-0 space-y-2">
+<div role="group" aria-label="Ingredientes" aria-describedby="ID" class="min-w-0 space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex items-center justify-between gap-2">
-<p class="text-sm font-medium text-foreground">Ingredientes</p>
+<p class="text-sm font-medium text-foreground">Ingredientes<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</p>
 <span class="text-xs text-muted-foreground">2 ingredientes</span>
 </div>
 <p class="text-xs text-muted-foreground">Para medidas caseras, añade el equivalente en gramos para calcular macros correctamente.</p>
@@ -3474,9 +3477,12 @@ exports[`DietsPage characterization > opens the builder from the empty state 1`]
 </div>
 </div>
 <div class="space-y-2">
-<div role="group" aria-label="Ingredientes" class="min-w-0 space-y-2">
+<div role="group" aria-label="Ingredientes" aria-describedby="ID" class="min-w-0 space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex items-center justify-between gap-2">
-<p class="text-sm font-medium text-foreground">Ingredientes</p>
+<p class="text-sm font-medium text-foreground">Ingredientes<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</p>
 </div>
 <p class="text-xs text-muted-foreground">Para medidas caseras, añade el equivalente en gramos para calcular macros correctamente.</p>
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card rounded-md px-3 h-7 w-full text-xs max-md:h-11" type="button">
@@ -4296,9 +4302,12 @@ exports[`DietsPage characterization > opens the builder from the header (create)
 </div>
 </div>
 <div class="space-y-2">
-<div role="group" aria-label="Ingredientes" class="min-w-0 space-y-2">
+<div role="group" aria-label="Ingredientes" aria-describedby="ID" class="min-w-0 space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex items-center justify-between gap-2">
-<p class="text-sm font-medium text-foreground">Ingredientes</p>
+<p class="text-sm font-medium text-foreground">Ingredientes<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</p>
 </div>
 <p class="text-xs text-muted-foreground">Para medidas caseras, añade el equivalente en gramos para calcular macros correctamente.</p>
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card rounded-md px-3 h-7 w-full text-xs max-md:h-11" type="button">
@@ -6197,9 +6206,12 @@ exports[`DietsPage characterization > opens the duplicate builder from the row m
 </div>
 </div>
 <div class="space-y-2">
-<div role="group" aria-label="Ingredientes" class="min-w-0 space-y-2">
+<div role="group" aria-label="Ingredientes" aria-describedby="ID" class="min-w-0 space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex items-center justify-between gap-2">
-<p class="text-sm font-medium text-foreground">Ingredientes</p>
+<p class="text-sm font-medium text-foreground">Ingredientes<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</p>
 <span class="text-xs text-muted-foreground">1 ingrediente</span>
 </div>
 <p class="text-xs text-muted-foreground">Para medidas caseras, añade el equivalente en gramos para calcular macros correctamente.</p>
@@ -6474,9 +6486,12 @@ exports[`DietsPage characterization > opens the duplicate builder from the row m
 </div>
 </div>
 <div class="space-y-2">
-<div role="group" aria-label="Ingredientes" class="min-w-0 space-y-2">
+<div role="group" aria-label="Ingredientes" aria-describedby="ID" class="min-w-0 space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex items-center justify-between gap-2">
-<p class="text-sm font-medium text-foreground">Ingredientes</p>
+<p class="text-sm font-medium text-foreground">Ingredientes<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</p>
 <span class="text-xs text-muted-foreground">2 ingredientes</span>
 </div>
 <p class="text-xs text-muted-foreground">Para medidas caseras, añade el equivalente en gramos para calcular macros correctamente.</p>
@@ -7446,9 +7461,12 @@ exports[`DietsPage characterization > opens the edit builder from the row menu >
 </div>
 </div>
 <div class="space-y-2">
-<div role="group" aria-label="Ingredientes" class="min-w-0 space-y-2">
+<div role="group" aria-label="Ingredientes" aria-describedby="ID" class="min-w-0 space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex items-center justify-between gap-2">
-<p class="text-sm font-medium text-foreground">Ingredientes</p>
+<p class="text-sm font-medium text-foreground">Ingredientes<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</p>
 <span class="text-xs text-muted-foreground">1 ingrediente</span>
 </div>
 <p class="text-xs text-muted-foreground">Para medidas caseras, añade el equivalente en gramos para calcular macros correctamente.</p>
@@ -7723,9 +7741,12 @@ exports[`DietsPage characterization > opens the edit builder from the row menu >
 </div>
 </div>
 <div class="space-y-2">
-<div role="group" aria-label="Ingredientes" class="min-w-0 space-y-2">
+<div role="group" aria-label="Ingredientes" aria-describedby="ID" class="min-w-0 space-y-2">
+<span id="ID" hidden="">Campo obligatorio</span>
 <div class="flex items-center justify-between gap-2">
-<p class="text-sm font-medium text-foreground">Ingredientes</p>
+<p class="text-sm font-medium text-foreground">Ingredientes<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</p>
 <span class="text-xs text-muted-foreground">2 ingredientes</span>
 </div>
 <p class="text-xs text-muted-foreground">Para medidas caseras, añade el equivalente en gramos para calcular macros correctamente.</p>

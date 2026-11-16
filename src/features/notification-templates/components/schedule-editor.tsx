@@ -32,7 +32,8 @@ export function ScheduleEditor({ template, draft, setDraft, disabled }: Schedule
 
   return (
     <div className="space-y-4 border border-border bg-background-surface p-4">
-      <div className="flex items-start gap-3 max-md:min-h-11">
+      {/* Por debajo de md la etiqueta cubre toda la fila: área pulsable de la casilla ≥ 44 px (RDS-F5-A11Y-10). */}
+      <div className="relative flex items-start gap-3 max-md:min-h-11">
         <input
           id={`schedule-enabled-${template.key}`}
           type="checkbox"
@@ -42,7 +43,12 @@ export function ScheduleEditor({ template, draft, setDraft, disabled }: Schedule
           className="mt-0.5 size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-md:size-6"
         />
         <div className="space-y-1">
-          <Label htmlFor={`schedule-enabled-${template.key}`}>Programación activa</Label>
+          <Label
+            htmlFor={`schedule-enabled-${template.key}`}
+            className="max-md:after:absolute max-md:after:inset-0 max-md:after:content-['']"
+          >
+            Programación activa
+          </Label>
           <p className="text-[13px] leading-5 text-foreground-secondary">
             Si está pausada, el horario no se ejecuta aunque el texto de la plantilla siga activo.
           </p>

@@ -101,7 +101,7 @@ export function EditClientProfileDialog({
                 control={form.control}
                 name="first_name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
                       <Input {...field} />
@@ -114,7 +114,7 @@ export function EditClientProfileDialog({
                 control={form.control}
                 name="last_name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Apellido</FormLabel>
                     <FormControl>
                       <Input {...field} />
@@ -127,7 +127,7 @@ export function EditClientProfileDialog({
                 control={form.control}
                 name="level"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nivel</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>

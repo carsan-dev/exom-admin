@@ -1,4 +1,4 @@
-import type { Dispatch, FormEvent, SetStateAction } from 'react'
+import { useRef, type Dispatch, type FormEvent, type SetStateAction } from 'react'
 import { RotateCcw, Save, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -37,6 +37,8 @@ export function TemplateEditorForm({
   handleSubmit,
   handleResetOrDelete,
 }: TemplateEditorFormProps) {
+  const pointerFocusRef = useRef(false)
+
   return (
     <form onSubmit={handleSubmit} className="flex min-w-0 flex-col">
       <div className="space-y-3 py-5">
@@ -116,8 +118,21 @@ export function TemplateEditorForm({
             onChange={(event) => setDraft((current) => ({ ...current, body: event.target.value }))}
             // Al enfocar un textarea el navegador solo desplaza hasta el cursor, no la caja entera,
             // y la barra pegajosa de acciones tapa su parte inferior. «nearest» respeta el
-            // scroll-padding de index.css (RDS-F5-A11Y-03). `?.`: jsdom no implementa scrollIntoView.
-            onFocus={(event) => event.currentTarget.scrollIntoView?.({ block: 'nearest' })}
+            // scroll-padding de index.css (RDS-F5-A11Y-03). Solo con foco de teclado: con ratón o
+            // táctil el usuario ya ve dónde pulsa y el salto sería inesperado (H-7). No se usa
+            // :focus-visible porque en un textarea coincide también con el foco por puntero.
+            // `?.`: jsdom no implementa scrollIntoView.
+            onPointerDown={() => {
+              pointerFocusRef.current = true
+            }}
+            onFocus={(event) => {
+              const fromPointer = pointerFocusRef.current
+              pointerFocusRef.current = false
+              if (!fromPointer) event.currentTarget.scrollIntoView?.({ block: 'nearest' })
+            }}
+            onBlur={() => {
+              pointerFocusRef.current = false
+            }}
             disabled={isBusy}
             maxLength={500}
             rows={5}

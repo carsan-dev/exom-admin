@@ -134,7 +134,8 @@ export function MetricVisual({ series, period, chartPeriod, compact = false, sel
     {plotted.length === 0 ? <p className="rounded-md border border-border bg-muted p-4 text-sm text-foreground">Sin observaciones completas en esta página del histórico. Consulta otra página o selecciona otra medición.</p> :
       <div className="h-64 min-w-0" role="img" aria-label={`${metric.label}, ${metric.unit}, ${chartPeriod}. ${points.length} observaciones completas${compare && compared ? `; comparado con ${compare.label}, ${compared.points.length} observaciones completas` : ''}; alternativa en tabla de datos.`}>
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 12, right: 16, bottom: 8, left: 0 }}>
+          {/* RDS-F5-A11Y-20: el nombre lo da el contenedor role="img"; recharts marca cada símbolo con role="img" sin nombre. */}
+          <ScatterChart aria-hidden="true" margin={{ top: 12, right: 16, bottom: 8, left: 0 }}>
             <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
             <XAxis dataKey="timestamp" name="Fecha" type="number" scale="time" domain={['dataMin', 'dataMax']}
               tickFormatter={(value: number) => date(new Date(value).toISOString())} minTickGap={40} tick={{ fill: 'var(--foreground)', fontSize: 11 }} />

@@ -182,7 +182,7 @@ function TrainingMultiSelect({
               onChange(next)
               setDraggedId(null)
             }}
-            className="flex items-center gap-2 border border-border px-3 py-2"
+            className="flex flex-wrap items-center gap-2 border border-border px-3 py-2"
           >
             <GripVertical aria-hidden="true" className="h-4 w-4 cursor-grab text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground">{position + 1}</span>
@@ -413,7 +413,7 @@ export function AssignmentEditorDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-5xl">
+        <DialogContent disableOutsideClose className="max-h-[90vh] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-5xl">
           <DialogHeader>
             <DialogTitle>{dialogTitle}</DialogTitle>
             <DialogDescription>{dialogDescription}</DialogDescription>
@@ -587,7 +587,7 @@ export function AssignmentEditorDialog({
                         )}
                       />
 
-                      <div className="grid gap-4 lg:grid-cols-2">
+                      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
                         <FormField
                           control={form.control}
                           name={`days.${index}.training_ids`}
@@ -806,7 +806,7 @@ export function AssignmentEditorDialog({
                         control={form.control}
                         name="auto_assignment_ends_on"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem required>
                             <FormLabel>Fecha fin</FormLabel>
                             <FormControl>
                               <Input

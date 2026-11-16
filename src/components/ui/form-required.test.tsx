@@ -64,6 +64,19 @@ describe('campos obligatorios', () => {
     expect(screen.getByText('Notas').querySelector('[data-required-mark]')).toBeNull()
   })
 
+  it('Label asChild sin required no lanza y renderiza su único hijo (H-1)', () => {
+    expect(() =>
+      render(
+        <Label asChild>
+          <span>Etiqueta compuesta</span>
+        </Label>,
+      ),
+    ).not.toThrow()
+    const label = screen.getByText('Etiqueta compuesta')
+    expect(label.tagName).toBe('SPAN')
+    expect(label.querySelector('[data-required-mark]')).toBeNull()
+  })
+
   it('Label required pinta la marca sin alterar el nombre accesible del control', () => {
     render(
       <>

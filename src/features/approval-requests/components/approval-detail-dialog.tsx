@@ -3,6 +3,7 @@ import { AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { RequiredMark } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -253,9 +254,11 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
               <div className="space-y-2 rounded-xl border border-border/70 bg-muted/20 p-4">
                 <label htmlFor="approval-rejection-reason" className="text-sm font-medium text-foreground">
                   Motivo de rechazo
+                  <RequiredMark />
                 </label>
                 <textarea
                   id="approval-rejection-reason"
+                  aria-required="true"
                   value={rejectionReason}
                   onChange={(event) => setRejectionReason(event.target.value)}
                   rows={4}

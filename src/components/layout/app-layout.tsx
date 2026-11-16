@@ -98,10 +98,11 @@ export function AppLayout() {
                 // scroll-pb: en lg el foco se desplaza dentro de main; reserva «Volver arriba» (48 px a 24 px del borde) y el aviso de versión.
                 // Indicador solo con teclado tras «Saltar al contenido»: outline-none anula --tw-outline-style, de ahí outline-solid.
                 'outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus lg:scroll-pb-24 lg:[body:has([data-version-banner])_&]:scroll-pb-40',
-                'min-w-0 max-w-full flex-1 bg-background p-3 pb-[calc(56px+env(safe-area-inset-bottom,0px)+16px)] sm:p-5 sm:pb-[calc(56px+env(safe-area-inset-bottom,0px)+16px)] md:pb-5 lg:overflow-y-auto lg:p-6 lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]',
-                showScrollTop
-                  ? 'pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] sm:pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] md:pb-28 lg:pb-28'
-                  : null,
+                // < md: barra inferior + «Volver arriba» (44 px a 16 px) reservados siempre. El botón se monta
+                // tras desplazar y no recoloca el foco si la página ya está en su desplazamiento máximo
+                // (RDS-F5-A11Y-02); en md+ la reserva sigue dependiendo del botón.
+                'min-w-0 max-w-full flex-1 bg-background p-3 pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] sm:p-5 sm:pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] md:pb-5 lg:overflow-y-auto lg:p-6 lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]',
+                showScrollTop ? 'md:pb-28 lg:pb-28' : null,
                 // Aviso de versión (RDS-F5-A11Y-04), alto según su marcado: borde 2 + p-3 24 + texto
                 // text-sm en 2 líneas 40 + gap-3 12 + botón sm 36 ≈ 114 px apilado (< sm; hasta ~134 con
                 // 3 líneas a 320 px) y ≈ 62 px en fila (md+). Por debajo de md va 12 px sobre la barra

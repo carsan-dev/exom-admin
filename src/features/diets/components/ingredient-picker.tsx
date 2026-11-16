@@ -1,6 +1,7 @@
 ﻿import { useId, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { RequiredMark } from '@/components/ui/label'
 import { normalizeSearchText } from '@/lib/search'
 import { useIngredientsList } from '../api'
 import type { MealIngredientFormValues } from '../schemas'
@@ -11,6 +12,8 @@ interface IngredientPickerProps {
   value: MealIngredientFormValues[]
   onChange: (value: MealIngredientFormValues[]) => void
   error?: string
+  /** Obligatorio según el esquema: asterisco visible y descripción oculta (el rol group no admite aria-required). */
+  required?: boolean
 }
 
 const DEFAULT_UNIT_VALUES: Partial<
@@ -36,10 +39,13 @@ const DEFAULT_UNIT_VALUES: Partial<
   to_taste: { quantity: 1, gramsEquivalent: 1 },
 }
 
-export function IngredientPicker({ value, onChange, error }: IngredientPickerProps) {
+export function IngredientPicker({ value, onChange, error, required = false }: IngredientPickerProps) {
   const [search, setSearch] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)
   const errorId = useId()
+  const requiredId = useId()
+  const describedBy =
+    [error ? errorId : null, required ? requiredId : null].filter(Boolean).join(' ') || undefined
   const ingredientsQuery = useIngredientsList()
   const allIngredients = useMemo(() => ingredientsQuery.data?.data ?? [], [ingredientsQuery.data?.data])
 
@@ -109,11 +115,19 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
     <div
       role="group"
       aria-label="Ingredientes"
-      aria-describedby={error ? errorId : undefined}
+      aria-describedby={describedBy}
       className="min-w-0 space-y-2"
     >
+      {required ? (
+        <span id={requiredId} hidden>
+          Campo obligatorio
+        </span>
+      ) : null}
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-foreground">Ingredientes</p>
+        <p className="text-sm font-medium text-foreground">
+          Ingredientes
+          {required ? <RequiredMark /> : null}
+        </p>
         {value.length > 0 && (
           <span className="text-xs text-muted-foreground">
             {value.length} ingrediente{value.length !== 1 ? 's' : ''}

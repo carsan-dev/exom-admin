@@ -1,4 +1,4 @@
-import type { RefObject } from 'react'
+import { useId, type RefObject } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -26,6 +26,8 @@ export function TrainingFormGeneralFields({
   sectionRef,
   colorInputInstanceKey,
 }: TrainingFormGeneralFieldsProps) {
+  const typesLabelId = useId()
+
   return (
     <div ref={sectionRef} className="min-w-0 space-y-4">
       <p className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
@@ -49,13 +51,15 @@ export function TrainingFormGeneralFields({
           control={form.control}
           name="types"
           render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel>Tipos</FormLabel>
+            <FormItem required>
+              <FormLabel id={typesLabelId}>Tipos</FormLabel>
               <FormControl>
                 <TrainingTypesField
                   value={field.value}
                   onChange={field.onChange}
                   error={fieldState.error?.message}
+                  labelId={typesLabelId}
+                  required
                 />
               </FormControl>
             </FormItem>

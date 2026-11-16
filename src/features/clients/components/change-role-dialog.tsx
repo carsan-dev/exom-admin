@@ -100,7 +100,7 @@ export function ChangeRoleDialog({ user, open, onOpenChange }: ChangeRoleDialogP
               control={form.control}
               name="role"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Rol</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value} disabled={isOwnAccount}>
                     <FormControl>

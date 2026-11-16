@@ -1,7 +1,8 @@
-import type { ComponentProps } from 'react'
+import { useId, type ComponentProps } from 'react'
 import { ChevronDown, ChevronUp, Plus, Repeat, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RequiredMark } from '@/components/ui/label'
 import type { Exercise } from '../../exercises/types'
 import type { TrainingCircuitExerciseFormValues, TrainingItemFormValues } from '../schemas'
 import { CircuitExerciseRow } from './circuit-exercise-row'
@@ -53,6 +54,8 @@ export function CircuitBlock({
   onNestedTimedChange,
   onAddExercise,
 }: CircuitBlockProps) {
+  const nameId = useId()
+  const roundsId = useId()
   const nestedLabel = (key: string) => {
     const nested = item.exercises[nestedKeys.indexOf(key)]
     return (nested && exercisesById.get(nested.exercise_id)?.name) ?? 'ejercicio'
@@ -107,16 +110,26 @@ export function CircuitBlock({
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div className="col-span-2 space-y-1 sm:col-span-1">
-          <label className="text-xs text-muted-foreground">Nombre</label>
+          <label htmlFor={nameId} className="text-xs text-muted-foreground">
+            Nombre
+            <RequiredMark />
+          </label>
           <Input
+            id={nameId}
+            aria-required="true"
             value={item.name}
             onChange={(e) => onUpdateField('name', e.target.value)}
             className="h-8 text-sm"
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Rondas</label>
+          <label htmlFor={roundsId} className="text-xs text-muted-foreground">
+            Rondas
+            <RequiredMark />
+          </label>
           <Input
+            id={roundsId}
+            aria-required="true"
             type="number"
             min={1}
             value={item.rounds}

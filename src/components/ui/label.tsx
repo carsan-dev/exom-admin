@@ -25,7 +25,10 @@ const Label = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
     VariantProps<typeof labelVariants> & {
-      /** Muestra el asterisco de obligatorio. No usar con `asChild`. */
+      /**
+       * Muestra el asterisco de obligatorio. No se combina con `asChild`: el Slot exige un
+       * único hijo, así que la marca se añade al hijo (o se usa `RequiredMark`) en ese caso.
+       */
       required?: boolean
     }
 >(({ className, required = false, children, ...props }, ref) => (
@@ -34,8 +37,14 @@ const Label = React.forwardRef<
     className={cn(labelVariants(), className)}
     {...props}
   >
-    {children}
-    {required ? <RequiredMark /> : null}
+    {required ? (
+      <>
+        {children}
+        <RequiredMark />
+      </>
+    ) : (
+      children
+    )}
   </LabelPrimitive.Root>
 ))
 Label.displayName = LabelPrimitive.Root.displayName

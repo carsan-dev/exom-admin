@@ -87,7 +87,12 @@ export function MealVariantsEditor({
               render={({ field }) => (
                 <FormItem required className="min-w-0 flex-1">
                   <FormControl>
-                    <Input placeholder="Nombre de la variante" className="h-9 text-sm" {...field} />
+                    <Input
+                      placeholder="Nombre de la variante"
+                      aria-label={`Nombre de la variante ${variantIndex + 1}`}
+                      className="h-9 text-sm"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
@@ -259,6 +264,7 @@ export function MealVariantsEditor({
               <FormItem>
                 <FormControl>
                   <IngredientPicker
+                    required
                     value={field.value}
                     onChange={field.onChange}
                     error={getFirstErrorMessage(

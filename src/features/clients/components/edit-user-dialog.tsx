@@ -95,7 +95,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
                 control={form.control}
                 name="first_name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
                       <Input placeholder="Lucía" {...field} />
@@ -109,7 +109,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
                 control={form.control}
                 name="last_name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Apellido</FormLabel>
                     <FormControl>
                       <Input placeholder="Martínez" {...field} />
@@ -124,7 +124,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="admin@exom.app" autoComplete="email" {...field} />

@@ -74,6 +74,7 @@ type FormItemContextValue = {
   hasMessage: boolean
   /** Campo obligatorio según el esquema: asterisco en FormLabel y aria-required en FormControl (RDS-F5-A11Y-15). */
   required: boolean
+  /** Registra (`true`) o retira (`false`) una instancia montada; se llaman en pares montaje/limpieza. */
   setHasDescription: (mounted: boolean) => void
   setHasMessage: (mounted: boolean) => void
 }
@@ -85,11 +86,23 @@ const FormItem = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & { required?: boolean }
 >(({ className, required = false, ...props }, ref) => {
   const id = React.useId()
-  const [hasDescription, setHasDescription] = React.useState(false)
-  const [hasMessage, setHasMessage] = React.useState(false)
+  // Contadores, no booleanos: con dos FormDescription/FormMessage en el mismo FormItem,
+  // desmontar uno no debe dejar de referenciar el otro (H-3).
+  const [descriptionCount, setDescriptionCount] = React.useState(0)
+  const [messageCount, setMessageCount] = React.useState(0)
+  const setHasDescription = React.useCallback(
+    (mounted: boolean) => setDescriptionCount((count) => Math.max(0, count + (mounted ? 1 : -1))),
+    []
+  )
+  const setHasMessage = React.useCallback(
+    (mounted: boolean) => setMessageCount((count) => Math.max(0, count + (mounted ? 1 : -1))),
+    []
+  )
+  const hasDescription = descriptionCount > 0
+  const hasMessage = messageCount > 0
   const value = React.useMemo(
     () => ({ id, hasDescription, hasMessage, required, setHasDescription, setHasMessage }),
-    [id, hasDescription, hasMessage, required]
+    [id, hasDescription, hasMessage, required, setHasDescription, setHasMessage]
   )
 
   return (

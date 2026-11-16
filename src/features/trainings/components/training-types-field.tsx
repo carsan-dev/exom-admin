@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Check, LoaderCircle, Plus, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,10 +18,24 @@ interface TrainingTypesFieldProps {
   value: string[]
   onChange: (value: string[]) => void
   error?: string
+  /** Id de la etiqueta visible: convierte el contenedor en un grupo con nombre. */
+  labelId?: string
+  /** Obligatorio según el esquema: descripción oculta (el rol group no admite aria-required). */
+  required?: boolean
 }
 
-export function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps) {
+export function TrainingTypesField({
+  value,
+  onChange,
+  error,
+  labelId,
+  required = false,
+}: TrainingTypesFieldProps) {
   const [input, setInput] = useState('')
+  const errorId = useId()
+  const requiredId = useId()
+  const describedBy =
+    [error ? errorId : null, required ? requiredId : null].filter(Boolean).join(' ') || undefined
   const trainingTypesQuery = useTrainingTypes()
   const trainingTypeColorsQuery = useTrainingTypeCatalogColors()
   const trainingTypeColorMap = getCatalogColorMap(trainingTypeColorsQuery.data)
@@ -73,7 +87,17 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
   }
 
   return (
-    <div className="space-y-2">
+    <div
+      role={labelId ? 'group' : undefined}
+      aria-labelledby={labelId}
+      aria-describedby={labelId ? describedBy : undefined}
+      className="space-y-2"
+    >
+      {required ? (
+        <span id={requiredId} hidden>
+          Campo obligatorio
+        </span>
+      ) : null}
       <div className="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
         {value.length === 0 ? (
           <span className="self-center text-sm text-muted-foreground">Sin tipos</span>
@@ -191,7 +215,11 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
         </p>
       )}
 
-      {error && <p className="text-xs text-status-error">{error}</p>}
+      {error && (
+        <p id={errorId} className="text-xs text-status-error">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

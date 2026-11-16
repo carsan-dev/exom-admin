@@ -839,13 +839,17 @@ exports[`AssignmentsPage characterization > opens the copy week dialog 1`] = `
 </div>
 <form class="space-y-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Semana origen</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" disabled="" id="ID-form-item" aria-invalid="false" type="date" value="2026-03-02" name="source_week_start" aria-describedby="ID-form-item-description">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Semana origen<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" disabled="" id="ID-form-item" aria-invalid="false" aria-required="true" type="date" value="2026-03-02" name="source_week_start" aria-describedby="ID-form-item-description">
 <p id="ID-form-item-description" class="text-sm text-muted-foreground">Se usa la semana visible actualmente.</p>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Semana destino</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" id="ID-form-item" aria-invalid="false" type="date" value="2026-03-02" name="target_week_start" aria-describedby="ID-form-item-description">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Semana destino<span aria-hidden="true" data-required-mark="" class="ml-0.5 text-destructive after:content-['*']">
+</span>
+</label>
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" id="ID-form-item" aria-invalid="false" aria-required="true" type="date" value="2026-03-02" name="target_week_start" aria-describedby="ID-form-item-description">
 <p id="ID-form-item-description" class="text-sm text-muted-foreground">Selecciona el lunes de la semana donde quieres copiar la planificación.</p>
 </div>
 <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
@@ -1963,7 +1967,7 @@ exports[`AssignmentsPage characterization > opens the editor for the selected da
 </div>
 <div data-state="open" data-slot="dialog-overlay" class="fixed inset-0 z-50 bg-scrim anim-overlay-scrim" style="pointer-events: auto;" data-aria-hidden="true" aria-hidden="true">
 </div>
-<div role="dialog" id="radix-ID" aria-describedby="radix-ID" aria-labelledby="radix-ID" data-state="open" data-slot="dialog-content" class="fixed left-[50%] top-[50%] z-50 grid w-[calc(100vw-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-border-strong bg-background-surface p-4 text-foreground shadow-overlay anim-overlay-panel sm:p-6 max-h-[90vh] overflow-y-auto sm:max-w-5xl" tabindex="-1" style="pointer-events: auto;">
+<div role="dialog" id="radix-ID" aria-describedby="radix-ID" aria-labelledby="radix-ID" data-state="open" data-slot="dialog-content" class="fixed left-[50%] top-[50%] z-50 grid w-[calc(100vw-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-border-strong bg-background-surface p-4 text-foreground shadow-overlay anim-overlay-panel sm:p-6 max-h-[90vh] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-5xl" tabindex="-1" style="pointer-events: auto;">
 <div class="flex flex-col space-y-1 pr-8 text-left">
 <h2 id="radix-ID" class="text-lg font-semibold leading-6 text-foreground">Editar día</h2>
 <p id="radix-ID" class="text-[13px] leading-5 text-foreground-secondary">Ajusta la planificación del día seleccionado y cambia descanso, entreno o dieta sin salir del modal.</p>
@@ -2000,13 +2004,13 @@ exports[`AssignmentsPage characterization > opens the editor for the selected da
 </div>
 <p id="ID-form-item-description" class="text-sm text-muted-foreground">El descanso se aplica solo a esta fila y no cambia nada hasta que confirmes.</p>
 </div>
-<div class="grid gap-4 lg:grid-cols-2">
+<div class="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Entrenamientos</label>
 <div class="space-y-3">
 <input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Buscar entrenamiento…" value="">
 <div class="space-y-2">
-<div draggable="true" class="flex items-center gap-2 border border-border px-3 py-2">
+<div draggable="true" class="flex flex-wrap items-center gap-2 border border-border px-3 py-2">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4 cursor-grab text-muted-foreground" aria-hidden="true">
 <circle cx="9" cy="12" r="1">
 </circle>
@@ -2409,7 +2413,7 @@ exports[`AssignmentsPage characterization > opens the editor in auto-rule mode 1
 </div>
 <div data-state="open" data-slot="dialog-overlay" class="fixed inset-0 z-50 bg-scrim anim-overlay-scrim" style="pointer-events: auto;" data-aria-hidden="true" aria-hidden="true">
 </div>
-<div role="dialog" id="radix-ID" aria-describedby="radix-ID" aria-labelledby="radix-ID" data-state="open" data-slot="dialog-content" class="fixed left-[50%] top-[50%] z-50 grid w-[calc(100vw-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-border-strong bg-background-surface p-4 text-foreground shadow-overlay anim-overlay-panel sm:p-6 max-h-[90vh] overflow-y-auto sm:max-w-5xl" tabindex="-1" style="pointer-events: auto;">
+<div role="dialog" id="radix-ID" aria-describedby="radix-ID" aria-labelledby="radix-ID" data-state="open" data-slot="dialog-content" class="fixed left-[50%] top-[50%] z-50 grid w-[calc(100vw-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-border-strong bg-background-surface p-4 text-foreground shadow-overlay anim-overlay-panel sm:p-6 max-h-[90vh] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-5xl" tabindex="-1" style="pointer-events: auto;">
 <div class="flex flex-col space-y-1 pr-8 text-left">
 <h2 id="radix-ID" class="text-lg font-semibold leading-6 text-foreground">Editar autoasignación</h2>
 <p id="radix-ID" class="text-[13px] leading-5 text-foreground-secondary">Actualiza el patrón semanal que se aplicará a futuras asignaciones.</p>
@@ -2447,13 +2451,13 @@ exports[`AssignmentsPage characterization > opens the editor in auto-rule mode 1
 </div>
 <p id="ID-form-item-description" class="text-sm text-muted-foreground">El descanso se aplica solo a esta fila y no cambia nada hasta que confirmes.</p>
 </div>
-<div class="grid gap-4 lg:grid-cols-2">
+<div class="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Entrenamientos</label>
 <div class="space-y-3">
 <input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Buscar entrenamiento…" value="">
 <div class="space-y-2">
-<div draggable="true" class="flex items-center gap-2 border border-border px-3 py-2">
+<div draggable="true" class="flex flex-wrap items-center gap-2 border border-border px-3 py-2">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical h-4 w-4 cursor-grab text-muted-foreground" aria-hidden="true">
 <circle cx="9" cy="12" r="1">
 </circle>
