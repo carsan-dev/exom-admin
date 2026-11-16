@@ -1,39 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Save } from 'lucide-react'
-import { toast } from 'sonner'
-import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
-import { Button } from '@/components/ui/button'
+import type { Dispatch, SetStateAction } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
-import { getApiErrorMessage, useUpdateNotificationTemplateSchedule } from '../api'
-import {
-  getScheduleDraft,
-  mealTimeLabels,
-  normalizeScheduleDraft,
-  schedulesEqual,
-  weekdayOptions,
-  type ScheduleDraft,
-} from '../template-helpers'
+import { mealTimeLabels, weekdayOptions, type ScheduleDraft } from '../template-helpers'
 import type { NotificationTemplate } from '../types'
 
-export function ScheduleEditor({ template }: { template: NotificationTemplate }) {
-  const updateSchedule = useUpdateNotificationTemplateSchedule()
-  const [draft, setDraft] = useState<ScheduleDraft>(() => getScheduleDraft(template))
+interface ScheduleEditorProps {
+  template: NotificationTemplate
+  draft: ScheduleDraft
+  setDraft: Dispatch<SetStateAction<ScheduleDraft>>
+  disabled: boolean
+}
+
+/** Schedule fields of the selected template. The draft and its save live in the page (single save). */
+export function ScheduleEditor({ template, draft, setDraft, disabled }: ScheduleEditorProps) {
   const delivery = template.delivery_info
   const kind = delivery.schedule_kind ?? 'daily'
-
-  useEffect(() => {
-    setDraft(getScheduleDraft(template))
-  }, [template])
-
-  const baseline = useMemo(
-    () => normalizeScheduleDraft(template, getScheduleDraft(template)),
-    [template],
-  )
-  const normalizedDraft = normalizeScheduleDraft(template, draft)
-  const hasChanges = !schedulesEqual(normalizedDraft, baseline)
-  useUnsavedChanges(`notification-schedule-${template.key}`, hasChanges || updateSchedule.isPending)
   const timeLabels = kind === 'meal_daily' ? mealTimeLabels : ['Hora']
 
   if (delivery.type !== 'schedule') {
@@ -48,35 +30,6 @@ export function ScheduleEditor({ template }: { template: NotificationTemplate })
     })
   }
 
-  const handleSave = async () => {
-    const nextDraft = normalizeScheduleDraft(template, draft)
-
-    if (!nextDraft.timezone) {
-      toast.error('El huso horario es obligatorio')
-      return
-    }
-
-    if (nextDraft.times.some((time) => !time)) {
-      toast.error('Completa todas las horas')
-      return
-    }
-
-    try {
-      await updateSchedule.mutateAsync({
-        key: template.key,
-        values: {
-          enabled: nextDraft.enabled,
-          timezone: nextDraft.timezone,
-          times: nextDraft.times,
-          weekday: kind === 'weekly' ? nextDraft.weekday : null,
-        },
-      })
-      toast.success('Horario actualizado')
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'No se ha podido actualizar el horario'))
-    }
-  }
-
   return (
     <div className="space-y-4 border border-border bg-background-surface p-4">
       <div className="flex items-start gap-3 max-md:min-h-11">
@@ -85,7 +38,7 @@ export function ScheduleEditor({ template }: { template: NotificationTemplate })
           type="checkbox"
           checked={draft.enabled}
           onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))}
-          disabled={updateSchedule.isPending}
+          disabled={disabled}
           className="mt-0.5 size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-md:size-6"
         />
         <div className="space-y-1">
@@ -103,7 +56,7 @@ export function ScheduleEditor({ template }: { template: NotificationTemplate })
             id={`schedule-timezone-${template.key}`}
             value={draft.timezone}
             onChange={(event) => setDraft((current) => ({ ...current, timezone: event.target.value }))}
-            disabled={updateSchedule.isPending}
+            disabled={disabled}
             placeholder="Europe/Madrid"
             className="max-md:h-11"
           />
@@ -118,7 +71,7 @@ export function ScheduleEditor({ template }: { template: NotificationTemplate })
               onChange={(event) =>
                 setDraft((current) => ({ ...current, weekday: Number(event.target.value) }))
               }
-              disabled={updateSchedule.isPending}
+              disabled={disabled}
               className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:h-11"
             >
               {weekdayOptions.map((option) => (
@@ -140,22 +93,16 @@ export function ScheduleEditor({ template }: { template: NotificationTemplate })
               type="time"
               value={draft.times[index] ?? ''}
               onChange={(event) => handleTimeChange(index, event.target.value)}
-              disabled={updateSchedule.isPending}
+              disabled={disabled}
               className="max-md:h-11"
             />
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-foreground-muted">
-          El cambio se aplica en la siguiente comprobación del programador.
-        </p>
-        <Button type="button" onClick={handleSave} disabled={updateSchedule.isPending || !hasChanges}>
-          <Save className="h-4 w-4" />
-          {updateSchedule.isPending ? 'Guardando...' : 'Guardar horario'}
-        </Button>
-      </div>
+      <p className="text-xs text-foreground-muted">
+        El cambio se aplica en la siguiente comprobación del programador.
+      </p>
     </div>
   )
 }

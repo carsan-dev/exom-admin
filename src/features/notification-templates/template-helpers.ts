@@ -87,6 +87,24 @@ export const TEMPLATE_STATE_OPTIONS: FilterOption[] = [
   { value: 'PAUSED', label: 'Pausada' },
 ]
 
+export function getTextDraft(template: NotificationTemplate): TemplateDraft {
+  return {
+    title: template.title,
+    body: template.body,
+    route: template.route ?? '',
+    enabled: template.enabled,
+  }
+}
+
+export function textDraftDiffers(template: NotificationTemplate, draft: TemplateDraft) {
+  return (
+    draft.title !== template.title ||
+    draft.body !== template.body ||
+    normalizeRoute(draft.route) !== template.route ||
+    draft.enabled !== template.enabled
+  )
+}
+
 export function getScheduleDraft(template: NotificationTemplate): ScheduleDraft {
   const delivery = template.delivery_info
 

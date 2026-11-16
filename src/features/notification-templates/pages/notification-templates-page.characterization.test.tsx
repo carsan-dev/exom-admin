@@ -330,11 +330,11 @@ describe('NotificationTemplatesPage schedule save', () => {
     const user = userEvent.setup()
     mount()
     await screen.findByDisplayValue('Título manual')
-    expect(screen.queryByRole('button', { name: 'Guardar horario' })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Programación activa')).not.toBeInTheDocument()
 
     await select(user, /Recordatorio evento/)
     await waitFor(() => expect(screen.getByLabelText('Título')).toHaveValue('Hola {name}'))
-    expect(screen.queryByRole('button', { name: 'Guardar horario' })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Programación activa')).not.toBeInTheDocument()
     expect(screen.getByText('Por evento', { selector: 'div,span' })).toBeInTheDocument()
   })
 
@@ -349,10 +349,11 @@ describe('NotificationTemplatesPage schedule save', () => {
     expect(screen.getByLabelText('Programación activa')).toBeChecked()
     expect(screen.getByText('30 7 * * 1')).toBeInTheDocument()
     expect(screen.getByText('Activo')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Guardar horario' })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Guardar horario' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Guardar cambios' })).toBeDisabled()
   })
 
-  it('saves the weekly schedule through the schedule endpoint, not the text endpoint', async () => {
+  it('saves only the weekly schedule through the schedule endpoint when the text is clean', async () => {
     const user = userEvent.setup()
     mount()
     await select(user, /Resumen semanal/)
@@ -363,7 +364,7 @@ describe('NotificationTemplatesPage schedule save', () => {
     await user.clear(screen.getByLabelText('Huso horario'))
     await user.type(screen.getByLabelText('Huso horario'), '  UTC  ')
     await user.click(screen.getByLabelText('Programación activa'))
-    await user.click(screen.getByRole('button', { name: 'Guardar horario' }))
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
 
     await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1))
     expect(api.patch).toHaveBeenCalledWith('/notifications/templates/system-semanal/schedule', {
@@ -376,7 +377,7 @@ describe('NotificationTemplatesPage schedule save', () => {
     expect(api.patch).not.toHaveBeenCalledWith('/notifications/templates/system-semanal', expect.anything())
   })
 
-  it('does not touch the text draft when only the schedule changes', async () => {
+  it('does not touch the text draft when only the schedule changes and enables the single save', async () => {
     const user = userEvent.setup()
     mount()
     await select(user, /Resumen semanal/)
@@ -384,8 +385,9 @@ describe('NotificationTemplatesPage schedule save', () => {
 
     fireEvent.change(screen.getByLabelText('Hora'), { target: { value: '10:00' } })
 
-    expect(screen.getByRole('button', { name: 'Guardar horario' })).toBeEnabled()
-    expect(screen.getByRole('button', { name: 'Guardar cambios' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Guardar cambios' })).toBeEnabled()
+    expect(screen.getByLabelText('Título')).toHaveValue('Tu semana')
+    expect(screen.getByLabelText('Cuerpo')).toHaveValue('Resumen de la semana')
   })
 
   it('uses four meal times with fallback defaults and sends a null weekday', async () => {
@@ -402,7 +404,7 @@ describe('NotificationTemplatesPage schedule save', () => {
     expect(screen.getByText('Pausado')).toBeInTheDocument()
 
     fireEvent.change(screen.getByLabelText('Cena'), { target: { value: '21:15' } })
-    await user.click(screen.getByRole('button', { name: 'Guardar horario' }))
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
 
     await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1))
     expect(api.patch).toHaveBeenCalledWith('/notifications/templates/system-comidas/schedule', {
@@ -420,12 +422,12 @@ describe('NotificationTemplatesPage schedule save', () => {
     await waitFor(() => expect(screen.getByLabelText('Hora')).toHaveValue('07:30'))
 
     await user.clear(screen.getByLabelText('Huso horario'))
-    await user.click(screen.getByRole('button', { name: 'Guardar horario' }))
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     expect(toast.error).toHaveBeenCalledWith('El huso horario es obligatorio')
 
     await user.type(screen.getByLabelText('Huso horario'), 'Europe/Madrid')
     fireEvent.change(screen.getByLabelText('Hora'), { target: { value: '' } })
-    await user.click(screen.getByRole('button', { name: 'Guardar horario' }))
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     expect(toast.error).toHaveBeenCalledWith('Completa todas las horas')
 
     expect(api.patch).not.toHaveBeenCalled()
@@ -439,7 +441,7 @@ describe('NotificationTemplatesPage schedule save', () => {
     await waitFor(() => expect(screen.getByLabelText('Hora')).toHaveValue('07:30'))
 
     fireEvent.change(screen.getByLabelText('Hora'), { target: { value: '10:00' } })
-    await user.click(screen.getByRole('button', { name: 'Guardar horario' }))
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Horario inválido'))
     expect(toast.success).not.toHaveBeenCalled()
@@ -455,7 +457,7 @@ describe('NotificationTemplatesPage schedule save', () => {
     await waitFor(() => expect(screen.getByLabelText('Hora')).toHaveValue('07:30'))
 
     fireEvent.change(screen.getByLabelText('Hora'), { target: { value: '10:00' } })
-    await user.click(screen.getByRole('button', { name: 'Guardar horario' }))
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
 
     expect(await screen.findByRole('button', { name: 'Guardando...' })).toBeDisabled()
     expect(screen.getByLabelText('Hora')).toBeDisabled()

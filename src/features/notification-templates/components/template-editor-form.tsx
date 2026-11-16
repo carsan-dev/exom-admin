@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { CharCounter } from '@/features/notifications/components/char-counter'
 import { PushPreview } from '@/features/notifications/components/push-preview'
-import { formatUpdatedAt, normalizeRoute, type TemplateDraft } from '../template-helpers'
+import { formatUpdatedAt, normalizeRoute, type ScheduleDraft, type TemplateDraft } from '../template-helpers'
 import type { NotificationTemplate } from '../types'
 import { DeliveryInfo } from './delivery-info'
 import { ScheduleEditor } from './schedule-editor'
@@ -16,6 +16,8 @@ interface TemplateEditorFormProps {
   selectedTemplate: NotificationTemplate
   draft: TemplateDraft
   setDraft: Dispatch<SetStateAction<TemplateDraft>>
+  scheduleDraft: ScheduleDraft
+  setScheduleDraft: Dispatch<SetStateAction<ScheduleDraft>>
   isBusy: boolean
   isSaving: boolean
   hasChanges: boolean
@@ -27,6 +29,8 @@ export function TemplateEditorForm({
   selectedTemplate,
   draft,
   setDraft,
+  scheduleDraft,
+  setScheduleDraft,
   isBusy,
   isSaving,
   hasChanges,
@@ -122,7 +126,12 @@ export function TemplateEditorForm({
         <div className="space-y-3 border-t border-border pt-5">
           <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Cuándo se envía</h3>
           <DeliveryInfo template={selectedTemplate} />
-          <ScheduleEditor template={selectedTemplate} />
+          <ScheduleEditor
+            template={selectedTemplate}
+            draft={scheduleDraft}
+            setDraft={setScheduleDraft}
+            disabled={isBusy}
+          />
         </div>
 
         <div className="space-y-3 border-t border-border pt-5">

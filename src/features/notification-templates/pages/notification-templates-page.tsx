@@ -1,4 +1,12 @@
-import { useDeferredValue, useEffect, useMemo, useState, type FormEvent } from 'react'
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type SetStateAction,
+} from 'react'
 import { Info, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -17,6 +25,7 @@ import {
   useNotificationTemplates,
   useResetNotificationTemplate,
   useUpdateNotificationTemplate,
+  useUpdateNotificationTemplateSchedule,
 } from '../api'
 import { CreateTemplateDialog } from '../components/create-template-dialog'
 import { LoadErrorCard } from '../components/load-error-card'
@@ -29,25 +38,51 @@ import {
   TEMPLATE_ORIGIN_OPTIONS,
   TEMPLATE_STATE_OPTIONS,
   emptyDraft,
+  getScheduleDraft,
   getTemplateOrigin,
   getTemplateSearchText,
   getTemplateState,
+  getTextDraft,
   normalizeRoute,
+  normalizeScheduleDraft,
+  schedulesEqual,
+  textDraftDiffers,
   validateTemplateFields,
+  type ScheduleDraft,
   type TemplateDraft,
 } from '../template-helpers'
+import type { NotificationTemplate } from '../types'
+
+/**
+ * Unsaved edits of one part (text or schedule) of one template. While there is no entry for the
+ * selected template, its draft is derived from the server value, so refetches never overwrite edits
+ * and a late response can only clear the exact entry it was sent for.
+ */
+interface TemplateEdits<T> {
+  key: string
+  draft: T
+}
+
+const SWITCH_QUESTION = '¿Descartar los cambios sin guardar y cambiar de plantilla?'
+
+function isScheduleTemplate(template: NotificationTemplate) {
+  return template.delivery_info.type === 'schedule'
+}
 
 export function NotificationTemplatesPage() {
   const currentUserRole = useAuth((state) => state.user?.role)
   const canManageTemplates = currentUserRole === 'SUPER_ADMIN'
   const templatesQuery = useNotificationTemplates(canManageTemplates)
   const updateTemplate = useUpdateNotificationTemplate()
+  const updateSchedule = useUpdateNotificationTemplateSchedule()
   const resetTemplate = useResetNotificationTemplate()
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
   const [selectedKey, setSelectedKey] = useState('')
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
-  const [draft, setDraft] = useState<TemplateDraft>(emptyDraft)
+  const [textEdits, setTextEdits] = useState<TemplateEdits<TemplateDraft> | null>(null)
+  const [scheduleEdits, setScheduleEdits] = useState<TemplateEdits<ScheduleDraft> | null>(null)
+  const saveInFlightRef = useRef(false)
   const deferredSearch = useDeferredValue(search)
 
   const templates = useMemo(() => templatesQuery.data ?? [], [templatesQuery.data])
@@ -136,32 +171,97 @@ export function NotificationTemplatesPage() {
     selectedStates,
     templates,
   ])
-  const selectedTemplate = filteredTemplates.find((template) => template.key === selectedKey) ?? null
+  const selectedServerTemplate = templates.find((template) => template.key === selectedKey) ?? null
+
+  const draft: TemplateDraft = selectedServerTemplate
+    ? textEdits?.key === selectedServerTemplate.key
+      ? textEdits.draft
+      : getTextDraft(selectedServerTemplate)
+    : emptyDraft
+  const scheduleDraft: ScheduleDraft | null = selectedServerTemplate
+    ? scheduleEdits?.key === selectedServerTemplate.key
+      ? scheduleEdits.draft
+      : getScheduleDraft(selectedServerTemplate)
+    : null
+  const hasTextChanges = selectedServerTemplate ? textDraftDiffers(selectedServerTemplate, draft) : false
+  const hasScheduleChanges =
+    selectedServerTemplate && scheduleDraft && isScheduleTemplate(selectedServerTemplate)
+      ? !schedulesEqual(
+          normalizeScheduleDraft(selectedServerTemplate, scheduleDraft),
+          normalizeScheduleDraft(selectedServerTemplate, getScheduleDraft(selectedServerTemplate)),
+        )
+      : false
+  const hasChanges = hasTextChanges || hasScheduleChanges
+  // A clean template hidden by search/filters is replaced by the first visible one (as before);
+  // a dirty one stays selected and editable so filtering never discards edits.
+  const keepHiddenSelection = Boolean(selectedServerTemplate && hasChanges)
+  const selectedTemplate =
+    selectedServerTemplate &&
+    (keepHiddenSelection || filteredTemplates.some((template) => template.key === selectedKey))
+      ? selectedServerTemplate
+      : null
+
+  /** Changes the selection and drops any edits; callers decide whether discarding is allowed. */
+  const changeSelection = (key: string) => {
+    setSelectedKey(key)
+    setTextEdits(null)
+    setScheduleEdits(null)
+  }
 
   useEffect(() => {
+    if (keepHiddenSelection) {
+      return
+    }
+
     if (filteredTemplates.length === 0) {
       setSelectedKey('')
+      setTextEdits(null)
+      setScheduleEdits(null)
       return
     }
 
     if (!selectedKey || !filteredTemplates.some((template) => template.key === selectedKey)) {
       setSelectedKey(filteredTemplates[0].key)
+      setTextEdits(null)
+      setScheduleEdits(null)
     }
-  }, [filteredTemplates, selectedKey])
+  }, [filteredTemplates, keepHiddenSelection, selectedKey])
 
-  useEffect(() => {
-    if (!selectedTemplate) {
-      setDraft(emptyDraft)
+  const requestSelection = async (key: string) => {
+    if (key === selectedKey) {
       return
     }
 
-    setDraft({
-      title: selectedTemplate.title,
-      body: selectedTemplate.body,
-      route: selectedTemplate.route ?? '',
-      enabled: selectedTemplate.enabled,
+    if (hasChanges && !(await confirm({ title: SWITCH_QUESTION }))) {
+      return
+    }
+
+    changeSelection(key)
+  }
+
+  const setDraft = (action: SetStateAction<TemplateDraft>) => {
+    if (!selectedServerTemplate) {
+      return
+    }
+
+    const template = selectedServerTemplate
+    setTextEdits((current) => {
+      const base = current?.key === template.key ? current.draft : getTextDraft(template)
+      return { key: template.key, draft: typeof action === 'function' ? action(base) : action }
     })
-  }, [selectedTemplate])
+  }
+
+  const setScheduleDraft = (action: SetStateAction<ScheduleDraft>) => {
+    if (!selectedServerTemplate) {
+      return
+    }
+
+    const template = selectedServerTemplate
+    setScheduleEdits((current) => {
+      const base = current?.key === template.key ? current.draft : getScheduleDraft(template)
+      return { key: template.key, draft: typeof action === 'function' ? action(base) : action }
+    })
+  }
 
   const categoryCounts = useMemo(() => {
     return templates.reduce<Record<string, number>>((acc, template) => {
@@ -170,48 +270,107 @@ export function NotificationTemplatesPage() {
     }, {})
   }, [templates])
 
-  const hasChanges = selectedTemplate
-    ? draft.title !== selectedTemplate.title ||
-      draft.body !== selectedTemplate.body ||
-      normalizeRoute(draft.route) !== selectedTemplate.route ||
-      draft.enabled !== selectedTemplate.enabled
-    : false
-
-  const isSaving = updateTemplate.isPending
+  const isSaving = updateTemplate.isPending || updateSchedule.isPending
   const isResetting = resetTemplate.isPending
   const isBusy = isSaving || isResetting
   useUnsavedChanges('notification-template', Boolean(selectedTemplate && (hasChanges || isBusy)))
+  useUnsavedChanges(
+    `notification-schedule-${selectedTemplate?.key ?? ''}`,
+    Boolean(selectedTemplate && (hasScheduleChanges || updateSchedule.isPending)),
+  )
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!selectedTemplate) {
+    if (!selectedTemplate || saveInFlightRef.current || isBusy) {
       return
     }
 
-    const title = draft.title.trim()
-    const body = draft.body.trim()
-    const route = normalizeRoute(draft.route)
-    const validationError = validateTemplateFields(title, body, route)
+    const template = selectedTemplate
+    const key = template.key
+    const textEntry = hasTextChanges && textEdits?.key === key ? textEdits : null
+    const scheduleEntry = hasScheduleChanges && scheduleEdits?.key === key ? scheduleEdits : null
 
-    if (validationError) {
-      toast.error(validationError)
+    if (!textEntry && !scheduleEntry) {
       return
     }
 
+    // Validate every dirty part before sending anything.
+    const validationErrors: string[] = []
+    const textValues = textEntry
+      ? {
+          title: textEntry.draft.title.trim(),
+          body: textEntry.draft.body.trim(),
+          route: normalizeRoute(textEntry.draft.route),
+          enabled: textEntry.draft.enabled,
+        }
+      : null
+    const scheduleValues = scheduleEntry ? normalizeScheduleDraft(template, scheduleEntry.draft) : null
+
+    if (textValues) {
+      const textError = validateTemplateFields(textValues.title, textValues.body, textValues.route)
+      if (textError) {
+        validationErrors.push(textError)
+      }
+    }
+
+    if (scheduleValues) {
+      if (!scheduleValues.timezone) {
+        validationErrors.push('El huso horario es obligatorio')
+      } else if (scheduleValues.times.some((time) => !time)) {
+        validationErrors.push('Completa todas las horas')
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      validationErrors.forEach((message) => toast.error(message))
+      return
+    }
+
+    // Each part is saved and reported on its own: a failure keeps only that part's edits.
+    // Edits are cleared only if the entry is still the one sent, so a late response cannot touch
+    // the drafts of another template or edits discarded by switching templates.
+    const saveText = async () => {
+      if (!textEntry || !textValues) {
+        return
+      }
+
+      try {
+        await updateTemplate.mutateAsync({ key, values: textValues })
+        setTextEdits((current) => (current === textEntry ? null : current))
+        toast.success('Plantilla actualizada')
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, 'No se ha podido actualizar la plantilla'))
+      }
+    }
+
+    const saveSchedule = async () => {
+      if (!scheduleEntry || !scheduleValues) {
+        return
+      }
+
+      try {
+        await updateSchedule.mutateAsync({
+          key,
+          values: {
+            enabled: scheduleValues.enabled,
+            timezone: scheduleValues.timezone,
+            times: scheduleValues.times,
+            weekday: (template.delivery_info.schedule_kind ?? 'daily') === 'weekly' ? scheduleValues.weekday : null,
+          },
+        })
+        setScheduleEdits((current) => (current === scheduleEntry ? null : current))
+        toast.success('Horario actualizado')
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, 'No se ha podido actualizar el horario'))
+      }
+    }
+
+    saveInFlightRef.current = true
     try {
-      await updateTemplate.mutateAsync({
-        key: selectedTemplate.key,
-        values: {
-          title,
-          body,
-          route,
-          enabled: draft.enabled,
-        },
-      })
-      toast.success('Plantilla actualizada')
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'No se ha podido actualizar la plantilla'))
+      await Promise.all([saveText(), saveSchedule()])
+    } finally {
+      saveInFlightRef.current = false
     }
   }
 
@@ -229,12 +388,16 @@ export function NotificationTemplatesPage() {
     }
 
     try {
-      const result = await resetTemplate.mutateAsync(selectedTemplate.key)
+      const key = selectedTemplate.key
+      const result = await resetTemplate.mutateAsync(key)
 
       if ('deleted' in result) {
         toast.success('Plantilla eliminada')
-        setSelectedKey('')
+        changeSelection('')
       } else {
+        // The restore replaces the text the user confirmed to discard; the API keeps the stored
+        // schedule, so unsaved schedule edits are kept too.
+        setTextEdits((current) => (current?.key === key ? null : current))
         toast.success('Plantilla restaurada')
       }
     } catch (error) {
@@ -287,7 +450,7 @@ export function NotificationTemplatesPage() {
             filteredTemplates={filteredTemplates}
             templates={templates}
             selectedTemplate={selectedTemplate}
-            setSelectedKey={setSelectedKey}
+            setSelectedKey={(key) => void requestSelection(key)}
             search={search}
             setSearch={setSearch}
             filterSections={filterSections}
@@ -300,6 +463,8 @@ export function NotificationTemplatesPage() {
                 selectedTemplate={selectedTemplate}
                 draft={draft}
                 setDraft={setDraft}
+                scheduleDraft={scheduleDraft ?? getScheduleDraft(selectedTemplate)}
+                setScheduleDraft={setScheduleDraft}
                 isBusy={isBusy}
                 isSaving={isSaving}
                 hasChanges={hasChanges}
@@ -316,7 +481,7 @@ export function NotificationTemplatesPage() {
       <CreateTemplateDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onCreated={(template) => setSelectedKey(template.key)}
+        onCreated={(template) => void requestSelection(template.key)}
       />
       {confirmDialog}
     </div>
