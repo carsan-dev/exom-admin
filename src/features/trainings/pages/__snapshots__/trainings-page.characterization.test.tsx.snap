@@ -99,9 +99,9 @@ exports[`TrainingsPage characterization > filters by catalog group > ungrouped 1
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_5a_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_5a_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Entrenamientos · Sin grupo</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Entrenamientos · Sin grupo</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -582,9 +582,9 @@ exports[`TrainingsPage characterization > filters by catalog group 1`] = `
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_5a_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_5a_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Entrenamientos · Fuerza</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Entrenamientos · Fuerza</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -1068,9 +1068,9 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_bo_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_bo_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -1495,12 +1495,12 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 <div class="min-w-0 space-y-4">
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_c1_-form-item">Nombre</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="_r_c1_-form-item" aria-describedby="_r_c1_-form-item-description" aria-invalid="false" value="Importado" name="name">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nombre</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="Importado" name="name">
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_c2_-form-item">Tipos</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: rgb(127, 181, 216);">Fuerza<button type="button" class="ml-1 rounded-full p-0.5 hover:bg-foreground/10">
@@ -1538,8 +1538,8 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_c3_-form-item">Nivel</label>
-<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="_r_c3_-form-item" aria-describedby="_r_c3_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nivel</label>
+<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 <span style="pointer-events: none;">Principiante</span>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground" aria-hidden="true">
 <path d="m6 9 6 6 6-6">
@@ -1554,7 +1554,7 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_c5_-form-item">Color visual</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Color visual</label>
 <div class="space-y-3">
 <div class="rounded-xl border border-border/70 bg-muted/20 p-4">
 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1639,16 +1639,16 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </div>
 <div class="grid grid-cols-2 gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_c6_-form-item">Duración estimada (min)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="_r_c6_-form-item" aria-describedby="_r_c6_-form-item-description" aria-invalid="false" type="number" value="">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración estimada (min)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_c7_-form-item">Calorías estimadas (kcal)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="_r_c7_-form-item" aria-describedby="_r_c7_-form-item-description" aria-invalid="false" type="number" value="">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Calorías estimadas (kcal)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_c8_-form-item">Etiquetas</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Etiquetas</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <span class="self-center text-sm text-muted-foreground">Sin etiquetas</span>
@@ -1681,18 +1681,18 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Calentamiento y vuelta a la calma</p>
 <div class="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_cb_-form-item">Descripción calentamiento</label>
-<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="_r_cb_-form-item" aria-describedby="_r_cb_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción calentamiento</label>
+<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 </textarea>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_cc_-form-item">Duración (min)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="_r_cc_-form-item" aria-describedby="_r_cc_-form-item-description" aria-invalid="false" type="number" value="">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración (min)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_cd_-form-item">Descripción vuelta a la calma</label>
-<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="_r_cd_-form-item" aria-describedby="_r_cd_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción vuelta a la calma</label>
+<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 </textarea>
 </div>
 </div>
@@ -2013,9 +2013,9 @@ exports[`TrainingsPage characterization > lists trainings with groups and the pe
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_l_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_l_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -2499,9 +2499,9 @@ exports[`TrainingsPage characterization > opens the AI prompt dialog 1`] = `
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_87_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_87_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -3246,12 +3246,12 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 <div class="min-w-0 space-y-4">
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_ai_-form-item">Nombre</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="_r_ai_-form-item" aria-describedby="_r_ai_-form-item-description" aria-invalid="false" value="" name="name">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nombre</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="" name="name">
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_aj_-form-item">Tipos</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: rgb(127, 181, 216);">Fuerza<button type="button" class="ml-1 rounded-full p-0.5 hover:bg-foreground/10">
@@ -3289,8 +3289,8 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_ak_-form-item">Nivel</label>
-<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="_r_ak_-form-item" aria-describedby="_r_ak_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nivel</label>
+<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 <span style="pointer-events: none;">Principiante</span>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground" aria-hidden="true">
 <path d="m6 9 6 6 6-6">
@@ -3305,7 +3305,7 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_am_-form-item">Color visual</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Color visual</label>
 <div class="space-y-3">
 <div class="rounded-xl border border-border/70 bg-muted/20 p-4">
 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -3390,16 +3390,16 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 </div>
 <div class="grid grid-cols-2 gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_an_-form-item">Duración estimada (min)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="_r_an_-form-item" aria-describedby="_r_an_-form-item-description" aria-invalid="false" type="number" value="">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración estimada (min)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_ao_-form-item">Calorías estimadas (kcal)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="_r_ao_-form-item" aria-describedby="_r_ao_-form-item-description" aria-invalid="false" type="number" value="">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Calorías estimadas (kcal)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_ap_-form-item">Etiquetas</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Etiquetas</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <span class="self-center text-sm text-muted-foreground">Sin etiquetas</span>
@@ -3432,18 +3432,18 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Calentamiento y vuelta a la calma</p>
 <div class="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_as_-form-item">Descripción calentamiento</label>
-<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="_r_as_-form-item" aria-describedby="_r_as_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción calentamiento</label>
+<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 </textarea>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_at_-form-item">Duración (min)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="_r_at_-form-item" aria-describedby="_r_at_-form-item-description" aria-invalid="false" type="number" value="">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración (min)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_au_-form-item">Descripción vuelta a la calma</label>
-<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="_r_au_-form-item" aria-describedby="_r_au_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción vuelta a la calma</label>
+<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 </textarea>
 </div>
 </div>
@@ -3601,9 +3601,9 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_95_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_95_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -4010,12 +4010,12 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 <div class="min-w-0 space-y-4">
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_9e_-form-item">Nombre</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="_r_9e_-form-item" aria-describedby="_r_9e_-form-item-description" aria-invalid="false" value="" name="name">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nombre</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="" name="name">
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_9f_-form-item">Tipos</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: rgb(127, 181, 216);">Fuerza<button type="button" class="ml-1 rounded-full p-0.5 hover:bg-foreground/10">
@@ -4053,8 +4053,8 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_9g_-form-item">Nivel</label>
-<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="_r_9g_-form-item" aria-describedby="_r_9g_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nivel</label>
+<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 <span style="pointer-events: none;">Principiante</span>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground" aria-hidden="true">
 <path d="m6 9 6 6 6-6">
@@ -4069,7 +4069,7 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_9i_-form-item">Color visual</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Color visual</label>
 <div class="space-y-3">
 <div class="rounded-xl border border-border/70 bg-muted/20 p-4">
 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -4154,16 +4154,16 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 </div>
 <div class="grid grid-cols-2 gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_9j_-form-item">Duración estimada (min)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="_r_9j_-form-item" aria-describedby="_r_9j_-form-item-description" aria-invalid="false" type="number" value="">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración estimada (min)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_9k_-form-item">Calorías estimadas (kcal)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="_r_9k_-form-item" aria-describedby="_r_9k_-form-item-description" aria-invalid="false" type="number" value="">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Calorías estimadas (kcal)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_9l_-form-item">Etiquetas</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Etiquetas</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <span class="self-center text-sm text-muted-foreground">Sin etiquetas</span>
@@ -4196,18 +4196,18 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Calentamiento y vuelta a la calma</p>
 <div class="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_9o_-form-item">Descripción calentamiento</label>
-<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="_r_9o_-form-item" aria-describedby="_r_9o_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción calentamiento</label>
+<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 </textarea>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_9p_-form-item">Duración (min)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="_r_9p_-form-item" aria-describedby="_r_9p_-form-item-description" aria-invalid="false" type="number" value="">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración (min)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_9q_-form-item">Descripción vuelta a la calma</label>
-<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="_r_9q_-form-item" aria-describedby="_r_9q_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción vuelta a la calma</label>
+<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 </textarea>
 </div>
 </div>
@@ -4365,9 +4365,9 @@ exports[`TrainingsPage characterization > opens the delete dialog from the row m
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_ec_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_ec_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -4875,9 +4875,9 @@ exports[`TrainingsPage characterization > opens the detail dialog and the delete
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_d7_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_d7_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -5461,9 +5461,9 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_fe_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_fe_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -5870,12 +5870,12 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 <div class="min-w-0 space-y-4">
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_fr_-form-item">Nombre</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="_r_fr_-form-item" aria-describedby="_r_fr_-form-item-description" aria-invalid="false" value="Fuerza A" name="name">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nombre</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="Fuerza A" name="name">
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_fs_-form-item">Tipos</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: rgb(127, 181, 216);">Fuerza<button type="button" class="ml-1 rounded-full p-0.5 hover:bg-foreground/10">
@@ -5926,8 +5926,8 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_ft_-form-item">Nivel</label>
-<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="_r_ft_-form-item" aria-describedby="_r_ft_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nivel</label>
+<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 <span style="pointer-events: none;">Principiante</span>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground" aria-hidden="true">
 <path d="m6 9 6 6 6-6">
@@ -5942,7 +5942,7 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_fv_-form-item">Color visual</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Color visual</label>
 <div class="space-y-3">
 <div class="rounded-xl border border-border/70 bg-muted/20 p-4">
 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -6027,16 +6027,16 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 <div class="grid grid-cols-2 gap-4">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_g0_-form-item">Duración estimada (min)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="_r_g0_-form-item" aria-describedby="_r_g0_-form-item-description" aria-invalid="false" type="number" value="45">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración estimada (min)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="45">
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_g1_-form-item">Calorías estimadas (kcal)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="_r_g1_-form-item" aria-describedby="_r_g1_-form-item-description" aria-invalid="false" type="number" value="300">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Calorías estimadas (kcal)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="300">
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_g2_-form-item">Etiquetas</label>
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Etiquetas</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <div class="inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 gap-1 border-brand-soft/40 bg-brand-soft/10 pr-1 text-accent-text">Pierna<button type="button" class="ml-0.5 rounded-full p-0.5 hover:bg-brand-soft/20">
@@ -6077,18 +6077,18 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Calentamiento y vuelta a la calma</p>
 <div class="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_g5_-form-item">Descripción calentamiento</label>
-<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="_r_g5_-form-item" aria-describedby="_r_g5_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción calentamiento</label>
+<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 </textarea>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_g6_-form-item">Duración (min)</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="_r_g6_-form-item" aria-describedby="_r_g6_-form-item-description" aria-invalid="false" type="number" value="">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración (min)</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_g7_-form-item">Descripción vuelta a la calma</label>
-<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="_r_g7_-form-item" aria-describedby="_r_g7_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción vuelta a la calma</label>
+<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 </textarea>
 </div>
 </div>
@@ -6414,9 +6414,9 @@ exports[`TrainingsPage characterization > opens the group create dialog 1`] = `
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_79_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_79_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -6927,9 +6927,9 @@ exports[`TrainingsPage characterization > paginates through the URL 1`] = `
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_4c_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_4c_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -7403,9 +7403,9 @@ exports[`TrainingsPage characterization > shows the empty search result 1`] = `
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_3e_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_3e_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -7922,9 +7922,9 @@ exports[`TrainingsPage characterization > shows the move bar and the move dialog
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_68_" class="min-w-0 space-y-4" data-aria-hidden="true" aria-hidden="true">
+<section aria-labelledby="ID" class="min-w-0 space-y-4" data-aria-hidden="true" aria-hidden="true">
 <div>
-<h2 id="_r_68_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
@@ -8450,9 +8450,9 @@ exports[`TrainingsPage characterization > shows the move bar and the move dialog
 </div>
 </div>
 </section>
-<section aria-labelledby="_r_68_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_68_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de entrenamientos</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada del catálogo con búsqueda y acciones por entrenamiento</p>
 </div>
 <div class="space-y-3">
