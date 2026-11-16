@@ -8,6 +8,7 @@ const baseRouteLabels: Record<string, string> = {
   dashboard: 'Dashboard',
   clients: 'Clientes',
   users: 'Usuarios',
+  'base-service': 'Servicio base',
   exercises: 'Ejercicios',
   trainings: 'Entrenamientos',
   badges: 'Etiquetas',
