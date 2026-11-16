@@ -20,7 +20,7 @@ export type HarnessAuth = 'session' | 'none' | 'noprofile'
 const STORE_KEY = 'exom-harness-flags'
 const query = new URLSearchParams(window.location.search)
 const saved = JSON.parse(sessionStorage.getItem(STORE_KEY) ?? '{}') as Record<string, string>
-for (const key of ['__role', '__theme', '__auth', '__authError', '__fail']) {
+for (const key of ['__role', '__theme', '__auth', '__authError', '__fail', '__clientsDelay', '__clientsFail']) {
   const value = query.get(key)
   if (value) saved[key] = value
 }
@@ -33,3 +33,8 @@ if (saved.__theme === 'light' || saved.__theme === 'dark') localStorage.setItem(
 // F4-F: estados de error de login/onboarding. __authError=blocked (cuenta bloqueada 423) | invalid (login falla); __fail=profile (PUT /profile/me da 500).
 export const harnessAuthError: 'blocked' | 'invalid' | null = saved.__authError === 'blocked' || saved.__authError === 'invalid' ? saved.__authError : null
 export const harnessFailProfile: boolean = saved.__fail === 'profile'
+
+// F4-bis: buscador global. __clientsDelay=<ms> retrasa la respuesta de GET /admin/clients; __clientsFail=1 la hace fallar con 500.
+const delayValue = Number(saved.__clientsDelay)
+export const harnessClientsDelay: number = Number.isFinite(delayValue) && delayValue > 0 ? delayValue : 0
+export const harnessClientsFail: boolean = saved.__clientsFail === '1'
