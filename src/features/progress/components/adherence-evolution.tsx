@@ -19,9 +19,9 @@ export function AdherenceEvolution({ days }: { days: AdherenceDay[] }) {
   }))
   const observations = points.filter((point) => point.global !== null).length
   return <section aria-label="Evolución diaria del periodo seleccionado" className="min-w-0 space-y-3">
-    <h2 className="text-lg font-semibold">Evolución diaria del periodo seleccionado</h2>
-    <p className="max-w-prose text-sm text-muted-foreground">Porcentajes diarios cerrados, no el veredicto de siete días. Los huecos no son ceros; hoy provisional y futuro no se trazan. Los pasos se consultan por semana.</p>
-    {observations < 2 && <p className="text-sm">{observations === 1 ? 'Una observación global: no permite establecer una tendencia.' : 'Sin observaciones globales evaluables para mostrar una tendencia.'}</p>}
+    <h2 className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Evolución diaria del periodo seleccionado</h2>
+    <p className="max-w-prose text-sm text-foreground-muted">Porcentajes diarios cerrados, no el veredicto de siete días. Los huecos no son ceros; hoy provisional y futuro no se trazan. Los pasos se consultan por semana.</p>
+    {observations < 2 && <p className="text-sm text-foreground-secondary">{observations === 1 ? 'Una observación global: no permite establecer una tendencia.' : 'Sin observaciones globales evaluables para mostrar una tendencia.'}</p>}
     {points.length > 0 ? <>
       {points.some((point) => Number.isFinite(point.timestamp)) && <div className="h-64 w-full" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
@@ -37,17 +37,17 @@ export function AdherenceEvolution({ days }: { days: AdherenceDay[] }) {
           </LineChart>
         </ResponsiveContainer>
       </div>}
-      <p className="text-xs text-muted-foreground">Global: línea continua · Entrenamiento: trazos · Nutrición: puntos. Escala común de 0 a 100 %. Las líneas son una guía entre observaciones diarias, no una reconstrucción de días sin datos.</p>
-      <details className="border-t pt-3">
-        <summary className="cursor-pointer text-sm font-medium rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Ver valores diarios en tabla</summary>
+      <p className="text-xs text-foreground-muted">Global: línea continua · Entrenamiento: trazos · Nutrición: puntos. Escala común de 0 a 100 %. Las líneas son una guía entre observaciones diarias, no una reconstrucción de días sin datos.</p>
+      <details className="border-t border-border-strong pt-1">
+        <summary className="flex min-h-11 cursor-pointer items-center rounded text-sm font-medium text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Ver valores diarios en tabla</summary>
         <div className="overflow-x-auto pt-3">
           <table className="w-full text-left text-sm tabular-nums">
             <caption className="sr-only">Porcentajes diarios cerrados del periodo seleccionado</caption>
-            <thead><tr>{['Fecha UTC', 'Global', 'Entrenamiento', 'Nutrición'].map((label) => <th key={label} scope="col" className="p-2 font-medium">{label}</th>)}</tr></thead>
-            <tbody>{points.map((point) => <tr key={point.date} className="border-t"><th scope="row" className="p-2 font-medium">{point.date}</th>{[point.global, point.training, point.nutrition].map((value, index) => <td key={index} className="p-2">{value === null ? 'Sin dato evaluable' : format(value)}</td>)}</tr>)}</tbody>
+            <thead><tr className="border-b border-border-strong">{['Fecha UTC', 'Global', 'Entrenamiento', 'Nutrición'].map((label) => <th key={label} scope="col" className="p-2 text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">{label}</th>)}</tr></thead>
+            <tbody>{points.map((point) => <tr key={point.date} className="border-t border-border"><th scope="row" className="p-2 font-medium">{point.date}</th>{[point.global, point.training, point.nutrition].map((value, index) => <td key={index} className="p-2">{value === null ? 'Sin dato evaluable' : format(value)}</td>)}</tr>)}</tbody>
           </table>
         </div>
       </details>
-    </> : <p className="text-sm">No hay días disponibles en este periodo. Consulta otro rango o actualiza las evaluaciones.</p>}
+    </> : <p className="text-sm text-foreground-muted">No hay días disponibles en este periodo. Consulta otro rango o actualiza las evaluaciones.</p>}
   </section>
 }
