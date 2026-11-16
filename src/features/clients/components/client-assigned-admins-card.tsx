@@ -1,9 +1,9 @@
 import { AlertTriangle, RefreshCcw, UserPlus, Users } from 'lucide-react'
+import { EmptyState } from '@/components/page'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { StatusChip } from '@/components/ui/status-chip'
 import { getApiErrorMessage, useClientAssignments } from '../api'
 import { getUserDisplayName } from '../types'
 
@@ -28,27 +28,21 @@ function getAdminInitials(admin: { email: string; profile: { first_name: string;
 
 function AssignedAdminsSkeleton() {
   return (
-    <Card className="border-border/70">
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-6 w-44" />
-          <Skeleton className="h-4 w-72 max-w-full" />
-        </div>
-        <Skeleton className="h-10 w-36" />
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {Array.from({ length: 2 }).map((_, index) => (
-          <div key={index} className="flex items-center gap-3 rounded-xl border border-border/70 p-4">
-            <Skeleton className="h-11 w-11 rounded-full" />
-            <div className="min-w-0 flex-1 space-y-2">
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-4 w-56 max-w-full" />
-            </div>
-            <Skeleton className="h-6 w-24" />
+    <div className="space-y-4 py-3">
+      <div className="space-y-2">
+        <Skeleton className="h-6 w-44" />
+        <Skeleton className="h-4 w-72 max-w-full" />
+      </div>
+      {Array.from({ length: 2 }).map((_, index) => (
+        <div key={index} className="flex items-center gap-3 border-t border-border pt-4">
+          <Skeleton className="h-11 w-11 rounded-full" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-4 w-56 max-w-full" />
           </div>
-        ))}
-      </CardContent>
-    </Card>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -62,17 +56,15 @@ export function ClientAssignedAdminsCard({ clientId, onManage }: ClientAssignedA
 
   if (assignmentsQuery.isError) {
     return (
-      <Card className="border-status-error/20">
-        <CardHeader>
-          <CardTitle className="text-lg">Admins asignados</CardTitle>
-          <CardDescription>No se ha podido cargar la cartera actual del cliente.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <div className="rounded-full bg-status-error/10 p-3 text-status-error">
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-            <p className="max-w-xl text-sm text-muted-foreground">
+      <div role="group" aria-label="Admins asignados" className="space-y-4 py-3">
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">Admins asignados</h3>
+          <p className="mt-1 text-[13px] leading-5 text-foreground-secondary">No se ha podido cargar la cartera actual del cliente.</p>
+        </div>
+        <div className="flex flex-col gap-4 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
+            <AlertTriangle aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <p className="max-w-xl text-sm text-muted-foreground [overflow-wrap:anywhere]">
               {getApiErrorMessage(assignmentsQuery.error, 'Reintenta para consultar qué admins tiene asignados este cliente.')}
             </p>
           </div>
@@ -81,74 +73,64 @@ export function ClientAssignedAdminsCard({ clientId, onManage }: ClientAssignedA
             <RefreshCcw className="h-4 w-4" />
             Reintentar
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     )
   }
 
   return (
-    <Card className="border-border/70">
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <CardTitle className="text-lg">Admins asignados</CardTitle>
-          <CardDescription>
+    <div className="space-y-4 py-3">
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        <div className="min-w-0 flex-[1_1_16rem]">
+          <h3 className="text-lg font-semibold text-foreground">Admins asignados</h3>
+          <p className="mt-1 text-[13px] leading-5 text-foreground-secondary">
             Visualiza rápidamente la cartera activa antes de abrir la gestión de asignaciones.
-          </CardDescription>
+          </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-accent-text">
+        <div className="flex flex-wrap items-center gap-3">
+          <StatusChip variant="brand" dot={false}>
             {activeAdmins.length} admin{activeAdmins.length === 1 ? '' : 's'} activo{activeAdmins.length === 1 ? '' : 's'}
-          </Badge>
+          </StatusChip>
           <Button type="button" variant="outline" onClick={onManage}>
             <Users className="h-4 w-4" />
             Gestionar admins
           </Button>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent>
-        {activeAdmins.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border/70 bg-muted/20 px-4 py-8 text-center">
-            <div className="rounded-full bg-status-warning/10 p-4 text-status-warning">
-              <UserPlus className="h-6 w-6" />
-            </div>
-            <div className="space-y-1">
-              <p className="font-medium text-foreground">Sin admins asignados</p>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                Este cliente está actualmente sin cartera asignada. Puedes dejarlo así si está pausado o volver a asignarlo cuando retome actividad.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid gap-3 lg:grid-cols-2">
-            {activeAdmins.map((admin) => (
-              <div key={admin.id} className="rounded-xl border border-border/70 bg-background/50 p-4">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-11 w-11 border border-border/60">
-                    <AvatarImage src={admin.profile?.avatar_url ?? undefined} alt={getUserDisplayName(admin)} />
-                    <AvatarFallback>{getAdminInitials(admin)}</AvatarFallback>
-                  </Avatar>
+      {activeAdmins.length === 0 ? (
+        <div className="border-t border-border">
+          <EmptyState
+            icon={<UserPlus />}
+            title="Sin admins asignados"
+            description="Este cliente está actualmente sin cartera asignada. Puedes dejarlo así si está pausado o volver a asignarlo cuando retome actividad."
+          />
+        </div>
+      ) : (
+        <ul className="border-t border-border">
+          {activeAdmins.map((admin) => (
+            <li key={admin.id} className="flex items-start gap-3 border-b border-border py-3">
+              <Avatar className="h-11 w-11 shrink-0 border border-border/60">
+                <AvatarImage src={admin.profile?.avatar_url ?? undefined} alt={getUserDisplayName(admin)} />
+                <AvatarFallback>{getAdminInitials(admin)}</AvatarFallback>
+              </Avatar>
 
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate font-medium text-foreground">{getUserDisplayName(admin)}</p>
-                      <Badge variant="outline" className="border-status-success/30 bg-status-success/10 text-status-success">
-                        Activo
-                      </Badge>
-                    </div>
-
-                    <p className="truncate text-sm text-muted-foreground">{admin.email}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Asignado desde {assignmentDateFormatter.format(new Date(admin.assigned_at))}
-                    </p>
-                  </div>
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="min-w-0 font-medium text-foreground [overflow-wrap:anywhere]">{getUserDisplayName(admin)}</p>
+                  <StatusChip variant="success">Activo</StatusChip>
                 </div>
+
+                <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">{admin.email}</p>
+                <p className="text-xs text-muted-foreground">
+                  Asignado desde {assignmentDateFormatter.format(new Date(admin.assigned_at))}
+                </p>
               </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }

@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { ArrowLeft, AlertTriangle, CalendarDays, ShieldCheck, Unlock, UserCheck, UserX, Users } from 'lucide-react'
+import { ArrowLeft, CalendarDays, ShieldCheck, Unlock, UserCheck, UserX, Users } from 'lucide-react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { ErrorState } from '@/components/page'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/hooks/use-auth'
-import { cn } from '@/lib/utils'
 import { getApiErrorMessage, getApiErrorStatus, useClientProfile } from '../api'
 import { ChangeRoleDialog } from '../components/change-role-dialog'
 import { ClientAssignedAdminsCard } from '../components/client-assigned-admins-card'
@@ -20,20 +19,24 @@ import { ToggleUserStatusDialog } from '../components/toggle-user-status-dialog'
 import { UnlockDialog } from '../components/unlock-dialog'
 import { getUsersRoute } from '../types'
 
+const TAB_TRIGGER_CLASS = 'min-h-11 shrink-0 md:min-h-10'
 const CLIENT_TABS = ['info', 'metrics', 'streak', 'adherence'] as const
 
 function DetailPageSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Skeleton className="h-10 w-28" />
-        <Skeleton className="h-8 w-40" />
+    <div className="space-y-6" aria-busy="true">
+      <Skeleton className="h-11 w-40" />
+      <div className="flex items-center gap-4 border-b border-border pb-6">
+        <Skeleton className="size-14 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1 space-y-3">
+          <Skeleton className="h-8 w-56 max-w-full" />
+          <Skeleton className="h-5 w-72 max-w-full" />
+        </div>
       </div>
-      <Skeleton className="h-52 w-full rounded-2xl" />
-      <Skeleton className="h-12 w-full rounded-xl" />
-      <div className="grid gap-4 md:grid-cols-3">
-        <Skeleton className="h-40 rounded-xl md:col-span-2" />
-        <Skeleton className="h-40 rounded-xl" />
+      <Skeleton className="h-11 w-full" />
+      <div className="grid gap-6 md:grid-cols-2">
+        <Skeleton className="h-32" />
+        <Skeleton className="h-32" />
       </div>
     </div>
   )
@@ -47,7 +50,6 @@ function getErrorCopy(errorStatus: number | undefined, currentUserRole?: string)
         currentUserRole === 'ADMIN'
           ? 'Solo puedes abrir perfiles de clientes asignados a tu cuenta. Vuelve al listado para revisar tu cartera actual.'
           : 'No tienes permisos para abrir este perfil desde tu sesión actual.',
-      toneClass: 'bg-status-warning/10 text-status-warning',
       canRetry: false,
     }
   }
@@ -56,7 +58,6 @@ function getErrorCopy(errorStatus: number | undefined, currentUserRole?: string)
     return {
       title: 'Cliente no encontrado',
       message: 'No hemos encontrado el cliente solicitado o este enlace ya no corresponde a un perfil de cliente.',
-      toneClass: 'bg-muted text-muted-foreground',
       canRetry: false,
     }
   }
@@ -65,7 +66,6 @@ function getErrorCopy(errorStatus: number | undefined, currentUserRole?: string)
     return {
       title: 'Error del servidor',
       message: 'El servidor no ha podido cargar el perfil del cliente. Inténtalo de nuevo en unos segundos.',
-      toneClass: 'bg-status-error/10 text-status-error',
       canRetry: true,
     }
   }
@@ -73,7 +73,6 @@ function getErrorCopy(errorStatus: number | undefined, currentUserRole?: string)
   return {
     title: 'Error al cargar el perfil',
     message: 'No se ha podido cargar el perfil del cliente.',
-    toneClass: 'bg-status-error/10 text-status-error',
     canRetry: true,
   }
 }
@@ -115,26 +114,21 @@ export function ClientDetailPage() {
         : getApiErrorMessage(clientProfile.error, errorCopy.message)
 
     return (
-      <Card className="border-border/70">
-        <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-          <div className={cn('rounded-full p-4', errorCopy.toneClass)}>
-            <AlertTriangle className="h-8 w-8" />
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold text-foreground">{errorCopy.title}</h1>
-            <p className="max-w-xl text-sm text-muted-foreground">{message}</p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Button variant="outline" asChild>
-              <Link to={usersRoute}>
-                <ArrowLeft className="h-4 w-4" />
-                {backLabel}
-              </Link>
-            </Button>
-            {errorCopy.canRetry && <Button onClick={() => clientProfile.refetch()}>Reintentar</Button>}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="border-y border-border">
+        <ErrorState
+          title={errorCopy.title}
+          description={message}
+          onRetry={errorCopy.canRetry ? () => clientProfile.refetch() : undefined}
+        />
+        <div className="flex justify-center pb-14">
+          <Button variant="outline" asChild>
+            <Link to={usersRoute}>
+              <ArrowLeft className="h-4 w-4" />
+              {backLabel}
+            </Link>
+          </Button>
+        </div>
+      </div>
     )
   }
 
@@ -151,7 +145,7 @@ export function ClientDetailPage() {
         </Button>
 
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" asChild>
+          <Button asChild>
             <Link to={`/assignments?clientId=${client.id}`}>
               <CalendarDays className="h-4 w-4" />
               Planificar asignaciones
@@ -187,24 +181,24 @@ export function ClientDetailPage() {
       <ClientHeader client={client} />
 
       {currentUserRole === 'SUPER_ADMIN' && (
-        <details className="rounded-xl border p-3">
-          <summary className="min-h-11 cursor-pointer content-center rounded font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Administradores asignados</summary>
+        <details className="border-t border-border">
+          <summary className="min-h-11 cursor-pointer content-center rounded text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Administradores asignados</summary>
           <ClientAssignedAdminsCard clientId={client.id} onManage={() => setManageAssignmentsDialogOpen(true)} />
         </details>
       )}
 
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-        <TabsList aria-label="Secciones del cliente" className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 [&_button]:min-h-11 [&_button]:shrink-0 [&_button]:text-foreground [&_button]:data-[state=active]:text-foreground! sm:flex-wrap">
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="info">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+        <TabsList aria-label="Secciones del cliente" className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto border-t border-border">
+          <TabsTrigger className={TAB_TRIGGER_CLASS} value="info">
             Info general
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="metrics">
+          <TabsTrigger className={TAB_TRIGGER_CLASS} value="metrics">
             Métricas
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="streak">
+          <TabsTrigger className={TAB_TRIGGER_CLASS} value="streak">
             Racha
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl border border-border bg-card py-3 data-[state=active]:border-brand-primary/40 data-[state=active]:bg-brand-soft/10 data-[state=active]:text-accent-text" value="adherence">
+          <TabsTrigger className={TAB_TRIGGER_CLASS} value="adherence">
             Adherencia
           </TabsTrigger>
         </TabsList>
