@@ -140,7 +140,6 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
                         <Button
                           variant="ghost"
                           size="icon"
-                    className="min-h-11 min-w-11 md:min-h-10 md:min-w-10"
                           className="min-h-11 min-w-11 md:min-h-10 md:min-w-10"
                           aria-label={`Editar métricas del ${tableDateFormatter.format(new Date(metric.date))}`}
                           onClick={() => openEditDialog(metric)}

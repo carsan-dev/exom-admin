@@ -24,6 +24,8 @@ const progressWithNote = {
   meals_completed: [],
   meals_completed_details: [],
   notes: 'Me molestó la rodilla',
+  admin_reply_text: null,
+  admin_reply_sent_at: null,
 }
 
 afterEach(() => {
