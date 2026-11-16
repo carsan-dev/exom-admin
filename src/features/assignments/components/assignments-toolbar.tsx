@@ -36,6 +36,7 @@ interface AssignmentsToolbarProps {
   onChangeView: (viewMode: AssignmentsViewMode) => void
   onPreviousPeriod: () => void
   onNextPeriod: () => void
+  onToday: () => void
   onOpenEditor: () => void
   onOpenCopyWeek: () => void
   onOpenCopySelection: () => void
@@ -71,6 +72,7 @@ export function AssignmentsToolbar({
   onChangeView,
   onPreviousPeriod,
   onNextPeriod,
+  onToday,
   onOpenEditor,
   onOpenCopyWeek,
   onOpenCopySelection,
@@ -138,6 +140,9 @@ export function AssignmentsToolbar({
             <Button variant="outline" onClick={onNextPeriod} disabled={!selectedClientId || isBusy}>
               Siguiente
               <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" onClick={onToday} disabled={!selectedClientId || isBusy}>
+              Hoy
             </Button>
           </div>
         </div>

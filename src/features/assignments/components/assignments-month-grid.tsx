@@ -8,7 +8,10 @@ interface AssignmentsMonthGridProps {
   days: AssignmentDay[]
   selectedDates: string[]
   disabled?: boolean
+  /** Current date (yyyy-MM-dd); only the matching visible day is marked. */
+  todayDate?: string
   onToggleDay: (date: string) => void
+  onOpenDay?: (date: string) => void
 }
 
 function compareByDate(left: AssignmentDay, right: AssignmentDay) {
@@ -19,7 +22,9 @@ export function AssignmentsMonthGrid({
   days,
   selectedDates,
   disabled = false,
+  todayDate,
   onToggleDay,
+  onOpenDay,
 }: AssignmentsMonthGridProps) {
   const orderedDays = [...days].sort(compareByDate)
   const firstVisibleDay = orderedDays[0]
@@ -51,7 +56,9 @@ export function AssignmentsMonthGrid({
             variant="month"
             isSelected={selectedDates.includes(day.date)}
             disabled={disabled}
+            isToday={day.date === todayDate}
             onSelect={onToggleDay}
+            onOpen={onOpenDay}
           />
         ))}
 

@@ -24,6 +24,7 @@ import {
   useUpdateAssignment,
   useUpdateAutoAssignmentRule,
 } from '../api'
+import { DAY_GESTURE_HINT_ID } from '../components/assignment-day-card'
 import { AssignmentEditorDialog } from '../components/assignment-editor-dialog'
 import type { AssignmentEditorMode } from '../components/assignment-editor-state'
 import { AssignmentsCatalogErrorState } from '../components/assignments-catalog-error-state'
@@ -272,6 +273,10 @@ export function AssignmentsPage() {
     updateSearchParam({ date: formatIsoDate(nextDate) })
   }
 
+  const goToToday = () => {
+    updateSearchParam({ date: getCurrentAnchorDate() })
+  }
+
   const handleClearSelection = () => {
     setSelectedDates([])
   }
@@ -280,13 +285,23 @@ export function AssignmentsPage() {
     setSelectedDates(days.map((day) => day.date))
   }
 
+  const openSelectionEditor = () => {
+    setEditorMode('selection')
+    setEditorOpen(true)
+  }
+
   const handleOpenEditor = () => {
     if (selectedDates.length === 0) {
       return
     }
 
-    setEditorMode('selection')
-    setEditorOpen(true)
+    openSelectionEditor()
+  }
+
+  // Double click / Enter on a day: the editor works on the selected days, so the day becomes the selection.
+  const handleOpenDayEditor = (date: string) => {
+    setSelectedDates([date])
+    openSelectionEditor()
   }
 
   const handleOpenAutoRuleEditor = () => {
@@ -477,6 +492,7 @@ export function AssignmentsPage() {
         onChangeView={handleViewChange}
         onPreviousPeriod={() => changeVisiblePeriod(-1)}
         onNextPeriod={() => changeVisiblePeriod(1)}
+        onToday={goToToday}
         onOpenEditor={handleOpenEditor}
         onOpenCopyWeek={() => setCopyWeekOpen(true)}
         onSelectAllVisible={handleSelectAllVisible}
@@ -519,16 +535,24 @@ export function AssignmentsPage() {
               days={days}
               selectedDates={selectedDates}
               disabled={isMutating}
+              todayDate={getCurrentAnchorDate()}
               onToggleDay={toggleDaySelection}
+              onOpenDay={handleOpenDayEditor}
             />
           ) : (
             <AssignmentsMonthGrid
               days={days}
               selectedDates={selectedDates}
               disabled={isMutating}
+              todayDate={getCurrentAnchorDate()}
               onToggleDay={toggleDaySelection}
+              onOpenDay={handleOpenDayEditor}
             />
           )}
+
+          <p id={DAY_GESTURE_HINT_ID} className="text-xs text-foreground-muted">
+            Clic en un día para seleccionarlo · doble clic o Intro para editarlo directamente.
+          </p>
         </>
       )}
 

@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react'
 import { Apple, Check, Dumbbell, PauseCircle } from 'lucide-react'
 import { StatusChip } from '@/components/ui/status-chip'
 import { Tag } from '@/components/ui/tag'
@@ -13,8 +14,15 @@ interface AssignmentDayCardProps {
   isSelected: boolean
   disabled?: boolean
   variant?: 'week' | 'month'
+  /** The day is the current date: marked with aria-current and a visible "Hoy" label. */
+  isToday?: boolean
   onSelect: (date: string) => void
+  /** Double click or Enter: open the editor for this day. Space keeps selecting. */
+  onOpen?: (date: string) => void
 }
+
+/** Id of the visible hint that describes the day gestures; the day buttons point to it. */
+export const DAY_GESTURE_HINT_ID = 'assignments-day-gesture-hint'
 
 function toDisplayDate(date: string) {
   return new Date(`${date}T00:00:00`)
@@ -54,36 +62,58 @@ function SelectionMark({ isSelected, label, className }: { isSelected: boolean; 
   )
 }
 
+function TodayLabel() {
+  return (
+    <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-accent">
+      Hoy
+    </span>
+  )
+}
+
 export function AssignmentDayCard({
   day,
   isSelected,
   disabled = false,
   variant = 'week',
+  isToday = false,
   onSelect,
+  onOpen,
 }: AssignmentDayCardProps) {
   const displayDate = toDisplayDate(day.date)
   const trainings = day.trainings ?? (day.training ? [day.training] : [])
   const retiredTrainings = trainings.filter((training) => training.is_active === false)
+  const dayButtonProps = {
+    type: 'button' as const,
+    'aria-pressed': isSelected,
+    'aria-current': isToday ? ('date' as const) : undefined,
+    'aria-describedby': onOpen ? DAY_GESTURE_HINT_ID : undefined,
+    disabled,
+    onClick: () => onSelect(day.date),
+    onDoubleClick: onOpen ? () => onOpen(day.date) : undefined,
+    onKeyDown: onOpen
+      ? (event: KeyboardEvent<HTMLButtonElement>) => {
+          if (event.key !== 'Enter') return
+          // Enter would otherwise click the button (toggle); here it opens the editor instead.
+          event.preventDefault()
+          if (!event.repeat) onOpen(day.date)
+        }
+      : undefined,
+  }
 
   if (variant === 'month') {
     return (
-      <button
-        type="button"
-        aria-pressed={isSelected}
-        disabled={disabled}
-        onClick={() => onSelect(day.date)}
-        className={getBaseClassName(isSelected, variant)}
-      >
+      <button {...dayButtonProps} className={getBaseClassName(isSelected, variant)}>
         <div className="flex items-center gap-1.5 max-md:contents">
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted max-md:col-start-1 max-md:row-start-1 md:hidden">
             {weekdayFormatter.format(displayDate)}
           </p>
           <p className="flex items-baseline gap-1 max-md:col-start-1 max-md:row-start-2 max-md:pt-0.5">
-            <span className="font-display text-[22px] font-extrabold leading-none tabular-nums text-foreground md:text-[13px] md:font-semibold md:font-sans">
+            <span className={cn('font-display text-[22px] font-extrabold leading-none tabular-nums text-foreground md:text-[13px] md:font-semibold md:font-sans', isToday && 'text-foreground-accent')}>
               {dayFormatter.format(displayDate)}
             </span>
             <span className="sr-only">{monthFormatter.format(displayDate)}</span>
           </p>
+          {isToday && <TodayLabel />}
           <div className="flex items-center gap-1 text-foreground-muted md:ml-auto max-md:col-start-3 max-md:row-start-1 max-md:pl-2">
             {trainings.length > 0 && (
               <span className="inline-flex items-center gap-1">
@@ -135,20 +165,15 @@ export function AssignmentDayCard({
   }
 
   return (
-    <button
-      type="button"
-      aria-pressed={isSelected}
-      disabled={disabled}
-      onClick={() => onSelect(day.date)}
-      className={getBaseClassName(isSelected, variant)}
-    >
+    <button {...dayButtonProps} className={getBaseClassName(isSelected, variant)}>
       <div className="flex items-start justify-between gap-2 px-3 pt-3.5 pb-3 max-md:flex-col max-md:items-start max-md:justify-start max-md:gap-1.5 max-md:px-0.5 md:border-b md:border-border max-lg:md:px-2">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted">
+          <p className={cn('text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted', isToday && 'flex items-center gap-1.5 text-foreground-accent')}>
             {weekdayFormatter.format(displayDate)}
+            {isToday && <TodayLabel />}
           </p>
           <p className="mt-1.5 flex items-baseline gap-1.5 max-md:mt-1">
-            <span className="font-display text-[28px] font-extrabold leading-[0.9] tabular-nums text-foreground max-lg:md:text-2xl">
+            <span className={cn('font-display text-[28px] font-extrabold leading-[0.9] tabular-nums text-foreground max-lg:md:text-2xl', isToday && 'text-foreground-accent')}>
               {dayFormatter.format(displayDate)}
             </span>
             <span className="text-xs text-foreground-muted">{monthFormatter.format(displayDate)}</span>
