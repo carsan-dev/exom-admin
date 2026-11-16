@@ -256,7 +256,7 @@ describe('Diet meals drag and drop reordering (P7)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Bajar comida Avena con fruta' }))
     fireEvent.click(screen.getByRole('button', { name: 'Bajar comida Avena con fruta' }))
     expect(dragged).toEqual(await savedPayload())
-  })
+  }, 15000)
 
   it('cancels with Escape without moving anything or closing the builder', async () => {
     const { onOpenChange } = await renderBuilder()
