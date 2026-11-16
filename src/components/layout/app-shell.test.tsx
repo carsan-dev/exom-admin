@@ -56,6 +56,7 @@ function renderBreadcrumbs(role: TestRole, route: string) {
 const SUPER_ADMIN_NAV: Array<[string, string]> = [
   ['Dashboard', '/dashboard'],
   ['Usuarios', '/users'],
+  ['Servicio base', '/base-service'],
   ['Ejercicios', '/exercises'],
   ['Entrenamientos', '/trainings'],
   ['Badges', '/badges'],

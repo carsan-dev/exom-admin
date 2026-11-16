@@ -17,6 +17,7 @@ import {
   Settings,
   ShieldCheck,
   Tags,
+  Mail,
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
@@ -36,6 +37,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/clients', label: 'Clientes', icon: Users },
+  { to: '/base-service', label: 'Servicio base', icon: Mail },
   { to: '/exercises', label: 'Ejercicios', icon: Dumbbell },
   { to: '/trainings', label: 'Entrenamientos', icon: ClipboardList },
   { to: '/badges', label: 'Badges', icon: Tags },
