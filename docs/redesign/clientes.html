@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Clientes · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="clientes" data-group="Seguimiento" data-crumbs='["Clientes"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1" data-text-super="Usuarios" data-text-admin="Clientes">Usuarios</h1>
+        <span class="ph-meta">
+          <span data-meta="clientes" data-text-super="46 clientes registrados" data-text-admin="46 clientes asignados a tu cuenta">46 clientes registrados</span>
+          <span data-meta="admins" hidden>5 admins registrados</span>
+          <span data-meta="super" hidden>2 super admins registrados</span>
+        </span>
+      </div>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-primary" type="button" data-open="#dlg-new" aria-haspopup="dialog" data-new="clientes"><i data-lucide="plus"></i>Nuevo cliente</button>
+      <button class="btn btn-primary" type="button" data-open="#dlg-new-admin" aria-haspopup="dialog" data-new="admins" hidden><i data-lucide="plus"></i>Nuevo admin</button>
+    </div>
+  </header>
+
+  <div data-tabs id="user-tabs">
+    <div class="tabs" role="tablist" aria-label="Tipo de usuario" data-role="super">
+      <button class="tab" type="button" role="tab" id="tab-clientes" aria-controls="panel-clientes" aria-selected="true" data-kind="clientes">Clientes <span class="tab-count">46</span></button>
+      <button class="tab" type="button" role="tab" id="tab-admins" aria-controls="panel-admins" aria-selected="false" data-kind="admins">Admins <span class="tab-count">5</span></button>
+      <button class="tab" type="button" role="tab" id="tab-super" aria-controls="panel-super" aria-selected="false" data-kind="super">Super Admins <span class="tab-count">2</span></button>
+    </div>
+
+    <!-- ===================== CLIENTES ===================== -->
+    <section id="panel-clientes" role="tabpanel" aria-labelledby="tab-clientes">
+      <div class="toolbar-row">
+        <div class="toolbar" role="search" aria-label="Buscar y filtrar clientes">
+          <label class="input-icon">
+            <span class="sr-only">Buscar clientes</span>
+            <i data-lucide="search"></i>
+            <input class="input" type="search" placeholder="Buscar por nombre o email..." autocomplete="off">
+          </label>
+          <button class="btn btn-secondary" type="button" data-open="#filters-pop" aria-haspopup="dialog" aria-expanded="false"><i data-lucide="sliders-horizontal"></i>Filtros<span class="count" data-filter-count>2</span></button>
+          <span class="filter-chip">Estado: <b>Activa</b><button type="button" data-remove-chip aria-label="Quitar filtro Estado: Activa"><i data-lucide="x"></i></button></span>
+          <span class="filter-chip">Nivel: <b>Intermedio</b><button type="button" data-remove-chip aria-label="Quitar filtro Nivel: Intermedio"><i data-lucide="x"></i></button></span>
+          <button class="btn btn-ghost btn-sm clear-all" type="button" data-clear-chips>Limpiar todo</button>
+        </div>
+        <div class="segmented" role="group" aria-label="Visibilidad del listado">
+          <button class="seg-btn" type="button" aria-pressed="true" data-panel="#view-main">Listado principal</button>
+          <button class="seg-btn" type="button" aria-pressed="false" data-panel="#view-archived">Archivados</button>
+        </div>
+      </div>
+
+      <div id="view-main">
+        <div class="banner banner-info" data-role="super" data-show="data" style="margin-bottom:16px">
+          <i data-lucide="rotate-cw"></i>
+          <span class="banner-text"><b>1 eliminación en curso.</b> La limpieza se reintenta automáticamente.</span>
+          <span class="banner-actions"><button class="btn btn-ghost btn-sm" type="button" data-open="#sheet-deletions" aria-haspopup="dialog">Ver estado</button></span>
+        </div>
+
+        <div data-show="data">
+          <div class="table-wrap">
+            <table class="table table--stack">
+              <caption class="sr-only">Listado de clientes, página 1 de 5</caption>
+          <thead>
+            <tr>
+              <th scope="col">Cliente</th>
+              <th scope="col" class="p3">Email</th>
+              <th scope="col">Nivel</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Admins</th>
+              <th scope="col" class="p2">Fecha registro</th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+              <tbody>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">CN</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Carla Núñez</a>
+                    <span class="entity-sub">Sin objetivo definido</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>carla.nunez@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="text-3">Sin nivel</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-warning">Sin admins</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>14 nov 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Carla Núñez" data-ctx="" data-ctx-name="Carla Núñez" data-ctx-email="carla.nunez@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">LM</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Lucía Martínez</a>
+                    <span class="entity-sub">Perder grasa, ganar masa muscular</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>lucia.martinez@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Intermedio</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-brand">2 admins</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>12 nov 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Lucía Martínez" data-ctx="" data-ctx-name="Lucía Martínez" data-ctx-email="lucia.martinez@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">JO</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Javier Ortega</a>
+                    <span class="entity-sub">Ganar fuerza en los básicos</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>javier.ortega@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Avanzado</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-brand">1 admin</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>3 nov 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Javier Ortega" data-ctx="" data-ctx-name="Javier Ortega" data-ctx-email="javier.ortega@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">MR</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Marta Ruiz</a>
+                    <span class="entity-sub">Preparar mi primera media maratón</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>marta.ruiz@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Intermedio</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-brand">1 admin</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>28 oct 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Marta Ruiz" data-ctx="" data-ctx-name="Marta Ruiz" data-ctx-email="marta.ruiz@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">DV</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Daniel Vega</a>
+                    <span class="entity-sub">Volver a entrenar sin dolor de hombro</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>dvega@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Principiante</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-danger">Bloqueada</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-brand">1 admin</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>21 oct 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Daniel Vega" data-ctx="blocked" data-ctx-name="Daniel Vega" data-ctx-email="dvega@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">PH</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Pablo Herrera</a>
+                    <span class="entity-sub">Mejorar movilidad y postura</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>pablo.herrera@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Principiante</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Inactiva</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-brand">1 admin</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>9 sep 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Pablo Herrera" data-ctx="inactive" data-ctx-name="Pablo Herrera" data-ctx-email="pablo.herrera@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">SG</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Sara Gil</a>
+                    <span class="entity-sub">Recuperar la rutina tras el embarazo</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>sara.gil@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Principiante</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-brand">2 admins</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>2 sep 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Sara Gil" data-ctx="" data-ctx-name="Sara Gil" data-ctx-email="sara.gil@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">AM</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Andrés Molina</a>
+                    <span class="entity-sub">Ganar masa muscular</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>andres.molina@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Intermedio</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-brand">1 admin</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>18 ago 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Andrés Molina" data-ctx="" data-ctx-name="Andrés Molina" data-ctx-email="andres.molina@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">EC</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Elena Castro</a>
+                    <span class="entity-sub">Perder 6 kg antes del verano</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>elena.castro@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Intermedio</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-brand">1 admin</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>30 jul 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Elena Castro" data-ctx="" data-ctx-name="Elena Castro" data-ctx-email="elena.castro@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">RD</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Raúl Domínguez</a>
+                    <span class="entity-sub">Mejorar mis marcas en peso muerto</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>raul.dominguez@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Avanzado</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-brand">2 admins</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>11 jul 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Raúl Domínguez" data-ctx="" data-ctx-name="Raúl Domínguez" data-ctx-email="raul.dominguez@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+          <nav class="pagination" aria-label="Paginación">
+            <span class="pagination-label">Página 1 de 5</span>
+            <span class="pagination-actions">
+              <button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button>
+              <button class="btn btn-secondary btn-sm" type="button">Siguiente</button>
+            </span>
+          </nav>
+        </div>
+
+        <div data-show="loading" aria-busy="true" aria-label="Cargando clientes">
+          <div class="table-wrap" aria-hidden="true">
+            <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Cliente</th>
+              <th scope="col" class="p3">Email</th>
+              <th scope="col">Nivel</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Admins</th>
+              <th scope="col" class="p2">Fecha registro</th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+              <tbody>
+            <tr>
+              <td><div class="entity"><span class="sk-circle"></span><span class="entity-text stack-8" style="flex:1"><span class="sk-line" style="--w:42%"></span><span class="sk-line" style="--w:64%"></span></span></div></td>
+              <td class="p3"><span class="sk-line" style="--w:80%"></span></td>
+              <td><span class="sk-line" style="--w:72px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td class="p2"><span class="sk-line" style="--w:80px"></span></td>
+              <td class="cell-actions"><span class="sk-line" style="--w:20px;margin-left:auto;margin-right:8px"></span></td>
+            </tr>
+            <tr>
+              <td><div class="entity"><span class="sk-circle"></span><span class="entity-text stack-8" style="flex:1"><span class="sk-line" style="--w:36%"></span><span class="sk-line" style="--w:72%"></span></span></div></td>
+              <td class="p3"><span class="sk-line" style="--w:80%"></span></td>
+              <td><span class="sk-line" style="--w:72px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td class="p2"><span class="sk-line" style="--w:80px"></span></td>
+              <td class="cell-actions"><span class="sk-line" style="--w:20px;margin-left:auto;margin-right:8px"></span></td>
+            </tr>
+            <tr>
+              <td><div class="entity"><span class="sk-circle"></span><span class="entity-text stack-8" style="flex:1"><span class="sk-line" style="--w:48%"></span><span class="sk-line" style="--w:58%"></span></span></div></td>
+              <td class="p3"><span class="sk-line" style="--w:80%"></span></td>
+              <td><span class="sk-line" style="--w:72px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td class="p2"><span class="sk-line" style="--w:80px"></span></td>
+              <td class="cell-actions"><span class="sk-line" style="--w:20px;margin-left:auto;margin-right:8px"></span></td>
+            </tr>
+            <tr>
+              <td><div class="entity"><span class="sk-circle"></span><span class="entity-text stack-8" style="flex:1"><span class="sk-line" style="--w:40%"></span><span class="sk-line" style="--w:66%"></span></span></div></td>
+              <td class="p3"><span class="sk-line" style="--w:80%"></span></td>
+              <td><span class="sk-line" style="--w:72px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td class="p2"><span class="sk-line" style="--w:80px"></span></td>
+              <td class="cell-actions"><span class="sk-line" style="--w:20px;margin-left:auto;margin-right:8px"></span></td>
+            </tr>
+            <tr>
+              <td><div class="entity"><span class="sk-circle"></span><span class="entity-text stack-8" style="flex:1"><span class="sk-line" style="--w:34%"></span><span class="sk-line" style="--w:70%"></span></span></div></td>
+              <td class="p3"><span class="sk-line" style="--w:80%"></span></td>
+              <td><span class="sk-line" style="--w:72px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td class="p2"><span class="sk-line" style="--w:80px"></span></td>
+              <td class="cell-actions"><span class="sk-line" style="--w:20px;margin-left:auto;margin-right:8px"></span></td>
+            </tr>
+            <tr>
+              <td><div class="entity"><span class="sk-circle"></span><span class="entity-text stack-8" style="flex:1"><span class="sk-line" style="--w:44%"></span><span class="sk-line" style="--w:60%"></span></span></div></td>
+              <td class="p3"><span class="sk-line" style="--w:80%"></span></td>
+              <td><span class="sk-line" style="--w:72px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td><span class="sk-line" style="--w:64px"></span></td>
+              <td class="p2"><span class="sk-line" style="--w:80px"></span></td>
+              <td class="cell-actions"><span class="sk-line" style="--w:20px;margin-left:auto;margin-right:8px"></span></td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div data-show="empty" class="section">
+          <div class="empty">
+            <span class="empty-x" aria-hidden="true"></span>
+            <h2 class="empty-title" data-text-super="Todavía no hay clientes registrados" data-text-admin="Aún no tienes clientes asignados">Todavía no hay clientes registrados</h2>
+            <p class="empty-text">Da de alta a tu primer cliente para asignarle entrenamientos, dietas y seguimiento.</p>
+            <button class="btn btn-primary" type="button" data-open="#dlg-new" aria-haspopup="dialog"><i data-lucide="plus"></i>Crear primer cliente</button>
+          </div>
+        </div>
+
+        <div data-show="error" class="section">
+          <div class="error-state" role="alert">
+            <i data-lucide="circle-alert"></i>
+            <h2 class="empty-title">No se ha podido cargar el listado</h2>
+            <p class="empty-text">Comprueba tu conexión y vuelve a intentarlo. Los filtros se mantienen.</p>
+            <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-archived" hidden>
+        <div data-show="data loading error">
+          <div class="table-wrap">
+            <table class="table table--stack">
+              <caption class="sr-only">Clientes archivados</caption>
+          <thead>
+            <tr>
+              <th scope="col">Cliente</th>
+              <th scope="col" class="p3">Email</th>
+              <th scope="col">Nivel</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Admins</th>
+              <th scope="col" class="p2">Fecha registro</th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+              <tbody>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">IP</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Iván Prieto</a>
+                    <span class="entity-sub">Perder grasa</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>ivan.prieto@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Principiante</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Inactiva</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-brand">1 admin</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>4 mar 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Iván Prieto" data-ctx="inactive archived" data-ctx-name="Iván Prieto" data-ctx-email="ivan.prieto@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr data-href="cliente-detalle.html">
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">NS</span>
+                  <span class="entity-text">
+                    <a class="entity-name row-anchor" href="cliente-detalle.html">Nuria Sanz</a>
+                    <span class="entity-sub">Preparar oposiciones de bombero</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>nuria.sanz@example.com</span></td>
+              <td class="st-inline" data-label="Nivel"><span class="tag">Avanzado</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="st-inline" data-label="Admins"><span class="chip chip-warning">Sin admins</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>19 ene 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <i data-lucide="chevron-right" class="row-chevron"></i>
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Nuria Sanz" data-ctx="archived" data-ctx-name="Nuria Sanz" data-ctx-email="nuria.sanz@example.com"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+          <nav class="pagination" aria-label="Paginación de archivados">
+            <span class="pagination-label">Página 1 de 1</span>
+            <span class="pagination-actions">
+              <button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button>
+              <button class="btn btn-secondary btn-sm" type="button" disabled>Siguiente</button>
+            </span>
+          </nav>
+        </div>
+        <div data-show="empty" class="section">
+          <div class="empty">
+            <span class="empty-x" aria-hidden="true"></span>
+            <h2 class="empty-title">No se encontraron clientes con la búsqueda y filtros actuales.</h2>
+            <p class="empty-text">Quita algún filtro o cambia la búsqueda para ver más resultados.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ADMINS ===================== -->
+    <section id="panel-admins" role="tabpanel" aria-labelledby="tab-admins" hidden>
+      <div class="toolbar-row">
+        <div class="toolbar" role="search" aria-label="Buscar y filtrar admins">
+          <label class="input-icon">
+            <span class="sr-only">Buscar admins</span>
+            <i data-lucide="search"></i>
+            <input class="input" type="search" placeholder="Buscar por nombre o email..." autocomplete="off">
+          </label>
+          <button class="btn btn-secondary" type="button" data-open="#filters-pop" aria-haspopup="dialog" aria-expanded="false"><i data-lucide="sliders-horizontal"></i>Filtros<span class="count" data-filter-count hidden>0</span></button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table table--stack">
+          <caption class="sr-only">Listado de admins</caption>
+          <thead>
+            <tr>
+              <th scope="col">Usuario</th>
+              <th scope="col" class="p3">Email</th>
+              <th scope="col">Rol</th>
+              <th scope="col">Estado</th>
+              <th scope="col" class="p2">Fecha registro</th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">IL</span>
+                  <span class="entity-text">
+                    <span class="entity-name">Irene Lozano</span>
+                    <span class="entity-sub">Acceso al panel de administración</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>irene.lozano@exom.app</span></td>
+              <td class="st-inline" data-label="Rol"><span class="tag">Admin</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>2 feb 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#admin-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Irene Lozano" data-ctx="" data-ctx-name="Irene Lozano" data-ctx-first="Irene" data-ctx-last="Lozano" data-ctx-email="irene.lozano@exom.app" data-ctx-role="Admin"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr>
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">ÁR</span>
+                  <span class="entity-text">
+                    <span class="entity-name">Álvaro Rey</span>
+                    <span class="entity-sub">Acceso al panel de administración</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>alvaro.rey@exom.app</span></td>
+              <td class="st-inline" data-label="Rol"><span class="tag">Admin</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>14 mar 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#admin-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Álvaro Rey" data-ctx="" data-ctx-name="Álvaro Rey" data-ctx-first="Álvaro" data-ctx-last="Rey" data-ctx-email="alvaro.rey@exom.app" data-ctx-role="Admin"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr>
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">BS</span>
+                  <span class="entity-text">
+                    <span class="entity-name">Beatriz Soler</span>
+                    <span class="entity-sub">Acceso al panel de administración</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>beatriz.soler@exom.app</span></td>
+              <td class="st-inline" data-label="Rol"><span class="tag">Admin</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-danger">Bloqueada</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>8 abr 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#admin-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Beatriz Soler" data-ctx="blocked" data-ctx-name="Beatriz Soler" data-ctx-first="Beatriz" data-ctx-last="Soler" data-ctx-email="beatriz.soler@exom.app" data-ctx-role="Admin"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr>
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">HM</span>
+                  <span class="entity-text">
+                    <span class="entity-name">Hugo Marín</span>
+                    <span class="entity-sub">Acceso al panel de administración</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>hugo.marin@exom.app</span></td>
+              <td class="st-inline" data-label="Rol"><span class="tag">Admin</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>22 jun 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#admin-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Hugo Marín" data-ctx="" data-ctx-name="Hugo Marín" data-ctx-first="Hugo" data-ctx-last="Marín" data-ctx-email="hugo.marin@exom.app" data-ctx-role="Admin"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr>
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">LV</span>
+                  <span class="entity-text">
+                    <span class="entity-name">Laura Vidal</span>
+                    <span class="entity-sub">Acceso al panel de administración</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>laura.vidal@exom.app</span></td>
+              <td class="st-inline" data-label="Rol"><span class="tag">Admin</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Inactiva</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>5 sep 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#admin-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Laura Vidal" data-ctx="inactive" data-ctx-name="Laura Vidal" data-ctx-first="Laura" data-ctx-last="Vidal" data-ctx-email="laura.vidal@exom.app" data-ctx-role="Admin"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="pagination" aria-label="Paginación de admins">
+        <span class="pagination-label">Página 1 de 1</span>
+        <span class="pagination-actions">
+          <button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button>
+          <button class="btn btn-secondary btn-sm" type="button" disabled>Siguiente</button>
+        </span>
+      </nav>
+    </section>
+
+    <!-- ===================== SUPER ADMINS ===================== -->
+    <section id="panel-super" role="tabpanel" aria-labelledby="tab-super" hidden>
+      <p class="prose-13" style="margin-bottom:16px">Tu propia cuenta queda protegida frente a degradaciones o bajas accidentales.</p>
+      <div class="table-wrap">
+        <table class="table table--stack">
+          <caption class="sr-only">Listado de super admins</caption>
+          <thead>
+            <tr>
+              <th scope="col">Usuario</th>
+              <th scope="col" class="p3">Email</th>
+              <th scope="col">Rol</th>
+              <th scope="col">Estado</th>
+              <th scope="col" class="p2">Fecha registro</th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">MS</span>
+                  <span class="entity-text">
+                    <span class="entity-name">Moisés Sánchez<span class="chip chip-brand no-dot">Tú</span></span>
+                    <span class="entity-sub">Acceso al panel de administración</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>moises@exom.app</span></td>
+              <td class="st-inline" data-label="Rol"><span class="tag">Super Admin</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>10 ene 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#admin-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Moisés Sánchez" data-ctx="self" data-ctx-name="Moisés Sánchez" data-ctx-first="Moisés" data-ctx-last="Sánchez" data-ctx-email="moises@exom.app" data-ctx-role="Super Admin"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+            <tr>
+              <td class="cell-primary">
+                <div class="entity">
+                  <span class="avatar avatar-32" aria-hidden="true">CF</span>
+                  <span class="entity-text">
+                    <span class="entity-name">Cristina Ferrer</span>
+                    <span class="entity-sub">Acceso al panel de administración</span>
+                  </span>
+                </div>
+              </td>
+              <td class="cell-muted p3" data-label="Email"><span>cristina.ferrer@exom.app</span></td>
+              <td class="st-inline" data-label="Rol"><span class="tag">Super Admin</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Activa</span></td>
+              <td class="cell-date p2" data-label="Fecha registro"><span>10 ene 2026</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner">
+                <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#admin-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones de Cristina Ferrer" data-ctx="" data-ctx-name="Cristina Ferrer" data-ctx-first="Cristina" data-ctx-last="Ferrer" data-ctx-email="cristina.ferrer@exom.app" data-ctx-role="Super Admin"><i data-lucide="ellipsis"></i></button>
+              </span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="pagination" aria-label="Paginación de super admins">
+        <span class="pagination-label">Página 1 de 1</span>
+        <span class="pagination-actions">
+          <button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button>
+          <button class="btn btn-secondary btn-sm" type="button" disabled>Siguiente</button>
+        </span>
+      </nav>
+    </section>
+  </div>
+
+</main>
+</div>
+
+<!-- ===================== MENUS ===================== -->
+<div class="menu" id="row-menu" role="menu" aria-label="Acciones del cliente" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-role="super" data-toast="Gestionar admins" data-toast-tone="info" data-toast-desc="Diálogo pendiente de bocetar en la ficha del cliente."><i data-lucide="users"></i>Gestionar admins</button>
+  <button class="menu-item" type="button" role="menuitem" data-role="super" data-open="#dlg-role"><i data-lucide="user-cog"></i>Cambiar rol</button>
+  <div class="menu-sep" role="separator" data-role="super"></div>
+  <button class="menu-item" type="button" role="menuitem" data-if="blocked" data-open="#dlg-unblock"><i data-lucide="lock-open"></i>Desbloquear</button>
+  <button class="menu-item" type="button" role="menuitem" data-if-not="archived" data-open="#dlg-archive"><i data-lucide="archive"></i>Archivar</button>
+  <button class="menu-item" type="button" role="menuitem" data-if="archived" data-open="#dlg-unarchive"><i data-lucide="archive-restore"></i>Desarchivar</button>
+  <div class="menu-sep" role="separator" data-role="super"></div>
+  <button class="menu-item" type="button" role="menuitem" data-role="super" data-if-not="inactive" data-open="#dlg-deactivate"><i data-lucide="user-x"></i>Dar de baja</button>
+  <button class="menu-item" type="button" role="menuitem" data-role="super" data-if="inactive" data-open="#dlg-reactivate"><i data-lucide="user-check"></i>Reactivar</button>
+  <div class="menu-sep" role="separator" data-role="super"></div>
+  <button class="menu-item is-danger" type="button" role="menuitem" data-role="super" data-open="#dlg-delete"><i data-lucide="trash-2"></i>Eliminar definitivamente</button>
+</div>
+
+<div class="menu" id="admin-menu" role="menu" aria-label="Acciones del usuario" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-open="#dlg-edit"><i data-lucide="pencil"></i>Editar</button>
+  <button class="menu-item" type="button" role="menuitem" data-if="blocked" data-open="#dlg-unblock"><i data-lucide="lock-open"></i>Desbloquear</button>
+  <button class="menu-item" type="button" role="menuitem" data-disable-if="self" data-open="#dlg-role"><i data-lucide="user-cog"></i>Cambiar rol</button>
+  <div class="menu-sep" role="separator"></div>
+  <button class="menu-item" type="button" role="menuitem" data-disable-if="self" data-if-not="inactive" data-open="#dlg-deactivate"><i data-lucide="user-x"></i>Dar de baja</button>
+  <button class="menu-item" type="button" role="menuitem" data-if="inactive" data-open="#dlg-reactivate"><i data-lucide="user-check"></i>Reactivar</button>
+</div>
+
+<!-- ===================== FILTERS POPOVER ===================== -->
+<div class="popover" id="filters-pop" role="dialog" aria-labelledby="filters-title" data-align="start" style="--w:440px" hidden>
+  <div class="popover-head">
+    <h2 class="h3" id="filters-title">Filtros del listado</h2>
+    <p class="caption" style="margin-top:2px">Selecciona uno o varios criterios.</p>
+  </div>
+  <div class="popover-body">
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Estado</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox" checked>Activa</label>
+        <label class="check"><input type="checkbox">Bloqueada</label>
+        <label class="check"><input type="checkbox">Inactiva</label>
+      </div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Nivel</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox">Principiante</label>
+        <label class="check"><input type="checkbox" checked>Intermedio</label>
+        <label class="check"><input type="checkbox">Avanzado</label>
+      </div>
+    </fieldset></div>
+    <div class="filter-group" data-role="super"><fieldset class="fieldset">
+      <legend class="micro">Asignación</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox">Con admins</label>
+        <label class="check"><input type="checkbox">Sin admins</label>
+      </div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Fecha registro</legend>
+      <div class="field-grid">
+        <div class="field"><label class="field-label" for="f-from">Desde</label><input class="input" id="f-from" type="date"></div>
+        <div class="field"><label class="field-label" for="f-to">Hasta</label><input class="input" id="f-to" type="date"></div>
+      </div>
+    </fieldset></div>
+  </div>
+  <div class="popover-foot">
+    <button class="btn btn-ghost btn-sm" type="button">Limpiar</button>
+    <button class="btn btn-primary btn-sm" type="button" data-close>Aplicar</button>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: NUEVO CLIENTE ===================== -->
+<div class="overlay" id="dlg-new" data-static hidden>
+  <div class="dialog dialog-md" role="dialog" aria-modal="true" aria-labelledby="dlg-new-title" aria-describedby="dlg-new-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-new-title">Nuevo cliente</h2>
+        <p class="ov-desc" id="dlg-new-desc" data-text-super="Crea una nueva cuenta de cliente. Después podrás decidir qué admin o admins la gestionarán." data-text-admin="Crea una nueva cuenta y el backend la asignará automáticamente al admin actual.">Crea una nueva cuenta de cliente. Después podrás decidir qué admin o admins la gestionarán.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-new" data-validate novalidate data-success-toast="Cliente creado. Email de invitación enviado." data-success-toast-alt="Cliente creado correctamente">
+        <div class="field-grid">
+              <div class="field">
+                <label class="field-label" for="n-first">Nombre</label>
+                <input class="input" id="n-first" name="first" required placeholder="Lucía" autocomplete="off" data-error-required="Introduce el nombre.">
+              </div>
+              <div class="field">
+                <label class="field-label" for="n-last">Apellido</label>
+                <input class="input" id="n-last" name="last" required placeholder="Martínez" autocomplete="off" data-error-required="Introduce el apellido.">
+              </div>
+              <div class="field span-2">
+                <label class="field-label" for="n-email">Email</label>
+                <input class="input" id="n-email" name="email" type="email" required placeholder="cliente@exom.app" autocomplete="off" data-error-required="Introduce el email." data-error-format="Introduce un email válido.">
+              </div>
+              <div class="field span-2">
+                <label class="field-label" for="n-method">Método de contraseña</label>
+                <select class="select" id="n-method" name="method" data-switch="npw">
+                  <option value="invite">Enviar email de invitación</option>
+                  <option value="manual">Establecer contraseña manual</option>
+                </select>
+              </div>
+              <div class="span-2" data-case="npw:invite">
+                <div class="banner banner-info"><i data-lucide="mail"></i><span class="banner-text">El cliente recibirá un email para fijar su propia contraseña.</span></div>
+              </div>
+              <div class="field span-2" data-case="npw:manual" hidden>
+                <label class="field-label" for="n-pass">Contraseña</label>
+                <input class="input" id="n-pass" name="password" type="password" minlength="8" required placeholder="Mínimo 8 caracteres" autocomplete="new-password" data-error-required="Introduce una contraseña." data-error-format="La contraseña debe tener al menos 8 caracteres.">
+              </div>
+              <div class="field span-2">
+                <label class="field-label" for="n-level">Nivel</label>
+                <select class="select" id="n-level" name="level"><option>Principiante</option><option>Intermedio</option><option>Avanzado</option></select>
+              </div>
+              <div class="field span-2">
+                <label class="field-label" for="n-goal">Objetivo principal <span class="field-optional">Opcional</span></label>
+                <textarea class="textarea" id="n-goal" name="goal" rows="3" maxlength="160" data-count placeholder="Perder grasa, ganar masa muscular..." aria-describedby="n-goal-count"></textarea>
+                <div class="field-foot"><span></span><span class="field-count" id="n-goal-count" aria-live="polite">0/160</span></div>
+              </div>
+        </div>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="submit" form="form-new" data-loading-label="Creando...">Crear cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: NUEVO ADMIN ===================== -->
+<div class="overlay" id="dlg-new-admin" data-static hidden>
+  <div class="dialog dialog-md" role="dialog" aria-modal="true" aria-labelledby="dlg-na-title" aria-describedby="dlg-na-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-na-title">Nuevo admin</h2>
+        <p class="ov-desc" id="dlg-na-desc">Crea una nueva cuenta de administrador con acceso al panel de gestión de EXOM.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-new-admin" data-validate novalidate data-success-toast="Admin creado. Email de invitación enviado." data-success-toast-alt="Admin creado correctamente">
+        <div class="field-grid">
+              <div class="field">
+                <label class="field-label" for="a-first">Nombre</label>
+                <input class="input" id="a-first" required autocomplete="off" data-error-required="Introduce el nombre.">
+              </div>
+              <div class="field">
+                <label class="field-label" for="a-last">Apellido</label>
+                <input class="input" id="a-last" required autocomplete="off" data-error-required="Introduce el apellido.">
+              </div>
+              <div class="field span-2">
+                <label class="field-label" for="a-email">Email</label>
+                <input class="input" id="a-email" type="email" required placeholder="admin@exom.app" autocomplete="off" data-error-required="Introduce el email." data-error-format="Introduce un email válido.">
+              </div>
+              <div class="field span-2">
+                <label class="field-label" for="a-method">Método de contraseña</label>
+                <select class="select" id="a-method" name="method" data-switch="apw">
+                  <option value="invite">Enviar email de invitación</option>
+                  <option value="manual">Establecer contraseña manual</option>
+                </select>
+              </div>
+              <div class="span-2" data-case="apw:invite">
+                <div class="banner banner-info"><i data-lucide="mail"></i><span class="banner-text">El cliente recibirá un email para fijar su propia contraseña.</span></div>
+              </div>
+              <div class="field span-2" data-case="apw:manual" hidden>
+                <label class="field-label" for="a-pass">Contraseña</label>
+                <input class="input" id="a-pass" name="password" type="password" minlength="8" required placeholder="Mínimo 8 caracteres" autocomplete="new-password" data-error-required="Introduce una contraseña." data-error-format="La contraseña debe tener al menos 8 caracteres.">
+              </div>
+        </div>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="submit" form="form-new-admin" data-loading-label="Creando...">Crear admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: EDITAR USUARIO ===================== -->
+<div class="overlay" id="dlg-edit" data-static hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-edit-title" aria-describedby="dlg-edit-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-edit-title">Editar usuario</h2>
+        <p class="ov-desc" id="dlg-edit-desc">Actualiza los datos básicos de <span data-fill="name">Irene Lozano</span>. Seguirá teniendo rol <span data-fill="role">Admin</span>.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-edit" data-validate novalidate data-success-toast="Usuario actualizado correctamente">
+        <div class="field-grid">
+              <div class="field">
+                <label class="field-label" for="e-first">Nombre</label>
+                <input class="input" id="e-first" required data-fill="first" autocomplete="off" data-error-required="Introduce el nombre.">
+              </div>
+              <div class="field">
+                <label class="field-label" for="e-last">Apellido</label>
+                <input class="input" id="e-last" required data-fill="last" autocomplete="off" data-error-required="Introduce el apellido.">
+              </div>
+              <div class="field span-2">
+                <label class="field-label" for="e-email">Email</label>
+                <input class="input" id="e-email" type="email" required data-fill="email" placeholder="admin@exom.app" autocomplete="off" data-error-required="Introduce el email." data-error-format="Introduce un email válido.">
+              </div>
+        </div>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="submit" form="form-edit" data-loading-label="Guardando...">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: CAMBIAR ROL ===================== -->
+<div class="overlay" id="dlg-role" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-role-title" aria-describedby="dlg-role-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-role-title">Cambiar rol</h2>
+        <p class="ov-desc" id="dlg-role-desc">Selecciona el nuevo rol de <span data-fill="name">este usuario</span>.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="field">
+        <label class="field-label" for="r-role">Rol</label>
+        <select class="select" id="r-role"><option>Super Admin</option><option>Admin</option><option selected>Cliente</option></select>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-toast="Rol actualizado correctamente">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: DESBLOQUEAR ===================== -->
+<div class="overlay" id="dlg-unblock" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-unblock-title" aria-describedby="dlg-unblock-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-unblock-title">Desbloquear cuenta</h2>
+        <p class="ov-desc" id="dlg-unblock-desc">Vas a restaurar el acceso de <span data-fill="name">Daniel Vega</span>.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="banner banner-warning"><i data-lucide="triangle-alert"></i><span class="banner-text">La cuenta recuperará el acceso al panel y se reiniciarán sus intentos de login fallidos.</span></div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-toast="Cuenta desbloqueada correctamente">Confirmar desbloqueo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: ARCHIVAR / DESARCHIVAR ===================== -->
+<div class="overlay" id="dlg-archive" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-archive-title" aria-describedby="dlg-archive-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-archive-title">Archivar cliente</h2>
+        <p class="ov-desc" id="dlg-archive-desc"><span data-fill="name">Lucía Martínez</span> se ocultará del listado principal. Podrás encontrarlo en Archivados y desarchivarlo cuando quieras.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <p class="prose-13">Se conservan todos sus datos. Su situación de alta o baja, acceso a la App y recordatorios no cambian.</p>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-toast="Cliente archivado">Confirmar archivado</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="dlg-unarchive" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-unarchive-title" aria-describedby="dlg-unarchive-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-unarchive-title">Desarchivar cliente</h2>
+        <p class="ov-desc" id="dlg-unarchive-desc"><span data-fill="name">Iván Prieto</span> volverá a aparecer en el listado principal.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <p class="prose-13">Se conservan todos sus datos. Su situación de alta o baja, acceso a la App y recordatorios no cambian.</p>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-toast="Cliente desarchivado">Confirmar desarchivado</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: DAR DE BAJA / REACTIVAR ===================== -->
+<div class="overlay" id="dlg-deactivate" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-deact-title" aria-describedby="dlg-deact-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-deact-title">Dar de baja cuenta</h2>
+        <p class="ov-desc" id="dlg-deact-desc">Se conservarán sus datos, pero se bloqueará el acceso hasta nueva activación.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <p class="prose-13">Cuenta: <b data-fill="name">Lucía Martínez</b> · <span data-fill="email">lucia.martinez@example.com</span></p>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast="Cuenta dada de baja">Confirmar baja</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="dlg-reactivate" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-react-title" aria-describedby="dlg-react-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-react-title">Reactivar cuenta</h2>
+        <p class="ov-desc" id="dlg-react-desc">La cuenta recuperará acceso al panel y podrá volver a operar con normalidad.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <p class="prose-13">Cuenta: <b data-fill="name">Pablo Herrera</b> · <span data-fill="email">pablo.herrera@example.com</span></p>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-toast="Cuenta reactivada">Confirmar reactivación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: ELIMINAR PERMANENTEMENTE ===================== -->
+<div class="overlay" id="dlg-delete" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dlg-del-title" aria-describedby="dlg-del-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-del-title">Eliminar cliente permanentemente</h2>
+        <p class="ov-desc" id="dlg-del-desc">Vas a eliminar a <b data-fill="name">Lucía Martínez</b> (<span data-fill="email">lucia.martinez@example.com</span>). Esta acción no se puede deshacer.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body stack-16">
+      <div class="banner banner-danger"><i data-lucide="triangle-alert"></i><span class="banner-text">Perderá el acceso y se eliminarán su cuenta, historial, asignaciones, métricas, feedback y archivos propios. Los entrenamientos y dietas compartidos se conservan.</span></div>
+      <p class="prose-13">Si solo quieres ocultarlo del listado, utiliza <b>Archivar</b>.</p>
+      <div class="field">
+        <label class="field-label" for="del-confirm">Escribe ELIMINAR para confirmar</label>
+        <input class="input" id="del-confirm" autocomplete="off" autocapitalize="characters" spellcheck="false" data-confirm-match="ELIMINAR" data-confirm-target="#del-submit">
+        <p class="field-help">Distingue mayúsculas y minúsculas.</p>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" id="del-submit" disabled data-close data-toast="Eliminación solicitada" data-toast-tone="info" data-toast-desc="Puedes seguir su estado en Eliminaciones recientes."><i data-lucide="trash-2"></i>Eliminar permanentemente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SHEET: ELIMINACIONES RECIENTES ===================== -->
+<div class="overlay overlay-sheet" id="sheet-deletions" hidden>
+  <div class="sheet sheet-sm" role="dialog" aria-modal="true" aria-labelledby="sheet-del-title" aria-describedby="sheet-del-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="sheet-del-title">Eliminaciones recientes</h2>
+        <p class="ov-desc" id="sheet-del-desc">La limpieza pendiente se reintenta automáticamente. Hasta 100 operaciones; las completadas se muestran durante 7 días.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <ul class="ruled">
+        <li class="stack-8">
+          <div class="ruled-row"><span class="secondary text-2">Cliente: <span class="num">3f9a2c71-8b4e-4d1a-9c55-0e7f1b2a6d43</span></span><span class="chip chip-info">En curso</span></div>
+          <p class="prose-13">Eliminación en curso. La limpieza de la cuenta y sus archivos se comprueba y reintenta automáticamente.</p>
+          <p class="caption">Solicitada el 15 nov 2026, 10:42</p>
+        </li>
+        <li class="stack-8">
+          <div class="ruled-row"><span class="secondary text-2">Cliente: <span class="num">a81d04be-52f3-4c0e-8f6a-7d29c3e1b590</span></span><span class="chip chip-success">Completada</span></div>
+          <p class="prose-13">Eliminación completada</p>
+          <p class="caption">Solicitada el 12 nov 2026, 17:05</p>
+        </li>
+        <li class="stack-8">
+          <div class="ruled-row"><span class="secondary text-2">Cliente: <span class="num">c0e6f2a9-1b7d-4e83-a2c4-58f9d6b30e17</span></span><span class="chip chip-danger">Requiere verificación</span></div>
+          <p class="prose-13">Acceso retirado. La limpieza de la cuenta y sus archivos requiere verificación técnica; la eliminación aún no está completada.</p>
+          <p class="caption">Solicitada el 10 nov 2026, 09:18</p>
+        </li>
+      </ul>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-toast="Estado actualizado" data-toast-tone="info"><i data-lucide="refresh-cw"></i>Actualizar estado</button>
+      <button class="btn btn-primary" type="button" data-close>Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* Page-only: header action and count follow the selected user tab. */
+  document.addEventListener('tabchange', function (e) {
+    var kind = e.detail.tab.getAttribute('data-kind');
+    document.querySelectorAll('[data-meta]').forEach(function (el) { el.hidden = el.getAttribute('data-meta') !== kind; });
+    document.querySelectorAll('[data-new]').forEach(function (el) {
+      el.hidden = kind === 'clientes' ? el.getAttribute('data-new') !== 'clientes' : el.getAttribute('data-new') !== 'admins';
+    });
+  });
+</script>
+</body>
+</html>

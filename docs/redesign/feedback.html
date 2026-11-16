@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Feedback · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/feedback.css">
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="feedback" data-crumbs='["Feedback"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1">Feedback multimedia</h1>
+        <span class="ph-meta" data-show="data loading"><span data-pending-meta>4 pendientes</span></span>
+        <span class="ph-meta" data-show="empty">0 pendientes</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ PERIOD SUMMARY ============ -->
+  <section class="stats is-collapsed" id="fb-stats" aria-labelledby="stats-title">
+    <button class="stats-toggle" type="button" aria-expanded="false" aria-controls="fb-stats-body">
+      <span>Resumen · Últimos 30 días</span>
+      <i data-lucide="chevron-down"></i>
+    </button>
+    <div class="stats-body" id="fb-stats-body">
+      <div class="stats-head">
+        <div class="stats-title">
+          <h2 class="h2" id="stats-title">Resumen · Últimos 30 días</h2>
+          <p class="caption stats-range">16/10/2026 – 15/11/2026 · Comparado con 16/09/2026 – 15/10/2026</p>
+        </div>
+        <div class="period">
+          <label class="field-label" for="fb-period">Periodo</label>
+          <select class="select" id="fb-period">
+            <option>Últimos 7 días</option>
+            <option selected>Últimos 30 días</option>
+            <option>Últimos 90 días</option>
+            <option>Año actual</option>
+            <option>Todo el historial</option>
+            <option>Personalizado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ledger" data-show="data">
+        <div class="ledger-cell">
+          <span class="ledger-head"><span class="ledger-label micro">Total feedback</span></span>
+          <span class="fig">22</span>
+          
+        </div>
+        <div class="ledger-cell">
+          <span class="ledger-head"><span class="ledger-label micro">Pendientes</span></span>
+          <span class="fig">4</span>
+          
+        </div>
+        <div class="ledger-cell">
+          <span class="ledger-head"><span class="ledger-label micro">Revisados</span></span>
+          <span class="fig">18</span>
+          
+        </div>
+        <div class="ledger-cell">
+          <span class="ledger-head"><span class="ledger-label micro">Tiempo medio de revisión</span></span>
+          <span class="fig">5 h 12 min</span>
+          <span class="ledger-sub">18 revisiones en el periodo</span>
+        </div>
+      </div>
+
+      <div class="ledger" data-show="empty">
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Total feedback</span></span><span class="fig">0</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Pendientes</span></span><span class="fig">0</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Revisados</span></span><span class="fig">0</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Tiempo medio de revisión</span></span><span class="fig">—</span><span class="ledger-sub">0 revisiones en el periodo</span></div>
+      </div>
+
+      <div class="ledger" data-show="loading" aria-busy="true" aria-label="Cargando el resumen">
+        <div class="ledger-cell" aria-hidden="true"><span class="sk-line" style="--w:56%"></span><span class="sk-fig" style="margin-top:12px;height:28px"></span><span class="sk-line" style="--w:70%;margin-top:12px"></span></div>
+        <div class="ledger-cell" aria-hidden="true"><span class="sk-line" style="--w:44%"></span><span class="sk-fig" style="margin-top:12px;height:28px"></span><span class="sk-line" style="--w:52%;margin-top:12px"></span></div>
+        <div class="ledger-cell" aria-hidden="true"><span class="sk-line" style="--w:48%"></span><span class="sk-fig" style="margin-top:12px;height:28px"></span><span class="sk-line" style="--w:66%;margin-top:12px"></span></div>
+        <div class="ledger-cell" aria-hidden="true"><span class="sk-line" style="--w:72%"></span><span class="sk-fig" style="margin-top:12px;height:28px;--w:120px"></span><span class="sk-line" style="--w:60%;margin-top:12px"></span></div>
+      </div>
+
+      <div class="ledger" data-show="error" style="--cols:1">
+        <div class="error-state" role="alert" style="padding:28px 16px">
+          <i data-lucide="circle-alert"></i>
+          <h3 class="empty-title">No se pudo cargar el resumen</h3>
+          <button class="btn btn-secondary btn-sm" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+        </div>
+      </div>
+
+      <p class="caption stats-note">Las tarjetas resumen el periodo y el filtro seleccionado; el listado inferior no se filtra por periodo.</p>
+    </div>
+  </section>
+
+  <!-- ============ WORKSPACE (data) ============ -->
+  <div class="fb-work" data-show="data">
+    <section class="fb-list-pane" aria-labelledby="queue-title">
+      <h2 class="sr-only" id="queue-title">Feedback recibido</h2>
+      <div class="fb-filters" role="search" aria-label="Filtrar feedback">
+        <div class="fb-filter">
+          <label class="field-label" for="fb-client">Cliente</label>
+          <select class="select" id="fb-client">
+            <option value="">Todos</option>
+            <option>Carla Núñez</option>
+            <option>Daniel Vega</option>
+            <option>Javier Ortega</option>
+            <option>Lucía Martínez</option>
+            <option>Marta Ruiz</option>
+            <option>Pablo Herrera</option>
+            <option>Sara Gil</option>
+          </select>
+        </div>
+        <div class="fb-filter">
+          <span class="field-label" id="fb-status-l">Estado</span>
+          <div class="segmented" role="group" aria-labelledby="fb-status-l" id="fb-status">
+            <button class="seg-btn" type="button" aria-pressed="true" value="ALL">Todos</button>
+            <button class="seg-btn" type="button" aria-pressed="false" value="PENDING">Pendientes</button>
+            <button class="seg-btn" type="button" aria-pressed="false" value="REVIEWED">Revisados</button>
+          </div>
+        </div>
+      </div>
+
+      <ul class="fb-list" id="fb-list" aria-label="Feedback recibido"></ul>
+
+      <div class="empty empty-compact" id="fb-filtered-empty" hidden>
+        <span class="empty-x" aria-hidden="true"></span>
+        <p class="empty-title">No hay resultados para los filtros seleccionados</p>
+      </div>
+
+      <nav class="pagination" aria-label="Paginación" id="fb-pagination">
+        <span class="pagination-label">Página 1 de 3</span>
+        <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button><button class="btn btn-secondary btn-sm" type="button">Siguiente</button></span>
+      </nav>
+    </section>
+
+    <section class="fb-detail-pane" id="fb-detail" aria-label="Detalle de feedback" aria-live="polite"></section>
+  </div>
+
+  <!-- ============ LOADING ============ -->
+  <div class="fb-work" data-show="loading" aria-busy="true" aria-label="Cargando el feedback">
+    <div class="fb-list-pane" aria-hidden="true">
+      <div class="fb-filters"><span class="sk-block" style="--h:36px"></span><span class="sk-block" style="--h:36px;width:260px"></span></div>
+      <div class="fb-list">
+        <div class="sk-row"><span class="sk-block" style="--h:16px"></span><span class="stack-8"><span class="sk-line" style="--w:46%"></span><span class="sk-line" style="--w:70%"></span></span><span class="sk-line"></span></div>
+        <div class="sk-row"><span class="sk-block" style="--h:16px"></span><span class="stack-8"><span class="sk-line" style="--w:38%"></span><span class="sk-line" style="--w:62%"></span></span><span class="sk-line"></span></div>
+        <div class="sk-row"><span class="sk-block" style="--h:16px"></span><span class="stack-8"><span class="sk-line" style="--w:52%"></span><span class="sk-line" style="--w:74%"></span></span><span class="sk-line"></span></div>
+        <div class="sk-row"><span class="sk-block" style="--h:16px"></span><span class="stack-8"><span class="sk-line" style="--w:40%"></span><span class="sk-line" style="--w:58%"></span></span><span class="sk-line"></span></div>
+        <div class="sk-row"><span class="sk-block" style="--h:16px"></span><span class="stack-8"><span class="sk-line" style="--w:44%"></span><span class="sk-line" style="--w:66%"></span></span><span class="sk-line"></span></div>
+      </div>
+    </div>
+    <div class="fb-detail-pane" aria-hidden="true">
+      <div class="fbd-head"><span class="sk-line lg" style="--w:200px"></span><span class="sk-line" style="--w:60%;margin-top:16px"></span></div>
+      <div class="fbd-body"><span class="sk-block" style="--h:auto;aspect-ratio:16/9"></span><span class="sk-line" style="--w:120px"></span><span class="sk-block" style="--h:64px"></span></div>
+    </div>
+  </div>
+
+  <!-- ============ EMPTY ============ -->
+  <section class="section" data-show="empty" style="margin-top:40px" aria-label="Feedback recibido">
+    <div class="empty">
+      <span class="empty-x" aria-hidden="true"></span>
+      <h2 class="empty-title">No hay feedback disponible</h2>
+    </div>
+  </section>
+
+  <!-- ============ ERROR ============ -->
+  <section class="section" data-show="error" style="margin-top:40px" aria-label="Feedback recibido">
+    <div class="error-state" role="alert">
+      <i data-lucide="circle-alert"></i>
+      <h2 class="empty-title">Error al cargar el feedback. Intenta de nuevo.</h2>
+      <div class="row" style="margin-top:20px">
+        <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..." style="margin-top:0"><i data-lucide="rotate-cw"></i>Reintentar</button>
+        <span class="proposal-tag" title="Hoy el error del listado no tiene botón de reintento">Propuesta</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<!-- Detail sheet (< 1024px): opened from a row; same content as the desktop pane -->
+<div class="overlay overlay-sheet" id="fb-sheet" hidden>
+  <div class="sheet sheet-md fb-sheet" role="dialog" aria-modal="true" aria-labelledby="fb-sheet-title">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="fb-sheet-title">Detalle de feedback</h2></div>
+      <div class="sheet-nav">
+        <span class="proposal-tag" title="Navegar entre elementos sin cerrar el detalle">Propuesta</span>
+        <span class="sheet-pos" id="fb-sheet-pos" aria-live="polite">1 de 7</span>
+        <button class="btn btn-ghost btn-icon" type="button" data-step="-1" aria-label="Anterior"><i data-lucide="chevron-up"></i></button>
+        <button class="btn btn-ghost btn-icon" type="button" data-step="1" aria-label="Siguiente"><i data-lucide="chevron-down"></i></button>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body" id="fb-sheet-body"></div>
+    <div class="ov-foot" id="fb-sheet-foot"></div>
+  </div>
+</div>
+
+<script src="assets/pages/feedback.js"></script>
+</body>
+</html>

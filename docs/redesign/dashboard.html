@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Dashboard · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="dashboard" data-crumbs='["Dashboard"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <h1 class="h1">Dashboard</h1>
+      <p class="ph-sub">Hola, Moisés. Aquí tienes el resumen ejecutivo de tu operación en EXOM.</p>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-meta" type="button" data-refresh-label="Actualizado ahora" data-tip="Actualizar ahora" data-loading-label="Actualizando…" data-show="data empty"><i data-lucide="refresh-cw"></i>Actualizado hace 12 s</button>
+    </div>
+  </header>
+
+  <!-- ============ DATA ============ -->
+  <div data-show="data" class="stack-48">
+    <section aria-label="Indicadores">
+      <div class="ledger">
+        <a class="ledger-cell" href="recaps.html?status=SUBMITTED">
+          <span class="ledger-head"><span class="ledger-label micro">Recaps pendientes</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+          <span class="fig">7</span>
+          <span class="ledger-sub">Pendientes de revisión</span>
+        </a>
+        <a class="ledger-cell" href="feedback.html?status=PENDING">
+          <span class="ledger-head"><span class="ledger-label micro">Feedback pendiente</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+          <span class="fig">4</span>
+          <span class="ledger-sub">Feedback por responder</span>
+        </a>
+        <a class="ledger-cell is-alert" href="clientes.html?status=BLOCKED" data-tone="danger">
+          <span class="ledger-head"><span class="ledger-dot" aria-hidden="true"></span><span class="ledger-label micro">Cuentas bloqueadas</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+          <span class="fig">1</span>
+          <span class="ledger-sub">Requieren atención inmediata</span>
+        </a>
+        <a class="ledger-cell" href="clientes.html">
+          <span class="ledger-head"><span class="ledger-label micro">Clientes activos</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+          <span class="fig">42</span>
+          <span class="ledger-sub">46 clientes visibles</span>
+        </a>
+      </div>
+    </section>
+
+    <div class="split">
+      <section class="section" aria-labelledby="act-title">
+        <div class="section-head">
+          <div>
+            <h2 class="h2" id="act-title">Actividad reciente</h2>
+            <p class="section-sub">Últimos movimientos relevantes de tus clientes.</p>
+          </div>
+        </div>
+
+        <h3 class="feed-day micro">Hoy</h3>
+        <ul class="feed">
+          <li><a class="feed-row" href="recaps.html?clientId=c01&amp;status=SUBMITTED">
+            <i data-lucide="file-text" class="feed-type"></i>
+            <span class="avatar avatar-32" aria-hidden="true">LM</span>
+            <span class="feed-text"><span class="feed-name"><span class="sr-only">Recap · </span>Lucía Martínez</span><span class="feed-desc">Ha enviado su recap semanal con 3 fotos de progreso.</span></span>
+            <time class="feed-time" datetime="2026-11-15T09:12">hace 3 horas</time>
+            <i data-lucide="chevron-right" class="row-chevron"></i>
+          </a></li>
+          <li><a class="feed-row" href="feedback.html?clientId=c02&amp;status=PENDING">
+            <i data-lucide="message-square" class="feed-type"></i>
+            <span class="avatar avatar-32" aria-hidden="true">JO</span>
+            <span class="feed-text"><span class="feed-name"><span class="sr-only">Feedback · </span>Javier Ortega</span><span class="feed-desc">Ha enviado feedback de Pierna B con 2 vídeos de la sentadilla búlgara.</span></span>
+            <time class="feed-time" datetime="2026-11-15T08:05">hace 4 horas</time>
+            <i data-lucide="chevron-right" class="row-chevron"></i>
+          </a></li>
+          <li><a class="feed-row" href="progreso.html?clientId=c03">
+            <i data-lucide="dumbbell" class="feed-type"></i>
+            <span class="avatar avatar-32" aria-hidden="true">MR</span>
+            <span class="feed-text"><span class="feed-name"><span class="sr-only">Progreso · </span>Marta Ruiz</span><span class="feed-desc">Ha completado Torso A: 6 ejercicios, 22 series.</span></span>
+            <time class="feed-time" datetime="2026-11-15T07:40">hace 5 horas</time>
+            <i data-lucide="chevron-right" class="row-chevron"></i>
+          </a></li>
+          <li><a class="feed-row" href="clientes.html">
+            <i data-lucide="user-plus" class="feed-type"></i>
+            <span class="avatar avatar-32" aria-hidden="true">CN</span>
+            <span class="feed-text"><span class="feed-name"><span class="sr-only">Alta · </span>Carla Núñez</span><span class="feed-desc">Nueva cliente dada de alta. Invitación enviada por email.</span></span>
+            <time class="feed-time" datetime="2026-11-15T05:02">hace 7 horas</time>
+            <i data-lucide="chevron-right" class="row-chevron"></i>
+          </a></li>
+        </ul>
+
+        <h3 class="feed-day micro">Ayer</h3>
+        <ul class="feed">
+          <li><a class="feed-row" href="feedback.html?clientId=c05&amp;status=PENDING">
+            <i data-lucide="message-square" class="feed-type"></i>
+            <span class="avatar avatar-32" aria-hidden="true">DV</span>
+            <span class="feed-text"><span class="feed-name"><span class="sr-only">Feedback · </span>Daniel Vega</span><span class="feed-desc">Comenta molestias en el hombro derecho durante el press militar con mancuernas.</span></span>
+            <time class="feed-time" datetime="2026-11-14T19:30">hace 1 día</time>
+            <i data-lucide="chevron-right" class="row-chevron"></i>
+          </a></li>
+          <li><a class="feed-row" href="recaps.html?clientId=c06&amp;status=SUBMITTED">
+            <i data-lucide="file-text" class="feed-type"></i>
+            <span class="avatar avatar-32" aria-hidden="true">PH</span>
+            <span class="feed-text"><span class="feed-name"><span class="sr-only">Recap · </span>Pablo Herrera</span><span class="feed-desc">Ha enviado su recap semanal.</span></span>
+            <time class="feed-time" datetime="2026-11-14T18:10">hace 1 día</time>
+            <i data-lucide="chevron-right" class="row-chevron"></i>
+          </a></li>
+          <li><a class="feed-row" href="progreso.html?clientId=c07">
+            <i data-lucide="dumbbell" class="feed-type"></i>
+            <span class="avatar avatar-32" aria-hidden="true">SG</span>
+            <span class="feed-text"><span class="feed-name"><span class="sr-only">Progreso · </span>Sara Gil</span><span class="feed-desc">Ha completado Full body C.</span></span>
+            <time class="feed-time" datetime="2026-11-14T10:45">hace 1 día</time>
+            <i data-lucide="chevron-right" class="row-chevron"></i>
+          </a></li>
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="top-title">
+        <div class="section-head">
+          <div>
+            <h2 class="h2" id="top-title">Top clientes</h2>
+            <p class="section-sub">Ranking semanal por días de entrenamiento completados.</p>
+          </div>
+        </div>
+        <ol class="rank">
+          <li><a class="rank-row" href="cliente-detalle.html">
+            <span class="rank-pos" aria-label="Posición 1">1</span>
+            <span class="avatar avatar-32" aria-hidden="true">MR</span>
+            <span class="rank-main">
+              <span class="feed-name">Marta Ruiz</span>
+              <span class="rank-meta"><span class="week-ticks" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="caption">7/7 días completados</span></span>
+            </span>
+            <span class="rank-streak"><i data-lucide="flame"></i><span><span class="sr-only">Racha de </span>21 días</span></span>
+          </a></li>
+          <li><a class="rank-row" href="cliente-detalle.html">
+            <span class="rank-pos" aria-label="Posición 2">2</span>
+            <span class="avatar avatar-32" aria-hidden="true">LM</span>
+            <span class="rank-main">
+              <span class="feed-name">Lucía Martínez</span>
+              <span class="rank-meta"><span class="week-ticks" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><span class="caption">6/7 días completados</span></span>
+            </span>
+            <span class="rank-streak"><i data-lucide="flame"></i><span><span class="sr-only">Racha de </span>12 días</span></span>
+          </a></li>
+          <li><a class="rank-row" href="cliente-detalle.html">
+            <span class="rank-pos" aria-label="Posición 3">3</span>
+            <span class="avatar avatar-32" aria-hidden="true">JO</span>
+            <span class="rank-main">
+              <span class="feed-name">Javier Ortega</span>
+              <span class="rank-meta"><span class="week-ticks" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span><span class="caption">5/7 días completados</span></span>
+            </span>
+            <span class="rank-streak"><i data-lucide="flame"></i><span><span class="sr-only">Racha de </span>9 días</span></span>
+          </a></li>
+          <li><a class="rank-row" href="cliente-detalle.html">
+            <span class="rank-pos" aria-label="Posición 4">4</span>
+            <span class="avatar avatar-32" aria-hidden="true">SG</span>
+            <span class="rank-main">
+              <span class="feed-name">Sara Gil</span>
+              <span class="rank-meta"><span class="week-ticks" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span><span class="caption">5/7 días completados</span></span>
+            </span>
+            <span class="rank-streak"><i data-lucide="flame"></i><span><span class="sr-only">Racha de </span>6 días</span></span>
+          </a></li>
+          <li><a class="rank-row" href="cliente-detalle.html">
+            <span class="rank-pos" aria-label="Posición 5">5</span>
+            <span class="avatar avatar-32" aria-hidden="true">CN</span>
+            <span class="rank-main">
+              <span class="feed-name">Carla Núñez</span>
+              <span class="rank-meta"><span class="week-ticks" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span><span class="caption">4/7 días completados</span></span>
+            </span>
+            <span class="rank-streak"><i data-lucide="flame"></i><span><span class="sr-only">Racha de </span>4 días</span></span>
+          </a></li>
+        </ol>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============ LOADING (skeleton mirrors the layout) ============ -->
+  <div data-show="loading" class="stack-48" aria-busy="true" aria-label="Cargando el dashboard">
+    <div class="ledger" aria-hidden="true">
+      <div class="ledger-cell"><span class="sk-line" style="--w:58%"></span><span class="sk-fig" style="margin-top:16px"></span><span class="sk-line" style="--w:72%;margin-top:14px"></span></div>
+      <div class="ledger-cell"><span class="sk-line" style="--w:62%"></span><span class="sk-fig" style="margin-top:16px"></span><span class="sk-line" style="--w:66%;margin-top:14px"></span></div>
+      <div class="ledger-cell"><span class="sk-line" style="--w:64%"></span><span class="sk-fig" style="margin-top:16px"></span><span class="sk-line" style="--w:80%;margin-top:14px"></span></div>
+      <div class="ledger-cell"><span class="sk-line" style="--w:54%"></span><span class="sk-fig" style="margin-top:16px;--w:72px"></span><span class="sk-line" style="--w:60%;margin-top:14px"></span></div>
+    </div>
+    <div class="split" aria-hidden="true">
+      <section class="section">
+        <div class="section-head"><div class="stack-8" style="width:100%"><span class="sk-line lg" style="--w:180px"></span><span class="sk-line" style="--w:300px;max-width:80%"></span></div></div>
+        <span class="sk-line" style="--w:40px;margin:16px 0 12px"></span>
+        <ul class="feed">
+          <li><div class="feed-row"><span class="feed-type"></span><span class="sk-circle"></span><span class="stack-8"><span class="sk-line" style="--w:38%"></span><span class="sk-line" style="--w:76%"></span></span><span class="sk-line" style="--w:72px"></span><span class="row-chevron"></span></div></li>
+          <li><div class="feed-row"><span class="feed-type"></span><span class="sk-circle"></span><span class="stack-8"><span class="sk-line" style="--w:32%"></span><span class="sk-line" style="--w:84%"></span></span><span class="sk-line" style="--w:72px"></span><span class="row-chevron"></span></div></li>
+          <li><div class="feed-row"><span class="feed-type"></span><span class="sk-circle"></span><span class="stack-8"><span class="sk-line" style="--w:28%"></span><span class="sk-line" style="--w:64%"></span></span><span class="sk-line" style="--w:72px"></span><span class="row-chevron"></span></div></li>
+          <li><div class="feed-row"><span class="feed-type"></span><span class="sk-circle"></span><span class="stack-8"><span class="sk-line" style="--w:36%"></span><span class="sk-line" style="--w:70%"></span></span><span class="sk-line" style="--w:72px"></span><span class="row-chevron"></span></div></li>
+          <li><div class="feed-row"><span class="feed-type"></span><span class="sk-circle"></span><span class="stack-8"><span class="sk-line" style="--w:30%"></span><span class="sk-line" style="--w:58%"></span></span><span class="sk-line" style="--w:72px"></span><span class="row-chevron"></span></div></li>
+        </ul>
+      </section>
+      <section class="section">
+        <div class="section-head"><div class="stack-8" style="width:100%"><span class="sk-line lg" style="--w:140px"></span><span class="sk-line" style="--w:280px;max-width:90%"></span></div></div>
+        <ol class="rank">
+          <li><div class="rank-row"><span class="sk-line" style="--w:12px;height:20px;margin:auto"></span><span class="sk-circle"></span><span class="stack-8"><span class="sk-line" style="--w:46%"></span><span class="sk-line" style="--w:70%"></span></span><span class="sk-line" style="--w:52px"></span></div></li>
+          <li><div class="rank-row"><span class="sk-line" style="--w:12px;height:20px;margin:auto"></span><span class="sk-circle"></span><span class="stack-8"><span class="sk-line" style="--w:52%"></span><span class="sk-line" style="--w:70%"></span></span><span class="sk-line" style="--w:52px"></span></div></li>
+          <li><div class="rank-row"><span class="sk-line" style="--w:12px;height:20px;margin:auto"></span><span class="sk-circle"></span><span class="stack-8"><span class="sk-line" style="--w:40%"></span><span class="sk-line" style="--w:70%"></span></span><span class="sk-line" style="--w:52px"></span></div></li>
+          <li><div class="rank-row"><span class="sk-line" style="--w:12px;height:20px;margin:auto"></span><span class="sk-circle"></span><span class="stack-8"><span class="sk-line" style="--w:44%"></span><span class="sk-line" style="--w:70%"></span></span><span class="sk-line" style="--w:52px"></span></div></li>
+          <li><div class="rank-row"><span class="sk-line" style="--w:12px;height:20px;margin:auto"></span><span class="sk-circle"></span><span class="stack-8"><span class="sk-line" style="--w:48%"></span><span class="sk-line" style="--w:70%"></span></span><span class="sk-line" style="--w:52px"></span></div></li>
+        </ol>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============ EMPTY (per-block empties, KPIs at zero) ============ -->
+  <div data-show="empty" class="stack-48">
+    <section aria-label="Indicadores">
+      <div class="ledger">
+        <a class="ledger-cell" href="recaps.html?status=SUBMITTED">
+          <span class="ledger-head"><span class="ledger-label micro">Recaps pendientes</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+          <span class="fig">0</span>
+          <span class="ledger-sub">Pendientes de revisión</span>
+        </a>
+        <a class="ledger-cell" href="feedback.html?status=PENDING">
+          <span class="ledger-head"><span class="ledger-label micro">Feedback pendiente</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+          <span class="fig">0</span>
+          <span class="ledger-sub">Feedback por responder</span>
+        </a>
+        <a class="ledger-cell" href="clientes.html">
+          <span class="ledger-head"><span class="ledger-label micro">Cuentas bloqueadas</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+          <span class="fig">0</span>
+          <span class="ledger-sub">Sin alertas activas</span>
+        </a>
+        <a class="ledger-cell" href="clientes.html">
+          <span class="ledger-head"><span class="ledger-label micro">Clientes activos</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+          <span class="fig">0</span>
+          <span class="ledger-sub">0 clientes visibles</span>
+        </a>
+      </div>
+    </section>
+    <div class="split">
+      <section class="section" aria-labelledby="act-title-e">
+        <div class="section-head"><div>
+          <h2 class="h2" id="act-title-e">Actividad reciente</h2>
+          <p class="section-sub">Últimos movimientos relevantes de tus clientes.</p>
+        </div></div>
+        <div class="empty empty-compact">
+          <span class="empty-x" aria-hidden="true"></span>
+          <p class="empty-title">Todavía no hay actividad reciente para mostrar.</p>
+          <p class="empty-text">Aquí aparecerán los recaps, el feedback, los entrenamientos completados y las altas de tus clientes.</p>
+        </div>
+      </section>
+      <section class="section" aria-labelledby="top-title-e">
+        <div class="section-head"><div>
+          <h2 class="h2" id="top-title-e">Top clientes</h2>
+          <p class="section-sub">Ranking semanal por días de entrenamiento completados.</p>
+        </div></div>
+        <div class="empty empty-compact">
+          <span class="empty-x" aria-hidden="true"></span>
+          <p class="empty-title">Aún no hay entrenamientos completados esta semana.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============ ERROR ============ -->
+  <div data-show="error">
+    <div class="section">
+      <div class="error-state" role="alert">
+        <i data-lucide="circle-alert"></i>
+        <h2 class="empty-title">No se pudo cargar el dashboard</h2>
+        <p class="empty-text">Reintenta para recuperar el resumen ejecutivo del panel.</p>
+        <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Lucía Martínez · Recap 9 nov - 15 nov 2026 · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/recap-detalle.css">
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="recaps" data-crumbs='["Recaps","Lucía Martínez · 9 nov - 15 nov 2026"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <!-- ============ DATA (the detail has no empty state: "vacío" shows the data) ============ -->
+  <div class="rd-wrap" data-show="data empty">
+   <div class="rd-body" data-view="answers">
+    <div class="rd-top">
+    <header class="page-header rd-header">
+      <div class="ph-main">
+        <div class="ph-title-row">
+          <h1 class="h1">Lucía Martínez</h1>
+          <span data-v="review conflict refresh"><span class="chip chip-warning">Por revisar</span></span>
+          <span data-v="reviewed"><span class="chip chip-success">Revisado</span></span>
+          <span data-v="archived"><span class="chip chip-neutral">Archivado</span></span>
+        </div>
+        <p class="ph-sub">Semana 9 nov - 15 nov 2026 · lucia.martinez@example.com</p>
+        <p class="caption rd-dates">
+          <span>Enviado: <b>domingo, 15 de noviembre de 2026</b></span>
+          <span data-v="reviewed archived">Revisado: <b>domingo, 15 de noviembre de 2026</b></span>
+          <span data-v="archived">Archivado: <b>domingo, 15 de noviembre de 2026</b></span>
+        </p>
+      </div>
+      <div class="ph-actions">
+        <button class="btn btn-secondary" type="button" id="rd-print"><i data-lucide="printer"></i>Imprimir / Guardar PDF</button>
+        <span data-v="reviewed"><button class="btn btn-ghost btn-icon" type="button" data-open="#rd-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones del recap"><i data-lucide="ellipsis"></i></button></span>
+      </div>
+    </header>
+
+    <div class="banner banner-warning rd-refresh" role="alert" data-v="refresh">
+      <i data-lucide="triangle-alert"></i>
+      <span class="banner-text">No se pudo actualizar el recap. Se conservan tus cambios.</span>
+      <span class="banner-actions"><button class="btn btn-ghost btn-sm" type="button" data-pv-set="review"><i data-lucide="rotate-cw"></i>Reintentar consulta</button></span>
+    </div>
+
+    </div>
+      <div class="segmented rd-switch" role="group" aria-label="Vista del recap">
+        <button class="seg-btn" type="button" aria-pressed="true" data-view="answers">Respuestas</button>
+        <button class="seg-btn" type="button" aria-pressed="false" data-view="review">Revisión</button>
+      </div>
+
+        <!-- ===== READING COLUMN: all answers in one scroll ===== -->
+        <article class="rd-read" id="rd-answers" aria-label="Respuestas del cliente">
+          <nav class="rd-index" aria-label="Secciones del recap">
+            <ol>
+              <li><a href="#sec-entreno" aria-current="true">Entreno</a></li>
+              <li><a href="#sec-nutricion">Nutrición</a></li>
+              <li><a href="#sec-recuperacion">Recuperación</a></li>
+              <li><a href="#sec-general">General</a></li>
+              <li><a href="#sec-mejora">Mejora</a></li>
+            </ol>
+          </nav>
+
+          <section class="section rd-sec" id="sec-entreno" aria-labelledby="h-entreno">
+            <div class="section-head"><h2 class="h2" id="h-entreno"><i data-lucide="dumbbell"></i>Entrenos</h2></div>
+            <dl class="dl">
+              <dt>Esfuerzo semanal</dt><dd><span class="rd-num">8</span></dd>
+              <dt>Sesiones completadas</dt><dd><span class="rd-num">4</span></dd>
+              <dt>Media diaria de pasos</dt><dd>8.500 pasos/día</dd>
+              <dt>Progreso</dt><dd>Mejorando</dd>
+            </dl>
+            <div class="rd-notes">
+              <span class="micro">Notas</span>
+              <blockquote class="quote">He completado las cuatro sesiones. En la sentadilla búlgara noto que la rodilla izquierda se me va hacia dentro en las últimas repeticiones, sobre todo en la última serie. El resto de ejercicios, bien.</blockquote>
+            </div>
+          </section>
+
+          <section class="section rd-sec" id="sec-nutricion" aria-labelledby="h-nutricion">
+            <div class="section-head"><h2 class="h2" id="h-nutricion"><i data-lucide="utensils-crossed"></i>Nutrición</h2></div>
+            <dl class="dl">
+              <dt>Calidad de alimentación</dt><dd>Buena</dd>
+              <dt>Calidad de comidas</dt><dd><span class="rd-num">7</span></dd>
+              <dt>Hidratación activada</dt><dd>Sí</dd>
+              <dt>Nivel de hidratación</dt><dd>Entre 2 y 3 litros</dd>
+            </dl>
+            <div class="rd-notes">
+              <span class="micro">Notas</span>
+              <blockquote class="quote">El fin de semana comí fuera dos veces y me salté la cena del sábado.</blockquote>
+            </div>
+          </section>
+
+          <section class="section rd-sec" id="sec-recuperacion" aria-labelledby="h-recuperacion">
+            <div class="section-head"><h2 class="h2" id="h-recuperacion"><i data-lucide="moon"></i>Recuperación y hábitos</h2></div>
+            <dl class="dl">
+              <dt>Horas de sueño</dt><dd>7 A 8</dd>
+              <dt>Fatiga</dt><dd>Moderada</dd>
+              <dt>Intensidad del dolor</dt><dd>Leve</dd>
+              <dt>Zonas con dolor muscular</dt><dd><span class="rd-tags"><span class="tag">Cuádriceps</span><span class="tag">Zona lumbar</span></span></dd>
+            </dl>
+            <div class="rd-notes">
+              <span class="micro">Notas</span>
+              <blockquote class="quote">Agujetas fuertes el miércoles después de pierna. La zona lumbar se cargó el jueves.</blockquote>
+            </div>
+          </section>
+
+          <section class="section rd-sec" id="sec-general" aria-labelledby="h-general">
+            <div class="section-head"><h2 class="h2" id="h-general"><i data-lucide="smile"></i>Sensaciones generales</h2></div>
+            <dl class="dl">
+              <dt>Estado de ánimo</dt><dd>Bueno</dd>
+              <dt>Estrés activado</dt><dd>Sí</dd>
+              <dt>Nivel de estrés</dt><dd>Medio</dd>
+              <dt class="dt-long">Hambre semanal (1 sin hambre – 10 extrema)</dt>
+              <dd><span class="rd-val"><span class="rd-num">6</span><span class="week-ticks" role="img" aria-label="6 de 10"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></span></span></dd>
+              <dt class="dt-long">Energía semanal (1 sin energía – 10 mucha)</dt>
+              <dd><span class="rd-val"><span class="rd-num">7</span><span class="week-ticks" role="img" aria-label="7 de 10"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></span></dd>
+              <dt class="dt-long">Digestión semanal (1 muy mala – 10 muy buena)</dt>
+              <dd><span class="rd-val"><span class="rd-num">8</span><span class="week-ticks" role="img" aria-label="8 de 10"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></span></dd>
+            </dl>
+            <div class="rd-notes">
+              <span class="micro">Notas</span>
+              <p class="quote quote-empty">Sin notas del cliente</p>
+            </div>
+          </section>
+
+          <section class="section rd-sec" id="sec-mejora" aria-labelledby="h-mejora">
+            <div class="section-head"><h2 class="h2" id="h-mejora"><i data-lucide="message-circle"></i>Ayúdanos a mejorar</h2></div>
+            <dl class="dl">
+              <dt>Valoración del servicio</dt><dd><span class="rd-num">9</span></dd>
+              <dt>Valoración de la app</dt><dd><span class="rd-num">8</span></dd>
+              <dt>Áreas de mejora</dt><dd><span class="rd-tags"><span class="tag">Variedad de recetas</span><span class="tag">Vídeos de técnica</span></span></dd>
+            </dl>
+            <div class="rd-notes">
+              <span class="micro">Comentario del cliente</span>
+              <blockquote class="quote">Me vendría bien ver un vídeo de la sentadilla búlgara desde el lateral.</blockquote>
+            </div>
+          </section>
+        </article>
+
+        <!-- ===== REVIEW PANEL ===== -->
+        <aside class="rd-review" id="rd-review" aria-label="Revisión del recap">
+          <div class="banner banner-info" data-v="archived">
+            <i data-lucide="archive"></i>
+            <span class="banner-text">Este recap está archivado. Los comentarios quedan en modo lectura.</span>
+          </div>
+
+          <!-- Block 1: shareable review (draft -> publish) -->
+          <section class="rv-block" id="rv-1" aria-labelledby="rv-1-t">
+            <h2 class="rv-title" id="rv-1-t"><span class="rv-n">1 ·</span> Revisión para el cliente</h2>
+            <p class="rv-help">El borrador es privado. El cliente mantiene la última publicación hasta que confirmes una nueva revisión.</p>
+            <p class="rv-version"><i data-lucide="file-pen-line"></i><span>Borrador: <b data-draft-version>versión 3</b></span></p>
+
+            <div class="banner banner-warning" role="alert" data-v="conflict">
+              <i data-lucide="triangle-alert"></i>
+              <span class="banner-text">La revisión cambió...</span>
+              <span class="banner-actions" style="flex-wrap:wrap">
+                <button class="btn btn-ghost btn-sm" type="button" data-pv-set="review">Consultar versión del servidor</button>
+                <button class="btn btn-ghost btn-sm" type="button" data-pv-set="review">Descartar borrador y cargar versión</button>
+              </span>
+            </div>
+
+            <div class="rv-fields" data-block="1">
+              <div class="field">
+                <label class="field-label" for="rv-summary">Resumen del coach <span class="field-optional">· borrador privado</span></label>
+                <textarea class="textarea" id="rv-summary" rows="4" maxlength="3000" data-count>Semana sólida: 4 de 4 sesiones y buena adherencia a la dieta. El sueño sigue algo por debajo de lo ideal y la rodilla izquierda necesita atención en la sentadilla búlgara.</textarea>
+                <div class="field-foot"><span></span><span class="field-count" aria-live="polite">0/3000</span></div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="rv-changes">Cambios realizados <span class="field-optional">· borrador privado</span></label>
+                <textarea class="textarea" id="rv-changes" rows="4" maxlength="3000" data-count>Bajamos 2,5 kg en la sentadilla búlgara y añadimos 10 minutos de movilidad de cadera antes de los días de pierna.</textarea>
+                <div class="field-foot"><span></span><span class="field-count" aria-live="polite">0/3000</span></div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="rv-goals">Objetivos de la próxima semana <span class="field-optional">· borrador privado</span></label>
+                <textarea class="textarea" id="rv-goals" rows="4" maxlength="3000" data-count>Dormir 7 horas o más al menos 5 noches. Mantener la media de 8.000 pasos diarios.</textarea>
+                <div class="field-foot"><span></span><span class="field-count" aria-live="polite">0/3000</span></div>
+              </div>
+            </div>
+
+            <details class="rv-published" id="rv-published">
+              <summary><i data-lucide="chevron-right"></i>Última revisión publicada · visible para el cliente</summary>
+              <dl class="dl">
+                <dt>Resumen del coach</dt><dd data-pub="summary">Buena semana de adaptación. Has cumplido 3 de 4 sesiones y la técnica de los básicos mejora.</dd>
+                <dt>Cambios realizados</dt><dd data-pub="changes">Subimos a 4 días de entrenamiento y añadimos hip thrust en Pierna A.</dd>
+                <dt class="dt-long">Objetivos de la próxima semana</dt><dd data-pub="goals">Completar las 4 sesiones y registrar los pasos todos los días.</dd>
+              </dl>
+            </details>
+
+            <div class="rv-foot" data-edit-only>
+              <p class="rv-foot-hint" id="rv-1-hint" hidden>Guarda el borrador actual antes de publicar. Guardarlo no cambia lo que ve el cliente ni envía el feedback anterior.</p>
+              <div class="rv-foot-actions">
+                <button class="btn btn-secondary" type="button" id="rv-save-draft" data-loading-label="Guardando..." disabled><i data-lucide="save"></i>Guardar borrador privado</button>
+                <button class="btn btn-primary" type="button" id="rv-publish" data-open="#dlg-publish" aria-haspopup="dialog" aria-describedby="rv-1-hint">Publicar revisión</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Block 2: client comment (push) + internal note -->
+          <section class="rv-block" id="rv-2" aria-labelledby="rv-2-t">
+            <h2 class="rv-title" id="rv-2-t"><span class="rv-n">2 ·</span> Comentario y nota interna</h2>
+            <p class="rv-help">Añade un comentario visible para el cliente y/o una nota interna. Solo el comentario para el cliente activa una notificación push.</p>
+
+            <div class="rv-fields" data-block="2">
+              <div class="field">
+                <label class="field-label" for="rv-comment">Comentario para el cliente</label>
+                <textarea class="textarea" id="rv-comment" rows="4" aria-describedby="rv-comment-push rv-comment-sent" data-comment></textarea>
+                <p class="rv-line" id="rv-comment-sent" data-v="reviewed archived"><i data-lucide="send"></i><span>Enviado al cliente: <b>domingo, 15 de noviembre de 2026</b> · Pendiente de lectura</span></p>
+                <p class="rv-line is-info" id="rv-comment-push"><i data-lucide="bell"></i><span>Este texto es visible para el cliente. Si lo cambias se enviará una notificación push.</span></p>
+              </div>
+              <div class="field rv-internal">
+                <label class="field-label" for="rv-note"><i data-lucide="lock"></i>Nota interna (solo visible para el equipo)</label>
+                <textarea class="textarea" id="rv-note" rows="3" aria-describedby="rv-note-help" data-note></textarea>
+                <p class="field-help" id="rv-note-help">Esta nota nunca se comparte con el cliente y no genera notificaciones.</p>
+              </div>
+            </div>
+
+            <div class="rv-foot" data-edit-only>
+              <p class="rv-foot-hint" data-v="review conflict refresh">Al guardar marcarás este recap como revisado.</p>
+              <p class="rv-foot-hint" data-v="reviewed">Puedes actualizar los comentarios antes de archivarlo.</p>
+              <div class="rv-foot-actions">
+                <span data-v="review conflict refresh" style="display:contents"><button class="btn btn-primary" type="button" id="rv-mark" data-loading-label="Guardando..."><i data-lucide="check"></i>Marcar como revisado</button></span>
+                <span data-v="reviewed" style="display:contents"><button class="btn btn-primary" type="button" id="rv-save-comments" data-loading-label="Guardando..." disabled><i data-lucide="save"></i>Guardar cambios</button></span>
+              </div>
+            </div>
+          </section>
+        </aside>
+   </div>
+  </div>
+
+  <!-- ============ LOADING ============ -->
+  <div data-show="loading" aria-busy="true" aria-label="Cargando el recap">
+    <div class="stack-12" aria-hidden="true" style="margin-bottom:32px">
+      <span class="sk-line lg" style="--w:260px;height:28px"></span>
+      <span class="sk-line" style="--w:320px;max-width:90%"></span>
+      <span class="sk-line" style="--w:220px"></span>
+    </div>
+    <div class="rd-sk-cols" aria-hidden="true">
+      <div class="stack-16">
+        <span class="sk-block" style="--h:40px"></span>
+        <span class="sk-line lg" style="--w:140px;margin-top:24px"></span>
+        <span class="sk-block" style="--h:44px"></span><span class="sk-block" style="--h:44px"></span><span class="sk-block" style="--h:44px"></span>
+        <span class="sk-block" style="--h:72px"></span>
+      </div>
+      <div class="stack-16 rd-sk-side">
+        <span class="sk-line lg" style="--w:220px"></span>
+        <span class="sk-line" style="--w:90%"></span>
+        <span class="sk-block" style="--h:96px"></span><span class="sk-block" style="--h:96px"></span><span class="sk-block" style="--h:96px"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ERROR ============ -->
+  <div data-show="error">
+    <div class="section">
+      <div class="error-state" role="alert">
+        <i data-lucide="circle-alert"></i>
+        <h2 class="empty-title">Error al cargar el recap</h2>
+        <div class="row" style="margin-top:20px">
+          <a class="btn btn-secondary" href="recaps.html" style="margin-top:0"><i data-lucide="arrow-left"></i>Volver a recaps</a>
+          <button class="btn btn-primary" type="button" data-set-state="data" data-loading-label="Reintentando..." style="margin-top:0"><i data-lucide="rotate-cw"></i>Reintentar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ⋯ menu (only when Revisado) -->
+<div class="menu" id="rd-menu" role="menu" aria-label="Más acciones del recap" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-open="#dlg-archive"><i data-lucide="archive"></i>Archivar recap</button>
+</div>
+
+<!-- Publish confirmation -->
+<div class="overlay" id="dlg-publish" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dlg-publish-t" aria-describedby="dlg-publish-d">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-publish-t">¿Publicar revisión para el cliente?</h2>
+        <p class="ov-desc" id="dlg-publish-d">Reemplazarás la última revisión visible por este borrador guardado. El feedback anterior y las notas internas se conservan por separado.</p></div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="dlg-publish-ok" data-loading-label="Publicando...">Confirmar publicación</button>
+    </div>
+  </div>
+</div>
+
+<!-- Archive confirmation -->
+<div class="overlay" id="dlg-archive" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dlg-archive-t" aria-describedby="dlg-archive-d">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-archive-t">¿Archivar recap?</h2>
+        <p class="ov-desc" id="dlg-archive-d">El recap dejará de aparecer en el listado activo y pasará a la vista de archivados.</p></div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="dlg-archive-ok">Archivar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Unsaved changes guard -->
+<div class="overlay" id="dlg-unsaved" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dlg-unsaved-t" aria-describedby="dlg-unsaved-d">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-unsaved-t">Hay cambios sin guardar</h2>
+        <p class="ov-desc" id="dlg-unsaved-d">Si sales ahora perderás los cambios introducidos. Guarda o cancela la edición para conservarlos.</p></div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close autofocus>Permanecer</button>
+      <button class="btn btn-danger" type="button" id="dlg-unsaved-leave">Salir sin guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/pages/recap-detalle.js"></script>
+</body>
+</html>
