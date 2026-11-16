@@ -195,6 +195,9 @@ async function savedPayload() {
   return api.put.mock.calls[0][1]
 }
 
+// Keyboard drags replay many async steps; under a loaded full run they exceed the 5 s default.
+vi.setConfig({ testTimeout: 15000 })
+
 describe('Diet meals drag and drop reordering (P7)', () => {
   beforeEach(() => {
     for (const fn of Object.values(api)) fn.mockReset()
