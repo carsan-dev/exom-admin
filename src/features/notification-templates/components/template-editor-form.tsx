@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { CharCounter } from '@/features/notifications/components/char-counter'
+import { PushPreview } from '@/features/notifications/components/push-preview'
 import { formatUpdatedAt, normalizeRoute, type TemplateDraft } from '../template-helpers'
 import type { NotificationTemplate } from '../types'
 import { DeliveryInfo } from './delivery-info'
@@ -87,6 +89,7 @@ export function TemplateEditorForm({
               maxLength={120}
               className="max-md:h-11"
             />
+            <CharCounter label="título" count={draft.title.length} max={120} />
           </div>
 
           <div className="space-y-2">
@@ -113,7 +116,7 @@ export function TemplateEditorForm({
             rows={5}
             className="flex min-h-28 w-full resize-y rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground"
           />
-          <p className="text-xs text-foreground-muted">{draft.body.length}/500 caracteres</p>
+          <CharCounter label="cuerpo" count={draft.body.length} max={500} unit=" caracteres" />
         </div>
 
         <div className="space-y-3 border-t border-border pt-5">
@@ -128,12 +131,13 @@ export function TemplateEditorForm({
         </div>
 
         <div className="space-y-3 border-t border-border pt-5">
-          <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">Vista previa</h3>
-          <div className="space-y-1 border border-border-strong bg-card p-3">
-            <p className="text-sm font-semibold text-foreground">{draft.title || 'Sin título'}</p>
-            <p className="text-[13px] leading-[18px] text-foreground-secondary">{draft.body || 'Sin cuerpo'}</p>
-            <p className="text-xs text-foreground-muted">{normalizeRoute(draft.route) ?? 'Sin ruta'}</p>
-          </div>
+          <PushPreview
+            title={draft.title}
+            body={draft.body}
+            titleFallback="Sin título"
+            bodyFallback="Sin cuerpo"
+          />
+          <p className="text-xs text-foreground-muted">{normalizeRoute(draft.route) ?? 'Sin ruta'}</p>
         </div>
       </div>
 
