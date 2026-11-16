@@ -5,6 +5,7 @@ import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { AuthBrandPanel } from '../components/auth-brand-panel'
 
 export function OnboardingPage() {
   const { user, logout } = useAuth()
@@ -42,19 +43,7 @@ export function OnboardingPage() {
 
   return (
     <div className="grid min-h-dvh grid-cols-1 grid-rows-[96px_minmax(0,1fr)] bg-background lg:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] lg:grid-rows-1">
-      <div className="relative isolate min-h-24 overflow-hidden bg-[#090a09] text-[#b7bcb3] lg:min-h-full" aria-hidden="true">
-        <span className="absolute left-[-30%] top-1/2 z-0 h-0.5 w-[150%] -rotate-[7deg] bg-[#baf23a] lg:top-[46%] lg:w-[160%] lg:-rotate-12" />
-        <span className="absolute left-[-30%] top-1/2 z-0 h-0.5 w-[150%] rotate-[7deg] bg-[#baf23a] lg:top-[46%] lg:w-[160%] lg:rotate-12" />
-        <span className="pointer-events-none absolute bottom-[calc(72px-0.2em)] left-[-0.07em] z-[1] hidden select-none whitespace-nowrap font-display text-[clamp(220px,29vw,420px)] font-extrabold uppercase leading-[0.8] tracking-[-0.04em] text-[#dfe0d4]/10 lg:block">
-          E<span className="text-[#baf23a]">X</span>OM
-        </span>
-        <p className="absolute inset-0 z-[2] flex items-center gap-3 px-5 text-[13px] leading-5 lg:inset-x-0 lg:bottom-0 lg:top-auto lg:h-[72px] lg:gap-2.5 lg:border-t lg:border-[#272b25] lg:bg-[#090a09] lg:px-10">
-          <span className="font-display text-[40px] font-extrabold uppercase leading-none tracking-[-0.04em] text-[#f2f1e9] lg:hidden">
-            E<span className="text-[#baf23a]">X</span>OM
-          </span>
-          <span className="hidden lg:inline">Panel de administración EXOM</span>
-        </p>
-      </div>
+      <AuthBrandPanel />
 
       <main className="flex min-w-0 items-start justify-center px-4 py-8 md:px-5 md:py-10 lg:items-center lg:px-8 lg:py-12">
         <div className="w-full max-w-[380px]">

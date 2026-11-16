@@ -74,7 +74,7 @@ const mealTemplate: NotificationTemplate = {
   },
 }
 
-const SWITCH_QUESTION = '¿Descartar los cambios sin guardar y cambiar de plantilla?'
+const SWITCH_TITLE = 'Hay cambios sin guardar'
 const TEXT_URL = '/notifications/templates/system-semanal'
 const SCHEDULE_URL = '/notifications/templates/system-semanal/schedule'
 const envelope = (data: unknown) => ({ data: { data } })
@@ -344,21 +344,47 @@ describe('NotificationTemplatesPage single save (P10)', () => {
     expect(api.patch).toHaveBeenCalledTimes(2)
   })
 
+  it('in-flight guard: two synchronous submits before any await send each part once', async () => {
+    let resolveText: () => void = () => undefined
+    api.patch.mockImplementation((url: string, values: Record<string, unknown>) => {
+      if (url === TEXT_URL) {
+        return new Promise((resolve) => { resolveText = () => resolve(applyPatch(url, values)) })
+      }
+      return Promise.resolve(applyPatch(url, values))
+    })
+    const user = userEvent.setup()
+    await openWeekly(user)
+
+    await editText(user)
+    editSchedule()
+    const form = saveButton().closest('form')
+    if (!form) throw new Error('form not found')
+    fireEvent.submit(form)
+    fireEvent.submit(form)
+
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Horario actualizado'))
+    expect(api.patch).toHaveBeenCalledTimes(2)
+
+    resolveText()
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Plantilla actualizada'))
+    expect(api.patch).toHaveBeenCalledTimes(2)
+  })
+
   it('switching with dirty text asks: cancel keeps the drafts, accept switches and discards', async () => {
     const user = userEvent.setup()
     await openWeekly(user)
     await editText(user)
 
     await user.click(screen.getByRole('button', { name: /Recordatorio comidas/ }))
-    expect(screen.getByRole('alertdialog', { name: SWITCH_QUESTION })).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(screen.getByRole('alertdialog', { name: SWITCH_TITLE })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Permanecer' }))
 
     await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
     expect(screen.getByRole('heading', { name: 'Resumen semanal' })).toBeInTheDocument()
     expect(screen.getByLabelText('Cuerpo')).toHaveValue('Resumen de la semana!')
 
     await user.click(screen.getByRole('button', { name: /Recordatorio comidas/ }))
-    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Aceptar' }))
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Salir sin guardar' }))
 
     await waitFor(() => expect(screen.getByLabelText('Título')).toHaveValue('Registra tu comida'))
     await user.click(screen.getByRole('button', { name: /Resumen semanal/ }))
@@ -372,14 +398,14 @@ describe('NotificationTemplatesPage single save (P10)', () => {
     editSchedule()
 
     await user.click(screen.getByRole('button', { name: /Aviso puntual/ }))
-    expect(screen.getByRole('alertdialog', { name: SWITCH_QUESTION })).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(screen.getByRole('alertdialog', { name: SWITCH_TITLE })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Permanecer' }))
 
     await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
     expect(screen.getByLabelText('Hora')).toHaveValue('18:45')
 
     await user.click(screen.getByRole('button', { name: /Aviso puntual/ }))
-    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Aceptar' }))
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Salir sin guardar' }))
     await waitFor(() => expect(screen.getByLabelText('Título')).toHaveValue('Título manual'))
     expect(api.patch).not.toHaveBeenCalled()
   })
@@ -425,7 +451,7 @@ describe('NotificationTemplatesPage single save (P10)', () => {
     await screen.findByRole('button', { name: 'Guardando...' })
 
     await user.click(screen.getByRole('button', { name: /Aviso puntual/ }))
-    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Aceptar' }))
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Salir sin guardar' }))
     await waitFor(() => expect(screen.getByLabelText('Título')).toHaveValue('Título manual'))
 
     resolveText()

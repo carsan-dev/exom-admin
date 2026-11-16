@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 import type { NotificationTemplate } from '../types'
 
 export function DeliveryInfo({ template }: { template: NotificationTemplate }) {
@@ -10,13 +11,16 @@ export function DeliveryInfo({ template }: { template: NotificationTemplate }) {
         ? 'Por evento'
         : 'Manual'
 
+  // La etiqueta del API suele repetir el tipo («Manual», «Programada»): solo se oculta a la vista, el texto se conserva.
+  const isLabelRedundant = delivery.label.trim().toLowerCase() === typeLabel.toLowerCase()
+
   return (
     <div className="space-y-3 border border-border bg-background-surface p-4">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="outline" className="rounded-none border-accent-line/40 bg-lime-soft text-accent-text">
           {typeLabel}
         </Badge>
-        <p className="text-sm font-medium text-foreground">{delivery.label}</p>
+        <p className={cn('text-sm font-medium text-foreground', isLabelRedundant && 'sr-only')}>{delivery.label}</p>
       </div>
       <p className="text-[13px] leading-5 text-foreground-secondary">{delivery.description}</p>
       {delivery.type === 'schedule' ? (

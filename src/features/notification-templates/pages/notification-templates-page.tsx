@@ -63,7 +63,13 @@ interface TemplateEdits<T> {
   draft: T
 }
 
-const SWITCH_QUESTION = '¿Descartar los cambios sin guardar y cambiar de plantilla?'
+const SWITCH_CONFIRM = {
+  title: 'Hay cambios sin guardar',
+  description: 'Si cambias de plantilla ahora, se descartarán los cambios sin guardar de esta plantilla.',
+  cancelLabel: 'Permanecer',
+  confirmLabel: 'Salir sin guardar',
+  destructive: true,
+} as const
 
 function isScheduleTemplate(template: NotificationTemplate) {
   return template.delivery_info.type === 'schedule'
@@ -232,7 +238,7 @@ export function NotificationTemplatesPage() {
       return
     }
 
-    if (hasChanges && !(await confirm({ title: SWITCH_QUESTION }))) {
+    if (hasChanges && !(await confirm(SWITCH_CONFIRM))) {
       return
     }
 

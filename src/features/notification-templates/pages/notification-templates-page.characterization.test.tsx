@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AxiosError, AxiosHeaders } from 'axios'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -121,7 +122,9 @@ function mount() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
   render(
     <QueryClientProvider client={client}>
-      <NotificationTemplatesPage />
+      <MemoryRouter>
+        <NotificationTemplatesPage />
+      </MemoryRouter>
     </QueryClientProvider>,
   )
 }
@@ -141,6 +144,7 @@ describe('NotificationTemplatesPage permissions', () => {
     expect(screen.queryByRole('button', { name: 'Nueva plantilla' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Guardar cambios' })).not.toBeInTheDocument()
     expect(screen.queryByText('Plantillas')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ir a Notificaciones' })).toHaveAttribute('href', '/notifications')
     expect(api.get).not.toHaveBeenCalled()
   })
 

@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { auth } from '@/lib/firebase'
+import { AuthBrandPanel } from '../components/auth-brand-panel'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -87,39 +88,7 @@ export function LoginPage() {
         Saltar al contenido
       </a>
 
-      {/* Panel de marca: siempre oscuro en ambos temas */}
-      <div className="relative isolate min-h-24 overflow-hidden bg-[#090a09] text-[#b7bcb3] lg:min-h-full">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
-          <span className="absolute left-0 top-1/2 h-0.5 w-[150%] origin-center -rotate-[7deg] bg-brand-primary lg:-left-[30%] lg:top-[46%] lg:w-[160%] lg:-rotate-12" />
-          <span className="absolute left-0 top-1/2 h-0.5 w-[150%] origin-center rotate-[7deg] bg-brand-primary lg:-left-[30%] lg:top-[46%] lg:w-[160%] lg:rotate-12" />
-        </div>
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-[calc(72px-0.2em)] -left-[0.07em] z-[1] hidden select-none whitespace-nowrap font-display text-[clamp(220px,29vw,420px)] font-extrabold uppercase leading-[0.8] tracking-[-0.04em] text-[#dfe0d4]/10 lg:block"
-        >
-          E<span className="text-brand-primary">X</span>OM
-        </span>
-        <p className="absolute inset-0 z-[2] flex items-center gap-3 px-5 text-[13px] leading-5 text-[#b7bcb3] lg:inset-x-0 lg:bottom-0 lg:top-auto lg:h-[72px] lg:gap-2.5 lg:border-t lg:border-[#272b25] lg:bg-[#090a09] lg:px-10">
-          <svg viewBox="0 0 120 112" aria-hidden="true" focusable="false" className="h-6 w-[26px] shrink-0 lg:h-[21px] lg:w-[22px]">
-            <path
-              fill="#f2f1e9"
-              d="M46 110C20 106 0 84 0 56C0 33 14 12 35 3C48-2 60 4 62 16C66 29 57 39 44 39C36 39 28 35 23 28C11 38 5 51 7 65C9 86 24 103 46 109Z"
-            />
-            <path
-              fill="#baf23a"
-              transform="rotate(180 60 56)"
-              d="M46 110C20 106 0 84 0 56C0 33 14 12 35 3C48-2 60 4 62 16C66 29 57 39 44 39C36 39 28 35 23 28C11 38 5 51 7 65C9 86 24 103 46 109Z"
-            />
-          </svg>
-          <span
-            aria-hidden="true"
-            className="font-display text-[40px] font-extrabold uppercase leading-none tracking-[-0.04em] text-[#f2f1e9] lg:hidden"
-          >
-            E<span className="text-brand-primary">X</span>OM
-          </span>
-          <span className="max-lg:sr-only">Panel de administración EXOM</span>
-        </p>
-      </div>
+      <AuthBrandPanel />
 
       <main
         id="auth-main"
@@ -206,9 +175,8 @@ export function LoginPage() {
                         type="button"
                         onClick={() => setShowPassword((v) => !v)}
                         aria-controls="password"
-                        aria-pressed={showPassword}
                         aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                        className="absolute inset-y-px right-px grid w-11 place-items-center text-foreground-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+                        className="absolute right-0 top-0 grid h-11 w-11 place-items-center text-foreground-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>

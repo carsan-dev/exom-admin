@@ -80,15 +80,16 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
+      <DialogContent disableOutsideClose className="flex max-h-[calc(100svh-2rem)] flex-col gap-0 overflow-hidden sm:max-w-2xl">
+        <DialogHeader className="shrink-0 pb-4">
           <DialogTitle>Nueva plantilla manual</DialogTitle>
           <DialogDescription>
             Crea un texto reutilizable para enviar notificaciones puntuales desde el panel.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-1 pb-1">
           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
             <div className="space-y-2">
               <Label htmlFor="new-template-name">Nombre</Label>
@@ -185,7 +186,9 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
             </div>
           </div>
 
-          <DialogFooter>
+          </div>
+
+          <DialogFooter className="shrink-0 gap-2 border-t border-border pt-4 max-sm:mt-3">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>

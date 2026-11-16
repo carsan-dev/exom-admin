@@ -150,7 +150,10 @@ export function TemplateEditorForm({
         </div>
       </div>
 
-      <div className="sticky bottom-0 z-[3] flex flex-col-reverse gap-2 border-t border-border-strong bg-background py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:flex-row sm:items-center sm:justify-between">
+      {/* Por debajo de md la barra inferior móvil (56px + safe-area, z-40) tapa lo que queda a bottom-0:
+          se ancla sobre ella con el mismo offset que el resto de elementos fijos del layout, y el pr
+          reserva el hueco del botón «Volver arriba» (fixed, right-4/6, 44-48px). */}
+      <div className="sticky bottom-0 z-[3] flex flex-col-reverse gap-2 border-t border-border-strong bg-background py-3 max-md:bottom-[calc(56px+env(safe-area-inset-bottom,0px))] max-md:pr-[60px] md:pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:flex-row sm:items-center sm:justify-between">
         <Button
           type="button"
           variant="outline"
