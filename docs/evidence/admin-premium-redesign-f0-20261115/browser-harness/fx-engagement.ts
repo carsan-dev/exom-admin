@@ -49,7 +49,7 @@ const notificationItems = notificationSeeds.map(([c, title, body, status, error,
 
 // ---- Plantillas -----------------------------------------------------------------------------------
 const tpl = (key: string, name: string, description: string, category: string, title: string, body: string, route: string | null, system: boolean, delivery: Record<string, unknown>, extra: Partial<{ enabled: boolean; customized: boolean; variables: string[] }> = {}) => ({
-  key, name, description, category, title, body, route, enabled: extra.enabled ?? true, variables: extra.variables ?? [], variable_help: Object.fromEntries((extra.variables ?? []).map((v) => [v, `Valor de ${v}`])),
+  key, name, description, category, title, body, route: route ? `/${route}` : null, enabled: extra.enabled ?? true, variables: extra.variables ?? [], variable_help: Object.fromEntries((extra.variables ?? []).map((v) => [v, `Valor de ${v}`])),
   delivery_info: { type: 'manual', label: 'Manual', description: 'Se envía cuando el coach lo decide.', ...delivery }, customized: extra.customized ?? false, is_system: system, updated_at: system && !extra.customized ? null : isoAt(-6),
 })
 const templates = [
