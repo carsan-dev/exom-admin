@@ -99,6 +99,15 @@ const withExercises = {
   ],
 } as unknown as Training
 
+const withRepeatedExercise = {
+  ...baseTraining,
+  items: [
+    { kind: 'EXERCISE', ...occurrence('te-1', 0, exercises[0], { rest_seconds: 61 }) },
+    { kind: 'EXERCISE', ...occurrence('te-2', 1, exercises[0], { rest_seconds: 62 }) },
+    { kind: 'EXERCISE', ...occurrence('te-3', 2, exercises[2], { rest_seconds: 63 }) },
+  ],
+} as unknown as Training
+
 const withCircuit = {
   ...baseTraining,
   items: [
@@ -296,6 +305,58 @@ describe('ExercisePicker drag and drop reordering (P7)', () => {
     // Outside a drag, Escape still reaches the Workbench.
     await press(handle, 'Escape')
     expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it('asks to close the builder with Escape when no drag is in progress', async () => {
+    const { onOpenChange } = await renderBuilder(withExercises)
+    const handle = screen.getByRole('button', { name: 'Reordenar Sentadilla goblet' })
+    handle.focus()
+    await press(handle, 'Escape')
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+    expect(handleOrder()).toEqual([
+      'Reordenar Sentadilla goblet',
+      'Reordenar Press banca',
+      'Reordenar Jumping jacks',
+    ])
+  })
+
+  it('exposes the handle role description in Spanish', async () => {
+    await renderBuilder(withExercises)
+    const handle = screen.getByRole('button', { name: 'Reordenar Sentadilla goblet' })
+    expect(handle.getAttribute('aria-roledescription')).toBe('elemento reordenable')
+  })
+
+  it('keeps row keys unique and the saved order right with a repeated exercise', async () => {
+    await renderBuilder(withRepeatedExercise)
+    const [firstRest, secondRest] = restInputs()
+    expect(firstRest).not.toBe(secondRest)
+    expect(restInputs().map((input) => input.value)).toEqual(['61', '62', '63'])
+
+    const [firstHandle] = screen.getAllByRole('button', { name: 'Reordenar Sentadilla goblet' })
+    firstHandle.focus()
+    await press(firstHandle, 'Space', ' ')
+    await press(firstHandle, 'ArrowDown')
+    await press(firstHandle, 'Space', ' ')
+
+    const after = restInputs()
+    expect(after.map((input) => input.value)).toEqual(['62', '61', '63'])
+    // Each row moved with its own input element, none was re-created or merged.
+    expect(after[0]).toBe(secondRest)
+    expect(after[1]).toBe(firstRest)
+    expect(new Set(after).size).toBe(3)
+
+    const payload = await savedPayload()
+    expect(
+      payload.items.map((item: { exercise_id: string; order: number; rest_seconds: number }) => [
+        item.exercise_id,
+        item.order,
+        item.rest_seconds,
+      ])
+    ).toEqual([
+      ['ex-1', 0, 62],
+      ['ex-1', 1, 61],
+      ['ex-3', 2, 63],
+    ])
   })
 
   it('reorders inside a circuit without touching the top level', async () => {

@@ -61,7 +61,6 @@ export function TrainingFormDialog({
   const generalSectionRef = useRef<HTMLDivElement | null>(null)
   const warmupSectionRef = useRef<HTMLDivElement | null>(null)
   const exercisesSectionRef = useRef<HTMLDivElement | null>(null)
-  const dialogContentRef = useRef<HTMLDivElement | null>(null)
   const [colorInputInstanceKey, setColorInputInstanceKey] = useState(0)
 
   const dialogTitle = isEditing
@@ -92,9 +91,6 @@ export function TrainingFormDialog({
     }
 
     setColorInputInstanceKey((current) => current + 1)
-    requestAnimationFrame(() => {
-      dialogContentRef.current?.scrollTo({ top: 0, behavior: 'auto' })
-    })
 
     if (training) {
       form.reset(toFormValues(training, isDuplicate))
@@ -182,7 +178,7 @@ export function TrainingFormDialog({
         />
       }
     >
-      <div ref={dialogContentRef} className="mx-auto w-full min-w-0 max-w-7xl px-4 py-6 md:px-8 md:py-8">
+      <div className="mx-auto w-full min-w-0 max-w-7xl px-4 py-6 md:px-8 md:py-8">
         <TrainingFormHeader importIssues={importIssues} />
 
         <Form {...form}>

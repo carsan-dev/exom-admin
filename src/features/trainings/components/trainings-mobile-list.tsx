@@ -115,7 +115,7 @@ export function TrainingsMobileList({
                 </div>
                 <TrainingTypeTags training={training} colorMap={colorMap} />
                 <p className="text-xs tabular-nums text-foreground-muted">
-                  {getTrainingExerciseCount(training)} ejercicios · {formatTrainingDuration(training)} ·{' '}
+                  {getTrainingExerciseCount(training)} ejercicio{getTrainingExerciseCount(training) === 1 ? '' : 's'} · {formatTrainingDuration(training)} ·{' '}
                   {formatTrainingCalories(training)}
                 </p>
                 {training.tags.length > 0 ? <TrainingTagList tags={training.tags} /> : null}

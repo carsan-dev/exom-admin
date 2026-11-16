@@ -339,4 +339,30 @@ describe('Nutrition checks are read-only', () => {
     expect(within(totals).getByText('330 kcal')).toBeInTheDocument()
     expect(within(totals).getByText('−370 kcal')).toBeInTheDocument()
   })
+
+  it('does not compare against zero when the meal has no calculable ingredients', async () => {
+    mockApi()
+    const cache = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    let form: UseFormReturn<DietFormValues> | null = null
+    render(
+      <QueryClientProvider client={cache}>
+        <Harness onForm={(f) => (form = f)}>
+          {(f) => <DietMealNutritionCheck control={f.control} path="meals.0" />}
+        </Harness>
+      </QueryClientProvider>
+    )
+    const meal = await screen.findByRole('group', { name: /^Suma de ingredientes/ })
+    await waitFor(() => expect(within(meal).getAllByText('330 kcal')).toHaveLength(2))
+
+    const current = form as unknown as UseFormReturn<DietFormValues>
+    act(() => {
+      current.setValue('meals.0.ingredients', [])
+    })
+
+    await waitFor(() => expect(within(meal).queryByText('330 kcal')).toBeInTheDocument())
+    expect(within(meal).getAllByText('330 kcal')).toHaveLength(1)
+    expect(within(meal).queryByText('No cuadra')).toBeNull()
+    expect(within(meal).queryByText('Cuadra')).toBeNull()
+    expect(within(meal).queryByText('−330 kcal')).toBeNull()
+  })
 })

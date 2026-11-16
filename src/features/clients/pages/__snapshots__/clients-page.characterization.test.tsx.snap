@@ -23,9 +23,9 @@ exports[`ClientsPage characterization > ADMIN /clients archived 1`] = `
 <button type="button" aria-pressed="false" class="relative inline-flex items-center justify-center rounded-full border border-transparent px-3.5 text-[13px] font-semibold whitespace-nowrap text-foreground-secondary transition-[background-color,color,border-color] duration-(--dur-fast) ease-(--ease-out) hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed disabled:text-muted-foreground disabled:hover:bg-transparent max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-0 max-md:after:inset-y-[min(0px,calc(50%-22px))] h-[26px]">Listado principal</button>
 <button type="button" aria-pressed="true" class="relative inline-flex items-center justify-center rounded-full border px-3.5 text-[13px] font-semibold whitespace-nowrap transition-[background-color,color,border-color] duration-(--dur-fast) ease-(--ease-out) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-0 max-md:after:inset-y-[min(0px,calc(50%-22px))] h-[26px] border-accent-line bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:bg-transparent">Archivados</button>
 </div>
-<section aria-labelledby="_r_50_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_50_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Clientes archivados</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Clientes archivados</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada de clientes asignados al admin actual.</p>
 </div>
 <div class="space-y-4">
@@ -268,9 +268,9 @@ exports[`ClientsPage characterization > ADMIN /clients empty with search 1`] = `
 <button type="button" aria-pressed="true" class="relative inline-flex items-center justify-center rounded-full border px-3.5 text-[13px] font-semibold whitespace-nowrap transition-[background-color,color,border-color] duration-(--dur-fast) ease-(--ease-out) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-0 max-md:after:inset-y-[min(0px,calc(50%-22px))] h-[26px] border-accent-line bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:bg-transparent">Listado principal</button>
 <button type="button" aria-pressed="false" class="relative inline-flex items-center justify-center rounded-full border border-transparent px-3.5 text-[13px] font-semibold whitespace-nowrap text-foreground-secondary transition-[background-color,color,border-color] duration-(--dur-fast) ease-(--ease-out) hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed disabled:text-muted-foreground disabled:hover:bg-transparent max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-0 max-md:after:inset-y-[min(0px,calc(50%-22px))] h-[26px]">Archivados</button>
 </div>
-<section aria-labelledby="_r_40_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_40_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de clientes</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de clientes</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada de clientes asignados al admin actual.</p>
 </div>
 <div class="space-y-4">
@@ -594,9 +594,9 @@ exports[`ClientsPage characterization > ADMIN /clients paginated: next, previous
 <button type="button" aria-pressed="true" class="relative inline-flex items-center justify-center rounded-full border px-3.5 text-[13px] font-semibold whitespace-nowrap transition-[background-color,color,border-color] duration-(--dur-fast) ease-(--ease-out) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-0 max-md:after:inset-y-[min(0px,calc(50%-22px))] h-[26px] border-accent-line bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:bg-transparent">Listado principal</button>
 <button type="button" aria-pressed="false" class="relative inline-flex items-center justify-center rounded-full border border-transparent px-3.5 text-[13px] font-semibold whitespace-nowrap text-foreground-secondary transition-[background-color,color,border-color] duration-(--dur-fast) ease-(--ease-out) hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed disabled:text-muted-foreground disabled:hover:bg-transparent max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-0 max-md:after:inset-y-[min(0px,calc(50%-22px))] h-[26px]">Archivados</button>
 </div>
-<section aria-labelledby="_r_60_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_60_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de clientes</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de clientes</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada de clientes asignados al admin actual.</p>
 </div>
 <div class="space-y-4">
@@ -855,9 +855,9 @@ exports[`ClientsPage characterization > ADMIN /clients with rows 1`] = `
 <button type="button" aria-pressed="true" class="relative inline-flex items-center justify-center rounded-full border px-3.5 text-[13px] font-semibold whitespace-nowrap transition-[background-color,color,border-color] duration-(--dur-fast) ease-(--ease-out) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-0 max-md:after:inset-y-[min(0px,calc(50%-22px))] h-[26px] border-accent-line bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:bg-transparent">Listado principal</button>
 <button type="button" aria-pressed="false" class="relative inline-flex items-center justify-center rounded-full border border-transparent px-3.5 text-[13px] font-semibold whitespace-nowrap text-foreground-secondary transition-[background-color,color,border-color] duration-(--dur-fast) ease-(--ease-out) hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed disabled:text-muted-foreground disabled:hover:bg-transparent max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-0 max-md:after:inset-y-[min(0px,calc(50%-22px))] h-[26px]">Archivados</button>
 </div>
-<section aria-labelledby="_r_o_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_o_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de clientes</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de clientes</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada de clientes asignados al admin actual.</p>
 </div>
 <div class="space-y-4">
@@ -1086,21 +1086,21 @@ exports[`ClientsPage characterization > ADMIN opens the create client dialog fro
 <form class="space-y-4">
 <div class="grid gap-4 sm:grid-cols-2">
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_78_-form-item">Nombre</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Lucía" id="_r_78_-form-item" aria-describedby="_r_78_-form-item-description" aria-invalid="false" value="" name="first_name">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nombre</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Lucía" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="" name="first_name">
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_79_-form-item">Apellido</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Martínez" id="_r_79_-form-item" aria-describedby="_r_79_-form-item-description" aria-invalid="false" value="" name="last_name">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Apellido</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Martínez" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="" name="last_name">
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_7a_-form-item">Email</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="cliente@exom.app" autocomplete="email" id="_r_7a_-form-item" aria-describedby="_r_7a_-form-item-description" aria-invalid="false" type="email" value="" name="email">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Email</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="cliente@exom.app" autocomplete="email" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="email" value="" name="email">
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_7b_-form-item">Método de contraseña</label>
-<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="_r_7b_-form-item" aria-describedby="_r_7b_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Método de contraseña</label>
+<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 <span style="pointer-events: none;">Enviar email de invitación</span>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground" aria-hidden="true">
 <path d="m6 9 6 6 6-6">
@@ -1115,8 +1115,8 @@ exports[`ClientsPage characterization > ADMIN opens the create client dialog fro
 <div class="grid gap-4 sm:grid-cols-[1fr_220px]">
 <div class="rounded-xl border border-dashed border-border/60 bg-muted/30 p-3 text-sm text-muted-foreground">El cliente recibirá un email para fijar su propia contraseña.</div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_7d_-form-item">Nivel</label>
-<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="_r_7d_-form-item" aria-describedby="_r_7d_-form-item-description" aria-invalid="false">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nivel</label>
+<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
 <span style="pointer-events: none;">Principiante</span>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground" aria-hidden="true">
 <path d="m6 9 6 6 6-6">
@@ -1131,8 +1131,8 @@ exports[`ClientsPage characterization > ADMIN opens the create client dialog fro
 </div>
 </div>
 <div class="space-y-2">
-<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="_r_7f_-form-item">Objetivo principal</label>
-<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Perder grasa, ganar masa muscular..." id="_r_7f_-form-item" aria-describedby="_r_7f_-form-item-description" aria-invalid="false" value="" name="main_goal">
+<label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Objetivo principal</label>
+<input class="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Perder grasa, ganar masa muscular..." id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="" name="main_goal">
 </div>
 <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
 <button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none rounded-md border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-10 px-4 py-2" type="button">Cancelar</button>
@@ -1241,9 +1241,9 @@ exports[`ClientsPage characterization > SUPER_ADMIN /users clients tab with dele
 </span>
 </div>
 <div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-ID" id="radix-ID" tabindex="0" class="mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-<section aria-labelledby="_r_8h_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_8h_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de clientes</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de clientes</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Vista paginada de clientes con reasignación, desbloqueo, cambio de rol y alta/baja de cuenta.</p>
 </div>
 <div class="space-y-4">
@@ -1858,9 +1858,9 @@ exports[`ClientsPage characterization > SUPER_ADMIN /users?tab=admins paginated 
 <div data-state="inactive" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-ID" hidden="" id="radix-ID" tabindex="0" class="mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background">
 </div>
 <div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-ID" id="radix-ID" tabindex="0" class="mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-<section aria-labelledby="_r_ev_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_ev_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de admins</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de admins</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Gestiona altas, edición, desbloqueos, cambios de rol y estado de acceso del equipo administrador.</p>
 </div>
 <div class="space-y-4">
@@ -2079,9 +2079,9 @@ exports[`ClientsPage characterization > SUPER_ADMIN /users?tab=admins rows 1`] =
 <div data-state="inactive" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-ID" hidden="" id="radix-ID" tabindex="0" class="mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background">
 </div>
 <div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-ID" id="radix-ID" tabindex="0" class="mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-<section aria-labelledby="_r_bd_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_bd_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de admins</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de admins</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Gestiona altas, edición, desbloqueos, cambios de rol y estado de acceso del equipo administrador.</p>
 </div>
 <div class="space-y-4">
@@ -2560,9 +2560,9 @@ exports[`ClientsPage characterization > SUPER_ADMIN /users?tab=super-admins rows
 <div data-state="inactive" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-ID" hidden="" id="radix-ID" tabindex="0" class="mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background">
 </div>
 <div data-state="active" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-ID" id="radix-ID" tabindex="0" class="mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-<section aria-labelledby="_r_ft_" class="min-w-0 space-y-4">
+<section aria-labelledby="ID" class="min-w-0 space-y-4">
 <div>
-<h2 id="_r_ft_" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de super admins</h2>
+<h2 id="ID" class="font-display text-lg font-bold uppercase leading-none text-foreground">Listado de super admins</h2>
 <p class="mt-1 text-[13px] text-foreground-secondary">Puedes editar, desbloquear, cambiar el rol o reactivar otros super admins. Tu propia cuenta queda protegida frente a degradaciones o bajas accidentales.</p>
 </div>
 <div class="space-y-4">

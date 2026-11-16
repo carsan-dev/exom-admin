@@ -99,7 +99,7 @@ function normalize(html: string) {
   return html
     .replace(/radix-[^"\s]*/g, 'radix-ID')
     .replace(/ style="(animation-duration: 0s;)?"/g, '')
-    .replace(/[«:]r[0-9a-z]+[»:]/g, 'ID')
+    .replace(/[«:]r[0-9a-z]+[»:]|_r_[0-9a-z]+_/g, 'ID')
     .replace(/></g, '>\n<')
 }
 

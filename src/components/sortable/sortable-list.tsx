@@ -145,7 +145,7 @@ export function SortableItem({ id, className, disabled, children }: SortableItem
     transform,
     transition,
     isDragging,
-  } = useSortable({ id, disabled })
+  } = useSortable({ id, disabled, attributes: { roleDescription: 'elemento reordenable' } })
 
   const style: CSSProperties = {
     transform: transform ? `translate3d(0, ${Math.round(transform.y)}px, 0)` : undefined,

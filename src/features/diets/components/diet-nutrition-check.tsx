@@ -162,7 +162,7 @@ export function DietMealNutritionCheck({
       title="Suma de ingredientes"
       ariaLabel={`Suma de ingredientes ${describePath(path)}`}
       computedLabel="Ingredientes"
-      computed={sum ? roundMacros(sum.totals) : null}
+      computed={sum && sum.calculatedItems > 0 ? roundMacros(sum.totals) : null}
       declared={{ calories, protein_g, carbs_g, fat_g }}
       note={
         skipped > 0

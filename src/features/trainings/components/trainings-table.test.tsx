@@ -1,6 +1,6 @@
 import { DndContext } from '@dnd-kit/core'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { TrainingsTable } from './trainings-table'
 import type { Training } from '../types'
 
@@ -35,5 +35,29 @@ describe('TrainingsTable', () => {
     rerender(<DndContext><TrainingsTable {...props} selectedIds={new Set(['training-other-page', 'training-1'])} /></DndContext>)
     fireEvent.click(screen.getByLabelText('Seleccionar página'))
     expect(onSelectionChange).toHaveBeenLastCalledWith(new Set(['training-other-page']))
+  })
+
+  describe('mobile list', () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    it('pluralizes the exercise count', () => {
+      vi.stubGlobal('matchMedia', () => ({
+        matches: false,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }))
+      const props = { onView: vi.fn(), onEdit: vi.fn(), onDuplicate: vi.fn(), onDelete: vi.fn() }
+      const exercises = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `e-${i}` }))
+      const trainings = [
+        { ...training, id: 't-0', exercises_count: 0 },
+        { ...training, id: 't-1', exercises_count: 1 },
+        { ...training, id: 't-3', exercises: exercises(3) },
+      ] as unknown as Training[]
+      render(<DndContext><TrainingsTable trainings={trainings} {...props} /></DndContext>)
+
+      expect(screen.getByText(/^0 ejercicios ·/)).toBeTruthy()
+      expect(screen.getByText(/^1 ejercicio ·/)).toBeTruthy()
+      expect(screen.getByText(/^3 ejercicios ·/)).toBeTruthy()
+    })
   })
 })
