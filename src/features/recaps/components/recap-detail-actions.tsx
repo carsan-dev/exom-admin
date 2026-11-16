@@ -5,10 +5,24 @@ import type { RecapItem } from '../types'
 import type { RecapPrintModel } from './recap-print-model'
 import { RecapPrintableSummary } from './recap-printable-summary'
 
-interface RecapDetailActionsProps {
-  recap: RecapItem
+interface RecapDetailBackLinkProps {
   backTo: string
   backLabel: string
+}
+
+export function RecapDetailBackLink({ backTo, backLabel }: RecapDetailBackLinkProps) {
+  return (
+    <Button variant="ghost" asChild>
+      <Link to={backTo}>
+        <ArrowLeft className="h-4 w-4" />
+        {backLabel}
+      </Link>
+    </Button>
+  )
+}
+
+interface RecapDetailActionsProps {
+  recap: RecapItem
   printModel: RecapPrintModel | null
   hasUnsavedChanges: boolean
   canSubmitReview: boolean
@@ -20,8 +34,6 @@ interface RecapDetailActionsProps {
 
 export function RecapDetailActions({
   recap,
-  backTo,
-  backLabel,
   printModel,
   hasUnsavedChanges,
   canSubmitReview,
@@ -31,29 +43,20 @@ export function RecapDetailActions({
   onArchiveClick,
 }: RecapDetailActionsProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <Button variant="ghost" asChild>
-        <Link to={backTo}>
-          <ArrowLeft className="h-4 w-4" />
-          {backLabel}
-        </Link>
-      </Button>
-
-      <div className="flex flex-wrap gap-3">
-        <RecapPrintableSummary model={printModel} disabled={hasUnsavedChanges} />
-        {!recap.archived_at && recap.status !== 'DRAFT' && (
-          <Button onClick={onReview} disabled={!canSubmitReview}>
-            <CheckCircle2 className="h-4 w-4" />
-            {reviewPending ? 'Guardando...' : reviewButtonLabel}
-          </Button>
-        )}
-        {recap.status === 'REVIEWED' && !recap.archived_at && (
-          <Button variant="outline" disabled={hasUnsavedChanges} onClick={onArchiveClick}>
-            <Archive className="h-4 w-4" />
-            Archivar recap
-          </Button>
-        )}
-      </div>
-    </div>
+    <>
+      <RecapPrintableSummary model={printModel} disabled={hasUnsavedChanges} />
+      {!recap.archived_at && recap.status !== 'DRAFT' && (
+        <Button onClick={onReview} disabled={!canSubmitReview}>
+          <CheckCircle2 className="h-4 w-4" />
+          {reviewPending ? 'Guardando...' : reviewButtonLabel}
+        </Button>
+      )}
+      {recap.status === 'REVIEWED' && !recap.archived_at && (
+        <Button variant="outline" disabled={hasUnsavedChanges} onClick={onArchiveClick}>
+          <Archive className="h-4 w-4" />
+          Archivar recap
+        </Button>
+      )}
+    </>
   )
 }

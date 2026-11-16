@@ -6,7 +6,7 @@ import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
 import { recapIdentity, useRecapIdentity, useArchiveRecap, useRecapDetail, useReviewRecap } from '../api'
 import { RecapArchiveDialog } from '../components/recap-archive-dialog'
-import { RecapDetailActions } from '../components/recap-detail-actions'
+import { RecapDetailActions, RecapDetailBackLink } from '../components/recap-detail-actions'
 import { RecapDetailLoadError } from '../components/recap-detail-load-error'
 import { RecapDetailRefreshAlert } from '../components/recap-detail-refresh-alert'
 import { RecapDetailSkeleton } from '../components/recap-detail-skeleton'
@@ -164,21 +164,27 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
   }
 
   return (
-    <div className="space-y-6">
-      <RecapDetailActions
-        recap={recap}
-        backTo={backTo}
-        backLabel={backLabel}
-        printModel={printModel}
-        hasUnsavedChanges={hasUnsavedChanges}
-        canSubmitReview={canSubmitReview}
-        reviewPending={reviewMutation.isPending}
-        reviewButtonLabel={reviewButtonLabel}
-        onReview={handleReview}
-        onArchiveClick={() => setArchiveDialogOpen(true)}
-      />
+    <div className="min-w-0 space-y-8">
+      <div>
+        <RecapDetailBackLink backTo={backTo} backLabel={backLabel} />
+      </div>
 
-      <RecapDetailSummaryCard recap={recap} clientName={clientName} />
+      <RecapDetailSummaryCard
+        recap={recap}
+        clientName={clientName}
+        actions={
+          <RecapDetailActions
+            recap={recap}
+            printModel={printModel}
+            hasUnsavedChanges={hasUnsavedChanges}
+            canSubmitReview={canSubmitReview}
+            reviewPending={reviewMutation.isPending}
+            reviewButtonLabel={reviewButtonLabel}
+            onReview={handleReview}
+            onArchiveClick={() => setArchiveDialogOpen(true)}
+          />
+        }
+      />
 
       <RecapDetailTabs recap={recap} />
 

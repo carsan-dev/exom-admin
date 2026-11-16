@@ -1,44 +1,44 @@
-import { Card, CardContent } from '@/components/ui/card'
+import type { ReactNode } from 'react'
+import { PageHeader } from '@/components/page'
 import type { RecapItem } from '../types'
 import { RecapDetailField } from './recap-detail-field'
 import { formatDate, formatWeekRange } from './recap-detail-format'
-import { RecapStatusBadge } from './recap-status-badge'
+import { RecapStatusChip } from './recap-status-chip'
 
-export function RecapDetailSummaryCard({ recap, clientName }: { recap: RecapItem; clientName: string }) {
+interface RecapDetailSummaryCardProps {
+  recap: RecapItem
+  clientName: string
+  /** Acciones de la cabecera (imprimir, revisar, archivar). */
+  actions?: ReactNode
+}
+
+/** Cabecera del detalle: título, estado, fechas y datos del recap en filetes. */
+export function RecapDetailSummaryCard({ recap, clientName, actions }: RecapDetailSummaryCardProps) {
   return (
-    <Card className="border-border/70">
-      <CardContent className="flex flex-col gap-5 pt-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-accent-text">Revisión de recap</p>
-            <div>
-              <h1 className="text-3xl font-semibold text-foreground">{clientName}</h1>
-              <p className="text-sm text-muted-foreground">{recap.client.email}</p>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Semana {formatWeekRange(recap.week_start_date, recap.week_end_date)}
-            </p>
-          </div>
-          <div className="flex flex-col items-start gap-2 sm:items-end">
-            <RecapStatusBadge status={recap.status} archivedAt={recap.archived_at} />
-            <p className="text-sm text-muted-foreground">
-              Enviado: {formatDate(recap.submitted_at ?? recap.created_at)}
-            </p>
-            {recap.reviewed_at && (
-              <p className="text-sm text-muted-foreground">Revisado: {formatDate(recap.reviewed_at)}</p>
-            )}
-            {recap.archived_at && (
-              <p className="text-sm text-muted-foreground">Archivado: {formatDate(recap.archived_at)}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-3">
-          <RecapDetailField label="Semana" value={formatWeekRange(recap.week_start_date, recap.week_end_date)} />
-          <RecapDetailField label="Cliente" value={clientName} />
-          <RecapDetailField label="Correo" value={recap.client.email} />
-        </div>
-      </CardContent>
-    </Card>
+    <section className="min-w-0">
+      <PageHeader
+        className="mb-3 min-w-0 md:mb-3 [&_h1]:min-w-0 [&_h1]:[overflow-wrap:anywhere]"
+        eyebrow="Revisión de recap"
+        title={clientName}
+        description={
+          <>
+            <span className="block [overflow-wrap:anywhere]">{recap.client.email}</span>
+            <span className="block">Semana {formatWeekRange(recap.week_start_date, recap.week_end_date)}</span>
+          </>
+        }
+        actions={actions}
+      />
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pb-4 text-[13px] leading-5 text-foreground-secondary">
+        <RecapStatusChip status={recap.status} archivedAt={recap.archived_at} />
+        <p>Enviado: {formatDate(recap.submitted_at ?? recap.created_at)}</p>
+        {recap.reviewed_at && <p>Revisado: {formatDate(recap.reviewed_at)}</p>}
+        {recap.archived_at && <p>Archivado: {formatDate(recap.archived_at)}</p>}
+      </div>
+      <div className="grid gap-x-8 md:grid-cols-3">
+        <RecapDetailField label="Semana" value={formatWeekRange(recap.week_start_date, recap.week_end_date)} />
+        <RecapDetailField label="Cliente" value={clientName} />
+        <RecapDetailField label="Correo" value={recap.client.email} />
+      </div>
+    </section>
   )
 }
