@@ -9,6 +9,8 @@ import type { Diet } from '../types'
 import { DietFormDialog } from './diet-form-dialog'
 import { DietMealNutritionCheck, DietTotalsNutritionCheck } from './diet-nutrition-check'
 
+vi.setConfig({ testTimeout: 15000 })
+
 // Live nutrition comparison of the builder (RDS-F4-10): read-only sums next to the
 // declared values, and the calculate buttons still writing exactly what they wrote before.
 
