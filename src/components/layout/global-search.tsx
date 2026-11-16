@@ -239,7 +239,9 @@ function SearchPalette({ variant, onClose }: SearchPaletteProps) {
       loop
       vimBindings={false}
       label="Buscar"
-      className="h-auto min-h-0 flex-1 rounded-none bg-transparent text-foreground"
+      // Skeleton colors equal to the panel/sheet background would be invisible: use the mockup's
+      // surface-3 (--secondary) and rule-strong (--border-strong), scoped to the search only.
+      className="h-auto min-h-0 flex-1 rounded-none bg-transparent text-foreground [--skeleton-base:var(--secondary)] [--skeleton-hi:var(--border-strong)]"
     >
       {isDesktop ? (
         <div className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border px-4 focus-within:shadow-[inset_0_-1px_0_var(--focus)] [&_[cmdk-input-wrapper]]:h-full [&_[cmdk-input-wrapper]]:min-w-0 [&_[cmdk-input-wrapper]]:flex-1 [&_[cmdk-input-wrapper]]:gap-3 [&_[cmdk-input-wrapper]]:border-0 [&_[cmdk-input-wrapper]]:px-0 [&_[cmdk-input-wrapper]_svg]:mr-0 [&_[cmdk-input-wrapper]_svg]:text-muted-foreground [&_[cmdk-input-wrapper]_svg]:opacity-100">
@@ -499,14 +501,16 @@ function EntryRow({ entry, query, variant, className, onSelect }: EntryRowProps)
       <span className="min-w-0 truncate">
         <Highlight text={entry.label} query={query} />
       </span>
-      <span
-        className={cn(
-          'ml-auto shrink-0 pl-3 text-xs text-muted-foreground',
-          variant === 'mobile' && 'max-w-[45%] truncate',
-        )}
-      >
-        {entry.hint}
-      </span>
+      {entry.hintIsRoute && variant === 'mobile' ? null : (
+        <span
+          className={cn(
+            'ml-auto shrink-0 pl-3 text-xs text-muted-foreground',
+            variant === 'mobile' && 'max-w-[45%] truncate',
+          )}
+        >
+          {entry.hint}
+        </span>
+      )}
     </CommandItem>
   )
 }

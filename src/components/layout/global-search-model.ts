@@ -16,6 +16,8 @@ export interface SearchEntry {
   label: string
   /** Secondary text shown at the end of the row (group or route). */
   hint: string
+  /** The hint is the raw route: shown on desktop, hidden on mobile where it would truncate. */
+  hintIsRoute?: boolean
   icon: LucideIcon
 }
 
@@ -57,6 +59,7 @@ export function getActionEntries(role: string | undefined): SearchEntry[] {
       to: action.to,
       label: action.label,
       hint: action.to,
+      hintIsRoute: true,
       icon: action.icon,
     }),
   )
