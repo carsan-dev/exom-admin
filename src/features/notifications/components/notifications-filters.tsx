@@ -34,7 +34,7 @@ export function NotificationsFilters({
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-foreground-muted">Estado:</span>
         <Select value={status} onValueChange={(value) => onStatusChange(value as NotificationStatusFilter)}>
-          <SelectTrigger aria-label="Estado" className="w-full max-md:h-11 md:w-[180px]">
+          <SelectTrigger aria-label="Estado" className="w-full md:w-[180px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -51,7 +51,7 @@ export function NotificationsFilters({
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Buscar por título o cuerpo"
-          className="pl-9 max-md:h-11"
+          className="pl-9"
         />
       </div>
 

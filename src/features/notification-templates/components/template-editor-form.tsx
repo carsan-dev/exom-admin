@@ -63,7 +63,8 @@ export function TemplateEditorForm({
       </div>
 
       <div className="space-y-6 pb-6">
-        <div className="flex items-start gap-3 max-md:min-h-11">
+        {/* Por debajo de md la etiqueta cubre toda la fila: área pulsable de la casilla ≥ 44 px. */}
+        <div className="relative flex items-start gap-3 max-md:min-h-11">
           <input
             id="template-enabled"
             type="checkbox"
@@ -73,7 +74,7 @@ export function TemplateEditorForm({
             className="mt-0.5 size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-md:size-6"
           />
           <div className="space-y-1">
-            <Label htmlFor="template-enabled">Activa</Label>
+            <Label htmlFor="template-enabled" className="max-md:after:absolute max-md:after:inset-0 max-md:after:content-['']">Activa</Label>
             <p className="text-[13px] leading-5 text-foreground-secondary">
               {selectedTemplate.is_system
                 ? 'Al pausar, el evento automático no enviará nada.'
@@ -91,7 +92,6 @@ export function TemplateEditorForm({
               onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
               disabled={isBusy}
               maxLength={120}
-              className="max-md:h-11"
             />
             <CharCounter label="título" count={draft.title.length} max={120} />
           </div>
@@ -104,7 +104,6 @@ export function TemplateEditorForm({
               onChange={(event) => setDraft((current) => ({ ...current, route: event.target.value }))}
               disabled={isBusy}
               placeholder="/trainings"
-              className="max-md:h-11"
             />
           </div>
         </div>
@@ -115,6 +114,10 @@ export function TemplateEditorForm({
             id="template-body"
             value={draft.body}
             onChange={(event) => setDraft((current) => ({ ...current, body: event.target.value }))}
+            // Al enfocar un textarea el navegador solo desplaza hasta el cursor, no la caja entera,
+            // y la barra pegajosa de acciones tapa su parte inferior. «nearest» respeta el
+            // scroll-padding de index.css (RDS-F5-A11Y-03). `?.`: jsdom no implementa scrollIntoView.
+            onFocus={(event) => event.currentTarget.scrollIntoView?.({ block: 'nearest' })}
             disabled={isBusy}
             maxLength={500}
             rows={5}

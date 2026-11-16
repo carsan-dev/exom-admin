@@ -105,7 +105,7 @@ export function AssignmentsToolbar({
         <div className="min-w-0 space-y-2 max-md:w-full md:w-72">
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted">Cliente</p>
           <Select value={selectedClientId || ''} onValueChange={onClientChange}>
-            <SelectTrigger aria-label="Cliente" className="max-md:h-11">
+            <SelectTrigger aria-label="Cliente">
               <SelectValue placeholder="Selecciona un cliente" />
             </SelectTrigger>
             <SelectContent>

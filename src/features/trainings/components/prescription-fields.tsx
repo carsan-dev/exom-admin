@@ -37,7 +37,7 @@ export function PrescriptionFields({
         <select
           value={measureType}
           onChange={(event) => onMeasureTypeChange(event.target.value as 'REPS' | 'SECONDS')}
-          className="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground"
+          className="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground max-md:h-11"
         >
           <option value="REPS">Repeticiones</option>
           <option value="SECONDS">Tiempo</option>

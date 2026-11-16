@@ -401,29 +401,25 @@ html {
    desplazamiento ocurre dentro de `main` (ver `app-layout.tsx`). Alturas: barra inferior móvil
    56px + safe-area; «Volver arriba» 44px a +16px sobre la barra (48px a 24px del borde en md+);
    aviso de versión ~112px en móvil; barra de acciones pegajosa del editor de plantillas ~112px
-   en móvil (botones apilados) y ~64px en md+. */
+   en móvil (botones apilados) y ~64px en md+.
+   La reserva de «Volver arriba» no depende de que el botón esté montado: aparece tras desplazar,
+   a veces después de que el navegador ya haya llevado el foco a su zona (RDS-F5-A11Y-02). */
 @media (max-width: 767px) {
   html:has([data-mobile-tabbar]) {
-    scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 16px);
-  }
-
-  html:has([data-mobile-tabbar]):has([data-scroll-top-button]) {
     scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 76px);
   }
 
-  html:has([data-mobile-tabbar]):has([data-sticky-actions]),
-  html:has([data-mobile-tabbar]):has([data-version-banner]) {
+  html:has([data-mobile-tabbar]):has([data-sticky-actions]) {
     scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 144px);
   }
 
-  html:has([data-mobile-tabbar]):has([data-version-banner]):has([data-scroll-top-button]) {
+  html:has([data-mobile-tabbar]):has([data-version-banner]) {
     scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 192px);
   }
 }
 
 @media (min-width: 768px) {
-  html:has([data-scroll-top-button]),
-  html:has([data-sticky-actions]) {
+  html {
     scroll-padding-bottom: 96px;
   }
 

@@ -226,7 +226,7 @@ function RirCycleContent({
               .filter((d) => d.trainings.length)
               .map((d) => (
                 <details key={d.date} className="border-b border-border py-2">
-                  <summary className="cursor-pointer text-sm">
+                  <summary className="cursor-pointer text-sm max-md:py-3">
                     {d.date} ·{' '}
                     {d.week
                       ? `Semana ${d.week} de ${d.weeks} · RIR ${d.target_rir}`
@@ -350,7 +350,7 @@ function RirCycleContent({
               </p>
               {state.dates.map((d) => (
                 <details key={d.date}>
-                  <summary className="text-sm">
+                  <summary className="text-sm max-md:py-3">
                     {d.date} ·{' '}
                     {d.protected
                       ? 'Protegida, sin cambios'

@@ -156,7 +156,6 @@ export function AchievementsPage() {
                 <div className="flex gap-2">
                   <Input
                     id="achievement-search"
-                    className="max-md:h-11"
                     value={searchDraft}
                     onChange={(event) => setSearchDraft(event.target.value)}
                     placeholder="Nombre o descripción"
@@ -173,7 +172,7 @@ export function AchievementsPage() {
                   value={criteriaType}
                   onValueChange={(value) => updateSearchParams({ criteria_type: value as CriteriaType | 'ALL', page: 1 })}
                 >
-                  <SelectTrigger aria-label="Tipo de criterio" className="max-md:h-11">
+                  <SelectTrigger aria-label="Tipo de criterio">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

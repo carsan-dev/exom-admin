@@ -95,11 +95,12 @@ export function AppLayout() {
               id="contenido"
               tabIndex={-1}
               className={cn(
-                // scroll-pb: en lg el foco se desplaza dentro de main; reserva «Volver arriba» y el aviso de versión.
-                'outline-none lg:scroll-pb-24 lg:[body:has([data-version-banner])_&]:scroll-pb-40',
+                // scroll-pb: en lg el foco se desplaza dentro de main; reserva «Volver arriba» (48 px a 24 px del borde) y el aviso de versión.
+                // Indicador solo con teclado tras «Saltar al contenido»: outline-none anula --tw-outline-style, de ahí outline-solid.
+                'outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus lg:scroll-pb-24 lg:[body:has([data-version-banner])_&]:scroll-pb-40',
                 'min-w-0 max-w-full flex-1 bg-background p-3 pb-[calc(56px+env(safe-area-inset-bottom,0px)+16px)] sm:p-5 sm:pb-[calc(56px+env(safe-area-inset-bottom,0px)+16px)] md:pb-5 lg:overflow-y-auto lg:p-6 lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]',
                 showScrollTop
-                  ? 'pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] sm:pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] md:pb-28'
+                  ? 'pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] sm:pb-[calc(56px+env(safe-area-inset-bottom,0px)+76px)] md:pb-28 lg:pb-28'
                   : null,
               )}
             >

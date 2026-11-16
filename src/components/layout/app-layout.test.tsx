@@ -156,6 +156,8 @@ describe('AppLayout responsive', () => {
     fireEvent.scroll(main)
     const withTop = 'calc(56px+env(safe-area-inset-bottom,0px)+76px)'
     expect(main).toHaveClass(`pb-[${withTop}]`, `sm:pb-[${withTop}]`, 'md:pb-28')
+    // lg:p-6 anularía md:pb-28 en lg: la reserva se repite con la variante lg (RDS-F5-A11Y-01).
+    expect(main).toHaveClass('lg:p-6', 'lg:pb-28')
     expect(main).not.toHaveClass(`pb-[${bar}]`, `sm:pb-[${bar}]`, 'md:pb-5', 'pb-24')
   })
 })
@@ -195,6 +197,19 @@ describe('AppLayout accesibilidad (RDS-F5-01)', () => {
     expect(main).toHaveAttribute('id', 'contenido')
     expect(main).toHaveAttribute('tabindex', '-1')
     expect(main).toHaveFocus()
+  })
+
+  it('main muestra indicador de foco solo con teclado tras el salto', () => {
+    renderAt('/dashboard')
+    const main = screen.getByRole('main')
+    // outline-none anula --tw-outline-style: hace falta outline-solid explícito en focus-visible.
+    expect(main).toHaveClass(
+      'outline-none',
+      'focus-visible:outline-solid',
+      'focus-visible:outline-2',
+      'focus-visible:outline-focus',
+    )
+    expect(main.className).not.toMatch(/(^|\s)focus:outline/)
   })
 
   it.each([

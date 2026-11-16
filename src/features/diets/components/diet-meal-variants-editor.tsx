@@ -78,7 +78,7 @@ export function MealVariantsEditor({
           className="min-w-0 space-y-3 border-l-2 border-border-strong pl-3"
         >
           <div className="flex items-start gap-2">
-            <span className="w-5 flex-none pt-2.5 text-center text-xs font-medium tabular-nums text-muted-foreground">
+            <span className="w-5 flex-none pt-2.5 max-md:pt-3.5 text-center text-xs font-medium tabular-nums text-muted-foreground">
               {variantIndex + 1}
             </span>
             <FormField

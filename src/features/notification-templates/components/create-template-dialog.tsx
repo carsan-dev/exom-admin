@@ -99,7 +99,6 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
                 onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
                 maxLength={120}
                 disabled={createTemplate.isPending}
-                className="max-md:h-11"
               />
             </div>
 
@@ -111,7 +110,6 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
                 onChange={(event) => setDraft((current) => ({ ...current, category: event.target.value }))}
                 maxLength={80}
                 disabled={createTemplate.isPending}
-                className="max-md:h-11"
               />
             </div>
           </div>
@@ -125,7 +123,6 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
               maxLength={240}
               disabled={createTemplate.isPending}
               placeholder="Uso recomendado de esta plantilla"
-                className="max-md:h-11"
               />
           </div>
 
@@ -138,7 +135,6 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
                 onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
                 maxLength={120}
                 disabled={createTemplate.isPending}
-                className="max-md:h-11"
               />
             </div>
 
@@ -151,7 +147,6 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
                 maxLength={160}
                 disabled={createTemplate.isPending}
                 placeholder="/recap"
-                className="max-md:h-11"
               />
             </div>
           </div>
@@ -169,7 +164,8 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
             />
           </div>
 
-          <div className="flex items-start gap-3 border border-border p-3 max-md:min-h-11">
+          {/* Por debajo de md la etiqueta cubre toda la fila: área pulsable de la casilla ≥ 44 px. */}
+          <div className="relative flex items-start gap-3 border border-border p-3 max-md:min-h-11">
             <input
               id="new-template-enabled"
               type="checkbox"
@@ -179,7 +175,7 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTe
               className="mt-0.5 size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-md:size-6"
             />
             <div className="space-y-1">
-              <Label htmlFor="new-template-enabled">Disponible al enviar</Label>
+              <Label htmlFor="new-template-enabled" className="max-md:after:absolute max-md:after:inset-0 max-md:after:content-['']">Disponible al enviar</Label>
               <p className="text-[13px] leading-5 text-foreground-secondary">
                 Si está pausada, no aparecerá como plantilla rápida en envío manual.
               </p>

@@ -52,10 +52,12 @@ const useFormField = () => {
 
   const fieldState = getFieldState(fieldContext.name, formState)
 
-  const { id } = itemContext
+  const { id, hasDescription, hasMessage } = itemContext
 
   return {
     id,
+    hasDescription,
+    hasMessage,
     name: fieldContext.name,
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
@@ -66,6 +68,11 @@ const useFormField = () => {
 
 type FormItemContextValue = {
   id: string
+  /** Si FormDescription / FormMessage están montados: FormControl solo referencia ids existentes. */
+  hasDescription: boolean
+  hasMessage: boolean
+  setHasDescription: (mounted: boolean) => void
+  setHasMessage: (mounted: boolean) => void
 }
 
 const FormItemContext = React.createContext<FormItemContextValue | null>(null)
@@ -75,9 +82,15 @@ const FormItem = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
   const id = React.useId()
+  const [hasDescription, setHasDescription] = React.useState(false)
+  const [hasMessage, setHasMessage] = React.useState(false)
+  const value = React.useMemo(
+    () => ({ id, hasDescription, hasMessage, setHasDescription, setHasMessage }),
+    [id, hasDescription, hasMessage]
+  )
 
   return (
-    <FormItemContext.Provider value={{ id }}>
+    <FormItemContext.Provider value={value}>
       <div ref={ref} className={cn("space-y-2", className)} {...props} />
     </FormItemContext.Provider>
   )
@@ -105,17 +118,19 @@ const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   React.ComponentPropsWithoutRef<typeof Slot>
 >(({ ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+  const { error, formItemId, formDescriptionId, formMessageId, hasDescription, hasMessage } =
+    useFormField()
+  // Solo ids presentes en el DOM: un idref colgante es un error de ARIA (RDS-F5-A11Y-14).
+  const describedBy =
+    [hasDescription ? formDescriptionId : null, error && hasMessage ? formMessageId : null]
+      .filter(Boolean)
+      .join(" ") || undefined
 
   return (
     <Slot
       ref={ref}
       id={formItemId}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
+      aria-describedby={describedBy}
       aria-invalid={!!error}
       {...props}
     />
@@ -128,6 +143,13 @@ const FormDescription = React.forwardRef<
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => {
   const { formDescriptionId } = useFormField()
+  const itemContext = React.useContext(FormItemContext)
+  const setHasDescription = itemContext?.setHasDescription
+
+  React.useLayoutEffect(() => {
+    setHasDescription?.(true)
+    return () => setHasDescription?.(false)
+  }, [setHasDescription])
 
   return (
     <p
@@ -146,6 +168,15 @@ const FormMessage = React.forwardRef<
 >(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField()
   const body = error ? String(error?.message ?? "") : children
+  const itemContext = React.useContext(FormItemContext)
+  const setHasMessage = itemContext?.setHasMessage
+  const rendered = Boolean(body)
+
+  React.useLayoutEffect(() => {
+    if (!rendered) return
+    setHasMessage?.(true)
+    return () => setHasMessage?.(false)
+  }, [rendered, setHasMessage])
 
   if (!body) {
     return null

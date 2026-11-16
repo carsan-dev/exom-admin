@@ -30,8 +30,8 @@ export function resolveRouteTitle(pathname: string, role: string | undefined): s
       .flatMap((group) => group.items)
       .find((item) => item.to === to)
     if (visible) return visible.label
-    const any = NAV_GROUPS.flatMap((group) => group.items).find((item) => item.to === to)
-    if (any) return any.label
+    const anyRoleItem = NAV_GROUPS.flatMap((group) => group.items).find((item) => item.to === to)
+    if (anyRoleItem) return anyRoleItem.label
   }
 
   if (segments.length === 2) {

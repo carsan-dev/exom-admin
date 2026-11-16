@@ -504,7 +504,8 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
               control={form.control}
               name="sendToAll"
               render={({ field }) => (
-                <FormItem className="rounded-xl border border-border/70 p-4">
+                <FormItem className="relative rounded-xl border border-border/70 p-4">
+                  {/* Por debajo de md la etiqueta cubre la tarjeta: área pulsable de la casilla ≥ 44 px. */}
                   <div className="flex items-start gap-3">
                     <FormControl>
                       <input
@@ -512,11 +513,11 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                         checked={field.value}
                         onChange={(event) => field.onChange(event.target.checked)}
                         disabled={isClientsUnavailable || isSubmitting}
-                        className="mt-1 h-4 w-4 rounded border-input"
+                        className="mt-1 h-4 w-4 rounded border-input max-md:size-6"
                       />
                     </FormControl>
                     <div className="space-y-1">
-                      <FormLabel>Enviar a todos mis clientes</FormLabel>
+                      <FormLabel className="max-md:after:absolute max-md:after:inset-0 max-md:after:content-['']">Enviar a todos mis clientes</FormLabel>
                       <FormDescription>
                         {clientsLoadError
                           ? 'Corrige el problema de carga antes de enviar notificaciones.'
@@ -570,7 +571,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                     <FormControl>
                       <input
                         {...field}
-                        className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         placeholder="Nuevo recordatorio"
                       />
                     </FormControl>

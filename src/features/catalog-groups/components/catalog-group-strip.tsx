@@ -16,7 +16,7 @@ function GroupCard({ group, active, onSelect, onEdit, onDelete, disabled }: {
   return (
     <div ref={setNodeRef} className={`min-w-44 rounded-xl border p-3 transition-colors ${isOver || active ? 'border-brand-primary bg-brand-soft/20' : 'border-border bg-card'}`}>
       <div className="flex items-start justify-between gap-2">
-        <button type="button" aria-pressed={active} className="flex min-w-0 flex-1 items-center gap-2 text-left" onClick={onSelect}>
+        <button type="button" aria-pressed={active} className="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]" onClick={onSelect}>
           <Folder className="h-5 w-5 flex-none text-accent-text" />
           <span className="truncate font-medium">{group.name}</span>
         </button>

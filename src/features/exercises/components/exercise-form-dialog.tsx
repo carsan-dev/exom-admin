@@ -192,7 +192,7 @@ function MultiSelectField({
               type="button"
               onClick={() => remove(item)}
               aria-label={`Quitar ${item}`}
-              className="ml-0.5 rounded-full hover:bg-brand-soft/20 p-0.5"
+              className="relative ml-0.5 rounded-full hover:bg-brand-soft/20 p-0.5 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]"
             >
               <X aria-hidden="true" className="h-2.5 w-2.5" />
             </button>
@@ -200,10 +200,10 @@ function MultiSelectField({
         ))}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline" size="sm" className="flex-none">
+            <Button type="button" variant="outline" size="sm" className="flex-none max-md:h-11">
               Opciones
               <ChevronDown className="ml-1 h-3 w-3" />
             </Button>
@@ -232,6 +232,7 @@ function MultiSelectField({
           type="button"
           variant="outline"
           size="sm"
+          className="max-md:h-11"
           onClick={addCustom}
           disabled={!normalizeOptionLabel(customInput) || hasOption(customInput)}
           aria-label={`Añadir a ${label.toLocaleLowerCase('es')}`}

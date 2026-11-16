@@ -94,7 +94,7 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
                 type="button"
                 onClick={() => remove(type)}
                 aria-label={`Quitar ${getTrainingTypeLabel(type)}`}
-                className="ml-1 rounded-full p-0.5 hover:bg-foreground/10"
+                className="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]"
               >
                 <X aria-hidden="true" className="h-2.5 w-2.5" />
               </button>
@@ -103,7 +103,7 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
         )}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <Input
           value={input}
           onChange={(event) => setInput(event.target.value)}
@@ -115,6 +115,7 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
           type="button"
           variant="outline"
           size="sm"
+          className="max-md:h-11"
           onClick={() => add()}
           disabled={!normalizeTrainingTypeLabel(input) || hasType(input)}
           aria-label="Añadir tipo"
@@ -163,7 +164,7 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
                   type="button"
                   onClick={() => toggle(type)}
                   aria-pressed={isSelected}
-                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                  className={`relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] ${
                     isSelected && !catalogStyle
                       ? getTrainingTypeBadgeClass(type)
                       : !isSelected

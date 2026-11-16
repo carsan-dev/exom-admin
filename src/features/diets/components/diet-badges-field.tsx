@@ -97,7 +97,7 @@ export function BadgesField({
                 type="button"
                 onClick={() => remove(badge)}
                 aria-label={`Quitar ${badge}`}
-                className="ml-0.5 rounded-full hover:text-status-error"
+                className="relative ml-0.5 rounded-full hover:text-status-error max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]"
               >
                 <X aria-hidden="true" className="h-2.5 w-2.5" />
               </button>
@@ -105,10 +105,10 @@ export function BadgesField({
           ))}
         </div>
       )}
-      <div className="flex gap-1">
+      <div className="flex items-center gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline" size="sm" className="h-7 text-xs flex-none">
+            <Button type="button" variant="outline" size="sm" className="h-7 text-xs flex-none max-md:h-11">
               Opciones
               <ChevronDown className="h-3 w-3" />
             </Button>
@@ -141,7 +141,7 @@ export function BadgesField({
           type="button"
           variant="outline"
           size="sm"
-          className="h-7 text-xs flex-none"
+          className="h-7 text-xs flex-none max-md:h-11"
           onClick={add}
           disabled={!normalizeBadgeLabel(input) || hasBadge(input)}
           aria-label="Añadir badge"

@@ -65,7 +65,7 @@ exports[`TrainingsPage characterization > filters by catalog group > ungrouped 1
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -548,7 +548,7 @@ exports[`TrainingsPage characterization > filters by catalog group 1`] = `
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-brand-primary bg-brand-soft/20">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="true" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="true" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -1034,7 +1034,7 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -1496,14 +1496,14 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nombre</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="Importado" name="name">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-invalid="false" value="Importado" name="name">
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
-<div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="ml-1 rounded-full p-0.5 hover:bg-foreground/10">
+<div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-2.5 w-2.5" aria-hidden="true">
 <path d="M18 6 6 18">
 </path>
@@ -1513,9 +1513,9 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </button>
 </div>
 </div>
-<div class="flex gap-2">
+<div class="flex items-center gap-2">
 <input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Nuevo tipo (Enter)" value="">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3" type="button" disabled="" aria-label="Añadir tipo">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 max-md:h-11" type="button" disabled="" aria-label="Añadir tipo">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-3 w-3" aria-hidden="true">
 <path d="M5 12h14">
 </path>
@@ -1527,19 +1527,19 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 <div class="space-y-2">
 <p class="text-xs text-muted-foreground">Tipos guardados. Pulsa para activar o quitar varios.</p>
 <div class="flex flex-wrap gap-2 rounded-md border border-dashed border-border/70 bg-muted/20 p-2">
-<button type="button" aria-pressed="true" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors " style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">
+<button type="button" aria-pressed="true" class="relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] " style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check h-3 w-3">
 <path d="M20 6 9 17l-5-5">
 </path>
 </svg>Fuerza</button>
-<button type="button" aria-pressed="false" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors border-border bg-background text-muted-foreground hover:bg-muted">HIIT</button>
+<button type="button" aria-pressed="false" class="relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] border-border bg-background text-muted-foreground hover:bg-muted">HIIT</button>
 </div>
 </div>
 </div>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nivel</label>
-<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full max-md:h-11 items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full max-md:h-11 items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-invalid="false">
 <span style="pointer-events: none;">Principiante</span>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground" aria-hidden="true">
 <path d="m6 9 6 6 6-6">
@@ -1640,11 +1640,11 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 <div class="grid grid-cols-2 gap-4">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración estimada (min)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-invalid="false" type="number" value="">
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Calorías estimadas (kcal)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
@@ -1653,15 +1653,15 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <span class="self-center text-sm text-muted-foreground">Sin etiquetas</span>
 </div>
-<div class="flex flex-col gap-2 sm:flex-row">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 sm:w-auto" type="button" id="radix-ID" aria-haspopup="menu" aria-expanded="false" data-state="closed">Etiquetas existentes<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-3 w-3">
+<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 sm:w-auto max-md:h-11" type="button" id="radix-ID" aria-haspopup="menu" aria-expanded="false" data-state="closed">Etiquetas existentes<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-3 w-3">
 <path d="m6 9 6 6 6-6">
 </path>
 </svg>
 </button>
-<div class="flex flex-1 gap-2">
+<div class="flex flex-1 items-center gap-2">
 <input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Nueva etiqueta (Enter)" value="">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3" type="button" disabled="" aria-label="Añadir etiqueta">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 max-md:h-11" type="button" disabled="" aria-label="Añadir etiqueta">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-3 w-3" aria-hidden="true">
 <path d="M5 12h14">
 </path>
@@ -1682,17 +1682,17 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 <div class="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción calentamiento</label>
-<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-invalid="false">
 </textarea>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración (min)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción vuelta a la calma</label>
-<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-invalid="false">
 </textarea>
 </div>
 </div>
@@ -1765,7 +1765,7 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">Tipo de objetivo</label>
-<select class="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground">
+<select class="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground max-md:h-11">
 <option value="REPS">Repeticiones</option>
 <option value="SECONDS">Tiempo</option>
 </select>
@@ -1843,7 +1843,7 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">Tipo de objetivo</label>
-<select class="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground">
+<select class="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground max-md:h-11">
 <option value="REPS">Repeticiones</option>
 <option value="SECONDS">Tiempo</option>
 </select>
@@ -1979,7 +1979,7 @@ exports[`TrainingsPage characterization > lists trainings with groups and the pe
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -2465,7 +2465,7 @@ exports[`TrainingsPage characterization > opens the AI prompt dialog 1`] = `
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -3247,14 +3247,14 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nombre</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="" name="name">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-invalid="false" value="" name="name">
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
-<div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="ml-1 rounded-full p-0.5 hover:bg-foreground/10">
+<div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-2.5 w-2.5" aria-hidden="true">
 <path d="M18 6 6 18">
 </path>
@@ -3264,9 +3264,9 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 </button>
 </div>
 </div>
-<div class="flex gap-2">
+<div class="flex items-center gap-2">
 <input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Nuevo tipo (Enter)" value="">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3" type="button" disabled="" aria-label="Añadir tipo">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 max-md:h-11" type="button" disabled="" aria-label="Añadir tipo">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-3 w-3" aria-hidden="true">
 <path d="M5 12h14">
 </path>
@@ -3278,19 +3278,19 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 <div class="space-y-2">
 <p class="text-xs text-muted-foreground">Tipos guardados. Pulsa para activar o quitar varios.</p>
 <div class="flex flex-wrap gap-2 rounded-md border border-dashed border-border/70 bg-muted/20 p-2">
-<button type="button" aria-pressed="true" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors " style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">
+<button type="button" aria-pressed="true" class="relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] " style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check h-3 w-3">
 <path d="M20 6 9 17l-5-5">
 </path>
 </svg>Fuerza</button>
-<button type="button" aria-pressed="false" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors border-border bg-background text-muted-foreground hover:bg-muted">HIIT</button>
+<button type="button" aria-pressed="false" class="relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] border-border bg-background text-muted-foreground hover:bg-muted">HIIT</button>
 </div>
 </div>
 </div>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nivel</label>
-<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full max-md:h-11 items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full max-md:h-11 items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-invalid="false">
 <span style="pointer-events: none;">Principiante</span>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground" aria-hidden="true">
 <path d="m6 9 6 6 6-6">
@@ -3391,11 +3391,11 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 <div class="grid grid-cols-2 gap-4">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración estimada (min)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-invalid="false" type="number" value="">
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Calorías estimadas (kcal)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
@@ -3404,15 +3404,15 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <span class="self-center text-sm text-muted-foreground">Sin etiquetas</span>
 </div>
-<div class="flex flex-col gap-2 sm:flex-row">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 sm:w-auto" type="button" id="radix-ID" aria-haspopup="menu" aria-expanded="false" data-state="closed">Etiquetas existentes<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-3 w-3">
+<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 sm:w-auto max-md:h-11" type="button" id="radix-ID" aria-haspopup="menu" aria-expanded="false" data-state="closed">Etiquetas existentes<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-3 w-3">
 <path d="m6 9 6 6 6-6">
 </path>
 </svg>
 </button>
-<div class="flex flex-1 gap-2">
+<div class="flex flex-1 items-center gap-2">
 <input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Nueva etiqueta (Enter)" value="">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3" type="button" disabled="" aria-label="Añadir etiqueta">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 max-md:h-11" type="button" disabled="" aria-label="Añadir etiqueta">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-3 w-3" aria-hidden="true">
 <path d="M5 12h14">
 </path>
@@ -3433,17 +3433,17 @@ exports[`TrainingsPage characterization > opens the builder from the empty state
 <div class="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción calentamiento</label>
-<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-invalid="false">
 </textarea>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración (min)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción vuelta a la calma</label>
-<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-invalid="false">
 </textarea>
 </div>
 </div>
@@ -3567,7 +3567,7 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -4011,14 +4011,14 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nombre</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="" name="name">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-invalid="false" value="" name="name">
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
-<div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="ml-1 rounded-full p-0.5 hover:bg-foreground/10">
+<div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-2.5 w-2.5" aria-hidden="true">
 <path d="M18 6 6 18">
 </path>
@@ -4028,9 +4028,9 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 </button>
 </div>
 </div>
-<div class="flex gap-2">
+<div class="flex items-center gap-2">
 <input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Nuevo tipo (Enter)" value="">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3" type="button" disabled="" aria-label="Añadir tipo">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 max-md:h-11" type="button" disabled="" aria-label="Añadir tipo">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-3 w-3" aria-hidden="true">
 <path d="M5 12h14">
 </path>
@@ -4042,19 +4042,19 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 <div class="space-y-2">
 <p class="text-xs text-muted-foreground">Tipos guardados. Pulsa para activar o quitar varios.</p>
 <div class="flex flex-wrap gap-2 rounded-md border border-dashed border-border/70 bg-muted/20 p-2">
-<button type="button" aria-pressed="true" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors " style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">
+<button type="button" aria-pressed="true" class="relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] " style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check h-3 w-3">
 <path d="M20 6 9 17l-5-5">
 </path>
 </svg>Fuerza</button>
-<button type="button" aria-pressed="false" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors border-border bg-background text-muted-foreground hover:bg-muted">HIIT</button>
+<button type="button" aria-pressed="false" class="relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] border-border bg-background text-muted-foreground hover:bg-muted">HIIT</button>
 </div>
 </div>
 </div>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nivel</label>
-<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full max-md:h-11 items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full max-md:h-11 items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-invalid="false">
 <span style="pointer-events: none;">Principiante</span>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground" aria-hidden="true">
 <path d="m6 9 6 6 6-6">
@@ -4155,11 +4155,11 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 <div class="grid grid-cols-2 gap-4">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración estimada (min)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-invalid="false" type="number" value="">
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Calorías estimadas (kcal)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
@@ -4168,15 +4168,15 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
 <span class="self-center text-sm text-muted-foreground">Sin etiquetas</span>
 </div>
-<div class="flex flex-col gap-2 sm:flex-row">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 sm:w-auto" type="button" id="radix-ID" aria-haspopup="menu" aria-expanded="false" data-state="closed">Etiquetas existentes<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-3 w-3">
+<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 sm:w-auto max-md:h-11" type="button" id="radix-ID" aria-haspopup="menu" aria-expanded="false" data-state="closed">Etiquetas existentes<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-3 w-3">
 <path d="m6 9 6 6 6-6">
 </path>
 </svg>
 </button>
-<div class="flex flex-1 gap-2">
+<div class="flex flex-1 items-center gap-2">
 <input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Nueva etiqueta (Enter)" value="">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3" type="button" disabled="" aria-label="Añadir etiqueta">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 max-md:h-11" type="button" disabled="" aria-label="Añadir etiqueta">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-3 w-3" aria-hidden="true">
 <path d="M5 12h14">
 </path>
@@ -4197,17 +4197,17 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 <div class="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción calentamiento</label>
-<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-invalid="false">
 </textarea>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración (min)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción vuelta a la calma</label>
-<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-invalid="false">
 </textarea>
 </div>
 </div>
@@ -4331,7 +4331,7 @@ exports[`TrainingsPage characterization > opens the delete dialog from the row m
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -4841,7 +4841,7 @@ exports[`TrainingsPage characterization > opens the detail dialog and the delete
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -5427,7 +5427,7 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -5871,14 +5871,14 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 <p class="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nombre</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" value="Fuerza A" name="name">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" placeholder="Ej. Full Body Fuerza + Cardio" id="ID-form-item" aria-invalid="false" value="Fuerza A" name="name">
 </div>
 <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Tipos</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
-<div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="ml-1 rounded-full p-0.5 hover:bg-foreground/10">
+<div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">Fuerza<button type="button" aria-label="Quitar Fuerza" class="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-2.5 w-2.5" aria-hidden="true">
 <path d="M18 6 6 18">
 </path>
@@ -5887,7 +5887,7 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </svg>
 </button>
 </div>
-<div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(229, 190, 88, 0.3); background-color: rgba(229, 190, 88, 0.12); color: color-mix(in srgb, #E5BE58, var(--foreground) var(--training-accent-text-mix));">HIIT<button type="button" aria-label="Quitar HIIT" class="ml-1 rounded-full p-0.5 hover:bg-foreground/10">
+<div class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-border-strong text-foreground" style="border-color: rgba(229, 190, 88, 0.3); background-color: rgba(229, 190, 88, 0.12); color: color-mix(in srgb, #E5BE58, var(--foreground) var(--training-accent-text-mix));">HIIT<button type="button" aria-label="Quitar HIIT" class="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-2.5 w-2.5" aria-hidden="true">
 <path d="M18 6 6 18">
 </path>
@@ -5897,9 +5897,9 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </button>
 </div>
 </div>
-<div class="flex gap-2">
+<div class="flex items-center gap-2">
 <input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Nuevo tipo (Enter)" value="">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3" type="button" disabled="" aria-label="Añadir tipo">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 max-md:h-11" type="button" disabled="" aria-label="Añadir tipo">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-3 w-3" aria-hidden="true">
 <path d="M5 12h14">
 </path>
@@ -5911,12 +5911,12 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 <div class="space-y-2">
 <p class="text-xs text-muted-foreground">Tipos guardados. Pulsa para activar o quitar varios.</p>
 <div class="flex flex-wrap gap-2 rounded-md border border-dashed border-border/70 bg-muted/20 p-2">
-<button type="button" aria-pressed="true" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors " style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">
+<button type="button" aria-pressed="true" class="relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] " style="border-color: rgba(127, 181, 216, 0.3); background-color: rgba(127, 181, 216, 0.12); color: color-mix(in srgb, #7FB5D8, var(--foreground) var(--training-accent-text-mix));">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check h-3 w-3">
 <path d="M20 6 9 17l-5-5">
 </path>
 </svg>Fuerza</button>
-<button type="button" aria-pressed="true" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors " style="border-color: rgba(229, 190, 88, 0.3); background-color: rgba(229, 190, 88, 0.12); color: color-mix(in srgb, #E5BE58, var(--foreground) var(--training-accent-text-mix));">
+<button type="button" aria-pressed="true" class="relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] " style="border-color: rgba(229, 190, 88, 0.3); background-color: rgba(229, 190, 88, 0.12); color: color-mix(in srgb, #E5BE58, var(--foreground) var(--training-accent-text-mix));">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check h-3 w-3">
 <path d="M20 6 9 17l-5-5">
 </path>
@@ -5927,7 +5927,7 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Nivel</label>
-<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full max-md:h-11 items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<button type="button" role="combobox" aria-controls="radix-ID" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 w-full max-md:h-11 items-center justify-between rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) data-[placeholder]:text-muted-foreground hover:border-control-border-hover data-[state=open]:border-focus focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border [&amp;>span]:line-clamp-1" id="ID-form-item" aria-invalid="false">
 <span style="pointer-events: none;">Principiante</span>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground" aria-hidden="true">
 <path d="m6 9 6 6 6-6">
@@ -6028,18 +6028,18 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 <div class="grid grid-cols-2 gap-4">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración estimada (min)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="45">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="45" id="ID-form-item" aria-invalid="false" type="number" value="45">
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Calorías estimadas (kcal)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="300">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="300" id="ID-form-item" aria-invalid="false" type="number" value="300">
 </div>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Etiquetas</label>
 <div class="space-y-2">
 <div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
-<div class="inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 gap-1 border-brand-soft/40 bg-brand-soft/10 pr-1 text-accent-text">Pierna<button type="button" aria-label="Quitar Pierna" class="ml-0.5 rounded-full p-0.5 hover:bg-brand-soft/20">
+<div class="inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 gap-1 border-brand-soft/40 bg-brand-soft/10 pr-1 text-accent-text">Pierna<button type="button" aria-label="Quitar Pierna" class="relative ml-0.5 rounded-full p-0.5 hover:bg-brand-soft/20 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-2.5 w-2.5" aria-hidden="true">
 <path d="M18 6 6 18">
 </path>
@@ -6049,15 +6049,15 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </button>
 </div>
 </div>
-<div class="flex flex-col gap-2 sm:flex-row">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 sm:w-auto" type="button" id="radix-ID" aria-haspopup="menu" aria-expanded="false" data-state="closed">Etiquetas existentes<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-3 w-3">
+<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 sm:w-auto max-md:h-11" type="button" id="radix-ID" aria-haspopup="menu" aria-expanded="false" data-state="closed">Etiquetas existentes<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-3 w-3">
 <path d="m6 9 6 6 6-6">
 </path>
 </svg>
 </button>
-<div class="flex flex-1 gap-2">
+<div class="flex flex-1 items-center gap-2">
 <input class="flex w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border h-8 text-sm" placeholder="Nueva etiqueta (Enter)" value="">
-<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3" type="button" disabled="" aria-label="Añadir etiqueta">
+<button class="relative inline-flex items-center justify-center gap-2 whitespace-nowrap select-none border text-sm font-semibold [transition:background-color_var(--dur-fast)_var(--ease-out),border-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out),transform_var(--dur-press)_var(--ease-out),scale_var(--dur-press)_var(--ease-out)] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:border-border disabled:bg-transparent disabled:text-muted-foreground max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-control-border bg-transparent text-foreground hover:border-control-border-hover hover:bg-card h-9 rounded-md px-3 max-md:h-11" type="button" disabled="" aria-label="Añadir etiqueta">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-3 w-3" aria-hidden="true">
 <path d="M5 12h14">
 </path>
@@ -6078,17 +6078,17 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 <div class="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción calentamiento</label>
-<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<textarea name="warmup_description" rows="2" placeholder="Describe el calentamiento..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-invalid="false">
 </textarea>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Duración (min)</label>
-<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false" type="number" value="">
+<input class="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-out) file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground hover:border-control-border-hover focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus aria-invalid:border-status-error read-only:bg-transparent disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:hover:border-border" min="0" placeholder="10" id="ID-form-item" aria-invalid="false" type="number" value="">
 </div>
 </div>
 <div class="space-y-2">
 <label class="text-[13px] leading-[18px] font-normal text-foreground-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="ID-form-item">Descripción vuelta a la calma</label>
-<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-describedby="ID-form-item-description" aria-invalid="false">
+<textarea name="cooldown_description" rows="2" placeholder="Describe la vuelta a la calma..." class="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="ID-form-item" aria-invalid="false">
 </textarea>
 </div>
 </div>
@@ -6161,7 +6161,7 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">Tipo de objetivo</label>
-<select class="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground">
+<select class="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground max-md:h-11">
 <option value="REPS">Repeticiones</option>
 <option value="SECONDS">Tiempo</option>
 </select>
@@ -6241,7 +6241,7 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </div>
 <div class="space-y-1">
 <label class="text-xs text-muted-foreground">Tipo de objetivo</label>
-<select class="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground">
+<select class="flex h-8 w-full rounded-md border border-input bg-input px-3 text-sm text-foreground max-md:h-11">
 <option value="REPS">Repeticiones</option>
 <option value="SECONDS">Tiempo</option>
 </select>
@@ -6380,7 +6380,7 @@ exports[`TrainingsPage characterization > opens the group create dialog 1`] = `
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -6893,7 +6893,7 @@ exports[`TrainingsPage characterization > paginates through the URL 1`] = `
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -7369,7 +7369,7 @@ exports[`TrainingsPage characterization > shows the empty search result 1`] = `
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -7652,7 +7652,7 @@ exports[`TrainingsPage characterization > shows the error card 1`] = `
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -7888,7 +7888,7 @@ exports[`TrainingsPage characterization > shows the move bar and the move dialog
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>
@@ -8416,7 +8416,7 @@ exports[`TrainingsPage characterization > shows the move bar and the move dialog
 </button>
 <div class="min-w-44 rounded-xl border p-3 transition-colors border-border bg-card">
 <div class="flex items-start justify-between gap-2">
-<button type="button" aria-pressed="false" class="flex min-w-0 flex-1 items-center gap-2 text-left">
+<button type="button" aria-pressed="false" class="relative flex min-w-0 flex-1 items-center gap-2 text-left max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder h-5 w-5 flex-none text-accent-text">
 <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
 </path>

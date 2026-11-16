@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+﻿import { useId, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { normalizeSearchText } from '@/lib/search'
@@ -39,6 +39,7 @@ const DEFAULT_UNIT_VALUES: Partial<
 export function IngredientPicker({ value, onChange, error }: IngredientPickerProps) {
   const [search, setSearch] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)
+  const errorId = useId()
   const ingredientsQuery = useIngredientsList()
   const allIngredients = useMemo(() => ingredientsQuery.data?.data ?? [], [ingredientsQuery.data?.data])
 
@@ -105,7 +106,12 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
   }
 
   return (
-    <div className="min-w-0 space-y-2">
+    <div
+      role="group"
+      aria-label="Ingredientes"
+      aria-describedby={error ? errorId : undefined}
+      className="min-w-0 space-y-2"
+    >
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-foreground">Ingredientes</p>
         {value.length > 0 && (
@@ -172,7 +178,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
         </Button>
       )}
 
-      {error && <p className="text-xs text-status-error">{error}</p>}
+      {error && <p id={errorId} className="text-xs text-status-error">{error}</p>}
     </div>
   )
 }

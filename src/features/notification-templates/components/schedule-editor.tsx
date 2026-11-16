@@ -58,7 +58,6 @@ export function ScheduleEditor({ template, draft, setDraft, disabled }: Schedule
             onChange={(event) => setDraft((current) => ({ ...current, timezone: event.target.value }))}
             disabled={disabled}
             placeholder="Europe/Madrid"
-            className="max-md:h-11"
           />
         </div>
 
@@ -94,7 +93,6 @@ export function ScheduleEditor({ template, draft, setDraft, disabled }: Schedule
               value={draft.times[index] ?? ''}
               onChange={(event) => handleTimeChange(index, event.target.value)}
               disabled={disabled}
-              className="max-md:h-11"
             />
           </div>
         ))}
