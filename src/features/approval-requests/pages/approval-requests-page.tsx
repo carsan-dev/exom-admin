@@ -150,9 +150,9 @@ export function ApprovalRequestsPage() {
         <CardContent className="space-y-4 p-6">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <Tabs value={status} onValueChange={(value) => updateSearchParams({ status: value as ApprovalStatusFilter, page: 1 })}>
-              <TabsList className="grid w-full grid-cols-5 xl:w-auto">
+              <TabsList className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto sm:grid sm:h-10 sm:grid-cols-5 sm:gap-0 sm:overflow-visible xl:w-auto">
                 {getApprovalStatusFilterOptions().map((value) => (
-                  <TabsTrigger key={value} value={value}>
+                  <TabsTrigger key={value} value={value} className="min-h-10 shrink-0 sm:min-h-0 sm:shrink">
                     {value === 'ALL' ? 'Todas' : value === 'PENDING' ? 'Pendientes' : value === 'APPROVED' ? 'Aprobadas' : value === 'REJECTED' ? 'Rechazadas' : 'Fallidas'}
                   </TabsTrigger>
                 ))}

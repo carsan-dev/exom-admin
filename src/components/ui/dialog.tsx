@@ -4,15 +4,22 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const DialogConsumer = ({ children }: { children: React.ReactNode }) => {
+// Inline body overflow lock (059fbd4), kept alongside Radix's own counted scroll lock.
+// It renders nothing and lives inside Content: wrapping the Portal children instead hid
+// Overlay and Content from Radix Presence (no ref), so they unmounted without their
+// data-state=closed exit animation.
+const DialogConsumer = () => {
   React.useEffect(() => {
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = ''
     }
   }, [])
-  return <>{children}</>
+  return null
 }
+
+const overlayCloseButtonClassName =
+  "absolute right-3 top-3 inline-flex size-9 items-center justify-center text-foreground-secondary transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-background-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none sm:right-4 sm:top-4"
 
 const Dialog = DialogPrimitive.Root
 
@@ -28,8 +35,9 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
+    data-slot="dialog-overlay"
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-scrim anim-overlay-scrim",
       className
     )}
     {...props}
@@ -44,12 +52,12 @@ const DialogContent = React.forwardRef<
   }
 >(({ className, children, disableOutsideClose = false, onInteractOutside, ...props }, ref) => (
   <DialogPortal>
-    <DialogConsumer>
-      <DialogOverlay />
-      <DialogPrimitive.Content
+    <DialogOverlay />
+    <DialogPrimitive.Content
       ref={ref}
+      data-slot="dialog-content"
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid max-h-[calc(100svh-2rem)] w-[calc(100vw-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto border bg-background p-4 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:p-6 sm:rounded-lg",
+        "fixed left-[50%] top-[50%] z-50 grid max-h-[calc(100svh-2rem)] w-[calc(100vw-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto border border-border-strong bg-background-surface p-4 text-foreground shadow-overlay anim-overlay-panel sm:p-6",
         className
       )}
       onInteractOutside={(event) => {
@@ -61,13 +69,13 @@ const DialogContent = React.forwardRef<
       }}
       {...props}
     >
+      <DialogConsumer />
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+      <DialogPrimitive.Close className={overlayCloseButtonClassName}>
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
-    </DialogConsumer>
   </DialogPortal>
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
@@ -78,7 +86,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
+      "flex flex-col space-y-1 pr-8 text-left",
       className
     )}
     {...props}
@@ -107,7 +115,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
+      "text-lg font-semibold leading-6 text-foreground",
       className
     )}
     {...props}
@@ -121,7 +129,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-[13px] leading-5 text-foreground-secondary", className)}
     {...props}
   />
 ))

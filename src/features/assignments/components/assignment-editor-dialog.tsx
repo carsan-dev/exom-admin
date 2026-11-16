@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import { assignmentEditorSchema, type AssignmentEditorFormValues } from '../schemas'
 import {
   createAssignmentPreviewDiet,
@@ -253,6 +254,7 @@ export function AssignmentEditorDialog({
   activeAutoRule = null,
 }: AssignmentEditorDialogProps) {
   const [previewOpen, setPreviewOpen] = useState(false)
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
   const form = useForm<AssignmentEditorFormValues>({
     resolver: zodResolver(assignmentEditorSchema),
     defaultValues: {
@@ -367,9 +369,9 @@ export function AssignmentEditorDialog({
       const removedWeekdays = editingAutoRule.days
         .map((day) => day.weekday)
         .filter((weekday) => !nextWeekdays.has(weekday))
-      if (removedWeekdays.length > 0 && !window.confirm(
-        `El nuevo patrón elimina los días ${removedWeekdays.join(', ')}. ¿Confirmas la actualización?`,
-      )) {
+      if (removedWeekdays.length > 0 && !(await confirm({
+        title: `El nuevo patrón elimina los días ${removedWeekdays.join(', ')}. ¿Confirmas la actualización?`,
+      }))) {
         return
       }
     }
@@ -863,6 +865,7 @@ export function AssignmentEditorDialog({
           await handleSave(values)
         })}
       />
+      {confirmDialog}
     </>
   )
 }

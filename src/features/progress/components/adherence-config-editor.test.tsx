@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
 import { useAuth } from '@/hooks/use-auth'
 import { useUnsavedChangesStore } from '@/hooks/use-unsaved-changes'
+import { answerConfirmDialog, findConfirmDialog } from '@/test/confirm-dialog'
 import type { AdherenceConfig } from '../types'
 import { AdherenceConfigEditor } from './adherence-config-editor'
 
@@ -134,22 +135,21 @@ describe('AdherenceConfigEditor', () => {
 
   it('requires explicit discard before changing date and keeps the draft when cancelled', async () => {
     vi.mocked(api.get).mockResolvedValueOnce(response(policy)).mockResolvedValueOnce(response({ ...policy, version: 11 }))
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
     mount()
     const user = userEvent.setup()
     const lower = await screen.findByLabelText('Calorías: límite inferior (%)')
     await user.clear(lower); await user.type(lower, '12')
     const date = screen.getByLabelText('Fecha de vigencia (UTC)')
     fireEvent.change(date, { target: { value: '2027-01-03' } })
-    expect(confirm).toHaveBeenCalledWith(expect.stringMatching(/descartar|perder/i))
+    expect(await findConfirmDialog()).toHaveAccessibleName(expect.stringMatching(/descartar|perder/i))
+    await answerConfirmDialog('Cancelar')
     expect(date).toHaveValue('2027-01-02')
     expect(lower).toHaveValue(12)
     expect(api.get).toHaveBeenCalledTimes(1)
-    confirm.mockReturnValue(true)
     fireEvent.change(date, { target: { value: '2027-01-03' } })
+    await answerConfirmDialog('Aceptar')
     expect(date).toHaveValue('2027-01-03')
     expect(await screen.findByLabelText('Calorías: límite inferior (%)')).toHaveValue(10)
-    confirm.mockRestore()
   })
 
   it('isolates draft and version when changing effective date', async () => {
@@ -160,8 +160,8 @@ describe('AdherenceConfigEditor', () => {
     const lower = await screen.findByLabelText('Calorías: límite inferior (%)')
     await user.clear(lower); await user.type(lower, '12')
     const date = screen.getByLabelText('Fecha de vigencia (UTC)')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     fireEvent.change(date, { target: { value: '2027-01-03' } })
+    await answerConfirmDialog('Aceptar')
     expect(await screen.findByLabelText('Calorías: límite inferior (%)')).toHaveValue(10)
     await user.click(screen.getByRole('button', { name: 'Guardar configuración' }))
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/clients/client-a/adherence/config', expect.objectContaining({

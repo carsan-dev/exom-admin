@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import { useAuth } from '@/hooks/use-auth'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { getApiErrorMessage } from '@/lib/api-utils'
@@ -79,6 +80,7 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
   const requestQuery = useApprovalRequest(requestId ?? undefined, open)
   const resolveRequest = useResolveApprovalRequest()
   const cancelRequest = useCancelApprovalRequest()
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   const [rejectionReason, setRejectionReason] = useState('')
   const [showRejectForm, setShowRejectForm] = useState(false)
@@ -110,7 +112,7 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
       return
     }
 
-    const confirmed = window.confirm('¿Seguro que quieres ejecutar esta acción aprobada?')
+    const confirmed = await confirm({ title: '¿Seguro que quieres ejecutar esta acción aprobada?' })
     if (!confirmed) {
       return
     }
@@ -163,6 +165,7 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
   }
 
   return (
+    <>
       <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-5xl">
         <DialogHeader>
@@ -379,5 +382,7 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
         </DialogFooter>
       </DialogContent>
     </Dialog>
+      {confirmDialog}
+    </>
   )
 }

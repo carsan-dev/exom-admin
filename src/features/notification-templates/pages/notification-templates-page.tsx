@@ -23,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import { cn } from '@/lib/utils'
 import {
   getApiErrorMessage,
@@ -619,6 +620,7 @@ export function NotificationTemplatesPage() {
   const templatesQuery = useNotificationTemplates(canManageTemplates)
   const updateTemplate = useUpdateNotificationTemplate()
   const resetTemplate = useResetNotificationTemplate()
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
   const [selectedKey, setSelectedKey] = useState('')
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
@@ -795,9 +797,9 @@ export function NotificationTemplatesPage() {
       return
     }
 
-    const confirmed = selectedTemplate.is_system
-      ? window.confirm(`¿Restaurar "${selectedTemplate.name}" a su texto por defecto?`)
-      : window.confirm(`¿Eliminar la plantilla manual "${selectedTemplate.name}"?`)
+    const confirmed = await (selectedTemplate.is_system
+      ? confirm({ title: `¿Restaurar "${selectedTemplate.name}" a su texto por defecto?` })
+      : confirm({ title: `¿Eliminar la plantilla manual "${selectedTemplate.name}"?`, confirmLabel: 'Eliminar', destructive: true }))
 
     if (!confirmed) {
       return
@@ -1102,6 +1104,7 @@ export function NotificationTemplatesPage() {
         onOpenChange={setCreateOpen}
         onCreated={(template) => setSelectedKey(template.key)}
       />
+      {confirmDialog}
     </div>
   )
 }

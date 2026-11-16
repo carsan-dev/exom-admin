@@ -20,13 +20,13 @@ export function FilterChips({ chips, activeCount, onClear }: FilterChipsProps) {
         <Badge
           key={`${chip.sectionKey}-${chip.value}`}
           variant="secondary"
-          className="gap-2 rounded-full px-3 py-1 text-xs"
+          className="h-8 gap-1 rounded-none border-border-strong bg-card py-1 pl-2.5 pr-1 text-[13px] hover:bg-card font-normal text-foreground-secondary"
         >
           <span>{chip.label}</span>
           <button
             type="button"
             onClick={chip.onRemove}
-            className="rounded-full p-0.5 transition-colors hover:bg-foreground/10"
+            className="grid size-6 place-items-center text-muted-foreground transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-focus"
             aria-label={`Quitar filtro ${chip.label}`}
           >
             <X className="h-3 w-3" />

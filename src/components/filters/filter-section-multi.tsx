@@ -38,7 +38,7 @@ export function FilterSectionMulti({ section, value, onChange }: FilterSectionMu
     return (
       <div className="space-y-2">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Skeleton key={index} className="h-10 w-full rounded-lg" />
+          <Skeleton key={index} className="h-10 w-full" />
         ))}
       </div>
     )
@@ -62,13 +62,13 @@ export function FilterSectionMulti({ section, value, onChange }: FilterSectionMu
             return (
               <label
                 key={option.value}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-border/70 px-3 py-2 text-sm transition-colors hover:bg-accent/40"
+                className="flex cursor-pointer items-start gap-3 rounded-none border border-border px-3 py-2 text-sm transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card has-[:checked]:bg-lime-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-focus"
               >
                 <input
                   type="checkbox"
                   checked={checked}
                   onChange={() => toggleValue(option.value)}
-                  className="mt-0.5 h-4 w-4 flex-none rounded border-input accent-primary"
+                  className="mt-0.5 h-4 w-4 flex-none rounded-none border-input accent-primary hover:border-control-border-hover"
                 />
                 <span className="min-w-0 flex-1 whitespace-normal break-words leading-5 text-foreground">
                   {option.label}
@@ -77,7 +77,7 @@ export function FilterSectionMulti({ section, value, onChange }: FilterSectionMu
             )
           })
         ) : (
-          <p className="rounded-lg border border-dashed border-border/70 px-3 py-6 text-center text-sm text-muted-foreground">
+          <p className="rounded-none border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
             No hay opciones para mostrar.
           </p>
         )}
