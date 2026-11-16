@@ -13,6 +13,8 @@ export interface SelectionBarProps {
   count: number
   /** Clears the selection (the «Limpiar selección» control). */
   onClear: () => void
+  /** Disables the «Limpiar selección» control (e.g. while a bulk action is running). */
+  clearDisabled?: boolean
   /** Bulk action buttons, shown to the right of the count. */
   children?: React.ReactNode
   /** Count text. Default: «1 seleccionado» / «N seleccionados» (same copy as the mockups). */
@@ -32,6 +34,7 @@ export interface SelectionBarProps {
 export function SelectionBar({
   count,
   onClear,
+  clearDisabled = false,
   children,
   formatCount = formatSelectionCount,
   'aria-label': ariaLabel = 'Acciones de selección',
@@ -60,6 +63,7 @@ export function SelectionBar({
           size="icon"
           className="size-9"
           aria-label="Limpiar selección"
+          disabled={clearDisabled}
           onClick={onClear}
         >
           <X aria-hidden="true" />

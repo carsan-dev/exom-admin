@@ -1,5 +1,5 @@
 import { Apple, Dumbbell, PauseCircle } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { StatusChip } from '@/components/ui/status-chip'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -59,7 +59,7 @@ export function AssignmentPreviewDialog({
 
         <div className="space-y-4">
           {preview.days.map((day, index) => (
-            <div key={`${day.date}-${index}`} className="space-y-4 rounded-2xl border border-border/70 bg-background/60 p-5">
+            <div key={`${day.date}-${index}`} className="space-y-4 border border-border p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium text-foreground">{toDisplayDate(day.date)}</p>
@@ -68,19 +68,19 @@ export function AssignmentPreviewDialog({
 
                 <div className="flex flex-wrap gap-2">
                   {day.trainings.length > 0 && (
-                    <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-status-info">
+                    <StatusChip variant="info" dot={false}>
                       {day.trainings.length} entreno{day.trainings.length === 1 ? '' : 's'} asignado{day.trainings.length === 1 ? '' : 's'}
-                    </Badge>
+                    </StatusChip>
                   )}
                   {day.diet && (
-                    <Badge variant="outline" className="border-status-success/30 bg-status-success/10 text-status-success">
+                    <StatusChip variant="success" dot={false}>
                       Dieta asignada
-                    </Badge>
+                    </StatusChip>
                   )}
                   {day.is_rest_day && (
-                    <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-accent-text">
+                    <StatusChip variant="brand" dot={false}>
                       Descanso
-                    </Badge>
+                    </StatusChip>
                   )}
                 </div>
               </div>
@@ -88,9 +88,9 @@ export function AssignmentPreviewDialog({
               <Separator />
 
               {day.is_rest_day ? (
-                <div className="rounded-2xl border border-brand-primary/25 bg-brand-soft/10 p-5">
+                <div className="border border-border-strong bg-lime-soft p-5">
                   <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-brand-soft/20 p-3 text-accent-text">
+                    <div className="text-accent-text">
                       <PauseCircle className="h-5 w-5" />
                     </div>
                     <div className="space-y-1">
@@ -104,9 +104,9 @@ export function AssignmentPreviewDialog({
               ) : (
                 <div className="grid gap-4 lg:grid-cols-2">
                   {day.training ? (
-                    <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
+                    <div className="border border-border bg-card p-5">
                       <div className="flex items-start gap-3">
-                        <div className="rounded-full bg-status-info/10 p-3 text-status-info">
+                        <div className="text-status-info">
                           <Dumbbell className="h-5 w-5" />
                         </div>
                         <div>
@@ -118,15 +118,15 @@ export function AssignmentPreviewDialog({
                       </div>
 
                       <div className="mt-4 flex flex-wrap gap-2">
-                        <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-status-info">
+                        <StatusChip variant="info" dot={false}>
                           {getTrainingTypeLabel(day.training.type)}
-                        </Badge>
-                        <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-accent-text">
+                        </StatusChip>
+                        <StatusChip variant="brand" dot={false}>
                           {LEVEL_LABELS[day.training.level]}
-                        </Badge>
+                        </StatusChip>
                       </div>
 
-                      <ol className="mt-4 space-y-2 rounded-xl border border-border/60 bg-background/50 p-3">
+                      <ol className="mt-4 space-y-2 border border-border p-3">
                         {day.trainings.map((training, index) => (
                           <li key={training.id} className="text-sm font-medium text-foreground">
                             {index + 1}. {training.name}{training.is_active === false ? ' (retirado)' : ''}
@@ -135,13 +135,13 @@ export function AssignmentPreviewDialog({
                       </ol>
 
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-xl border border-border/60 bg-background/50 p-3">
+                        <div className="border border-border p-3">
                           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Duración</p>
                           <p className="mt-1 text-sm font-medium text-foreground">
                             {day.training.estimated_duration_min ? `${day.training.estimated_duration_min} min` : 'Flexible'}
                           </p>
                         </div>
-                        <div className="rounded-xl border border-border/60 bg-background/50 p-3">
+                        <div className="border border-border p-3">
                           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ejercicios</p>
                           <p className="mt-1 text-sm font-medium text-foreground">
                             {day.training.exercises_count ?? 'Contenido existente'}
@@ -150,15 +150,15 @@ export function AssignmentPreviewDialog({
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-5 text-sm text-muted-foreground">
+                    <div className="border border-dashed border-border-strong p-5 text-sm text-muted-foreground">
                       Sin entrenamiento asignado.
                     </div>
                   )}
 
                   {day.diet ? (
-                    <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
+                    <div className="border border-border bg-card p-5">
                       <div className="flex items-start gap-3">
-                        <div className="rounded-full bg-status-success/10 p-3 text-status-success">
+                        <div className="text-status-success">
                           <Apple className="h-5 w-5" />
                         </div>
                         <div>
@@ -168,25 +168,25 @@ export function AssignmentPreviewDialog({
                       </div>
 
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-xl border border-border/60 bg-background/50 p-3">
+                        <div className="border border-border p-3">
                           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Calorías</p>
                           <p className="mt-1 text-sm font-medium text-foreground">
                             {day.diet.total_calories ? `${day.diet.total_calories} kcal` : 'Personalizadas'}
                           </p>
                         </div>
-                        <div className="rounded-xl border border-border/60 bg-background/50 p-3">
+                        <div className="border border-border p-3">
                           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Comidas</p>
                           <p className="mt-1 text-sm font-medium text-foreground">
                             {day.diet.meals_count ?? 'Contenido existente'}
                           </p>
                         </div>
-                        <div className="rounded-xl border border-border/60 bg-background/50 p-3">
+                        <div className="border border-border p-3">
                           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Proteína</p>
                           <p className="mt-1 text-sm font-medium text-foreground">
                             {day.diet.total_protein_g ? `${day.diet.total_protein_g} g` : 'N/D'}
                           </p>
                         </div>
-                        <div className="rounded-xl border border-border/60 bg-background/50 p-3">
+                        <div className="border border-border p-3">
                           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Carbohidratos</p>
                           <p className="mt-1 text-sm font-medium text-foreground">
                             {day.diet.total_carbs_g ? `${day.diet.total_carbs_g} g` : 'N/D'}
@@ -195,7 +195,7 @@ export function AssignmentPreviewDialog({
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-5 text-sm text-muted-foreground">
+                    <div className="border border-dashed border-border-strong p-5 text-sm text-muted-foreground">
                       Sin dieta asignada.
                     </div>
                   )}

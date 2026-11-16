@@ -1,22 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { addDays, addMonths, addWeeks, differenceInCalendarDays, format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { AlertTriangle, CalendarDays, Repeat2, Users } from 'lucide-react'
+import { CalendarDays, Users } from 'lucide-react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/hooks/use-auth'
 import { useSearchParams } from 'react-router'
+import { cn } from '@/lib/utils'
 import {
   buildCatalogAvailability,
   getApiErrorMessage,
@@ -35,16 +24,24 @@ import {
   useUpdateAssignment,
   useUpdateAutoAssignmentRule,
 } from '../api'
+import { DAY_GESTURE_HINT_ID } from '../components/assignment-day-card'
 import { AssignmentEditorDialog } from '../components/assignment-editor-dialog'
 import type { AssignmentEditorMode } from '../components/assignment-editor-state'
 import { AssignmentsCatalogErrorState } from '../components/assignments-catalog-error-state'
+import { AssignmentsClientsErrorCard } from '../components/assignments-clients-error-card'
 import { AssignmentsEmptyState } from '../components/assignments-empty-state'
 import { AssignmentsMonthGrid } from '../components/assignments-month-grid'
+import { AssignmentsNoPlanningCard } from '../components/assignments-no-planning-card'
+import { AssignmentsPageSkeleton } from '../components/assignments-page-skeleton'
+import { AssignmentsPeriodErrorCard } from '../components/assignments-period-error-card'
 import { AssignmentsToolbar } from '../components/assignments-toolbar'
 import { RirCyclePanel } from '../components/rir-cycle-panel'
 import { AssignmentsWeekGrid } from '../components/assignments-week-grid'
+import { CopySelectionDialog } from '../components/copy-selection-dialog'
 import { CopyWeekDialog } from '../components/copy-week-dialog'
 import { CopyWeekPreviewDialog } from '../components/copy-week-preview-dialog'
+import { DeactivateAutoRuleDialog } from '../components/deactivate-auto-rule-dialog'
+import { DeleteSelectionDialog } from '../components/delete-selection-dialog'
 import type {
   AssignmentEditorValues,
   AssignmentUpdateValues,
@@ -93,46 +90,6 @@ function getIsoWeekday(date: string) {
   const [year, month, day] = date.split('-').map(Number)
   const value = new Date(Date.UTC(year, month - 1, day)).getUTCDay()
   return value === 0 ? 7 : value
-}
-
-function AssignmentsPageSkeleton({ viewMode }: { viewMode: AssignmentsViewMode }) {
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="space-y-4 p-6">
-          <Skeleton className="h-8 w-52" />
-          <Skeleton className="h-4 w-full max-w-2xl" />
-          <div className="grid gap-4 xl:grid-cols-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </CardContent>
-      </Card>
-
-      {viewMode === 'week' ? (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
-          {Array.from({ length: 7 }).map((_, index) => (
-            <Skeleton key={index} className="h-52 rounded-2xl" />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <div className="grid grid-cols-7 gap-2">
-            {Array.from({ length: 7 }).map((_, index) => (
-              <Skeleton key={index} className="h-6 rounded-lg" />
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-2">
-            {Array.from({ length: 35 }).map((_, index) => (
-              <Skeleton key={index} className="min-h-32 rounded-2xl" />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
 }
 
 export function AssignmentsPage() {
@@ -316,6 +273,10 @@ export function AssignmentsPage() {
     updateSearchParam({ date: formatIsoDate(nextDate) })
   }
 
+  const goToToday = () => {
+    updateSearchParam({ date: getCurrentAnchorDate() })
+  }
+
   const handleClearSelection = () => {
     setSelectedDates([])
   }
@@ -324,13 +285,23 @@ export function AssignmentsPage() {
     setSelectedDates(days.map((day) => day.date))
   }
 
+  const openSelectionEditor = () => {
+    setEditorMode('selection')
+    setEditorOpen(true)
+  }
+
   const handleOpenEditor = () => {
     if (selectedDates.length === 0) {
       return
     }
 
-    setEditorMode('selection')
-    setEditorOpen(true)
+    openSelectionEditor()
+  }
+
+  // Double click / Enter on a day: the editor works on the selected days, so the day becomes the selection.
+  const handleOpenDayEditor = (date: string) => {
+    setSelectedDates([date])
+    openSelectionEditor()
   }
 
   const handleOpenAutoRuleEditor = () => {
@@ -476,22 +447,11 @@ export function AssignmentsPage() {
 
   if (clientsQuery.isError) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-          <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-            <AlertTriangle className="h-8 w-8" />
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold text-foreground">
-              {isSuperAdmin ? 'No se ha podido cargar el listado de clientes' : 'No se ha podido cargar la cartera'}
-            </h1>
-            <p className="max-w-xl text-sm text-muted-foreground">
-               {getApiErrorMessage(clientsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
-            </p>
-          </div>
-          <Button onClick={() => clientsQuery.refetch()}>Reintentar</Button>
-        </CardContent>
-      </Card>
+      <AssignmentsClientsErrorCard
+        isSuperAdmin={isSuperAdmin}
+        message={getApiErrorMessage(clientsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
+        onRetry={() => clientsQuery.refetch()}
+      />
     )
   }
 
@@ -510,7 +470,7 @@ export function AssignmentsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={cn('space-y-6', selectedDates.length > 0 && 'pb-28')}>
       <AssignmentsToolbar
         clients={clients}
         selectedClientId={selectedClientId}
@@ -532,6 +492,7 @@ export function AssignmentsPage() {
         onChangeView={handleViewChange}
         onPreviousPeriod={() => changeVisiblePeriod(-1)}
         onNextPeriod={() => changeVisiblePeriod(1)}
+        onToday={goToToday}
         onOpenEditor={handleOpenEditor}
         onOpenCopyWeek={() => setCopyWeekOpen(true)}
         onSelectAllVisible={handleSelectAllVisible}
@@ -541,7 +502,6 @@ export function AssignmentsPage() {
         onClearSelection={handleClearSelection}
       />
 
-      {selectedClientId && days.length > 0 && <RirCyclePanel key={selectedClientId} clientId={selectedClientId} from={days[0].date} to={days[days.length - 1].date} trainings={trainings} />}
       {!selectedClientId ? (
         <AssignmentsEmptyState
           icon={<CalendarDays className="h-8 w-8" />}
@@ -553,22 +513,11 @@ export function AssignmentsPage() {
       ) : activeAssignmentsQuery.isLoading ? (
         <AssignmentsPageSkeleton viewMode={viewMode} />
       ) : activeAssignmentsQuery.isError ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-            <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-              <AlertTriangle className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">
-                {viewMode === 'week' ? 'No se ha podido cargar la semana' : 'No se ha podido cargar el mes'}
-              </h2>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                {getApiErrorMessage(activeAssignmentsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
-              </p>
-            </div>
-            <Button onClick={() => activeAssignmentsQuery.refetch()}>Reintentar</Button>
-          </CardContent>
-        </Card>
+        <AssignmentsPeriodErrorCard
+          viewMode={viewMode}
+          message={getApiErrorMessage(activeAssignmentsQuery.error, 'Inténtalo de nuevo en unos segundos.')}
+          onRetry={() => activeAssignmentsQuery.refetch()}
+        />
       ) : (
         <>
           {catalogQuery.isFetched && (catalogAvailability.has_error || catalogAvailability.has_empty_catalogs) && (
@@ -579,143 +528,63 @@ export function AssignmentsPage() {
             />
           )}
 
-          {!hasAssignmentsInPeriod && (
-            <Card className="border-dashed border-border/70">
-              <CardContent className="flex min-h-28 flex-col items-center justify-center py-6 text-center sm:py-6">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {viewMode === 'week' ? 'Semana sin planificación' : 'Mes sin planificación'}
-                  </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {viewMode === 'week'
-                      ? 'Selecciona uno o varios días en el grid para crear la primera asignación de esta semana.'
-                      : 'Selecciona varios días en el calendario mensual para construir una planificación más rápida.'}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {!hasAssignmentsInPeriod && <AssignmentsNoPlanningCard viewMode={viewMode} />}
 
           {viewMode === 'week' ? (
             <AssignmentsWeekGrid
               days={days}
               selectedDates={selectedDates}
               disabled={isMutating}
+              todayDate={getCurrentAnchorDate()}
               onToggleDay={toggleDaySelection}
+              onOpenDay={handleOpenDayEditor}
             />
           ) : (
             <AssignmentsMonthGrid
               days={days}
               selectedDates={selectedDates}
               disabled={isMutating}
+              todayDate={getCurrentAnchorDate()}
               onToggleDay={toggleDaySelection}
+              onOpenDay={handleOpenDayEditor}
             />
           )}
+
+          <p id={DAY_GESTURE_HINT_ID} className="text-xs text-foreground-muted">
+            Clic en un día para seleccionarlo · doble clic o Intro para editarlo directamente.
+          </p>
         </>
       )}
 
+      {selectedClientId && days.length > 0 && <RirCyclePanel key={selectedClientId} clientId={selectedClientId} from={days[0].date} to={days[days.length - 1].date} trainings={trainings} />}
+
       {selectedClientId && (
         <>
-          <Dialog open={deleteSelectionOpen} onOpenChange={setDeleteSelectionOpen}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Limpiar días seleccionados</DialogTitle>
-                <DialogDescription>
-                  Se eliminarán las asignaciones de {selectedAssignmentIds.length} días. Esta acción no se puede deshacer.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDeleteSelectionOpen(false)} disabled={deleteAssignments.isPending}>Cancelar</Button>
-                <Button variant="destructive" onClick={async () => { await handleDeleteSelectedDays(); setDeleteSelectionOpen(false) }} disabled={deleteAssignments.isPending}>
-                  {deleteAssignments.isPending ? 'Limpiando...' : 'Limpiar días'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <DeleteSelectionDialog
+            open={deleteSelectionOpen}
+            selectedCount={selectedAssignmentIds.length}
+            isPending={deleteAssignments.isPending}
+            onOpenChange={setDeleteSelectionOpen}
+            onConfirm={async () => { await handleDeleteSelectedDays(); setDeleteSelectionOpen(false) }}
+          />
 
-          <Dialog open={copySelectionOpen} onOpenChange={setCopySelectionOpen}>
-            <DialogContent disableOutsideClose className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Copiar selección</DialogTitle>
-                <DialogDescription>
-                  Primer día seleccionado irá a fecha destino. Resto conservará distancia entre fechas. Destinos existentes serán sobrescritos.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="copy-selection-target" className="text-sm font-medium">Fecha destino inicial</label>
-                  <Input id="copy-selection-target" type="date" value={copyTargetDate} onChange={(event) => setCopyTargetDate(event.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  {copySelectionPreview.map(({ day, targetDate, existingTarget }) => {
-                    const trainingNames = (day.trainings?.length ? day.trainings : day.training ? [day.training] : [])
-                      .map((training) => `${training.name}${training.is_active === false ? ' (retirado)' : ''}`)
-                      .join(' + ')
-                    const sourceLabel = day.is_rest_day ? 'Descanso' : [trainingNames, day.diet?.name].filter(Boolean).join(' + ') || 'Vacío (limpiará destino)'
-                    const targetBusy = Boolean(existingTarget && (existingTarget.training || existingTarget.diet || existingTarget.is_rest_day))
-                    return (
-                      <div key={day.date} className="rounded-lg border border-border/70 p-3 text-sm">
-                        <p className="font-medium">{day.date} → {targetDate}</p>
-                        <p className="text-muted-foreground">{sourceLabel}</p>
-                        <p className={targetBusy ? 'text-status-warning' : 'text-muted-foreground'}>
-                          {targetBusy ? 'Destino ocupado: será sobrescrito' : existingTarget ? 'Destino vacío' : 'Destino fuera del período visible; se sobrescribirá si está ocupado'}
-                        </p>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setCopySelectionOpen(false)} disabled={copySelection.isPending}>Cancelar</Button>
-                <Button onClick={() => void handleCopySelection()} disabled={!copyTargetDate || copySelection.isPending}>
-                  {copySelection.isPending ? 'Copiando...' : `Copiar ${selectedDays.length} días`}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Dialog open={deactivateAutoRuleOpen} onOpenChange={setDeactivateAutoRuleOpen}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Desactivar autoasignación semanal</DialogTitle>
-                <DialogDescription>
-                  La regla dejará de generar nuevos entrenamientos, dietas o descansos para próximas semanas.
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-foreground">
-                <div className="flex items-start gap-3">
-                  <div className="rounded-full bg-status-warning/10 p-2 text-status-warning">
-                    <Repeat2 className="h-4 w-4" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-medium">Las fechas automáticas pendientes se retirarán.</p>
-                    <p className="text-muted-foreground">
-                      El histórico y los cambios manuales se mantienen. Podrás activar otro patrón cuando quieras.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setDeactivateAutoRuleOpen(false)}
-                  disabled={deactivateAutoRule.isPending}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => void handleDeactivateAutoRule()}
-                  disabled={deactivateAutoRule.isPending || !activeAutoRuleQuery.data}
-                >
-                  {deactivateAutoRule.isPending ? 'Desactivando...' : 'Desactivar autoasignación'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <CopySelectionDialog
+            open={copySelectionOpen}
+            targetDate={copyTargetDate}
+            preview={copySelectionPreview}
+            selectedCount={selectedDays.length}
+            isPending={copySelection.isPending}
+            onOpenChange={setCopySelectionOpen}
+            onTargetDateChange={setCopyTargetDate}
+            onConfirm={() => void handleCopySelection()}
+          />
+          <DeactivateAutoRuleDialog
+            open={deactivateAutoRuleOpen}
+            isPending={deactivateAutoRule.isPending}
+            hasActiveRule={Boolean(activeAutoRuleQuery.data)}
+            onOpenChange={setDeactivateAutoRuleOpen}
+            onConfirm={() => void handleDeactivateAutoRule()}
+          />
 
           <AssignmentEditorDialog
             open={editorOpen}

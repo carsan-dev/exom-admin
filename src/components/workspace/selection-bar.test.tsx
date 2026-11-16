@@ -53,6 +53,17 @@ describe('SelectionBar (RDS-F2-05)', () => {
     expect(screen.getByText('2 días seleccionados')).toBeInTheDocument()
   })
 
+  it('disables the clear control when clearDisabled is set', async () => {
+    const user = userEvent.setup()
+    const onClear = vi.fn()
+    render(<SelectionBar count={2} onClear={onClear} clearDisabled />)
+
+    const clear = screen.getByRole('button', { name: 'Limpiar selección' })
+    expect(clear).toBeDisabled()
+    await user.click(clear)
+    expect(onClear).not.toHaveBeenCalled()
+  })
+
   it('clears the selection by click and by keyboard', async () => {
     const user = userEvent.setup()
     const onClear = vi.fn()

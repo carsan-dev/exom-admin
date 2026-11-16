@@ -195,6 +195,9 @@ async function savedPayload() {
   return api.put.mock.calls[0][1]
 }
 
+// Keyboard drags replay many async steps; under a loaded full run they exceed the 5 s default.
+vi.setConfig({ testTimeout: 15000 })
+
 describe('Diet meals drag and drop reordering (P7)', () => {
   beforeEach(() => {
     for (const fn of Object.values(api)) fn.mockReset()
@@ -256,7 +259,7 @@ describe('Diet meals drag and drop reordering (P7)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Bajar comida Avena con fruta' }))
     fireEvent.click(screen.getByRole('button', { name: 'Bajar comida Avena con fruta' }))
     expect(dragged).toEqual(await savedPayload())
-  })
+  }, 15000)
 
   it('cancels with Escape without moving anything or closing the builder', async () => {
     const { onOpenChange } = await renderBuilder()

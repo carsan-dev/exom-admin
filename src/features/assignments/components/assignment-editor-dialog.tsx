@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { AlertTriangle, Eye, GripVertical, RefreshCw, X } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { StatusChip } from '@/components/ui/status-chip'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -153,12 +153,12 @@ function TrainingMultiSelect({
         onChange={(event) => setSearch(event.target.value)}
       />
       {search.trim() && value.length < 5 && (
-        <div className="max-h-36 overflow-y-auto rounded-xl border border-border/70 bg-background p-1">
+        <div className="max-h-36 overflow-y-auto border border-border p-1">
           {available.length ? available.map((training) => (
             <button
               key={training.id}
               type="button"
-              className="flex w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
+              className="flex w-full px-3 py-2 text-left text-sm hover:bg-background-surface"
               onClick={() => { onChange([...value, training.id]); setSearch('') }}
             >
               {training.name}
@@ -182,15 +182,15 @@ function TrainingMultiSelect({
               onChange(next)
               setDraggedId(null)
             }}
-            className="flex items-center gap-2 rounded-xl border border-border/70 bg-muted/20 px-3 py-2"
+            className="flex items-center gap-2 border border-border px-3 py-2"
           >
             <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground">{position + 1}</span>
             <span className="min-w-0 flex-1 truncate text-sm font-medium">{training.name}</span>
             {training.is_active === false && (
-              <Badge variant="outline" className="border-status-warning/30 bg-status-warning/10 text-status-warning">
+              <StatusChip variant="warning" dot={false}>
                 Retirado
-              </Badge>
+              </StatusChip>
             )}
             <Select
               disabled={disabled}
@@ -427,7 +427,7 @@ export function AssignmentEditorDialog({
               })}
             >
               {editingAutoRule && (
-                <div className="rounded-2xl border border-status-warning/30 bg-status-warning/5 p-4 text-sm">
+                <div className="border border-status-warning bg-status-warning-soft p-4 text-sm">
                   <p className="font-medium">Actualizando patrón activo</p>
                   <p className="mt-1 text-muted-foreground">
                     Patrón actual: {editingAutoRule.days.map((day) => day.weekday).join(', ')}.
@@ -438,7 +438,7 @@ export function AssignmentEditorDialog({
                 </div>
               )}
 
-              <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+              <div className="border border-border p-4">
                 <p className="text-sm font-medium text-foreground">
                   {editingAutoRule
                     ? `${fields.length} días en el patrón semanal`
@@ -448,7 +448,7 @@ export function AssignmentEditorDialog({
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {(editingAutoRule ? watchedDays : sortedSelectedDays).map((day) => (
-                    <span key={day.date} className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs text-muted-foreground">
+                    <span key={day.date} className="border border-border px-3 py-1 text-xs text-muted-foreground">
                       {day.date}
                     </span>
                   ))}
@@ -456,9 +456,9 @@ export function AssignmentEditorDialog({
               </div>
 
               {(catalogAvailability.is_loading || catalogAvailability.has_error || catalogAvailability.has_empty_catalogs) && (
-                <div className="space-y-3 rounded-2xl border border-dashed border-border/70 bg-background/60 p-4">
+                <div className="space-y-3 border border-dashed border-border-strong p-4">
                   <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-brand-soft/10 p-3 text-accent-text">
+                    <div className="text-accent-text">
                       <AlertTriangle className="h-4 w-4" />
                     </div>
                     <div className="space-y-1">
@@ -475,14 +475,14 @@ export function AssignmentEditorDialog({
 
                   <div className="flex flex-wrap gap-2">
                     {!canUseTrainingCatalog && (
-                      <Badge variant="outline" className="border-status-error/30 bg-status-error/10 text-status-error">
+                      <StatusChip variant="danger" dot={false}>
                         Entrenamientos no disponibles
-                      </Badge>
+                      </StatusChip>
                     )}
                     {!canUseDietCatalog && (
-                      <Badge variant="outline" className="border-status-error/30 bg-status-error/10 text-status-error">
+                      <StatusChip variant="danger" dot={false}>
                         Dietas no disponibles
-                      </Badge>
+                      </StatusChip>
                     )}
                   </div>
 
@@ -509,7 +509,7 @@ export function AssignmentEditorDialog({
                   const isRestDay = watchedDays[index]?.is_rest_day ?? false
 
                   return (
-                    <div key={field.id} className="space-y-4 rounded-2xl border border-border/70 bg-background/60 p-5">
+                    <div key={field.id} className="space-y-4 border border-border p-5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <p className="text-sm font-medium text-foreground">Día {index + 1}</p>
@@ -519,13 +519,13 @@ export function AssignmentEditorDialog({
                         </div>
 
                         <div className="flex flex-wrap gap-2">
-                          <Badge variant="outline" className="border-border/70 bg-background text-foreground">
+                          <StatusChip variant="neutral" dot={false}>
                             {field.original_date}
-                          </Badge>
+                          </StatusChip>
                           {field.assignment_id && (
-                            <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-accent-text">
+                            <StatusChip variant="brand" dot={false}>
                               Ya existía
-                            </Badge>
+                            </StatusChip>
                           )}
                         </div>
                       </div>
@@ -546,7 +546,7 @@ export function AssignmentEditorDialog({
                           )}
                         />
                       ) : (
-                        <div className="rounded-xl border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+                        <div className="border border-border px-4 py-3 text-sm text-muted-foreground">
                           Fecha planificada: <span className="font-medium text-foreground">{field.date}</span>
                         </div>
                       )}
@@ -621,7 +621,7 @@ export function AssignmentEditorDialog({
                                   />
                                 </FormControl>
                               ) : (
-                                <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm">
+                                <div className="border border-dashed border-border-strong p-4 text-sm">
                                   <p className="font-medium text-foreground">
                                     {sourceDay?.trainings?.length ? `Entrenos actuales: ${sourceDay.trainings.map((training) => `${training.name}${training.is_active === false ? ' (retirado)' : ''}`).join(', ')}` : sourceDay?.training ? `Entreno actual: ${sourceDay.training.name}${sourceDay.training.is_active === false ? ' (retirado)' : ''}` : 'Catálogo no disponible'}
                                   </p>
@@ -651,7 +651,7 @@ export function AssignmentEditorDialog({
                                   onValueChange={(value) => dietField.onChange(value === CLEAR_SELECTION_VALUE ? null : value)}
                                 >
                                   <FormControl>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="[&>span>span>span:nth-child(n+2)]:hidden">
                                       <SelectValue placeholder="Selecciona una dieta" />
                                     </SelectTrigger>
                                   </FormControl>
@@ -672,7 +672,7 @@ export function AssignmentEditorDialog({
                                   </SelectContent>
                                 </Select>
                               ) : (
-                                <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm">
+                                <div className="border border-dashed border-border-strong p-4 text-sm">
                                   <p className="font-medium text-foreground">
                                     {sourceDay?.diet ? `Dieta actual: ${sourceDay.diet.name}` : 'Catálogo no disponible'}
                                   </p>
@@ -711,14 +711,14 @@ export function AssignmentEditorDialog({
               </div>
 
               {!editingAutoRule && activeAutoRule ? (
-                <div className="rounded-2xl border border-status-info/30 bg-status-info/5 p-5 text-sm">
+                <div className="border border-status-info bg-status-info-soft p-5 text-sm">
                   <p className="font-medium text-foreground">Edición puntual</p>
                   <p className="mt-1 text-muted-foreground">
                     Este cambio solo afecta a las fechas seleccionadas. La autoasignación activa no se modificará.
                   </p>
                 </div>
               ) : (
-              <div className="space-y-4 rounded-2xl border border-border/70 bg-muted/20 p-5">
+              <div className="space-y-4 border border-border p-5">
                 <FormField
                   control={form.control}
                   name="auto_assignment_enabled"
@@ -732,7 +732,7 @@ export function AssignmentEditorDialog({
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <label className="flex items-center gap-2 rounded-full border border-border/70 bg-background px-3 py-2 text-sm font-medium text-foreground">
+                          <label className="flex items-center gap-2 border border-border px-3 py-2 text-sm font-medium text-foreground">
                             <input
                               type="checkbox"
                               className="h-4 w-4 accent-current"
@@ -751,7 +751,7 @@ export function AssignmentEditorDialog({
 
                 {autoAssignmentEnabled && (
                   <div className="space-y-4">
-                    <div className="rounded-xl border border-border/60 bg-background/70 px-4 py-3 text-sm text-muted-foreground">
+                    <div className="border border-border px-4 py-3 text-sm text-muted-foreground">
                       Patrón origen: <span className="font-medium text-foreground">{sourceWeekStart ?? '—'}</span>
                       {' · '}
                       Empieza: <span className="font-medium text-foreground">{startsOn ?? '—'}</span>

@@ -73,8 +73,8 @@ export function RirCyclePanel({
       ),
   })
   return (
-    <section className="space-y-4 rounded-xl border border-border bg-card p-5">
-      <h2 className="text-lg font-semibold">Mesociclo de RIR</h2>
+    <section className="space-y-4 border-t border-border-strong pt-5">
+      <h2 className="text-base font-semibold text-foreground">Mesociclo de RIR</h2>
       {query.isPending ? (
         <p className="text-sm text-muted-foreground">Cargando objetivos…</p>
       ) : query.isError ? (
@@ -225,7 +225,7 @@ function RirCycleContent({
             {state.dates
               .filter((d) => d.trainings.length)
               .map((d) => (
-                <details key={d.date} className="rounded-lg border p-3">
+                <details key={d.date} className="border-b border-border py-2">
                   <summary className="cursor-pointer text-sm">
                     {d.date} ·{' '}
                     {d.week
@@ -293,7 +293,7 @@ function RirCycleContent({
                   Cargar propuesta de un entrenamiento
                   <select
                     aria-label="Propuesta de entrenamiento"
-                    className="ml-2 rounded-md border bg-background p-2"
+                    className="ml-2 h-10 border border-control-border bg-input px-2 text-sm text-foreground hover:border-control-border-hover focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus"
                     value={proposalId}
                     onChange={(e) => setProposalId(e.target.value)}
                   >
@@ -342,7 +342,7 @@ function RirCycleContent({
             </p>
           )}
           {preview && (
-            <div className="space-y-2 rounded-lg bg-muted p-4">
+            <div className="space-y-2 bg-background-surface p-4">
               <h3 className="font-medium">Vista previa del periodo visible</h3>
               <p className="text-sm">
                 El cambio se repetirá también en las fechas futuras que se asignen. Las asignaciones
