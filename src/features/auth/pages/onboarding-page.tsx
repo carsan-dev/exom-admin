@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 export function OnboardingPage() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -115,6 +115,17 @@ export function OnboardingPage() {
               {!isSubmitting && <ArrowRight aria-hidden="true" />}
             </Button>
           </form>
+
+          <p className="mt-7 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() => void logout()}
+              disabled={isSubmitting}
+              className="relative inline-flex min-h-11 items-center px-2 text-[13px] leading-5 text-foreground-secondary underline decoration-transparent underline-offset-4 transition-[color,text-decoration-color] duration-(--dur-fast) ease-(--ease-out) hover:text-foreground hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none disabled:text-muted-foreground"
+            >
+              Cerrar sesión
+            </button>
+          </p>
         </div>
       </main>
     </div>
