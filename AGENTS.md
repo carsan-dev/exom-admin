@@ -16,7 +16,7 @@ Este repo forma parte del workspace EXOM. El protocolo común es `../AGENTS.md` 
 ## CI y despliegue
 
 - CI (`.github/workflows/ci.yml`, Node 22.21.0): `npm ci`, `npm run lint`, `npm test -- --run`, `npm run build`.
-- Vercel ejecuta `npm run lint && npm test -- --run && npm run build` (`vercel.json`). Un fallo de lint o test bloquea el despliegue.
+- Vercel ejecuta solo `npm run build` (`vercel.json`). Lint y tests se validan en GitHub Actions (`ci.yml`); no fusiones con el CI en rojo, porque Vercel ya no bloquea el despliegue por ellos.
 - No leas ni imprimas `.env`; la plantilla es `.env.example`.
 
 ## Arnés (resumen de `../AGENTS.md`)
