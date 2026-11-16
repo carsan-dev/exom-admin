@@ -15,6 +15,7 @@ import {
   Settings,
   ShieldCheck,
   Tags,
+  Mail,
   type LucideIcon,
 } from 'lucide-react'
 import { getUsersRoute } from '@/features/clients/types'
@@ -44,6 +45,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Seguimiento',
     items: [
       { to: '/clients', label: 'Clientes', icon: Users },
+      { to: '/base-service', label: 'Servicio base', icon: Mail },
       { to: '/progress', label: 'Progreso', icon: TrendingUp },
       { to: '/feedback', label: 'Feedback', icon: MessageSquare },
       { to: '/recaps', label: 'Recaps', icon: FileText },
