@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatMacroValue, type Ingredient } from '../../ingredients/types'
+import { calculateIngredientMacros } from '../diet-nutrition-summary'
 import { MEASURE_UNIT_LABELS, MEASURE_UNIT_OPTIONS } from '../types'
 import type { MealIngredientFormValues } from '../schemas'
 
@@ -30,13 +31,16 @@ export function IngredientRow({
   onUnitChange,
   onGramsEquivalentChange,
 }: IngredientRowProps) {
+  // Mismo cálculo que «Calcular desde ingredientes»; sin gramos o sin catálogo no suma.
+  const macros = calculateIngredientMacros(item, ingredient)
+
   return (
-    <div className="rounded-md border border-border/60 bg-muted/20 p-2 space-y-2">
+    <div data-slot="ingredient-row" className="min-w-0 space-y-2 py-3">
       <div className="flex items-start gap-2">
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           {ingredient ? (
             <>
-              <p className="text-xs font-medium text-foreground truncate">{ingredient.name}</p>
+              <p className="break-words text-sm font-medium text-foreground [overflow-wrap:anywhere]">{ingredient.name}</p>
               <p className="text-xs text-muted-foreground">
                 P {formatMacroValue(ingredient.protein_per_100g)}g · C{' '}
                 {formatMacroValue(ingredient.carbs_per_100g)}g · G{' '}
@@ -47,14 +51,21 @@ export function IngredientRow({
             <p className="text-xs text-muted-foreground italic">Ingrediente no encontrado</p>
           )}
         </div>
+        <span
+          data-slot="ingredient-kcal"
+          className="flex-none whitespace-nowrap pt-0.5 text-xs font-medium tabular-nums text-foreground-secondary"
+        >
+          {macros ? `${Math.round(macros.calories)} kcal` : '— kcal'}
+        </span>
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className="h-6 w-6 p-0 text-muted-foreground hover:text-status-error flex-none"
+          className="size-8 flex-none p-0 text-muted-foreground hover:text-status-error max-md:size-11"
           onClick={onRemove}
+          aria-label={`Quitar ${ingredient?.name ?? 'ingrediente'}`}
         >
-          <X className="h-3 w-3" />
+          <X className="h-4 w-4" />
         </Button>
       </div>
 
@@ -67,13 +78,13 @@ export function IngredientRow({
             step={0.1}
             value={item.quantity}
             onChange={onQuantityChange}
-            className="h-7 text-xs"
+            className="h-8 text-xs"
           />
         </div>
         <div className="space-y-1">
           <label className="text-xs text-muted-foreground">Unidad</label>
           <Select value={item.unit} onValueChange={onUnitChange}>
-            <SelectTrigger className="h-7 text-xs">
+            <SelectTrigger className="h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -94,7 +105,7 @@ export function IngredientRow({
             value={item.unit === 'g' ? item.quantity : (item.grams_equivalent ?? '')}
             disabled={item.unit === 'g'}
             onChange={onGramsEquivalentChange}
-            className="h-7 text-xs"
+            className="h-8 text-xs"
           />
         </div>
       </div>

@@ -8,6 +8,7 @@ import { defaultVariant } from '../diet-form-values'
 import type { DietFormValues } from '../schemas'
 import { BadgesField } from './diet-badges-field'
 import { getFirstErrorMessage } from './diet-form-errors'
+import { DietMealNutritionCheck } from './diet-nutrition-check'
 import { IngredientPicker } from './ingredient-picker'
 
 export function MealVariantsEditor({
@@ -51,10 +52,10 @@ export function MealVariantsEditor({
   }
 
   return (
-    <div className="space-y-3 rounded-md border border-dashed border-border/70 bg-background/60 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <p className="text-xs font-medium text-foreground">Variantes</p>
+    <div className="min-w-0 space-y-4 border-t border-border pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground">Variantes</p>
           <p className="text-xs text-muted-foreground">
             Alternativas completas que el cliente podrá elegir en la app.
           </p>
@@ -63,7 +64,7 @@ export function MealVariantsEditor({
           type="button"
           variant="outline"
           size="sm"
-          className="h-7 text-xs"
+          className="h-7 text-xs max-md:h-11"
           onClick={addVariant}
         >
           <Plus className="h-3 w-3" />
@@ -74,10 +75,10 @@ export function MealVariantsEditor({
       {variants.map((_, variantIndex) => (
         <div
           key={`${mealFieldId}-variant-${variantIndex}`}
-          className="space-y-3 rounded-md border border-border/60 bg-muted/10 p-3"
+          className="min-w-0 space-y-3 border-l-2 border-border-strong pl-3"
         >
-          <div className="flex items-center gap-2">
-            <span className="w-5 flex-none text-center text-xs font-medium text-muted-foreground">
+          <div className="flex items-start gap-2">
+            <span className="w-5 flex-none pt-2.5 text-center text-xs font-medium tabular-nums text-muted-foreground">
               {variantIndex + 1}
             </span>
             <FormField
@@ -86,7 +87,7 @@ export function MealVariantsEditor({
               render={({ field }) => (
                 <FormItem className="min-w-0 flex-1">
                   <FormControl>
-                    <Input placeholder="Nombre de la variante" className="h-8 text-sm" {...field} />
+                    <Input placeholder="Nombre de la variante" className="h-9 text-sm" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
@@ -96,21 +97,22 @@ export function MealVariantsEditor({
               type="button"
               variant="ghost"
               size="sm"
-              className="h-7 w-7 flex-none p-0 text-muted-foreground hover:text-status-error"
+              className="size-8 flex-none p-0 text-muted-foreground hover:text-status-error max-md:size-11"
               onClick={() => removeVariant(variantIndex)}
+              aria-label={`Quitar variante ${variantIndex + 1}`}
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">Macros de la variante</p>
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+              <p className="text-xs font-medium text-foreground-secondary">Macros de la variante</p>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-6 px-2 text-xs text-muted-foreground"
+                className="h-7 px-2 text-xs text-muted-foreground max-md:h-11"
                 onClick={() => onCalculateMacros(`meals.${mealIndex}.variants.${variantIndex}`)}
               >
                 Calcular desde ingredientes
@@ -131,7 +133,7 @@ export function MealVariantsEditor({
                         onChange={(e) =>
                           field.onChange(e.target.value === '' ? null : parseInt(e.target.value))
                         }
-                        className="h-7 text-xs"
+                        className="h-8 text-xs"
                       />
                     </FormControl>
                   </FormItem>
@@ -152,7 +154,7 @@ export function MealVariantsEditor({
                         onChange={(e) =>
                           field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))
                         }
-                        className="h-7 text-xs"
+                        className="h-8 text-xs"
                       />
                     </FormControl>
                   </FormItem>
@@ -173,7 +175,7 @@ export function MealVariantsEditor({
                         onChange={(e) =>
                           field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))
                         }
-                        className="h-7 text-xs"
+                        className="h-8 text-xs"
                       />
                     </FormControl>
                   </FormItem>
@@ -194,13 +196,17 @@ export function MealVariantsEditor({
                         onChange={(e) =>
                           field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))
                         }
-                        className="h-7 text-xs"
+                        className="h-8 text-xs"
                       />
                     </FormControl>
                   </FormItem>
                 )}
               />
             </div>
+            <DietMealNutritionCheck
+              control={form.control}
+              path={`meals.${mealIndex}.variants.${variantIndex}`}
+            />
           </div>
 
           <FormField

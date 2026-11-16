@@ -1,4 +1,4 @@
-import type { UseFormReturn } from 'react-hook-form'
+import { useWatch, type UseFormReturn } from 'react-hook-form'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
 import { ImageUploadField } from '@/components/uploads/image-upload-field'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ import type { DietFormValues } from '../schemas'
 import { MEAL_TYPE_LABELS, MEAL_TYPE_OPTIONS } from '../types'
 import { BadgesField } from './diet-badges-field'
 import { getFirstErrorMessage } from './diet-form-errors'
+import { DietMealNutritionCheck } from './diet-nutrition-check'
 import { MealVariantsEditor } from './diet-meal-variants-editor'
 import { IngredientPicker } from './ingredient-picker'
 
@@ -43,46 +44,52 @@ export function DietMealCard({
   onCalculateMacrosAtPath,
   onUploadingChange,
 }: DietMealCardProps) {
+  // Solo lectura, para nombrar los controles de icono con la comida a la que afectan.
+  const mealName = useWatch({ control: form.control, name: `meals.${mealIndex}.name` })
+  const mealLabel = mealName?.trim() || `${mealIndex + 1}`
+
   return (
-    <div className="rounded-lg border border-border/70 bg-muted/10 p-4 space-y-4">
+    <div className="min-w-0 space-y-4 py-5">
       {/* Meal header */}
-      <div className="flex items-center gap-2">
-        <div className="flex flex-col gap-0.5">
+      <div className="flex items-start gap-2">
+        <div className="flex flex-none flex-col gap-0.5">
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+            className="size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11"
             onClick={() => onMove(mealIndex, mealIndex - 1)}
             disabled={mealIndex === 0}
+            aria-label={`Subir comida ${mealLabel}`}
           >
-            <ChevronUp className="h-3 w-3" />
+            <ChevronUp className="h-4 w-4" />
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+            className="size-8 p-0 text-muted-foreground hover:text-foreground max-md:size-11"
             onClick={() => onMove(mealIndex, mealIndex + 1)}
             disabled={mealIndex === mealCount - 1}
+            aria-label={`Bajar comida ${mealLabel}`}
           >
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-4 w-4" />
           </Button>
         </div>
 
-        <span className="text-xs font-medium text-muted-foreground w-5 text-center flex-none">
+        <span className="w-5 flex-none pt-2 text-center text-xs font-medium tabular-nums text-muted-foreground max-md:hidden">
           {mealIndex + 1}
         </span>
 
-        <div className="flex flex-1 gap-2 min-w-0">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 md:flex-row">
           <FormField
             control={form.control}
             name={`meals.${mealIndex}.type`}
             render={({ field }) => (
-              <FormItem className="flex-none w-32">
+              <FormItem className="w-full flex-none md:w-36">
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="h-8 text-xs">
+                    <SelectTrigger className="h-9 text-xs">
                       <SelectValue placeholder="Tipo" />
                     </SelectTrigger>
                   </FormControl>
@@ -102,9 +109,9 @@ export function DietMealCard({
             control={form.control}
             name={`meals.${mealIndex}.name`}
             render={({ field }) => (
-              <FormItem className="flex-1 min-w-0">
+              <FormItem className="min-w-0 flex-1">
                 <FormControl>
-                  <Input placeholder="Nombre de la comida" className="h-8 text-sm" {...field} />
+                  <Input placeholder="Nombre de la comida" className="h-9 text-sm" {...field} />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>
@@ -117,23 +124,24 @@ export function DietMealCard({
             type="button"
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 text-muted-foreground hover:text-status-error flex-none"
+            className="size-8 flex-none p-0 text-muted-foreground hover:text-status-error max-md:size-11"
             onClick={() => onRemove(mealIndex)}
+            aria-label={`Quitar comida ${mealLabel}`}
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-4 w-4" />
           </Button>
         )}
       </div>
 
       {/* Macros de la comida */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">Macros de la comida (opcional)</p>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <p className="text-sm font-medium text-foreground">Macros de la comida (opcional)</p>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-6 text-xs text-muted-foreground px-2"
+            className="h-7 px-2 text-xs text-muted-foreground max-md:h-11"
             onClick={() => onCalculateMealMacros(mealIndex)}
           >
             Calcular desde ingredientes
@@ -155,7 +163,7 @@ export function DietMealCard({
                     onChange={(e) =>
                       field.onChange(e.target.value === '' ? null : parseInt(e.target.value))
                     }
-                    className="h-7 text-xs"
+                    className="h-8 text-xs"
                   />
                 </FormControl>
               </FormItem>
@@ -177,7 +185,7 @@ export function DietMealCard({
                     onChange={(e) =>
                       field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))
                     }
-                    className="h-7 text-xs"
+                    className="h-8 text-xs"
                   />
                 </FormControl>
               </FormItem>
@@ -199,7 +207,7 @@ export function DietMealCard({
                     onChange={(e) =>
                       field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))
                     }
-                    className="h-7 text-xs"
+                    className="h-8 text-xs"
                   />
                 </FormControl>
               </FormItem>
@@ -221,13 +229,14 @@ export function DietMealCard({
                     onChange={(e) =>
                       field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))
                     }
-                    className="h-7 text-xs"
+                    className="h-8 text-xs"
                   />
                 </FormControl>
               </FormItem>
             )}
           />
         </div>
+        <DietMealNutritionCheck control={form.control} path={`meals.${mealIndex}`} />
       </div>
 
       {/* Imagen */}

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import type { DietFormValues } from '../schemas'
+import { DietTotalsNutritionCheck } from './diet-nutrition-check'
 import { DietTagsField } from './diet-tags-field'
 
 interface DietFormGeneralFieldsProps {
@@ -12,10 +13,8 @@ interface DietFormGeneralFieldsProps {
 
 export function DietFormGeneralFields({ form, onCalculateDietMacros }: DietFormGeneralFieldsProps) {
   return (
-    <div className="space-y-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Información general
-      </p>
+    <div className="min-w-0 space-y-4">
+      <p className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Información general</p>
 
       <FormField
         control={form.control}
@@ -48,14 +47,14 @@ export function DietFormGeneralFields({ form, onCalculateDietMacros }: DietFormG
         )}
       />
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
+      <div className="space-y-3 border-t border-border pt-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
           <p className="text-sm font-medium">Macros totales</p>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-7 text-xs text-muted-foreground"
+            className="h-7 text-xs text-muted-foreground max-md:h-11"
             onClick={onCalculateDietMacros}
           >
             Calcular desde comidas
@@ -150,6 +149,7 @@ export function DietFormGeneralFields({ form, onCalculateDietMacros }: DietFormG
             )}
           />
         </div>
+        <DietTotalsNutritionCheck control={form.control} />
       </div>
     </div>
   )

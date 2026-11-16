@@ -24,7 +24,7 @@ export function IngredientSearchPanel({
   onCancel,
 }: IngredientSearchPanelProps) {
   return (
-    <div className="rounded-md border border-border/70 bg-background p-2 space-y-2">
+    <div className="space-y-2 border border-border-strong bg-background-surface p-3">
       <div className="relative">
         <Search className="absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -32,7 +32,7 @@ export function IngredientSearchPanel({
           placeholder="Buscar ingrediente..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-7 h-7 text-xs"
+          className="h-8 pl-7 text-xs"
         />
       </div>
 
@@ -43,7 +43,7 @@ export function IngredientSearchPanel({
           {search ? `Sin resultados para "${search}"` : 'No hay ingredientes disponibles'}
         </p>
       ) : (
-        <div className="max-h-40 overflow-y-auto space-y-0.5">
+        <div className="max-h-56 divide-y divide-border overflow-y-auto">
           {ingredients.map((ingredient) => {
             const isSelected = selectedIds.has(ingredient.id)
             return (
@@ -53,7 +53,7 @@ export function IngredientSearchPanel({
                 disabled={isSelected}
                 onClick={() => onAdd(ingredient.id)}
                 className={cn(
-                  'w-full flex items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors',
+                  'flex w-full items-center gap-2 px-2 py-2 text-left text-xs transition-colors max-md:min-h-11',
                   isSelected ? 'opacity-40 cursor-not-allowed' : 'hover:bg-muted cursor-pointer'
                 )}
               >
@@ -79,7 +79,7 @@ export function IngredientSearchPanel({
         type="button"
         variant="ghost"
         size="sm"
-        className="w-full h-7 text-xs text-muted-foreground"
+        className="h-7 w-full text-xs text-muted-foreground max-md:h-11"
         onClick={onCancel}
       >
         Cancelar

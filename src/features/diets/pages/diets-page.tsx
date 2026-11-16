@@ -376,6 +376,7 @@ export function DietsPage() {
           count={selectedIds.size}
           disabled={organizationPending}
           onMove={() => setMoveDialogOpen(true)}
+          onClear={() => setSelectedIds(new Set())}
         />
       )}
       <CatalogGroupDialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen} group={groupToEdit} pending={organizationPending} onSubmit={handleGroupSubmit} />

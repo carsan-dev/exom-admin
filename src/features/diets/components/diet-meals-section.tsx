@@ -31,9 +31,9 @@ export function DietMealsSection({
   onUploadingChange,
 }: DietMealsSectionProps) {
   return (
-    <div ref={sectionRef} className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+    <div ref={sectionRef} className="min-w-0 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <p className="font-display text-xl font-extrabold uppercase leading-none text-foreground">
           Comidas ({mealFields.length})
         </p>
         {form.formState.errors.meals?.root && (
@@ -44,23 +44,25 @@ export function DietMealsSection({
         )}
       </div>
 
-      {mealFields.map((mealField, mealIndex) => (
-        <DietMealCard
-          key={mealField.id}
-          form={form}
-          mealIndex={mealIndex}
-          mealFieldId={mealField.id}
-          mealCount={mealFields.length}
-          isBusy={isBusy}
-          onMove={onMove}
-          onRemove={onRemove}
-          onCalculateMealMacros={onCalculateMealMacros}
-          onCalculateMacrosAtPath={onCalculateMacrosAtPath}
-          onUploadingChange={onUploadingChange}
-        />
-      ))}
+      <div className="divide-y divide-border border-y border-border">
+        {mealFields.map((mealField, mealIndex) => (
+          <DietMealCard
+            key={mealField.id}
+            form={form}
+            mealIndex={mealIndex}
+            mealFieldId={mealField.id}
+            mealCount={mealFields.length}
+            isBusy={isBusy}
+            onMove={onMove}
+            onRemove={onRemove}
+            onCalculateMealMacros={onCalculateMealMacros}
+            onCalculateMacrosAtPath={onCalculateMacrosAtPath}
+            onUploadingChange={onUploadingChange}
+          />
+        ))}
+      </div>
 
-      <Button type="button" variant="outline" size="sm" className="w-full" onClick={onAddMeal}>
+      <Button type="button" variant="outline" size="sm" className="w-full max-md:h-11" onClick={onAddMeal}>
         <Plus className="h-4 w-4" />
         Agregar comida
       </Button>

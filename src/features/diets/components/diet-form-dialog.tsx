@@ -3,18 +3,17 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { clearUnsavedChanges, useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { toast } from 'sonner'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Form } from '@/components/ui/form'
-import { Separator } from '@/components/ui/separator'
+import { Workbench } from '@/components/workspace/workbench'
 import { isApprovalPendingError } from '@/lib/api-utils'
 import { getApiErrorMessage, useCreateDiet, useIngredientsList, useUpdateDiet } from '../api'
 import { defaultMeal, defaultValues, toFormValues } from '../diet-form-values'
+import { roundMacros, sumDeclaredMealMacros, sumIngredientMacros } from '../diet-nutrition-summary'
 import { dietSchema, type DietFormValues } from '../schemas'
 import type { Diet } from '../types'
 import { getFirstErrorMessage } from './diet-form-errors'
 import { DietFormFooter } from './diet-form-footer'
 import { DietFormGeneralFields } from './diet-form-general-fields'
-import { DietFormHeader } from './diet-form-header'
 import { DietImportIssues } from './diet-import-issues'
 import { DietMealsSection } from './diet-meals-section'
 
@@ -27,6 +26,8 @@ interface DietFormDialogProps {
   importIssues?: string[]
   onSaved?: () => void
 }
+
+const FORM_ID = 'diet-form-dialog'
 
 export function DietFormDialog({
   open,
@@ -104,20 +105,11 @@ export function DietFormDialog({
   }, [form, open, diet, isDuplicate, importedValues])
 
   const calculateDietMacros = () => {
-    const meals = form.getValues('meals')
-    const totals = meals.reduce(
-      (acc, meal) => ({
-        calories: acc.calories + (meal.calories ?? 0),
-        protein_g: acc.protein_g + (meal.protein_g ?? 0),
-        carbs_g: acc.carbs_g + (meal.carbs_g ?? 0),
-        fat_g: acc.fat_g + (meal.fat_g ?? 0),
-      }),
-      { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 }
-    )
-    form.setValue('total_calories', Math.round(totals.calories))
-    form.setValue('total_protein_g', Math.round(totals.protein_g * 10) / 10)
-    form.setValue('total_carbs_g', Math.round(totals.carbs_g * 10) / 10)
-    form.setValue('total_fat_g', Math.round(totals.fat_g * 10) / 10)
+    const totals = roundMacros(sumDeclaredMealMacros(form.getValues('meals')))
+    form.setValue('total_calories', totals.calories)
+    form.setValue('total_protein_g', totals.protein_g)
+    form.setValue('total_carbs_g', totals.carbs_g)
+    form.setValue('total_fat_g', totals.fat_g)
   }
 
   const calculateMealMacrosAtPath = (path: `meals.${number}` | `meals.${number}.variants.${number}`) => {
@@ -151,33 +143,10 @@ export function DietFormDialog({
 
     const ingredientMap = new Map((ingredientsData?.data ?? []).map((ing) => [ing.id, ing]))
 
-    let calories = 0
-    let protein_g = 0
-    let carbs_g = 0
-    let fat_g = 0
-    let calculatedItems = 0
-    let omittedItems = 0
-    let missingItems = 0
-
-    for (const item of items) {
-      const ing = ingredientMap.get(item.ingredient_id)
-      if (!ing) {
-        missingItems += 1
-        continue
-      }
-      const grams = item.unit === 'g' ? item.quantity : item.grams_equivalent
-      if (!grams || grams <= 0) {
-        omittedItems += 1
-        continue
-      }
-
-      const factor = grams / 100
-      calories += ing.calories_per_100g * factor
-      protein_g += ing.protein_per_100g * factor
-      carbs_g += ing.carbs_per_100g * factor
-      fat_g += ing.fat_per_100g * factor
-      calculatedItems += 1
-    }
+    const { totals, calculatedItems, omittedItems, missingItems } = sumIngredientMacros(
+      items,
+      ingredientMap
+    )
 
     if (calculatedItems === 0) {
       if (missingItems > 0) {
@@ -193,10 +162,11 @@ export function DietFormDialog({
       return
     }
 
-    form.setValue(`${path}.calories` as 'meals.0.calories', Math.round(calories))
-    form.setValue(`${path}.protein_g` as 'meals.0.protein_g', Math.round(protein_g * 10) / 10)
-    form.setValue(`${path}.carbs_g` as 'meals.0.carbs_g', Math.round(carbs_g * 10) / 10)
-    form.setValue(`${path}.fat_g` as 'meals.0.fat_g', Math.round(fat_g * 10) / 10)
+    const rounded = roundMacros(totals)
+    form.setValue(`${path}.calories` as 'meals.0.calories', rounded.calories)
+    form.setValue(`${path}.protein_g` as 'meals.0.protein_g', rounded.protein_g)
+    form.setValue(`${path}.carbs_g` as 'meals.0.carbs_g', rounded.carbs_g)
+    form.setValue(`${path}.fat_g` as 'meals.0.fat_g', rounded.fat_g)
 
     const warnings: string[] = []
 
@@ -310,44 +280,54 @@ export function DietFormDialog({
   )
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent disableOutsideClose className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
-        <DietFormHeader title={dialogTitle} description={dialogDescription} />
-
+    <Workbench
+      open={open}
+      onOpenChange={handleDialogOpenChange}
+      title={dialogTitle}
+      description={dialogDescription}
+      disableOutsideClose
+      footer={
+        <DietFormFooter
+          formId={FORM_ID}
+          isPending={isPending}
+          isEditing={isEditing}
+          isDuplicate={isDuplicate}
+          isUploadingMealImage={isUploadingMealImage}
+          isBusy={isBusy}
+          onCancel={() => onOpenChange(false)}
+        />
+      }
+    >
+      <div className="mx-auto w-full min-w-0 max-w-7xl px-4 py-6 md:px-8 md:py-8">
         {importIssues.length > 0 && <DietImportIssues issues={importIssues} />}
 
         <Form {...form}>
-          <form onSubmit={handleSubmit} className="min-w-0 space-y-5">
-            <fieldset disabled={isBusy} className="min-w-0 space-y-5">
-              <DietFormGeneralFields form={form} onCalculateDietMacros={calculateDietMacros} />
+          <form id={FORM_ID} onSubmit={handleSubmit} className="min-w-0">
+            <fieldset disabled={isBusy} className="min-w-0">
+              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,27rem)_minmax(0,1fr)] lg:gap-0">
+                <div className="min-w-0 lg:pr-10">
+                  <DietFormGeneralFields form={form} onCalculateDietMacros={calculateDietMacros} />
+                </div>
 
-              <Separator />
-
-              <DietMealsSection
-                form={form}
-                sectionRef={mealsSectionRef}
-                mealFields={mealFields}
-                isBusy={isBusy}
-                onMove={move}
-                onRemove={remove}
-                onAddMeal={addMeal}
-                onCalculateMealMacros={calculateMealMacros}
-                onCalculateMacrosAtPath={calculateMealMacrosAtPath}
-                onUploadingChange={handleMealUploadChange}
-              />
-
-              <DietFormFooter
-                isPending={isPending}
-                isEditing={isEditing}
-                isDuplicate={isDuplicate}
-                isUploadingMealImage={isUploadingMealImage}
-                isBusy={isBusy}
-                onCancel={() => onOpenChange(false)}
-              />
+                <div className="min-w-0 border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+                  <DietMealsSection
+                    form={form}
+                    sectionRef={mealsSectionRef}
+                    mealFields={mealFields}
+                    isBusy={isBusy}
+                    onMove={move}
+                    onRemove={remove}
+                    onAddMeal={addMeal}
+                    onCalculateMealMacros={calculateMealMacros}
+                    onCalculateMacrosAtPath={calculateMealMacrosAtPath}
+                    onUploadingChange={handleMealUploadChange}
+                  />
+                </div>
+              </div>
             </fieldset>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </Workbench>
   )
 }

@@ -105,9 +105,9 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-muted-foreground">Ingredientes</p>
+    <div className="min-w-0 space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-medium text-foreground">Ingredientes</p>
         {value.length > 0 && (
           <span className="text-xs text-muted-foreground">
             {value.length} ingrediente{value.length !== 1 ? 's' : ''}
@@ -119,7 +119,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
       </p>
 
       {value.length > 0 && (
-        <div className="space-y-2">
+        <div className="divide-y divide-border border-t border-border">
           {value.map((item, index) => (
             <IngredientRow
               key={`${item.ingredient_id}-${index}`}
@@ -164,7 +164,7 @@ export function IngredientPicker({ value, onChange, error }: IngredientPickerPro
           type="button"
           variant="outline"
           size="sm"
-          className="w-full h-7 text-xs"
+          className="h-7 w-full text-xs max-md:h-11"
           onClick={() => setPickerOpen(true)}
         >
           <Plus className="h-3 w-3" />

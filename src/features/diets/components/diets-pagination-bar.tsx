@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Pagination } from '@/components/page'
 import { Button } from '@/components/ui/button'
 
 interface DietsPaginationBarProps {
@@ -14,21 +15,36 @@ export function DietsPaginationBar({
   onPrevious,
   onNext,
 }: DietsPaginationBarProps) {
+  // El listado siempre indica en qué página está y conserva Anterior/Siguiente (deshabilitados
+  // con una sola página); el componente compartido no pinta nada en ese caso.
+  if (totalPages <= 1) {
+    return (
+      <nav
+        aria-label="Paginación"
+        className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p className="text-[13px] tabular-nums text-foreground-muted">
+          Página {page} de {totalPages}
+        </p>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={onPrevious} disabled={page <= 1}>
+            <ChevronLeft aria-hidden="true" />
+            Anterior
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={onNext} disabled={page >= totalPages}>
+            Siguiente
+            <ChevronRight aria-hidden="true" />
+          </Button>
+        </div>
+      </nav>
+    )
+  }
+
   return (
-    <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-muted-foreground">
-        Página {page} de {totalPages}
-      </p>
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={onPrevious} disabled={page === 1}>
-          <ChevronLeft className="h-4 w-4" />
-          Anterior
-        </Button>
-        <Button variant="outline" onClick={onNext} disabled={page >= totalPages}>
-          Siguiente
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
+    <Pagination
+      page={page}
+      totalPages={totalPages}
+      onPageChange={(nextPage) => (nextPage < page ? onPrevious() : onNext())}
+    />
   )
 }

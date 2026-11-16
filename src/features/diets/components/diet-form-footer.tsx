@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { DialogFooter } from '@/components/ui/dialog'
 
 interface DietFormFooterProps {
   isPending: boolean
@@ -8,6 +7,8 @@ interface DietFormFooterProps {
   isUploadingMealImage: boolean
   isBusy: boolean
   onCancel: () => void
+  /** Id del `<form>`: las acciones viven en el pie del Workbench, fuera del formulario. */
+  formId: string
 }
 
 export function DietFormFooter({
@@ -17,35 +18,35 @@ export function DietFormFooter({
   isUploadingMealImage,
   isBusy,
   onCancel,
+  formId,
 }: DietFormFooterProps) {
   return (
     <>
       {isUploadingMealImage && (
-        <p className="text-xs text-muted-foreground">
+        <p className="mr-auto basis-full text-xs text-status-warning md:basis-auto">
           Espera a que termine la subida de la imagen para seguir editando o guardar la dieta.
         </p>
       )}
 
-      <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={isBusy}>
-          {isPending
-            ? isEditing
-              ? 'Guardando...'
+      {/* Fuera del fieldset del formulario: se deshabilitan con la misma condición (isBusy). */}
+      <Button type="button" variant="outline" onClick={onCancel} disabled={isBusy} className="max-md:h-11">
+        Cancelar
+      </Button>
+      <Button type="submit" form={formId} disabled={isBusy} className="max-md:h-11">
+        {isPending
+          ? isEditing
+            ? 'Guardando...'
+            : isDuplicate
+              ? 'Creando copia...'
+              : 'Creando...'
+          : isUploadingMealImage
+            ? 'Subiendo imagen...'
+            : isEditing
+              ? 'Guardar cambios'
               : isDuplicate
-                ? 'Creando copia...'
-                : 'Creando...'
-            : isUploadingMealImage
-              ? 'Subiendo imagen...'
-              : isEditing
-                ? 'Guardar cambios'
-                : isDuplicate
-                  ? 'Crear copia'
-                  : 'Crear dieta'}
-        </Button>
-      </DialogFooter>
+                ? 'Crear copia'
+                : 'Crear dieta'}
+      </Button>
     </>
   )
 }

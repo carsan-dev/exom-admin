@@ -1,9 +1,10 @@
+import { useId } from 'react'
 import {
   FilterToolbar,
   type FilterSectionConfig,
   type UseListFiltersResult,
 } from '@/components/filters'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState } from '@/components/page'
 import type { SortDir } from '@/lib/sort-search-params'
 import type { Diet, DietCatalogValueWithColor } from '../types'
 import { DietsPaginationBar } from './diets-pagination-bar'
@@ -62,52 +63,56 @@ export function DietsListPanel({
   onPreviousPage,
   onNextPage,
 }: DietsListPanelProps) {
+  const titleId = useId()
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">{title}</CardTitle>
-        <CardDescription>
+    <section aria-labelledby={titleId} className="min-w-0 space-y-4">
+      <div>
+        <h2 id={titleId} className="font-display text-lg font-bold uppercase leading-none text-foreground">
+          {title}
+        </h2>
+        <p className="mt-1 text-[13px] text-foreground-secondary">
           Vista paginada del catálogo con búsqueda y acciones por dieta
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <FilterToolbar
-          search={search}
-          onSearchChange={onSearchChange}
-          searchPlaceholder="Buscar por nombre..."
-          sections={sections}
-          filters={filters}
-        />
+        </p>
+      </div>
 
-        {diets.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            No se encontraron dietas con la búsqueda y filtros actuales.
-          </p>
-        ) : (
-          <DietsTable
-            diets={diets}
-            approvalById={approvalById}
-            onView={onView}
-            onEdit={onEdit}
-            onDuplicate={onDuplicate}
-            onDelete={onDelete}
-            selectedIds={selectedIds}
-            onSelectionChange={onSelectionChange}
-            sortBy={sortBy}
-            sortDir={sortDir}
-            onSortChange={onSortChange}
-            movementDisabled={movementDisabled}
-            nutritionalBadgeColors={nutritionalBadgeColors}
-          />
-        )}
+      <FilterToolbar
+        search={search}
+        onSearchChange={onSearchChange}
+        searchPlaceholder="Buscar por nombre..."
+        sections={sections}
+        filters={filters}
+      />
 
-        <DietsPaginationBar
-          page={page}
-          totalPages={totalPages}
-          onPrevious={onPreviousPage}
-          onNext={onNextPage}
+      {diets.length === 0 ? (
+        <EmptyState
+          className="border-y border-border"
+          title="No se encontraron dietas con la búsqueda y filtros actuales."
         />
-      </CardContent>
-    </Card>
+      ) : (
+        <DietsTable
+          diets={diets}
+          approvalById={approvalById}
+          onView={onView}
+          onEdit={onEdit}
+          onDuplicate={onDuplicate}
+          onDelete={onDelete}
+          selectedIds={selectedIds}
+          onSelectionChange={onSelectionChange}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSortChange={onSortChange}
+          movementDisabled={movementDisabled}
+          nutritionalBadgeColors={nutritionalBadgeColors}
+        />
+      )}
+
+      <DietsPaginationBar
+        page={page}
+        totalPages={totalPages}
+        onPrevious={onPreviousPage}
+        onNext={onNextPage}
+      />
+    </section>
   )
 }
