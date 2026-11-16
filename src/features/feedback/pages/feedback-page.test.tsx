@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { AxiosError } from 'axios'
 import { MemoryRouter, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { useUnsavedChangesStore } from '@/hooks/use-unsaved-changes'
 import { FeedbackPage } from './feedback-page'
 import type { FeedbackItem } from '../types'
 
@@ -61,6 +62,30 @@ function mockApi({ listFails = false, totalPages = 1 }: { listFails?: boolean; t
   })
 }
 
+// La siguiente llamada a PUT queda en vuelo hasta que el test la resuelva o la rechace.
+function deferNextPut() {
+  let settle: { resolve: () => void; reject: (error: unknown) => void } | null = null
+  api.put.mockImplementationOnce(
+    (url: string, body: { admin_response: string }) =>
+      new Promise((resolve, reject) => {
+        settle = {
+          resolve: () => {
+            const id = url.split('/')[2]
+            store = store.map((item) =>
+              item.id === id ? { ...item, status: 'REVIEWED' as const, admin_response: body.admin_response } : item,
+            )
+            resolve({ data: { data: store.find((item) => item.id === id) } })
+          },
+          reject,
+        }
+      }),
+  )
+  return {
+    resolve: () => settle?.resolve(),
+    reject: () => settle?.reject(Object.assign(new AxiosError('boom'), { response: { status: 500, data: {} } })),
+  }
+}
+
 function LocationProbe() {
   const location = useLocation()
   return <output data-testid="location">{location.pathname + location.search}</output>
@@ -93,6 +118,8 @@ describe('FeedbackPage', () => {
     api.put.mockReset()
     vi.mocked(toast.info).mockClear()
     vi.mocked(toast.success).mockClear()
+    vi.mocked(toast.error).mockClear()
+    useUnsavedChangesStore.setState({ dirtyEditors: {}, hasUnsavedChanges: false })
     store = [
       makeItem('f1', 'Ana', 'PENDING', { feedback_kind: 'LAST_SET' }),
       makeItem('f2', 'Beto', 'REVIEWED'),
@@ -351,6 +378,140 @@ describe('FeedbackPage', () => {
 
       await waitFor(() => expect(toast.info).toHaveBeenCalledWith('No quedan feedbacks pendientes en esta lista.'))
       await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    })
+  })
+
+  describe('respuesta que llega tras cerrar o cambiar el detalle', () => {
+    const placeholder = 'Escribe tu respuesta o comentario...'
+
+    it('reports an error that arrives after closing the mobile dialog and keeps the draft', async () => {
+      stubViewport(false)
+      mockApi()
+      const put = deferNextPut()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await screen.findByRole('button', { name: /Ana Test/ }))
+      const dialog = await screen.findByRole('dialog', { name: 'Detalle de feedback' })
+      await user.type(within(dialog).getByPlaceholderText(placeholder), 'Respuesta')
+      await user.click(within(dialog).getByRole('button', { name: 'Responder' }))
+      await user.keyboard('{Escape}')
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
+      put.reject()
+      await waitFor(() => expect(toast.error).toHaveBeenCalledTimes(1))
+      expect(toast.success).not.toHaveBeenCalled()
+
+      await user.click(screen.getByRole('button', { name: /Ana Test/ }))
+      const reopened = await screen.findByRole('dialog', { name: 'Detalle de feedback' })
+      expect(within(reopened).getByPlaceholderText(placeholder)).toHaveValue('Respuesta')
+      expect(within(reopened).getByRole('button', { name: 'Responder' })).toBeEnabled()
+    })
+
+    it('confirms a success that arrives after closing the mobile dialog', async () => {
+      stubViewport(false)
+      mockApi()
+      const put = deferNextPut()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await screen.findByRole('button', { name: /Ana Test/ }))
+      const dialog = await screen.findByRole('dialog', { name: 'Detalle de feedback' })
+      await user.type(within(dialog).getByPlaceholderText(placeholder), 'Respuesta')
+      await user.click(within(dialog).getByRole('button', { name: 'Responder' }))
+      await user.keyboard('{Escape}')
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
+      put.resolve()
+      await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Respuesta enviada correctamente'))
+      // Cerrado por el usuario: no se reabre con el siguiente pendiente.
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    it('reports an error that arrives after changing the desktop filter and keeps the draft', async () => {
+      mockApi()
+      const put = deferNextPut()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await screen.findByRole('button', { name: /Ana Test/ }))
+      await user.type(screen.getByPlaceholderText(placeholder), 'Respuesta')
+      await user.click(screen.getByRole('button', { name: 'Responder' }))
+      await user.click(screen.getByRole('button', { name: 'Pendientes' }))
+      expect(await screen.findByText('Selecciona un feedback del listado')).toBeInTheDocument()
+
+      put.reject()
+      await waitFor(() => expect(toast.error).toHaveBeenCalledTimes(1))
+
+      await user.click(await screen.findByRole('button', { name: /Ana Test/ }))
+      expect(screen.getByPlaceholderText(placeholder)).toHaveValue('Respuesta')
+    })
+
+    it('does not replace a selection made while the answer was in flight', async () => {
+      mockApi()
+      const put = deferNextPut()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await screen.findByRole('button', { name: /Ana Test/ }))
+      await user.type(screen.getByPlaceholderText(placeholder), 'Respuesta')
+      await user.click(screen.getByRole('button', { name: 'Responder' }))
+      // El siguiente pendiente tras Ana sería Carla; el usuario elige Dani.
+      await user.click(screen.getByRole('button', { name: /Dani Test/ }))
+
+      put.resolve()
+      await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Respuesta enviada correctamente'))
+      await waitFor(() => expect(screen.getByRole('button', { name: /Ana Test/ })).toHaveAccessibleName(/Revisado/))
+      expect(screen.getByRole('heading', { level: 2, name: 'Dani Test' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Dani Test/ })).toHaveAttribute('aria-current', 'true')
+    })
+
+    it('keeps the answer button of another item usable while one answer is in flight', async () => {
+      mockApi()
+      deferNextPut()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await screen.findByRole('button', { name: /Ana Test/ }))
+      await user.type(screen.getByPlaceholderText(placeholder), 'Respuesta')
+      await user.click(screen.getByRole('button', { name: 'Responder' }))
+      expect(screen.getByRole('button', { name: 'Enviando...' })).toBeDisabled()
+
+      await user.click(screen.getByRole('button', { name: /Dani Test/ }))
+      await user.type(screen.getByPlaceholderText(placeholder), 'Otra')
+      expect(screen.getByRole('button', { name: 'Responder' })).toBeEnabled()
+      expect(screen.queryByRole('button', { name: 'Enviando...' })).not.toBeInTheDocument()
+    })
+  })
+
+  describe('guarda de cambios sin guardar', () => {
+    it('keeps the guard active for an unsent draft of another item', async () => {
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await screen.findByRole('button', { name: /Ana Test/ }))
+      await user.type(screen.getByPlaceholderText('Escribe tu respuesta o comentario...'), 'Borrador')
+      expect(useUnsavedChangesStore.getState().hasUnsavedChanges).toBe(true)
+
+      await user.click(screen.getByRole('button', { name: /Carla Test/ }))
+      expect(screen.getByPlaceholderText('Escribe tu respuesta o comentario...')).toHaveValue('')
+      expect(useUnsavedChangesStore.getState().hasUnsavedChanges).toBe(true)
+    })
+  })
+
+  describe('texto accesible de las filas', () => {
+    it('names each row with the old column labels, including the media type', async () => {
+      mockApi()
+      renderPage()
+
+      const ana = await screen.findByRole('button', { name: /Ana Test/ })
+      expect(ana).toHaveAccessibleName(/Cliente: Ana Test/)
+      expect(ana).toHaveAccessibleName(/Ejercicio: Ejercicio Ana/)
+      expect(ana).toHaveAccessibleName(/Tipo: Vídeo/)
+      expect(ana).toHaveAccessibleName(/Estado: Pendiente/)
+      expect(ana).toHaveAccessibleName(/Fecha: \d{2}\/\d{2}\/\d{4}/)
+      expect(screen.getByRole('button', { name: /Carla Test/ })).toHaveAccessibleName(/Tipo: Imagen/)
     })
   })
 })

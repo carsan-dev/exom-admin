@@ -5,7 +5,9 @@ import { PageHeader } from '@/components/page'
 import { PeriodStatsHeader } from '@/components/stats/period-stats-header'
 import { useStatsPeriod } from '@/components/stats/use-stats-period'
 import { useMediaQuery } from '@/hooks/use-media-query'
-import { useFeedbackList } from '../api'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
+import { getApiErrorMessage } from '@/lib/api-utils'
+import { useFeedbackList, useRespondFeedback } from '../api'
 import { FeedbackDetailDialog } from '../components/feedback-detail-dialog'
 import { FeedbackDetailPane } from '../components/feedback-detail-pane'
 import { FeedbackFilters } from '../components/feedback-filters'
@@ -34,6 +36,12 @@ export function FeedbackPage() {
   // sin él (p. ej. filtro Pendientes tras responder). Se resuelve contra la lista cargada.
   const [selected, setSelected] = useState<FeedbackItem | null>(null)
   const [drafts, setDrafts] = useState<Record<string, string>>({})
+  // Elementos con una respuesta en vuelo: el estado «Enviando...» es por elemento.
+  const [respondingIds, setRespondingIds] = useState<ReadonlySet<string>>(() => new Set())
+  const { mutateAsync: respondAsync } = useRespondFeedback()
+  // La guarda cubre los borradores de todos los elementos, no solo el visible.
+  const hasUnsentDraft = Object.values(drafts).some((value) => value.trim() !== '')
+  useUnsavedChanges('feedback-response', hasUnsentDraft || respondingIds.size > 0)
   // Panel junto al listado desde lg; por debajo, diálogo. Solo se monta una variante.
   const isDesktop = useMediaQuery('(min-width: 1024px)', true)
 
@@ -109,22 +117,62 @@ export function FeedbackPage() {
 
   // P11: tras responder, abre el siguiente pendiente de la lista cargada (en su orden,
   // y si no hay posterior, el primero pendiente restante) o avisa de que no quedan.
-  // `items` es el de este render (previo al refetch), que aún contiene el elemento respondido.
-  const handleResponded = (respondedItem: FeedbackItem, response: string) => {
-    const nextPending = getNextPendingItem(items, respondedItem.id)
+  // `listAtSubmit` es la lista del momento del envío (previa al refetch), que aún contiene el
+  // elemento respondido. Solo se cambia la selección si sigue en el elemento respondido: si el
+  // usuario eligió otro (o cerró el detalle) mientras se enviaba, se respeta su elección.
+  const handleResponded = (
+    respondedItem: FeedbackItem,
+    response: string,
+    listAtSubmit: FeedbackItem[],
+    desktopAtSubmit: boolean,
+  ) => {
+    const nextPending = getNextPendingItem(listAtSubmit, respondedItem.id)
     if (nextPending) {
-      setSelected(nextPending)
+      setSelected((previous) => (previous?.id === respondedItem.id ? nextPending : previous))
       return
     }
 
     toast.info('No quedan feedbacks pendientes en esta lista.')
-    setSelected(isDesktop ? { ...respondedItem, status: 'REVIEWED', admin_response: response } : null)
+    const answered: FeedbackItem | null = desktopAtSubmit
+      ? { ...respondedItem, status: 'REVIEWED', admin_response: response }
+      : null
+    setSelected((previous) => (previous?.id === respondedItem.id ? answered : previous))
+  }
+
+  // La mutación vive en la página (siempre montada) para que el resultado se notifique aunque el
+  // detalle se haya cerrado o cambiado. Se usa la promesa de mutateAsync porque los callbacks de
+  // mutate() se pierden si el observer cambia de mutación o se desmonta.
+  const handleRespond = (item: FeedbackItem, response: string) => {
+    if (respondingIds.has(item.id)) return
+    const listAtSubmit = items
+    const desktopAtSubmit = isDesktop
+    setRespondingIds((previous) => new Set(previous).add(item.id))
+    respondAsync({ id: item.id, admin_response: response })
+      .then(
+        () => {
+          toast.success('Respuesta enviada correctamente')
+          handleDraftChange(item.id, '')
+          handleResponded(item, response, listAtSubmit, desktopAtSubmit)
+        },
+        (error: unknown) => {
+          // El borrador se conserva para poder reintentar.
+          toast.error(getApiErrorMessage(error, 'No se ha podido enviar la respuesta'))
+        },
+      )
+      .finally(() => {
+        setRespondingIds((previous) => {
+          const next = new Set(previous)
+          next.delete(item.id)
+          return next
+        })
+      })
   }
 
   const previousItem = current ? getSiblingItem(items, current.id, -1) : null
   const nextItem = current ? getSiblingItem(items, current.id, 1) : null
   const position = current ? items.findIndex((item) => item.id === current.id) + 1 : 0
   const currentDraft = current ? (drafts[current.id] ?? '') : ''
+  const currentResponding = current ? respondingIds.has(current.id) : false
   const handleCurrentDraftChange = (value: string) => {
     if (current) handleDraftChange(current.id, value)
   }
@@ -173,7 +221,8 @@ export function FeedbackPage() {
             item={current}
             draft={currentDraft}
             onDraftChange={handleCurrentDraftChange}
-            onResponded={handleResponded}
+            onRespond={handleRespond}
+            isResponding={currentResponding}
           />
         ) : (
           <FeedbackDetailDialog
@@ -181,13 +230,15 @@ export function FeedbackPage() {
             open={Boolean(current)}
             onOpenChange={(open) => {
               if (!open) {
-                handleCurrentDraftChange('')
+                // Con un envío en vuelo, el borrador se conserva hasta conocer el resultado.
+                if (!currentResponding) handleCurrentDraftChange('')
                 setSelected(null)
               }
             }}
             draft={currentDraft}
             onDraftChange={handleCurrentDraftChange}
-            onResponded={handleResponded}
+            onRespond={handleRespond}
+            isResponding={currentResponding}
             position={position}
             total={items.length}
             onPrevious={previousItem ? () => setSelected(previousItem) : undefined}

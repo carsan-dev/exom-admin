@@ -134,11 +134,13 @@ export function ClientsPage() {
     search: clientSearch,
     setSearch: setClientSearch,
     filters: clientFilters,
+    isFromUrl: isClientFiltersFromUrl,
   } = useClientsUrlFilters({ param: 'clientsFilters', sections: clientSections, searchParams, setSearchParams })
   const {
     search: adminSearch,
     setSearch: setAdminSearch,
     filters: adminFilters,
+    isFromUrl: isAdminFiltersFromUrl,
   } = useClientsUrlFilters({
     param: 'adminsFilters',
     sections: userSections,
@@ -150,6 +152,7 @@ export function ClientsPage() {
     search: superAdminSearch,
     setSearch: setSuperAdminSearch,
     filters: superAdminFilters,
+    isFromUrl: isSuperAdminFiltersFromUrl,
   } = useClientsUrlFilters({
     param: 'superAdminsFilters',
     sections: userSections,
@@ -214,8 +217,13 @@ export function ClientsPage() {
     }
 
     lastClientPageResetKeyRef.current = clientPageResetKey
+    // Search and filters taken from a URL (outside navigation) keep that URL's page.
+    if (isClientFiltersFromUrl()) {
+      return
+    }
+
     replacePaginationSearchParams(setSearchParams, { clientsPage: 1 })
-  }, [clientPageResetKey, setSearchParams])
+  }, [clientPageResetKey, setSearchParams, isClientFiltersFromUrl])
 
   useEffect(() => {
     if (lastAdminPageResetKeyRef.current === adminPageResetKey) {
@@ -223,8 +231,13 @@ export function ClientsPage() {
     }
 
     lastAdminPageResetKeyRef.current = adminPageResetKey
+    // Search and filters taken from a URL (outside navigation) keep that URL's page.
+    if (isAdminFiltersFromUrl()) {
+      return
+    }
+
     replacePaginationSearchParams(setSearchParams, { adminsPage: 1 })
-  }, [adminPageResetKey, setSearchParams])
+  }, [adminPageResetKey, setSearchParams, isAdminFiltersFromUrl])
 
   useEffect(() => {
     if (lastSuperAdminPageResetKeyRef.current === superAdminPageResetKey) {
@@ -232,8 +245,13 @@ export function ClientsPage() {
     }
 
     lastSuperAdminPageResetKeyRef.current = superAdminPageResetKey
+    // Search and filters taken from a URL (outside navigation) keep that URL's page.
+    if (isSuperAdminFiltersFromUrl()) {
+      return
+    }
+
     replacePaginationSearchParams(setSearchParams, { superAdminsPage: 1 })
-  }, [superAdminPageResetKey, setSearchParams])
+  }, [superAdminPageResetKey, setSearchParams, isSuperAdminFiltersFromUrl])
 
   const clientsQuery = useClients({
     archive,

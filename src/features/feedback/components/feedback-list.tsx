@@ -87,11 +87,24 @@ export function FeedbackList({
         {items.map((item) => {
           const selected = item.id === selectedId
           const TypeIcon = item.media_type === 'VIDEO' ? Video : Image
+          const clientName = getFeedbackClientName(item)
+          const exerciseName = item.exercise?.name ?? '—'
+          const date = formatFeedbackDate(item.assignment_date ?? item.created_at)
+          // Conserva como nombre accesible las columnas de la tabla anterior (Cliente, Ejercicio,
+          // Tipo, Estado, Fecha), incluido el tipo de medio que visualmente solo es un icono.
+          const rowLabel = [
+            `Cliente: ${clientName}`,
+            `Ejercicio: ${exerciseName}${item.feedback_kind === 'LAST_SET' ? ' (Última serie)' : ''}`,
+            `Tipo: ${item.media_type === 'VIDEO' ? 'Vídeo' : 'Imagen'}`,
+            `Estado: ${item.status === 'PENDING' ? 'Pendiente' : 'Revisado'}`,
+            `Fecha: ${date}`,
+          ].join('. ')
 
           return (
             <li key={item.id}>
               <button
                 type="button"
+                aria-label={rowLabel}
                 aria-current={selected ? 'true' : undefined}
                 aria-controls={controlsId}
                 aria-haspopup={controlsId ? undefined : 'dialog'}
@@ -106,18 +119,15 @@ export function FeedbackList({
                   className={cn('size-4 self-start mt-[3px]', selected ? 'text-accent-text' : 'text-foreground-muted')}
                 />
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="truncate text-sm font-semibold leading-5 text-foreground">
-                    <span className="sr-only">{item.media_type === 'VIDEO' ? 'Vídeo' : 'Imagen'} de </span>
-                    {getFeedbackClientName(item)}
-                  </span>
+                  <span className="truncate text-sm font-semibold leading-5 text-foreground">{clientName}</span>
                   <span className="flex min-w-0 items-center gap-2 text-[13px] leading-5 text-foreground-secondary">
-                    <span className="min-w-0 truncate">{item.exercise?.name ?? '—'}</span>
+                    <span className="min-w-0 truncate">{exerciseName}</span>
                     {item.feedback_kind === 'LAST_SET' && <Tag className="h-5 flex-none px-1.5 text-[11px]">Última serie</Tag>}
                   </span>
                 </span>
                 <span className="flex flex-col items-end gap-1.5">
                   <span className="whitespace-nowrap text-xs leading-4 text-foreground-muted">
-                    {formatFeedbackDate(item.assignment_date ?? item.created_at)}
+                    {date}
                   </span>
                   {item.status === 'PENDING' ? (
                     <StatusChip variant="warning">Pendiente</StatusChip>

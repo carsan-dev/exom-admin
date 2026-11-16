@@ -6,11 +6,12 @@ interface FeedbackDetailPaneProps {
   item: FeedbackItem | null
   draft: string
   onDraftChange: (value: string) => void
-  onResponded: (item: FeedbackItem, response: string) => void
+  onRespond: (item: FeedbackItem, response: string) => void
+  isResponding: boolean
 }
 
 /** Detalle fijo junto al listado (lg y superior). */
-export function FeedbackDetailPane({ item, draft, onDraftChange, onResponded }: FeedbackDetailPaneProps) {
+export function FeedbackDetailPane({ item, draft, onDraftChange, onRespond, isResponding }: FeedbackDetailPaneProps) {
   return (
     <section
       id="feedback-detail"
@@ -19,10 +20,12 @@ export function FeedbackDetailPane({ item, draft, onDraftChange, onResponded }: 
     >
       {item ? (
         <FeedbackDetailView
+          key={item.id}
           item={item}
           draft={draft}
           onDraftChange={onDraftChange}
-          onResponded={onResponded}
+          onRespond={onRespond}
+          isResponding={isResponding}
           layout="pane"
         />
       ) : (

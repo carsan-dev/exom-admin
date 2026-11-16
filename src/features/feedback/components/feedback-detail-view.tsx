@@ -1,13 +1,9 @@
 import { Check, ImageOff, VideoOff } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { StatusChip } from '@/components/ui/status-chip'
 import { Tag } from '@/components/ui/tag'
 import { Textarea } from '@/components/ui/textarea'
-import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
-import { getApiErrorMessage } from '@/lib/api-utils'
 import { cn } from '@/lib/utils'
-import { useRespondFeedback } from '../api'
 import { formatFeedbackDate, getFeedbackClientName } from '../feedback-format'
 import type { FeedbackItem } from '../types'
 
@@ -22,8 +18,10 @@ interface FeedbackDetailViewProps {
   item: FeedbackItem
   draft: string
   onDraftChange: (value: string) => void
-  /** Se llama tras un envío correcto, con el texto enviado. */
-  onResponded: (item: FeedbackItem, response: string) => void
+  /** Envía la respuesta (ya recortada). La mutación vive en la página para sobrevivir al desmontaje del detalle. */
+  onRespond: (item: FeedbackItem, response: string) => void
+  /** Hay una respuesta de este elemento en vuelo. */
+  isResponding: boolean
   /** Nivel del título con el nombre del cliente. */
   titleAs?: 'h2' | 'h3'
   /** `pane`: panel fijo de escritorio (medio y notas en dos columnas desde xl). */
@@ -34,29 +32,15 @@ export function FeedbackDetailView({
   item,
   draft,
   onDraftChange,
-  onResponded,
+  onRespond,
+  isResponding,
   titleAs: Title = 'h2',
   layout = 'stacked',
 }: FeedbackDetailViewProps) {
-  const { mutate: respond, isPending } = useRespondFeedback()
-  useUnsavedChanges('feedback-response', Boolean(draft.trim()) || isPending)
-
   function handleRespond() {
     const response = draft.trim()
-    if (!response) return
-    respond(
-      { id: item.id, admin_response: response },
-      {
-        onSuccess: () => {
-          toast.success('Respuesta enviada correctamente')
-          onDraftChange('')
-          onResponded(item, response)
-        },
-        onError: (error) => {
-          toast.error(getApiErrorMessage(error, 'No se ha podido enviar la respuesta'))
-        },
-      },
-    )
+    if (!response || isResponding) return
+    onRespond(item, response)
   }
 
   const isPane = layout === 'pane'
@@ -172,8 +156,8 @@ export function FeedbackDetailView({
                 rows={3}
                 className="resize-none"
               />
-              <Button onClick={handleRespond} disabled={isPending || !draft.trim()} className="max-md:h-11 max-md:w-full">
-                {isPending ? 'Enviando...' : 'Responder'}
+              <Button onClick={handleRespond} disabled={isResponding || !draft.trim()} className="max-md:h-11 max-md:w-full">
+                {isResponding ? 'Enviando...' : 'Responder'}
               </Button>
             </div>
           )}

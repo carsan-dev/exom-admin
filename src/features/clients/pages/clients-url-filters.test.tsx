@@ -66,6 +66,15 @@ function ListHarness() {
       <Location />
       <button type="button" onClick={() => navigate('/clients/c-1')}>Ir al detalle</button>
       <button type="button" onClick={() => navigate('/clients')}>Enlace lateral</button>
+      <button type="button" onClick={() => navigate('/clients?clientsFilters=q%3Abea&clientsPage=3')}>
+        Enlace con búsqueda y página
+      </button>
+      <button
+        type="button"
+        onClick={() => navigate('/clients?clientsFilters=status%3ALOCKED%3Bq%3Abea&clientsPage=3')}
+      >
+        Enlace con filtros y página
+      </button>
     </>
   )
 }
@@ -293,5 +302,36 @@ describe('ClientsPage search and filters in the URL', () => {
     await waitFor(() => expect(searchBox()).toHaveValue(''))
     expect(locationText()).toBe('/clients')
     await waitFor(() => expect(lastCall('/admin/clients')).not.toHaveProperty('search'))
+  })
+
+  it('an outside navigation with a different search and clientsPage keeps that page', async () => {
+    renderPage('/clients?clientsFilters=q%3Aana', 'ADMIN', 3)
+    await screen.findByText('Página 1 de 3')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Enlace con búsqueda y página' }))
+
+    await waitFor(() => expect(searchBox()).toHaveValue('bea'))
+    await waitFor(() => expect(lastCall('/admin/clients')).toMatchObject({ page: 3, search: 'bea' }))
+    await screen.findByText('Página 3 de 3')
+    expect(params().get('clientsPage')).toBe('3')
+    expect(params().get('clientsFilters')).toBe('q:bea')
+  })
+
+  it('an outside navigation with different filters in another order and clientsPage keeps that page', async () => {
+    renderPage('/clients?clientsFilters=q%3Aana', 'ADMIN', 3)
+    await screen.findByText('Página 1 de 3')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Enlace con filtros y página' }))
+
+    await waitFor(() => expect(searchBox()).toHaveValue('bea'))
+    // La URL se normaliza al orden canónico sin perder la página.
+    await waitFor(() => expect(params().get('clientsFilters')).toBe('q:bea;status:LOCKED'))
+    await waitFor(() => expect(lastCall('/admin/clients')).toMatchObject({ page: 3, search: 'bea', status: ['LOCKED'] }))
+    expect(params().get('clientsPage')).toBe('3')
+
+    // Un cambio posterior del usuario sí vuelve a la página 1.
+    fireEvent.change(searchBox(), { target: { value: 'bead' } })
+    await waitFor(() => expect(params().get('clientsFilters')).toBe('q:bead;status:LOCKED'))
+    await waitFor(() => expect(params().has('clientsPage')).toBe(false))
   })
 })

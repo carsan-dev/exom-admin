@@ -10,7 +10,8 @@ interface FeedbackDetailDialogProps {
   onOpenChange: (open: boolean) => void
   draft: string
   onDraftChange: (value: string) => void
-  onResponded: (item: FeedbackItem, response: string) => void
+  onRespond: (item: FeedbackItem, response: string) => void
+  isResponding: boolean
   /** Posición del elemento en la lista cargada (1-based) y tamaño de la lista; 0 si no está en ella. */
   position: number
   total: number
@@ -25,7 +26,8 @@ export function FeedbackDetailDialog({
   onOpenChange,
   draft,
   onDraftChange,
-  onResponded,
+  onRespond,
+  isResponding,
   position,
   total,
   onPrevious,
@@ -71,10 +73,12 @@ export function FeedbackDetailDialog({
         </div>
 
         <FeedbackDetailView
+          key={item.id}
           item={item}
           draft={draft}
           onDraftChange={onDraftChange}
-          onResponded={onResponded}
+          onRespond={onRespond}
+          isResponding={isResponding}
           titleAs="h3"
         />
       </DialogContent>

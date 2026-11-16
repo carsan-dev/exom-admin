@@ -88,12 +88,21 @@ interface ClientsUrlFiltersSync {
   observed: string
   written: string
   pending: string[]
+  /** Encoded local state last taken from the URL; null once the user changes it. */
+  fromUrl: string | null
 }
 
 export interface ClientsUrlFiltersResult {
   search: string
   setSearch: (value: string) => void
   filters: UseListFiltersResult
+  /**
+   * True while search and filters are exactly the state last taken from the URL
+   * (deep link, reload or a navigation from outside the page) and the user has
+   * not changed them since. Pages use it to keep the page number of that URL
+   * instead of treating the change as a user filter change.
+   */
+  isFromUrl: () => boolean
 }
 
 /**
@@ -119,7 +128,12 @@ export function useClientsUrlFilters({
   const syncRef = useRef<ClientsUrlFiltersSync | null>(null)
 
   if (syncRef.current === null) {
-    syncRef.current = { observed: urlValue, written: urlValue, pending: [] }
+    syncRef.current = {
+      observed: urlValue,
+      written: urlValue,
+      pending: [],
+      fromUrl: encodeClientsUrlFilters(initial, sections),
+    }
   }
 
   useEffect(() => {
@@ -140,6 +154,7 @@ export function useClientsUrlFilters({
         sync.pending = []
         sync.written = urlValue
         const next = decodeClientsUrlFilters(urlValue, sections)
+        sync.fromUrl = encodeClientsUrlFilters(next, sections)
         setSearch(next.search)
         filters.clear()
         for (const [key, value] of Object.entries(next.values) as [string, FilterValues[string]][]) {
@@ -155,6 +170,10 @@ export function useClientsUrlFilters({
 
     if (encoded === sync.written) {
       return
+    }
+
+    if (encoded !== sync.fromUrl) {
+      sync.fromUrl = null
     }
 
     sync.written = encoded
@@ -175,5 +194,7 @@ export function useClientsUrlFilters({
     )
   }, [enabled, urlValue, encoded, setSearchParams, sections, filters, param])
 
-  return { search, setSearch, filters }
+  const isFromUrl = useCallback(() => syncRef.current?.fromUrl != null, [])
+
+  return { search, setSearch, filters, isFromUrl }
 }

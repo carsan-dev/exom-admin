@@ -112,10 +112,21 @@ function decodeRange(raw: string): [string, string] | null {
   return [from, to]
 }
 
+// Shape plus round-trip check, so impossible dates such as 2026-13-45 or 2026-02-30 are dropped.
+function isValidDate(value: string) {
+  if (!DATE_PATTERN.test(value)) {
+    return false
+  }
+
+  const date = new Date(`${value}T00:00:00Z`)
+
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+}
+
 function decodeDateRange(raw: string): [string | null, string | null] | null {
   const range = decodeRange(raw)
 
-  if (!range || range.some((side) => side !== '' && !DATE_PATTERN.test(side))) {
+  if (!range || range.some((side) => side !== '' && !isValidDate(side))) {
     return null
   }
 

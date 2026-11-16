@@ -86,4 +86,14 @@ describe('clients URL filters codec', () => {
     }
     expect(decodeClientsUrlFilters('q:a:b', sections).search).toBe('')
   })
+
+  it('drops dates with a valid shape that do not exist', () => {
+    expect(decodeClientsUrlFilters('created:2026-13-45~', sections)).toEqual({ search: '', values: {} })
+    expect(decodeClientsUrlFilters('created:~2026-02-30', sections)).toEqual({ search: '', values: {} })
+    expect(decodeClientsUrlFilters('created:2026-00-10~', sections)).toEqual({ search: '', values: {} })
+    expect(decodeClientsUrlFilters('created:2024-02-29~2026-12-31', sections)).toEqual({
+      search: '',
+      values: { created: ['2024-02-29', '2026-12-31'] },
+    })
+  })
 })
