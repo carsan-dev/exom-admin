@@ -100,7 +100,7 @@ export function LoginPage() {
         <div className="w-full max-w-[380px]">
           {/* Blocked state */}
           {isBlocked ? (
-            <section aria-labelledby="blocked-title">
+            <section aria-labelledby="blocked-title" className="auth-enter">
               <Lock className="mb-5 h-6 w-6 text-status-warning" aria-hidden="true" />
               <h1
                 id="blocked-title"
@@ -122,7 +122,7 @@ export function LoginPage() {
             </section>
           ) : (
             <>
-              <h1 className="font-display text-[38px] font-extrabold uppercase leading-[0.92] text-foreground md:text-[44px]">
+              <h1 className="auth-enter font-display text-[38px] font-extrabold uppercase leading-[0.92] text-foreground md:text-[44px]">
                 Iniciar sesión
               </h1>
 
@@ -142,7 +142,7 @@ export function LoginPage() {
                   </div>
                 )}
 
-                <div className="space-y-1.5">
+                <div className="auth-enter space-y-1.5" style={{ animationDelay: '40ms' }}>
                   <label className="text-sm font-medium text-foreground" htmlFor="email">
                     Email
                     <RequiredMark />
@@ -164,7 +164,7 @@ export function LoginPage() {
                   )}
                 </div>
 
-                <div>
+                <div className="auth-enter" style={{ animationDelay: '80ms' }}>
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-foreground" htmlFor="password">
                       Contraseña
@@ -209,21 +209,26 @@ export function LoginPage() {
                   </div>
                 </div>
 
-                <Button type="submit" size="lg" className="mt-7 h-11 w-full" disabled={isLoading}>
-                  {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
-                  {!isLoading && <ArrowRight aria-hidden="true" />}
-                </Button>
+                <div className="auth-enter mt-7" style={{ animationDelay: '120ms' }}>
+                  <Button type="submit" size="lg" className="auth-submit h-11 w-full" disabled={isLoading}>
+                    {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+                    {!isLoading && <ArrowRight aria-hidden="true" className="auth-arrow" />}
+                  </Button>
+                </div>
               </form>
 
               {/* Divider */}
-              <div className="mb-5 mt-7 flex items-center gap-3 text-xs leading-4 text-foreground-muted">
+              <div
+                className="auth-enter mb-5 mt-7 flex items-center gap-3 text-xs leading-4 text-foreground-muted"
+                style={{ animationDelay: '160ms' }}
+              >
                 <span aria-hidden="true" className="h-px flex-1 bg-border-strong" />
                 <span>O continúa con</span>
                 <span aria-hidden="true" className="h-px flex-1 bg-border-strong" />
               </div>
 
               {/* Social buttons */}
-              <div>
+              <div className="auth-enter" style={{ animationDelay: '200ms' }}>
                 <Button
                   variant="secondary"
                   type="button"
