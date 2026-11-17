@@ -5,10 +5,11 @@ interface DietsSelectionBarProps {
   count: number
   disabled: boolean
   onMove: () => void
+  onDelete: () => void
   onClear: () => void
 }
 
-export function DietsSelectionBar({ count, disabled, onMove, onClear }: DietsSelectionBarProps) {
+export function DietsSelectionBar({ count, disabled, onMove, onDelete, onClear }: DietsSelectionBarProps) {
   return (
     <SelectionBar
       count={count}
@@ -18,6 +19,9 @@ export function DietsSelectionBar({ count, disabled, onMove, onClear }: DietsSel
     >
       <Button disabled={disabled} onClick={onMove} className="max-md:h-11">
         Mover a grupo ({count})
+      </Button>
+      <Button variant="destructive" disabled={disabled} onClick={onDelete} className="max-md:h-11">
+        Eliminar ({count})
       </Button>
     </SelectionBar>
   )

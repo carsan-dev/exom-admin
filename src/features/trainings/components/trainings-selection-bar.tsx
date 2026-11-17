@@ -5,10 +5,11 @@ interface TrainingsSelectionBarProps {
   count: number
   disabled: boolean
   onMove: () => void
+  onDelete: () => void
   onClear: () => void
 }
 
-export function TrainingsSelectionBar({ count, disabled, onMove, onClear }: TrainingsSelectionBarProps) {
+export function TrainingsSelectionBar({ count, disabled, onMove, onDelete, onClear }: TrainingsSelectionBarProps) {
   return (
     <SelectionBar
       count={count}
@@ -18,6 +19,9 @@ export function TrainingsSelectionBar({ count, disabled, onMove, onClear }: Trai
     >
       <Button disabled={disabled} onClick={onMove} className="max-md:h-11">
         Mover a grupo ({count})
+      </Button>
+      <Button variant="destructive" disabled={disabled} onClick={onDelete} className="max-md:h-11">
+        Eliminar ({count})
       </Button>
     </SelectionBar>
   )
