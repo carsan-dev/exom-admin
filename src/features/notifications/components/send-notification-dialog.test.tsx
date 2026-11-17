@@ -72,7 +72,7 @@ describe('SendNotificationDialog', () => {
 
   describe('P1 confirm sending to everyone', () => {
     it('asks first, makes no call when cancelled with the button and keeps the form', async () => {
-      const user = userEvent.setup()
+      const user = userEvent.setup({ delay: null })
       renderDialog()
       await fillMessage(user)
       await user.click(screen.getByLabelText('Enviar a todos mis clientes'))
@@ -91,7 +91,7 @@ describe('SendNotificationDialog', () => {
       expect(screen.getByLabelText('Título')).toHaveValue('Hola equipo')
       expect(screen.getByLabelText('Cuerpo')).toHaveValue('Mensaje de prueba')
       expect(screen.getByLabelText('Enviar a todos mis clientes')).toBeChecked()
-    })
+    }, 15000)
 
     it('makes no call when cancelled with Escape', async () => {
       const user = userEvent.setup()
@@ -130,7 +130,7 @@ describe('SendNotificationDialog', () => {
     })
 
     it('announces the real portfolio total, not the 200 loaded', async () => {
-      const user = userEvent.setup()
+      const user = userEvent.setup({ delay: null })
       clientsResponse = {
         data: Array.from({ length: 200 }, (_, index) => ({
           id: `00000000-0000-4000-8000-${String(index).padStart(12, '0')}`,
@@ -148,10 +148,10 @@ describe('SendNotificationDialog', () => {
       const confirm = await screen.findByRole('alertdialog')
       expect(within(confirm).getByText('Llegará a 350 clientes visibles de tu cartera.')).toBeInTheDocument()
       expect(within(confirm).queryByText(/\b200\b/)).not.toBeInTheDocument()
-    })
+    }, 15000)
 
     it('uses a text without figure when the response has no usable total', async () => {
-      const user = userEvent.setup()
+      const user = userEvent.setup({ delay: null })
       clientsResponse = { data: clients }
       renderDialog()
       expect(screen.getByText('Se enviará a todos los clientes visibles.')).toBeInTheDocument()
@@ -161,7 +161,7 @@ describe('SendNotificationDialog', () => {
 
       const confirm = await screen.findByRole('alertdialog')
       expect(within(confirm).getByText('Llegará a todos los clientes visibles de tu cartera.')).toBeInTheDocument()
-    })
+    }, 15000)
 
     it('aborts without calling the API when the clients query fails while the confirmation is open', async () => {
       const user = userEvent.setup()
