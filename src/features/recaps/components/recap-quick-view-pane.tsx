@@ -2,6 +2,7 @@ import { EmptyState } from '@/components/page'
 import type { RecapListItem } from '../types'
 import {
   RecapQuickView,
+  type RecapDraftDiscardReason,
   type RecapFocusRequest,
   type RecapReplyDraft,
   type RecapReplyMode,
@@ -15,7 +16,7 @@ interface RecapQuickViewPaneProps {
   draft: RecapReplyDraft | undefined
   onDraftChange: (id: string, values: RecapReplyDraft, saved: RecapReplyValues) => void
   onSend: (item: RecapListItem, values: RecapReplyValues, mode: RecapReplyMode) => void
-  onDraftDiscard: (id: string) => void
+  onDraftDiscard: (id: string, reason: RecapDraftDiscardReason | null) => void
   isSending: boolean
   focusRequest: RecapFocusRequest | null
   onFocusHandled: () => void

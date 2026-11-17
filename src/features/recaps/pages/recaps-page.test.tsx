@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AxiosError } from 'axios'
+import { StrictMode } from 'react'
 import { MemoryRouter, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useUnsavedChangesStore } from '@/hooks/use-unsaved-changes'
@@ -207,7 +208,9 @@ const sendButton = () => screen.getByRole('button', { name: 'Enviar y marcar rev
 const saveButton = () => screen.getByRole('button', { name: 'Guardar cambios' })
 const PUSH_WARNING = 'Este texto es visible para el cliente. Si lo cambias se enviará una notificación push.'
 const EDIT_HELP = 'Para la revisión compartible, imprimir o archivar, abre «Ver completo».'
-const ARCHIVED_HELP = 'Recap archivado: los comentarios son de solo lectura. Para consultar la revisión compartible o imprimir, abre «Ver completo».'
+const REVIEWED_BY_OTHER = 'Otra persona ha revisado este recap. Tu borrador se ha descartado para no sobrescribir su respuesta.'
+const ARCHIVED_DISCARD = 'Este recap se ha archivado. Tu borrador se ha descartado.'
+const ARCHIVED_HELP ='Recap archivado: los comentarios son de solo lectura. Para consultar la revisión compartible o imprimir, abre «Ver completo».'
 
 describe('RecapsPage', () => {
   beforeEach(() => {
@@ -655,9 +658,115 @@ describe('RecapsPage', () => {
       expect(within(row(/Ana Test/)).queryByText('Borrador')).not.toBeInTheDocument()
       expect(useUnsavedChangesStore.getState().hasUnsavedChanges).toBe(false)
     })
+
+    it('warns once, even in StrictMode, when another person reviews a recap with a pending draft', async () => {
+      mockApi()
+      const user = userEvent.setup()
+      const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
+      render(
+        <StrictMode>
+          <QueryClientProvider client={client}>
+            <MemoryRouter initialEntries={['/recaps']}>
+              <RecapsPage />
+            </MemoryRouter>
+          </QueryClientProvider>
+        </StrictMode>,
+      )
+
+      await user.click(await findRow(/Ana Test/))
+      await user.type(await findComment(), 'Pendiente')
+      await user.click(row(/Carla Test/))
+      await findComment()
+      store = store.map((recap) => (recap.id === 'r1' ? { ...recap, status: 'REVIEWED' as const } : recap))
+      // La caché de Ana ya está revisada al volver: el descarte ocurre en el montaje, que StrictMode repite.
+      await client.refetchQueries({ queryKey: ['admin-recaps', 'detail', 'r1'] })
+      await user.click(row(/Ana Test/))
+
+      await waitFor(() => expect(toast.info).toHaveBeenCalledWith(REVIEWED_BY_OTHER))
+      await waitFor(() => expect(row(/Ana Test/)).not.toHaveAccessibleName(/Borrador/))
+      // Sin sobrescribir: el formulario muestra lo que guardó la otra persona.
+      expect(comment()).toHaveValue('')
+      await user.click(row(/Carla Test/))
+      await findComment()
+      await user.click(row(/Ana Test/))
+      await findComment()
+      expect(toast.info).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not warn when another person reviews a recap without a draft', async () => {
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Ana Test/))
+      await findComment()
+      await user.click(row(/Carla Test/))
+      await findComment()
+      store = store.map((recap) => (recap.id === 'r1' ? { ...recap, status: 'REVIEWED' as const } : recap))
+      await user.click(row(/Ana Test/))
+
+      await waitFor(() => expect(saveButton()).toBeInTheDocument())
+      expect(toast.info).not.toHaveBeenCalled()
+    })
+
+    it('does not warn about a discarded draft after the user’s own successful review', async () => {
+      store = [makeRecap('r1', 'Ana'), makeRecap('r2', 'Beto', { status: 'REVIEWED' })]
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Ana Test/))
+      await user.type(await findComment(), 'Último')
+      await user.click(sendButton())
+
+      await waitFor(() => expect(toast.info).toHaveBeenCalledWith('No quedan recaps por revisar en esta lista.'))
+      await waitFor(() => expect(saveButton()).toBeDisabled())
+      expect(comment()).toHaveValue('Último')
+      expect(toast.info).toHaveBeenCalledTimes(1)
+      expect(toast.info).not.toHaveBeenCalledWith(REVIEWED_BY_OTHER)
+    })
   })
 
   describe('edición de revisados', () => {
+    it('drops an edit draft with a warning when another person archives the recap', async () => {
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Beto Test/))
+      await user.type(await findComment(), ' y más')
+      expect(row(/Beto Test/)).toHaveAccessibleName(/Borrador de respuesta sin enviar/)
+      await user.click(row(/Ana Test/))
+      await findComment()
+      store = store.map((recap) => (recap.id === 'r2' ? { ...recap, archived_at: ARCHIVED_AT } : recap))
+      await user.click(row(/Beto Test/))
+
+      await waitFor(() => expect(toast.info).toHaveBeenCalledWith(ARCHIVED_DISCARD))
+      expect(toast.info).toHaveBeenCalledTimes(1)
+      await waitFor(() => expect(screen.queryByLabelText('Comentario para el cliente')).not.toBeInTheDocument())
+      expect(screen.getByText(ARCHIVED_HELP)).toBeInTheDocument()
+      expect(row(/Beto Test/)).not.toHaveAccessibleName(/Borrador/)
+      expect(useUnsavedChangesStore.getState().hasUnsavedChanges).toBe(false)
+    })
+
+    it('edits a reviewed recap with null comment and note, sending an empty string for the untouched field', async () => {
+      store = [makeRecap('r6', 'Fran', { status: 'REVIEWED', admin_comments: null, client_feedback_text: null })]
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Fran Test/))
+      expect(await findComment()).toHaveValue('')
+      expect(internalNote()).toHaveValue('')
+      expect(saveButton()).toBeDisabled()
+      await user.click(screen.getByText('Nota interna'))
+      await user.type(internalNote(), 'Solo nota')
+      await user.click(saveButton())
+
+      await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1))
+      expect(api.put).toHaveBeenCalledWith('/recaps/r6/review', { admin_comments: 'Solo nota', client_feedback_text: '' })
+    })
+
     it('saves the trimmed comment and note, keeps the selection and focuses the heading', async () => {
       mockApi()
       const user = userEvent.setup()

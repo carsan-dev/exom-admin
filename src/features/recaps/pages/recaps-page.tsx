@@ -8,7 +8,7 @@ import { useMediaQuery } from '@/hooks/use-media-query'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { getApiErrorMessage } from '@/lib/api-utils'
 import { useRecapsList, useReviewRecap } from '../api'
-import type { RecapFocusRequest, RecapReplyDraft, RecapReplyMode, RecapReplyValues } from '../components/recap-quick-view'
+import type { RecapDraftDiscardReason, RecapFocusRequest, RecapReplyDraft, RecapReplyMode, RecapReplyValues } from '../components/recap-quick-view'
 import { RecapQuickViewDialog } from '../components/recap-quick-view-dialog'
 import { RECAP_QUICK_VIEW_PANE_ID, RecapQuickViewPane } from '../components/recap-quick-view-pane'
 import { RecapsFilters } from '../components/recaps-filters'
@@ -47,6 +47,13 @@ export function RecapsPage() {
   const [drafts, setDrafts] = useState<Record<string, RecapReplyDraft>>({})
   // Recaps con un envío en vuelo: el estado «Enviando...» es por recap.
   const [sendingIds, setSendingIds] = useState<ReadonlySet<string>>(() => new Set())
+  // Copias síncronas de los borradores y de los envíos en vuelo para el aviso de borrador descartado:
+  // el efecto que lo pide puede repetirse (StrictMode, re-render) antes de que se aplique el estado.
+  const draftsRef = useRef(drafts)
+  useEffect(() => {
+    draftsRef.current = drafts
+  }, [drafts])
+  const sendingRef = useRef(new Set<string>())
   const [focusRequest, setFocusRequest] = useState<{ id: string; mode: RecapFocusRequest } | null>(null)
   const { mutateAsync: reviewAsync } = useReviewRecap()
   const hasAnyDraft = Object.keys(drafts).length > 0
@@ -158,6 +165,25 @@ export function RecapsPage() {
     })
   }, [])
 
+  // La vista rápida retira el borrador cuando otra persona revisa o archiva el recap. Se avisa una sola
+  // vez por borrador y nunca si el cambio viene de un envío propio en vuelo (su éxito ya lo retira).
+  const discardStaleDraft = useCallback(
+    (id: string, reason: RecapDraftDiscardReason | null) => {
+      if (!(id in draftsRef.current)) return
+      const rest = { ...draftsRef.current }
+      delete rest[id]
+      draftsRef.current = rest
+      dropDraft(id)
+      if (!reason || sendingRef.current.has(id)) return
+      toast.info(
+        reason === 'archived'
+          ? 'Este recap se ha archivado. Tu borrador se ha descartado.'
+          : 'Otra persona ha revisado este recap. Tu borrador se ha descartado para no sobrescribir su respuesta.',
+      )
+    },
+    [dropDraft],
+  )
+
   // Tras revisar, abre el siguiente recap por revisar de la lista del momento del envío (previa al
   // refetch, aún contiene el revisado) o avisa de que no quedan. Solo se cambia la selección si sigue
   // en el recap revisado: si el usuario eligió otro (o cerró el diálogo) mientras se enviaba, se respeta.
@@ -191,6 +217,7 @@ export function RecapsPage() {
     if (sendingIds.has(item.id)) return
     const listAtSubmit = items
     const desktopAtSubmit = isDesktop
+    sendingRef.current.add(item.id)
     setSendingIds((previous) => new Set(previous).add(item.id))
     reviewAsync({ id: item.id, admin_comments: values.internalNote, client_feedback_text: values.clientFeedback })
       .then(
@@ -212,6 +239,7 @@ export function RecapsPage() {
         },
       )
       .finally(() => {
+        sendingRef.current.delete(item.id)
         setSendingIds((previous) => {
           const next = new Set(previous)
           next.delete(item.id)
@@ -300,7 +328,7 @@ export function RecapsPage() {
             draft={currentDraft}
             onDraftChange={handleDraftChange}
             onSend={handleSend}
-            onDraftDiscard={dropDraft}
+            onDraftDiscard={discardStaleDraft}
             isSending={currentSending}
             focusRequest={currentFocusRequest}
             onFocusHandled={handleFocusHandled}
@@ -317,7 +345,7 @@ export function RecapsPage() {
             draft={currentDraft}
             onDraftChange={handleDraftChange}
             onSend={handleSend}
-            onDraftDiscard={dropDraft}
+            onDraftDiscard={discardStaleDraft}
             isSending={currentSending}
             focusRequest={currentFocusRequest}
             onFocusHandled={handleFocusHandled}

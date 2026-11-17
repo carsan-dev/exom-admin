@@ -24,6 +24,9 @@ export interface RecapReplyValues {
 /** `review`: primera revisión de un pendiente. `edit`: cambios en un recap ya revisado. */
 export type RecapReplyMode = 'review' | 'edit'
 
+/** Motivo por el que se retira un borrador: otra persona revisó el pendiente, o se archivó el recap. */
+export type RecapDraftDiscardReason = 'reviewed-by-other' | 'archived'
+
 /** Borrador local de un recap, con el modo en el que se empezó a escribir. */
 export interface RecapReplyDraft extends RecapReplyValues {
   mode: RecapReplyMode
@@ -234,8 +237,11 @@ interface RecapQuickViewProps {
   onDraftChange: (id: string, values: RecapReplyDraft, saved: RecapReplyValues) => void
   /** Envía la revisión o los cambios (valores ya recortados). La mutación vive en la página. */
   onSend: (item: RecapListItem, values: RecapReplyValues, mode: RecapReplyMode) => void
-  /** Descarta el borrador de este recap cuando ya no admite respuesta o cambia de modo. */
-  onDraftDiscard: (id: string) => void
+  /**
+   * Descarta el borrador de este recap cuando ya no admite respuesta o cambia de modo. `reason` indica
+   * por qué, para avisar al usuario (`null`: sin aviso). La página decide si avisa (una sola vez).
+   */
+  onDraftDiscard: (id: string, reason: RecapDraftDiscardReason | null) => void
   /** Hay un envío de este recap en vuelo. */
   isSending: boolean
   focusRequest: RecapFocusRequest | null
@@ -281,8 +287,14 @@ export function RecapQuickView({
   // sobrescribir con «Guardar cambios» lo que esa persona guardó.
   const draftMode = draft?.mode
   useEffect(() => {
-    if (detailState === 'ready' && draftMode !== undefined && (!canWrite || draftMode !== mode)) onDraftDiscard(item.id)
-  }, [detailState, canWrite, mode, draftMode, onDraftDiscard, item.id])
+    if (detailState !== 'ready' || draftMode === undefined || (canWrite && draftMode === mode)) return
+    const reason: RecapDraftDiscardReason | null = !canWrite
+      ? archivedAt
+        ? 'archived'
+        : null
+      : 'reviewed-by-other'
+    onDraftDiscard(item.id, reason)
+  }, [detailState, canWrite, mode, draftMode, archivedAt, onDraftDiscard, item.id])
 
   useEffect(() => {
     if (!focusRequest) return
