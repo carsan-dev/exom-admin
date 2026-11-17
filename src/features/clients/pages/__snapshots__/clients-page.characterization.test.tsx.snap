@@ -64,7 +64,7 @@ exports[`ClientsPage characterization > ADMIN /clients archived 1`] = `
 </div>
 </div>
 <div tabindex="-1" class="focus:outline-none">
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -635,7 +635,7 @@ exports[`ClientsPage characterization > ADMIN /clients paginated: next, previous
 </div>
 </div>
 <div tabindex="-1" class="focus:outline-none">
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -896,7 +896,7 @@ exports[`ClientsPage characterization > ADMIN /clients with rows 1`] = `
 </div>
 </div>
 <div tabindex="-1" class="focus:outline-none">
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -1290,7 +1290,7 @@ exports[`ClientsPage characterization > SUPER_ADMIN /users clients tab with dele
 </div>
 </div>
 <div tabindex="-1" class="focus:outline-none">
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -1906,7 +1906,7 @@ exports[`ClientsPage characterization > SUPER_ADMIN /users?tab=admins paginated 
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -2127,7 +2127,7 @@ exports[`ClientsPage characterization > SUPER_ADMIN /users?tab=admins rows 1`] =
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -2608,7 +2608,7 @@ exports[`ClientsPage characterization > SUPER_ADMIN /users?tab=super-admins rows
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">

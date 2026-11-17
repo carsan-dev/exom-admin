@@ -138,7 +138,7 @@ exports[`TrainingsPage characterization > filters by catalog group > ungrouped 1
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -621,7 +621,7 @@ exports[`TrainingsPage characterization > filters by catalog group 1`] = `
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -1107,7 +1107,7 @@ exports[`TrainingsPage characterization > imports a JSON file into the builder w
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -2067,7 +2067,7 @@ exports[`TrainingsPage characterization > lists trainings with groups and the pe
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -2553,7 +2553,7 @@ exports[`TrainingsPage characterization > opens the AI prompt dialog 1`] = `
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -3662,7 +3662,7 @@ exports[`TrainingsPage characterization > opens the builder from the header (cre
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -4433,7 +4433,7 @@ exports[`TrainingsPage characterization > opens the delete dialog from the row m
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -4943,7 +4943,7 @@ exports[`TrainingsPage characterization > opens the detail dialog and the delete
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -5529,7 +5529,7 @@ exports[`TrainingsPage characterization > opens the edit and duplicate builder f
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -6497,7 +6497,7 @@ exports[`TrainingsPage characterization > opens the group create dialog 1`] = `
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -7010,7 +7010,7 @@ exports[`TrainingsPage characterization > paginates through the URL 1`] = `
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -8005,7 +8005,7 @@ exports[`TrainingsPage characterization > shows the move bar and the move dialog
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -8533,7 +8533,7 @@ exports[`TrainingsPage characterization > shows the move bar and the move dialog
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">

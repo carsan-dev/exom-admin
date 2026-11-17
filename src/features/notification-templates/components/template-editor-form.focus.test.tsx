@@ -69,4 +69,30 @@ describe('TemplateEditorForm foco de «Cuerpo»', () => {
     fireEvent.focus(body)
     expect(scroll).toHaveBeenCalledTimes(1)
   })
+
+  it('un toque cancelado sin foco no suprime el desplazamiento de un foco de teclado posterior', () => {
+    const scroll = vi.fn()
+    Element.prototype.scrollIntoView = scroll
+    renderForm()
+
+    const body = screen.getByLabelText('Cuerpo')
+    fireEvent.pointerDown(body)
+    fireEvent.pointerCancel(body)
+    fireEvent.focus(body)
+    expect(scroll).toHaveBeenCalledTimes(1)
+    expect(scroll).toHaveBeenCalledWith({ block: 'nearest' })
+  })
+
+  it('un clic sin foco (barra de desplazamiento) no suprime el desplazamiento de un foco de teclado posterior', () => {
+    const scroll = vi.fn()
+    Element.prototype.scrollIntoView = scroll
+    renderForm()
+
+    const body = screen.getByLabelText('Cuerpo')
+    fireEvent.pointerDown(body)
+    fireEvent.pointerUp(body)
+    fireEvent.focus(body)
+    expect(scroll).toHaveBeenCalledTimes(1)
+    expect(scroll).toHaveBeenCalledWith({ block: 'nearest' })
+  })
 })

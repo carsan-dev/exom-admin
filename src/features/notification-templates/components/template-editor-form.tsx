@@ -130,6 +130,14 @@ export function TemplateEditorForm({
               pointerFocusRef.current = false
               if (!fromPointer) event.currentTarget.scrollIntoView?.({ block: 'nearest' })
             }}
+            // La marca solo cubre el foco de esta pulsación: un toque cancelado o un clic en la barra
+            // de desplazamiento no enfocan, y no deben suprimir un foco de teclado posterior.
+            onPointerUp={() => {
+              pointerFocusRef.current = false
+            }}
+            onPointerCancel={() => {
+              pointerFocusRef.current = false
+            }}
             onBlur={() => {
               pointerFocusRef.current = false
             }}

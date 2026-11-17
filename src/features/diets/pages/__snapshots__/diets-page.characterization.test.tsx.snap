@@ -138,7 +138,7 @@ exports[`DietsPage characterization > filters by catalog group > ungrouped 1`] =
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -601,7 +601,7 @@ exports[`DietsPage characterization > filters by catalog group 1`] = `
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -1067,7 +1067,7 @@ exports[`DietsPage characterization > imports a JSON file into the builder with 
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -2050,7 +2050,7 @@ exports[`DietsPage characterization > lists diets with groups and the pending ap
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -2516,7 +2516,7 @@ exports[`DietsPage characterization > opens the AI prompt dialog 1`] = `
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -3679,7 +3679,7 @@ exports[`DietsPage characterization > opens the builder from the header (create)
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -4504,7 +4504,7 @@ exports[`DietsPage characterization > opens the delete dialog from the row menu 
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -4994,7 +4994,7 @@ exports[`DietsPage characterization > opens the detail dialog from the row menu 
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -5550,7 +5550,7 @@ exports[`DietsPage characterization > opens the duplicate builder from the row m
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -6805,7 +6805,7 @@ exports[`DietsPage characterization > opens the edit builder from the row menu >
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -8060,7 +8060,7 @@ exports[`DietsPage characterization > opens the group create dialog 1`] = `
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -8553,7 +8553,7 @@ exports[`DietsPage characterization > paginates through the URL 1`] = `
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -9526,7 +9526,7 @@ exports[`DietsPage characterization > shows the move bar and the move dialog aft
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
@@ -10034,7 +10034,7 @@ exports[`DietsPage characterization > shows the move bar and the move dialog aft
 </svg>Filtros</button>
 </div>
 </div>
-<div class="relative max-w-full overflow-x-auto overscroll-x-contain">
+<div class="relative max-w-full overflow-x-auto overscroll-x-contain scroll-px-6">
 <table class="w-full caption-bottom text-sm">
 <thead class="[&amp;_tr]:border-b">
 <tr class="border-b transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-card data-[state=selected]:bg-lime-soft">
