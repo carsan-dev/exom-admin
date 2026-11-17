@@ -1,17 +1,19 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, ChevronLeft, ChevronRight, Dumbbell, Plus } from 'lucide-react'
+import { Dumbbell, Plus } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import {
-  FilterToolbar,
   filtersToApiParams,
   type FilterOption,
   type FilterSectionConfig,
   useListFilters,
 } from '@/components/filters'
+import { EmptyState, ErrorState, PageHeader, Pagination } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
+import { BulkDeleteDialog } from '@/components/workspace/bulk-delete-dialog'
+import type { BulkDeleteEntityLabels } from '@/components/workspace/bulk-delete-labels'
+import { SelectionBar } from '@/components/workspace/selection-bar'
+import { useBulkDeleteFlow } from '@/components/workspace/use-bulk-delete-flow'
+import { useNamedSelection } from '@/components/workspace/use-named-selection'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import {
@@ -22,6 +24,7 @@ import { getSortSearchParams, toggleSortSearchParams } from '@/lib/sort-search-p
 import {
   getApiErrorMessage,
   type ExercisesListParams,
+  useBulkDeleteExercises,
   useExerciseEquipment,
   useExerciseMuscleGroups,
   useExercises,
@@ -29,10 +32,19 @@ import {
 import { DeleteExerciseDialog } from '../components/delete-exercise-dialog'
 import { ExerciseDetailDialog } from '../components/exercise-detail-dialog'
 import { ExerciseFormDialog } from '../components/exercise-form-dialog'
-import { ExercisesTable } from '../components/exercises-table'
+import { ExercisesFiltersBar } from '../components/exercises-filters-bar'
+import { ExercisesList } from '../components/exercises-list'
+import { ExercisesListSkeleton } from '../components/exercises-list-skeleton'
 import type { Exercise } from '../types'
 
 const PAGE_SIZE = 10
+const EXERCISE_LABELS: BulkDeleteEntityLabels = {
+  singular: 'ejercicio',
+  plural: 'ejercicios',
+  gender: 'masculine',
+}
+const BULK_DELETE_CONSEQUENCES =
+  'Dejarán de estar disponibles en el catálogo. Los entrenamientos que ya los usan y el histórico de los clientes se conservan. No se puede deshacer desde el panel.'
 const LEVEL_OPTIONS: FilterOption[] = [
   { value: 'PRINCIPIANTE', label: 'Principiante' },
   { value: 'INTERMEDIO', label: 'Intermedio' },
@@ -51,22 +63,6 @@ function toFilterOptions(values?: string[]): FilterOption[] {
   return values?.map((value) => ({ value, label: value })) ?? []
 }
 
-function ExercisesTableSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-7 w-40" />
-        <Skeleton className="h-4 w-64" />
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <Skeleton key={index} className="h-12 w-full rounded-lg" />
-        ))}
-      </CardContent>
-    </Card>
-  )
-}
-
 export function ExercisesPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState('')
@@ -83,6 +79,7 @@ export function ExercisesPage() {
   const activeSearch = deferredSearch.trim()
   const muscleGroupsQuery = useExerciseMuscleGroups()
   const equipmentQuery = useExerciseEquipment()
+  const bulkDeleteExercises = useBulkDeleteExercises()
   const sections = useMemo<FilterSectionConfig[]>(
     () => [
       {
@@ -137,6 +134,17 @@ export function ExercisesPage() {
     ...exerciseFilterParams,
   })
   const exercises = exercisesQuery.data?.data ?? []
+  const { selectedIds, updateSelection, clearSelection, retainSelection, toItems } = useNamedSelection(
+    exercises,
+    pageResetKey
+  )
+  const bulkDelete = useBulkDeleteFlow({
+    labels: EXERCISE_LABELS,
+    consequences: BULK_DELETE_CONSEQUENCES,
+    run: bulkDeleteExercises.mutateAsync,
+    onDeleted: () => replacePaginationSearchParams(setSearchParams, { page: 1 }),
+    onSettled: (retryableIds) => (retryableIds ? retainSelection(retryableIds) : clearSelection()),
+  })
   const exerciseApprovalQuery = useResourceApprovalBatch(
     'exercise',
     exercises.map((exercise) => exercise.id)
@@ -184,170 +192,137 @@ export function ExercisesPage() {
     }
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 shadow-none sm:shadow-sm lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">
-            Catálogo
-          </p>
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Ejercicios</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Gestiona el catálogo completo de ejercicios. Crea, edita y adjunta videos instructivos
-              para cada movimiento.
-            </p>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {total > 0
-              ? `${total} ejercicios en el catálogo`
-              : 'Aún no hay ejercicios en el catálogo'}
-          </p>
-        </div>
+  const handleTrainingUsageChange = (value: string) => {
+    const nextSearchParams = new URLSearchParams(searchParams)
+    if (value === 'all') {
+      nextSearchParams.delete('training_usage')
+    } else {
+      nextSearchParams.set('training_usage', value)
+    }
+    nextSearchParams.delete('page')
+    setSearchParams(nextSearchParams)
+  }
 
-        <Button onClick={handleCreate} className="lg:self-start">
-          <Plus className="h-4 w-4" />
-          Nuevo ejercicio
-        </Button>
-      </div>
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Catálogo"
+        title="Ejercicios"
+        description={
+          <>
+            Gestiona el catálogo completo de ejercicios. Crea, edita y adjunta videos instructivos
+            para cada movimiento.
+            <span className="mt-1 block text-foreground-muted">
+              {total > 0
+                ? `${total} ejercicios en el catálogo`
+                : 'Aún no hay ejercicios en el catálogo'}
+            </span>
+          </>
+        }
+        actions={
+          <Button onClick={handleCreate}>
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            Nuevo ejercicio
+          </Button>
+        }
+      />
 
       {/* Content */}
       {exercisesQuery.isLoading ? (
-        <ExercisesTableSkeleton />
+        <ExercisesListSkeleton />
       ) : exercisesQuery.isError ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-            <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-              <AlertTriangle className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">
-                No se ha podido cargar el catálogo
-              </h2>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                {getApiErrorMessage(exercisesQuery.error, 'Inténtalo de nuevo en unos segundos.')}
-              </p>
-            </div>
-            <Button onClick={() => exercisesQuery.refetch()}>Reintentar</Button>
-          </CardContent>
-        </Card>
+        <ErrorState
+          className="border-y border-border"
+          title="No se ha podido cargar el catálogo"
+          description={getApiErrorMessage(exercisesQuery.error, 'Inténtalo de nuevo en unos segundos.')}
+          onRetry={() => exercisesQuery.refetch()}
+        />
       ) : total === 0 && !hasQuery ? (
-        <Card className="border-dashed border-border/70">
-          <CardContent className="flex flex-col items-center gap-4 pt-10 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
-              <Dumbbell className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-foreground">Aún no hay ejercicios</h2>
-              <p className="max-w-xl text-sm text-muted-foreground">
-                Crea el primer ejercicio para empezar a construir el catálogo que usarán tus
-                clientes.
-              </p>
-            </div>
+        <EmptyState
+          className="border-y border-border"
+          icon={<Dumbbell aria-hidden="true" />}
+          title="Aún no hay ejercicios"
+          description="Crea el primer ejercicio para empezar a construir el catálogo que usarán tus clientes."
+          action={
             <Button onClick={handleCreate}>
-              <Plus className="h-4 w-4" />
+              <Plus aria-hidden="true" className="h-4 w-4" />
               Crear primer ejercicio
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Listado de ejercicios</CardTitle>
-            <CardDescription>
+        <section aria-labelledby="exercises-list-title" className="space-y-4">
+          <div>
+            <h2
+              id="exercises-list-title"
+              className="font-display text-lg font-bold uppercase leading-none text-foreground"
+            >
+              Listado de ejercicios
+            </h2>
+            <p className="mt-1 text-[13px] text-foreground-secondary">
               Vista paginada del catálogo con búsqueda y acciones por ejercicio
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FilterToolbar
-              search={search}
-              onSearchChange={setSearch}
-              searchPlaceholder="Buscar por nombre..."
-              sections={sections}
-              filters={filters}
+            </p>
+          </div>
+          <ExercisesFiltersBar
+            search={search}
+            onSearchChange={setSearch}
+            sections={sections}
+            filters={filters}
+            trainingUsage={trainingUsage}
+            onTrainingUsageChange={handleTrainingUsageChange}
+          />
+
+          {exercises.length === 0 ? (
+            <EmptyState
+              className="border-y border-border"
+              title="Sin resultados"
+              description="No se encontraron ejercicios con la búsqueda y filtros actuales."
             />
-            <div className="flex flex-col gap-2 sm:w-64">
-              <span className="text-xs font-medium text-muted-foreground">Uso en entrenamientos</span>
-              <Select
-                value={trainingUsage}
-                onValueChange={(value) => {
-                  const nextSearchParams = new URLSearchParams(searchParams)
-                  if (value === 'all') {
-                    nextSearchParams.delete('training_usage')
-                  } else {
-                    nextSearchParams.set('training_usage', value)
-                  }
-                  nextSearchParams.delete('page')
-                  setSearchParams(nextSearchParams)
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="used">Usados en entrenamientos</SelectItem>
-                  <SelectItem value="unused">Sin entrenamientos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          ) : (
+            <ExercisesList
+              exercises={exercises}
+              approvalById={exerciseApprovalById}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDuplicate={handleDuplicate}
+              onDelete={handleDelete}
+              selectedIds={selectedIds}
+              onSelectionChange={updateSelection}
+              sortBy={sort.sort_by}
+              sortDir={sort.sort_dir}
+              onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
+            />
+          )}
 
-            {exercises.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                No se encontraron ejercicios con la búsqueda y filtros actuales.
-              </p>
-            ) : (
-              <ExercisesTable
-                exercises={exercises}
-                approvalById={exerciseApprovalById}
-                onView={handleView}
-                onEdit={handleEdit}
-                onDuplicate={handleDuplicate}
-                onDelete={handleDelete}
-                sortBy={sort.sort_by}
-                sortDir={sort.sort_dir}
-                onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
-              />
-            )}
-
-            {/* Pagination */}
-            <div className="flex flex-col gap-3 border-t border-border/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                Página {page} de {totalPages}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    replacePaginationSearchParams(setSearchParams, {
-                      page: Math.max(1, page - 1),
-                    })
-                  }
-                  disabled={page === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Anterior
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    replacePaginationSearchParams(setSearchParams, {
-                      page: Math.min(totalPages, page + 1),
-                    })
-                  }
-                  disabled={page >= totalPages}
-                >
-                  Siguiente
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Pagination: la compartida no se pinta con una sola página, el texto sí se conserva. */}
+          {totalPages > 1 ? (
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={(nextPage) =>
+                replacePaginationSearchParams(setSearchParams, { page: nextPage })
+              }
+            />
+          ) : (
+            <p className="pt-4 text-[13px] tabular-nums text-foreground-muted">
+              Página {page} de {totalPages}
+            </p>
+          )}
+        </section>
       )}
 
       {/* Dialogs */}
+      <SelectionBar
+        count={selectedIds.size}
+        onClear={clearSelection}
+        aria-label="Acciones de selección de ejercicios"
+        className="fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px)+12px)] left-4 right-4 z-40 mt-0 w-auto max-md:overflow-x-visible md:bottom-6 md:left-1/2 md:right-auto md:w-auto md:min-w-96 md:-translate-x-1/2"
+      >
+        <Button variant="destructive" onClick={() => bulkDelete.open(toItems())} className="max-md:h-11">
+          Eliminar ({selectedIds.size})
+        </Button>
+      </SelectionBar>
+      <BulkDeleteDialog {...bulkDelete.dialogProps} />
       <ExerciseFormDialog
         open={formDialogOpen}
         onOpenChange={handleFormDialogOpenChange}

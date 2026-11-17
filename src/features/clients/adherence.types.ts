@@ -5,7 +5,7 @@ export const ADHERENCE_STATUS = {
 export type AdherenceStatus = (typeof ADHERENCE_STATUS)[keyof typeof ADHERENCE_STATUS]
 export const PERIOD = { CLOSED: 'closed', PROVISIONAL: 'provisional', FUTURE: 'future' } as const
 export type Period = (typeof PERIOD)[keyof typeof PERIOD]
-export const BASIS = { ORIGINAL: 'original', CURRENT: 'current_provisional', UNKNOWN: 'unknown' } as const
+export const BASIS = { ORIGINAL: 'original', CURRENT: 'current_provisional', CURRENT_FALLBACK: 'current_fallback', UNKNOWN: 'unknown' } as const
 export type Basis = (typeof BASIS)[keyof typeof BASIS]
 export const CALENDAR = {
   FUTURE: 'future', INSUFFICIENT: 'insufficient', REST: 'rest', NOT_ASSIGNED: 'not_assigned',

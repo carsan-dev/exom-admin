@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Entrenamientos · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/catalogo.css">
+  <script src="assets/vendor/lucide-local.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="entrenamientos" data-group="Planificación" data-crumbs='["Entrenamientos"]'
+      data-variants='[["filtered","vacío filtrado"],["drag","arrastre"],["validation","validación (editor)"],["import","importación (editor)"]]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1">Entrenamientos</h1>
+        <span class="ph-meta" data-show="data loading error">48 entrenamientos</span>
+      </div>
+      <p class="ph-sub">Gestiona el catálogo de entrenamientos. Crea rutinas con ejercicios, series, reps y más.</p>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-secondary" type="button" data-import><i data-lucide="upload"></i>Importar</button>
+      <button class="btn btn-secondary btn-icon" type="button" data-open="#dlg-prompt" aria-haspopup="dialog" data-tip="Prompt para IA" aria-label="Ver prompt para generar entrenamientos importables"><i data-lucide="bot"></i></button>
+      <button class="btn btn-primary" type="button" data-open="#wb-training" data-mode="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Nuevo entrenamiento</button>
+    </div>
+  </header>
+
+  <div class="cat-layout">
+    <!-- Folder rail -->
+    <nav class="rail" aria-label="Grupos del catálogo">
+      <div class="rail-head"><span class="micro">Grupos</span></div>
+      <ul class="rail-list" id="rail"></ul>
+    </nav>
+
+    <section class="cat-main" aria-labelledby="list-title">
+      <div class="list-head">
+        <h2 class="list-title" id="list-title">Listado de entrenamientos</h2>
+      </div>
+
+      <div class="toolbar-row" data-show="data loading error">
+        <div class="toolbar" role="search" aria-label="Buscar y filtrar entrenamientos">
+          <label class="input-icon">
+            <span class="sr-only">Buscar entrenamientos</span>
+            <i data-lucide="search"></i>
+            <input class="input" type="search" placeholder="Buscar por nombre..." autocomplete="off">
+          </label>
+          <button class="btn btn-secondary" type="button" data-open="#filters-pop" aria-haspopup="dialog" aria-expanded="false"><i data-lucide="sliders-horizontal"></i>Filtros<span class="count" data-filter-count>1</span></button>
+          <span class="filter-chip">Nivel: <b>Intermedio, Avanzado</b><button type="button" data-remove-chip aria-label="Quitar filtro Nivel: Intermedio, Avanzado"><i data-lucide="x"></i></button></span>
+          <button class="btn btn-ghost btn-sm clear-all" type="button" data-clear-chips>Limpiar todo</button>
+        </div>
+      </div>
+
+      <div data-show="data">
+        <div data-v-not="filtered">
+          <div class="table-wrap">
+            <table class="table table--stack tbl-dense" id="tbl-tr" data-selectable>
+              <caption class="sr-only">Listado de entrenamientos, página 1 de 5</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="cell-check has-grip"><label class="check"><input type="checkbox" data-select-all aria-label="Seleccionar página"></label></th>
+                  <th scope="col" aria-sort="ascending"><button class="th-sort" type="button">Nombre<i data-lucide="arrow-up-down"></i></button></th>
+                  <th scope="col" class="col-group">Grupo</th>
+                  <th scope="col">Tipos</th>
+                  <th scope="col" aria-sort="none"><button class="th-sort" type="button">Nivel<i data-lucide="arrow-up-down"></i></button></th>
+                  <th scope="col" class="cell-num">Ejercicios</th>
+                  <th scope="col" class="cell-num p2" aria-sort="none"><button class="th-sort" type="button">Duración<i data-lucide="arrow-up-down"></i></button></th>
+                  <th scope="col" class="cell-num p2" aria-sort="none"><button class="th-sort" type="button">Calorías<i data-lucide="arrow-up-down"></i></button></th>
+                  <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody id="tr-rows"></tbody>
+            </table>
+          </div>
+          <div class="selection-bar is-docked" data-for="#tbl-tr" hidden>
+            <span class="selection-count">2 seleccionados</span>
+            <span class="sel-sep" aria-hidden="true"></span>
+            <button class="btn btn-secondary btn-sm" type="button" data-open="#dlg-move" aria-haspopup="dialog"><i data-lucide="folder-input"></i>Mover a grupo</button>
+            <span class="spacer"></span>
+            <button class="btn btn-ghost btn-sm" type="button" data-clear-selection>Limpiar</button>
+          </div>
+          <nav class="pagination" aria-label="Paginación">
+            <span class="pagination-label">Página 1 de 5</span>
+            <span class="pagination-actions">
+              <button class="btn btn-secondary btn-sm" type="button" disabled><i data-lucide="chevron-left"></i>Anterior</button>
+              <button class="btn btn-secondary btn-sm" type="button">Siguiente<i data-lucide="chevron-right"></i></button>
+            </span>
+          </nav>
+        </div>
+        <div data-v="filtered" class="section">
+          <div class="empty empty-compact">
+            <span class="empty-x" aria-hidden="true"></span>
+            <h3 class="empty-title">Sin resultados</h3>
+            <p class="empty-text">No se encontraron entrenamientos con la búsqueda y filtros actuales.</p>
+          </div>
+        </div>
+      </div>
+
+      <div data-show="loading" aria-busy="true" aria-label="Cargando entrenamientos">
+        <div class="table-wrap" aria-hidden="true">
+          <table class="table tbl-dense"><thead><tr><th class="cell-check"></th><th>Nombre</th><th>Grupo</th><th>Tipos</th><th>Nivel</th><th class="cell-num">Ejercicios</th><th class="cell-num p2">Duración</th><th class="cell-num p2">Calorías</th><th class="cell-actions"></th></tr></thead>
+            <tbody id="tr-sk"></tbody></table>
+        </div>
+      </div>
+      <div data-show="empty" class="section">
+        <div class="empty">
+          <span class="empty-x" aria-hidden="true"></span>
+          <h3 class="empty-title">Aún no hay entrenamientos</h3>
+          <p class="empty-text">Crea el primer entrenamiento para empezar a asignarlo a tus clientes.</p>
+          <button class="btn btn-primary" type="button" data-open="#wb-training" data-mode="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Crear primer entrenamiento</button>
+        </div>
+      </div>
+      <div data-show="error" class="section">
+        <div class="error-state" role="alert">
+          <i data-lucide="circle-alert"></i>
+          <h3 class="empty-title">No se ha podido cargar el catálogo</h3>
+          <p class="empty-text">Network Error. Comprueba tu conexión y vuelve a intentarlo.</p>
+          <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</main>
+</div>
+
+<!-- ===================== MENUS / POPOVERS ===================== -->
+<div class="menu" id="row-menu" role="menu" aria-label="Acciones del entrenamiento" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-open="#sheet-tr"><i data-lucide="eye"></i>Ver detalle</button>
+  <button class="menu-item" type="button" role="menuitem" data-open="#wb-training" data-mode="edit"><i data-lucide="pencil"></i>Editar</button>
+  <button class="menu-item" type="button" role="menuitem" data-open="#wb-training" data-mode="dup"><i data-lucide="copy"></i>Duplicar</button>
+  <div class="menu-sep" role="separator"></div>
+  <button class="menu-item is-danger" type="button" role="menuitem" data-open="#dlg-delete"><i data-lucide="trash-2"></i>Eliminar</button>
+</div>
+<div class="menu" id="group-menu" role="menu" aria-label="Acciones del grupo" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-open="#dlg-group" data-mode="edit"><i data-lucide="pencil"></i>Renombrar</button>
+  <button class="menu-item is-danger" type="button" role="menuitem" data-open="#dlg-group-del"><i data-lucide="trash-2"></i>Eliminar</button>
+</div>
+
+<div class="popover" id="filters-pop" role="dialog" aria-labelledby="filters-title" data-align="start" style="--w:440px" hidden>
+  <div class="popover-head">
+    <h2 class="h3" id="filters-title">Filtros del listado</h2>
+    <p class="caption" style="margin-top:2px">Selecciona uno o varios criterios.</p>
+  </div>
+  <div class="popover-body">
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Tipos</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox">Cardio</label><label class="check"><input type="checkbox">Flexibilidad</label>
+        <label class="check"><input type="checkbox">Fuerza</label><label class="check"><input type="checkbox">HIIT</label>
+        <label class="check"><input type="checkbox">Movilidad</label><label class="check"><input type="checkbox">Resistencia</label>
+      </div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Nivel</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox">Principiante</label><label class="check"><input type="checkbox" checked>Intermedio</label><label class="check"><input type="checkbox" checked>Avanzado</label>
+      </div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Tags</legend>
+      <label class="input-icon filter-search"><span class="sr-only">Buscar tags</span><i data-lucide="search"></i><input class="input" type="search" placeholder="Buscar tags..."></label>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox">30 minutos</label><label class="check"><input type="checkbox">Casa</label><label class="check"><input type="checkbox">Gimnasio</label>
+        <label class="check"><input type="checkbox">Glúteo</label><label class="check"><input type="checkbox">Postparto</label><label class="check"><input type="checkbox">Principiantes</label>
+        <label class="check"><input type="checkbox">Sin material</label><label class="check"><input type="checkbox">Tren inferior</label><label class="check"><input type="checkbox">Tren superior</label>
+      </div>
+    </fieldset></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Duración</legend>
+      <div class="range2"><div class="range2-inputs">
+        <div class="field"><label class="field-label" for="dur-a">Mínimo</label><span class="input-unit"><input class="input input-sm" id="dur-a" type="number" min="0" max="180" step="5" value="0"><span class="unit">min</span></span></div>
+        <span class="range2-dash" aria-hidden="true">–</span>
+        <div class="field"><label class="field-label" for="dur-b">Máximo</label><span class="input-unit"><input class="input input-sm" id="dur-b" type="number" min="0" max="180" step="5" value="180"><span class="unit">min</span></span></div>
+      </div><div class="range2-track"><span class="range2-fill"></span>
+        <input type="range" min="0" max="180" step="5" value="0" aria-label="Duración mínima">
+        <input type="range" min="0" max="180" step="5" value="180" aria-label="Duración máxima">
+      </div><div class="range2-scale"><span>0 min</span><span>180 min</span></div></div>
+    </fieldset></div>
+  </div>
+  <div class="popover-foot">
+    <button class="btn btn-ghost btn-sm" type="button">Limpiar</button>
+    <button class="btn btn-primary btn-sm" type="button" data-close>Aplicar</button>
+  </div>
+</div>
+
+<!-- ===================== DETAIL SHEET ===================== -->
+<div class="overlay overlay-sheet" id="sheet-tr" hidden>
+  <div class="sheet sheet-md" role="dialog" aria-modal="true" aria-labelledby="st-title">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="st-title" data-fill="name">Full Body Fuerza + Cardio</h2>
+        <div class="d-meta" style="margin-top:8px">
+          <span class="dot dot-lg" style="--c:#C5E384" aria-hidden="true"></span>
+          <span class="tag"><span class="dot" style="--c:#7FB5D8"></span>Fuerza</span>
+          <span class="tag"><span class="dot" style="--c:#D76C5E"></span>Cardio</span>
+          <span class="tag">Intermedio</span>
+        </div>
+        <div class="tags" style="margin-top:6px"><span class="tag">Gimnasio</span><span class="tag">Tren superior</span><span class="tag">Tren inferior</span></div>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="metrics" style="padding-bottom:16px">
+        <span><i data-lucide="clock"></i>45 min</span>
+        <span><i data-lucide="flame"></i>300 kcal</span>
+        <span><i data-lucide="layers"></i>19 vol</span>
+      </div>
+      <div class="d-block">
+        <span class="micro">Calentamiento · 10 min</span>
+        <p class="d-text">5 minutos de bici suave, movilidad de cadera y hombro y dos series de aproximación con la barra vacía.</p>
+      </div>
+      <div class="d-block">
+        <span class="micro">Ejercicios (6)</span>
+        <ol class="d-ex">
+          <li><span class="d-ex-n">1</span><div><span class="d-ex-name">Sentadilla con barra</span><div class="tags"><span class="tag">Cuádriceps</span><span class="tag">Glúteos</span></div></div>
+            <span class="d-rx">4×8-10 reps · RIR 2<span class="caption">90 s entre series</span></span></li>
+          <li><span class="d-ex-n">2</span><div><span class="d-ex-name">Press de banca</span><div class="tags"><span class="tag">Pecho</span><span class="tag">Tríceps</span></div></div>
+            <span class="d-rx">4×10 reps · RIR 2<span class="caption">60 s entre series</span></span></li>
+          <li><span class="d-ex-n">3</span><div><span class="d-ex-name">Remo con mancuerna</span><div class="tags"><span class="tag">Espalda</span><span class="tag">Bíceps</span></div></div>
+            <span class="d-rx">4×10-12 reps · RIR 1<span class="caption">60 s entre series</span></span></li>
+          <li><span class="d-ex-n">4</span><div><span class="d-ex-name">Carrera en cinta</span><div class="tags"><span class="tag">Cuádriceps</span><span class="tag">Gemelos</span></div></div>
+            <span class="d-rx">1 serie<span class="caption">60 s entre series</span></span>
+            <p class="d-ex-wide">12 min en total. Corre: 1 min; Camina: 2 min; repetir hasta terminar.</p></li>
+        </ol>
+        <div class="d-circuit">
+          <div class="d-circuit-head"><i data-lucide="repeat"></i>Circuito · 3 rondas<span class="caption">60 s entre rondas</span></div>
+          <ol class="d-ex">
+            <li><span class="d-ex-n">5</span><div><span class="d-ex-name">Hip thrust</span><div class="tags"><span class="tag">Glúteos</span><span class="tag">Isquiotibiales</span></div></div>
+              <span class="d-rx">12 reps · RIR 2<span class="caption">15 s tras ejercicio</span></span></li>
+            <li><span class="d-ex-n">6</span><div><span class="d-ex-name">Face pull en polea</span><div class="tags"><span class="tag">Hombros</span><span class="tag">Trapecio</span></div></div>
+              <span class="d-rx">15 reps · RIR 2<span class="caption">15 s tras ejercicio</span></span></li>
+          </ol>
+        </div>
+      </div>
+      <div class="d-block">
+        <span class="micro">Vuelta a la calma</span>
+        <p class="d-text">Caminar 5 minutos y estiramientos de cadena posterior y pectoral.</p>
+      </div>
+      <div class="d-block">
+        <span class="micro">Propuesta de mesociclo de RIR</span>
+        <p class="d-seq">3<span class="arr">→</span>2<span class="arr">→</span>1<span class="arr">→</span>0<span class="arr">→</span><span class="text-2" style="font-weight:400;font-size:14px">repetir</span></p>
+        <p class="caption" style="margin-top:4px">Se activa expresamente para cada cliente desde Asignaciones.</p>
+        <ul class="ruled" style="margin-top:12px">
+          <li class="ruled-row"><span class="secondary">Carrera en cinta</span><span class="secondary text-2">Sin objetivo RIR</span></li>
+          <li class="ruled-row"><span class="secondary">Face pull en polea</span><span class="secondary text-2">RIR fijo 2</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cerrar</button>
+      <button class="btn btn-secondary" type="button" data-close-also="#sheet-tr" data-open="#wb-training" data-mode="dup"><i data-lucide="copy"></i>Duplicar</button>
+      <button class="btn btn-primary" type="button" data-close-also="#sheet-tr" data-open="#wb-training" data-mode="edit"><i data-lucide="pencil"></i>Editar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== BUILDER (full-screen workbench) ===================== -->
+<div class="overlay overlay-wb" id="wb-training" data-static hidden>
+  <div class="workbench" role="dialog" aria-modal="true" aria-labelledby="wbt-kind">
+    <button type="button" data-close hidden>Cerrar sin confirmar</button>
+    <header class="wb-top">
+      <button class="btn btn-ghost btn-icon wb-close" type="button" data-open="#dlg-unsaved" data-wb-close aria-haspopup="dialog" aria-label="Cerrar el editor"><i data-lucide="x"></i></button>
+      <h2 class="wb-kind" id="wbt-kind" data-t-new="Nuevo entrenamiento" data-t-edit="Editar entrenamiento" data-t-dup="Duplicar entrenamiento" data-t-import="Importar entrenamiento">Nuevo entrenamiento</h2>
+      <div class="wb-name field">
+        <label class="sr-only" for="wbt-name">Nombre</label>
+        <input class="input" id="wbt-name" placeholder="Ej. Full Body Fuerza + Cardio" value="Full Body Fuerza + Cardio" autocomplete="off" autofocus>
+      </div>
+      <div class="wb-sum"><span id="wbt-sum" aria-live="polite">6 ejercicios · 1 circuito · 19 series</span><span class="proposal-tag" tabindex="0" data-tip="Recuento derivado de la lista (hoy no existe)">Propuesta</span></div>
+      <div class="wb-actions">
+        <button class="btn btn-secondary btn-cancel" type="button" data-open="#dlg-unsaved" aria-haspopup="dialog">Cancelar</button>
+        <button class="btn btn-primary" type="button" id="wbt-submit" data-t-new="Crear entrenamiento" data-t-edit="Guardar cambios" data-t-dup="Crear copia" data-t-import="Crear entrenamiento">Crear entrenamiento</button>
+      </div>
+    </header>
+
+    <div class="wb-body">
+      <!-- LEFT: información general -->
+      <aside class="wb-col wb-side wb-left" id="wbt-left" aria-label="Información general">
+        <div class="wb-pad">
+          <button class="wb-toggle" type="button" data-collapse-mobile data-collapse="#wbt-left" aria-expanded="true" aria-controls="wbt-info">Información general<i data-lucide="chevron-down"></i></button>
+          <h3 class="h2 wb-h-desk" style="margin-bottom:16px">Información general</h3>
+          <div class="wb-info-body" id="wbt-info">
+            <div class="field">
+              <span class="field-label" id="wbt-types-l">Tipos</span>
+              <div class="chipbox" role="group" aria-labelledby="wbt-types-l">
+                <span class="tag tag-x tag-c" style="--c:#7FB5D8"><span class="dot"></span>Fuerza<button type="button" aria-label="Quitar Fuerza"><i data-lucide="x"></i></button></span>
+                <span class="tag tag-x tag-c" style="--c:#D76C5E"><span class="dot"></span>Cardio<button type="button" aria-label="Quitar Cardio"><i data-lucide="x"></i></button></span>
+              </div>
+              <div class="chip-add">
+                <label class="sr-only" for="wbt-newtype">Nuevo tipo</label>
+                <input class="input input-sm" id="wbt-newtype" placeholder="Nuevo tipo (Enter)" autocomplete="off">
+                <button class="btn btn-secondary btn-icon" type="button" aria-label="Añadir tipo"><i data-lucide="plus"></i></button>
+              </div>
+              <p class="field-help" id="wbt-saved-l">Tipos guardados. Pulsa para activar o quitar varios.</p>
+              <div class="toggle-tags" role="group" aria-labelledby="wbt-saved-l" style="margin-top:8px">
+                <button class="toggle-tag" type="button" aria-pressed="true" data-toggle-pressed><span class="dot" style="--c:#7FB5D8"></span>Fuerza<i data-lucide="check"></i></button>
+                <button class="toggle-tag" type="button" aria-pressed="true" data-toggle-pressed><span class="dot" style="--c:#D76C5E"></span>Cardio<i data-lucide="check"></i></button>
+                <button class="toggle-tag" type="button" aria-pressed="false" data-toggle-pressed><span class="dot" style="--c:#E5BE58"></span>HIIT<i data-lucide="check"></i></button>
+                <button class="toggle-tag" type="button" aria-pressed="false" data-toggle-pressed><span class="dot" style="--c:#9B7FCC"></span>Flexibilidad<i data-lucide="check"></i></button>
+                <button class="toggle-tag" type="button" aria-pressed="false" data-toggle-pressed><span class="dot" style="--c:#8CCB68"></span>Movilidad<i data-lucide="check"></i></button>
+                <button class="toggle-tag" type="button" aria-pressed="false" data-toggle-pressed><span class="dot" style="--c:#6B7280"></span>Resistencia<i data-lucide="check"></i></button>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="wbt-level">Nivel</label>
+              <select class="select" id="wbt-level"><option>Principiante</option><option selected>Intermedio</option><option>Avanzado</option></select>
+            </div>
+            <div class="field">
+              <span class="field-label" id="wbt-color-l">Color visual <span class="field-optional">Opcional</span></span>
+              <div class="swatch-grid" role="group" aria-labelledby="wbt-color-l" id="wbt-swatches"></div>
+              <div class="color-row" style="margin-top:10px">
+                <input class="color-native" type="color" value="#c5e384" aria-label="Selector de color">
+                <label class="sr-only" for="wbt-hex">Código hexadecimal</label>
+                <input class="input" id="wbt-hex" value="#C5E384" maxlength="9" spellcheck="false" style="width:104px">
+                <span class="preview-pill" style="--c:#C5E384">Vista previa</span>
+              </div>
+              <div class="row" style="justify-content:space-between;margin-top:6px">
+                <p class="field-help" style="margin:0">Usa swatches, picker o hex. El preview ajusta contraste del texto automáticamente.</p>
+                <button class="btn btn-ghost btn-sm" type="button">Limpiar</button>
+              </div>
+            </div>
+            <div class="field-pair">
+              <div class="field">
+                <label class="field-label" for="wbt-dur">Duración estimada (min)</label>
+                <input class="input" id="wbt-dur" type="number" min="0" placeholder="45" value="45" inputmode="numeric">
+              </div>
+              <div class="field">
+                <label class="field-label" for="wbt-kcal">Calorías estimadas (kcal)</label>
+                <input class="input" id="wbt-kcal" type="number" min="0" placeholder="300" value="300" inputmode="numeric">
+              </div>
+            </div>
+            <div class="field">
+              <span class="field-label" id="wbt-tags-l">Etiquetas</span>
+              <div class="chipbox" role="group" aria-labelledby="wbt-tags-l">
+                <span class="tag tag-x">Gimnasio<button type="button" aria-label="Quitar Gimnasio"><i data-lucide="x"></i></button></span>
+                <span class="tag tag-x">Tren superior<button type="button" aria-label="Quitar Tren superior"><i data-lucide="x"></i></button></span>
+              </div>
+              <div class="chip-add">
+                <button class="btn btn-secondary btn-sm" type="button">Etiquetas existentes<i data-lucide="chevron-down"></i></button>
+                <label class="sr-only" for="wbt-newtag">Nueva etiqueta</label>
+                <input class="input input-sm" id="wbt-newtag" placeholder="Nueva etiqueta (Enter)" autocomplete="off">
+                <button class="btn btn-secondary btn-icon" type="button" aria-label="Añadir etiqueta"><i data-lucide="plus"></i></button>
+              </div>
+              <p class="field-help">Selecciona etiquetas existentes o crea una nueva.</p>
+            </div>
+
+            <div style="margin-top:20px">
+              <details class="fold">
+                <summary>Calentamiento y vuelta a la calma<i data-lucide="chevron-down"></i></summary>
+                <div class="fold-body">
+                  <div class="field">
+                    <label class="field-label" for="wbt-warm">Descripción calentamiento <span class="field-optional">Opcional</span></label>
+                    <textarea class="textarea" id="wbt-warm" rows="2" maxlength="1000" placeholder="Describe el calentamiento..." style="min-height:64px">5 minutos de bici suave, movilidad de cadera y hombro y dos series de aproximación con la barra vacía.</textarea>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="wbt-warm-min">Duración (min)</label>
+                    <input class="input" id="wbt-warm-min" type="number" min="0" placeholder="10" value="10" style="width:120px">
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="wbt-cool">Descripción vuelta a la calma <span class="field-optional">Opcional</span></label>
+                    <textarea class="textarea" id="wbt-cool" rows="2" maxlength="1000" style="min-height:64px">Caminar 5 minutos y estiramientos de cadena posterior y pectoral.</textarea>
+                  </div>
+                </div>
+              </details>
+              <details class="fold" open>
+                <summary>Propuesta de mesociclo de RIR<i data-lucide="chevron-down"></i></summary>
+                <div class="fold-body">
+                  <p class="fold-text">Plantilla opcional para cargar al asignar a un cliente. Editarla conserva los ciclos ya activados y el RIR fijo de los ejercicios.</p>
+                  <fieldset class="fieldset">
+                    <legend class="micro" style="margin-bottom:8px">Secuencia común</legend>
+                    <div class="rir-seq">
+                      <div class="rir-step"><label for="rir1">Semana 1</label><input class="input" id="rir1" type="number" min="0" max="10" value="3"></div><span class="rir-arrow" aria-hidden="true">→</span>
+                      <div class="rir-step"><label for="rir2">Semana 2</label><input class="input" id="rir2" type="number" min="0" max="10" value="2"></div><span class="rir-arrow" aria-hidden="true">→</span>
+                      <div class="rir-step"><label for="rir3">Semana 3</label><input class="input" id="rir3" type="number" min="0" max="10" value="1"></div><span class="rir-arrow" aria-hidden="true">→</span>
+                      <div class="rir-step"><label for="rir4">Semana 4</label><input class="input" id="rir4" type="number" min="0" max="10" value="0"></div>
+                    </div>
+                  </fieldset>
+                  <div class="row">
+                    <button class="btn btn-secondary btn-sm" type="button"><i data-lucide="plus"></i>Añadir semana</button>
+                    <button class="btn btn-ghost btn-sm" type="button">Quitar última</button>
+                  </div>
+                  <p class="fold-text">RIR entero de 0 a 10. Semanas de lunes a domingo; la secuencia se repite aunque no haya entrenamientos.</p>
+                  <div>
+                    <div class="rir-over"><span class="truncate">Sentadilla con barra</span><select class="select" aria-label="RIR de Sentadilla con barra"><option selected>Heredar secuencia común</option><option>Secuencia propia</option><option>RIR fijo</option><option>Sin objetivo RIR</option></select></div>
+                    <div class="rir-over"><span class="truncate">Press de banca</span><select class="select" aria-label="RIR de Press de banca"><option selected>Heredar secuencia común</option><option>Secuencia propia</option><option>RIR fijo</option><option>Sin objetivo RIR</option></select></div>
+                    <div class="rir-over"><span class="truncate">Remo con mancuerna</span><select class="select" aria-label="RIR de Remo con mancuerna"><option selected>Heredar secuencia común</option><option>Secuencia propia</option><option>RIR fijo</option><option>Sin objetivo RIR</option></select></div>
+                    <div class="rir-over"><span class="truncate">Carrera en cinta</span><select class="select" aria-label="RIR de Carrera en cinta"><option>Heredar secuencia común</option><option>Secuencia propia</option><option>RIR fijo</option><option selected>Sin objetivo RIR</option></select></div>
+                    <div class="rir-over"><span class="truncate">Hip thrust</span><select class="select" aria-label="RIR de Hip thrust"><option selected>Heredar secuencia común</option><option>Secuencia propia</option><option>RIR fijo</option><option>Sin objetivo RIR</option></select></div>
+                    <div class="rir-over"><span class="truncate">Face pull en polea</span><select class="select" aria-label="RIR de Face pull en polea"><option>Heredar secuencia común</option><option>Secuencia propia</option><option selected>RIR fijo</option><option>Sin objetivo RIR</option></select></div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" type="button" style="color:var(--danger)"><i data-lucide="trash-2"></i>Quitar propuesta</button>
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CENTER: ejercicios -->
+      <section class="wb-col wb-center" aria-labelledby="wbt-ex-h">
+        <div class="wb-pad">
+          <div class="banner banner-info" data-mode-only="dup" hidden style="margin-bottom:16px"><i data-lucide="copy"></i><span class="banner-text">Se creará una copia del entrenamiento con el mismo contenido.</span></div>
+          <div class="banner banner-warning" data-v="import" style="margin-bottom:16px" role="status">
+            <i data-lucide="triangle-alert"></i>
+            <span class="banner-text"><b>Revisa ejercicios no enlazados</b><br>«Remo Hammer» no coincide con ningún ejercicio del catálogo. Los ejercicios se enlazan por nombre exacto.</span>
+          </div>
+          <div class="rx-head">
+            <h3 class="h2" id="wbt-ex-h">Ejercicios</h3>
+            <label class="check check-sm"><input type="checkbox" data-indeterminate aria-describedby="wbt-reg-help">Solicitar registro en todos</label>
+            <span class="sr-only" id="wbt-reg-help">Activa o desactiva «Solicitar rendimiento real» en todos los ejercicios.</span>
+          </div>
+
+          <div data-v-not="validation">
+            <div class="rx-list" role="list" id="wbt-list">
+              <!-- 1 -->
+              <div class="rx" role="listitem" data-movable data-name="Sentadilla con barra">
+                <button class="grip" type="button" aria-label="Arrastrar Sentadilla con barra" data-tip="Arrastrar para reordenar"><i data-lucide="grip-vertical"></i></button>
+                <span class="rx-num">1</span>
+                <div class="rx-main">
+                  <div class="rx-id"><span class="rx-name">Sentadilla con barra</span>
+                    <div class="tags"><span class="tag">Intermedio</span><span class="tag">Cuádriceps</span><span class="tag">Glúteos</span></div></div>
+                  <div class="rx-fields">
+                    <div class="mini"><label for="s1">Series</label><input class="input" id="s1" type="number" min="1" value="4" data-series></div>
+                    <span class="rx-x" aria-hidden="true">×</span>
+                    <div class="mini"><label for="r1">Repeticiones objetivo</label><input class="input is-text" id="r1" value="8-10" placeholder="Ej. 8 o 8-10" style="--w:132px"></div>
+                    <div class="mini"><label for="i1">RIR objetivo</label><input class="input" id="i1" type="number" min="0" max="10" value="2" style="--w:72px"></div>
+                    <div class="mini"><label for="d1">Descanso entre series (s)</label><input class="input" id="d1" type="number" min="0" value="90" style="--w:140px"></div>
+                  </div>
+                </div>
+                <div class="rx-tools">
+                  <button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Sentadilla con barra"><i data-lucide="chevron-up"></i></button>
+                  <button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Sentadilla con barra"><i data-lucide="chevron-down"></i></button>
+                  <button class="btn btn-ghost btn-icon" type="button" data-remove-item aria-label="Quitar Sentadilla con barra"><i data-lucide="x"></i></button>
+                </div>
+                <div class="rx-extra">
+                  <div class="row"><span class="caption" id="t1l">Tipo de objetivo</span>
+                    <div class="segmented seg-sm" role="group" aria-labelledby="t1l"><button class="seg-btn" type="button" aria-pressed="true">Repeticiones</button><button class="seg-btn" type="button" aria-pressed="false">Tiempo</button></div></div>
+                  <label class="check check-sm"><input type="checkbox" checked>Solicitar rendimiento real en cada serie</label>
+                </div>
+              </div>
+              <div class="drop-line" data-v="drag" aria-hidden="true"></div>
+              <!-- 2 -->
+              <div class="rx" role="listitem" data-movable data-name="Press de banca">
+                <button class="grip" type="button" aria-label="Arrastrar Press de banca" data-tip="Arrastrar para reordenar"><i data-lucide="grip-vertical"></i></button>
+                <span class="rx-num">2</span>
+                <div class="rx-main">
+                  <div class="rx-id"><span class="rx-name">Press de banca</span>
+                    <div class="tags"><span class="tag">Intermedio</span><span class="tag">Pecho</span><span class="tag">Tríceps</span></div></div>
+                  <div class="rx-fields">
+                    <div class="mini"><label for="s2">Series</label><input class="input" id="s2" type="number" min="1" value="4" data-series></div>
+                    <span class="rx-x" aria-hidden="true">×</span>
+                    <div class="mini"><label for="r2">Repeticiones objetivo</label><input class="input is-text" id="r2" value="10" placeholder="Ej. 8 o 8-10" style="--w:132px"></div>
+                    <div class="mini"><label for="i2">RIR objetivo</label><input class="input" id="i2" type="number" min="0" max="10" value="2" style="--w:72px"></div>
+                    <div class="mini"><label for="d2">Descanso entre series (s)</label><input class="input" id="d2" type="number" min="0" value="60" style="--w:140px"></div>
+                  </div>
+                </div>
+                <div class="rx-tools">
+                  <button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Press de banca"><i data-lucide="chevron-up"></i></button>
+                  <button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Press de banca"><i data-lucide="chevron-down"></i></button>
+                  <button class="btn btn-ghost btn-icon" type="button" data-remove-item aria-label="Quitar Press de banca"><i data-lucide="x"></i></button>
+                </div>
+                <div class="rx-extra">
+                  <div class="row"><span class="caption" id="t2l">Tipo de objetivo</span>
+                    <div class="segmented seg-sm" role="group" aria-labelledby="t2l"><button class="seg-btn" type="button" aria-pressed="true">Repeticiones</button><button class="seg-btn" type="button" aria-pressed="false">Tiempo</button></div></div>
+                  <label class="check check-sm"><input type="checkbox" checked>Solicitar rendimiento real en cada serie</label>
+                </div>
+              </div>
+              <!-- 3 (dragging in drag variant) -->
+              <div class="rx" role="listitem" data-movable data-name="Remo con mancuerna" data-drag-row>
+                <button class="grip" type="button" aria-label="Arrastrar Remo con mancuerna" data-tip="Arrastrar para reordenar"><i data-lucide="grip-vertical"></i></button>
+                <span class="rx-num">3</span>
+                <div class="rx-main">
+                  <div class="rx-id"><span class="rx-name">Remo con mancuerna</span>
+                    <div class="tags"><span class="tag">Principiante</span><span class="tag">Espalda</span><span class="tag">Bíceps</span></div></div>
+                  <div class="rx-fields">
+                    <div class="mini"><label for="s3">Series</label><input class="input" id="s3" type="number" min="1" value="4" data-series></div>
+                    <span class="rx-x" aria-hidden="true">×</span>
+                    <div class="mini"><label for="r3">Repeticiones objetivo</label><input class="input is-text" id="r3" value="10-12" placeholder="Ej. 8 o 8-10" style="--w:132px"></div>
+                    <div class="mini"><label for="i3">RIR objetivo</label><input class="input" id="i3" type="number" min="0" max="10" value="1" style="--w:72px"></div>
+                    <div class="mini"><label for="d3">Descanso entre series (s)</label><input class="input" id="d3" type="number" min="0" value="60" style="--w:140px"></div>
+                  </div>
+                </div>
+                <div class="rx-tools">
+                  <button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Remo con mancuerna"><i data-lucide="chevron-up"></i></button>
+                  <button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Remo con mancuerna"><i data-lucide="chevron-down"></i></button>
+                  <button class="btn btn-ghost btn-icon" type="button" data-remove-item aria-label="Quitar Remo con mancuerna"><i data-lucide="x"></i></button>
+                </div>
+                <div class="rx-extra">
+                  <div class="row"><span class="caption" id="t3l">Tipo de objetivo</span>
+                    <div class="segmented seg-sm" role="group" aria-labelledby="t3l"><button class="seg-btn" type="button" aria-pressed="true">Repeticiones</button><button class="seg-btn" type="button" aria-pressed="false">Tiempo</button></div></div>
+                  <label class="check check-sm"><input type="checkbox">Solicitar rendimiento real en cada serie</label>
+                </div>
+              </div>
+              <!-- import: unlinked -->
+              <div class="rx" role="listitem" data-movable data-name="Ejercicio no encontrado" data-v="import">
+                <button class="grip" type="button" aria-label="Arrastrar ejercicio no encontrado"><i data-lucide="grip-vertical"></i></button>
+                <span class="rx-num">4</span>
+                <div class="rx-main">
+                  <div class="rx-id"><span class="rx-name is-missing">Ejercicio no encontrado</span>
+                    <div class="tags"><span class="caption">Importado como «Remo Hammer»</span></div></div>
+                  <div class="rx-fields">
+                    <div class="mini"><label for="s9">Series</label><input class="input" id="s9" type="number" min="1" value="3"></div>
+                    <span class="rx-x" aria-hidden="true">×</span>
+                    <div class="mini"><label for="r9">Repeticiones objetivo</label><input class="input is-text" id="r9" value="12" style="--w:132px"></div>
+                    <div class="mini"><label for="i9">RIR objetivo</label><input class="input" id="i9" type="number" min="0" max="10" style="--w:72px"></div>
+                    <div class="mini"><label for="d9">Descanso entre series (s)</label><input class="input" id="d9" type="number" min="0" value="60" style="--w:140px"></div>
+                  </div>
+                </div>
+                <div class="rx-tools">
+                  <button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir ejercicio no encontrado"><i data-lucide="chevron-up"></i></button>
+                  <button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar ejercicio no encontrado"><i data-lucide="chevron-down"></i></button>
+                  <button class="btn btn-ghost btn-icon" type="button" data-remove-item aria-label="Quitar ejercicio no encontrado"><i data-lucide="x"></i></button>
+                </div>
+              </div>
+              <!-- 4 timed -->
+              <div class="rx" role="listitem" data-movable data-name="Carrera en cinta">
+                <button class="grip" type="button" aria-label="Arrastrar Carrera en cinta" data-tip="Arrastrar para reordenar"><i data-lucide="grip-vertical"></i></button>
+                <span class="rx-num">4</span>
+                <div class="rx-main">
+                  <div class="rx-id"><span class="rx-name">Carrera en cinta</span>
+                    <div class="tags"><span class="tag">Principiante</span><span class="tag">Cuádriceps</span><span class="tag">Gemelos</span></div></div>
+                  <div class="rx-fields">
+                    <div class="mini"><label for="s4">Series</label><input class="input" id="s4" type="number" min="1" value="1" data-series></div>
+                    <div class="mini"><label for="i4">RIR objetivo</label><input class="input" id="i4" type="number" min="0" max="10" style="--w:72px"></div>
+                    <div class="mini"><label for="d4">Descanso entre series (s)</label><input class="input" id="d4" type="number" min="0" value="60" style="--w:140px"></div>
+                  </div>
+                </div>
+                <div class="rx-tools">
+                  <button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Carrera en cinta"><i data-lucide="chevron-up"></i></button>
+                  <button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Carrera en cinta"><i data-lucide="chevron-down"></i></button>
+                  <button class="btn btn-ghost btn-icon" type="button" data-remove-item aria-label="Quitar Carrera en cinta"><i data-lucide="x"></i></button>
+                </div>
+                <div class="rx-extra">
+                  <div class="row"><span class="caption" id="t4l">Tipo de objetivo</span>
+                    <div class="segmented seg-sm" role="group" aria-labelledby="t4l"><button class="seg-btn" type="button" aria-pressed="false">Repeticiones</button><button class="seg-btn" type="button" aria-pressed="true">Tiempo</button></div></div>
+                  <label class="check check-sm"><input type="checkbox">Solicitar rendimiento real en cada serie</label>
+                </div>
+                <div class="timed" role="group" aria-label="Prescripción por tiempo de Carrera en cinta">
+                  <div class="timed-row">
+                    <div class="mini"><label for="tt">Duración total</label><input class="input" id="tt" type="number" min="0" step="0.5" value="12" style="--w:80px"></div>
+                    <div class="mini"><label for="tu">Unidad</label><select class="select" id="tu" style="--w:120px"><option>Segundos</option><option selected>Minutos</option></select></div>
+                    <button class="btn btn-ghost btn-sm" type="button">Usar rango</button>
+                  </div>
+                  <div class="seg-row">
+                    <label class="check check-sm"><input type="checkbox" checked>Alternar acciones dentro del ejercicio</label>
+                  </div>
+                  <div class="tramos">
+                    <div class="tramo">
+                      <span class="tramo-n">1</span>
+                      <div class="mini"><label for="ta1">Acción</label><input class="input is-text" id="ta1" maxlength="80" placeholder="Ej. Corre" value="Corre" style="--w:150px"></div>
+                      <div class="mini"><label for="tv1">Duración</label><input class="input" id="tv1" type="number" min="0" value="1" style="--w:64px"></div>
+                      <div class="mini"><label for="tw1">Unidad</label><select class="select" id="tw1" style="--w:112px"><option>Segundos</option><option selected>Minutos</option></select></div>
+                      <span class="spacer"></span>
+                      <button class="btn btn-ghost btn-sm" type="button" disabled>Subir</button>
+                      <button class="btn btn-ghost btn-sm" type="button">Quitar tramo</button>
+                    </div>
+                    <div class="tramo">
+                      <span class="tramo-n">2</span>
+                      <div class="mini"><label for="ta2">Acción</label><input class="input is-text" id="ta2" maxlength="80" placeholder="Ej. Corre" value="Camina" style="--w:150px"></div>
+                      <div class="mini"><label for="tv2">Duración</label><input class="input" id="tv2" type="number" min="0" value="2" style="--w:64px"></div>
+                      <div class="mini"><label for="tw2">Unidad</label><select class="select" id="tw2" style="--w:112px"><option>Segundos</option><option selected>Minutos</option></select></div>
+                      <span class="spacer"></span>
+                      <button class="btn btn-ghost btn-sm" type="button">Subir</button>
+                      <button class="btn btn-ghost btn-sm" type="button">Quitar tramo</button>
+                    </div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" type="button" style="margin-top:8px"><i data-lucide="plus"></i>Añadir tramo</button>
+                  <div class="timed-preview" aria-live="polite"><span class="micro">Previsualización</span>12 min en total. Corre: 1 min; Camina: 2 min; repetir hasta terminar.</div>
+                  <p class="timed-note">Todos los tramos cuentan dentro del total. El descanso entre series se configura aparte.</p>
+                </div>
+              </div>
+              <!-- 5 circuit -->
+              <div class="circuit" role="listitem" data-movable data-name="Circuito">
+                <div class="circuit-head">
+                  <button class="grip" type="button" aria-label="Arrastrar Circuito" data-tip="Arrastrar para reordenar"><i data-lucide="grip-vertical"></i></button>
+                  <span class="rx-num">5</span>
+                  <div class="rx-main">
+                    <div class="row" style="align-self:flex-end;gap:10px">
+                      <span class="circuit-icon" aria-hidden="true"><i data-lucide="repeat"></i></span>
+                      <div class="mini"><label for="cn">Nombre</label><input class="input is-text" id="cn" value="Circuito" required style="--w:180px"></div>
+                    </div>
+                    <div class="rx-fields">
+                      <div class="mini"><label for="cr">Rondas</label><input class="input" id="cr" type="number" min="1" value="3" data-rounds></div>
+                      <div class="mini"><label for="cd">Descanso entre rondas (s)</label><input class="input" id="cd" type="number" min="0" value="60" style="--w:150px"></div>
+                      <span class="circuit-meta" style="height:32px;display:flex;align-items:center" data-circuit-count>2 ejercicios</span>
+                    </div>
+                  </div>
+                  <div class="rx-tools">
+                    <button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Circuito"><i data-lucide="chevron-up"></i></button>
+                    <button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Circuito"><i data-lucide="chevron-down"></i></button>
+                    <button class="btn btn-ghost btn-icon" type="button" data-remove-item aria-label="Quitar Circuito"><i data-lucide="x"></i></button>
+                  </div>
+                </div>
+                <div class="circuit-items" role="list" aria-label="Ejercicios del circuito">
+                  <div class="rx" role="listitem" data-movable data-name="Hip thrust" data-circuit-item>
+                    <button class="grip" type="button" aria-label="Arrastrar Hip thrust"><i data-lucide="grip-vertical"></i></button>
+                    <span class="rx-num">1</span>
+                    <div class="rx-main">
+                      <div class="rx-id"><span class="rx-name">Hip thrust</span><div class="tags"><span class="tag">Intermedio</span><span class="tag">Glúteos</span></div></div>
+                      <div class="rx-fields">
+                        <div class="mini"><label for="ch1r">Repeticiones objetivo</label><input class="input is-text" id="ch1r" value="12" style="--w:132px"></div>
+                        <div class="mini"><label for="ch1i">RIR objetivo</label><input class="input" id="ch1i" type="number" min="0" max="10" value="2" style="--w:72px"></div>
+                        <div class="mini"><label for="ch1d">Descanso tras ejercicio (s)</label><input class="input" id="ch1d" type="number" min="0" value="15" style="--w:150px"></div>
+                      </div>
+                    </div>
+                    <div class="rx-tools">
+                      <button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Hip thrust"><i data-lucide="chevron-up"></i></button>
+                      <button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Hip thrust"><i data-lucide="chevron-down"></i></button>
+                      <button class="btn btn-ghost btn-icon" type="button" data-remove-item aria-label="Quitar Hip thrust"><i data-lucide="x"></i></button>
+                    </div>
+                    <div class="rx-extra">
+                      <div class="row"><span class="caption" id="c1l">Tipo de objetivo</span>
+                        <div class="segmented seg-sm" role="group" aria-labelledby="c1l"><button class="seg-btn" type="button" aria-pressed="true">Repeticiones</button><button class="seg-btn" type="button" aria-pressed="false">Tiempo</button></div></div>
+                      <label class="check check-sm"><input type="checkbox" checked>Solicitar rendimiento real en cada ronda</label>
+                    </div>
+                  </div>
+                  <div class="rx" role="listitem" data-movable data-name="Face pull en polea" data-circuit-item>
+                    <button class="grip" type="button" aria-label="Arrastrar Face pull en polea"><i data-lucide="grip-vertical"></i></button>
+                    <span class="rx-num">2</span>
+                    <div class="rx-main">
+                      <div class="rx-id"><span class="rx-name">Face pull en polea</span><div class="tags"><span class="tag">Principiante</span><span class="tag">Hombros</span></div></div>
+                      <div class="rx-fields">
+                        <div class="mini"><label for="ch2r">Repeticiones objetivo</label><input class="input is-text" id="ch2r" value="15" style="--w:132px"></div>
+                        <div class="mini"><label for="ch2i">RIR objetivo</label><input class="input" id="ch2i" type="number" min="0" max="10" value="2" style="--w:72px"></div>
+                        <div class="mini"><label for="ch2d">Descanso tras ejercicio (s)</label><input class="input" id="ch2d" type="number" min="0" value="15" style="--w:150px"></div>
+                      </div>
+                    </div>
+                    <div class="rx-tools">
+                      <button class="btn btn-ghost btn-icon" type="button" data-move="up" aria-label="Subir Face pull en polea"><i data-lucide="chevron-up"></i></button>
+                      <button class="btn btn-ghost btn-icon" type="button" data-move="down" aria-label="Bajar Face pull en polea"><i data-lucide="chevron-down"></i></button>
+                      <button class="btn btn-ghost btn-icon" type="button" data-remove-item aria-label="Quitar Face pull en polea"><i data-lucide="x"></i></button>
+                    </div>
+                    <div class="rx-extra">
+                      <div class="row"><span class="caption" id="c2l">Tipo de objetivo</span>
+                        <div class="segmented seg-sm" role="group" aria-labelledby="c2l"><button class="seg-btn" type="button" aria-pressed="true">Repeticiones</button><button class="seg-btn" type="button" aria-pressed="false">Tiempo</button></div></div>
+                      <label class="check check-sm"><input type="checkbox" checked>Solicitar rendimiento real en cada ronda</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="circuit-add"><button class="btn btn-ghost btn-sm" type="button" data-sheet-open="#wbt-picker"><i data-lucide="plus"></i>Agregar ejercicio al circuito</button></div>
+              </div>
+            </div>
+            <p class="caption" style="margin-top:12px;display:flex;align-items:center;gap:8px">
+              <span class="proposal-tag" tabindex="0" data-tip="Hoy solo se reordena con las flechas">Propuesta</span>
+              Arrastra desde el asa para reordenar; las flechas siguen disponibles con teclado y en pantallas táctiles.
+            </p>
+          </div>
+
+          <div data-v="validation">
+            <div class="rx-list"><div class="empty-list"><p>Añade ejercicios desde el panel «Añadir ejercicio» o crea un circuito.</p></div></div>
+            <p class="list-error" role="alert"><i data-lucide="circle-alert"></i>Agrega al menos un ejercicio o circuito</p>
+          </div>
+        </div>
+        <div class="wb-addbar">
+          <button class="btn btn-secondary" type="button" data-sheet-open="#wbt-picker" aria-controls="wbt-picker"><i data-lucide="plus"></i>Agregar ejercicio</button>
+        </div>
+      </section>
+
+      <!-- RIGHT: picker -->
+      <aside class="wb-col wb-side wb-right" id="wbt-picker" aria-labelledby="wbt-pk-h">
+        <div class="picker-head">
+          <div class="row"><h3 class="h2" id="wbt-pk-h">Añadir ejercicio</h3><span class="spacer"></span>
+            <button class="btn btn-ghost btn-icon picker-close" type="button" data-sheet-close aria-label="Cerrar el panel de ejercicios"><i data-lucide="x"></i></button></div>
+          <label class="input-icon">
+            <span class="sr-only">Buscar ejercicio por nombre o músculo</span>
+            <i data-lucide="search"></i>
+            <input class="input" type="search" placeholder="Buscar ejercicio..." autocomplete="off">
+          </label>
+          <div class="picker-filters" role="group" aria-label="Filtrar por grupo muscular">
+            <button class="toggle-tag" type="button" aria-pressed="false" data-toggle-pressed>Pecho<i data-lucide="check"></i></button>
+            <button class="toggle-tag" type="button" aria-pressed="true" data-toggle-pressed>Espalda<i data-lucide="check"></i></button>
+            <button class="toggle-tag" type="button" aria-pressed="false" data-toggle-pressed>Glúteos<i data-lucide="check"></i></button>
+            <button class="toggle-tag" type="button" aria-pressed="false" data-toggle-pressed>Hombros<i data-lucide="check"></i></button>
+            <button class="toggle-tag" type="button" aria-pressed="false" data-toggle-pressed>Core<i data-lucide="check"></i></button>
+            <span class="proposal-tag" tabindex="0" data-tip="Filtro rápido por grupo muscular (hoy la búsqueda es solo texto)">Propuesta</span>
+          </div>
+        </div>
+        <div class="picker-list" role="list" id="wbt-results"></div>
+        <div class="picker-foot"><button class="btn btn-secondary" type="button" data-add-circuit><i data-lucide="repeat"></i>Agregar circuito</button></div>
+      </aside>
+    </div>
+    <div class="wb-scrim" data-sheet-close aria-hidden="true"></div>
+  </div>
+</div>
+
+<!-- ===================== DIALOGS ===================== -->
+<div class="overlay" id="dlg-unsaved" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="du-title" aria-describedby="du-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="du-title">Hay cambios sin guardar</h2>
+        <p class="ov-desc" id="du-desc">Si sales ahora perderás los cambios introducidos. Guarda o cancela la edición para conservarlos.</p>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close autofocus>Permanecer</button>
+      <button class="btn btn-danger" type="button" data-close data-close-also="#wb-training">Salir sin guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-delete" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dt-title" aria-describedby="dt-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dt-title">Eliminar entrenamiento</h2>
+        <p class="ov-desc" id="dt-desc">¿Eliminar <b data-fill="name">Full Body Fuerza + Cardio</b>? El entrenamiento dejará de estar disponible para asignaciones.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast-fill='"{name}" ha sido eliminado'><i data-lucide="trash-2"></i>Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-group" data-static hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dg-title" aria-describedby="dg-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dg-title" data-t-new="Crear grupo" data-t-edit="Renombrar grupo">Crear grupo</h2>
+        <p class="ov-desc" id="dg-desc">Nombre único, entre 1 y 100 caracteres.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-group" data-validate novalidate data-success-toast="Grupo guardado">
+        <div class="field">
+          <label class="field-label" for="dg-name">Nombre</label>
+          <input class="input" id="dg-name" required maxlength="100" autocomplete="off" data-fill="name" data-error-required="Escribe un nombre para el grupo.">
+        </div>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="submit" form="form-group" data-t-new="Crear" data-t-edit="Guardar">Crear</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-group-del" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dgd-title" aria-describedby="dgd-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dgd-title">Eliminar grupo</h2>
+        <p class="ov-desc" id="dgd-desc">Se eliminará “<span data-fill="name">Hipertrofia</span>”. Su contenido permanecerá intacto y quedará sin grupo.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast="Grupo eliminado"><i data-lucide="trash-2"></i>Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-move" data-static hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dm-title" aria-describedby="dm-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dm-title">Mover a grupo</h2>
+        <p class="ov-desc" id="dm-desc" data-sel-n="#tbl-tr" data-sel-tpl="Se moverán {n} elementos seleccionados.">Se moverán 2 elementos seleccionados.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="field">
+        <label class="field-label" for="dm-group">Grupo</label>
+        <select class="select" id="dm-group"><option>Sin grupo</option><option>Fuerza básica</option><option selected>Hipertrofia</option><option>Cardio y HIIT</option><option>Movilidad</option></select>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-sel-n="#tbl-tr" data-sel-tpl="Mover" data-toast="2 elementos movidos">Mover</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-prompt" hidden>
+  <div class="dialog dialog-md" role="dialog" aria-modal="true" aria-labelledby="dp-title">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dp-title">Prompt para generar JSON compatible</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body stack-16">
+      <div class="banner banner-warning"><i data-lucide="triangle-alert"></i><span class="banner-text">Las partes entre [MODIFICAR] son obligatorias.</span></div>
+      <p class="prose-13">El botón "Copiar con catálogo" incluirá 128 ejercicios cargados.</p>
+      <ul class="ruled">
+        <li class="ruled-row"><span class="h3">Varios ejercicios sueltos</span></li>
+        <li class="ruled-row"><span class="h3">Sin circuito</span></li>
+        <li class="ruled-row"><span class="h3">Con circuito</span></li>
+      </ul>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button"><i data-lucide="copy"></i>Copiar plantilla</button>
+      <button class="btn btn-primary" type="button"><i data-lucide="copy"></i>Copiar con catálogo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var GROUPS = [['Fuerza básica', 14], ['Hipertrofia', 12], ['Cardio y HIIT', 9], ['Movilidad', 6]];
+  var TYPES = { Fuerza: '#7FB5D8', Cardio: '#D76C5E', HIIT: '#E5BE58', Flexibilidad: '#9B7FCC' };
+  var TR = [
+    ['Full Body Fuerza + Cardio', '#C5E384', 'Fuerza básica', ['Fuerza', 'Cardio'], 'Intermedio', 6, 45, 300, ['Gimnasio', 'Tren superior', 'Tren inferior']],
+    ['Pierna y glúteo', '#9B7FCC', 'Hipertrofia', ['Fuerza'], 'Intermedio', 7, 60, 420, ['Glúteo', 'Tren inferior']],
+    ['HIIT 20 minutos', '#E5BE58', 'Cardio y HIIT', ['HIIT', 'Cardio'], 'Avanzado', 5, 20, 250, ['Sin material', 'Casa']],
+    ['Torso empuje', null, 'Hipertrofia', ['Fuerza'], 'Avanzado', 6, 55, 380, ['Gimnasio', 'Tren superior'], 'Edición pendiente de aprobación'],
+    ['Movilidad matinal', '#7FB5D8', 'Movilidad', ['Flexibilidad'], 'Principiante', 8, 25, 120, ['Casa', 'Sin material']],
+    ['Fuerza 5x5', '#2A6A35', 'Fuerza básica', ['Fuerza'], 'Avanzado', 3, 50, 350, ['Gimnasio']],
+    ['Core y estabilidad', null, null, ['Fuerza', 'Flexibilidad'], 'Principiante', 6, 30, null, ['Casa']],
+    ['Circuito metabólico', '#D76C5E', 'Cardio y HIIT', ['HIIT'], 'Intermedio', 8, 35, 400, ['Gimnasio', '30 minutos']],
+    ['Espalda y bíceps', '#8CCB68', 'Hipertrofia', ['Fuerza'], 'Intermedio', 6, 50, 330, ['Gimnasio', 'Tren superior']],
+    ['Principiantes semana 1', null, null, ['Fuerza', 'Cardio'], 'Principiante', 5, 40, 260, ['Principiantes', 'Casa', 'Sin material']]
+  ];
+  var params = new URLSearchParams(location.search);
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function moreTag(list, max) {
+    var out = list.slice(0, max).map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('');
+    if (list.length > max) { var rest = list.slice(max).join(', '); out += '<span class="tag tag-more" tabindex="0" data-tip="' + esc(rest) + '" aria-label="' + (list.length - max) + ' más: ' + esc(rest) + '">+' + (list.length - max) + '</span>'; }
+    return '<span class="tags">' + out + '</span>';
+  }
+
+  // Rail
+  var railHTML = '<li class="rail-item"><button class="rail-btn" type="button" aria-pressed="true" data-group="Todos"><i data-lucide="layers"></i><span class="rail-name">Todos</span><span class="rail-count">48</span></button></li>';
+  GROUPS.forEach(function (g, i) {
+    railHTML += '<li class="rail-item has-more' + (i === GROUPS.length - 1 ? ' is-last-group' : '') + '" data-drop="' + (g[0] === 'Hipertrofia' ? '1' : '') + '">' +
+      '<button class="rail-btn" type="button" aria-pressed="false" data-group="' + g[0] + '"><i data-lucide="folder"></i><span class="rail-name">' + g[0] + '</span><span class="rail-count">' + g[1] + '</span><span class="rail-drop-hint">Soltar aquí</span></button>' +
+      '<button class="btn btn-ghost btn-icon rail-more" type="button" data-open="#group-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Acciones del grupo ' + g[0] + '" data-ctx-name="' + g[0] + '"><i data-lucide="ellipsis"></i></button></li>';
+  });
+  railHTML += '<li class="rail-item"><button class="rail-btn" type="button" aria-pressed="false" data-group="Sin grupo" data-tip="Filtrar o soltar aquí"><i data-lucide="folder-minus"></i><span class="rail-name">Sin grupo</span><span class="rail-count">7</span></button></li>';
+  railHTML += '<li class="rail-item"><button class="btn btn-ghost btn-sm rail-new" type="button" data-open="#dlg-group" data-mode="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Nuevo grupo</button></li>';
+  document.getElementById('rail').innerHTML = railHTML;
+
+  // Rows
+  var preSel = params.get('sel') !== '0';
+  document.getElementById('tr-rows').innerHTML = TR.map(function (x, i) {
+    var dot = x[1] ? '<span class="dot dot-lg" style="--c:' + x[1] + '" aria-hidden="true"></span>' : '<span class="dot dot-lg" style="--c:transparent;border:1px dashed var(--rule-hover)" aria-hidden="true"></span>';
+    var pend = x[9] ? '<span class="chip chip-warning no-dot chip-pending" tabindex="0" data-tip="' + x[9] + '"><i data-lucide="triangle-alert"></i>Pendiente</span>' : '';
+    var types = '<span class="tags">' + x[3].map(function (t) { return '<span class="tag"><span class="dot" style="--c:' + TYPES[t] + '"></span>' + t + '</span>'; }).join('') + '</span>';
+    var sel = preSel && (i === 1 || i === 2);
+    return '<tr data-row-open class="row-link' + (i === 1 ? '" data-drag-tr="1' : '') + '">' +
+      '<td class="cell-check has-grip"><span class="check-grip"><label class="check"><input type="checkbox" data-select-row aria-label="Seleccionar ' + esc(x[0]) + '"' + (sel ? ' checked' : '') + '></label>' +
+        '<button class="grip" type="button" aria-label="Mover ' + esc(x[0]) + '" data-tip="Arrastra a un grupo"><i data-lucide="grip-vertical"></i></button></span></td>' +
+      '<td class="cell-primary"><span class="name-line">' + dot + '<span class="entity-text"><span class="name-line"><button type="button" class="entity-name row-anchor" data-open="#sheet-tr" aria-haspopup="dialog" data-ctx-name="' + esc(x[0]) + '">' + esc(x[0]) + '</button>' + pend + '</span>' +
+        '<span class="row-tags"><span class="sr-only">Etiquetas: </span>' + x[8].map(esc).join(' · ') + '</span></span></span></td>' +
+      '<td class="col-group" data-label="Grupo">' + (x[2] ? '<span class="group-name">' + x[2] + '</span>' : '<span class="caption">Sin grupo</span>') + '</td>' +
+      '<td data-label="Tipos">' + types + '</td>' +
+      '<td class="st-inline" data-label="Nivel"><span class="tag">' + x[4] + '</span></td>' +
+      '<td class="cell-num" data-label="Ejercicios"><span>' + x[5] + '</span></td>' +
+      '<td class="cell-num p2" data-label="Duración"><span class="nowrap">' + (x[6] ? x[6] + ' min' : '—') + '</span></td>' +
+      '<td class="cell-num p2" data-label="Calorías"><span class="nowrap">' + (x[7] ? x[7] + ' kcal' : '<span class="muted-dash">—</span>') + '</span></td>' +
+      '<td class="cell-actions"><span class="cell-actions-inner"><i data-lucide="chevron-right" class="row-chevron"></i>' +
+        '<button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Abrir menú de ' + esc(x[0]) + '" data-ctx-name="' + esc(x[0]) + '"><i data-lucide="ellipsis"></i></button></span></td></tr>';
+  }).join('');
+  var sk = '';
+  for (var k = 0; k < 6; k++) sk += '<tr><td class="cell-check"><span class="sk-block" style="--h:16px;width:16px"></span></td><td><span class="sk-line" style="--w:' + (100 + k * 29 % 80) + 'px"></span></td><td><span class="sk-line" style="--w:72px"></span></td><td><span class="sk-line" style="--w:90px"></span></td><td><span class="sk-line" style="--w:72px"></span></td><td><span class="sk-line" style="--w:16px;margin-left:auto"></span></td><td class="p2"><span class="sk-line" style="--w:40px;margin-left:auto"></span></td><td class="p2"><span class="sk-line" style="--w:48px;margin-left:auto"></span></td><td class="cell-actions"></td></tr>';
+  document.getElementById('tr-sk').innerHTML = sk;
+
+  // Rail selection: title + Grupo column only in "Todos"
+  function selectGroup(name) {
+    document.querySelectorAll('.rail-btn').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-group') === name)); });
+    document.getElementById('list-title').textContent = name === 'Todos' ? 'Listado de entrenamientos' : 'Entrenamientos · ' + name;
+    document.querySelectorAll('#tbl-tr .col-group').forEach(function (c) { c.classList.toggle('is-hidden-col', name !== 'Todos'); });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.rail-btn');
+    if (b) selectGroup(b.getAttribute('data-group'));
+    var imp = e.target.closest && e.target.closest('[data-import]');
+    if (imp) {
+      Catalog.applyVariant('import');
+      var wb = document.getElementById('wb-training');
+      Catalog.applyMode(wb, 'import');
+      var opener = document.createElement('button');
+      opener.type = 'button'; opener.hidden = true; opener.setAttribute('data-open', '#wb-training');
+      document.body.appendChild(opener); opener.click(); opener.remove();
+      Proto.toast('Entrenamiento importado con avisos. Revisa ejercicios no enlazados.', 'warning');
+    }
+  });
+  if (params.get('group')) selectGroup(params.get('group'));
+
+  // Swatches
+  var SW = ['#C5E384', '#D2EB99', '#A9C85D', '#8CCB68', '#E5BE58', '#D76C5E', '#7FB5D8', '#9B7FCC', '#552015', '#7A2E1E', '#184822', '#2A6A35'];
+  var DARK = ['#552015', '#7A2E1E', '#184822', '#2A6A35'];
+  document.getElementById('wbt-swatches').innerHTML = SW.map(function (c) {
+    return '<button class="swatch-btn" type="button" style="--c:' + c + ';--on:' + (DARK.indexOf(c) > -1 ? '#f2f1e9' : '#101111') + '" aria-pressed="' + (c === '#C5E384') + '" aria-label="Color ' + c + '" data-tip="' + c.slice(1) + '"></button>';
+  }).join('');
+  document.getElementById('wbt-swatches').addEventListener('click', function (e) {
+    var s = e.target.closest('.swatch-btn'); if (!s) return;
+    this.querySelectorAll('.swatch-btn').forEach(function (b) { b.setAttribute('aria-pressed', String(b === s)); });
+    var c = s.style.getPropertyValue('--c').trim();
+    document.getElementById('wbt-hex').value = c;
+    var pill = document.querySelector('#wb-training .preview-pill');
+    pill.style.setProperty('--c', c); pill.style.setProperty('--on', s.style.getPropertyValue('--on'));
+  });
+
+  // Segmented in prescription rows: toggle pressed within the group
+  document.addEventListener('click', function (e) {
+    var seg = e.target.closest && e.target.closest('.rx .segmented .seg-btn');
+    if (!seg) return;
+    seg.parentNode.querySelectorAll('.seg-btn').forEach(function (b) { b.setAttribute('aria-pressed', String(b === seg)); });
+  });
+
+  // Picker results
+  var PK = [
+    ['Press de banca', 'Intermedio', ['Pecho', 'Tríceps'], 1], ['Remo con mancuerna', 'Principiante', ['Espalda', 'Bíceps'], 1],
+    ['Dominadas', 'Avanzado', ['Espalda', 'Bíceps'], 0], ['Peso muerto rumano', 'Avanzado', ['Isquiotibiales', 'Glúteos'], 0],
+    ['Jalón al pecho', 'Principiante', ['Espalda', 'Bíceps'], 0], ['Remo en polea baja', 'Principiante', ['Espalda', 'Trapecio'], 0],
+    ['Face pull en polea', 'Principiante', ['Hombros', 'Trapecio'], 1], ['Pull-over con mancuerna', 'Intermedio', ['Espalda', 'Pecho'], 0]
+  ];
+  function pkRow(p, i) {
+    return '<div class="pk-row" role="listitem"><div style="min-width:0"><span class="pk-name">' + p[0] + '</span>' +
+      '<div class="pk-sub"><span class="tag">' + p[1] + '</span>' + p[2].join(' · ') + (p[3] ? '<span class="pk-added">· Añadido ' + p[3] + (p[3] === 1 ? ' vez' : ' veces') + '</span>' : '') + '</div></div>' +
+      '<button class="btn btn-secondary btn-icon" type="button" data-pk="' + i + '" aria-label="Agregar ' + p[0] + '"><i data-lucide="plus"></i></button></div>';
+  }
+  function renderPicker() { document.getElementById('wbt-results').innerHTML = PK.map(pkRow).join(''); if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.6 } }); }
+  renderPicker();
+
+  // Summary (derived counts)
+  function summary() {
+    var list = document.getElementById('wbt-list');
+    var standalone = list.querySelectorAll(':scope > .rx:not(.is-v-off)').length;
+    var circuits = list.querySelectorAll(':scope > .circuit').length;
+    var inCircuit = list.querySelectorAll('[data-circuit-item]').length;
+    var series = 0;
+    list.querySelectorAll(':scope > .rx:not(.is-v-off) [data-series]').forEach(function (i) { series += +i.value || 0; });
+    list.querySelectorAll(':scope > .circuit').forEach(function (c) {
+      var r = +(c.querySelector('[data-rounds]') || {}).value || 0;
+      var n = c.querySelectorAll('[data-circuit-item]').length;
+      series += r * n;
+      var m = c.querySelector('[data-circuit-count]'); if (m) m.textContent = n + (n === 1 ? ' ejercicio' : ' ejercicios');
+    });
+    var ex = standalone + inCircuit;
+    document.getElementById('wbt-sum').textContent = ex + (ex === 1 ? ' ejercicio' : ' ejercicios') + ' · ' + circuits + (circuits === 1 ? ' circuito' : ' circuitos') + ' · ' + series + ' series';
+  }
+  document.addEventListener('input', function (e) { if (e.target.closest && e.target.closest('#wbt-list')) summary(); });
+  document.addEventListener('itemsChanged', summary);
+  document.addEventListener('click', function (e) {
+    var add = e.target.closest && e.target.closest('[data-pk]');
+    if (!add) return;
+    var p = PK[+add.getAttribute('data-pk')];
+    var list = document.getElementById('wbt-list');
+    var tpl = list.querySelector(':scope > .rx[data-name="Press de banca"]').cloneNode(true);
+    var uid = 'n' + Date.now();
+    tpl.setAttribute('data-name', p[0]);
+    tpl.querySelector('.rx-name').textContent = p[0];
+    tpl.querySelector('.tags').innerHTML = '<span class="tag">' + p[1] + '</span>' + p[2].map(function (m) { return '<span class="tag">' + m + '</span>'; }).join('');
+    tpl.querySelectorAll('[id]').forEach(function (el) { var old = el.id; el.id = old + uid; var l = tpl.querySelector('label[for="' + old + '"]'); if (l) l.setAttribute('for', el.id); });
+    tpl.querySelectorAll('[aria-labelledby]').forEach(function (el) { el.setAttribute('aria-labelledby', el.getAttribute('aria-labelledby') + uid); });
+    tpl.querySelectorAll('[aria-label]').forEach(function (el) { el.setAttribute('aria-label', el.getAttribute('aria-label').replace('Press de banca', p[0])); });
+    tpl.querySelector('[data-series]').value = 3;
+    var circuit = list.querySelector(':scope > .circuit');
+    list.insertBefore(tpl, circuit);
+    Catalog.renumber(list);
+    p[3]++; renderPicker(); summary();
+    Catalog.announce(p[0] + ' añadido a la lista');
+    Proto.toast(p[0] + ' añadido', 'success');
+  });
+
+  // Drag variant: dragging row + drop target in rail and insertion line in builder
+  document.addEventListener('variantchange', function (e) {
+    var drag = e.detail.variant === 'drag';
+    document.querySelectorAll('.rail-item[data-drop="1"]').forEach(function (li) { li.classList.toggle('is-drop', drag); });
+    document.querySelectorAll('[data-drag-tr]').forEach(function (tr) { tr.classList.toggle('is-dragging', drag); });
+    document.querySelectorAll('[data-drag-row]').forEach(function (r) { r.classList.toggle('is-dragging', drag); });
+    var wb = document.getElementById('wb-training');
+    if (e.detail.variant === 'import') Catalog.applyMode(wb, 'import');
+    else if (wb.getAttribute('data-mode') === 'import') Catalog.applyMode(wb, 'new');
+    // Renumber visible standalone rows
+    var list = document.getElementById('wbt-list'); var n = 0;
+    list.querySelectorAll(':scope > [data-movable]').forEach(function (it) {
+      if (it.classList.contains('is-v-off')) return; n++;
+      var num = it.querySelector(':scope > .rx-num, :scope > .circuit-head > .rx-num'); if (num) num.textContent = n;
+    });
+    summary();
+  });
+  document.getElementById('wbt-submit').addEventListener('click', function () {
+    if (document.body.getAttribute('data-variant') === 'validation') { Proto.toast('Agrega al menos un ejercicio o circuito', 'danger'); return; }
+    var c = document.querySelector('#wb-training > .workbench > [data-close]'); if (c) c.click();
+    var mode = document.getElementById('wb-training').getAttribute('data-mode');
+    Proto.toast(mode === 'edit' ? 'Entrenamiento actualizado correctamente' : mode === 'dup' ? 'Entrenamiento duplicado correctamente' : 'Entrenamiento creado correctamente', 'success');
+  });
+})();
+</script>
+<script src="assets/pages/catalogo.js"></script>
+</body>
+</html>

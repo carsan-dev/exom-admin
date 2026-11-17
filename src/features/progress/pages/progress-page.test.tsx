@@ -4,6 +4,7 @@ import { createMemoryRouter, RouterProvider, useSearchParams } from 'react-route
 import { fixtureAssignee, fixturePage, fixtureSummary, fixtureTask } from '../follow-up-tasks/fixtures'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AuthUser } from '@/types/auth'
+import { answerConfirmDialog, findConfirmDialog } from '@/test/confirm-dialog'
 import type { AdherenceConfig, AdherenceReport } from '../../clients/adherence.types'
 import { ProgressPage } from './progress-page'
 
@@ -91,7 +92,6 @@ describe('Progreso: contexto y navegación', () => {
   })
 
   it('abre Seguimiento por URL, preserva navegación y confirma descarte al cambiar cliente', async () => {
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
     mount('clientId=client-a&section=seguimiento&period=3m&date=2020-01-03')
     expect(screen.getByRole('tab', { name: 'Seguimiento' })).toHaveAttribute('aria-selected', 'true')
     await screen.findByRole('button', { name: fixtureTask.title })
@@ -100,11 +100,12 @@ describe('Progreso: contexto y navegación', () => {
     // The sheet modal isolates the background; route changes exercise the same
     // navigation blocker as browser back and external client deep links.
     fireEvent.click(screen.getByText('Seleccionar cliente B'))
-    expect(confirm).toHaveBeenCalled()
+    expect(await findConfirmDialog()).toBeInTheDocument()
+    await answerConfirmDialog('Cancelar')
     expect(params().get('clientId')).toBe('client-a')
     expect(screen.getByLabelText('Título')).toHaveValue('Draft A')
-    confirm.mockReturnValue(true)
     fireEvent.click(screen.getByText('Seleccionar cliente B'))
+    await answerConfirmDialog('Aceptar')
     await waitFor(() => expect(params().get('clientId')).toBe('client-b'))
     expect(screen.queryByLabelText('Título')).not.toBeInTheDocument()
     expect(params().get('section')).toBe('seguimiento')

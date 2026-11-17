@@ -16,7 +16,7 @@ export function CatalogDragHandle({ id, label, disabled }: { id: string; label: 
       {...listeners}
       {...attributes}
     >
-      <GripVertical className="h-4 w-4" />
+      <GripVertical aria-hidden="true" className="h-4 w-4" />
     </Button>
   )
 }

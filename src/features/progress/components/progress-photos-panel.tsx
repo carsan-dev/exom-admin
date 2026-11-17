@@ -31,6 +31,11 @@ import type { ProgressPhoto, ProgressPhotoSession, ProgressPhotoView } from '../
 import { ProgressPhotosImage } from './progress-photos-image'
 import { ProgressPhotosWorkspace } from './progress-photos-workspace'
 
+const headingClass = 'font-display text-xl font-extrabold uppercase leading-none text-foreground'
+const labelClass = 'text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted'
+const controlClass = 'mt-1 block min-h-11 rounded-md border border-border-strong bg-background p-2 text-sm normal-case tracking-normal text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+const chipClass = 'inline-flex min-h-6 w-fit max-w-full items-center rounded-full border px-2.5 py-0.5 text-xs font-medium'
+
 const HISTORY_PAGE_SIZE = 20
 const MAX_LOADED_COMPARISON_SESSIONS = HISTORY_PAGE_SIZE * 5
 
@@ -65,6 +70,11 @@ function activePhoto(session: ProgressPhotoSession | undefined, view: ProgressPh
 
 function sessionMissingViews(session: ProgressPhotoSession) {
   return PHOTO_VIEWS.filter(({ value }) => !activePhoto(session, value))
+}
+
+function statusChipTone(session: ProgressPhotoSession) {
+  if (sessionMissingViews(session).length > 0) return 'border-status-warning/40 bg-status-warning-soft text-status-warning'
+  return session.is_complete ? 'border-status-success/40 bg-status-success-soft text-status-success' : 'border-status-info/40 bg-status-info-soft text-status-info'
 }
 
 function statusLabel(session: ProgressPhotoSession) {
@@ -274,7 +284,7 @@ function ClientProgressPhotosPanel({ clientId }: { clientId: string }) {
   }
 
   if (history.isLoading) {
-    return <Card><CardContent className="space-y-4 py-8 text-sm text-muted-foreground" role="status"><p>Cargando fotos de progreso…</p><div aria-hidden="true" className="grid gap-4 sm:grid-cols-2"><div className="h-64 rounded bg-muted/50" /><div className="h-64 rounded bg-muted/50" /></div></CardContent></Card>
+    return <Card><CardContent className="space-y-4 py-8 text-sm text-foreground-muted" role="status"><p>Cargando fotos de progreso…</p><div aria-hidden="true" className="grid gap-4 sm:grid-cols-2"><div className="h-64 rounded-md bg-muted/50" /><div className="h-64 rounded-md bg-muted/50" /></div></CardContent></Card>
   }
 
   if (history.isError) {
@@ -282,7 +292,7 @@ function ClientProgressPhotosPanel({ clientId }: { clientId: string }) {
       <Card>
         <CardContent className="space-y-3 py-8">
           <p role="alert">No se han podido cargar las fotos: {getApiErrorMessage(history.error)}</p>
-          <Button variant="outline" onClick={() => void history.refetch()}><RefreshCw className="h-4 w-4" />Reintentar</Button>
+          <Button variant="outline" onClick={() => void history.refetch()}><RefreshCw aria-hidden="true" className="h-4 w-4" />Reintentar</Button>
         </CardContent>
       </Card>
     )
@@ -291,9 +301,9 @@ function ClientProgressPhotosPanel({ clientId }: { clientId: string }) {
   return (
     <div className="min-w-0 space-y-6 motion-reduce:[&_*]:transition-none motion-reduce:[&_*]:animate-none">
       <header className="space-y-2">
-        <h2 className="text-xl font-semibold">Fotos de progreso</h2>
-        <p className="max-w-prose text-sm text-muted-foreground">Revisa fechas, vistas disponibles y contexto antes de comparar. Completar o reemplazar fotos requiere una acción explícita.</p>
-        <p className="text-sm tabular-nums">{history.data?.total ?? 0} sesiones en el historial · {sessions.length} en esta página · {sessions.filter((session) => session.is_complete && sessionMissingViews(session).length === 0).length} completas en esta página</p>
+        <h2 className="font-display text-2xl font-extrabold uppercase leading-none text-foreground">Fotos de progreso</h2>
+        <p className="max-w-prose text-sm text-foreground-muted">Revisa fechas, vistas disponibles y contexto antes de comparar. Completar o reemplazar fotos requiere una acción explícita.</p>
+        <p className="text-sm tabular-nums text-foreground-muted">{history.data?.total ?? 0} sesiones en el historial · {sessions.length} en esta página · {sessions.filter((session) => session.is_complete && sessionMissingViews(session).length === 0).length} completas en esta página</p>
       </header>
       {sessions.length > 0 && <ProgressPhotosWorkspace
         sessions={loadedComparisonSessions} olderId={olderSessionId} newerId={newerSessionId}
@@ -305,45 +315,45 @@ function ClientProgressPhotosPanel({ clientId }: { clientId: string }) {
       />}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Historial y nueva sesión</CardTitle>
+          <CardTitle className={headingClass}>Historial y nueva sesión</CardTitle>
           <CardDescription>Consulta otras fechas o crea una sesión para añadir las cuatro vistas. Crear una sesión no añade fotos.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-end gap-3">
-            <label className="text-sm font-medium">Nueva sesión fechada
+            <label className={labelClass}>Nueva sesión fechada
               <input aria-label="Fecha de nueva sesión" type="date" value={sessionDate} disabled={createSession.isPending} onChange={(event) => {
                 setSessionDate(event.target.value)
                 createOperationRef.current = null
                 setCreateOperation(null)
                 createSession.reset()
-              }} className="mt-1 block min-h-11 rounded-md border bg-background p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+              }} className={controlClass} />
             </label>
-            <Button onClick={() => void createDatedSession()} disabled={createSession.isPending || !sessionDate}>
-              <ImagePlus className="h-4 w-4" />{createSession.isPending ? 'Creando…' : createOperation ? 'Reintentar crear sesión' : 'Crear sesión incompleta'}
+            <Button variant="secondary" className="min-h-11" onClick={() => void createDatedSession()} disabled={createSession.isPending || !sessionDate}>
+              <ImagePlus aria-hidden="true" className="h-4 w-4" />{createSession.isPending ? 'Creando…' : createOperation ? 'Reintentar crear sesión' : 'Crear sesión incompleta'}
             </Button>
           </div>
           {createSession.isError && <p role="alert" className="text-sm text-status-error">{getApiErrorMessage(createSession.error, 'No se ha podido crear la sesión. Puedes reintentarlo sin duplicarla.')}</p>}
 
           {sessions.length === 0 ? (
-            <p className="rounded-md border border-dashed p-5 text-sm text-muted-foreground">Aún no hay sesiones de fotos. Crea una sesión fechada para añadir las cuatro vistas.</p>
+            <p className="rounded-md border border-dashed border-border-strong p-5 text-sm text-foreground-muted">Aún no hay sesiones de fotos. Crea una sesión fechada para añadir las cuatro vistas.</p>
           ) : (
             <>
               <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="Historial de sesiones de fotos">
                 {sessions.map((session) => {
                   const missing = sessionMissingViews(session)
                   return (
-                    <li key={session.id} className="min-w-0 border-b py-3">
-                      <p className="font-medium">{formatDate(session.session_date)}</p>
-                      <p className="mt-1 text-sm" aria-label={`Estado ${formatDate(session.session_date)}`}>{statusLabel(session)}</p>
-                      {missing.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Pendientes: {missing.map(({ label }) => label).join(', ')}</p>}
+                    <li key={session.id} className="min-w-0 border-b border-border py-3">
+                      <p className="font-medium text-foreground">{formatDate(session.session_date)}</p>
+                      <p className={`${chipClass} mt-1 ${statusChipTone(session)}`} aria-label={`Estado ${formatDate(session.session_date)}`}>{statusLabel(session)}</p>
+                      {missing.length > 0 && <p className="mt-2 text-xs text-foreground-muted">Pendientes: {missing.map(({ label }) => label).join(', ')}</p>}
                     </li>
                   )
                 })}
               </ul>
               <div className="flex items-center justify-between gap-3" aria-label="Paginación del historial de fotos">
-                <Button type="button" variant="outline" size="sm" onClick={() => setHistoryPage((page) => Math.max(1, page - 1))} disabled={currentHistoryPage <= 1 || photoActionBusy}>Anterior</Button>
-                <p className="text-sm text-muted-foreground">Página {currentHistoryPage} de {totalPages}</p>
-                <Button type="button" variant="outline" size="sm" onClick={() => setHistoryPage((page) => Math.min(totalPages, page + 1))} disabled={currentHistoryPage >= totalPages || photoActionBusy}>Siguiente</Button>
+                <Button type="button" variant="outline" size="sm" className="min-h-11 md:min-h-0" onClick={() => setHistoryPage((page) => Math.max(1, page - 1))} disabled={currentHistoryPage <= 1 || photoActionBusy}>Anterior</Button>
+                <p className="text-sm tabular-nums text-foreground-muted">Página {currentHistoryPage} de {totalPages}</p>
+                <Button type="button" variant="outline" size="sm" className="min-h-11 md:min-h-0" onClick={() => setHistoryPage((page) => Math.min(totalPages, page + 1))} disabled={currentHistoryPage >= totalPages || photoActionBusy}>Siguiente</Button>
               </div>
             </>
           )}
@@ -353,12 +363,12 @@ function ClientProgressPhotosPanel({ clientId }: { clientId: string }) {
       {sessions.length > 0 && <>
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Completar sesión</CardTitle>
+            <CardTitle className={headingClass}>Completar sesión</CardTitle>
             <CardDescription>Las acciones de foto se procesan de una en una: reintenta una asociación pendiente antes de iniciar otra.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <label className="text-sm font-medium">Sesión a completar
-              <select aria-label="Sesión a completar" value={uploadSessionId} onChange={(event) => { setUploadSessionId(event.target.value); setCurrentAction(null); setCurrentAssociation(null); setUploadPreview(null); setReplaceCandidate(null) }} disabled={photoActionBusy} className="mt-1 block min-h-11 w-full rounded-md border bg-background p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <label className={labelClass}>Sesión a completar
+              <select aria-label="Sesión a completar" value={uploadSessionId} onChange={(event) => { setUploadSessionId(event.target.value); setCurrentAction(null); setCurrentAssociation(null); setUploadPreview(null); setReplaceCandidate(null) }} disabled={photoActionBusy} className={`${controlClass} w-full sm:max-w-md`}>
                 {sessions.map((session) => <option key={session.id} value={session.id}>{formatDate(session.session_date)} · {statusLabel(session)}</option>)}
               </select>
             </label>
@@ -366,22 +376,22 @@ function ClientProgressPhotosPanel({ clientId }: { clientId: string }) {
               {PHOTO_VIEWS.map(({ value, label }) => {
                 const photo = activePhoto(uploadSession, value)
                 const actionMatches = pendingAction?.sessionId === uploadSession.id && pendingAction.view === value
-                return <div key={value} className="rounded-lg border p-3">
-                  <p className="font-medium">{label}</p>
+                return <div key={value} className="min-w-0 rounded-md border border-border-strong p-3">
+                  <p className={labelClass}>{label}</p>
                   {photo ? <>
                     <div className="mt-2"><ProgressPhotosImage key={`${uploadSession.id}:${photo.id}:${photo.image_url}`} src={photo.image_url} alt={`${label} activo del ${formatDate(uploadSession.session_date)}`} /></div>
-                    <Button type="button" className="mt-3 w-full" variant="outline" onClick={() => setReplaceCandidate({ sessionId: uploadSession.id, view: value, photo })} disabled={photoActionBusy}>Reemplazar {label}</Button>
+                    <Button type="button" className="mt-3 min-h-11 w-full md:min-h-9" variant="secondary" onClick={() => setReplaceCandidate({ sessionId: uploadSession.id, view: value, photo })} disabled={photoActionBusy}>Reemplazar {label}</Button>
                   </> : <>
-                    <p className="mt-2 text-sm text-muted-foreground">Pendiente · sin imagen</p>
-                    <Button type="button" className="mt-3 w-full" variant="outline" onClick={() => startPhotoAction({ sessionId: uploadSession.id, view: value })} disabled={photoActionBusy}>Subir {label}</Button>
+                    <p className="mt-2 flex aspect-[3/4] max-h-64 items-center justify-center rounded-md border border-dashed border-border-strong bg-muted/20 p-3 text-center text-sm text-foreground-muted">Pendiente · sin imagen</p>
+                    <Button type="button" className="mt-3 min-h-11 w-full md:min-h-9" variant="default" onClick={() => startPhotoAction({ sessionId: uploadSession.id, view: value })} disabled={photoActionBusy}>Subir {label}</Button>
                   </>}
                   {actionMatches && <div className="mt-3"><ImageUploadField value={uploadPreview ?? ''} onChange={(url, uploadId) => onUploadComplete(pendingAction, url, uploadId)} fileKeyPrefix={`progress-photos/${clientId}/${uploadSession.id}/${value.toLowerCase()}`} purpose="PROGRESS_PHOTO" managedOnly managedUploadOperationId={pendingAction.upload_operation_id} label={`Nueva imagen ${label}`} disabled={associatePhoto.isPending} /></div>}
                 </div>
               })}
             </div>}
-            {pendingAssociation && associatePhoto.isError && <div className="rounded-md border border-status-error/40 p-3 text-sm" role="alert">
+            {pendingAssociation && associatePhoto.isError && <div className="border-l-2 border-status-error pl-3 text-sm" role="alert">
               <p>{getApiErrorMessage(associatePhoto.error, 'No se ha podido asociar la imagen. Reintenta la misma operación; no subas otra foto.')}</p>
-              <Button className="mt-2" variant="outline" onClick={() => void associatePendingPhoto(pendingAssociation)} disabled={associatePhoto.isPending}>Reintentar asociación</Button>
+              <Button className="mt-2 min-h-11 md:min-h-9" variant="outline" onClick={() => void associatePendingPhoto(pendingAssociation)} disabled={associatePhoto.isPending}>Reintentar asociación</Button>
             </div>}
           </CardContent>
         </Card>
@@ -419,10 +429,10 @@ function ClientProgressPhotosPanel({ clientId }: { clientId: string }) {
           </DialogHeader>
           {enlarged && <ProgressPhotosImage key={`${enlarged.photo.id}:${enlarged.photo.image_url}`} src={enlarged.photo.image_url} alt={`${enlarged.label} ampliada del ${formatDate(enlarged.date)}`} enlarged />}
           <nav aria-label="Navegación de imágenes ampliadas" className="flex flex-wrap items-center justify-between gap-2">
-            <Button type="button" variant="outline" className="motion-reduce:transition-none" disabled={enlargedIndex <= 0} onClick={() => navigateEnlargement(-1)}>Imagen anterior</Button>
-            <span className="text-sm tabular-nums">{enlargedIndex + 1} de {enlargementPhotos.length} fotos disponibles</span>
-            <Button type="button" variant="outline" className="motion-reduce:transition-none" disabled={enlargedIndex < 0 || enlargedIndex >= enlargementPhotos.length - 1} onClick={() => navigateEnlargement(1)}>Imagen siguiente</Button>
-            <Button type="button" variant="ghost" className="motion-reduce:transition-none" onClick={() => setEnlarged(null)}>Cerrar ampliación</Button>
+            <Button type="button" variant="outline" className="min-h-11 motion-reduce:transition-none md:min-h-9" disabled={enlargedIndex <= 0} onClick={() => navigateEnlargement(-1)}>Imagen anterior</Button>
+            <span className="text-sm tabular-nums text-foreground-muted">{enlargedIndex + 1} de {enlargementPhotos.length} fotos disponibles</span>
+            <Button type="button" variant="outline" className="min-h-11 motion-reduce:transition-none md:min-h-9" disabled={enlargedIndex < 0 || enlargedIndex >= enlargementPhotos.length - 1} onClick={() => navigateEnlargement(1)}>Imagen siguiente</Button>
+            <Button type="button" variant="ghost" className="min-h-11 motion-reduce:transition-none md:min-h-9" onClick={() => setEnlarged(null)}>Cerrar ampliación</Button>
           </nav>
         </DialogContent>
       </Dialog>

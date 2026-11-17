@@ -2,6 +2,11 @@ import { create } from 'zustand'
 
 type Theme = 'dark' | 'light'
 
+const THEME_COLORS: Record<Theme, string> = {
+  dark: '#101111',
+  light: '#f2f1e9',
+}
+
 interface ThemeStore {
   theme: Theme
   toggle: () => void
@@ -13,6 +18,7 @@ function applyTheme(theme: Theme) {
   root.classList.remove('dark', 'light')
   root.classList.add(theme)
   localStorage.setItem('exom-admin-theme', theme)
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[theme])
 }
 
 export const useTheme = create<ThemeStore>()((set) => ({

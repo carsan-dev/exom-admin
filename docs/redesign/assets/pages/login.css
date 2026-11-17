@@ -1,0 +1,150 @@
+/* ==========================================================================
+   Auth frame (login.html, onboarding.html). No shell.
+   Brand panel is always #090a09, in both themes: its colours are fixed.
+   ========================================================================== */
+
+.auth-body { min-height: 100vh; min-height: 100dvh; }
+
+.auth-frame {
+  display: grid;
+  grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ---------- Brand panel ---------- */
+.auth-brand {
+  --panel-ink: #dfe0d4;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: #090a09;
+  color: #b7bcb3;
+  min-height: 100%;
+}
+.auth-rules { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.auth-rule {
+  position: absolute; left: -30%; top: 46%;
+  width: 160%; height: 2px;
+  background: #baf23a;
+  transform-origin: 50% 50%;
+}
+.auth-rule.r1 { transform: rotate(-12deg); }
+.auth-rule.r2 { transform: rotate(12deg); }
+
+.auth-mark {
+  position: absolute; z-index: 1;
+  left: -0.07em; bottom: calc(72px - 0.2em);
+  font-family: var(--font-display); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(220px, 29vw, 420px);
+  line-height: .8; letter-spacing: -.04em;
+  color: color-mix(in srgb, var(--panel-ink) 9%, transparent);
+  white-space: nowrap; user-select: none; pointer-events: none;
+}
+.auth-mark span { color: #baf23a; }
+
+/* Caption strip: crops the watermark with a hairline, carries symbol + line */
+.auth-tagline {
+  position: absolute; z-index: 2; left: 0; right: 0; bottom: 0;
+  height: 72px; padding: 0 40px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; line-height: 20px; color: #b7bcb3;
+  background: #090a09; border-top: 1px solid #272b25;
+}
+.auth-tagline .brand-symbol { width: 22px; height: 21px; }
+.auth-tagline .brand-symbol .half-a { fill: #f2f1e9; }
+.auth-tagline .brand-symbol .half-b { fill: #baf23a; }
+.auth-band-word { display: none; }
+
+/* ---------- Form column ---------- */
+.auth-main {
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px 32px;
+  background: var(--bg);
+  min-width: 0;
+}
+.auth-col { width: 100%; max-width: 380px; }
+.auth-h1 { font-size: 44px; line-height: .92; }
+.auth-h1[tabindex="-1"]:focus { outline: none; }
+.auth-lead { margin-top: 12px; font-size: 13px; line-height: 20px; color: var(--ink-2); }
+.auth-lead + .auth-lead { margin-top: 2px; }
+.auth-form { margin-top: 32px; }
+.auth-form > * + * { margin-top: 20px; }
+.auth-form .input { height: 44px; }
+.auth-row-end { display: flex; justify-content: flex-end; margin-top: 10px !important; }
+.auth-link {
+  position: relative;
+  font-size: 13px; line-height: 20px; font-weight: 600; color: var(--accent-text);
+  text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px;
+  transition: text-decoration-color var(--dur-fast) var(--ease-out);
+}
+.auth-link:hover { text-decoration-color: currentColor; }
+.auth-link::after { content: ""; position: absolute; inset: -12px -4px; }
+.auth-link.is-busy { color: var(--ink-3); pointer-events: none; }
+.btn-block { width: 100%; }
+.auth-form .btn-primary { margin-top: 28px; }
+
+/* Password + reveal toggle */
+.pw-wrap { position: relative; }
+.pw-wrap .input { padding-right: 48px; }
+.pw-toggle {
+  position: absolute; right: 1px; top: 1px; bottom: 1px; width: 44px;
+  display: grid; place-items: center; color: var(--ink-3);
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.pw-toggle:hover { color: var(--ink); background: var(--surface-2); }
+.pw-toggle:focus-visible { outline-offset: -2px; }
+.pw-toggle .ic-hide { display: none; }
+.pw-toggle[aria-pressed="true"] .ic-show { display: none; }
+.pw-toggle[aria-pressed="true"] .ic-hide { display: block; }
+
+/* "O continúa con" */
+.auth-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 28px 0 20px;
+  font-size: 12px; line-height: 16px; color: var(--ink-3);
+}
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--rule-strong); }
+.auth-alt > * + * { margin-top: 8px; }
+.auth-alt .btn { height: 44px; }
+.g-glyph { width: 18px; height: 18px; flex: none; }
+.btn-quiet:disabled { border-style: dashed; }
+.btn-quiet .soon { font-weight: 400; }
+
+/* Blocked account */
+.auth-blocked > .lucide { width: 24px; height: 24px; color: var(--warning); margin-bottom: 20px; }
+.auth-blocked .auth-lead { font-size: 14px; line-height: 22px; max-width: 34ch; }
+.auth-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 32px; }
+.auth-actions .btn { height: 44px; }
+
+.auth-foot-link { margin-top: 28px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.auth-foot-link .auth-link { color: var(--ink-2); font-weight: 400; }
+.auth-foot-link .auth-link:hover { color: var(--ink); }
+
+
+/* ---------- < 1024: brand collapses to a 96px top band ---------- */
+@media (max-width: 1023px) {
+  .auth-frame { grid-template-columns: minmax(0, 1fr); grid-template-rows: 96px minmax(0, 1fr); }
+  .auth-brand { min-height: 96px; }
+  .auth-mark { display: none; }
+  .auth-rule { top: 50%; left: 0; width: 150%; }
+  .auth-rule.r1 { transform: rotate(-7deg); }
+  .auth-rule.r2 { transform: rotate(7deg); }
+  .auth-tagline { inset: 0; height: auto; padding: 0 20px; gap: 12px; background: none; border: 0; }
+  .auth-tagline .brand-symbol { width: 26px; height: 24px; }
+  .auth-band-word {
+    display: inline; font-family: var(--font-display); font-weight: 800; text-transform: uppercase;
+    font-size: 40px; line-height: 1; letter-spacing: -.04em; color: #f2f1e9;
+  }
+  .auth-band-word span { color: #baf23a; }
+  .auth-tagline-text { display: none; }
+  .auth-main { align-items: flex-start; padding: 40px 20px; }
+}
+@media (max-width: 767px) {
+  .auth-main { padding: 32px 16px; }
+  .auth-h1 { font-size: 38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pw-toggle, .auth-link { transition: none; }
+}
+.btn.is-loading > .lucide:last-child, .btn.is-loading > i[data-lucide]:last-child { display: none; }

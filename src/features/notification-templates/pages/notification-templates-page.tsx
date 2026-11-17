@@ -1,616 +1,78 @@
-import { useDeferredValue, useEffect, useMemo, useState, type FormEvent } from 'react'
-import { AlertTriangle, Plus, RefreshCcw, RotateCcw, Save, Trash2 } from 'lucide-react'
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type SetStateAction,
+} from 'react'
+import { Info, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import {
-  FilterToolbar,
   type FilterOption,
   type FilterSectionConfig,
   useListFilters,
 } from '@/components/filters'
 import { useAuth } from '@/hooks/use-auth'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
+import { EmptyState, PageHeader } from '@/components/page'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import {
   getApiErrorMessage,
-  useCreateNotificationTemplate,
   useNotificationTemplates,
   useResetNotificationTemplate,
   useUpdateNotificationTemplate,
   useUpdateNotificationTemplateSchedule,
 } from '../api'
+import { CreateTemplateDialog } from '../components/create-template-dialog'
+import { LoadErrorCard } from '../components/load-error-card'
+import { LoadingState } from '../components/loading-state'
+import { PermissionsNotice } from '../components/permissions-notice'
+import { TemplateEditorForm } from '../components/template-editor-form'
+import { TemplateList } from '../components/template-list'
+import {
+  DELIVERY_TYPE_OPTIONS,
+  TEMPLATE_ORIGIN_OPTIONS,
+  TEMPLATE_STATE_OPTIONS,
+  emptyDraft,
+  getScheduleDraft,
+  getTemplateOrigin,
+  getTemplateSearchText,
+  getTemplateState,
+  getTextDraft,
+  normalizeRoute,
+  normalizeScheduleDraft,
+  schedulesEqual,
+  textDraftDiffers,
+  validateTemplateFields,
+  type ScheduleDraft,
+  type TemplateDraft,
+} from '../template-helpers'
 import type { NotificationTemplate } from '../types'
 
-interface TemplateDraft {
-  title: string
-  body: string
-  route: string
-  enabled: boolean
+/**
+ * Unsaved edits of one part (text or schedule) of one template. While there is no entry for the
+ * selected template, its draft is derived from the server value, so refetches never overwrite edits
+ * and a late response can only clear the exact entry it was sent for.
+ */
+interface TemplateEdits<T> {
+  key: string
+  draft: T
 }
 
-interface CreateTemplateDraft extends TemplateDraft {
-  name: string
-  description: string
-  category: string
-}
+const SWITCH_CONFIRM = {
+  title: 'Hay cambios sin guardar',
+  description: 'Si cambias de plantilla ahora, se descartarán los cambios sin guardar de esta plantilla.',
+  cancelLabel: 'Permanecer',
+  confirmLabel: 'Salir sin guardar',
+  destructive: true,
+} as const
 
-interface ScheduleDraft {
-  enabled: boolean
-  timezone: string
-  times: string[]
-  weekday: number
-}
-
-const emptyDraft: TemplateDraft = {
-  title: '',
-  body: '',
-  route: '',
-  enabled: true,
-}
-
-const defaultScheduleDraft: ScheduleDraft = {
-  enabled: true,
-  timezone: 'Europe/Madrid',
-  times: ['09:00'],
-  weekday: 0,
-}
-
-const emptyCreateDraft: CreateTemplateDraft = {
-  name: '',
-  description: '',
-  category: 'Manual',
-  title: '',
-  body: '',
-  route: '',
-  enabled: true,
-}
-
-function normalizeRoute(route: string) {
-  const trimmed = route.trim()
-  return trimmed ? trimmed : null
-}
-
-function validateTemplateFields(title: string, body: string, route: string | null) {
-  if (!title || !body) {
-    return 'Título y cuerpo son obligatorios'
-  }
-
-  if (route && !route.startsWith('/')) {
-    return 'La ruta debe empezar por / o quedar vacía'
-  }
-
-  return null
-}
-
-const weekdayOptions = [
-  { value: 0, label: 'Domingo' },
-  { value: 1, label: 'Lunes' },
-  { value: 2, label: 'Martes' },
-  { value: 3, label: 'Miércoles' },
-  { value: 4, label: 'Jueves' },
-  { value: 5, label: 'Viernes' },
-  { value: 6, label: 'Sábado' },
-]
-
-const mealTimeLabels = ['Desayuno', 'Comida', 'Snack', 'Cena']
-const DELIVERY_TYPE_OPTIONS: FilterOption[] = [
-  { value: 'manual', label: 'Manual' },
-  { value: 'event', label: 'Por evento' },
-  { value: 'schedule', label: 'Programada' },
-]
-const TEMPLATE_ORIGIN_OPTIONS: FilterOption[] = [
-  { value: 'SYSTEM', label: 'Automática' },
-  { value: 'MANUAL', label: 'Manual' },
-]
-const TEMPLATE_STATE_OPTIONS: FilterOption[] = [
-  { value: 'ENABLED', label: 'Activa' },
-  { value: 'PAUSED', label: 'Pausada' },
-]
-
-function getScheduleDraft(template: NotificationTemplate): ScheduleDraft {
-  const delivery = template.delivery_info
-
-  if (delivery.type !== 'schedule') {
-    return defaultScheduleDraft
-  }
-
-  const fallbackTimes =
-    delivery.schedule_kind === 'meal_daily'
-      ? ['08:00', '13:00', '17:00', '20:30']
-      : [delivery.times?.[0] ?? '09:00']
-
-  return {
-    enabled: delivery.schedule_enabled ?? true,
-    timezone: delivery.timezone ?? 'Europe/Madrid',
-    times: delivery.times && delivery.times.length > 0 ? delivery.times : fallbackTimes,
-    weekday: delivery.weekday ?? 0,
-  }
-}
-
-function normalizeScheduleDraft(template: NotificationTemplate, draft: ScheduleDraft): ScheduleDraft {
-  const kind = template.delivery_info.schedule_kind
-  const timeCount = kind === 'meal_daily' ? 4 : 1
-  const times = Array.from({ length: timeCount }, (_, index) => draft.times[index] ?? '')
-
-  return {
-    enabled: draft.enabled,
-    timezone: draft.timezone.trim(),
-    times,
-    weekday: kind === 'weekly' ? draft.weekday : 0,
-  }
-}
-
-function schedulesEqual(left: ScheduleDraft, right: ScheduleDraft) {
-  return (
-    left.enabled === right.enabled &&
-    left.timezone === right.timezone &&
-    left.weekday === right.weekday &&
-    left.times.length === right.times.length &&
-    left.times.every((time, index) => time === right.times[index])
-  )
-}
-
-function formatUpdatedAt(value: string | null) {
-  if (!value) {
-    return 'Sin cambios'
-  }
-
-  return new Date(value).toLocaleString('es-ES', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
-function getTemplateSearchText(template: NotificationTemplate) {
-  return [
-    template.name,
-    template.description,
-    template.category,
-    template.title,
-    template.body,
-    template.key,
-    template.delivery_info.label,
-    template.delivery_info.description,
-  ]
-    .join(' ')
-    .toLowerCase()
-}
-
-function getTemplateOrigin(template: NotificationTemplate) {
-  return template.is_system ? 'SYSTEM' : 'MANUAL'
-}
-
-function getTemplateState(template: NotificationTemplate) {
-  return template.enabled ? 'ENABLED' : 'PAUSED'
-}
-
-function TemplateVariables({ template }: { template: NotificationTemplate }) {
-  if (template.variables.length === 0) {
-    return (
-      <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-        Esta plantilla no recibe datos dinámicos. El texto se enviará tal como está escrito.
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
-        Las variables se reemplazan al enviar. Mantén las llaves si quieres conservar ese dato dinámico.
-      </p>
-      <div className="space-y-2">
-        {template.variables.map((variable) => (
-          <div key={variable} className="rounded-lg border border-border bg-muted/20 p-3">
-            <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
-              {`{${variable}}`}
-            </Badge>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {template.variable_help[variable] ?? 'Dato dinámico que el sistema reemplaza al enviar.'}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function DeliveryInfo({ template }: { template: NotificationTemplate }) {
-  const delivery = template.delivery_info
-  const typeLabel =
-    delivery.type === 'schedule'
-      ? 'Programada'
-      : delivery.type === 'event'
-        ? 'Por evento'
-        : 'Manual'
-
-  return (
-    <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
-          {typeLabel}
-        </Badge>
-        <p className="text-sm font-medium text-foreground">{delivery.label}</p>
-      </div>
-      <p className="text-sm text-muted-foreground">{delivery.description}</p>
-      {delivery.type === 'schedule' ? (
-        <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
-          <p>
-            Estado horario:{' '}
-            <span className="font-medium text-foreground">
-              {delivery.schedule_enabled === false ? 'Pausado' : 'Activo'}
-            </span>
-          </p>
-          <p>
-            Huso horario: <span className="font-medium text-foreground">{delivery.timezone ?? 'Europe/Madrid'}</span>
-          </p>
-          {delivery.cron ? (
-            <p>
-              Cron: <span className="font-mono text-foreground">{delivery.cron}</span>
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
-  )
-}
-
-function ScheduleEditor({ template }: { template: NotificationTemplate }) {
-  const updateSchedule = useUpdateNotificationTemplateSchedule()
-  const [draft, setDraft] = useState<ScheduleDraft>(() => getScheduleDraft(template))
-  const delivery = template.delivery_info
-  const kind = delivery.schedule_kind ?? 'daily'
-
-  useEffect(() => {
-    setDraft(getScheduleDraft(template))
-  }, [template])
-
-  const baseline = useMemo(
-    () => normalizeScheduleDraft(template, getScheduleDraft(template)),
-    [template],
-  )
-  const normalizedDraft = normalizeScheduleDraft(template, draft)
-  const hasChanges = !schedulesEqual(normalizedDraft, baseline)
-  useUnsavedChanges(`notification-schedule-${template.key}`, hasChanges || updateSchedule.isPending)
-  const timeLabels = kind === 'meal_daily' ? mealTimeLabels : ['Hora']
-
-  if (delivery.type !== 'schedule') {
-    return null
-  }
-
-  const handleTimeChange = (index: number, value: string) => {
-    setDraft((current) => {
-      const nextTimes = [...current.times]
-      nextTimes[index] = value
-      return { ...current, times: nextTimes }
-    })
-  }
-
-  const handleSave = async () => {
-    const nextDraft = normalizeScheduleDraft(template, draft)
-
-    if (!nextDraft.timezone) {
-      toast.error('El huso horario es obligatorio')
-      return
-    }
-
-    if (nextDraft.times.some((time) => !time)) {
-      toast.error('Completa todas las horas')
-      return
-    }
-
-    try {
-      await updateSchedule.mutateAsync({
-        key: template.key,
-        values: {
-          enabled: nextDraft.enabled,
-          timezone: nextDraft.timezone,
-          times: nextDraft.times,
-          weekday: kind === 'weekly' ? nextDraft.weekday : null,
-        },
-      })
-      toast.success('Horario actualizado')
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'No se ha podido actualizar el horario'))
-    }
-  }
-
-  return (
-    <div className="space-y-4 rounded-lg border border-border bg-muted/20 p-4">
-      <div className="flex items-start gap-3">
-        <input
-          id={`schedule-enabled-${template.key}`}
-          type="checkbox"
-          checked={draft.enabled}
-          onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))}
-          disabled={updateSchedule.isPending}
-          className="mt-1 h-4 w-4 rounded border-input"
-        />
-        <div className="space-y-1">
-          <Label htmlFor={`schedule-enabled-${template.key}`}>Programación activa</Label>
-          <p className="text-sm text-muted-foreground">
-            Si está pausada, el horario no se ejecuta aunque el texto de la plantilla siga activo.
-          </p>
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor={`schedule-timezone-${template.key}`}>Huso horario</Label>
-          <Input
-            id={`schedule-timezone-${template.key}`}
-            value={draft.timezone}
-            onChange={(event) => setDraft((current) => ({ ...current, timezone: event.target.value }))}
-            disabled={updateSchedule.isPending}
-            placeholder="Europe/Madrid"
-          />
-        </div>
-
-        {kind === 'weekly' ? (
-          <div className="space-y-2">
-            <Label htmlFor={`schedule-weekday-${template.key}`}>Día de la semana</Label>
-            <select
-              id={`schedule-weekday-${template.key}`}
-              value={draft.weekday}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, weekday: Number(event.target.value) }))
-              }
-              disabled={updateSchedule.isPending}
-              className="flex h-10 w-full rounded-lg border border-input bg-input px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {weekdayOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : null}
-      </div>
-
-      <div className={cn('grid gap-3', kind === 'meal_daily' ? 'sm:grid-cols-2' : 'sm:grid-cols-[220px]')}>
-        {timeLabels.map((label, index) => (
-          <div key={label} className="space-y-2">
-            <Label htmlFor={`schedule-time-${template.key}-${index}`}>{label}</Label>
-            <Input
-              id={`schedule-time-${template.key}-${index}`}
-              type="time"
-              value={draft.times[index] ?? ''}
-              onChange={(event) => handleTimeChange(index, event.target.value)}
-              disabled={updateSchedule.isPending}
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-muted-foreground">
-          El cambio se aplica en la siguiente comprobación del programador.
-        </p>
-        <Button type="button" onClick={handleSave} disabled={updateSchedule.isPending || !hasChanges}>
-          <Save className="h-4 w-4" />
-          {updateSchedule.isPending ? 'Guardando...' : 'Guardar horario'}
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-function LoadingState() {
-  return (
-    <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-5 w-48" />
-          <Skeleton className="h-4 w-64" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-16 w-full" />
-          ))}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-64" />
-          <Skeleton className="h-4 w-80" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-28 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-interface CreateTemplateDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onCreated: (template: NotificationTemplate) => void
-}
-
-function CreateTemplateDialog({ open, onOpenChange, onCreated }: CreateTemplateDialogProps) {
-  const createTemplate = useCreateNotificationTemplate()
-  const [draft, setDraft] = useState<CreateTemplateDraft>(emptyCreateDraft)
-  useUnsavedChanges(
-    'create-notification-template',
-    open && (JSON.stringify(draft) !== JSON.stringify(emptyCreateDraft) || createTemplate.isPending),
-  )
-
-  useEffect(() => {
-    if (!open) {
-      setDraft(emptyCreateDraft)
-    }
-  }, [open])
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    const name = draft.name.trim()
-    const title = draft.title.trim()
-    const body = draft.body.trim()
-    const route = normalizeRoute(draft.route)
-    const validationError = validateTemplateFields(title, body, route)
-
-    if (!name) {
-      toast.error('El nombre es obligatorio')
-      return
-    }
-
-    if (validationError) {
-      toast.error(validationError)
-      return
-    }
-
-    try {
-      const template = await createTemplate.mutateAsync({
-        name,
-        description: draft.description.trim() || undefined,
-        category: draft.category.trim() || 'Manual',
-        title,
-        body,
-        route,
-        enabled: draft.enabled,
-      })
-      toast.success('Plantilla creada')
-      onCreated(template)
-      onOpenChange(false)
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'No se ha podido crear la plantilla'))
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Nueva plantilla manual</DialogTitle>
-          <DialogDescription>
-            Crea un texto reutilizable para enviar notificaciones puntuales desde el panel.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
-            <div className="space-y-2">
-              <Label htmlFor="new-template-name">Nombre</Label>
-              <Input
-                id="new-template-name"
-                value={draft.name}
-                onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
-                maxLength={120}
-                disabled={createTemplate.isPending}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="new-template-category">Categoría</Label>
-              <Input
-                id="new-template-category"
-                value={draft.category}
-                onChange={(event) => setDraft((current) => ({ ...current, category: event.target.value }))}
-                maxLength={80}
-                disabled={createTemplate.isPending}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="new-template-description">Descripción</Label>
-            <Input
-              id="new-template-description"
-              value={draft.description}
-              onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
-              maxLength={240}
-              disabled={createTemplate.isPending}
-              placeholder="Uso recomendado de esta plantilla"
-            />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_220px]">
-            <div className="space-y-2">
-              <Label htmlFor="new-template-title">Título</Label>
-              <Input
-                id="new-template-title"
-                value={draft.title}
-                onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
-                maxLength={120}
-                disabled={createTemplate.isPending}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="new-template-route">Ruta</Label>
-              <Input
-                id="new-template-route"
-                value={draft.route}
-                onChange={(event) => setDraft((current) => ({ ...current, route: event.target.value }))}
-                maxLength={160}
-                disabled={createTemplate.isPending}
-                placeholder="/recap"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="new-template-body">Cuerpo</Label>
-            <textarea
-              id="new-template-body"
-              value={draft.body}
-              onChange={(event) => setDraft((current) => ({ ...current, body: event.target.value }))}
-              maxLength={500}
-              rows={5}
-              disabled={createTemplate.isPending}
-              className="flex min-h-28 w-full resize-y rounded-lg border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            />
-          </div>
-
-          <div className="flex items-start gap-3 rounded-lg border border-border p-3">
-            <input
-              id="new-template-enabled"
-              type="checkbox"
-              checked={draft.enabled}
-              onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))}
-              disabled={createTemplate.isPending}
-              className="mt-1 h-4 w-4 rounded border-input"
-            />
-            <div className="space-y-1">
-              <Label htmlFor="new-template-enabled">Disponible al enviar</Label>
-              <p className="text-sm text-muted-foreground">
-                Si está pausada, no aparecerá como plantilla rápida en envío manual.
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={createTemplate.isPending}>
-              {createTemplate.isPending ? 'Creando...' : 'Crear plantilla'}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  )
+function isScheduleTemplate(template: NotificationTemplate) {
+  return template.delivery_info.type === 'schedule'
 }
 
 export function NotificationTemplatesPage() {
@@ -618,11 +80,15 @@ export function NotificationTemplatesPage() {
   const canManageTemplates = currentUserRole === 'SUPER_ADMIN'
   const templatesQuery = useNotificationTemplates(canManageTemplates)
   const updateTemplate = useUpdateNotificationTemplate()
+  const updateSchedule = useUpdateNotificationTemplateSchedule()
   const resetTemplate = useResetNotificationTemplate()
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
   const [selectedKey, setSelectedKey] = useState('')
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
-  const [draft, setDraft] = useState<TemplateDraft>(emptyDraft)
+  const [textEdits, setTextEdits] = useState<TemplateEdits<TemplateDraft> | null>(null)
+  const [scheduleEdits, setScheduleEdits] = useState<TemplateEdits<ScheduleDraft> | null>(null)
+  const saveInFlightRef = useRef(false)
   const deferredSearch = useDeferredValue(search)
 
   const templates = useMemo(() => templatesQuery.data ?? [], [templatesQuery.data])
@@ -711,32 +177,97 @@ export function NotificationTemplatesPage() {
     selectedStates,
     templates,
   ])
-  const selectedTemplate = filteredTemplates.find((template) => template.key === selectedKey) ?? null
+  const selectedServerTemplate = templates.find((template) => template.key === selectedKey) ?? null
+
+  const draft: TemplateDraft = selectedServerTemplate
+    ? textEdits?.key === selectedServerTemplate.key
+      ? textEdits.draft
+      : getTextDraft(selectedServerTemplate)
+    : emptyDraft
+  const scheduleDraft: ScheduleDraft | null = selectedServerTemplate
+    ? scheduleEdits?.key === selectedServerTemplate.key
+      ? scheduleEdits.draft
+      : getScheduleDraft(selectedServerTemplate)
+    : null
+  const hasTextChanges = selectedServerTemplate ? textDraftDiffers(selectedServerTemplate, draft) : false
+  const hasScheduleChanges =
+    selectedServerTemplate && scheduleDraft && isScheduleTemplate(selectedServerTemplate)
+      ? !schedulesEqual(
+          normalizeScheduleDraft(selectedServerTemplate, scheduleDraft),
+          normalizeScheduleDraft(selectedServerTemplate, getScheduleDraft(selectedServerTemplate)),
+        )
+      : false
+  const hasChanges = hasTextChanges || hasScheduleChanges
+  // A clean template hidden by search/filters is replaced by the first visible one (as before);
+  // a dirty one stays selected and editable so filtering never discards edits.
+  const keepHiddenSelection = Boolean(selectedServerTemplate && hasChanges)
+  const selectedTemplate =
+    selectedServerTemplate &&
+    (keepHiddenSelection || filteredTemplates.some((template) => template.key === selectedKey))
+      ? selectedServerTemplate
+      : null
+
+  /** Changes the selection and drops any edits; callers decide whether discarding is allowed. */
+  const changeSelection = (key: string) => {
+    setSelectedKey(key)
+    setTextEdits(null)
+    setScheduleEdits(null)
+  }
 
   useEffect(() => {
+    if (keepHiddenSelection) {
+      return
+    }
+
     if (filteredTemplates.length === 0) {
       setSelectedKey('')
+      setTextEdits(null)
+      setScheduleEdits(null)
       return
     }
 
     if (!selectedKey || !filteredTemplates.some((template) => template.key === selectedKey)) {
       setSelectedKey(filteredTemplates[0].key)
+      setTextEdits(null)
+      setScheduleEdits(null)
     }
-  }, [filteredTemplates, selectedKey])
+  }, [filteredTemplates, keepHiddenSelection, selectedKey])
 
-  useEffect(() => {
-    if (!selectedTemplate) {
-      setDraft(emptyDraft)
+  const requestSelection = async (key: string) => {
+    if (key === selectedKey) {
       return
     }
 
-    setDraft({
-      title: selectedTemplate.title,
-      body: selectedTemplate.body,
-      route: selectedTemplate.route ?? '',
-      enabled: selectedTemplate.enabled,
+    if (hasChanges && !(await confirm(SWITCH_CONFIRM))) {
+      return
+    }
+
+    changeSelection(key)
+  }
+
+  const setDraft = (action: SetStateAction<TemplateDraft>) => {
+    if (!selectedServerTemplate) {
+      return
+    }
+
+    const template = selectedServerTemplate
+    setTextEdits((current) => {
+      const base = current?.key === template.key ? current.draft : getTextDraft(template)
+      return { key: template.key, draft: typeof action === 'function' ? action(base) : action }
     })
-  }, [selectedTemplate])
+  }
+
+  const setScheduleDraft = (action: SetStateAction<ScheduleDraft>) => {
+    if (!selectedServerTemplate) {
+      return
+    }
+
+    const template = selectedServerTemplate
+    setScheduleEdits((current) => {
+      const base = current?.key === template.key ? current.draft : getScheduleDraft(template)
+      return { key: template.key, draft: typeof action === 'function' ? action(base) : action }
+    })
+  }
 
   const categoryCounts = useMemo(() => {
     return templates.reduce<Record<string, number>>((acc, template) => {
@@ -745,48 +276,107 @@ export function NotificationTemplatesPage() {
     }, {})
   }, [templates])
 
-  const hasChanges = selectedTemplate
-    ? draft.title !== selectedTemplate.title ||
-      draft.body !== selectedTemplate.body ||
-      normalizeRoute(draft.route) !== selectedTemplate.route ||
-      draft.enabled !== selectedTemplate.enabled
-    : false
-
-  const isSaving = updateTemplate.isPending
+  const isSaving = updateTemplate.isPending || updateSchedule.isPending
   const isResetting = resetTemplate.isPending
   const isBusy = isSaving || isResetting
   useUnsavedChanges('notification-template', Boolean(selectedTemplate && (hasChanges || isBusy)))
+  useUnsavedChanges(
+    `notification-schedule-${selectedTemplate?.key ?? ''}`,
+    Boolean(selectedTemplate && (hasScheduleChanges || updateSchedule.isPending)),
+  )
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!selectedTemplate) {
+    if (!selectedTemplate || saveInFlightRef.current || isBusy) {
       return
     }
 
-    const title = draft.title.trim()
-    const body = draft.body.trim()
-    const route = normalizeRoute(draft.route)
-    const validationError = validateTemplateFields(title, body, route)
+    const template = selectedTemplate
+    const key = template.key
+    const textEntry = hasTextChanges && textEdits?.key === key ? textEdits : null
+    const scheduleEntry = hasScheduleChanges && scheduleEdits?.key === key ? scheduleEdits : null
 
-    if (validationError) {
-      toast.error(validationError)
+    if (!textEntry && !scheduleEntry) {
       return
     }
 
+    // Validate every dirty part before sending anything.
+    const validationErrors: string[] = []
+    const textValues = textEntry
+      ? {
+          title: textEntry.draft.title.trim(),
+          body: textEntry.draft.body.trim(),
+          route: normalizeRoute(textEntry.draft.route),
+          enabled: textEntry.draft.enabled,
+        }
+      : null
+    const scheduleValues = scheduleEntry ? normalizeScheduleDraft(template, scheduleEntry.draft) : null
+
+    if (textValues) {
+      const textError = validateTemplateFields(textValues.title, textValues.body, textValues.route)
+      if (textError) {
+        validationErrors.push(textError)
+      }
+    }
+
+    if (scheduleValues) {
+      if (!scheduleValues.timezone) {
+        validationErrors.push('El huso horario es obligatorio')
+      } else if (scheduleValues.times.some((time) => !time)) {
+        validationErrors.push('Completa todas las horas')
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      validationErrors.forEach((message) => toast.error(message))
+      return
+    }
+
+    // Each part is saved and reported on its own: a failure keeps only that part's edits.
+    // Edits are cleared only if the entry is still the one sent, so a late response cannot touch
+    // the drafts of another template or edits discarded by switching templates.
+    const saveText = async () => {
+      if (!textEntry || !textValues) {
+        return
+      }
+
+      try {
+        await updateTemplate.mutateAsync({ key, values: textValues })
+        setTextEdits((current) => (current === textEntry ? null : current))
+        toast.success('Plantilla actualizada')
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, 'No se ha podido actualizar la plantilla'))
+      }
+    }
+
+    const saveSchedule = async () => {
+      if (!scheduleEntry || !scheduleValues) {
+        return
+      }
+
+      try {
+        await updateSchedule.mutateAsync({
+          key,
+          values: {
+            enabled: scheduleValues.enabled,
+            timezone: scheduleValues.timezone,
+            times: scheduleValues.times,
+            weekday: (template.delivery_info.schedule_kind ?? 'daily') === 'weekly' ? scheduleValues.weekday : null,
+          },
+        })
+        setScheduleEdits((current) => (current === scheduleEntry ? null : current))
+        toast.success('Horario actualizado')
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, 'No se ha podido actualizar el horario'))
+      }
+    }
+
+    saveInFlightRef.current = true
     try {
-      await updateTemplate.mutateAsync({
-        key: selectedTemplate.key,
-        values: {
-          title,
-          body,
-          route,
-          enabled: draft.enabled,
-        },
-      })
-      toast.success('Plantilla actualizada')
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'No se ha podido actualizar la plantilla'))
+      await Promise.all([saveText(), saveSchedule()])
+    } finally {
+      saveInFlightRef.current = false
     }
   }
 
@@ -795,21 +385,25 @@ export function NotificationTemplatesPage() {
       return
     }
 
-    const confirmed = selectedTemplate.is_system
-      ? window.confirm(`¿Restaurar "${selectedTemplate.name}" a su texto por defecto?`)
-      : window.confirm(`¿Eliminar la plantilla manual "${selectedTemplate.name}"?`)
+    const confirmed = await (selectedTemplate.is_system
+      ? confirm({ title: `¿Restaurar "${selectedTemplate.name}" a su texto por defecto?` })
+      : confirm({ title: `¿Eliminar la plantilla manual "${selectedTemplate.name}"?`, confirmLabel: 'Eliminar', destructive: true }))
 
     if (!confirmed) {
       return
     }
 
     try {
-      const result = await resetTemplate.mutateAsync(selectedTemplate.key)
+      const key = selectedTemplate.key
+      const result = await resetTemplate.mutateAsync(key)
 
       if ('deleted' in result) {
         toast.success('Plantilla eliminada')
-        setSelectedKey('')
+        changeSelection('')
       } else {
+        // The restore replaces the text the user confirmed to discard; the API keeps the stored
+        // schedule, so unsaved schedule edits are kept too.
+        setTextEdits((current) => (current?.key === key ? null : current))
         toast.success('Plantilla restaurada')
       }
     } catch (error) {
@@ -818,290 +412,84 @@ export function NotificationTemplatesPage() {
   }
 
   if (!canManageTemplates) {
-    return (
-      <div className="space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-foreground">Plantillas de notificaciones</h1>
-          <p className="text-sm text-muted-foreground">
-            Solo super admins pueden cambiar plantillas.
-          </p>
-        </div>
-
-        <Card>
-          <CardContent className="flex items-start gap-3 p-6 text-sm text-muted-foreground">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-status-warning" />
-            <p>No tienes permisos para modificar plantillas.</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <PermissionsNotice />
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-foreground">Plantillas de notificaciones</h1>
-          <p className="text-sm text-muted-foreground">
-            Edita automáticas existentes y crea plantillas manuales para envíos puntuales.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(categoryCounts).map(([category, count]) => (
-              <Badge key={category} variant="outline" className="border-border bg-muted text-muted-foreground">
-                {category}: {count}
-              </Badge>
-            ))}
-          </div>
+    <div>
+      <PageHeader
+        title="Plantillas de notificaciones"
+        description="Edita automáticas existentes y crea plantillas manuales para envíos puntuales."
+        actions={
           <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Nueva plantilla
           </Button>
-        </div>
+        }
+      />
+
+      <div className="mb-6 flex items-start gap-3 border border-status-info/30 bg-status-info-soft p-3 text-[13px] leading-5 text-foreground-secondary">
+        <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-info" />
+        <p>
+          Las plantillas automáticas dependen de un evento del sistema. Una plantilla nueva creada aquí es manual:
+          queda disponible al enviar una notificación desde el historial.
+        </p>
       </div>
 
-      <div className="rounded-lg border border-brand-primary/15 bg-brand-soft/10 p-4 text-sm text-muted-foreground">
-        Las plantillas automáticas dependen de un evento del sistema. Una plantilla nueva creada aquí es manual:
-        queda disponible al enviar una notificación desde el historial.
+      <div className="mb-4 flex flex-wrap gap-2">
+        {Object.entries(categoryCounts).map(([category, count]) => (
+          <Badge key={category} variant="outline" className="rounded-none border-border-strong text-foreground-secondary">
+            {category}: {count}
+          </Badge>
+        ))}
       </div>
 
       {templatesQuery.isLoading ? <LoadingState /> : null}
 
       {templatesQuery.isError ? (
-        <Card>
-          <CardContent className="flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-status-error" />
-              <div className="space-y-1">
-                <p className="font-medium text-foreground">No se pudieron cargar las plantillas</p>
-                <p className="text-sm text-muted-foreground">
-                  {getApiErrorMessage(templatesQuery.error, 'Reintenta en unos segundos')}
-                </p>
-              </div>
-            </div>
-            <Button variant="outline" onClick={() => void templatesQuery.refetch()}>
-              <RefreshCcw className="h-4 w-4" />
-              Reintentar
-            </Button>
-          </CardContent>
-        </Card>
+        <LoadErrorCard error={templatesQuery.error} onRetry={() => void templatesQuery.refetch()} />
       ) : null}
 
       {!templatesQuery.isLoading && !templatesQuery.isError ? (
-        <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Plantillas</CardTitle>
-              <CardDescription>
-                {filteredTemplates.length} visibles de {templates.length}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <FilterToolbar
-                onSearchChange={setSearch}
-                searchPlaceholder="Nombre, categoría o texto"
-                sections={filterSections}
-                filters={filters}
-                search={search}
-                  placeholder="Nombre, categoría o texto"
-                />
-              </div>
+        <div className="grid border-t border-border-strong xl:grid-cols-[360px_minmax(0,1fr)]">
+          <TemplateList
+            filteredTemplates={filteredTemplates}
+            templates={templates}
+            selectedTemplate={selectedTemplate}
+            setSelectedKey={(key) => void requestSelection(key)}
+            search={search}
+            setSearch={setSearch}
+            filterSections={filterSections}
+            filters={filters}
+          />
 
-              <div className="space-y-2">
-                {filteredTemplates.map((template) => {
-                  const isSelected = template.key === selectedTemplate?.key
-
-                  return (
-                    <button
-                      key={template.key}
-                      type="button"
-                      className={cn(
-                        'w-full rounded-lg border p-3 text-left transition-colors',
-                        isSelected
-                          ? 'border-brand-primary bg-brand-primary/10'
-                          : 'border-border bg-background hover:bg-muted/40',
-                      )}
-                      onClick={() => setSelectedKey(template.key)}
-                    >
-                      <span className="flex items-start justify-between gap-3">
-                        <span className="min-w-0 space-y-1">
-                          <span className="block truncate text-sm font-medium text-foreground">{template.name}</span>
-                          <span className="block line-clamp-2 text-xs text-muted-foreground">{template.title}</span>
-                        </span>
-                        <span className="flex shrink-0 flex-col items-end gap-1">
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              'text-[10px]',
-                              template.is_system
-                                ? 'border-brand-primary/20 bg-brand-soft/10 text-brand-primary'
-                                : 'border-border bg-muted text-muted-foreground',
-                            )}
-                          >
-                            {template.is_system ? 'Automática' : 'Manual'}
-                          </Badge>
-                          <Badge variant="outline" className="border-border bg-muted text-[10px] text-muted-foreground">
-                            {template.category}
-                          </Badge>
-                          {!template.enabled ? (
-                            <Badge variant="outline" className="border-status-warning/30 bg-status-warning/10 text-[10px] text-status-warning">
-                              Pausada
-                            </Badge>
-                          ) : null}
-                        </span>
-                      </span>
-                    </button>
-                  )
-                })}
-
-                {filteredTemplates.length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-                    No hay plantillas con esos filtros.
-                  </p>
-                ) : null}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
+          <div className="min-w-0 xl:pl-8">
             {selectedTemplate ? (
-              <form onSubmit={handleSubmit}>
-                <CardHeader className="gap-3">
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="space-y-2">
-                      <CardTitle className="text-xl">{selectedTemplate.name}</CardTitle>
-                      <CardDescription>{selectedTemplate.description}</CardDescription>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
-                        {selectedTemplate.category}
-                      </Badge>
-                      <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
-                        {selectedTemplate.is_system ? 'Automática' : 'Manual'}
-                      </Badge>
-                      <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
-                        {selectedTemplate.customized ? 'Editada' : 'Por defecto'}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Último cambio: {formatUpdatedAt(selectedTemplate.updated_at)}
-                  </p>
-                </CardHeader>
-
-                <CardContent className="space-y-5">
-                  <div className="flex items-start gap-3">
-                    <input
-                      id="template-enabled"
-                      type="checkbox"
-                      checked={draft.enabled}
-                      onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))}
-                      disabled={isBusy}
-                      className="mt-1 h-4 w-4 rounded border-input"
-                    />
-                    <div className="space-y-1">
-                      <Label htmlFor="template-enabled">Activa</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedTemplate.is_system
-                          ? 'Al pausar, el evento automático no enviará nada.'
-                          : 'Al pausar, no aparecerá como plantilla rápida al enviar.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
-                    <div className="space-y-2">
-                      <Label htmlFor="template-title">Título</Label>
-                      <Input
-                        id="template-title"
-                        value={draft.title}
-                        onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
-                        disabled={isBusy}
-                        maxLength={120}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="template-route">Ruta</Label>
-                      <Input
-                        id="template-route"
-                        value={draft.route}
-                        onChange={(event) => setDraft((current) => ({ ...current, route: event.target.value }))}
-                        disabled={isBusy}
-                        placeholder="/trainings"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="template-body">Cuerpo</Label>
-                    <textarea
-                      id="template-body"
-                      value={draft.body}
-                      onChange={(event) => setDraft((current) => ({ ...current, body: event.target.value }))}
-                      disabled={isBusy}
-                      maxLength={500}
-                      rows={5}
-                      className="flex min-h-28 w-full resize-y rounded-lg border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                    <p className="text-xs text-muted-foreground">{draft.body.length}/500 caracteres</p>
-                  </div>
-
-                  <div className="space-y-2 border-t border-border pt-4">
-                    <Label>Cuándo se envía</Label>
-                    <DeliveryInfo template={selectedTemplate} />
-                    <ScheduleEditor template={selectedTemplate} />
-                  </div>
-
-                  <div className="space-y-2 border-t border-border pt-4">
-                    <Label>Variables</Label>
-                    <TemplateVariables template={selectedTemplate} />
-                  </div>
-
-                  <div className="space-y-2 border-t border-border pt-4">
-                    <Label>Vista previa</Label>
-                    <div className="space-y-1 rounded-lg border border-border bg-muted/30 p-3">
-                      <p className="text-sm font-medium text-foreground">{draft.title || 'Sin título'}</p>
-                      <p className="text-sm text-muted-foreground">{draft.body || 'Sin cuerpo'}</p>
-                      <p className="text-xs text-muted-foreground">{normalizeRoute(draft.route) ?? 'Sin ruta'}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleResetOrDelete}
-                      disabled={isBusy || (selectedTemplate.is_system && !selectedTemplate.customized)}
-                    >
-                      {selectedTemplate.is_system ? <RotateCcw className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
-                      {selectedTemplate.is_system ? 'Restaurar defecto' : 'Eliminar plantilla'}
-                    </Button>
-
-                    <Button type="submit" disabled={isBusy || !hasChanges}>
-                      <Save className="h-4 w-4" />
-                      {isSaving ? 'Guardando...' : 'Guardar cambios'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </form>
+              <TemplateEditorForm
+                selectedTemplate={selectedTemplate}
+                draft={draft}
+                setDraft={setDraft}
+                scheduleDraft={scheduleDraft ?? getScheduleDraft(selectedTemplate)}
+                setScheduleDraft={setScheduleDraft}
+                isBusy={isBusy}
+                isSaving={isSaving}
+                hasChanges={hasChanges}
+                handleSubmit={handleSubmit}
+                handleResetOrDelete={handleResetOrDelete}
+              />
             ) : (
-              <CardContent className="p-6 text-sm text-muted-foreground">
-                Selecciona una plantilla para editarla.
-              </CardContent>
+              <EmptyState title="Selecciona una plantilla para editarla." />
             )}
-          </Card>
+          </div>
         </div>
       ) : null}
 
       <CreateTemplateDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onCreated={(template) => setSelectedKey(template.key)}
+        onCreated={(template) => void requestSelection(template.key)}
       />
+      {confirmDialog}
     </div>
   )
 }

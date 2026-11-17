@@ -1,8 +1,7 @@
+import { FigureStrip } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { AlertTriangle, Archive, CheckCircle2, Clock3, FileText } from 'lucide-react'
-import { AvgReviewTimeCard } from '@/components/stats/avg-review-time-card'
+import { formatReviewCount, formatReviewDuration } from '@/lib/review-duration'
 import { useRecapStats, type RecapStatsParams } from '../api'
 
 export function RecapsStatsCards({ params }: { params?: RecapStatsParams }) {
@@ -10,16 +9,17 @@ export function RecapsStatsCards({ params }: { params?: RecapStatsParams }) {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Card key={i}>
-            <CardHeader className="pb-2">
-              <Skeleton className="h-4 w-32" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-16" />
-            </CardContent>
-          </Card>
+      <div
+        role="status"
+        aria-busy="true"
+        className="grid grid-cols-2 gap-px border-y border-border-strong lg:grid-cols-5"
+      >
+        <span className="sr-only">Cargando resumen de recaps</span>
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} aria-hidden="true" className="space-y-3 px-5 pb-[18px] pt-4">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-9 w-16" />
+          </div>
         ))}
       </div>
     )
@@ -27,70 +27,42 @@ export function RecapsStatsCards({ params }: { params?: RecapStatsParams }) {
 
   if (isError) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <Card className="border-status-error/30 sm:col-span-2 xl:col-span-5">
-          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-            <div className="space-y-1">
-              <CardTitle className="text-base">No se pudo cargar el resumen</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Reintenta para recuperar los contadores de recaps.
-              </p>
-            </div>
-            <AlertTriangle className="h-5 w-5 text-status-error" />
-          </CardHeader>
-          <CardContent>
-            <Button size="sm" variant="outline" onClick={() => void refetch()} disabled={isFetching}>
-              {isFetching ? 'Reintentando...' : 'Reintentar'}
-            </Button>
-          </CardContent>
-        </Card>
+      <div
+        role="alert"
+        className="flex flex-col gap-3 border-y border-border-strong px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div className="space-y-1">
+          <p className="text-base font-semibold text-foreground">No se pudo cargar el resumen</p>
+          <p className="text-[13px] text-foreground-secondary">
+            Reintenta para recuperar los contadores de recaps.
+          </p>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => void refetch()} disabled={isFetching} className="max-md:h-11">
+          {isFetching ? 'Reintentando...' : 'Reintentar'}
+        </Button>
       </div>
     )
   }
 
+  const reviewedInPeriod = stats?.reviewed_in_period
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Total recaps</CardTitle>
-          <FileText className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">{stats?.total ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Por revisar</CardTitle>
-          <Clock3 className="h-4 w-4 text-status-warning" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{stats?.submitted ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Revisados</CardTitle>
-          <CheckCircle2 className="h-4 w-4 text-status-success" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{stats?.reviewed ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Archivados</CardTitle>
-          <Archive className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold text-foreground">{stats?.archived ?? 0}</p>
-        </CardContent>
-      </Card>
-
-      <AvgReviewTimeCard seconds={stats?.avg_review_seconds} reviewedInPeriod={stats?.reviewed_in_period} />
-    </div>
+    <FigureStrip
+      aria-label="Resumen de recaps"
+      items={[
+        { label: 'Total recaps', value: stats?.total ?? 0 },
+        { label: 'Por revisar', value: stats?.submitted ?? 0, tone: (stats?.submitted ?? 0) > 0 ? 'warning' : 'default' },
+        { label: 'Revisados', value: stats?.reviewed ?? 0 },
+        { label: 'Archivados', value: stats?.archived ?? 0 },
+        {
+          label: 'Tiempo medio de revisión',
+          value: formatReviewDuration(stats?.avg_review_seconds),
+          hint:
+            reviewedInPeriod !== undefined && reviewedInPeriod !== null
+              ? formatReviewCount(reviewedInPeriod)
+              : undefined,
+        },
+      ]}
+    />
   )
 }

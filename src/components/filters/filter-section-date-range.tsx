@@ -17,7 +17,7 @@ export function FilterSectionDateRange({
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
           Desde
         </p>
         <Input
@@ -29,7 +29,7 @@ export function FilterSectionDateRange({
         />
       </div>
       <div className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
           Hasta
         </p>
         <Input

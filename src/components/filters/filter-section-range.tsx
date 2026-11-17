@@ -46,7 +46,7 @@ export function FilterSectionRange({ section, value, onChange }: FilterSectionRa
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Mínimo
           </p>
           <Input
@@ -60,7 +60,7 @@ export function FilterSectionRange({ section, value, onChange }: FilterSectionRa
           />
         </div>
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Máximo
           </p>
           <Input
@@ -75,7 +75,7 @@ export function FilterSectionRange({ section, value, onChange }: FilterSectionRa
         </div>
       </div>
 
-      <div className="rounded-lg border border-border/70 bg-muted/20 p-3">
+      <div className="rounded-none border border-border bg-card p-3">
         <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
           <span>
             {section.min}

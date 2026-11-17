@@ -1,7 +1,6 @@
-import { ChevronLeft, ChevronRight, Copy, Layers3, Pencil, Plus, Repeat2, Trash2, X } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { ChevronLeft, ChevronRight, Copy, Layers3, Pencil, Plus, Repeat2, Trash2 } from 'lucide-react'
+import { PageHeader } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -9,6 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { SegmentedControl } from '@/components/ui/segmented'
+import { StatusChip } from '@/components/ui/status-chip'
+import { SelectionBar } from '@/components/workspace/selection-bar'
 import { getUserDisplayName } from '../../clients/types'
 import type { AssignmentSummary, AssignmentsViewMode, AutoAssignmentRule, ClientOption } from '../types'
 
@@ -34,6 +36,7 @@ interface AssignmentsToolbarProps {
   onChangeView: (viewMode: AssignmentsViewMode) => void
   onPreviousPeriod: () => void
   onNextPeriod: () => void
+  onToday: () => void
   onOpenEditor: () => void
   onOpenCopyWeek: () => void
   onOpenCopySelection: () => void
@@ -41,6 +44,11 @@ interface AssignmentsToolbarProps {
   onDeleteSelectedDays: () => void
   onClearSelection: () => void
 }
+
+const viewOptions: { value: AssignmentsViewMode; label: string }[] = [
+  { value: 'week', label: 'Semanal' },
+  { value: 'month', label: 'Mensual' },
+]
 
 export function AssignmentsToolbar({
   clients,
@@ -64,6 +72,7 @@ export function AssignmentsToolbar({
   onChangeView,
   onPreviousPeriod,
   onNextPeriod,
+  onToday,
   onOpenEditor,
   onOpenCopyWeek,
   onOpenCopySelection,
@@ -72,142 +81,122 @@ export function AssignmentsToolbar({
   onClearSelection,
 }: AssignmentsToolbarProps) {
   return (
-    <Card>
-      <CardContent className="min-w-0 space-y-5 p-4 sm:p-6">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div className="space-y-2">
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand-primary">Planificación de asignaciones</p>
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground">Asignaciones</h2>
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                Alterna entre la vista semanal y mensual, selecciona varios días y configura entrenamientos, dietas o descansos sin salir del modal.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-2 sm:flex sm:flex-wrap">
+    <div className="flex min-w-0 flex-col gap-5">
+      <PageHeader
+        className="mb-0 md:mb-0"
+        eyebrow="Planificación de asignaciones"
+        title="Asignaciones"
+        description="Alterna entre la vista semanal y mensual, selecciona varios días y configura entrenamientos, dietas o descansos sin salir del modal."
+        actions={
+          <>
             <Button variant="outline" onClick={onSelectAllVisible} disabled={!canSelectAll || isBusy}>
-              <Layers3 className="h-4 w-4" />
+              <Layers3 aria-hidden="true" className="h-4 w-4" />
               Seleccionar todos
             </Button>
             <Button variant="outline" onClick={onOpenCopyWeek} disabled={!canCopyWeek || isBusy}>
-              <Copy className="h-4 w-4" />
+              <Copy aria-hidden="true" className="h-4 w-4" />
               Copiar semana
             </Button>
-            <Button variant="outline" onClick={onOpenCopySelection} disabled={!canCopySelection || isBusy}>
-              <Copy className="h-4 w-4" />
-              Copiar selección
+          </>
+        }
+      />
+
+      <div className="flex min-w-0 flex-wrap items-end gap-x-6 gap-y-4">
+        <div className="min-w-0 space-y-2 max-md:w-full md:w-72">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted">Cliente</p>
+          <Select value={selectedClientId || ''} onValueChange={onClientChange}>
+            <SelectTrigger aria-label="Cliente">
+              <SelectValue placeholder="Selecciona un cliente" />
+            </SelectTrigger>
+            <SelectContent>
+              {clients.map((client) => (
+                <SelectItem key={client.id} value={client.id}>
+                  {getUserDisplayName(client)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2 max-md:w-full">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted">Vista</p>
+          <SegmentedControl
+            aria-label="Vista del calendario"
+            value={viewMode}
+            options={viewOptions.map((option) => ({ ...option, disabled: isBusy }))}
+            onValueChange={onChangeView}
+            className="max-md:flex max-md:w-full max-md:[&>button]:h-9 max-md:[&>button]:flex-1"
+          />
+        </div>
+
+        <div className="min-w-0 space-y-2 max-md:w-full">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted">Periodo visible</p>
+          <div className="flex flex-wrap items-center gap-2 md:flex-nowrap">
+            <Button variant="outline" className="max-md:flex-1" onClick={onPreviousPeriod} disabled={!selectedClientId || isBusy}>
+              <ChevronLeft aria-hidden="true" className="h-4 w-4" />
+              Anterior
             </Button>
-            <Button onClick={onOpenEditor} disabled={!canAssign || isBusy}>
-              <Plus className="h-4 w-4" />
-              {assignActionLabel}
+            <p className="text-center text-sm font-semibold tabular-nums text-foreground max-md:order-first max-md:w-full md:min-w-40">{periodLabel}</p>
+            <Button variant="outline" className="max-md:flex-1" onClick={onNextPeriod} disabled={!selectedClientId || isBusy}>
+              Siguiente
+              <ChevronRight aria-hidden="true" className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" className="max-md:flex-1" onClick={onToday} disabled={!selectedClientId || isBusy}>
+              Hoy
             </Button>
           </div>
         </div>
+      </div>
 
-        <div className="grid min-w-0 gap-4 md:grid-cols-2 2xl:grid-cols-[minmax(240px,320px)_minmax(180px,220px)_minmax(360px,1fr)] 2xl:items-end">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-foreground">Cliente</p>
-            <Select value={selectedClientId || ''} onValueChange={onClientChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona un cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {clients.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {getUserDisplayName(client)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-foreground">Vista</p>
-            <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border/70 bg-background/60 p-1">
-              <Button
-                type="button"
-                variant={viewMode === 'week' ? 'default' : 'ghost'}
-                onClick={() => onChangeView('week')}
-                disabled={isBusy}
-              >
-                Semanal
-              </Button>
-              <Button
-                type="button"
-                variant={viewMode === 'month' ? 'default' : 'ghost'}
-                onClick={() => onChangeView('month')}
-                disabled={isBusy}
-              >
-                Mensual
-              </Button>
-            </div>
-          </div>
-
-          <div className="min-w-0 space-y-3 rounded-2xl border border-border/70 bg-background/50 p-4 md:col-span-2 2xl:col-span-1">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground">Periodo visible</p>
-                <p className="text-sm text-muted-foreground">{periodLabel}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2 sm:flex">
-                <Button variant="outline" onClick={onPreviousPeriod} disabled={!selectedClientId || isBusy}>
-                  <ChevronLeft className="h-4 w-4" />
-                  Anterior
-                </Button>
-                <Button variant="outline" onClick={onNextPeriod} disabled={!selectedClientId || isBusy}>
-                  Siguiente
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {isAutoRuleLoading ? (
-                <Badge variant="outline" className="border-border/70 bg-background text-muted-foreground">
-                  Cargando autoasignación
-                </Badge>
-              ) : activeAutoRule ? (
-                <Badge variant="outline" className="border-status-success/30 bg-status-success/10 text-status-success">
-                  Autoasignación activa desde {activeAutoRule.starts_on}
-                  {activeAutoRule.ends_on ? ` hasta ${activeAutoRule.ends_on}` : ' · indefinida'}
-                </Badge>
-              ) : null}
-              <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-status-info">
-                {summary.training_days} días con entreno
-              </Badge>
-              <Badge variant="outline" className="border-status-success/30 bg-status-success/10 text-status-success">
-                {summary.diet_days} días con dieta
-              </Badge>
-              <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
-                {summary.rest_days} descansos
-              </Badge>
-              <Badge variant="outline" className="border-border/70 bg-background text-foreground">
-                {selectionCount} seleccionados
-              </Badge>
-            </div>
-          </div>
-
-          <div className="grid gap-2 sm:flex sm:flex-wrap md:col-span-2 2xl:col-span-3 2xl:justify-end">
-            <Button variant="outline" onClick={onEditAutoRule} disabled={!activeAutoRule || isBusy}>
-              <Pencil className="h-4 w-4" />
-              Editar autoasignación
-            </Button>
-            <Button variant="outline" onClick={onDeactivateAutoRule} disabled={!activeAutoRule || isBusy}>
-              <Repeat2 className="h-4 w-4" />
-              Desactivar autoasignación
-            </Button>
-            <Button variant="outline" onClick={onClearSelection} disabled={selectionCount === 0 || isBusy}>
-              <X className="h-4 w-4" />
-              Limpiar selección
-            </Button>
-            <Button variant="outline" onClick={onDeleteSelectedDays} disabled={!canDeleteSelectedDays || isBusy}>
-              <Trash2 className="h-4 w-4" />
-              {selectionCount > 1 ? 'Limpiar días' : 'Limpiar día'}
-            </Button>
-          </div>
+      <div className="flex min-h-11 min-w-0 flex-wrap items-center gap-x-4 gap-y-2 border-y border-border py-2 text-[13px] text-foreground-secondary">
+        <div role="group" aria-label="Resumen del periodo" className="flex flex-wrap items-center gap-x-4 gap-y-1 tabular-nums">
+          <span>{`${summary.training_days} días con entreno`}</span>
+          <span>{`${summary.diet_days} días con dieta`}</span>
+          <span>{`${summary.rest_days} descansos`}</span>
         </div>
-      </CardContent>
-    </Card>
+        {isAutoRuleLoading ? (
+          <StatusChip variant="neutral" dot={false}>
+            Cargando autoasignación
+          </StatusChip>
+        ) : activeAutoRule ? (
+          <StatusChip variant="success">
+            Autoasignación activa desde {activeAutoRule.starts_on}
+            {activeAutoRule.ends_on ? ` hasta ${activeAutoRule.ends_on}` : ' · indefinida'}
+          </StatusChip>
+        ) : null}
+        <div className="flex flex-wrap items-center gap-1 md:ml-auto">
+          <Button variant="ghost" size="sm" onClick={onEditAutoRule} disabled={!activeAutoRule || isBusy}>
+            <Pencil aria-hidden="true" className="h-4 w-4" />
+            Editar autoasignación
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onDeactivateAutoRule} disabled={!activeAutoRule || isBusy}>
+            <Repeat2 aria-hidden="true" className="h-4 w-4" />
+            Desactivar autoasignación
+          </Button>
+        </div>
+      </div>
+
+      <SelectionBar
+        count={selectionCount}
+        onClear={onClearSelection}
+        clearDisabled={isBusy}
+        formatCount={(count) => `${count} seleccionados`}
+        aria-label="Acciones de la selección"
+        className="fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px)+12px)] left-4 right-4 z-40 mt-0 w-auto flex-wrap max-md:overflow-x-visible md:bottom-6 md:left-1/2 md:right-auto md:w-auto md:min-w-96 md:-translate-x-1/2"
+      >
+        <Button onClick={onOpenEditor} disabled={!canAssign || isBusy}>
+          <Plus aria-hidden="true" className="h-4 w-4" />
+          {assignActionLabel}
+        </Button>
+        <Button variant="outline" onClick={onOpenCopySelection} disabled={!canCopySelection || isBusy}>
+          <Copy aria-hidden="true" className="h-4 w-4" />
+          <span className="max-md:sr-only">Copiar selección</span>
+        </Button>
+        <Button variant="outline" onClick={onDeleteSelectedDays} disabled={!canDeleteSelectedDays || isBusy}>
+          <Trash2 aria-hidden="true" className="h-4 w-4" />
+          <span className="max-md:sr-only">{selectionCount > 1 ? 'Limpiar días' : 'Limpiar día'}</span>
+        </Button>
+      </SelectionBar>
+    </div>
   )
 }

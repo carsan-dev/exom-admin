@@ -171,7 +171,7 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Nombre</FormLabel>
                   <FormControl>
                     <Input autoComplete="off" {...field} />
@@ -185,7 +185,7 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" autoComplete="off" {...field} />
@@ -206,7 +206,7 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
                 control={form.control}
                 name="goal"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Objetivo</FormLabel>
                     <Select
                       value={field.value}
@@ -242,7 +242,7 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
                 control={form.control}
                 name="days_per_week"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Días de entrenamiento por semana</FormLabel>
                     <Select value={field.value} disabled={!goal} onValueChange={field.onChange}>
                       <FormControl>
@@ -273,7 +273,7 @@ export function SubscriberFormDialog({ open, onOpenChange, subscriber, routes, r
               control={form.control}
               name="service_scope"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Servicio contratado</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Activity, Pencil, Plus } from 'lucide-react'
+import { Pencil, Plus } from 'lucide-react'
 import { Link } from 'react-router'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState } from '@/components/page'
 import {
   Table,
   TableBody,
@@ -94,17 +94,17 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
   if (metrics.length === 0) {
     return (
       <>
-        <Card>
-          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6 [--muted-foreground:var(--foreground-secondary)] [--primary-foreground:#30271e]">
-            <p className="text-sm text-muted-foreground">
-              Aún no hay métricas corporales registradas para este cliente.
-            </p>
-            <Button size="sm" onClick={openCreateDialog}>
-              <Plus className="h-4 w-4" />
-              Añadir métricas
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="border-y border-border">
+          <EmptyState
+            title="Aún no hay métricas corporales registradas para este cliente."
+            action={
+              <Button size="sm" onClick={openCreateDialog}>
+                <Plus aria-hidden="true" className="h-4 w-4" />
+                Añadir métricas
+              </Button>
+            }
+          />
+        </div>
         <ClientMetricDialog
           clientId={clientId}
           metric={null}
@@ -118,8 +118,8 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
   const summary = summarize(metrics)
 
   return (
-    <div className="space-y-4 [--muted-foreground:var(--foreground-secondary)] [--primary-foreground:#30271e]">
-      <section aria-label="Resumen de últimas mediciones" className="space-y-3">
+    <div className="space-y-10">
+      <section aria-label="Resumen de últimas mediciones" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
             Última medición disponible de cada valor entre los {metrics.length} registros recientes.
@@ -131,11 +131,11 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
         {summary.length === 0 ? (
           <p className="text-sm text-muted-foreground">Ninguna medición tiene valores completos.</p>
         ) : (
-          <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <dl className="grid grid-cols-1 border-y border-border sm:grid-cols-2 lg:grid-cols-3">
             {summary.map((item) => (
-              <div key={item.key} className="rounded-xl border border-border bg-card p-3">
-                <dt className="text-sm text-muted-foreground">{item.label}</dt>
-                <dd className="mt-1 text-lg font-semibold text-foreground">{numberFormatter.format(item.lastValue)} {item.unit}</dd>
+              <div key={item.key} className="-ml-px -mt-px min-w-0 border-l border-t border-border px-5 py-4">
+                <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">{item.label}</dt>
+                <dd className="mt-2 text-lg font-semibold tabular-nums text-foreground">{numberFormatter.format(item.lastValue)} {item.unit}</dd>
                 <dd className="text-xs text-muted-foreground">{tableDateFormatter.format(new Date(item.lastDate))}</dd>
                 <dd className="text-xs text-muted-foreground">
                   {item.change === null ? 'Sin medición anterior' : `Cambio desde la medición anterior: ${formatChange(item.change, item.unit)}`}
@@ -146,23 +146,17 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
         )}
       </section>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-brand-primary" />
-                <CardTitle className="text-xl">Últimas 10 métricas</CardTitle>
-              </div>
-              <CardDescription>Historial reciente de composición corporal y medidas</CardDescription>
-            </div>
-            <Button size="sm" onClick={openCreateDialog}>
-              <Plus className="h-4 w-4" />
-              Añadir métricas
-            </Button>
+      <section aria-labelledby="client-metrics-history-title" className="space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+          <div className="min-w-0 flex-[1_1_16rem]">
+            <h2 id="client-metrics-history-title" className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Últimas 10 métricas</h2>
+            <p className="mt-1 text-[13px] leading-5 text-foreground-secondary">Historial reciente de composición corporal y medidas</p>
           </div>
-        </CardHeader>
-        <CardContent>
+          <Button size="sm" onClick={openCreateDialog}>
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            Añadir métricas
+          </Button>
+        </div>
           <div role="region" aria-label="Historial corporal desplazable" tabIndex={0} className="overflow-x-auto rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <Table>
             <caption className="sr-only">Historial reciente de métricas corporales y acciones</caption>
@@ -217,7 +211,7 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
                       aria-label={`Editar métricas del ${tableDateFormatter.format(new Date(metric.date))}`}
                       onClick={() => openEditDialog(metric)}
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil aria-hidden="true" className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -225,8 +219,7 @@ function ClientMetricsContent({ clientId, metrics }: ClientMetricsTabProps) {
             </TableBody>
           </Table>
           </div>
-        </CardContent>
-      </Card>
+      </section>
 
       <ClientMetricDialog
         clientId={clientId}

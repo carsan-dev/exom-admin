@@ -101,7 +101,7 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
                 control={form.control}
                 name="first_name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
                       <Input placeholder="Lucía" {...field} />
@@ -115,7 +115,7 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
                 control={form.control}
                 name="last_name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Apellido</FormLabel>
                     <FormControl>
                       <Input placeholder="Martínez" {...field} />
@@ -130,7 +130,7 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="cliente@exom.app" autoComplete="email" {...field} />
@@ -144,7 +144,7 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
               control={form.control}
               name="send_invitation"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Método de contraseña</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(value === 'invitation')}
@@ -175,7 +175,7 @@ export function CreateClientDialog({ open, onOpenChange, onCreated }: CreateClie
                   control={form.control}
                   name="password"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem required>
                       <FormLabel>Contraseña</FormLabel>
                       <FormControl>
                         <Input

@@ -42,10 +42,10 @@ export function DeleteTrainingDialog({ training, open, onOpenChange, onDeleted }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="grid-cols-[minmax(0,1fr)] sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Eliminar entrenamiento</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="[overflow-wrap:anywhere]">
             ¿Eliminar <strong>{training?.name}</strong>? El entrenamiento dejará de estar disponible para asignaciones.
           </DialogDescription>
         </DialogHeader>

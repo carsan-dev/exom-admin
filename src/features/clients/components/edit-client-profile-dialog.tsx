@@ -89,7 +89,7 @@ export function EditClientProfileDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent disableOutsideClose className="max-h-[90vh] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Editar datos del cliente</DialogTitle>
           <DialogDescription>Actualiza información personal, nivel y objetivos.</DialogDescription>
@@ -101,7 +101,7 @@ export function EditClientProfileDialog({
                 control={form.control}
                 name="first_name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
                       <Input {...field} />
@@ -114,7 +114,7 @@ export function EditClientProfileDialog({
                 control={form.control}
                 name="last_name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Apellido</FormLabel>
                     <FormControl>
                       <Input {...field} />
@@ -127,7 +127,7 @@ export function EditClientProfileDialog({
                 control={form.control}
                 name="level"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nivel</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>

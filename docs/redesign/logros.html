@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Logros · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/logros.css">
+  <script src="assets/vendor/lucide-local.js" defer></script>
+  <script src="assets/proto.js"></script>
+  <script src="assets/pages/logros.js" defer></script>
+</head>
+<body data-page="logros" data-group="Motivación" data-crumbs='["Logros"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1">Gestión de logros</h1>
+        <span class="ph-meta" data-show="data loading error">14 logros · 6 días de entrenamiento · 3 días de racha · 2 retos completados</span>
+      </div>
+      <p class="ph-sub">Crea logros para premiar hitos medibles, define su meta de desbloqueo y mantén separada esta gestión del objetivo principal del cliente.</p>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-primary" type="button" data-open="#dlg-form" aria-haspopup="dialog"><i data-lucide="plus"></i>Nuevo logro</button>
+    </div>
+  </header>
+
+  <div class="banner banner-info lg-info" id="lg-info" data-show="data empty loading">
+    <i data-lucide="info"></i>
+    <span class="banner-text">Los logros premian hitos desbloqueables. El objetivo principal se gestiona en <a href="retos.html">Retos</a>. <span class="proposal-tag">Propuesta</span></span>
+    <span class="banner-actions"><button class="btn btn-ghost btn-icon btn-sm" type="button" data-dismiss-info aria-label="Ocultar aviso"><i data-lucide="x"></i></button></span>
+  </div>
+
+  <form class="toolbar-r" role="search" aria-label="Buscar y filtrar logros" onsubmit="return false" data-show="data empty loading">
+    <span class="tb-search">
+      <label class="input-icon"><span class="sr-only">Buscar logros</span><i data-lucide="search"></i><input class="input input-sm" type="search" placeholder="Nombre o descripción" autocomplete="off" data-search></label>
+      <span class="proposal-tag" data-tip="Búsqueda en vivo. Hoy se aplica al pulsar «Buscar».">Propuesta</span>
+    </span>
+    <label class="tb-field">Tipo de criterio <select class="select"><option>Todos</option><option>Días de entrenamiento</option><option>Días de racha</option><option>Retos completados</option><option>Registros de peso</option><option>Personalizado</option></select></label>
+    <span class="tb-meta"><span class="tb-count" aria-live="polite" data-count-label>14 logros encontrados</span>
+      <button class="btn btn-ghost btn-sm" type="reset" data-clear-filters hidden>Limpiar filtros</button></span>
+  </form>
+
+  <div data-show="data">
+    <div class="table-wrap">
+      <table class="table table--stack">
+        <caption class="sr-only">Listado de logros, página 1 de 3</caption>
+            <thead><tr>
+              <th scope="col">Logro</th>
+              <th scope="col">Regla</th>
+              <th scope="col" class="cell-num">Meta<span class="proposal-tag" data-tip="Unidad derivada de la regla">Propuesta</span></th>
+              <th scope="col">Modo</th>
+              <th scope="col">Usuarios</th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+            </tr></thead>
+        <tbody>
+          <tr>
+            <td class="cell-primary cell-clip"><div class="entity">
+              <span class="badge-frame" aria-hidden="true"><i data-lucide="award"></i></span>
+              <span class="entity-text ch-cell"><span class="row"><span class="entity-name" title="Primer entreno completado">Primer entreno completado</span></span>
+              <span class="ch-desc" title="Desbloquéate completando tu primer entreno en la plataforma.">Desbloquéate completando tu primer entreno en la plataforma.</span></span></div></td>
+            <td data-label="Regla"><span class="tag">Días de entrenamiento</span></td>
+            <td class="cell-num" data-label="Meta"><span>1 día</span></td>
+            <td data-label="Modo"><span class="tag tag-sm">Automático</span></td>
+            <td data-label="Usuarios"><button class="link-btn" type="button" data-open="#sheet-users" aria-haspopup="dialog" data-ctx="auto" data-ctx-name="Primer entreno completado" data-ctx-rule="Días de entrenamiento" data-ctx-meta="1 día" data-ctx-mode="Automático" data-ctx-users="38 clientes">38 clientes</button></td>
+            <td class="cell-actions"><span class="cell-actions-inner">
+              <button class="btn btn-secondary btn-sm btn-assign" type="button" data-open="#dlg-grant" aria-haspopup="dialog" data-ctx="auto" data-ctx-name="Primer entreno completado" data-ctx-rule="Días de entrenamiento" data-ctx-meta="1 día" data-ctx-mode="Automático" data-ctx-users="38 clientes">Otorgar</button>
+              <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones de Primer entreno completado" data-ctx="auto" data-ctx-name="Primer entreno completado" data-ctx-rule="Días de entrenamiento" data-ctx-meta="1 día" data-ctx-mode="Automático" data-ctx-users="38 clientes"><i data-lucide="ellipsis"></i></button>
+            </span></td>
+          </tr>
+          <tr>
+            <td class="cell-primary cell-clip"><div class="entity">
+              <span class="badge-frame" aria-hidden="true"><i data-lucide="award"></i></span>
+              <span class="entity-text ch-cell"><span class="row"><span class="entity-name" title="30 días de fuerza">30 días de fuerza</span></span>
+              <span class="ch-desc" title="Completa 30 días con entrenamientos de fuerza.">Completa 30 días con entrenamientos de fuerza.</span></span></div></td>
+            <td data-label="Regla"><span class="tag">Días de entrenamiento · Fuerza</span></td>
+            <td class="cell-num" data-label="Meta"><span>30 días</span></td>
+            <td data-label="Modo"><span class="tag tag-sm">Automático</span></td>
+            <td data-label="Usuarios"><button class="link-btn" type="button" data-open="#sheet-users" aria-haspopup="dialog" data-ctx="auto" data-ctx-name="30 días de fuerza" data-ctx-rule="Días de entrenamiento · Fuerza" data-ctx-meta="30 días" data-ctx-mode="Automático" data-ctx-users="14 clientes">14 clientes</button></td>
+            <td class="cell-actions"><span class="cell-actions-inner">
+              <button class="btn btn-secondary btn-sm btn-assign" type="button" data-open="#dlg-grant" aria-haspopup="dialog" data-ctx="auto" data-ctx-name="30 días de fuerza" data-ctx-rule="Días de entrenamiento · Fuerza" data-ctx-meta="30 días" data-ctx-mode="Automático" data-ctx-users="14 clientes">Otorgar</button>
+              <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones de 30 días de fuerza" data-ctx="auto" data-ctx-name="30 días de fuerza" data-ctx-rule="Días de entrenamiento · Fuerza" data-ctx-meta="30 días" data-ctx-mode="Automático" data-ctx-users="14 clientes"><i data-lucide="ellipsis"></i></button>
+            </span></td>
+          </tr>
+          <tr>
+            <td class="cell-primary cell-clip"><div class="entity">
+              <span class="badge-frame" aria-hidden="true"><i data-lucide="award"></i></span>
+              <span class="entity-text ch-cell"><span class="row"><span class="entity-name" title="Racha de hierro">Racha de hierro</span><span class="chip chip-warning" data-tip="Creación pendiente de aprobación">Pendiente</span></span>
+              <span class="ch-desc" title="Mantén una racha de 21 días seguidos.">Mantén una racha de 21 días seguidos.</span></span></div></td>
+            <td data-label="Regla"><span class="tag">Días de racha</span></td>
+            <td class="cell-num" data-label="Meta"><span>21 días</span></td>
+            <td data-label="Modo"><span class="tag tag-sm">Automático</span></td>
+            <td data-label="Usuarios"><button class="link-btn" type="button" data-open="#sheet-users" aria-haspopup="dialog" data-ctx="auto" data-ctx-name="Racha de hierro" data-ctx-rule="Días de racha" data-ctx-meta="21 días" data-ctx-mode="Automático" data-ctx-users="6 clientes">6 clientes</button></td>
+            <td class="cell-actions"><span class="cell-actions-inner">
+              <button class="btn btn-secondary btn-sm btn-assign" type="button" data-open="#dlg-grant" aria-haspopup="dialog" data-ctx="auto" data-ctx-name="Racha de hierro" data-ctx-rule="Días de racha" data-ctx-meta="21 días" data-ctx-mode="Automático" data-ctx-users="6 clientes">Otorgar</button>
+              <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones de Racha de hierro" data-ctx="auto" data-ctx-name="Racha de hierro" data-ctx-rule="Días de racha" data-ctx-meta="21 días" data-ctx-mode="Automático" data-ctx-users="6 clientes"><i data-lucide="ellipsis"></i></button>
+            </span></td>
+          </tr>
+          <tr>
+            <td class="cell-primary cell-clip"><div class="entity">
+              <span class="badge-frame" aria-hidden="true"><i data-lucide="award"></i></span>
+              <span class="entity-text ch-cell"><span class="row"><span class="entity-name" title="Retador">Retador</span></span>
+              <span class="ch-desc" title="Completa 10 retos desde que empezaste.">Completa 10 retos desde que empezaste.</span></span></div></td>
+            <td data-label="Regla"><span class="tag">Retos completados</span></td>
+            <td class="cell-num" data-label="Meta"><span>10 retos</span></td>
+            <td data-label="Modo"><span class="tag tag-sm">Automático</span></td>
+            <td data-label="Usuarios"><button class="link-btn" type="button" data-open="#sheet-users" aria-haspopup="dialog" data-ctx="auto" data-ctx-name="Retador" data-ctx-rule="Retos completados" data-ctx-meta="10 retos" data-ctx-mode="Automático" data-ctx-users="3 clientes">3 clientes</button></td>
+            <td class="cell-actions"><span class="cell-actions-inner">
+              <button class="btn btn-secondary btn-sm btn-assign" type="button" data-open="#dlg-grant" aria-haspopup="dialog" data-ctx="auto" data-ctx-name="Retador" data-ctx-rule="Retos completados" data-ctx-meta="10 retos" data-ctx-mode="Automático" data-ctx-users="3 clientes">Otorgar</button>
+              <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones de Retador" data-ctx="auto" data-ctx-name="Retador" data-ctx-rule="Retos completados" data-ctx-meta="10 retos" data-ctx-mode="Automático" data-ctx-users="3 clientes"><i data-lucide="ellipsis"></i></button>
+            </span></td>
+          </tr>
+          <tr>
+            <td class="cell-primary cell-clip"><div class="entity">
+              <span class="badge-frame" aria-hidden="true"><i data-lucide="award"></i></span>
+              <span class="entity-text ch-cell"><span class="row"><span class="entity-name" title="Constancia en la báscula">Constancia en la báscula</span></span>
+              <span class="ch-desc" title="Registra tu peso 20 veces.">Registra tu peso 20 veces.</span></span></div></td>
+            <td data-label="Regla"><span class="tag">Registros de peso</span></td>
+            <td class="cell-num" data-label="Meta"><span>20 registros</span></td>
+            <td data-label="Modo"><span class="tag tag-sm">Automático</span></td>
+            <td data-label="Usuarios"><button class="link-btn" type="button" data-open="#sheet-users" aria-haspopup="dialog" data-ctx="auto" data-ctx-name="Constancia en la báscula" data-ctx-rule="Registros de peso" data-ctx-meta="20 registros" data-ctx-mode="Automático" data-ctx-users="9 clientes">9 clientes</button></td>
+            <td class="cell-actions"><span class="cell-actions-inner">
+              <button class="btn btn-secondary btn-sm btn-assign" type="button" data-open="#dlg-grant" aria-haspopup="dialog" data-ctx="auto" data-ctx-name="Constancia en la báscula" data-ctx-rule="Registros de peso" data-ctx-meta="20 registros" data-ctx-mode="Automático" data-ctx-users="9 clientes">Otorgar</button>
+              <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones de Constancia en la báscula" data-ctx="auto" data-ctx-name="Constancia en la báscula" data-ctx-rule="Registros de peso" data-ctx-meta="20 registros" data-ctx-mode="Automático" data-ctx-users="9 clientes"><i data-lucide="ellipsis"></i></button>
+            </span></td>
+          </tr>
+          <tr>
+            <td class="cell-primary cell-clip"><div class="entity">
+              <span class="badge-frame" aria-hidden="true"><i data-lucide="award"></i></span>
+              <span class="entity-text ch-cell"><span class="row"><span class="entity-name" title="Mención del entrenador">Mención del entrenador</span></span>
+              <span class="ch-desc" title="Reconocimiento personal de tu entrenador por tu actitud.">Reconocimiento personal de tu entrenador por tu actitud.</span></span></div></td>
+            <td data-label="Regla"><span class="tag">Personalizado</span></td>
+            <td class="cell-num" data-label="Meta"><span>—</span></td>
+            <td data-label="Modo"><span class="tag tag-sm">Manual</span></td>
+            <td data-label="Usuarios"><button class="link-btn" type="button" data-open="#sheet-users" aria-haspopup="dialog" data-ctx="manual" data-ctx-name="Mención del entrenador" data-ctx-rule="Personalizado" data-ctx-meta="—" data-ctx-mode="Manual" data-ctx-users="2 clientes">2 clientes</button></td>
+            <td class="cell-actions"><span class="cell-actions-inner">
+              <button class="btn btn-secondary btn-sm btn-assign" type="button" data-open="#dlg-grant" aria-haspopup="dialog" data-ctx="manual" data-ctx-name="Mención del entrenador" data-ctx-rule="Personalizado" data-ctx-meta="—" data-ctx-mode="Manual" data-ctx-users="2 clientes">Otorgar</button>
+              <button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones de Mención del entrenador" data-ctx="manual" data-ctx-name="Mención del entrenador" data-ctx-rule="Personalizado" data-ctx-meta="—" data-ctx-mode="Manual" data-ctx-users="2 clientes"><i data-lucide="ellipsis"></i></button>
+            </span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <nav class="pagination" aria-label="Paginación"><span class="pagination-label">Página 1 de 3</span>
+      <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button><button class="btn btn-secondary btn-sm" type="button">Siguiente</button></span></nav>
+  </div>
+
+  <div data-show="loading" aria-busy="true" aria-label="Cargando logros" hidden>
+    <div class="table-wrap"><table class="table" aria-hidden="true">
+            <thead><tr>
+              <th scope="col">Logro</th>
+              <th scope="col">Regla</th>
+              <th scope="col" class="cell-num">Meta<span class="proposal-tag" data-tip="Unidad derivada de la regla">Propuesta</span></th>
+              <th scope="col">Modo</th>
+              <th scope="col">Usuarios</th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+            </tr></thead>
+      <tbody>
+          <tr><td><div class="entity"><span class="sk-block" style="--h:32px;width:32px"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:40%"></span><span class="sk-line" style="--w:70%"></span></span></div></td><td><span class="sk-line" style="--w:150px"></span></td><td class="cell-num"><span class="sk-line" style="--w:50px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:80px"></span></td><td><span class="sk-line" style="--w:70px"></span></td><td class="cell-actions"><span class="sk-line" style="--w:110px"></span></td></tr>
+          <tr><td><div class="entity"><span class="sk-block" style="--h:32px;width:32px"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:47%"></span><span class="sk-line" style="--w:70%"></span></span></div></td><td><span class="sk-line" style="--w:150px"></span></td><td class="cell-num"><span class="sk-line" style="--w:50px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:80px"></span></td><td><span class="sk-line" style="--w:70px"></span></td><td class="cell-actions"><span class="sk-line" style="--w:110px"></span></td></tr>
+          <tr><td><div class="entity"><span class="sk-block" style="--h:32px;width:32px"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:54%"></span><span class="sk-line" style="--w:70%"></span></span></div></td><td><span class="sk-line" style="--w:150px"></span></td><td class="cell-num"><span class="sk-line" style="--w:50px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:80px"></span></td><td><span class="sk-line" style="--w:70px"></span></td><td class="cell-actions"><span class="sk-line" style="--w:110px"></span></td></tr>
+          <tr><td><div class="entity"><span class="sk-block" style="--h:32px;width:32px"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:61%"></span><span class="sk-line" style="--w:70%"></span></span></div></td><td><span class="sk-line" style="--w:150px"></span></td><td class="cell-num"><span class="sk-line" style="--w:50px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:80px"></span></td><td><span class="sk-line" style="--w:70px"></span></td><td class="cell-actions"><span class="sk-line" style="--w:110px"></span></td></tr>
+          <tr><td><div class="entity"><span class="sk-block" style="--h:32px;width:32px"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:68%"></span><span class="sk-line" style="--w:70%"></span></span></div></td><td><span class="sk-line" style="--w:150px"></span></td><td class="cell-num"><span class="sk-line" style="--w:50px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:80px"></span></td><td><span class="sk-line" style="--w:70px"></span></td><td class="cell-actions"><span class="sk-line" style="--w:110px"></span></td></tr>
+          <tr><td><div class="entity"><span class="sk-block" style="--h:32px;width:32px"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:45%"></span><span class="sk-line" style="--w:70%"></span></span></div></td><td><span class="sk-line" style="--w:150px"></span></td><td class="cell-num"><span class="sk-line" style="--w:50px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:80px"></span></td><td><span class="sk-line" style="--w:70px"></span></td><td class="cell-actions"><span class="sk-line" style="--w:110px"></span></td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div data-show="empty" class="section" hidden>
+    <div class="empty"><span class="empty-x" aria-hidden="true"></span>
+      <h2 class="empty-title">Todavía no hay logros creados</h2>
+      <p class="empty-text">Crea un logro con una regla automática o manual para premiar los hitos de tus clientes.</p>
+      <button class="btn btn-primary" type="button" data-open="#dlg-form" aria-haspopup="dialog">Crear primer logro</button></div>
+  </div>
+
+  <div data-show="error" hidden>
+    <div class="section"><div class="error-state" role="alert"><i data-lucide="circle-alert"></i>
+      <h2 class="empty-title">No se pudieron cargar los logros</h2>
+      <p class="empty-text">Comprueba la conexión y vuelve a intentarlo.</p>
+      <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button></div></div>
+  </div>
+
+</main>
+</div>
+
+<div class="menu" id="row-menu" role="menu" aria-label="Acciones del logro" hidden>
+  <button class="menu-item m-only" type="button" role="menuitem" data-open="#dlg-grant"><i data-lucide="gift"></i>Otorgar</button>
+  <button class="menu-item" type="button" role="menuitem" data-open="#sheet-users"><i data-lucide="users"></i>Usuarios</button>
+  <button class="menu-item" type="button" role="menuitem" data-open="#dlg-form" data-edit><i data-lucide="pencil"></i>Editar</button>
+  <div class="menu-sep" role="separator" data-role="super"></div>
+  <button class="menu-item is-danger" type="button" role="menuitem" data-open="#dlg-delete" data-role="super"><i data-lucide="trash-2"></i>Eliminar</button>
+</div>
+
+<!-- ===================== Users sheet ===================== -->
+<div class="overlay overlay-sheet" id="sheet-users" hidden>
+  <div class="sheet sheet-md" role="dialog" aria-modal="true" aria-labelledby="us-t" aria-describedby="us-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="us-t" data-fill="name">30 días de fuerza</h2>
+        <p class="ov-desc" id="us-d">Clientes que han desbloqueado este logro. Puedes revocar el logro de cualquier cliente.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body stack-16">
+      <p class="us-sum">Criterio: <b data-fill="rule">Días de entrenamiento · Fuerza</b> · Meta: <b data-fill="meta">30 días</b> · Modo: <b data-fill="mode">Automático</b> · <b data-fill="users">14 clientes</b> con este logro</p>
+      <div class="us-actions" data-if="auto">
+        <button class="btn btn-secondary btn-sm" type="button" data-open="#dlg-recalc" data-recalc="visible"><i data-lucide="refresh-cw"></i>Recalcular visibles</button>
+        <button class="btn btn-secondary btn-sm" type="button" data-open="#dlg-recalc" data-recalc="sel" id="recalc-sel"><i data-lucide="refresh-cw"></i>Recalcular selección (2)</button>
+        <span class="proposal-tag" data-tip="Hoy recalcula al instante, sin confirmación.">Confirmación · Propuesta</span>
+      </div>
+      <ul class="us-list" aria-label="Clientes con el logro">
+          <li class="us-row is-selected">
+            <input class="checkbox" type="checkbox" data-us-cb aria-label="Seleccionar Lucía Martínez" checked>
+            <span class="avatar avatar-32" aria-hidden="true">LM</span>
+            <span class="entity-text"><span class="entity-name">Lucía Martínez</span><span class="entity-sub">lucia.martinez@example.com</span></span>
+            <span class="caption us-date">Desbloqueado: 12 nov 2026</span>
+            <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-revoke" aria-haspopup="dialog" data-ctx-client="Lucía Martínez">Revocar</button>
+          </li>
+          <li class="us-row is-selected">
+            <input class="checkbox" type="checkbox" data-us-cb aria-label="Seleccionar Javier Ortega" checked>
+            <span class="avatar avatar-32" aria-hidden="true">JO</span>
+            <span class="entity-text"><span class="entity-name">Javier Ortega</span><span class="entity-sub">javier.ortega@example.com</span></span>
+            <span class="caption us-date">Desbloqueado: 10 nov 2026</span>
+            <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-revoke" aria-haspopup="dialog" data-ctx-client="Javier Ortega">Revocar</button>
+          </li>
+          <li class="us-row">
+            <input class="checkbox" type="checkbox" data-us-cb aria-label="Seleccionar Marta Ruiz">
+            <span class="avatar avatar-32" aria-hidden="true">MR</span>
+            <span class="entity-text"><span class="entity-name">Marta Ruiz</span><span class="entity-sub">marta.ruiz@example.com</span></span>
+            <span class="caption us-date">Desbloqueado: 2 nov 2026</span>
+            <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-revoke" aria-haspopup="dialog" data-ctx-client="Marta Ruiz">Revocar</button>
+          </li>
+          <li class="us-row">
+            <input class="checkbox" type="checkbox" data-us-cb aria-label="Seleccionar Sara Gil">
+            <span class="avatar avatar-32" aria-hidden="true">SG</span>
+            <span class="entity-text"><span class="entity-name">Sara Gil</span><span class="entity-sub">sara.gil@example.com</span></span>
+            <span class="caption us-date">Desbloqueado: 28 oct 2026</span>
+            <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-revoke" aria-haspopup="dialog" data-ctx-client="Sara Gil">Revocar</button>
+          </li>
+          <li class="us-row">
+            <input class="checkbox" type="checkbox" data-us-cb aria-label="Seleccionar Pablo Herrera">
+            <span class="avatar avatar-32" aria-hidden="true">PH</span>
+            <span class="entity-text"><span class="entity-name">Pablo Herrera</span><span class="entity-sub">pablo.herrera@example.com</span></span>
+            <span class="caption us-date">Desbloqueado: 15 oct 2026</span>
+            <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-revoke" aria-haspopup="dialog" data-ctx-client="Pablo Herrera">Revocar</button>
+          </li>
+          <li class="us-row">
+            <input class="checkbox" type="checkbox" data-us-cb aria-label="Seleccionar Daniel Vega">
+            <span class="avatar avatar-32" aria-hidden="true">DV</span>
+            <span class="entity-text"><span class="entity-name">Daniel Vega</span><span class="entity-sub">daniel.vega@example.com</span></span>
+            <span class="caption us-date">Desbloqueado: 3 oct 2026</span>
+            <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-revoke" aria-haspopup="dialog" data-ctx-client="Daniel Vega">Revocar</button>
+          </li>
+      </ul>
+      <nav class="pagination" aria-label="Paginación de usuarios"><span class="pagination-label">Página 1 de 3</span>
+        <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button><button class="btn btn-secondary btn-sm" type="button">Siguiente</button></span></nav>
+    </div>
+  </div>
+</div>
+
+<!-- Recalc confirm (PROPOSAL) -->
+<div class="overlay" id="dlg-recalc" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="rc-t" aria-describedby="rc-d">
+    <div class="ov-head"><div class="ov-head-text"><h2 class="ov-title" id="rc-t">Recalcular logro</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+    <div class="ov-body stack-12">
+      <p class="prose-13" id="rc-d">Se volverá a evaluar la regla para <b id="rc-scope">los clientes visibles</b>: se otorgará el logro a quien cumpla la meta y se revocará a quien ya no la cumpla.</p>
+      <p class="caption">La fecha de desbloqueo de quien mantiene el logro no cambia.</p>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="rc-ok" data-loading-label="Recalculando...">Recalcular</button>
+    </div>
+  </div>
+</div>
+
+<!-- Revoke confirm (PROPOSAL) -->
+<div class="overlay" id="dlg-revoke" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="rv-t" aria-describedby="rv-d">
+    <div class="ov-head"><div class="ov-head-text"><h2 class="ov-title" id="rv-t">Revocar logro</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+    <div class="ov-body"><p class="prose-13" id="rv-d"><b data-fill="client">Lucía Martínez</b> dejará de tener este logro y desaparecerá de su perfil. Podrás otorgarlo de nuevo cuando quieras.</p></div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" id="rv-ok" data-loading-label="Revocando...">Revocar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== Form dialog ===================== -->
+<div class="overlay" id="dlg-form" data-static hidden>
+  <div class="dialog dialog-md" role="dialog" aria-modal="true" aria-labelledby="fm-t" aria-describedby="fm-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="fm-t"><span data-if-not="edit">Nuevo logro</span><span data-if="edit" hidden>Editar logro</span></h2>
+        <p class="ov-desc" id="fm-d">Define la regla del logro, su meta numérica y cuándo el desbloqueo depende de una otorgación manual.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-logro" class="form-stack" data-validate data-success-toast="Logro creado correctamente" novalidate>
+        <div class="field">
+          <label class="field-label" for="l-name">Nombre</label>
+          <input class="input" id="l-name" required minlength="2" maxlength="100" data-error-required="El nombre es obligatorio" placeholder="Primer entreno completado" data-fill="name">
+        </div>
+        <div class="field">
+          <label class="field-label" for="l-desc">Descripción</label>
+          <textarea class="textarea" id="l-desc" rows="3" required minlength="5" maxlength="500" data-count data-error-required="La descripción es obligatoria" placeholder="Desbloquéate completando tu primer entreno en la plataforma."></textarea>
+          <div class="field-foot"><span></span><span class="field-count" aria-live="polite">0/500</span></div>
+        </div>
+        <div class="icon-field">
+          <div class="field">
+            <label class="field-label" for="l-icon">URL del icono <span class="field-optional">Opcional</span></label>
+            <input class="input" id="l-icon" type="url" placeholder="https://..." data-icon-url>
+            <p class="field-help" id="l-icon-help">Pega la URL de una imagen cuadrada.</p>
+          </div>
+          <div class="icon-preview">
+            <span class="badge-frame badge-48" id="icon-prev" aria-hidden="true"><i data-lucide="award"></i></span>
+            <span class="proposal-tag">Propuesta</span>
+          </div>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label class="field-label" for="l-rule">Regla</label>
+            <select class="select" id="l-rule" data-switch="lr">
+              <option value="TRAINING_DAYS" selected>Días de entrenamiento</option>
+              <option value="STREAK_DAYS">Días de racha</option>
+              <option value="CHALLENGES_COMPLETED">Retos completados</option>
+              <option value="WEIGHT_LOGS">Registros de peso</option>
+              <option value="CUSTOM">Personalizado</option>
+            </select>
+          </div>
+          <div class="field" data-meta-field>
+            <label class="field-label" for="l-meta">Meta</label>
+            <div class="row"><input class="input" id="l-meta" type="number" min="1" value="30" style="max-width:120px"><span class="text-2" data-meta-unit>días</span></div>
+          </div>
+          <div class="field span-2" data-case="lr:TRAINING_DAYS">
+            <label class="field-label" for="l-type">Tipo de entrenamiento <span class="field-optional">Opcional</span></label>
+            <select class="select" id="l-type"><option>Cualquier entrenamiento</option><option selected>Fuerza</option><option>Cardio</option><option>HIIT</option><option>Flexibilidad</option></select>
+          </div>
+        </div>
+        <section class="rule-preview" aria-labelledby="rp-t">
+          <h3 class="h3" id="rp-t">Vista previa de la regla <span class="proposal-tag">Propuesta</span></h3>
+          <dl class="dl rp-dl">
+            <dt>Modo</dt><dd data-rp-mode>Automático</dd>
+            <dt>Qué se mide</dt><dd data-rp-what>Días con un entrenamiento de tipo Fuerza completado.</dd>
+            <dt>Meta</dt><dd data-rp-goal>30 días</dd>
+          </dl>
+          <p class="caption" data-rp-note>Al guardar, se revisa el historial de todos los clientes afectados: se otorga el logro a quien ya cumple la meta y se retira a quien ya no la cumple.</p>
+        </section>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="submit" form="form-logro" data-loading-label="Guardando..."><span data-if-not="edit">Crear logro</span><span data-if="edit" hidden>Guardar cambios</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== Grant dialog ===================== -->
+<div class="overlay" id="dlg-grant" data-static hidden>
+  <div class="dialog dialog-md" role="dialog" aria-modal="true" aria-labelledby="gr-t" aria-describedby="gr-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="gr-t">Otorgar logro</h2>
+        <p class="ov-desc" id="gr-d">Selecciona los clientes a los que deseas otorgar este logro manualmente.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body form-stack">
+      <div class="summary">
+        <span class="row"><span class="badge-frame" aria-hidden="true"><i data-lucide="award"></i></span><span class="h3" data-fill="name">Mención del entrenador</span></span>
+        <span class="sum-tags"><span class="tag" data-fill="rule">Personalizado</span><span class="tag" data-fill="mode">Manual</span></span>
+      </div>
+      <label class="input-icon"><span class="sr-only">Buscar cliente</span><i data-lucide="search"></i><input class="input" type="search" placeholder="Buscar cliente por nombre o email" autocomplete="off" data-pick-search></label>
+      <div class="pick-list" role="group" aria-label="Clientes">
+          <label class="pick-row" data-pick="lucía martínez lucia.martinez@example.com"><input class="checkbox" type="checkbox" data-pick-cb aria-label="Lucía Martínez"><span class="avatar avatar-32" aria-hidden="true">LM</span><span class="entity-text"><span class="entity-name">Lucía Martínez</span><span class="entity-sub">lucia.martinez@example.com</span></span></label>
+          <label class="pick-row" data-pick="javier ortega javier.ortega@example.com"><input class="checkbox" type="checkbox" data-pick-cb aria-label="Javier Ortega"><span class="avatar avatar-32" aria-hidden="true">JO</span><span class="entity-text"><span class="entity-name">Javier Ortega</span><span class="entity-sub">javier.ortega@example.com</span></span></label>
+          <label class="pick-row" data-pick="marta ruiz marta.ruiz@example.com"><input class="checkbox" type="checkbox" data-pick-cb aria-label="Marta Ruiz"><span class="avatar avatar-32" aria-hidden="true">MR</span><span class="entity-text"><span class="entity-name">Marta Ruiz</span><span class="entity-sub">marta.ruiz@example.com</span></span></label>
+          <label class="pick-row" data-pick="sara gil sara.gil@example.com"><input class="checkbox" type="checkbox" data-pick-cb aria-label="Sara Gil"><span class="avatar avatar-32" aria-hidden="true">SG</span><span class="entity-text"><span class="entity-name">Sara Gil</span><span class="entity-sub">sara.gil@example.com</span></span></label>
+          <label class="pick-row" data-pick="carla núñez carla.nunez@example.com"><input class="checkbox" type="checkbox" data-pick-cb aria-label="Carla Núñez"><span class="avatar avatar-32" aria-hidden="true">CN</span><span class="entity-text"><span class="entity-name">Carla Núñez</span><span class="entity-sub">carla.nunez@example.com</span></span></label>
+          <label class="pick-row" data-pick="daniel vega daniel.vega@example.com"><input class="checkbox" type="checkbox" data-pick-cb aria-label="Daniel Vega"><span class="avatar avatar-32" aria-hidden="true">DV</span><span class="entity-text"><span class="entity-name">Daniel Vega</span><span class="entity-sub">daniel.vega@example.com</span></span></label>
+          <label class="pick-row" data-pick="pablo herrera pablo.herrera@example.com"><input class="checkbox" type="checkbox" data-pick-cb aria-label="Pablo Herrera"><span class="avatar avatar-32" aria-hidden="true">PH</span><span class="entity-text"><span class="entity-name">Pablo Herrera</span><span class="entity-sub">pablo.herrera@example.com</span></span></label>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <span class="ov-foot-start" id="gr-count" aria-live="polite">0 clientes seleccionados</span>
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="gr-ok" data-loading-label="Otorgando..." disabled>Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete (SUPER_ADMIN) -->
+<div class="overlay" id="dlg-delete" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dl-t" aria-describedby="dl-d">
+    <div class="ov-head"><div class="ov-head-text"><h2 class="ov-title" id="dl-t">Eliminar logro</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+    <div class="ov-body"><p class="prose-13" id="dl-d">Eliminarás "<b data-fill="name">30 días de fuerza</b>" y todos los registros de clientes que lo hayan desbloqueado. Esta acción no se puede deshacer.</p></div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" id="dl-ok" data-loading-label="Eliminando...">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+/* Solo arnés: conserva la hoja de estilos real y descubre sus utilidades. */
+@import "../../../../src/index.css";
+@source "../../../../src";
+/* Oculta el botón flotante de React Query Devtools (solo existe en DEV). */
+.tsqd-parent-container, .tsqd-open-btn-container, [class*="tsqd-"] { display: none !important; }

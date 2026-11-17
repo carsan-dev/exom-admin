@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Lucía Martínez · Clientes · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/progreso-shared.css">
+  <link rel="stylesheet" href="assets/pages/cliente-detalle.css">
+  <script src="assets/vendor/lucide-local.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="clientes" data-crumbs='["Clientes","Lucía Martínez"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <a class="btn btn-ghost btn-sm cd-back" href="clientes.html" data-show="data empty error"><i data-lucide="arrow-left"></i><span data-text-super="Volver a usuarios" data-text-admin="Volver a clientes">Volver a clientes</span></a>
+
+  <!-- ============ PROFILE BAND ============ -->
+  <section class="cd-band" aria-labelledby="cd-name" data-show="data empty">
+    <span class="avatar avatar-56" aria-hidden="true">LM</span>
+    <div class="cd-id">
+      <div class="cd-title-row">
+        <h1 class="h1" id="cd-name">Lucía Martínez</h1>
+        <span class="cd-chips">
+          <span class="chip chip-neutral no-dot">Cliente</span>
+          <span class="chip chip-success when-active">Activa</span>
+          <span class="chip chip-danger when-blocked">Bloqueada</span>
+          <span class="tag">Intermedio</span>
+        </span>
+      </div>
+      <p class="cd-facts">
+        <a href="mailto:lucia.martinez@example.com">lucia.martinez@example.com</a>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>Alta 2 de febrero de 2026</span>
+        <span class="sep" aria-hidden="true" data-role="super">·</span>
+        <button class="link-btn" type="button" data-role="super" data-open="#sheet-admins" aria-haspopup="dialog">2 admins asignados</button>
+      </p>
+    </div>
+    <div class="cd-actions">
+      <a class="btn btn-primary" href="asignaciones.html?clientId=c01"><i data-lucide="calendar-days"></i>Planificar asignaciones</a>
+      <button class="btn btn-secondary cd-more" type="button" id="more-btn" data-open="#more-menu" aria-haspopup="menu" aria-expanded="false" data-ctx="" data-ctx-name="Lucía Martínez" data-ctx-email="lucia.martinez@example.com"><i data-lucide="ellipsis"></i>Más acciones</button>
+    </div>
+  </section>
+
+  <!-- ============ TABS ============ -->
+  <div data-tabs id="cd-tabs" data-show="data empty">
+    <div class="tabs" role="tablist" aria-label="Secciones del cliente">
+      <button class="tab" type="button" role="tab" id="tab-info" aria-controls="p-info" aria-selected="true" data-tab="info">Info general</button>
+      <button class="tab" type="button" role="tab" id="tab-metricas" aria-controls="p-metricas" aria-selected="false" data-tab="metricas">Métricas</button>
+      <button class="tab" type="button" role="tab" id="tab-racha" aria-controls="p-racha" aria-selected="false" data-tab="racha">Racha</button>
+      <button class="tab" type="button" role="tab" id="tab-adherencia" aria-controls="p-adherencia" aria-selected="false" data-tab="adherencia">Adherencia</button>
+    </div>
+
+    <div class="banner banner-danger cd-banner when-blocked" role="status">
+      <i data-lucide="lock"></i>
+      <span class="banner-text"><b>Cuenta bloqueada.</b> Lucía Martínez no puede acceder. Al desbloquearla se reiniciarán sus intentos de login fallidos.</span>
+      <span class="banner-actions"><button class="btn btn-secondary btn-sm" type="button" data-open="#dlg-unblock" data-ctx-name="Lucía Martínez" aria-haspopup="dialog"><i data-lucide="lock-open"></i>Desbloquear</button></span>
+    </div>
+
+    <!-- ===== Info general ===== -->
+    <section id="p-info" role="tabpanel" aria-labelledby="tab-info" tabindex="0">
+      <div data-show="data">
+        <section class="section" aria-labelledby="goal-t">
+          <div class="section-head">
+            <div><h2 class="h2" id="goal-t">Objetivo principal</h2><p class="section-sub">Motivación y foco actual del cliente</p></div>
+            <div class="section-actions"><button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-profile" aria-haspopup="dialog"><i data-lucide="pencil"></i>Editar datos</button></div>
+          </div>
+          <p class="cd-goal">Perder grasa sin perder fuerza en los básicos y llegar a 70 kg antes del verano.</p>
+          <dl class="facts" aria-label="Datos del perfil">
+            <div><dt>Nivel</dt><dd>Intermedio</dd></div>
+            <div><dt>Peso actual</dt><dd>72,4 kg</dd></div>
+            <div><dt>Altura</dt><dd>175 cm</dd></div>
+            <div><dt>Calorías objetivo</dt><dd>2.400 kcal</dd></div>
+            <div><dt class="dt-long">Objetivo de masa muscular</dt><dd>33,0 kg</dd></div>
+            <div><dt>Fecha de nacimiento</dt><dd>12 de mayo de 1992</dd></div>
+            <div><dt>Creado</dt><dd>2 de febrero de 2026</dd></div>
+            <div><dt>Última actualización</dt><dd>14 de noviembre de 2026</dd></div>
+          </dl>
+        </section>
+      </div>
+      <div data-show="empty" class="section">
+        <div class="empty empty-compact">
+          <span class="empty-x" aria-hidden="true"></span>
+          <h2 class="empty-title">Este cliente todavía no tiene datos de perfil ampliados.</h2>
+          <button class="btn btn-primary" type="button" data-open="#dlg-profile" aria-haspopup="dialog"><i data-lucide="plus"></i>Añadir datos</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Métricas ===== -->
+    <section id="p-metricas" role="tabpanel" aria-labelledby="tab-metricas" tabindex="0" hidden>
+      <div data-show="data" class="stack-48">
+        <section class="section" aria-labelledby="msum-t">
+          <div class="section-head">
+            <div><h2 class="h2" id="msum-t">Resumen de últimas mediciones</h2><p class="section-sub">Última medición disponible de cada valor entre los 10 registros recientes.</p></div>
+            <div class="section-actions"><a class="btn btn-ghost btn-sm" href="progreso.html?clientId=c01&amp;section=metricas">Ver evolución completa<i data-lucide="arrow-up-right"></i></a></div>
+          </div>
+          <div class="msum" data-msum></div>
+        </section>
+
+        <section class="section" aria-labelledby="mtab-t">
+          <div class="section-head">
+            <div><h2 class="h2" id="mtab-t">Últimas 10 métricas</h2><p class="section-sub">Historial reciente de composición corporal y medidas</p></div>
+            <div class="section-actions"><button class="btn btn-secondary btn-sm" type="button" data-open="#dlg-metric" data-ctx="" aria-haspopup="dialog"><i data-lucide="plus"></i>Añadir métricas</button></div>
+          </div>
+          <div data-tpl="metrics-table" data-rows="10"></div>
+        </section>
+      </div>
+      <div data-show="empty" class="section">
+        <div class="empty empty-compact">
+          <span class="empty-x" aria-hidden="true"></span>
+          <h2 class="empty-title">Aún no hay métricas corporales registradas para este cliente.</h2>
+          <button class="btn btn-primary" type="button" data-open="#dlg-metric" data-ctx="" aria-haspopup="dialog"><i data-lucide="plus"></i>Añadir métricas</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Racha ===== -->
+    <section id="p-racha" role="tabpanel" aria-labelledby="tab-racha" tabindex="0" hidden>
+      <div class="section"><div data-tpl="streak" data-mode="client"></div></div>
+    </section>
+
+    <!-- ===== Adherencia (same block as Progreso > Adherencia) ===== -->
+    <section id="p-adherencia" role="tabpanel" aria-labelledby="tab-adherencia" tabindex="0" hidden>
+      <div class="section"><div data-tpl="adherence" data-title="h2"></div></div>
+    </section>
+  </div>
+
+  <!-- ============ LOADING ============ -->
+  <div data-show="loading" aria-busy="true" aria-label="Cargando el perfil del cliente">
+    <div class="cd-band" aria-hidden="true">
+      <span class="sk-circle" style="--av:56px"></span>
+      <div class="stack-12"><span class="sk-line lg" style="--w:240px;height:26px;max-width:80%"></span><span class="sk-line" style="--w:380px;max-width:90%"></span></div>
+      <div class="cd-actions"><span class="sk-block" style="--h:36px;width:200px"></span></div>
+    </div>
+    <div class="tabs" aria-hidden="true" style="margin-bottom:24px;border-top:1px solid var(--rule);gap:24px;align-items:center;height:41px">
+      <span class="sk-line" style="--w:84px"></span><span class="sk-line" style="--w:60px"></span><span class="sk-line" style="--w:44px"></span><span class="sk-line" style="--w:72px"></span>
+    </div>
+    <div class="section" aria-hidden="true">
+      <div class="stack-8"><span class="sk-line lg" style="--w:160px"></span><span class="sk-line" style="--w:240px"></span></div>
+      <span class="sk-line" style="--w:520px;max-width:100%;height:14px;margin-top:20px"></span>
+      <div class="facts">
+        <div><span class="sk-line" style="--w:50%"></span><span class="sk-line lg" style="--w:70%;margin-top:10px"></span></div>
+        <div><span class="sk-line" style="--w:60%"></span><span class="sk-line lg" style="--w:50%;margin-top:10px"></span></div>
+        <div><span class="sk-line" style="--w:40%"></span><span class="sk-line lg" style="--w:55%;margin-top:10px"></span></div>
+        <div><span class="sk-line" style="--w:65%"></span><span class="sk-line lg" style="--w:60%;margin-top:10px"></span></div>
+        <div><span class="sk-line" style="--w:70%"></span><span class="sk-line lg" style="--w:45%;margin-top:10px"></span></div>
+        <div><span class="sk-line" style="--w:60%"></span><span class="sk-line lg" style="--w:75%;margin-top:10px"></span></div>
+        <div><span class="sk-line" style="--w:35%"></span><span class="sk-line lg" style="--w:70%;margin-top:10px"></span></div>
+        <div><span class="sk-line" style="--w:70%"></span><span class="sk-line lg" style="--w:70%;margin-top:10px"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ERROR (?error=403|404|500; default 404) ============ -->
+  <div data-show="error" class="section">
+    <div class="error-state" role="alert">
+      <i data-lucide="circle-alert"></i>
+      <h1 class="empty-title" data-err-title>Cliente no encontrado</h1>
+      <p class="empty-text" data-err-text>No hemos encontrado el cliente solicitado o este enlace ya no corresponde a un perfil de cliente.</p>
+      <div class="row" style="margin-top:20px;justify-content:center;flex-wrap:wrap">
+        <a class="btn btn-secondary" href="clientes.html" style="margin-top:0"><i data-lucide="arrow-left"></i><span data-text-super="Volver a usuarios" data-text-admin="Volver a clientes">Volver a clientes</span></a>
+        <button class="btn btn-primary" type="button" data-set-state="data" data-loading-label="Reintentando..." data-err-retry hidden style="margin-top:0"><i data-lucide="rotate-cw"></i>Reintentar</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- Dev-only switch: blocked variant (also ?blocked=1) -->
+
+<!-- ===================== MENU: MÁS ACCIONES ===================== -->
+<div class="menu" id="more-menu" role="menu" aria-label="Más acciones" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-if="blocked" data-open="#dlg-unblock"><i data-lucide="lock-open"></i>Desbloquear</button>
+  <div class="menu-sep" role="separator" data-if="blocked" data-role="super"></div>
+  <button class="menu-item" type="button" role="menuitem" data-role="super" data-open="#sheet-admins"><i data-lucide="users"></i>Gestionar admins</button>
+  <button class="menu-item" type="button" role="menuitem" data-role="super" data-open="#dlg-role"><i data-lucide="user-cog"></i>Cambiar rol</button>
+  <div class="menu-sep" role="separator" data-role="super"></div>
+  <button class="menu-item" type="button" role="menuitem" data-role="super" data-if-not="inactive" data-open="#dlg-deactivate"><i data-lucide="user-x"></i>Dar de baja</button>
+  <button class="menu-item" type="button" role="menuitem" data-role="super" data-if="inactive" data-open="#dlg-reactivate"><i data-lucide="user-check"></i>Reactivar</button>
+</div>
+
+<!-- ===================== DIALOG: EDITAR DATOS DEL CLIENTE ===================== -->
+<div class="overlay" id="dlg-profile" data-static hidden>
+  <div class="dialog dialog-md" role="dialog" aria-modal="true" aria-labelledby="dlg-profile-t" aria-describedby="dlg-profile-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-profile-t">Editar datos del cliente</h2>
+        <p class="ov-desc" id="dlg-profile-d">Actualiza información personal, nivel y objetivos.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-profile" novalidate>
+        <div class="field-grid">
+          <div class="field"><label class="field-label" for="p-first">Nombre</label><input class="input" id="p-first" required maxlength="100" value="Lucía" autocomplete="off"></div>
+          <div class="field"><label class="field-label" for="p-last">Apellido</label><input class="input" id="p-last" required maxlength="100" value="Martínez" autocomplete="off"></div>
+          <div class="field"><label class="field-label" for="p-level">Nivel</label>
+            <select class="select" id="p-level"><option>Principiante</option><option selected>Intermedio</option><option>Avanzado</option></select></div>
+          <div class="field"><label class="field-label" for="p-birth">Fecha de nacimiento</label><input class="input" id="p-birth" type="date" max="2026-11-15" value="1992-05-12"></div>
+          <div class="field span-2">
+            <label class="field-label" for="p-goal">Objetivo principal <span class="field-optional">Opcional</span></label>
+            <textarea class="textarea" id="p-goal" maxlength="160" data-count placeholder="Perder grasa, ganar fuerza..." rows="2">Perder grasa sin perder fuerza en los básicos y llegar a 70 kg antes del verano.</textarea>
+            <div class="field-foot"><span></span><span class="field-count" aria-live="polite">0/160</span></div>
+          </div>
+          <div class="field"><label class="field-label" for="p-weight">Peso actual (kg)</label><input class="input" id="p-weight" type="number" min="0" max="500" step="0.1" value="72.4" inputmode="decimal"></div>
+          <div class="field"><label class="field-label" for="p-height">Altura (cm)</label><input class="input" id="p-height" type="number" min="0" max="300" step="1" value="175" inputmode="numeric"></div>
+          <div class="field is-invalid" data-kcal-field>
+            <label class="field-label" for="p-kcal">Calorías objetivo (kcal)</label>
+            <input class="input" id="p-kcal" type="number" min="0" max="20000" step="1" value="24000" inputmode="numeric" aria-invalid="true" aria-describedby="p-kcal-err">
+            <p class="field-error" id="p-kcal-err" data-static><i data-lucide="circle-alert"></i><span>Introduce un valor entero entre 0 y 20.000</span></p>
+          </div>
+          <div class="field"><label class="field-label" for="p-mm">Objetivo masa muscular (kg)</label><input class="input" id="p-mm" type="number" min="0" max="500" step="0.1" value="33" inputmode="decimal"></div>
+        </div>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-profile-save>Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: AÑADIR / EDITAR MÉTRICAS (shared) ===================== -->
+<div data-tpl="metric-dialog"></div>
+
+<!-- ===================== DIALOG: CAMBIAR ROL ===================== -->
+<div class="overlay" id="dlg-role" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-role-t" aria-describedby="dlg-role-d">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-role-t">Cambiar rol</h2><p class="ov-desc" id="dlg-role-d">Selecciona el nuevo rol de Lucía Martínez.</p></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="field"><label class="field-label" for="r-role">Rol</label>
+        <select class="select" id="r-role"><option>Super Admin</option><option>Admin</option><option selected>Cliente</option></select></div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-toast="Rol actualizado correctamente" data-toast-tone="success">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: DESBLOQUEAR ===================== -->
+<div class="overlay" id="dlg-unblock" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-unblock-t" aria-describedby="dlg-unblock-d">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-unblock-t">Desbloquear cuenta</h2><p class="ov-desc" id="dlg-unblock-d">Vas a restaurar el acceso de Lucía Martínez.</p></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="banner banner-warning"><i data-lucide="triangle-alert"></i><span class="banner-text">La cuenta recuperará el acceso al panel y se reiniciarán sus intentos de login fallidos.</span></div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-unblock-confirm>Confirmar desbloqueo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: DAR DE BAJA / REACTIVAR ===================== -->
+<div class="overlay" id="dlg-deactivate" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-deact-t" aria-describedby="dlg-deact-d">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-deact-t">Dar de baja cuenta</h2><p class="ov-desc" id="dlg-deact-d">Se conservarán sus datos, pero se bloqueará el acceso hasta nueva activación.</p></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body"><p class="prose-13">Cuenta: <b>Lucía Martínez</b> · lucia.martinez@example.com</p></div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast="Cuenta dada de baja" data-toast-tone="success">Confirmar baja</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="dlg-reactivate" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-react-t" aria-describedby="dlg-react-d">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-react-t">Reactivar cuenta</h2><p class="ov-desc" id="dlg-react-d">La cuenta recuperará acceso al panel y podrá volver a operar con normalidad.</p></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body"><p class="prose-13">Cuenta: <b>Lucía Martínez</b> · lucia.martinez@example.com</p></div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-toast="Cuenta reactivada" data-toast-tone="success">Confirmar reactivación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SHEET: GESTIONAR ADMINS ASIGNADOS ===================== -->
+<div class="overlay overlay-sheet" id="sheet-admins" data-static hidden>
+  <div class="sheet sheet-md" role="dialog" aria-modal="true" aria-labelledby="sheet-admins-t" aria-describedby="sheet-admins-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="sheet-admins-t">Gestionar admins asignados</h2>
+        <p class="ov-desc" id="sheet-admins-d">Actualiza el conjunto activo de admins para Lucía Martínez. Si el cliente queda pausado, puedes dejarlo sin admins asignados.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="adm-cover">
+        <div><span class="caption">Cobertura final prevista</span><br><b data-adm-cover>2 admins activos tras guardar</b></div>
+        <span class="chip chip-neutral" data-adm-chip>Sin cambios</span>
+      </div>
+      <div class="banner banner-warning" data-adm-none hidden style="margin-top:16px"><i data-lucide="triangle-alert"></i><span class="banner-text">Este cliente quedará sin admins activos. Úsalo cuando quieras dejarlo pausado sin cartera asignada.</span></div>
+      <ul class="adm-list" aria-label="Admins activos">
+        <li class="adm-row" data-adm data-assigned="1">
+          <span class="avatar avatar-32" aria-hidden="true">AM</span>
+          <span class="entity-text"><span class="entity-name">Andrés Molina</span><span class="entity-sub">andres.molina@exom.app</span><span class="adm-meta">Activo desde 2 de febrero de 2026</span></span>
+          <span class="adm-side"><span class="chip chip-success" data-adm-state>Se mantiene</span><button class="btn btn-secondary btn-sm" type="button" data-adm-toggle aria-label="Quitar a Andrés Molina">Quitar</button></span>
+        </li>
+        <li class="adm-row" data-adm data-assigned="1">
+          <span class="avatar avatar-32" aria-hidden="true">IL</span>
+          <span class="entity-text"><span class="entity-name">Irene Lozano</span><span class="entity-sub">irene.lozano@exom.app</span><span class="adm-meta">Activo desde 14 de abril de 2026</span></span>
+          <span class="adm-side"><span class="chip chip-success" data-adm-state>Se mantiene</span><button class="btn btn-secondary btn-sm" type="button" data-adm-toggle aria-label="Quitar a Irene Lozano">Quitar</button></span>
+        </li>
+        <li class="adm-row" data-adm data-assigned="0">
+          <span class="avatar avatar-32" aria-hidden="true">PR</span>
+          <span class="entity-text"><span class="entity-name">Paula Romero</span><span class="entity-sub">paula.romero@exom.app</span><span class="adm-meta">Activo desde 9 de septiembre de 2025</span></span>
+          <span class="adm-side"><span class="chip chip-neutral" data-adm-state>Disponible</span><button class="btn btn-secondary btn-sm" type="button" data-adm-toggle aria-label="Asignar a Paula Romero">Asignar</button></span>
+        </li>
+        <li class="adm-row" data-adm data-assigned="0">
+          <span class="avatar avatar-32" aria-hidden="true">SC</span>
+          <span class="entity-text"><span class="entity-name">Sergio Campos</span><span class="entity-sub">sergio.campos@exom.app</span><span class="adm-meta">Activo desde 20 de enero de 2026</span></span>
+          <span class="adm-side"><span class="chip chip-neutral" data-adm-state>Disponible</span><button class="btn btn-secondary btn-sm" type="button" data-adm-toggle aria-label="Asignar a Sergio Campos">Asignar</button></span>
+        </li>
+      </ul>
+      <h3 class="h3" style="margin-top:28px">Resumen de cambios</h3>
+      <dl class="adm-sum">
+        <div><dt>Añadir</dt><dd data-adm-add>0</dd></div>
+        <div><dt>Retirar</dt><dd data-adm-remove>0</dd></div>
+        <div><dt>Sin cambios</dt><dd data-adm-keep>2</dd></div>
+      </dl>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-toast="Asignaciones actualizadas correctamente" data-toast-tone="success">Guardar asignaciones</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/pages/progreso-shared.js"></script>
+<script src="assets/pages/cliente-detalle.js"></script>
+</body>
+</html>

@@ -51,7 +51,7 @@ export function TrainingProgressPanel({ clientId, from, to, valid, previousFrom,
       return <div role="alert">El periodo supera el límite del resumen de ejercicios. Reduce el intervalo de fechas.</div>
     }
     const error = overview.error ?? sessions.error
-    return <div role="alert"><p>{getApiErrorStatus(error) === 403 ? 'No tienes acceso al entrenamiento de este cliente.' : 'No se pudo cargar el entrenamiento. Comprueba el periodo y vuelve a intentarlo.'}</p><Button variant="outline" onClick={() => { void overview.refetch(); void sessions.refetch() }}>Reintentar</Button></div>
+    return <div role="alert"><p>{getApiErrorStatus(error) === 403 ? 'No tienes acceso al entrenamiento de este cliente.' : 'No se pudo cargar el entrenamiento. Comprueba el periodo y vuelve a intentarlo.'}</p><Button variant="outline" className="min-h-11 md:min-h-9" onClick={() => { void overview.refetch(); void sessions.refetch() }}>Reintentar</Button></div>
   }
   const { indicators } = overview.data
   // A failed or missing previous interval stays null: "Sin datos previos", never zero.
@@ -64,38 +64,38 @@ export function TrainingProgressPanel({ clientId, from, to, valid, previousFrom,
     { label: 'RPE medio', text: value(indicators.mean_rpe), current: indicators.mean_rpe, previous: previous?.mean_rpe ?? null, unit: undefined },
   ]
   return <div className="min-w-0 space-y-6">
-    <section aria-label="Lectura del periodo de entrenamiento" className="space-y-4 rounded-lg border bg-card p-4 sm:p-6">
+    <section aria-label="Lectura del periodo de entrenamiento" className="space-y-4 rounded-lg border border-border bg-card p-4 sm:p-6">
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Entrenamiento del periodo</h2>
-        <p className="text-sm text-muted-foreground">{formatDate(`${from}T00:00:00`)} – {formatDate(`${to}T00:00:00`)} · Totales del intervalo, independientes de las páginas de detalle.{hasPrevious && previousFrom && previousTo && ` Comparado con ${formatDate(`${previousFrom}T00:00:00`)} – ${formatDate(`${previousTo}T00:00:00`)}; la variación no indica por sí sola mejora o empeoramiento.`}</p>
-        <p className="max-w-prose text-sm">{indicators.trainings_completed === 0 ? 'Sin registros de entrenamiento en este intervalo.' : 'El recuento de registros no confirma la finalización de las sesiones antiguas.'} Consulta las series para interpretar las cargas y el esfuerzo registrado.</p>
+        <h2 className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Entrenamiento del periodo</h2>
+        <p className="text-sm text-foreground-secondary">{formatDate(`${from}T00:00:00`)} – {formatDate(`${to}T00:00:00`)} · Totales del intervalo, independientes de las páginas de detalle.{hasPrevious && previousFrom && previousTo && ` Comparado con ${formatDate(`${previousFrom}T00:00:00`)} – ${formatDate(`${previousTo}T00:00:00`)}; la variación no indica por sí sola mejora o empeoramiento.`}</p>
+        <p className="max-w-prose text-sm text-foreground-secondary">{indicators.trainings_completed === 0 ? 'Sin registros de entrenamiento en este intervalo.' : 'El recuento de registros no confirma la finalización de las sesiones antiguas.'} Consulta las series para interpretar las cargas y el esfuerzo registrado.</p>
       </div>
-      <div className="grid gap-4 border-t pt-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 border-t border-border-strong pt-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((item) => <div key={item.label} className="min-w-0">
-          <CardHeader className="p-0 pb-2"><CardTitle className="flex items-center justify-between gap-2 text-sm font-medium text-muted-foreground">
+          <CardHeader className="p-0 pb-2"><CardTitle className="flex items-center justify-between gap-2 text-xs font-medium uppercase tracking-[0.08em] text-foreground-muted">
             <span>{item.label}</span>
             {item.label === 'Registros de entrenamiento' && <TrainingInfo label={item.label}>Puede incluir registros antiguos. El total no permite confirmar cuántos entrenamientos se finalizaron.</TrainingInfo>}
             {item.label === 'Volumen' && <TrainingInfo label={item.label}>Suma de peso × repeticiones de series válidas; las series en segundos no suman kg·reps.</TrainingInfo>}
             {item.label === 'RIR medio' && <TrainingInfo label={item.label}>Repeticiones en reserva de las series con RIR registrado. Sin dato no equivale a cero.</TrainingInfo>}
             {item.label === 'RPE medio' && <TrainingInfo label={item.label}>Esfuerzo percibido de las sesiones con valoración registrada; no es una medida de carga.</TrainingInfo>}
           </CardTitle></CardHeader>
-          <CardContent className="space-y-1 p-0"><p className="text-xl font-semibold tabular-nums">{item.text}</p>
+          <CardContent className="space-y-1 p-0"><p className={item.current === null || item.current === undefined ? 'text-base font-medium text-foreground-muted' : 'font-display text-2xl font-extrabold leading-none tabular-nums text-foreground'}>{item.text}</p>
             {showDelta && item.current !== null && <DeltaBadge current={item.current} previous={item.previous} polarity="neutral" unit={item.unit} />}</CardContent>
         </div>)}
       </div>
     </section>
     <TrainingLoadEvolution key={`loads:${overviewScope}`} clientId={clientId} from={from} to={to} measure={measure} onMeasureChange={onMeasureChange} />
     <section aria-label="Historial de entrenamiento" className="space-y-4">
-      <h2 className="text-lg font-semibold">Historial de entrenamiento</h2>
-    <Card><CardHeader><CardTitle>Sesiones con detalle</CardTitle></CardHeader><CardContent className="space-y-3">
-      <p className="text-sm text-muted-foreground">Consulta las series, cargas y valoraciones guardadas. El detalle disponible no confirma por sí solo la finalización de una sesión antigua.</p>
-      {sessions.data.page.length === 0 ? <p>Sin sesiones con detalle en esta página.</p> : <ul className="space-y-2">{sessions.data.page.map((session) => <li key={`${session.date}:${session.training_session_id}`} className="flex flex-wrap items-center justify-between gap-3 rounded-md border-b px-2 py-3 transition-colors duration-150 hover:bg-muted/50 motion-reduce:transition-none">
-        <span className="min-w-0 break-words"><span className="block font-medium">{session.training_name || 'Nombre no disponible'}<NameSourceTag source={session.training_name ? session.training_name_source : null} /></span><span className="text-sm text-muted-foreground">{formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}</span></span>
-        <Button variant="outline" aria-expanded={currentSelection?.training_session_id === session.training_session_id && currentSelection.date === session.date}
+      <h2 className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Historial de entrenamiento</h2>
+    <Card className="border-border shadow-none"><CardHeader><CardTitle className="font-display text-lg font-extrabold uppercase leading-none">Sesiones con detalle</CardTitle></CardHeader><CardContent className="space-y-3">
+      <p className="text-sm text-foreground-muted">Consulta las series, cargas y valoraciones guardadas. El detalle disponible no confirma por sí solo la finalización de una sesión antigua.</p>
+      {sessions.data.page.length === 0 ? <p>Sin sesiones con detalle en esta página.</p> : <ul className="space-y-2">{sessions.data.page.map((session) => <li key={`${session.date}:${session.training_session_id}`} className="flex flex-wrap items-center justify-between gap-3 rounded-md border-b border-border px-2 py-3 transition-colors duration-150 hover:bg-muted/50 motion-reduce:transition-none">
+        <span className="min-w-0 break-words"><span className="block font-medium">{session.training_name || 'Nombre no disponible'}<NameSourceTag source={session.training_name ? session.training_name_source : null} /></span><span className="text-sm text-foreground-muted">{formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}</span></span>
+        <Button variant="outline" className="min-h-11 md:min-h-9" aria-expanded={currentSelection?.training_session_id === session.training_session_id && currentSelection.date === session.date}
           aria-controls={detailId} aria-label={`Ver detalle de ${session.training_name || 'entrenamiento'} del ${formatDate(`${session.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")}`}
           onClick={(event) => { sessionTrigger.current = event.currentTarget; setSelected({ scope: overviewScope, session }) }}>Ver detalle</Button>
       </li>)}</ul>}
-      <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={cursors.length === 1} onClick={() => { setSelected(null); setCursorState({ scope: overviewScope, cursors: cursors.slice(0, -1) }) }}>Más recientes</Button><Button variant="outline" disabled={!sessions.data.nextCursor} onClick={() => { if (sessions.data.nextCursor) { setSelected(null); setCursorState({ scope: overviewScope, cursors: [...cursors, sessions.data.nextCursor] }) } }}>Más antiguos</Button></div>
+      <div className="flex flex-wrap gap-2 border-t border-border pt-4"><Button variant="outline" className="min-h-11 md:min-h-9" disabled={cursors.length === 1} onClick={() => { setSelected(null); setCursorState({ scope: overviewScope, cursors: cursors.slice(0, -1) }) }}>Más recientes</Button><Button variant="outline" className="min-h-11 md:min-h-9" disabled={!sessions.data.nextCursor} onClick={() => { if (sessions.data.nextCursor) { setSelected(null); setCursorState({ scope: overviewScope, cursors: [...cursors, sessions.data.nextCursor] }) } }}>Más antiguos</Button></div>
     </CardContent></Card>
     <div id={detailId}>
       {currentSelection && <TrainingSessionDetail key={`${clientId}:${currentSelection.date}:${currentSelection.training_session_id}`} clientId={clientId} session={currentSelection}
@@ -103,13 +103,13 @@ export function TrainingProgressPanel({ clientId, from, to, valid, previousFrom,
     </div>
     </section>
     <TrainingExerciseTable key={`exercises:${overviewScope}`} clientId={clientId} from={from} to={to} />
-    <Card><CardHeader><CardTitle>Registros históricos</CardTitle></CardHeader><CardContent className="space-y-3">
-      <p className="text-sm text-muted-foreground">Registros antiguos sin detalle de la sesión. No permiten saber si el entrenamiento se terminó.</p>
-      <Button variant="outline" aria-expanded={legacyExpanded} onClick={() => setLegacyState({ scope: overviewScope, expanded: !legacyExpanded, cursors: [null] })}>{legacyExpanded ? 'Ocultar registros históricos' : 'Mostrar registros históricos'}</Button>
+    <Card className="border-border shadow-none"><CardHeader><CardTitle className="font-display text-lg font-extrabold uppercase leading-none">Registros históricos</CardTitle></CardHeader><CardContent className="space-y-3">
+      <p className="text-sm text-foreground-muted">Registros antiguos sin detalle de la sesión. No permiten saber si el entrenamiento se terminó.</p>
+      <Button variant="outline" className="min-h-11 md:min-h-9" aria-expanded={legacyExpanded} onClick={() => setLegacyState({ scope: overviewScope, expanded: !legacyExpanded, cursors: [null] })}>{legacyExpanded ? 'Ocultar registros históricos' : 'Mostrar registros históricos'}</Button>
       {legacyExpanded && <div className="space-y-3">
-        {legacy.isPending ? <p role="status">Cargando registros históricos…</p> : legacy.isError ? <div role="alert"><p>{getApiErrorStatus(legacy.error) === 403 ? 'No tienes acceso a los registros históricos.' : getApiErrorStatus(legacy.error) === 404 ? 'Los registros históricos aún no están disponibles.' : 'No se pudieron cargar los registros históricos.'}</p><Button variant="outline" onClick={() => void legacy.refetch()}>Reintentar registros históricos</Button></div> : <>
-          {legacy.data.page.length === 0 ? <p>Sin registros históricos en este periodo.</p> : <ul aria-label="Registros históricos" className="space-y-2">{legacy.data.page.map((record) => <li key={`${record.date}:${record.record_index}`} className="border-b py-2">{formatDate(`${record.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")} · Registro antiguo{record.record_index > 1 || legacy.data.page.some((other) => other.date === record.date && other.record_index !== record.record_index) ? ` ${record.record_index}` : ''} · Detalle no disponible</li>)}</ul>}
-          <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={legacyCursors.length === 1} onClick={() => setLegacyState({ scope: overviewScope, expanded: true, cursors: legacyCursors.slice(0, -1) })}>Registros históricos anteriores</Button><Button variant="outline" disabled={!legacy.data.nextCursor} onClick={() => { if (legacy.data.nextCursor) setLegacyState({ scope: overviewScope, expanded: true, cursors: [...legacyCursors, legacy.data.nextCursor] }) }}>Más registros históricos</Button></div>
+        {legacy.isPending ? <p role="status">Cargando registros históricos…</p> : legacy.isError ? <div role="alert"><p>{getApiErrorStatus(legacy.error) === 403 ? 'No tienes acceso a los registros históricos.' : getApiErrorStatus(legacy.error) === 404 ? 'Los registros históricos aún no están disponibles.' : 'No se pudieron cargar los registros históricos.'}</p><Button variant="outline" className="min-h-11 md:min-h-9" onClick={() => void legacy.refetch()}>Reintentar registros históricos</Button></div> : <>
+          {legacy.data.page.length === 0 ? <p>Sin registros históricos en este periodo.</p> : <ul aria-label="Registros históricos" className="space-y-2">{legacy.data.page.map((record) => <li key={`${record.date}:${record.record_index}`} className="border-b border-border py-2 text-sm">{formatDate(`${record.date}T00:00:00`, "d 'de' MMMM 'de' yyyy")} · Registro antiguo{record.record_index > 1 || legacy.data.page.some((other) => other.date === record.date && other.record_index !== record.record_index) ? ` ${record.record_index}` : ''} · Detalle no disponible</li>)}</ul>}
+          <div className="flex flex-wrap gap-2"><Button variant="outline" className="min-h-11 md:min-h-9" disabled={legacyCursors.length === 1} onClick={() => setLegacyState({ scope: overviewScope, expanded: true, cursors: legacyCursors.slice(0, -1) })}>Registros históricos anteriores</Button><Button variant="outline" className="min-h-11 md:min-h-9" disabled={!legacy.data.nextCursor} onClick={() => { if (legacy.data.nextCursor) setLegacyState({ scope: overviewScope, expanded: true, cursors: [...legacyCursors, legacy.data.nextCursor] }) }}>Más registros históricos</Button></div>
         </>}
       </div>}
     </CardContent></Card>

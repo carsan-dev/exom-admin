@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import { getApiErrorMessage } from '@/lib/api-utils'
 import { getRecapForReview, recapIdentity, usePublishRecapReview, useRecapIdentity, useSaveRecapReviewDraft } from '../api'
 import type { RecapReviewRecord } from '../types'
@@ -31,6 +32,9 @@ export function RecapReviewEditor({ recap, archived, onDirty, onPending, disable
   const [server, setServer] = useState<RecapReviewRecord | null>(null)
   const [reading, setReading] = useState(false)
   const [readError, setReadError] = useState('')
+  const { confirm: askConfirmation, dialog: confirmDialog } = useConfirmDialog()
+  const latest = useRef({ server, reading })
+  useEffect(() => { latest.current = { server, reading } }, [server, reading])
   useEffect(() => { live.current = true; return () => { live.current = false } }, [])
   const current = () => live.current && recapIdentity() === owner
   const pending = save.isPending || publish.isPending
@@ -70,8 +74,12 @@ export function RecapReviewEditor({ recap, archived, onDirty, onPending, disable
       await readServer()
     } finally { busy.current = false }
   }
-  function discard() {
-    if (!current() || !server || reading || !window.confirm('Descartar tu borrador privado y cargar la versión consultada del servidor?')) return
+  async function discard() {
+    if (!current() || !server || reading) return
+    // The answer is asynchronous: load only the version that was on screen when asked,
+    // and only if the session, that version and the read state are still the same.
+    if (!(await askConfirmation({ title: 'Descartar tu borrador privado y cargar la versión consultada del servidor?' }))) return
+    if (!current() || latest.current.server !== server || latest.current.reading) return
     setRecord(server); setValues(valuesOf(server)); setBaseline(valuesOf(server)); setSaved(false); setError(''); setServer(null); setReadError('')
   }
   // Only confirmed server fields enter this preview; local draft values never do.
@@ -91,7 +99,7 @@ export function RecapReviewEditor({ recap, archived, onDirty, onPending, disable
       {stale && !error && <div role="alert" className="space-y-2 text-sm"><p>La revisión cambió. Se conserva tu borrador. Consulta la versión del servidor antes de continuar.</p><Button variant="outline" disabled={reading} onClick={() => void readServer()}>Consultar versión del servidor</Button></div>}
       {error && <div role="alert" className="space-y-2 text-sm"><p>{error}</p><Button variant="outline" disabled={reading} onClick={() => void readServer()}>{reading ? 'Consultando...' : 'Consultar versión del servidor'}</Button></div>}
       {readError && <p role="status" className="text-sm">{readError}</p>}
-      {server && <div className="space-y-2 border-y py-3 text-sm"><p>Servidor: versión {server.review_version ?? 'no disponible'}</p><p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{server.draft_coach_summary || 'Sin resumen guardado'}</p><Button variant="outline" disabled={reading} onClick={discard}>Descartar borrador y cargar versión</Button></div>}
+      {server && <div className="space-y-2 border-y py-3 text-sm"><p>Servidor: versión {server.review_version ?? 'no disponible'}</p><p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{server.draft_coach_summary || 'Sin resumen guardado'}</p><Button variant="outline" disabled={reading} onClick={() => { void discard() }}>Descartar borrador y cargar versión</Button></div>}
       <div className="flex flex-wrap gap-3">
         <Button disabled={!available || pending || reading || Boolean(error) || stale} onClick={() => void command(false)}>{save.isPending ? 'Guardando borrador...' : 'Guardar borrador privado'}</Button>
         <Button variant="outline" disabled={!canPublish} onClick={() => setConfirm(true)}>{publish.isPending ? 'Publicando...' : 'Publicar revisión'}</Button>
@@ -105,5 +113,6 @@ export function RecapReviewEditor({ recap, archived, onDirty, onPending, disable
     <AlertDialog open={confirm} onOpenChange={setConfirm}>
       <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>¿Publicar revisión para el cliente?</AlertDialogTitle><AlertDialogDescription>Reemplazarás la última revisión visible por este borrador guardado. El feedback anterior y las notas internas se conservan por separado.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction disabled={!canPublish} onClick={() => void command(true)}>Confirmar publicación</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
     </AlertDialog>
+    {confirmDialog}
   </RecapSectionCard>
 }

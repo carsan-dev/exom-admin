@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CheckCircle2, Dumbbell, MessageSquareReply, Salad, StickyNote } from 'lucide-react'
+import { Bell, CheckCircle2, Dumbbell, MessageSquareReply, Salad, StickyNote } from 'lucide-react'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
@@ -64,10 +64,10 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
   }
 
   return (
-    <section aria-label="Detalle del día seleccionado" className="min-w-0 space-y-5 rounded-lg bg-card p-4 sm:p-6">
-      <header className="space-y-2 border-b pb-4">
-        <h2 className="text-lg font-semibold capitalize">{formattedDate}</h2>
-        <p className="text-sm text-muted-foreground">Detalle de actividad del día · UTC. Los registros conservan ejercicios, comidas y valores históricos.</p>
+    <section aria-label="Detalle del día seleccionado" className="min-w-0 space-y-5 border-border-strong xl:border-l xl:pl-6">
+      <header className="space-y-2 border-b border-border-strong pb-4">
+        <h2 className="font-display text-lg font-extrabold uppercase leading-7 text-foreground">{formattedDate}</h2>
+        <p className="text-sm text-foreground-secondary">Detalle de actividad del día · UTC. Los registros conservan ejercicios, comidas y valores históricos.</p>
       </header>
       <div className="space-y-5">
         {isError ? <div role="alert" className="space-y-3"><p className="text-sm">No se pudo cargar el detalle del día. No significa que no haya actividad.</p>{onRetry && <Button variant="outline" size="sm" onClick={onRetry}>Reintentar detalle</Button>}</div> : isLoading ? (
@@ -77,19 +77,19 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
             <Skeleton className="h-4 w-52" />
           </div>
         ) : !progress ? (
-          <div className="space-y-2 text-sm"><p>Sin registro de progreso para este día.</p><p className="text-muted-foreground">No permite concluir que no hubo actividad. Selecciona otra fecha en el calendario o en el historial del mes.</p></div>
+          <div className="space-y-2 text-sm"><p>Sin registro de progreso para este día.</p><p className="text-foreground-muted">No permite concluir que no hubo actividad. Selecciona otra fecha en el calendario o en el historial del mes.</p></div>
         ) : (
           <>
             {/* Entrenamiento */}
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <Dumbbell className="h-4 w-4 text-brand-primary" />
-                <span className="text-sm font-medium">Entrenamiento</span>
+                <Dumbbell aria-hidden="true" className="h-4 w-4 text-accent-text" />
+                <span className="text-sm font-semibold text-foreground">Entrenamiento</span>
                 <Badge variant={progress.training_completed ? 'default' : 'secondary'}>
                   {progress.training_completed ? 'Completado' : 'No completado'}
                 </Badge>
                 {progress.training_summary && progress.training_summary.assigned_count > 1 && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-foreground-muted">
                     {progress.training_summary.completed_count} de {progress.training_summary.assigned_count} entrenamientos
                   </span>
                 )}
@@ -102,7 +102,7 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                   {progress.exercises_completed.map((ex, i) => (
                     <li key={i} className="space-y-1 text-sm">
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-status-success shrink-0" />
+                        <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 text-status-success shrink-0" />
                         <span title={ex.exercise_id}>
                           {ex.exercise_name ?? 'Ejercicio eliminado'}
                         </span>
@@ -115,7 +115,7 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                           {ex.sets.map((set) => (
                             <span
                               key={set.set_number}
-                              className="rounded-md bg-muted px-2 py-1 text-xs"
+                              className="rounded-md bg-muted px-2 py-1 text-xs text-foreground-secondary"
                             >
                               {formatCompletedSet(set)}
                             </span>
@@ -126,15 +126,15 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                   ))}
                 </ul>
               ) : (
-                <p className="pl-6 text-xs text-muted-foreground">Sin ejercicios registrados</p>
+                <p className="pl-6 text-xs text-foreground-muted">Sin ejercicios registrados</p>
               )}
             </div>
 
             {/* Dieta */}
-            <div className="space-y-3 border-t pt-4">
+            <div className="space-y-3 border-t border-border pt-4">
               <div className="flex flex-wrap items-center gap-2">
-                <Salad className="h-4 w-4 text-status-success" />
-                <span className="text-sm font-medium">Dieta</span>
+                <Salad aria-hidden="true" className="h-4 w-4 text-status-success" />
+                <span className="text-sm font-semibold text-foreground">Dieta</span>
                 <Badge variant={progress.meals_completed.length > 0 ? 'default' : 'secondary'}>
                   {progress.meals_completed.length > 0
                     ? `${progress.meals_completed.length} comidas`
@@ -145,13 +145,13 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                 <ul className="space-y-1 pl-6">
                   {progress.meals_completed_details.map((meal, i) => (
                     <li key={i} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-status-success shrink-0" />
+                      <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 text-status-success shrink-0" />
                       <span title={meal.meal_id}>{meal.meal_name ?? 'Comida eliminada'}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="pl-6 text-xs text-muted-foreground">Sin comidas registradas</p>
+                <p className="pl-6 text-xs text-foreground-muted">Sin comidas registradas</p>
               )}
             </div>
 
@@ -160,17 +160,17 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
             {progress.notes && (
               <div className="space-y-3 border-t border-border pt-4">
                 <div className="flex items-center gap-2">
-                  <StickyNote className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Nota del cliente</span>
+                  <StickyNote aria-hidden="true" className="h-4 w-4 text-foreground-muted" />
+                  <span className="text-sm font-semibold text-foreground">Nota del cliente</span>
                 </div>
-                <p className="whitespace-pre-wrap break-words text-sm text-foreground">{progress.notes}</p>
+                <p className="whitespace-pre-wrap break-words border-l-2 border-border-strong pl-3 text-sm text-foreground">{progress.notes}</p>
 
                 <div className="space-y-2">
                   <label
                     htmlFor="training-note-reply"
-                    className="flex items-center gap-2 text-sm font-medium"
+                    className="flex items-center gap-2 text-sm font-semibold text-foreground"
                   >
-                    <MessageSquareReply className="h-4 w-4 text-brand-primary" />
+                    <MessageSquareReply aria-hidden="true" className="h-4 w-4 text-accent-text" />
                     Respuesta para el cliente
                   </label>
                   <textarea
@@ -181,10 +181,10 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                     rows={4}
                     disabled={replyMutation.isPending}
                     placeholder="Escribe una respuesta que verá el cliente en el detalle del entreno..."
-                    className="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex w-full resize-none rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-foreground-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-foreground-muted">
                       <span>{reply.length}/1000</span>
                       {progress.admin_reply_sent_at && (
                         <span>
@@ -210,8 +210,9 @@ export function DayProgressDetail({ clientId, date, progress: receivedProgress, 
                           : 'Eliminar respuesta'}
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Una respuesta nueva o modificada enviará una notificación push al cliente.
+                  <p className="flex items-start gap-2 text-xs text-foreground-muted">
+                    <Bell aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <span>Una respuesta nueva o modificada enviará una notificación push al cliente.</span>
                   </p>
                 </div>
               </div>

@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import { getApiErrorStatus } from '@/lib/api-utils'
+import { cn } from '@/lib/utils'
 import { useAdherenceConfig, useUpdateAdherenceConfig } from '../api'
 import type { AdherencePolicyFields } from '../types'
 
+const buttonClass = 'inline-flex h-11 items-center justify-center rounded-md border border-border-strong px-4 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-50 md:h-10'
 type Field = keyof AdherencePolicyFields
 const fields: { key: Field; label: string; max: number; min: number }[] = [
   { key: 'steps_goal', label: 'Meta de pasos', min: 1, max: Number.MAX_SAFE_INTEGER },
@@ -56,27 +59,30 @@ export function AdherenceConfigEditor({ clientId }: { clientId: string }) {
     setDirtyEditor((current) => dirty ? editorKey : current === editorKey ? null : current)
   }, [editorKey])
 
-  function changeDate(nextDate: string) {
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
+
+  async function changeDate(nextDate: string) {
     if (nextDate === date) return
-    if (dirtyEditor === editorKey && !window.confirm('¿Descartar los cambios sin guardar y cambiar la fecha?')) return
+    if (dirtyEditor === editorKey && !(await confirm({ title: '¿Descartar los cambios sin guardar y cambiar la fecha?' }))) return
     setDate(nextDate)
   }
 
   // Logout unmounts the editor and intentionally drops its in-memory draft; never carry it to another account.
   return (
     <section aria-label="Configuración de adherencia">
-      <label className="block text-sm font-medium">
+      <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">
         Fecha de vigencia (UTC)
-        <input className="mt-1 block rounded-md border p-2" type="date" min={utcTomorrow()} value={date}
-          onChange={(event) => changeDate(event.target.value)} />
+        <input className="mt-1 block h-11 rounded-md border border-input bg-input px-3 text-sm font-normal normal-case tracking-normal text-foreground focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus md:h-10" type="date" min={utcTomorrow()} value={date}
+          onChange={(event) => { void changeDate(event.target.value) }} />
       </label>
       {adminId && clientId && validFutureDate(date)
         ? <PolicyEditor key={editorKey} adminId={adminId} clientId={clientId} date={date}
             onDirtyChange={onDirtyChange} />
         : <>
-            <p role="alert">{!validFutureDate(date) ? 'Seleccione una fecha futura en UTC.' : 'La sesión no está validada o falta seleccionar un cliente.'}</p>
-            <button type="button" disabled>Guardar configuración</button>
+            <p role="alert" className="mt-2 text-sm text-status-error">{!validFutureDate(date) ? 'Seleccione una fecha futura en UTC.' : 'La sesión no está validada o falta seleccionar un cliente.'}</p>
+            <button type="button" disabled className="mt-2 inline-flex h-11 items-center rounded-md border border-border px-4 text-sm font-medium text-foreground-muted disabled:cursor-not-allowed md:h-10">Guardar configuración</button>
           </>}
+      {confirmDialog}
     </section>
   )
 }
@@ -158,24 +164,24 @@ function PolicyEditor({ adminId, clientId, date, onDirtyChange }: {
   const ready = query.data?.known && draft && version !== null && !query.isFetching && !query.isError
   return (
     <form onSubmit={save} noValidate className="mt-4 space-y-4">
-      {query.isPending || query.isFetching && !draft ? <p role="status">Cargando configuración...</p> : null}
-      {query.isError && <div role="alert">
+      {query.isPending || query.isFetching && !draft ? <p role="status" className="text-sm text-foreground-muted">Cargando configuración...</p> : null}
+      {query.isError && <div role="alert" className="space-y-2 text-sm text-status-error">
         <p>{getApiErrorStatus(query.error) === 403 ? 'No tiene permiso para consultar esta configuración.'
           : getApiErrorStatus(query.error) === 404 ? 'No se ha encontrado la configuración del cliente.'
             : 'No se ha podido cargar la configuración.'}</p>
-        <button type="button" onClick={() => { void query.refetch() }}>Reintentar</button>
+        <button type="button" className={buttonClass} onClick={() => { void query.refetch() }}>Reintentar</button>
       </div>}
-      {query.data && !query.data.known && !query.isError && <p>configuración histórica no capturada</p>}
+      {query.data && !query.data.known && !query.isError && <p className="text-sm text-foreground-muted">configuración histórica no capturada</p>}
       {ready && fields.map(({ key, label, min, max }) => (
-        <label key={key} className="block text-sm font-medium">
+        <label key={key} className="block text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">
           {label}
-          <input className="mt-1 block w-full rounded-md border p-2" type="number" step="1" min={min} max={max}
+          <input className="mt-1 block h-11 w-full rounded-md border border-input bg-input px-3 text-sm font-normal normal-case tracking-normal text-foreground focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus md:h-10" type="number" step="1" min={min} max={max}
             value={draft[key]} onChange={(event) => { setDraft({ ...draft, [key]: event.target.value }); if (!conflict) setMessage('') }} />
         </label>
       ))}
-      {message && <p role={conflict || message.includes('futura') || message.includes('No ') ? 'alert' : 'status'}>{message}</p>}
-      {conflict && <button type="button" onClick={() => { void reload() }} disabled={query.isFetching}>Recargar configuración</button>}
-      <button type="submit" disabled={!ready || !validDraft(draft) || conflict || mutation.isPending || !validFutureDate(date)}>
+      {message && <p className="text-sm text-foreground-secondary" role={conflict || message.includes('futura') || message.includes('No ') ? 'alert' : 'status'}>{message}</p>}
+      {conflict && <button type="button" className={buttonClass} onClick={() => { void reload() }} disabled={query.isFetching}>Recargar configuración</button>}
+      <button type="submit" className={cn(buttonClass, 'border-transparent bg-primary text-primary-foreground hover:bg-primary/90')} disabled={!ready || !validDraft(draft) || conflict || mutation.isPending || !validFutureDate(date)}>
         {mutation.isPending ? 'Guardando...' : 'Guardar configuración'}
       </button>
     </form>

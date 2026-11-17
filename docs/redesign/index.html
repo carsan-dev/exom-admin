@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Rediseño de EXOM Admin · Propuesta de diseño · Fase 1</title>
+  <meta name="description" content="Propuesta de rediseño de EXOM Admin: auditoría, dirección de arte, bocetos, microinteracciones y plan de implementación.">
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/index.css">
+  <script src="assets/vendor/lucide-local.js" defer></script>
+  <!-- proto.js without #app: no shell is built; it provides theme, dialogs, tabs and toasts -->
+  <script src="assets/proto.js"></script>
+  <script src="assets/pages/index.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+<header class="hub-top">
+  <div class="hub-wrap">
+    <a class="hub-brand" href="index.html" aria-label="EXOM Admin, propuesta de rediseño">
+      <svg class="brand-symbol" viewBox="0 0 120 112" aria-hidden="true" focusable="false">
+        <path class="half-a" d="M46 110C20 106 0 84 0 56C0 33 14 12 35 3C48-2 60 4 62 16C66 29 57 39 44 39C36 39 28 35 23 28C11 38 5 51 7 65C9 86 24 103 46 109Z"/>
+        <path class="half-b" transform="rotate(180 60 56)" d="M46 110C20 106 0 84 0 56C0 33 14 12 35 3C48-2 60 4 62 16C66 29 57 39 44 39C36 39 28 35 23 28C11 38 5 51 7 65C9 86 24 103 46 109Z"/>
+      </svg>
+      <span class="wordmark">E<span>X</span>OM</span><span class="micro">Admin</span>
+    </a>
+    <p class="hub-meta">Rediseño de EXOM Admin · Propuesta de diseño · Fase 1</p>
+    <div class="hub-actions">
+      <button class="btn btn-ghost btn-icon" type="button" data-theme-toggle aria-label="Cambiar tema" data-tip="Cambiar tema">
+        <i data-lucide="sun" class="theme-icon-dark"></i><i data-lucide="moon" class="theme-icon-light"></i>
+      </button>
+      <a class="btn btn-primary btn-arrow" href="dashboard.html">Abrir prototipo<i data-lucide="arrow-right"></i></a>
+    </div>
+  </div>
+</header>
+
+<main id="contenido">
+
+  <!-- Opening (01 Resumen) -->
+  <section class="hub-wrap hub-hero" id="resumen" aria-labelledby="doc-title">
+    <h1 class="doc-title" id="doc-title">El cuaderno de pista del <span class="accent">entrenador.</span></h1>
+    <p class="doc-lead">EXOM Admin funciona, pero no parece EXOM: usa un tema marrón y amarillo ajeno a la web, tipografía de sistema y una navegación plana de 16 entradas. Esta propuesta lo convierte en la otra mitad del método: el mismo negro verdoso, crema y lima de exommethod.com, traducidos a una herramienta de trabajo diario. Menos tarjetas, más filas y filetes; el lima solo donde se actúa. Nada de esto toca todavía el código de producción.</p>
+    <div class="ledger" role="list" aria-label="La propuesta en cifras">
+      <div class="ledger-cell" role="listitem"><span class="fig">22</span><span class="ledger-sub">pantallas bocetadas</span></div>
+      <div class="ledger-cell" role="listitem"><span class="fig">16 → 6</span><span class="ledger-sub">grupos de navegación</span></div>
+      <div class="ledger-cell" role="listitem"><span class="fig">3</span><span class="ledger-sub">anchos: 1440 / 820 / 390</span></div>
+      <div class="ledger-cell" role="listitem"><span class="fig">0</span><span class="ledger-sub">archivos de producción tocados</span></div>
+    </div>
+  </section>
+
+  <div class="hub-wrap hub-body">
+
+    <nav class="hub-index" aria-label="Índice de la propuesta">
+      <ol>
+        <li><a href="#resumen"><span>Resumen</span></a></li>
+        <li><a href="#auditoria"><span>Auditoría</span></a></li>
+        <li><a href="#direccion"><span>Dirección de arte</span></a></li>
+        <li><a href="#bocetos"><span>Bocetos</span></a></li>
+        <li><a href="#micro"><span>Microinteracciones</span></a></li>
+        <li><a href="#plan"><span>Plan de implementación</span></a></li>
+        <li><a href="#funcionales"><span>Propuestas funcionales</span></a></li>
+        <li><a href="#decisiones"><span>Decisiones</span></a></li>
+      </ol>
+    </nav>
+
+    <div class="hub-content">
+
+      <!-- AUDITORÍA -->
+      <section class="hub-sec" id="auditoria" aria-labelledby="h-auditoria">
+        <header class="sec-head"><h2 class="sec-title" id="h-auditoria">Auditoría</h2></header>
+        <div class="read">
+          <p class="p">Se han leído las 22 rutas reales, sus diálogos y estados, y la arquitectura (React 19, Vite 6, Tailwind 4, shadcn/Radix, TanStack Query, react-hook-form + zod, recharts, lucide, sonner, dnd-kit). Todo lo que sigue sale del código.</p>
+        </div>
+
+        <div class="blk read" style="margin-top:40px">
+          <h3 class="blk-title">Lo que funciona y se conserva</h3>
+          <ul class="list">
+            <li><i data-lucide="check"></i><span>Filtros, orden, paginación y periodos en la URL.</span></li>
+            <li><i data-lucide="check"></i><span>Guardia de cambios sin guardar.</span></li>
+            <li><i data-lucide="check"></i><span>Flujo de aprobaciones ADMIN → SUPER_ADMIN.</span></li>
+            <li><i data-lucide="check"></i><span>Subidas con compresión y reintento.</span></li>
+            <li><i data-lucide="check"></i><span>Importación con IA de entrenamientos y dietas.</span></li>
+            <li><i data-lucide="check"></i><span>Tema claro y oscuro.</span></li>
+            <li><i data-lucide="check"></i><span>81 ficheros de test, sin snapshots: 693 consultas por rol y 399 por texto. Los textos y roles accesibles son contrato.</span></li>
+          </ul>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Problemas transversales</h3>
+          <div class="table-wrap">
+            <table class="table doc-table">
+              <caption class="sr-only">Problemas transversales, evidencia y respuesta de la propuesta</caption>
+              <colgroup><col style="width:32px"><col style="width:22%"><col style="width:42%"><col></colgroup>
+              <thead><tr><th scope="col" class="n">#</th><th scope="col">Problema</th><th scope="col">Evidencia</th><th scope="col">Qué hace la propuesta</th></tr></thead>
+              <tbody>
+                <tr><td class="n">1</td><td>Identidad ajena a la marca</td><td data-label="Evidencia">Fondo #30271e, texto #f7e681, fuentes de sistema; la web es #101111, #f2f1e9, #baf23a, Barlow y DM Sans.</td><td data-label="Qué hace la propuesta">Sistema visual derivado de la web.</td></tr>
+                <tr><td class="n">2</td><td>Contraste insuficiente</td><td data-label="Evidencia">Texto secundario 2,8:1 sobre tarjeta (usado en 730 sitios); bordes 1,1–1,3:1; botón primario claro 1,9:1.</td><td data-label="Qué hace la propuesta">Todos los pares de color verificados en AA en ambos temas; bordes de control ≥ 3:1.</td></tr>
+                <tr><td class="n">3</td><td>Navegación plana</td><td data-label="Evidencia">16 entradas sin agrupar.</td><td data-label="Qué hace la propuesta">6 grupos por tarea; barra inferior en móvil; carril de iconos en tablet.</td></tr>
+                <tr><td class="n">4</td><td>Tres cabeceras de página distintas</td><td data-label="Evidencia">“Hero” en tarjeta en 8 páginas, h1 simple en otras, propias en detalle.</td><td data-label="Qué hace la propuesta">Una cabecera: título, recuento y acciones.</td></tr>
+                <tr><td class="n">5</td><td>Patrones copiados, no compartidos</td><td data-label="Evidencia">Paginación en ~12 sitios; vacíos, errores y cabeceras duplicados; 17 textareas, 17 checkboxes y 16 selects nativos.</td><td data-label="Qué hace la propuesta">Componentes únicos: cabecera, paginación, vacío, error, chip de estado, checkbox, interruptor, conmutador.</td></tr>
+                <tr><td class="n">6</td><td>Animaciones muertas</td><td data-label="Evidencia">Diálogos, paneles y menús usan clases de animación sin el plugin instalado; el skeleton no pulsa.</td><td data-label="Qué hace la propuesta">Movimiento definido con tokens propios y reducido por preferencia del sistema.</td></tr>
+                <tr><td class="n">7</td><td>Confirmaciones mezcladas</td><td data-label="Evidencia">Diálogo propio, AlertDialog y window.confirm nativo (5 sitios); “Revocar” y “Recalcular” sin confirmar.</td><td data-label="Qué hace la propuesta">Un único diálogo de confirmación; lo destructivo siempre confirma.</td></tr>
+                <tr><td class="n">8</td><td>Móvil y tablet</td><td data-label="Evidencia">Tablas con scroll horizontal; tablet usa el layout móvil hasta 1023 px.</td><td data-label="Qué hace la propuesta">Listas apiladas, paneles a pantalla completa y acciones al pie en móvil.</td></tr>
+                <tr><td class="n">9</td><td>Jerga técnica a la vista</td><td data-label="Evidencia">MAIN_GOAL, CUSTOM, “DayProgress”, cron, fechas ISO, UTC en cada etiqueta.</td><td data-label="Qué hace la propuesta">Español llano; lo técnico queda en “Datos técnicos”.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Problemas por pantalla</h3>
+          <dl class="pairs">
+            <dt>Dashboard</dt><dd>Todo pesa igual y los enlaces de “Clientes activos” y “Cuentas bloqueadas” no filtran.</dd>
+            <dt>Clientes</dt><dd>Dos patrones de acciones distintos entre pestañas; búsqueda y filtros no persisten.</dd>
+            <dt>Detalle de cliente</dt><dd>Datos clave ocultos en desplegables; tabla de métricas de 19 columnas.</dd>
+            <dt>Progreso</dt><dd>8 pestañas con reglas de periodo distintas y un párrafo para explicarlo.</dd>
+            <dt>Feedback</dt><dd>Tabla + modal; el resumen va por periodo y la lista no.</dd>
+            <dt>Detalle de recap</dt><dd>Dos flujos de revisión superpuestos y el botón de guardar lejos de los campos.</dd>
+            <dt>Solicitudes</dt><dd>Se decide sobre JSON crudo y el botón está al final de un diálogo largo.</dd>
+            <dt>Entrenamientos</dt><dd>Builder de unos 25 campos en un modal con un solo scroll; reordenar solo con flechas de 20 px.</dd>
+            <dt>Dietas</dt><dd>Hasta 4 niveles de tarjetas anidadas; macros manuales sin relación con los ingredientes.</dd>
+            <dt>Asignaciones</dt><dd>Barra con más de 8 botones lejos del calendario; los días solo se seleccionan.</dd>
+            <dt>Badges</dt><dd>Seis vocabularios distintos bajo un mismo nombre; no se ve el impacto antes de borrar.</dd>
+            <dt>Retos y Logros</dt><dd>Cabeceras que no dicen lo que muestran; cuatro botones de texto por fila.</dd>
+            <dt>Notificaciones</dt><dd>Historial sin hora; envío a todos sin confirmación.</dd>
+            <dt>Plantillas</dt><dd>Dos botones de guardar en el mismo panel; cambiar de plantilla descarta el borrador.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <!-- DIRECCIÓN DE ARTE -->
+      <section class="hub-sec" id="direccion" aria-labelledby="h-direccion">
+        <header class="sec-head"><h2 class="sec-title" id="h-direccion">Dirección de arte</h2></header>
+
+        <div class="blk read">
+          <h3 class="blk-title">Tesis</h3>
+          <p class="thesis">El cuaderno de pista del entrenador.</p>
+          <p class="p">Filas y filetes en lugar de un mosaico de tarjetas. El lima aparece solo donde el entrenador actúa, donde algo está activo o donde está el foco.</p>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Relación con la web</h3>
+          <div class="trio">
+            <div>
+              <span class="micro">Se hereda</span>
+              <ul>
+                <li>Paleta: negro verdoso, crema, lima único</li>
+                <li>Barlow 800 en mayúsculas</li>
+                <li>DM Sans</li>
+                <li>Esquinas rectas</li>
+                <li>Filetes de 1 px</li>
+                <li>La X en lima</li>
+                <li>El símbolo de equilibrio</li>
+                <li>Botón lima que pasa a crema</li>
+                <li>Anillo de foco lima</li>
+              </ul>
+            </div>
+            <div>
+              <span class="micro">Se adapta</span>
+              <ul>
+                <li>Los titulares de 112 px pasan a 30 px</li>
+                <li>Secciones numeradas solo en documentos largos</li>
+                <li>La banda cruzada en X solo en el acceso</li>
+                <li>Iconos de trazo 1,6 (Lucide en vez de SVG propios)</li>
+              </ul>
+            </div>
+            <div>
+              <span class="micro">No se trae</span>
+              <ul>
+                <li>Coreografías de scroll</li>
+                <li>Vídeo</li>
+                <li>Marca de agua en pantallas de trabajo</li>
+                <li>Botones de 58 px</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Color</h3>
+          <p class="p">Estrategia contenida: neutros teñidos de verde y un solo acento.</p>
+          <div class="sys-themes">
+            <div class="sys-theme" data-theme="dark">
+              <div class="row" style="justify-content:space-between;margin-bottom:12px"><span class="h2">Oscuro</span><span class="caption">Por defecto</span></div>
+              <div class="swatches">
+                <div class="swatch"><span class="swatch-chip" style="background:#101111"></span><span><span class="swatch-name">Fondo</span><span class="swatch-hex" style="display:block">#101111</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#151715"></span><span><span class="swatch-name">Superficie</span><span class="swatch-hex" style="display:block">#151715</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#272b25"></span><span><span class="swatch-name">Filete</span><span class="swatch-hex" style="display:block">#272b25</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#f2f1e9"></span><span><span class="swatch-name">Texto</span><span class="swatch-hex" style="display:block">#f2f1e9</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#b7bcb3"></span><span><span class="swatch-name">Secundario</span><span class="swatch-hex" style="display:block">#b7bcb3</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#8a9086"></span><span><span class="swatch-name">Terciario</span><span class="swatch-hex" style="display:block">#8a9086</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#baf23a"></span><span><span class="swatch-name">Lima</span><span class="swatch-hex" style="display:block">#baf23a</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#5fd08a"></span><span><span class="swatch-name">Éxito</span><span class="swatch-hex" style="display:block">#5fd08a</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#f0b23e"></span><span><span class="swatch-name">Aviso</span><span class="swatch-hex" style="display:block">#f0b23e</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#ff6b57"></span><span><span class="swatch-name">Peligro</span><span class="swatch-hex" style="display:block">#ff6b57</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#7fb5d8"></span><span><span class="swatch-name">Info</span><span class="swatch-hex" style="display:block">#7fb5d8</span></span></div>
+              </div>
+              <p class="theme-note">Los cuatro estados son nuevos: la web no los tiene.</p>
+              <div class="sys-row" style="margin-top:16px">
+                <span class="chip chip-success">Activa</span><span class="chip chip-warning">Pendiente</span><span class="chip chip-danger">Bloqueada</span><span class="chip chip-info">En revisión</span>
+                <button class="btn btn-primary btn-sm" type="button">Acción</button>
+              </div>
+            </div>
+            <div class="sys-theme" data-theme="light">
+              <div class="row" style="justify-content:space-between;margin-bottom:12px"><span class="h2">Claro</span><span class="caption">Opcional</span></div>
+              <div class="swatches">
+                <div class="swatch"><span class="swatch-chip" style="background:#f2f1e9"></span><span><span class="swatch-name">Fondo crema</span><span class="swatch-hex" style="display:block">#f2f1e9</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#101111"></span><span><span class="swatch-name">Texto</span><span class="swatch-hex" style="display:block">#101111</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#baf23a"></span><span><span class="swatch-name">Lima, solo como relleno</span><span class="swatch-hex" style="display:block">#baf23a</span></span></div>
+                <div class="swatch"><span class="swatch-chip" style="background:#3f5c00"></span><span><span class="swatch-name">Verde oliva, texto de acento</span><span class="swatch-hex" style="display:block">#3f5c00</span></span></div>
+              </div>
+              <p class="theme-note">El lima nunca es texto sobre crema: el acento escrito pasa a verde oliva.</p>
+              <div class="sys-row" style="margin-top:16px">
+                <span class="chip chip-success">Activa</span><span class="chip chip-warning">Pendiente</span><span class="chip chip-danger">Bloqueada</span><span class="chip chip-info">En revisión</span>
+                <button class="btn btn-primary btn-sm" type="button">Acción</button>
+                <span class="accent" style="font-weight:600;font-size:13px">Texto de acento</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Tipografía</h3>
+          <p class="p">Las mismas fuentes locales de la web; solo tres ficheros.</p>
+          <div>
+            <div class="type-spec"><span class="h1">Clientes</span><span class="caption">Barlow 800 mayúsculas · título de página 30 px</span></div>
+            <div class="type-spec"><span class="spec-fig">42</span><span class="caption">Barlow 800 · cifras 44 px</span></div>
+            <div class="type-spec"><span style="font-size:14px">Lucía ha completado el entrenamiento de hoy.</span><span class="caption">DM Sans 400 · texto 14 px</span></div>
+            <div class="type-spec"><span style="font-size:14px;font-weight:600">Actividad reciente</span><span class="caption">DM Sans 600 · 14 px</span></div>
+            <div class="type-spec"><span class="secondary text-2">Texto secundario para contexto y ayudas.</span><span class="caption">DM Sans 400 · secundario 13 px</span></div>
+            <div class="type-spec"><span class="spec-label">Etiqueta de tabla</span><span class="caption">DM Sans 600 · etiqueta 11 px en mayúsculas con tracking</span></div>
+            <div class="type-spec"><span class="spec-tab"><span>1.240</span><span>86,5</span><span>12</span><span>980</span><span>101,0</span><span>7</span></span><span class="caption">Cifras tabulares</span></div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Forma y profundidad</h3>
+          <p class="p">Radio 0 en estructura y controles. Píldora solo para estado y conmutadores; círculo solo para avatares. La profundidad se reserva a lo que flota: diálogos, paneles, menús y avisos llevan sombra; el contenido en flujo, nunca.</p>
+          <div class="shape-row">
+            <span class="chip chip-success">Activa</span>
+            <span class="tag">Intermedio</span>
+            <span class="shape-sep" aria-hidden="true"></span>
+            <span class="rule-label">Estado = píldora · Taxonomía = etiqueta cuadrada</span>
+          </div>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Densidad y espaciado</h3>
+          <p class="p">Rejilla de 4 px. Filas de tabla de 48 px, controles de 36 px (44 px táctiles en móvil). Márgenes de página 32 / 20 / 16 px.</p>
+          <div class="metrics">
+            <div><span class="micro">Rejilla</span><span class="v">4 px</span></div>
+            <div><span class="micro">Fila de tabla</span><span class="v">48 px</span></div>
+            <div><span class="micro">Control</span><span class="v">36 px · 44 px táctil</span></div>
+            <div><span class="micro">Margen de página</span><span class="v">32 / 20 / 16 px</span></div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Iconografía</h3>
+          <p class="p">Lucide a 16 px y trazo 1,6, igual que los iconos de la web. Sin iconos decorativos dentro de círculos.</p>
+          <div class="icon-row" aria-hidden="true">
+            <i data-lucide="layout-dashboard"></i><i data-lucide="users"></i><i data-lucide="trending-up"></i><i data-lucide="message-square"></i><i data-lucide="file-text"></i><i data-lucide="calendar-days"></i><i data-lucide="clipboard-list"></i><i data-lucide="utensils-crossed"></i><i data-lucide="dumbbell"></i><i data-lucide="apple"></i><i data-lucide="tags"></i><i data-lucide="trophy"></i><i data-lucide="award"></i><i data-lucide="bell"></i><i data-lucide="settings"></i><i data-lucide="shield-check"></i>
+          </div>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Navegación</h3>
+          <p class="p">De 16 entradas planas a Dashboard y seis grupos por tarea. Móvil: Dashboard, Feedback, Recaps, Progreso y Más.</p>
+          <div class="navmap">
+            <div><span class="micro">Sin grupo</span><ul><li><i data-lucide="layout-dashboard"></i>Dashboard</li></ul></div>
+            <div><span class="micro">Seguimiento</span><ul><li><i data-lucide="users"></i>Clientes</li><li><i data-lucide="trending-up"></i>Progreso</li><li><i data-lucide="message-square"></i>Feedback</li><li><i data-lucide="file-text"></i>Recaps</li></ul></div>
+            <div><span class="micro">Planificación</span><ul><li><i data-lucide="calendar-days"></i>Asignaciones</li><li><i data-lucide="clipboard-list"></i>Entrenamientos</li><li><i data-lucide="utensils-crossed"></i>Dietas</li></ul></div>
+            <div><span class="micro">Catálogo</span><ul><li><i data-lucide="dumbbell"></i>Ejercicios</li><li><i data-lucide="apple"></i>Ingredientes</li><li><i data-lucide="tags"></i>Badges</li></ul></div>
+            <div><span class="micro">Motivación</span><ul><li><i data-lucide="trophy"></i>Retos</li><li><i data-lucide="award"></i>Logros</li></ul></div>
+            <div><span class="micro">Comunicación</span><ul><li><i data-lucide="bell"></i>Notificaciones</li><li><i data-lucide="settings"></i>Plantillas</li></ul></div>
+            <div><span class="micro">Control</span><ul><li><i data-lucide="shield-check"></i>Solicitudes</li></ul></div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Patrones propios del producto</h3>
+          <dl class="patterns">
+            <dt>Tira de cifras</dt><dd>Ledger de cifras ordenadas por prioridad.</dd>
+            <dt>Barra de selección acoplada</dt><dd>Las acciones aparecen junto a lo seleccionado.</dd>
+            <dt>Banco de trabajo</dt><dd>A pantalla completa, para los builders.</dd>
+            <dt>Bandeja de revisión</dt><dd>Lista y detalle a la vez.</dd>
+            <dt>Panel lateral</dt><dd>Detalle sin perder la lista.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <!-- BOCETOS -->
+      <section class="hub-sec gallery" id="bocetos" aria-labelledby="h-bocetos">
+        <header class="sec-head"><h2 class="sec-title" id="h-bocetos">Bocetos</h2></header>
+        <p class="p gallery-note">Cada boceto es HTML real y navegable. La pestaña PROTOTIPO (borde derecho de cada pantalla) cambia rol, tema y estado (datos, cargando, vacío, error). Lo marcado como «Propuesta» no existe hoy en el panel.</p>
+        <p class="p gallery-note">Todos los clientes, correos y cifras de los bocetos son datos de demostración ficticios.</p>
+
+        <!-- Acceso -->
+        <div class="g-group" aria-labelledby="g-acceso">
+          <div class="g-head"><h3 class="h2" id="g-acceso">Acceso</h3><span class="caption">2 pantallas</span></div>
+          <div class="tiles">
+            <article class="tile">
+              <a class="tile-frame" href="login.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Login</span><span class="tile-ph-file">login.html</span></span>
+                <iframe data-src="login.html" tabindex="-1" inert title="Vista previa de Login"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Login</h4>
+                <p class="tile-desc">La marca habla una vez: panel con la X y marca de agua; formulario limpio con estados de error y bloqueo.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="login.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="login.html" data-phone-title="Login"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="onboarding.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Onboarding</span><span class="tile-ph-file">onboarding.html</span></span>
+                <iframe data-src="onboarding.html" tabindex="-1" inert title="Vista previa de Onboarding"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Onboarding <span class="tag">Propuesta</span></h4>
+                <p class="tile-desc">Mismo marco; se añade salida (propuesta).</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="onboarding.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="onboarding.html" data-phone-title="Onboarding"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Dashboard (sin grupo) -->
+        <div class="g-group" aria-labelledby="g-inicio">
+          <div class="g-head"><h3 class="h2" id="g-inicio">Dashboard</h3><span class="caption">Sin grupo · 1 pantalla</span></div>
+          <div class="tiles">
+            <article class="tile">
+              <a class="tile-frame" href="dashboard.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Dashboard</span><span class="tile-ph-file">dashboard.html</span></span>
+                <iframe data-src="dashboard.html" tabindex="-1" inert title="Vista previa de Dashboard"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Dashboard</h4>
+                <p class="tile-desc">Lo urgente primero: tira de cifras por prioridad; actividad agrupada por día; ranking con 7 marcas semanales.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="dashboard.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="dashboard.html" data-phone-title="Dashboard"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Seguimiento -->
+        <div class="g-group" aria-labelledby="g-seguimiento">
+          <div class="g-head"><h3 class="h2" id="g-seguimiento">Seguimiento</h3><span class="caption">6 pantallas</span></div>
+          <div class="tiles">
+            <article class="tile">
+              <a class="tile-frame" href="clientes.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Clientes / Usuarios</span><span class="tile-ph-file">clientes.html</span></span>
+                <iframe data-src="clientes.html" tabindex="-1" inert title="Vista previa de Clientes / Usuarios"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Clientes / Usuarios</h4>
+                <p class="tile-desc">Una sola tabla con fila clicable, menú único de acciones por rol, filtros con chips.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="clientes.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="clientes.html" data-phone-title="Clientes / Usuarios"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="cliente-detalle.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Detalle de cliente</span><span class="tile-ph-file">cliente-detalle.html</span></span>
+                <iframe data-src="cliente-detalle.html" tabindex="-1" inert title="Vista previa de Detalle de cliente"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Detalle de cliente</h4>
+                <p class="tile-desc">Datos clave a la vista, una acción principal, métricas con columnas agrupadas.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="cliente-detalle.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="cliente-detalle.html" data-phone-title="Detalle de cliente"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="progreso.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Progreso</span><span class="tile-ph-file">progreso.html</span></span>
+                <iframe data-src="progreso.html" tabindex="-1" inert title="Vista previa de Progreso"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Progreso</h4>
+                <p class="tile-desc">Las 8 secciones pasan a un carril lateral; cada sección lleva su propio periodo.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="progreso.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="progreso.html" data-phone-title="Progreso"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="feedback.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Feedback</span><span class="tile-ph-file">feedback.html</span></span>
+                <iframe data-src="feedback.html" tabindex="-1" inert title="Vista previa de Feedback"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Feedback</h4>
+                <p class="tile-desc">De tabla + modal a bandeja de revisión: lista y detalle a la vez; en móvil, responder con una mano.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="feedback.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="feedback.html" data-phone-title="Feedback"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="recaps.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Recaps</span><span class="tile-ph-file">recaps.html</span></span>
+                <iframe data-src="recaps.html" tabindex="-1" inert title="Vista previa de Recaps"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Recaps</h4>
+                <p class="tile-desc">Pendientes primero; activos y archivados como conmutador claro.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="recaps.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="recaps.html" data-phone-title="Recaps"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="recap-detalle.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Detalle de recap</span><span class="tile-ph-file">recap-detalle.html</span></span>
+                <iframe data-src="recap-detalle.html" tabindex="-1" inert title="Vista previa de Detalle de recap"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Detalle de recap</h4>
+                <p class="tile-desc">Respuestas en una sola lectura y panel de revisión fijo con los dos flujos separados y su botón al lado.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="recap-detalle.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="recap-detalle.html" data-phone-title="Detalle de recap"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Planificación -->
+        <div class="g-group" aria-labelledby="g-planificacion">
+          <div class="g-head"><h3 class="h2" id="g-planificacion">Planificación</h3><span class="caption">3 pantallas</span></div>
+          <div class="tiles">
+            <article class="tile">
+              <a class="tile-frame" href="asignaciones.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Asignaciones</span><span class="tile-ph-file">asignaciones.html</span></span>
+                <iframe data-src="asignaciones.html" tabindex="-1" inert title="Vista previa de Asignaciones"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Asignaciones</h4>
+                <p class="tile-desc">El calendario manda: hoja semanal, acciones junto a la selección, mesociclo RIR en panel lateral.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="asignaciones.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="asignaciones.html" data-phone-title="Asignaciones"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="entrenamientos.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Entrenamientos y builder</span><span class="tile-ph-file">entrenamientos.html</span></span>
+                <iframe data-src="entrenamientos.html" tabindex="-1" inert title="Vista previa de Entrenamientos y builder"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Entrenamientos y builder</h4>
+                <p class="tile-desc">Carpetas en carril; builder a pantalla completa con hoja de prescripción y buscador de ejercicios siempre abierto.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="entrenamientos.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="entrenamientos.html" data-phone-title="Entrenamientos y builder"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="dietas.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Dietas y builder</span><span class="tile-ph-file">dietas.html</span></span>
+                <iframe data-src="dietas.html" tabindex="-1" inert title="Vista previa de Dietas y builder"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Dietas y builder</h4>
+                <p class="tile-desc">Comidas en esquema lateral, variantes como pestañas, ingredientes en tabla y totales siempre visibles.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="dietas.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="dietas.html" data-phone-title="Dietas y builder"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Catálogo -->
+        <div class="g-group" aria-labelledby="g-catalogo">
+          <div class="g-head"><h3 class="h2" id="g-catalogo">Catálogo</h3><span class="caption">3 pantallas</span></div>
+          <div class="tiles">
+            <article class="tile">
+              <a class="tile-frame" href="ejercicios.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Ejercicios</span><span class="tile-ph-file">ejercicios.html</span></span>
+                <iframe data-src="ejercicios.html" tabindex="-1" inert title="Vista previa de Ejercicios"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Ejercicios</h4>
+                <p class="tile-desc">Miniatura en la lista, filtros unificados, detalle en panel lateral.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="ejercicios.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="ejercicios.html" data-phone-title="Ejercicios"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="ingredientes.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Ingredientes</span><span class="tile-ph-file">ingredientes.html</span></span>
+                <iframe data-src="ingredientes.html" tabindex="-1" inert title="Vista previa de Ingredientes"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Ingredientes</h4>
+                <p class="tile-desc">Tabla numérica densa, alineada y ordenable.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="ingredientes.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="ingredientes.html" data-phone-title="Ingredientes"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="badges.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Badges</span><span class="tile-ph-file">badges.html</span></span>
+                <iframe data-src="badges.html" tabindex="-1" inert title="Vista previa de Badges"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Badges</h4>
+                <p class="tile-desc">Seis vocabularios en maestro-detalle en lugar de seis pestañas.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="badges.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="badges.html" data-phone-title="Badges"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Motivación -->
+        <div class="g-group" aria-labelledby="g-motivacion">
+          <div class="g-head"><h3 class="h2" id="g-motivacion">Motivación</h3><span class="caption">2 pantallas</span></div>
+          <div class="tiles">
+            <article class="tile">
+              <a class="tile-frame" href="retos.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Retos</span><span class="tile-ph-file">retos.html</span></span>
+                <iframe data-src="retos.html" tabindex="-1" inert title="Vista previa de Retos"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Retos</h4>
+                <p class="tile-desc">Cabeceras que dicen lo que muestran; acciones en menú; controles de dos opciones como conmutadores.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="retos.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="retos.html" data-phone-title="Retos"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="logros.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Logros</span><span class="tile-ph-file">logros.html</span></span>
+                <iframe data-src="logros.html" tabindex="-1" inert title="Vista previa de Logros"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Logros</h4>
+                <p class="tile-desc">Sin jerga técnica, meta con unidad, confirmación antes de revocar o recalcular.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="logros.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="logros.html" data-phone-title="Logros"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Comunicación -->
+        <div class="g-group" aria-labelledby="g-comunicacion">
+          <div class="g-head"><h3 class="h2" id="g-comunicacion">Comunicación</h3><span class="caption">2 pantallas</span></div>
+          <div class="tiles">
+            <article class="tile">
+              <a class="tile-frame" href="notificaciones.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Notificaciones</span><span class="tile-ph-file">notificaciones.html</span></span>
+                <iframe data-src="notificaciones.html" tabindex="-1" inert title="Vista previa de Notificaciones"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Notificaciones</h4>
+                <p class="tile-desc">Historial con hora; envío con vista previa de la notificación y contadores.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="notificaciones.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="notificaciones.html" data-phone-title="Notificaciones"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="plantillas.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Plantillas</span><span class="tile-ph-file">plantillas.html</span></span>
+                <iframe data-src="plantillas.html" tabindex="-1" inert title="Vista previa de Plantillas"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Plantillas</h4>
+                <p class="tile-desc">Un solo guardado, horario en lenguaje humano, variables insertables.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="plantillas.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="plantillas.html" data-phone-title="Plantillas"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Control -->
+        <div class="g-group" aria-labelledby="g-control">
+          <div class="g-head"><h3 class="h2" id="g-control">Control</h3><span class="caption">1 pantalla</span></div>
+          <div class="tiles">
+            <article class="tile">
+              <a class="tile-frame" href="solicitudes.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Solicitudes</span><span class="tile-ph-file">solicitudes.html</span></span>
+                <iframe data-src="solicitudes.html" tabindex="-1" inert title="Vista previa de Solicitudes"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Solicitudes</h4>
+                <p class="tile-desc">Diff legible en vez de JSON, barra de decisión siempre visible, confirmación propia.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="solicitudes.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="solicitudes.html" data-phone-title="Solicitudes"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Sistema -->
+        <div class="g-group" aria-labelledby="g-sistema">
+          <div class="g-head"><h3 class="h2" id="g-sistema">Sistema</h3><span class="caption">3 pantallas</span></div>
+          <div class="tiles">
+            <article class="tile">
+              <a class="tile-frame" href="sistema.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Sistema visual</span><span class="tile-ph-file">sistema.html</span></span>
+                <iframe data-src="sistema.html" tabindex="-1" inert title="Vista previa de Sistema visual"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Sistema visual</h4>
+                <p class="tile-desc">Tokens, tipografía, componentes y estados en ambos temas.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="sistema.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="sistema.html" data-phone-title="Sistema visual"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="404.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">No encontrada</span><span class="tile-ph-file">404.html</span></span>
+                <iframe data-src="404.html" tabindex="-1" inert title="Vista previa de No encontrada"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">No encontrada <span class="tag">Propuesta</span></h4>
+                <p class="tile-desc">Propuesta: hoy no existe.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="404.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-open="#dlg-phone" aria-haspopup="dialog" data-phone="404.html" data-phone-title="No encontrada"><i data-lucide="smartphone"></i>Ver en móvil</button>
+                </div>
+              </div>
+            </article>
+            <article class="tile">
+              <a class="tile-frame" href="buscador.html" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name">Buscador global</span><span class="tile-ph-file">buscador.html</span></span>
+                <iframe data-src="buscador.html" tabindex="-1" inert title="Vista previa del Buscador global"></iframe>
+              </a>
+              <div class="tile-body">
+                <h4 class="tile-title">Buscador global <span class="tag">Propuesta P13</span></h4>
+                <p class="tile-desc">Propuesta: paleta de comandos con Ctrl/⌘ K para pantallas, acciones de navegación y clientes. Hoy no existe.</p>
+                <div class="tile-actions">
+                  <a class="btn btn-ghost btn-sm" href="buscador.html" target="_blank" rel="noopener">Abrir<i data-lucide="arrow-up-right"></i></a>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- MICROINTERACCIONES -->
+      <section class="hub-sec" id="micro" aria-labelledby="h-micro">
+        <header class="sec-head"><h2 class="sec-title" id="h-micro">Microinteracciones</h2></header>
+        <div class="read">
+          <p class="p">La fluidez no es animarlo todo. Se anima solo lo que da respuesta, orienta o explica un cambio. Todo dura menos de 300 ms. Curva de salida cubic-bezier(.22,.75,.18,1), la misma de la web.</p>
+          <div class="tokens" aria-label="Tokens de duración">
+            <span class="tag">Pulsación <b>80 ms</b></span>
+            <span class="tag">Color <b>120 ms</b></span>
+            <span class="tag">Indicadores <b>180 ms</b></span>
+            <span class="tag">Entrada <b>240 ms</b></span>
+            <span class="tag">Salida <b>160 ms</b></span>
+          </div>
+        </div>
+
+        <div class="demos-wrap">
+          <div class="demos">
+            <div class="demo">
+              <span class="micro">Pulsación</span>
+              <div class="demo-stage"><button class="btn btn-primary" type="button">Guardar</button></div>
+              <span class="caption">Mantén pulsado: escala 0,98 en 80 ms.</span>
+            </div>
+            <div class="demo">
+              <span class="micro">Pestañas</span>
+              <div class="demo-stage" data-tabs>
+                <div class="tabs" role="tablist" aria-label="Demostración de pestañas">
+                  <button class="tab" role="tab" type="button" aria-selected="true">Activos</button>
+                  <button class="tab" role="tab" type="button" aria-selected="false">Archivados</button>
+                  <button class="tab" role="tab" type="button" aria-selected="false">Todos</button>
+                </div>
+              </div>
+              <span class="caption">El subrayado se desliza en 180 ms.</span>
+            </div>
+            <div class="demo">
+              <span class="micro">Diálogo</span>
+              <div class="demo-stage"><button class="btn btn-secondary" type="button" data-open="#dlg-demo" aria-haspopup="dialog">Abrir diálogo</button></div>
+              <span class="caption">Sube 8 px y aparece en 240 ms; sale en 160 ms.</span>
+            </div>
+            <div class="demo">
+              <span class="micro">Aviso</span>
+              <div class="demo-stage"><button class="btn btn-secondary" type="button" data-toast="Cambios guardados" data-toast-tone="success" data-toast-desc="Aviso de ejemplo: se pausa al pasar el cursor.">Lanzar aviso</button></div>
+              <span class="caption">Sube 8 px con fundido; confirma sin interrumpir.</span>
+            </div>
+            <div class="demo" data-sel-demo>
+              <span class="micro">Barra de selección</span>
+              <div class="demo-stage">
+                <div class="demo-sel">
+                  <label class="check"><input type="checkbox">Fila 1</label>
+                  <label class="check"><input type="checkbox">Fila 2</label>
+                </div>
+                <div class="selection-bar demo-selbar" role="region" aria-label="Selección" hidden>
+                  <span class="selection-count" aria-live="polite"></span>
+                  <span class="spacer"></span>
+                  <button class="btn btn-ghost btn-sm" type="button" data-demo-clear>Quitar</button>
+                </div>
+              </div>
+              <span class="caption">Sube desde abajo en 240 ms; el contador cambia con fundido.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <h3 class="blk-title">Especificación</h3>
+          <div class="table-wrap">
+            <table class="table doc-table doc-table--wide">
+              <caption class="sr-only">Especificación de microinteracciones</caption>
+              <thead><tr>
+                <th scope="col" class="n">#</th><th scope="col">Componente</th><th scope="col">Evento</th><th scope="col">De → a</th><th scope="col">Duración y curva</th><th scope="col">Para qué</th><th scope="col">Con movimiento reducido</th>
+              </tr></thead>
+              <tbody>
+                <tr><td class="n">1</td><td>Botón</td><td data-label="Evento">Pulsar</td><td data-label="De → a">Escala 1 → 0,98</td><td data-label="Duración y curva">80 ms, salida</td><td data-label="Para qué">Respuesta física inmediata</td><td data-label="Con movimiento reducido" class="reduced">Solo cambia el color</td></tr>
+                <tr><td class="n">2</td><td>Fila, enlace, control</td><td data-label="Evento">Pasar el cursor</td><td data-label="De → a">Color de fondo o borde</td><td data-label="Duración y curva">120 ms</td><td data-label="Para qué">Señalar que es interactivo</td><td data-label="Con movimiento reducido" class="reduced">Igual (solo color)</td></tr>
+                <tr><td class="n">3</td><td>Botón con flecha y celda de cifra</td><td data-label="Evento">Pasar el cursor</td><td data-label="De → a">La flecha se desplaza 3 px / aparece ↗</td><td data-label="Duración y curva">120 ms</td><td data-label="Para qué">Anticipar que navega</td><td data-label="Con movimiento reducido" class="reduced">Sin desplazamiento</td></tr>
+                <tr><td class="n">4</td><td>Pestañas</td><td data-label="Evento">Cambiar de pestaña</td><td data-label="De → a">El subrayado se desliza a la nueva pestaña</td><td data-label="Duración y curva">180 ms, salida</td><td data-label="Para qué">Orientar: de dónde vengo, a dónde voy</td><td data-label="Con movimiento reducido" class="reduced">Salto directo</td></tr>
+                <tr><td class="n">5</td><td>Diálogo</td><td data-label="Evento">Abrir / cerrar</td><td data-label="De → a">Opacidad 0 → 1 y subida de 8 px; velo 0 → 72 %</td><td data-label="Duración y curva">240 ms / 160 ms</td><td data-label="Para qué">Separar un plano que exige atención</td><td data-label="Con movimiento reducido" class="reduced">Fundido de 80 ms</td></tr>
+                <tr><td class="n">6</td><td>Panel lateral</td><td data-label="Evento">Abrir / cerrar</td><td data-label="De → a">Entra 16 px desde la derecha con fundido</td><td data-label="Duración y curva">240 ms / 160 ms</td><td data-label="Para qué">El detalle vive a la derecha de la lista</td><td data-label="Con movimiento reducido" class="reduced">Fundido de 80 ms</td></tr>
+                <tr><td class="n">7</td><td>Menú y popover</td><td data-label="Evento">Abrir</td><td data-label="De → a">Escala 0,98 → 1 desde el botón que lo abre</td><td data-label="Duración y curva">120 ms</td><td data-label="Para qué">Relacionar menú y origen</td><td data-label="Con movimiento reducido" class="reduced">Aparece sin escala</td></tr>
+                <tr><td class="n">8</td><td>Barra de selección</td><td data-label="Evento">Seleccionar la primera fila o día</td><td data-label="De → a">Sube desde el borde inferior; el contador cambia con fundido</td><td data-label="Duración y curva">240 ms; contador 120 ms</td><td data-label="Para qué">Acercar las acciones a la selección</td><td data-label="Con movimiento reducido" class="reduced">Aparece sin desplazamiento</td></tr>
+                <tr><td class="n">9</td><td>Aviso (toast)</td><td data-label="Evento">Acción completada o fallida</td><td data-label="De → a">Sube 8 px con fundido; se pausa al pasar el cursor</td><td data-label="Duración y curva">180 ms / 160 ms</td><td data-label="Para qué">Confirmar sin interrumpir</td><td data-label="Con movimiento reducido" class="reduced">Fundido</td></tr>
+                <tr><td class="n">10</td><td>Skeleton</td><td data-label="Evento">Carga de más de 150 ms</td><td data-label="De → a">Brillo lento; el contenido entra con fundido sin mover el layout</td><td data-label="Duración y curva">Brillo 1,2 s; fundido 120 ms</td><td data-label="Para qué">Sensación de respuesta por debajo de 400 ms</td><td data-label="Con movimiento reducido" class="reduced">Bloque estático</td></tr>
+                <tr><td class="n">11</td><td>Sidebar</td><td data-label="Evento">Contraer / expandir</td><td data-label="De → a">Ancho 240 ↔ 56 px; etiquetas con fundido</td><td data-label="Duración y curva">180 ms, entrada-salida</td><td data-label="Para qué">Conservar el contexto espacial</td><td data-label="Con movimiento reducido" class="reduced">Cambio inmediato</td></tr>
+                <tr><td class="n">12</td><td>Arrastre (reordenar, mover a carpeta)</td><td data-label="Evento">Arrastrar / soltar</td><td data-label="De → a">El elemento se eleva con sombra; línea de inserción lima; al soltar, asienta</td><td data-label="Duración y curva">180 ms al soltar</td><td data-label="Para qué">Mostrar dónde caerá</td><td data-label="Con movimiento reducido" class="reduced">Sin elevación, con línea de inserción</td></tr>
+                <tr><td class="n">13</td><td>Guardar</td><td data-label="Evento">Enviar</td><td data-label="De → a">El botón pasa a “cargando” al instante; al terminar, marca de verificación breve</td><td data-label="Duración y curva">&lt; 100 ms; verificación 600 ms</td><td data-label="Para qué">Respuesta inmediata aunque el servidor tarde</td><td data-label="Con movimiento reducido" class="reduced">Igual, sin transición</td></tr>
+                <tr><td class="n">14</td><td>Confirmación destructiva</td><td data-label="Evento">Escribir ELIMINAR</td><td data-label="De → a">El botón rojo se habilita con cambio de color</td><td data-label="Duración y curva">120 ms</td><td data-label="Para qué">Prevenir el error</td><td data-label="Con movimiento reducido" class="reduced">Igual</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="blk read">
+          <h3 class="blk-title">Lo que no se anima, a propósito</h3>
+          <p class="p">Son acciones frecuentes: se prioriza la velocidad.</p>
+          <ul class="list list-2">
+            <li><i data-lucide="minus"></i><span>Navegación entre páginas</span></li>
+            <li><i data-lucide="minus"></i><span>Carga de tablas</span></li>
+            <li><i data-lucide="minus"></i><span>Entradas escalonadas de listas</span></li>
+            <li><i data-lucide="minus"></i><span>Cifras que cuentan</span></li>
+            <li><i data-lucide="minus"></i><span>Cambio de tema</span></li>
+            <li><i data-lucide="minus"></i><span>Validación (sin sacudidas)</span></li>
+          </ul>
+        </div>
+
+        <div class="blk read">
+          <h3 class="blk-title">Los 20 principios y dónde se aplican</h3>
+          <div class="table-wrap">
+            <table class="table doc-table">
+              <caption class="sr-only">Principios de animación y de interacción, y dónde se aplican</caption>
+              <colgroup><col style="width:32px"><col style="width:34%"><col></colgroup>
+              <thead><tr><th scope="col" class="n">#</th><th scope="col">Principio</th><th scope="col">Dónde se aplica</th></tr></thead>
+              <tbody>
+                <tr><td class="n">1</td><td>Squash &amp; Stretch</td><td data-label="Dónde se aplica">Pulsación de botón</td></tr>
+                <tr><td class="n">2</td><td>Anticipation</td><td data-label="Dónde se aplica">Flecha del botón; habilitado de la confirmación</td></tr>
+                <tr><td class="n">3</td><td>Staging</td><td data-label="Dónde se aplica">Velo de diálogo; cifras por prioridad</td></tr>
+                <tr><td class="n">4</td><td>Pose to Pose</td><td data-label="Dónde se aplica">Estados inicial y final definidos en cada fila de la tabla</td></tr>
+                <tr><td class="n">5</td><td>Follow Through</td><td data-label="Dónde se aplica">Asentado al soltar un arrastre</td></tr>
+                <tr><td class="n">6</td><td>Slow In &amp; Slow Out</td><td data-label="Dónde se aplica">Curva única de salida</td></tr>
+                <tr><td class="n">7</td><td>Arcs</td><td data-label="Dónde se aplica">No se usa: trayectorias rectas y cortas en una herramienta densa</td></tr>
+                <tr><td class="n">8</td><td>Secondary Action</td><td data-label="Dónde se aplica">Contador de la barra de selección; flecha ↗</td></tr>
+                <tr><td class="n">9</td><td>Timing</td><td data-label="Dónde se aplica">Todo &lt; 300 ms</td></tr>
+                <tr><td class="n">10</td><td>Exaggeration</td><td data-label="Dónde se aplica">Escala máxima 0,98; desplazamientos ≤ 16 px</td></tr>
+                <tr><td class="n">11</td><td>Solid Drawing</td><td data-label="Dónde se aplica">Sombra solo en lo que flota</td></tr>
+                <tr><td class="n">12</td><td>Appeal</td><td data-label="Dónde se aplica">Alineación, ritmo y estados completos</td></tr>
+                <tr><td class="n">13</td><td>Fitts</td><td data-label="Dónde se aplica">Acciones junto a la selección; botón principal al pie en móvil</td></tr>
+                <tr><td class="n">14</td><td>Bigger Hit Areas</td><td data-label="Dónde se aplica">44 px táctiles; fila entera clicable</td></tr>
+                <tr><td class="n">15</td><td>Hick</td><td data-label="Dónde se aplica">6 grupos de navegación; una acción principal por pantalla; secundarias en menú</td></tr>
+                <tr><td class="n">16</td><td>Miller</td><td data-label="Dónde se aplica">Secciones y grupos de columnas; tira de cifras</td></tr>
+                <tr><td class="n">17</td><td>Doherty</td><td data-label="Dónde se aplica">Estado de carga inmediato; skeleton</td></tr>
+                <tr><td class="n">18</td><td>Postel</td><td data-label="Dónde se aplica">Rangos “8-10”, minutos o segundos, comas o puntos decimales normalizados</td></tr>
+                <tr><td class="n">19</td><td>Jakob</td><td data-label="Dónde se aplica">Tabla, panel lateral, bandeja y pestañas como en cualquier herramienta profesional</td></tr>
+                <tr><td class="n">20</td><td>Frequency of Use</td><td data-label="Dónde se aplica">Sin animación en navegación y listas</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PLAN -->
+      <section class="hub-sec" id="plan" aria-labelledby="h-plan">
+        <header class="sec-head"><h2 class="sec-title" id="h-plan">Plan de implementación</h2></header>
+        <div class="read">
+          <p class="p">Orden pensado para no romper nada: primero la red de seguridad, luego tokens, luego piezas compartidas, luego pantallas una a una. Cada fase se puede desplegar sola.</p>
+        </div>
+
+        <div class="blk" style="margin-top:32px">
+          <div class="table-wrap">
+            <table class="table doc-table doc-table--wide">
+              <caption class="sr-only">Fases de implementación</caption>
+              <colgroup><col style="width:17%"><col style="width:40%"><col style="width:10%"><col></colgroup>
+              <thead><tr><th scope="col">Fase</th><th scope="col">Qué incluye</th><th scope="col">Depende de</th><th scope="col">Riesgo y mitigación</th></tr></thead>
+              <tbody>
+                <tr><td><span class="phase"><b>F0</b><span>Red de seguridad</span></span></td><td data-label="Qué incluye">Tests de humo del shell por rol (sidebar ADMIN y SUPER_ADMIN, /clients ↔ /users, contador de solicitudes); capturas de referencia; decidir dependencias.</td><td data-label="Depende de">—</td><td data-label="Riesgo y mitigación">Hoy el shell y la mayoría de páginas no tienen tests.</td></tr>
+                <tr><td><span class="phase"><b>F1</b><span>Tokens y tema</span></span></td><td data-label="Qué incluye">Nuevos valores en index.css manteniendo los nombres de token actuales; tokens nuevos (borde de control, acento de texto, estados por tema); fuentes locales; tokens de movimiento y reducción global; index.html; sanear 40 clases de paleta cruda y 11 parches locales.</td><td data-label="Depende de">F0</td><td data-label="Riesgo y mitigación">Los nombres de token son contrato (unos 1.800 usos y 10 ficheros de test con clases): no se renombran.</td></tr>
+                <tr><td><span class="phase"><b>F2</b><span>Piezas compartidas</span></span></td><td data-label="Qué incluye">Rehacer Button, Input, Select, Dialog, Sheet, Table, Tabs, Badge, Skeleton, Tooltip, menús y avisos; crear Textarea, Checkbox, Switch, conmutador, cabecera de página, paginación, vacío, error, chip de estado, tira de cifras, diálogo de confirmación, barra de selección y banco de trabajo.</td><td data-label="Depende de">F1</td><td data-label="Riesgo y mitigación">Cambiar Button, Card y Dialog afecta a 120, 36 y 50 ficheros: se cambia el estilo sin tocar props ni roles.</td></tr>
+                <tr><td><span class="phase"><b>F3</b><span>Shell</span></span></td><td data-label="Qué incluye">Sidebar agrupada y persistente, cabecera, migas, barra inferior móvil, carril en tablet, página 404.</td><td data-label="Depende de">F2</td><td data-label="Riesgo y mitigación">Mantener el cambio Clientes ↔ Usuarios y “Plantillas” solo para SUPER_ADMIN.</td></tr>
+                <tr><td><span class="phase"><b>F4</b><span>Pantallas, por lotes</span></span></td><td data-label="Qué incluye">A: listas de catálogo y gestión (Ejercicios, Ingredientes, Badges, Retos, Logros, Notificaciones) · B: seguimiento (Dashboard, Clientes, Detalle, Feedback, Recaps, Detalle de recap, Solicitudes) · C: builders (Entrenamientos, Dietas) · D: Asignaciones · E: Progreso · F: Acceso y Plantillas.</td><td data-label="Depende de">F3</td><td data-label="Riesgo y mitigación">Lógica y vista están mezcladas en páginas de 800–1.100 líneas: se separa la presentación sin cambiar hooks ni llamadas. Los textos y nombres accesibles se conservan.</td></tr>
+                <tr><td><span class="phase"><b>F5</b><span>Cierre</span></span></td><td data-label="Qué incluye">Revisión de accesibilidad y teclado, rendimiento, móvil real, retirar dependencias sin uso (next-themes, @vercel/analytics, @vercel/speed-insights), DESIGN.md.</td><td data-label="Depende de">F4</td><td data-label="Riesgo y mitigación">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="blk read">
+          <h3 class="blk-title">Decisiones técnicas a confirmar</h3>
+          <ol class="list">
+            <li><i data-lucide="circle-help"></i><span>Animación de overlays con <code>tw-animate-css</code> o con keyframes propios. Recomendado: propios, sin dependencia.</span></li>
+            <li><i data-lucide="circle-help"></i><span>Subir tailwind-merge a v3 (pensado para Tailwind 4).</span></li>
+            <li><i data-lucide="circle-help"></i><span>Reordenación por arrastre en builders con <code>@dnd-kit/sortable</code> (pequeña, de la misma familia ya instalada) o mantener solo flechas.</span></li>
+            <li><i data-lucide="circle-help"></i><span>Los bocetos sirven los iconos Lucide desde un fichero local generado a partir de <code>lucide-react</code>; en producción se usa <code>lucide-react</code>, ya instalado.</span></li>
+          </ol>
+        </div>
+
+        <div class="blk read">
+          <h3 class="blk-title">Qué no cambia</h3>
+          <p class="p">Lógica de negocio, llamadas a la API, autenticación, estructuras de datos, rutas y parámetros de URL.</p>
+        </div>
+      </section>
+
+      <!-- PROPUESTAS FUNCIONALES -->
+      <section class="hub-sec" id="funcionales" aria-labelledby="h-funcionales">
+        <header class="sec-head"><h2 class="sec-title" id="h-funcionales">Propuestas funcionales <span class="text-3">(aparte)</span></h2></header>
+        <div class="read">
+          <p class="p">Mejoras detectadas que añaden o cambian comportamiento. No forman parte del rediseño salvo que las apruebes; en los bocetos van marcadas como «Propuesta».</p>
+          <ul class="list list-2" style="margin-top:24px">
+            <li><i data-lucide="plus"></i><span>Renombrar “Badges” a “Etiquetas”.</span></li>
+            <li><i data-lucide="plus"></i><span>Buscador global y paleta de comandos (cmdk ya está instalado).</span></li>
+            <li><i data-lucide="plus"></i><span>Contadores de pendientes en Feedback y Recaps del menú.</span></li>
+            <li><i data-lucide="plus"></i><span>Miniatura en la lista de ejercicios e icono en la de logros (los datos ya existen).</span></li>
+            <li><i data-lucide="plus"></i><span>Botón “Hoy” y marca del día actual en Asignaciones; abrir un día con doble clic.</span></li>
+            <li><i data-lucide="plus"></i><span>Suma en vivo de macros frente al objetivo en Dietas; kcal por ingrediente.</span></li>
+            <li><i data-lucide="plus"></i><span>Vista previa de notificación y contadores de caracteres.</span></li>
+            <li><i data-lucide="plus"></i><span>Confirmación al enviar a todos, al revocar y al recalcular logros.</span></li>
+            <li><i data-lucide="plus"></i><span>Hora en el historial de notificaciones; fecha absoluta en Solicitudes.</span></li>
+            <li><i data-lucide="plus"></i><span>Un solo guardado en Plantillas y aviso al cambiar de plantilla con cambios.</span></li>
+            <li><i data-lucide="plus"></i><span>Diff legible en Solicitudes.</span></li>
+            <li><i data-lucide="plus"></i><span>Enlace de salida en Onboarding.</span></li>
+            <li><i data-lucide="plus"></i><span>Página 404.</span></li>
+            <li><i data-lucide="plus"></i><span>Retirar el botón de Apple deshabilitado del acceso.</span></li>
+            <li><i data-lucide="plus"></i><span>Pasar al siguiente pendiente al responder un feedback.</span></li>
+            <li><i data-lucide="plus"></i><span>Persistir búsqueda y filtros de Clientes en la URL.</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- DECISIONES -->
+      <section class="hub-sec" id="decisiones" aria-labelledby="h-decisiones">
+        <header class="sec-head"><h2 class="sec-title" id="h-decisiones">Decisiones que necesito de ti</h2></header>
+        <ol class="asks">
+          <li>¿Apruebas la dirección visual (paleta, tipografía, esquinas rectas, filas en lugar de tarjetas)?</li>
+          <li>¿Tema oscuro por defecto con claro opcional, como hoy?</li>
+          <li>¿Qué propuestas funcionales de la sección 07 entran en la implementación?</li>
+          <li>¿Alguna pantalla que quieras replantear antes de empezar?</li>
+          <li>¿Confirmas las tres decisiones técnicas de la sección 06?</li>
+        </ol>
+        <p class="closing">No se implementa nada hasta tu <span class="accent">aprobación.</span></p>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<footer class="hub-foot">
+  <div class="hub-wrap">
+    <span>Rediseño de EXOM Admin · Propuesta de diseño · Fase 1</span>
+    <span>Bocetos estáticos: no tocan el código de producción.</span>
+  </div>
+</footer>
+
+<!-- Phone preview -->
+<div class="overlay" id="dlg-phone" hidden>
+  <div class="dialog phone-dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-phone-t" aria-describedby="dlg-phone-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-phone-t">Vista en móvil</h2>
+        <p class="ov-desc" id="dlg-phone-d">390 px de ancho. <a id="dlg-phone-open" href="#" target="_blank" rel="noopener">Abrir en una pestaña nueva</a></p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="phone-stage">
+        <div class="phone-frame">
+          <span class="tile-ph"><span class="empty-x"></span><span class="tile-ph-name"></span><span class="tile-ph-file"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Motion demo dialog -->
+<div class="overlay" id="dlg-demo" hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="dlg-demo-t" aria-describedby="dlg-demo-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dlg-demo-t">Diálogo de ejemplo</h2>
+        <p class="ov-desc" id="dlg-demo-d">Opacidad 0 → 1 y subida de 8 px en 240 ms; el velo llega al 72 %. Al cerrar, 160 ms.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close>Entendido</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

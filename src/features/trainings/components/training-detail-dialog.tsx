@@ -70,9 +70,9 @@ export function TrainingDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
+      <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] grid-cols-[minmax(0,1fr)] overflow-x-hidden overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
         <DialogHeader>
-          <DialogTitle className="pr-8">{training.name}</DialogTitle>
+          <DialogTitle className="pr-8 [overflow-wrap:anywhere]">{training.name}</DialogTitle>
         </DialogHeader>
 
         <div className="min-w-0 space-y-4">
@@ -80,7 +80,7 @@ export function TrainingDetailDialog({
           <div className="flex flex-wrap items-center gap-2">
             {training.accentColor ? (
               <span
-                className="h-3 w-3 rounded-full border border-white/20"
+                className="h-3 w-3 rounded-full border border-foreground/20"
                 style={{ backgroundColor: training.accentColor }}
               />
             ) : null}
@@ -151,19 +151,19 @@ export function TrainingDetailDialog({
           <div className="flex flex-wrap gap-4">
             {training.estimated_duration_min != null && training.estimated_duration_min > 0 && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
+                <Clock aria-hidden="true" className="h-4 w-4" />
                 <span>{training.estimated_duration_min} min</span>
               </div>
             )}
             {training.estimated_calories != null && training.estimated_calories > 0 && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Flame className="h-4 w-4" />
+                <Flame aria-hidden="true" className="h-4 w-4" />
                 <span>{training.estimated_calories} kcal</span>
               </div>
             )}
             {training.total_volume != null && training.total_volume > 0 && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Layers className="h-4 w-4" />
+                <Layers aria-hidden="true" className="h-4 w-4" />
                 <span>{training.total_volume} vol</span>
               </div>
             )}
@@ -173,8 +173,8 @@ export function TrainingDetailDialog({
 
           {/* Warmup */}
           {(training.warmup_description || training.warmup_duration_min) && (
-            <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-amber-600">
+            <div className="rounded-lg border border-status-warning/30 bg-status-warning-soft p-3 space-y-1">
+              <p className="text-xs font-medium uppercase tracking-wide text-status-warning">
                 Calentamiento
               </p>
               {training.warmup_duration_min != null && training.warmup_duration_min > 0 && (
@@ -203,7 +203,7 @@ export function TrainingDetailDialog({
                         className="space-y-2 rounded-lg border border-brand-soft/40 bg-brand-soft/10 p-3"
                       >
                         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                          <Repeat className="h-4 w-4 text-brand-primary" />
+                          <Repeat aria-hidden="true" className="h-4 w-4 text-accent-text" />
                           <span>
                             {item.name ?? 'Circuito'} · {item.rounds} rondas
                           </span>
@@ -249,7 +249,7 @@ export function TrainingDetailDialog({
                             <Badge
                               key={mg}
                               variant="outline"
-                              className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary"
+                              className="text-xs h-4 px-1 border-brand-soft/40 bg-brand-soft/10 text-accent-text"
                             >
                               {mg}
                             </Badge>
@@ -285,8 +285,8 @@ export function TrainingDetailDialog({
 
           {/* Cooldown */}
           {training.cooldown_description && (
-            <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3 space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-blue-500">
+            <div className="rounded-lg border border-status-info/30 bg-status-info-soft p-3 space-y-1">
+              <p className="text-xs font-medium uppercase tracking-wide text-status-info">
                 Vuelta a la calma
               </p>
               <p className="text-sm text-foreground whitespace-pre-wrap">
@@ -308,7 +308,7 @@ export function TrainingDetailDialog({
                   onDuplicate(training)
                 }}
               >
-                <Copy className="h-4 w-4" />
+                <Copy aria-hidden="true" className="h-4 w-4" />
                 Duplicar
               </Button>
             )}
@@ -319,7 +319,7 @@ export function TrainingDetailDialog({
                   onEdit(training)
                 }}
               >
-                <Edit className="h-4 w-4" />
+                <Edit aria-hidden="true" className="h-4 w-4" />
                 Editar
               </Button>
             )}

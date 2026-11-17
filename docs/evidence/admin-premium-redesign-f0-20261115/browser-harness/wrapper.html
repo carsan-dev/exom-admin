@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arnés · marco móvil</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #30271e; }
+      /* La ventana de Chrome headless en Windows no baja de ~500 px: el iframe mide 390 px (media queries de móvil)
+         y se escala para llenar la ventana. */
+      iframe { border: 0; transform-origin: 0 0; display: block; }
+    </style>
+  </head>
+  <body>
+    <iframe id="frame" title="App"></iframe>
+    <script>
+      const query = new URLSearchParams(window.location.search)
+      const width = Number(query.get('w') || 390)
+      const height = Number(query.get('h') || 844)
+      const frame = document.getElementById('frame')
+      const scale = window.innerWidth / width
+      frame.style.width = width + 'px'
+      frame.style.height = height + 'px'
+      frame.style.transform = 'scale(' + scale + ')'
+      frame.src = query.get('src') || '/'
+    </script>
+  </body>
+</html>

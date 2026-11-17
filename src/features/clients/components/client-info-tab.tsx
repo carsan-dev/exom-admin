@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState } from '@/components/page'
 import { LEVEL_LABELS, type ClientProfile } from '../types'
 import { EditClientProfileDialog } from './edit-client-profile-dialog'
 
@@ -38,17 +38,17 @@ export function ClientInfoTab({ profile, clientId }: ClientInfoTabProps) {
   if (!profile) {
     return (
       <>
-        <Card>
-          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
-            <p className="text-sm text-muted-foreground">
-              Este cliente todavía no tiene datos de perfil ampliados.
-            </p>
-            <Button size="sm" variant="outline" onClick={() => setEditProfileOpen(true)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Añadir datos
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="border-y border-border">
+          <EmptyState
+            title="Este cliente todavía no tiene datos de perfil ampliados."
+            action={
+              <Button size="sm" variant="outline" onClick={() => setEditProfileOpen(true)}>
+                <Pencil aria-hidden="true" className="mr-2 h-4 w-4" />
+                Añadir datos
+              </Button>
+            }
+          />
+        </div>
         <EditClientProfileDialog
           open={editProfileOpen}
           onOpenChange={setEditProfileOpen}
@@ -74,37 +74,31 @@ export function ClientInfoTab({ profile, clientId }: ClientInfoTabProps) {
   ]
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
-          <div>
-            <CardTitle className="text-xl">Objetivo principal</CardTitle>
-            <CardDescription>Motivación y foco actual del cliente</CardDescription>
+    <div className="space-y-8">
+      <section aria-labelledby="client-goal-title">
+        <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+          <div className="min-w-0 flex-[1_1_16rem]">
+            <h2 id="client-goal-title" className="font-display text-xl font-extrabold uppercase leading-none text-foreground">Objetivo principal</h2>
+            <p className="mt-1 text-[13px] leading-5 text-foreground-secondary">Motivación y foco actual del cliente</p>
           </div>
           <Button size="sm" variant="outline" onClick={() => setEditProfileOpen(true)}>
-            <Pencil className="mr-2 h-4 w-4" />
+            <Pencil aria-hidden="true" className="mr-2 h-4 w-4" />
             Editar datos
           </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-xl border border-border/60 bg-background/60 p-4 text-sm leading-6 text-foreground">
-            {profile.main_goal || 'El cliente todavía no ha definido un objetivo principal.'}
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+        <p className="mt-4 max-w-[72ch] text-sm leading-6 text-foreground [overflow-wrap:anywhere]">
+          {profile.main_goal || 'El cliente todavía no ha definido un objetivo principal.'}
+        </p>
+      </section>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <dl aria-label="Datos del perfil" className="grid grid-cols-1 border-y border-border sm:grid-cols-2 xl:grid-cols-4">
         {sections.map((section) => (
-          <Card key={section.label} className="border-border/70">
-            <CardHeader className="pb-3">
-              <CardDescription>{section.label}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg font-semibold text-foreground">{section.value}</p>
-            </CardContent>
-          </Card>
+          <div key={section.label} className="-ml-px -mt-px min-w-0 border-l border-t border-border px-5 py-4">
+            <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">{section.label}</dt>
+            <dd className="mt-2 text-lg font-semibold text-foreground [overflow-wrap:anywhere]">{section.value}</dd>
+          </div>
         ))}
-      </div>
+      </dl>
 
       <EditClientProfileDialog
         open={editProfileOpen}

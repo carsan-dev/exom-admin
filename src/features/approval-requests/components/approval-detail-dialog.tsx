@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { RequiredMark } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Tag } from '@/components/ui/tag'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import { useAuth } from '@/hooks/use-auth'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { getApiErrorMessage } from '@/lib/api-utils'
@@ -25,48 +27,13 @@ import {
   getApprovalActorName,
   getApprovalResourceLabel,
   getApprovalResourceName,
-  getRelativeApprovalDate,
   hasTechnicalApprovalDetail,
-  type SuperAdminApprovalRequestDetail,
 } from '../types'
+import { ApprovalDate } from './approval-date'
+import { ApprovalDiff } from './approval-diff'
 import { ApprovalStatusBadge } from './approval-status-badge'
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-}
-
-function formatValue(value: unknown) {
-  if (value === undefined) {
-    return '—'
-  }
-
-  if (value === null) {
-    return 'null'
-  }
-
-  if (typeof value === 'string') {
-    return value
-  }
-
-  return JSON.stringify(value, null, 2)
-}
-
-function buildComparisonRows(request: SuperAdminApprovalRequestDetail) {
-  const current = isRecord(request.current_resource) ? request.current_resource : {}
-  const payload = isRecord(request.payload) ? request.payload : {}
-  const keys = [...new Set([...Object.keys(current), ...Object.keys(payload)])]
-
-  return keys.map((key) => {
-    const currentValue = current[key]
-    const nextValue = payload[key]
-    return {
-      key,
-      currentValue,
-      nextValue,
-      changed: JSON.stringify(currentValue ?? null) !== JSON.stringify(nextValue ?? null),
-    }
-  })
-}
+const SECTION_TITLE_CLASS = 'font-display text-xl font-extrabold uppercase leading-none text-foreground'
 
 interface ApprovalDetailDialogProps {
   requestId: string | null
@@ -79,6 +46,7 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
   const requestQuery = useApprovalRequest(requestId ?? undefined, open)
   const resolveRequest = useResolveApprovalRequest()
   const cancelRequest = useCancelApprovalRequest()
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   const [rejectionReason, setRejectionReason] = useState('')
   const [showRejectForm, setShowRejectForm] = useState(false)
@@ -96,7 +64,6 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
 
   const request = requestQuery.data
   const technicalRequest = request && hasTechnicalApprovalDetail(request) ? request : null
-  const comparisonRows = useMemo(() => (technicalRequest ? buildComparisonRows(technicalRequest) : []), [technicalRequest])
   const adminDetailView = useMemo(() => (request ? buildAdminApprovalDetailView(request) : null), [request])
   const superAdminDetailView = useMemo(
     () => (technicalRequest ? buildSuperAdminApprovalDetailView(technicalRequest) : null),
@@ -110,7 +77,7 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
       return
     }
 
-    const confirmed = window.confirm('¿Seguro que quieres ejecutar esta acción aprobada?')
+    const confirmed = await confirm({ title: '¿Seguro que quieres ejecutar esta acción aprobada?' })
     if (!confirmed) {
       return
     }
@@ -163,8 +130,9 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
   }
 
   return (
+    <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-5xl">
+      <DialogContent className="max-h-[90vh] min-w-0 grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-5xl">
         <DialogHeader>
           <DialogTitle>Detalle de solicitud</DialogTitle>
           <DialogDescription>
@@ -182,122 +150,76 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="flex flex-col gap-4 rounded-xl border border-border/70 bg-muted/20 p-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-11 w-11 border border-border/60">
+            <div className="flex min-w-0 flex-col gap-4 border-y border-border py-4 md:flex-row md:items-start md:justify-between">
+              <div className="min-w-0 space-y-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <Avatar className="h-11 w-11 flex-none border border-border/60">
                     <AvatarImage
                       src={request.requester.profile?.avatar_url ?? undefined}
                       alt={getApprovalActorName(request.requester)}
                     />
                     <AvatarFallback>{getApprovalActorInitials(request.requester)}</AvatarFallback>
                   </Avatar>
-                  <div>
-                    <p className="font-medium text-foreground">{getApprovalActorName(request.requester)}</p>
-                    <p className="text-sm text-muted-foreground">{request.requester.email}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground [overflow-wrap:anywhere]">{getApprovalActorName(request.requester)}</p>
+                    <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">{request.requester.email}</p>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                  <span>{getRelativeApprovalDate(request.created_at)}</span>
+                  <ApprovalDate value={request.created_at} />
                   <span>·</span>
                   <span>{getApprovalActionLabel(request.action_type)}</span>
                   <span>·</span>
-                  <Badge variant="outline" className="border-border bg-background text-muted-foreground">
-                    {getApprovalResourceLabel(request.resource_type)}
-                  </Badge>
+                  <Tag>{getApprovalResourceLabel(request.resource_type)}</Tag>
                 </div>
               </div>
 
-              <ApprovalStatusBadge status={request.status} />
+              <div className="self-start">
+                <ApprovalStatusBadge status={request.status} />
+              </div>
             </div>
 
             <section className="space-y-2">
-              <h3 className="font-medium text-foreground">Resumen</h3>
-              <div className="rounded-xl border border-border/70 bg-background p-4 text-sm text-muted-foreground">
-                <p>
-                  {adminDetailView?.summary}
-                </p>
-              </div>
+              <h3 className={SECTION_TITLE_CLASS}>Resumen</h3>
+              <p className="text-sm text-foreground-secondary [overflow-wrap:anywhere]">{adminDetailView?.summary}</p>
             </section>
 
-            <section className="space-y-2">
-              <h3 className="font-medium text-foreground">Contexto</h3>
-              <div className="grid gap-3 md:grid-cols-2">
+            <section className="space-y-3">
+              <h3 className={SECTION_TITLE_CLASS}>Contexto</h3>
+              <dl className="grid gap-x-6 gap-y-4 md:grid-cols-2">
                 {(currentUserRole === 'SUPER_ADMIN' ? superAdminDetailView : adminDetailView)?.facts.map((fact) => (
-                  <div key={fact.label} className="rounded-xl border border-border/70 bg-background p-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{fact.label}</p>
-                    <p className="mt-2 text-sm text-foreground">{fact.value}</p>
+                  <div key={fact.label} className="min-w-0">
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{fact.label}</dt>
+                    <dd className="mt-1 text-sm text-foreground [overflow-wrap:anywhere]">
+                      {fact.label === 'Creada' ? (
+                        <ApprovalDate value={request.created_at} />
+                      ) : fact.label === 'Resuelta' && request.resolved_at ? (
+                        <ApprovalDate value={request.resolved_at} />
+                      ) : (
+                        fact.value
+                      )}
+                    </dd>
                   </div>
                 ))}
-              </div>
+              </dl>
             </section>
 
-            <section className="space-y-2">
-              <h3 className="font-medium text-foreground">Recurso afectado</h3>
-              <div className="rounded-xl border border-border/70 bg-background p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium text-foreground">{getApprovalResourceName(request)}</p>
-                  <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
-                    {getApprovalResourceLabel(request.resource_type)}
-                  </Badge>
-                </div>
-
-                {request.resource_deleted ? (
-                  <div className="mt-4 flex items-start gap-3 rounded-xl border border-orange-500/20 bg-orange-500/5 p-4 text-sm text-orange-700">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                    <p>Este recurso ya no existe en el estado actual del sistema.</p>
-                  </div>
-                ) : null}
-
-                {currentUserRole === 'SUPER_ADMIN' && technicalRequest ? (
-                  technicalRequest.action_type.endsWith('.update') ? (
-                    <div className="mt-4 overflow-hidden rounded-xl border border-border/70">
-                      <div className="grid grid-cols-[180px_1fr_1fr] border-b border-border bg-muted/40 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        <span>Campo</span>
-                        <span>Estado actual</span>
-                        <span>Cambio propuesto</span>
-                      </div>
-                      {comparisonRows.map((row) => (
-                        <div
-                          key={row.key}
-                          className={`grid grid-cols-[180px_1fr_1fr] gap-4 border-b border-border px-4 py-3 text-sm last:border-b-0 ${
-                            row.changed ? 'bg-brand-soft/5' : 'bg-background'
-                          }`}
-                        >
-                          <span className="font-medium text-foreground">{row.key}</span>
-                          <pre className="overflow-x-auto whitespace-pre-wrap text-muted-foreground">{formatValue(row.currentValue)}</pre>
-                          <pre className={`overflow-x-auto whitespace-pre-wrap ${row.changed ? 'text-foreground' : 'text-muted-foreground'}`}>
-                            {formatValue(row.nextValue)}
-                          </pre>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                      <div className="rounded-xl border border-border/70 bg-muted/20 p-4">
-                        <p className="mb-2 text-sm font-medium text-foreground">
-                          {request.action_type.endsWith('.delete') ? 'Estado actual' : 'Payload solicitado'}
-                        </p>
-                          <pre className="overflow-x-auto whitespace-pre-wrap text-xs text-muted-foreground">
-                            {technicalRequest.action_type.endsWith('.delete')
-                              ? JSON.stringify(technicalRequest.current_resource ?? {}, null, 2)
-                              : superAdminDetailView?.rawPayload}
-                          </pre>
-                        </div>
-
-                      {technicalRequest.action_type.endsWith('.delete') ? null : (
-                        <div className="rounded-xl border border-border/70 bg-muted/20 p-4">
-                          <p className="mb-2 text-sm font-medium text-foreground">Estado actual</p>
-                          <pre className="overflow-x-auto whitespace-pre-wrap text-xs text-muted-foreground">
-                            {JSON.stringify(technicalRequest.current_resource ?? {}, null, 2)}
-                          </pre>
-                        </div>
-                      )}
-                    </div>
-                  )
-                ) : null}
+            <section className="min-w-0 space-y-3">
+              <h3 className={SECTION_TITLE_CLASS}>Recurso afectado</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium text-foreground [overflow-wrap:anywhere]">{getApprovalResourceName(request)}</p>
+                <Tag>{getApprovalResourceLabel(request.resource_type)}</Tag>
               </div>
+
+              {request.resource_deleted ? (
+                <div className="flex items-start gap-3 rounded-xl border border-status-warning/30 bg-status-warning-soft p-4 text-sm text-status-warning">
+                  <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+                  <p>Este recurso ya no existe en el estado actual del sistema.</p>
+                </div>
+              ) : null}
+
+              {currentUserRole === 'SUPER_ADMIN' && technicalRequest ? <ApprovalDiff request={technicalRequest} /> : null}
             </section>
 
             {adminDetailView?.requestReason ? (
@@ -308,14 +230,14 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
             ) : null}
 
             {request.status === 'REJECTED' && request.rejection_reason ? (
-              <section className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4 text-sm text-rose-700">
+              <section className="rounded-xl border border-status-error/30 bg-status-error-soft p-4 text-sm text-status-error">
                 <p className="font-medium">Motivo de rechazo</p>
                 <p className="mt-1">{request.rejection_reason}</p>
               </section>
             ) : null}
 
             {request.status === 'FAILED' && request.failure_reason ? (
-              <section className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4 text-sm text-orange-700">
+              <section className="rounded-xl border border-status-warning/30 bg-status-warning-soft p-4 text-sm text-status-warning">
                 <p className="font-medium">La ejecución aprobada falló</p>
                 <p className="mt-1">{request.failure_reason}</p>
               </section>
@@ -332,9 +254,11 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
               <div className="space-y-2 rounded-xl border border-border/70 bg-muted/20 p-4">
                 <label htmlFor="approval-rejection-reason" className="text-sm font-medium text-foreground">
                   Motivo de rechazo
+                  <RequiredMark />
                 </label>
                 <textarea
                   id="approval-rejection-reason"
+                  aria-required="true"
                   value={rejectionReason}
                   onChange={(event) => setRejectionReason(event.target.value)}
                   rows={4}
@@ -379,5 +303,7 @@ export function ApprovalDetailDialog({ requestId, open, onOpenChange }: Approval
         </DialogFooter>
       </DialogContent>
     </Dialog>
+      {confirmDialog}
+    </>
   )
 }

@@ -13,19 +13,28 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme}
       className="toaster group"
       icons={{
-        success: <CircleCheck className="h-4 w-4" />,
-        info: <Info className="h-4 w-4" />,
-        warning: <TriangleAlert className="h-4 w-4" />,
-        error: <OctagonX className="h-4 w-4" />,
-        loading: <LoaderCircle className="h-4 w-4 animate-spin" />,
+        success: <CircleCheck aria-hidden="true" className="h-4 w-4" />,
+        info: <Info aria-hidden="true" className="h-4 w-4" />,
+        warning: <TriangleAlert aria-hidden="true" className="h-4 w-4" />,
+        error: <OctagonX aria-hidden="true" className="h-4 w-4" />,
+        loading: <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" />,
       }}
       toastOptions={{
         classNames: {
           toast:
-            'group toast group-[.toaster]:border-border group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:shadow-lg',
-          description: 'group-[.toast]:text-muted-foreground',
-          actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
-          cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+            'group toast font-sans group-[.toaster]:!rounded-none group-[.toaster]:!border group-[.toaster]:!border-border-strong group-[.toaster]:!bg-background-surface group-[.toaster]:!text-foreground group-[.toaster]:shadow-overlay',
+          title: 'group-[.toast]:text-sm group-[.toast]:font-semibold group-[.toast]:text-foreground',
+          description: 'group-[.toast]:text-[13px] group-[.toast]:text-foreground-secondary',
+          success: '[&_[data-icon]]:text-status-success',
+          error: '[&_[data-icon]]:text-status-error',
+          warning: '[&_[data-icon]]:text-status-warning',
+          info: '[&_[data-icon]]:text-status-info',
+          actionButton:
+            'group-[.toast]:!rounded-none group-[.toast]:!bg-primary group-[.toast]:!text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+          cancelButton:
+            'group-[.toast]:!rounded-none group-[.toast]:!border group-[.toast]:!border-border-strong group-[.toast]:!bg-transparent group-[.toast]:!text-foreground-secondary',
+          closeButton:
+            'group-[.toast]:!rounded-none group-[.toast]:!border-border-strong group-[.toast]:!bg-background-surface group-[.toast]:!text-foreground-secondary',
         },
       }}
       {...props}

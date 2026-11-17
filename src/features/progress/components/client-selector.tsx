@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useClients } from '../../clients/api'
 import { getUserDisplayName } from '../../clients/types'
+import { EmptyState } from '@/components/page'
 import { cn } from '@/lib/utils'
 
 const ALL_CLIENTS_LIMIT = 200
@@ -47,12 +48,12 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
           role="combobox"
           aria-label={selectedName ? `Cliente: ${selectedName}` : 'Seleccionar cliente'}
           aria-expanded={open}
-          className="w-full justify-between sm:w-[280px]"
+          className="h-11 w-full justify-between sm:w-[280px] md:h-10"
         >
           {selectedClientId && selected ? (
             <div className="flex items-center gap-2 truncate">
               <Avatar className="h-5 w-5">
-                <AvatarImage src={selected.profile?.avatar_url ?? undefined} />
+                <AvatarImage src={selected.profile?.avatar_url ?? undefined} alt="" />
                 <AvatarFallback className="text-[10px]">{getInitials(selectedName)}</AvatarFallback>
               </Avatar>
               <span className="truncate">{selectedName}</span>
@@ -60,7 +61,7 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
           ) : (
             <span className="text-muted-foreground">Seleccionar cliente...</span>
           )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown aria-hidden="true" className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[calc(100vw-2rem)] max-w-[280px] p-0">
@@ -85,14 +86,14 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
                       setOpen(false)
                     }}
                   >
-                    <Check
+                    <Check aria-hidden="true"
                       className={cn(
                         'mr-2 h-4 w-4',
                         selectedClientId === client.id ? 'opacity-100' : 'opacity-0',
                       )}
                     />
                     <Avatar className="mr-2 h-6 w-6">
-                      <AvatarImage src={client.profile?.avatar_url ?? undefined} />
+                      <AvatarImage src={client.profile?.avatar_url ?? undefined} alt="" />
                       <AvatarFallback className="text-[10px]">
                         {getInitials(displayName)}
                       </AvatarFallback>
@@ -114,16 +115,11 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
 
 export function EmptyClientState() {
   return (
-    <div className="flex flex-col items-center justify-center h-[50vh] gap-4 text-center">
-      <div className="rounded-full bg-muted p-6">
-        <User className="h-10 w-10 text-muted-foreground" />
-      </div>
-      <div className="space-y-1">
-        <p className="text-lg font-medium text-foreground">Selecciona un cliente</p>
-        <p className="text-sm text-muted-foreground">
-          Elige un cliente en el selector de arriba para ver su progreso detallado
-        </p>
-      </div>
-    </div>
+    <EmptyState
+      className="py-16"
+      icon={<User aria-hidden="true" />}
+      title="Selecciona un cliente"
+      description="Elige un cliente en el selector de arriba para ver su progreso detallado"
+    />
   )
 }

@@ -39,9 +39,9 @@ export function StreakSection({ clientId, streak, isLoading }: StreakSectionProp
   return (
     <>
       <ClientStreakCard streak={streak} isLoading={isLoading} action={
-        <Button variant="outline" size="sm" disabled={resetMutation.isPending}
+        <Button variant="destructive" disabled={resetMutation.isPending}
           onClick={() => setConfirmOpen(true)}
-          className="gap-2 text-status-error border-status-error/40 hover:bg-status-error/10">
+          className="gap-2">
           <RotateCcw className="h-4 w-4" aria-hidden="true" />
           Reiniciar racha
         </Button>

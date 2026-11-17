@@ -1,6 +1,6 @@
-import { AlertTriangle, FileText, MessageSquare, Users } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { Link } from 'react-router'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
 import { getUsersRoute } from '@/features/clients/types'
 import type { DashboardStats } from '../types'
@@ -12,70 +12,73 @@ interface StatsCardsProps {
 export function StatsCards({ stats }: StatsCardsProps) {
   const currentUserRole = useAuth((state) => state.user?.role)
   const usersRoute = getUsersRoute(currentUserRole)
-  const cards = [
-    {
-      title: 'Clientes activos',
-      value: stats.activeClients,
-      description: `${stats.totalClients} clientes visibles`,
-      icon: Users,
-      to: usersRoute,
-      valueClassName: 'text-brand-primary',
-    },
+  const hasLockedAccounts = stats.lockedAccounts > 0
+  const cells = [
     {
       title: 'Recaps pendientes',
       value: stats.pendingRecaps,
       description: 'Pendientes de revisión',
-      icon: FileText,
       to: '/recaps?status=SUBMITTED',
-      valueClassName: 'text-status-info',
+      alert: false,
     },
     {
       title: 'Feedback pendiente',
       value: stats.pendingFeedback,
       description: 'Feedback por responder',
-      icon: MessageSquare,
       to: '/feedback?status=PENDING',
-      valueClassName: 'text-status-warning',
+      alert: false,
     },
     {
       title: 'Cuentas bloqueadas',
       value: stats.lockedAccounts,
-      description:
-        stats.lockedAccounts > 0 ? 'Requieren atención inmediata' : 'Sin alertas activas',
-      icon: AlertTriangle,
+      description: hasLockedAccounts ? 'Requieren atención inmediata' : 'Sin alertas activas',
       to: usersRoute,
-      valueClassName: stats.lockedAccounts > 0 ? 'text-status-error' : 'text-foreground',
-      cardClassName:
-        stats.lockedAccounts > 0
-          ? 'border-status-error/40 bg-status-error/5'
-          : 'border-border hover:border-border/80',
+      alert: hasLockedAccounts,
+    },
+    {
+      title: 'Clientes activos',
+      value: stats.activeClients,
+      description: `${stats.totalClients} clientes visibles`,
+      to: usersRoute,
+      alert: false,
     },
   ]
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {cards.map((card) => {
-        const Icon = card.icon
-
-        return (
-          <Link key={card.title} to={card.to} className="block">
-            <Card className={`h-full transition-colors hover:border-brand-primary/40 ${card.cardClassName ?? ''}`}>
-              <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
-                <div className="space-y-1">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
-                  <p className={`text-3xl font-semibold ${card.valueClassName}`}>{card.value}</p>
-                </div>
-                <div className="rounded-full bg-muted p-2 text-muted-foreground">
-                  <Icon className="h-4 w-4" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">{card.description}</p>
-              </CardContent>
-            </Card>
+    <section aria-label="Indicadores">
+      <div
+        data-slot="figure-strip"
+        className="grid grid-cols-2 overflow-hidden border-y border-border-strong lg:grid-flow-col lg:auto-cols-fr lg:grid-cols-none"
+      >
+        {cells.map((cell) => (
+          <Link
+            key={cell.title}
+            to={cell.to}
+            data-tone={cell.alert ? 'danger' : 'default'}
+            className="group -ml-px -mt-px flex min-h-11 min-w-0 flex-col border-l border-t border-border px-5 pb-[18px] pt-4 transition-colors hover:bg-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+          >
+            <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-foreground-muted">
+              {cell.alert ? (
+                <span aria-hidden="true" className="size-1.5 flex-none rounded-full bg-destructive" />
+              ) : null}
+              <span className="min-w-0 flex-1 break-words">{cell.title}</span>
+              <ArrowUpRight
+                aria-hidden="true"
+                className="size-3.5 flex-none text-foreground-muted transition-colors group-hover:text-foreground"
+              />
+            </span>
+            <span
+              className={cn(
+                'mt-3.5 font-display text-4xl font-extrabold uppercase leading-none tabular-nums',
+                cell.alert ? 'text-destructive' : 'text-foreground',
+              )}
+            >
+              {cell.value}
+            </span>
+            <span className="mt-2.5 text-xs leading-4 text-foreground-muted">{cell.description}</span>
           </Link>
-        )
-      })}
-    </div>
+        ))}
+      </div>
+    </section>
   )
 }

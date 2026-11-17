@@ -54,9 +54,9 @@ function MealRow({ meal, badgeColorMap }: { meal: Meal; badgeColorMap: Map<strin
         onClick={() => setExpanded((prev) => !prev)}
       >
         {expanded ? (
-          <ChevronDown className="h-4 w-4 flex-none text-muted-foreground" />
+          <ChevronDown aria-hidden="true" className="h-4 w-4 flex-none text-muted-foreground" />
         ) : (
-          <ChevronRight className="h-4 w-4 flex-none text-muted-foreground" />
+          <ChevronRight aria-hidden="true" className="h-4 w-4 flex-none text-muted-foreground" />
         )}
 
         <div className="flex flex-1 flex-wrap items-center gap-2 min-w-0">
@@ -194,7 +194,7 @@ export function DietDetailDialog({
                 <Badge
                   key={tag}
                   variant="outline"
-                  className="border-brand-soft/40 bg-brand-soft/10 text-brand-primary text-xs"
+                  className="border-brand-soft/40 bg-brand-soft/10 text-accent-text text-xs"
                 >
                   {tag}
                 </Badge>
@@ -262,7 +262,7 @@ export function DietDetailDialog({
                   onDuplicate(diet)
                 }}
               >
-                <Copy className="h-4 w-4" />
+                <Copy aria-hidden="true" className="h-4 w-4" />
                 Duplicar
               </Button>
             )}
@@ -273,7 +273,7 @@ export function DietDetailDialog({
                   onEdit(diet)
                 }}
               >
-                <Edit className="h-4 w-4" />
+                <Edit aria-hidden="true" className="h-4 w-4" />
                 Editar
               </Button>
             )}

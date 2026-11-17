@@ -20,10 +20,10 @@ export function FilterPopover({ sections, filters }: FilterPopoverProps) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button type="button" variant="outline" className="gap-2">
-          <SlidersHorizontal className="h-4 w-4" />
+          <SlidersHorizontal aria-hidden="true" className="h-4 w-4" />
           Filtros
           {filters.activeCount > 0 ? (
-            <Badge variant="secondary" className="rounded-full px-2 py-0 text-[11px]">
+            <Badge variant="secondary" className="rounded-full border-transparent bg-primary px-2 py-0 text-[11px] text-primary-foreground hover:bg-primary">
               {filters.activeCount}
             </Badge>
           ) : null}
@@ -33,16 +33,16 @@ export function FilterPopover({ sections, filters }: FilterPopoverProps) {
         align="end"
         className="flex max-h-[var(--radix-popover-content-available-height)] w-[min(36rem,calc(100vw-2rem))] flex-col overflow-hidden p-0"
       >
-        <div className="border-b border-border/70 px-4 py-3">
+        <div className="border-b border-border px-4 py-3">
           <p className="text-sm font-semibold text-foreground">Filtros del listado</p>
           <p className="text-xs text-muted-foreground">Selecciona uno o varios criterios.</p>
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
           {sections.map((section) => (
-            <section key={section.key} className="space-y-3">
+            <section key={section.key} className="space-y-3 border-t border-border pt-4 first:border-t-0 first:pt-0">
               <div className="space-y-1">
-                <h3 className="text-sm font-medium text-foreground">{section.label}</h3>
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{section.label}</h3>
               </div>
 
               {section.type === 'multi' ? (
@@ -80,7 +80,7 @@ export function FilterPopover({ sections, filters }: FilterPopoverProps) {
           ))}
         </div>
 
-        <div className="flex items-center justify-between border-t border-border/70 px-4 py-3">
+        <div className="flex items-center justify-between border-t border-border px-4 py-3">
           <Button
             type="button"
             variant="ghost"

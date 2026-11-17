@@ -30,11 +30,15 @@ export function SortableTableHead({
         type="button"
         variant="ghost"
         size="sm"
-        className={cn('h-8 gap-1 px-0 font-medium hover:bg-transparent', className?.includes('text-center') && 'mx-auto')}
+        className={cn(
+          'h-9 gap-1 px-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-transparent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus',
+          active && 'text-foreground',
+          className?.includes('text-center') && 'mx-auto'
+        )}
         onClick={() => onSortChange(field)}
       >
         {label}
-        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+        <Icon className={cn('h-3.5 w-3.5', active ? 'text-accent-line' : 'opacity-50')} aria-hidden="true" />
       </Button>
     </TableHead>
   )

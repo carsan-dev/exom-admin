@@ -1,86 +1,179 @@
 @import "tailwindcss";
 
+/* Exclude mockups and evidence from automatic class detection */
+@source not "../docs";
+
 /* Dark mode via class on <html> */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Fonts (self-hosted, SIL OFL: Barlow Condensed ExtraBold, DM Sans) ─── */
+@font-face {
+  font-family: 'Barlow';
+  src: url('/fonts/barlow-800.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/dm-sans-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/dm-sans-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ── EXOM Design Tokens ──────────────────────────────────────────────── */
 :root {
   /* Dark mode (default) */
-  --background: #30271e;
-  --background-secondary: #423e35;
-  --background-surface: #503c04;
-  --background-darker: #0b1708;
+  --background: #101111;
+  --background-secondary: #151715;
+  --background-surface: #1b1e1b;
+  --background-darker: #0b0c0b;
 
-  --foreground: #f7e681;
-  --foreground-secondary: #e3bc18;
-  --foreground-muted: #888444;
-  --foreground-accent: #d3f858;
+  --foreground: #f2f1e9;
+  --foreground-secondary: #b7bcb3;
+  --foreground-muted: #949a90;
+  --foreground-accent: #baf23a;
 
-  --card: #423e35;
-  --card-foreground: #f7e681;
-  --popover: #423e35;
-  --popover-foreground: #f7e681;
+  --card: #151715;
+  --card-foreground: #f2f1e9;
+  --popover: #1b1e1b;
+  --popover-foreground: #f2f1e9;
 
-  --primary: #c8e848;
-  --primary-foreground: #1a1410;
-  --secondary: #4a5b21;
-  --secondary-foreground: #f7e681;
-  --muted: #423e35;
-  --muted-foreground: #888444;
-  --accent: #4a5b21;
-  --accent-foreground: #d3f858;
-  --destructive: #f44336;
-  --destructive-foreground: #ffffff;
+  --primary: #baf23a;
+  --primary-foreground: #101111;
+  --secondary: #22261f;
+  --secondary-foreground: #f2f1e9;
+  --muted: #1b1e1b;
+  --muted-foreground: #949a90;
+  --accent: #22261f;
+  --accent-foreground: #baf23a;
+  --destructive: #ff6b57;
+  --destructive-foreground: #101111;
 
-  --border: #1c3b00;
-  --input: #423e35;
-  --ring: #c8e848;
+  --border: #272b25;
+  --border-strong: #363b32;
+  --lime-soft: color-mix(in srgb, #baf23a 10%, transparent);
+  --input: #151715;
+  --ring: #baf23a;
 
-  --radius: 0.5rem;
+  --radius: 0;
+
+  /* Motion durations */
+  --dur-press: 80ms;
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-enter: 240ms;
+  --dur-exit: 160ms;
+  /* Panel de marca de autenticación (solo AuthBrandPanel; ver DESIGN.md 5.4) */
+  --dur-brand-enter: 600ms;
+  --dur-brand-letter: 500ms;
+  --dur-brand-loop: 90s;
 
   /* Brand palette */
-  --brand-primary: #c8e848;
-  --brand-secondary: #a2c809;
-  --brand-tertiary: #88a834;
-  --brand-soft: #4a5b21;
+  --brand-primary: #baf23a;
+  --brand-secondary: #baf23a;
+  --brand-tertiary: #baf23a;
+  --brand-soft: #22261f;
 
   /* Status */
-  --status-success: #4caf50;
-  --status-warning: #ffc107;
-  --status-error: #f44336;
-  --status-info: #2196f3;
+  --status-success: #5fd08a;
+  --status-warning: #f0b23e;
+  --status-error: #ff6b57;
+  --status-info: #7fb5d8;
+
+  /* Controls, accent usage and focus */
+  --control-border: #697160;
+  --control-border-hover: #8a9282;
+  --accent-text: #baf23a;
+  --accent-line: #baf23a;
+  --focus: #baf23a;
+
+  /* Soft status fills */
+  --status-success-soft: color-mix(in srgb, var(--status-success) 14%, transparent);
+  --status-warning-soft: color-mix(in srgb, var(--status-warning) 14%, transparent);
+  --status-error-soft: color-mix(in srgb, var(--status-error) 14%, transparent);
+  --status-info-soft: color-mix(in srgb, var(--status-info) 14%, transparent);
+  --status-neutral-soft: color-mix(in srgb, var(--foreground-muted) 14%, transparent);
+
+  /* Overlays and skeletons */
+  --scrim: rgb(9 10 9 / 0.72);
+  --shadow-overlay: 0 2px 4px rgb(0 0 0 / 0.3), 0 6px 12px rgb(0 0 0 / 0.42);
+  --skeleton-base: #1b1e1b;
+  --skeleton-hi: #242822;
+
+  /* Parte de --foreground mezclada en el texto de acentos de catálogo (types.ts de trainings):
+     en oscuro el acento se usa tal cual; en claro se oscurece hasta >= 4,5:1 (mín. 4,88). */
+  --training-accent-text-mix: 0%;
 }
 
 .light {
-  --background: #f5f0e8;
-  --background-secondary: #ede8e0;
-  --background-surface: #e5e0d8;
-  --background-darker: #ffffff;
+  --background: #f2f1e9;
+  --background-secondary: #f8f7f1;
+  --background-surface: #ffffff;
+  --background-darker: #e9e7dc;
 
-  --foreground: #1a1410;
-  --foreground-secondary: #3d3520;
-  --foreground-muted: #6b6040;
-  --foreground-accent: #4a5b21;
+  --foreground: #101111;
+  --foreground-secondary: #454a42;
+  --foreground-muted: #5f645a;
+  --foreground-accent: #3f5c00;
+  --training-accent-text-mix: 60%;
 
-  --card: #ffffff;
-  --card-foreground: #1a1410;
+  --card: #f8f7f1;
+  --card-foreground: #101111;
   --popover: #ffffff;
-  --popover-foreground: #1a1410;
+  --popover-foreground: #101111;
 
-  --primary: #a2c809;
-  --primary-foreground: #ffffff;
-  --secondary: #ede8e0;
-  --secondary-foreground: #1a1410;
-  --muted: #ede8e0;
-  --muted-foreground: #6b6040;
-  --accent: #ede8e0;
-  --accent-foreground: #4a5b21;
-  --destructive: #dc2626;
+  --primary: #baf23a;
+  --primary-foreground: #101111;
+  --secondary: #ecebe2;
+  --secondary-foreground: #101111;
+  --muted: #ffffff;
+  --muted-foreground: #5f645a;
+  --accent: #ecebe2;
+  --accent-foreground: #3f5c00;
+  --destructive: #a8301c;
   --destructive-foreground: #ffffff;
 
-  --border: #d8d0c0;
-  --input: #ede8e0;
-  --ring: #a2c809;
+  --border: #dddbce;
+  --border-strong: #c6c4b5;
+  --lime-soft: color-mix(in srgb, #baf23a 22%, transparent);
+  --input: #f8f7f1;
+  --ring: #3f5c00;
+
+  --brand-primary: #baf23a;
+  --brand-secondary: #baf23a;
+  --brand-tertiary: #5a8a00;
+  --brand-soft: #ecebe2;
+
+  --status-success: #1a6b3c;
+  --status-warning: #7a4f00;
+  --status-error: #a8301c;
+  --status-info: #245f85;
+
+  --control-border: #80857a;
+  --control-border-hover: #646a5a;
+  --accent-text: #3f5c00;
+  --accent-line: #5a8a00;
+  --focus: #3f5c00;
+
+  --status-success-soft: color-mix(in srgb, var(--status-success) 12%, transparent);
+  --status-warning-soft: color-mix(in srgb, var(--status-warning) 12%, transparent);
+  --status-error-soft: color-mix(in srgb, var(--status-error) 12%, transparent);
+  --status-info-soft: color-mix(in srgb, var(--status-info) 12%, transparent);
+  --status-neutral-soft: color-mix(in srgb, var(--foreground-muted) 12%, transparent);
+
+  --scrim: rgb(9 10 9 / 0.44);
+  --shadow-overlay: 0 2px 4px rgb(16 17 17 / 0.08), 0 6px 12px rgb(16 17 17 / 0.16);
+  --skeleton-base: #e6e4d8;
+  --skeleton-hi: #efeee5;
 }
 
 /* ── Tailwind v4 theme mapping ───────────────────────────────────────── */
@@ -113,37 +206,277 @@
 
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-border-strong: var(--border-strong);
+  --color-lime-soft: var(--lime-soft);
   --color-ring: var(--ring);
 
-  --color-brand-primary: #c8e848;
-  --color-brand-secondary: #a2c809;
-  --color-brand-tertiary: #88a834;
-  --color-brand-soft: #4a5b21;
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-tertiary: var(--brand-tertiary);
+  --color-brand-soft: var(--brand-soft);
 
-  --color-status-success: #4caf50;
-  --color-status-warning: #ffc107;
-  --color-status-error: #f44336;
-  --color-status-info: #2196f3;
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+  --color-status-info: var(--status-info);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-control-border: var(--control-border);
+  --color-control-border-hover: var(--control-border-hover);
+  --color-accent-text: var(--accent-text);
+  --color-accent-line: var(--accent-line);
+  --color-focus: var(--focus);
+  --color-status-success-soft: var(--status-success-soft);
+  --color-status-warning-soft: var(--status-warning-soft);
+  --color-status-error-soft: var(--status-error-soft);
+  --color-status-info-soft: var(--status-info-soft);
+  --color-status-neutral-soft: var(--status-neutral-soft);
+  --color-scrim: var(--scrim);
+  --color-skeleton-base: var(--skeleton-base);
+  --color-skeleton-hi: var(--skeleton-hi);
+
+  /* Radius 0 (D1). Names kept; rounded-full stays for pills and avatars. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
+
+  /* Shadow only on overlays (D1) */
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+}
+
+/* Fonts and easing: emitted on :root only when referenced (no `static`, so the
+   default Tailwind palette is not dumped into the bundle). */
+@theme {
+  --font-display: 'Barlow', 'Arial Narrow', sans-serif;
+  --font-ui: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: var(--font-ui);
+
+  --ease-out: cubic-bezier(0.22, 0.75, 0.18, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Overlay motion (D4): own keyframes driven by Radix data-state, no tw-animate-css.
+   CSS animations (not transitions) so Radix Presence waits for animationend on exit.
+   Under prefers-reduced-motion the global rule below shrinks durations to 0.01ms,
+   so animationend still fires and the overlay unmounts normally. */
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+}
+@keyframes overlay-fade-out {
+  to { opacity: 0; }
+}
+@keyframes overlay-rise-in {
+  from { opacity: 0; transform: translate(var(--ov-x, 0), var(--ov-y, 8px)); }
+}
+@keyframes overlay-rise-out {
+  to { opacity: 0; transform: translate(var(--ov-x, 0), var(--ov-y, 8px)); }
+}
+@keyframes overlay-pop-in {
+  from { opacity: 0; transform: scale(0.98); }
+}
+@keyframes overlay-pop-out {
+  to { opacity: 0; transform: scale(0.98); }
+}
+@keyframes skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+/* Auth brand panel + login entrance (DESIGN.md 5.4): transform and opacity only. */
+@keyframes auth-mark-light-in {
+  from { opacity: 0; transform: translate(-16%, -16%) rotate(-30deg); }
+}
+@keyframes auth-mark-dark-in {
+  from { opacity: 0; transform: translate(16%, 16%) rotate(-30deg); }
+}
+@keyframes auth-mark-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes auth-letter-rise {
+  from { transform: translateY(105%); }
+}
+@keyframes auth-rule-grow {
+  from { transform: scaleX(0); }
+}
+@keyframes auth-enter {
+  from { opacity: 0; transform: translateY(8px); }
+}
+.auth-mark-light {
+  animation: auth-mark-light-in var(--dur-brand-enter) var(--ease-out) backwards;
+}
+.auth-mark-dark {
+  animation: auth-mark-dark-in var(--dur-brand-enter) var(--ease-out) backwards;
+}
+.auth-mark-spin {
+  animation: auth-mark-spin var(--dur-brand-loop) linear infinite;
+}
+.auth-letter {
+  animation: auth-letter-rise var(--dur-brand-letter) var(--ease-out) backwards;
+}
+.auth-rule {
+  transform-origin: left;
+  animation: auth-rule-grow var(--dur-brand-letter) var(--ease-out) 200ms backwards;
+}
+.auth-enter {
+  animation: auth-enter var(--dur-enter) var(--ease-out) backwards;
+}
+.auth-arrow {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .auth-submit:hover:not(:disabled) .auth-arrow {
+    transform: translateX(4px);
+  }
+}
+
+/* Scrim: fade. */
+@utility anim-overlay-scrim {
+  &[data-state='open'] {
+    animation: overlay-fade-in var(--dur-enter) var(--ease-out) backwards;
+  }
+  &[data-state='closed'] {
+    animation: overlay-fade-out var(--dur-exit) var(--ease-out) forwards;
+  }
+}
+
+/* Dialog / alert-dialog / sheet content: fade + short translate. Direction through
+   --ov-x / --ov-y (dialog: 8px up from below; sheet: 16px from its own side). */
+@utility anim-overlay-panel {
+  &[data-state='open'] {
+    animation: overlay-rise-in var(--dur-enter) var(--ease-out) backwards;
+  }
+  &[data-state='closed'] {
+    animation: overlay-rise-out var(--dur-exit) var(--ease-out) forwards;
+  }
+}
+@utility anim-overlay-from-top {
+  --ov-x: 0;
+  --ov-y: -16px;
+}
+@utility anim-overlay-from-bottom {
+  --ov-x: 0;
+  --ov-y: 16px;
+}
+@utility anim-overlay-from-left {
+  --ov-x: -16px;
+  --ov-y: 0;
+}
+@utility anim-overlay-from-right {
+  --ov-x: 16px;
+  --ov-y: 0;
+}
+
+/* Menus, popovers, select, tooltip: fade + scale .98 from the trigger origin.
+   Tooltip states are delayed-open / instant-open, hence :not(closed). */
+@utility anim-overlay-pop {
+  transform-origin: var(
+    --radix-popover-content-transform-origin,
+    var(
+      --radix-dropdown-menu-content-transform-origin,
+      var(--radix-select-content-transform-origin, var(--radix-tooltip-content-transform-origin, center))
+    )
+  );
+  &:not([data-state='closed']) {
+    animation: overlay-pop-in var(--dur-fast) var(--ease-out) backwards;
+  }
+  &[data-state='closed'] {
+    animation: overlay-pop-out var(--dur-fast) var(--ease-out) forwards;
+  }
+}
+
+/* Skeleton shimmer: base colour with a highlight band sweeping across. At rest
+   (no animation, or reduced motion collapsing it to its end frame) the visible
+   third of the gradient is plain --skeleton-base. */
+@utility anim-skeleton {
+  background-color: var(--skeleton-base);
+  background-image: linear-gradient(
+    90deg,
+    var(--skeleton-base) 0%,
+    var(--skeleton-base) 40%,
+    var(--skeleton-hi) 50%,
+    var(--skeleton-base) 60%,
+    var(--skeleton-base) 100%
+  );
+  background-size: 300% 100%;
+  animation: skeleton-shimmer 1.2s linear infinite;
+}
+
+/* Registers the overlay shadow utility (the :root vars share its name, so it cannot
+   be aliased through @theme). */
+@utility shadow-overlay {
+  box-shadow: var(--shadow-overlay);
+}
+
+/* `border-input` is the control border (>=3:1 on field and page). The theme key
+   `--color-input` (field fill) also generates `.border-input{border-color:var(--input)}`;
+   this plain rule sits in the same utilities layer, later in source order, so it wins at
+   rest, while variants (`hover:`, `focus-visible:`, `aria-invalid:`, `disabled:`) have
+   higher specificity and override it. Replaces the unlayered F1 bridge rule. */
+@layer utilities {
+  .border-input {
+    border-color: var(--control-border);
+  }
 }
 
 /* ── Base styles ─────────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  border-width: 0;
-  border-style: solid;
-  border-color: var(--border);
-  -webkit-tap-highlight-color: transparent;
+/* In @layer base so Tailwind border utilities (border, border-input, ...) can win.
+   Unlayered, this reset overrode every `border` utility and hid all borders. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-width: 0;
+    border-style: solid;
+    border-color: var(--border);
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 html {
   color-scheme: dark;
   overscroll-behavior: none;
+}
+
+/* Foco nunca oculto (WCAG 2.4.7/2.4.11): al desplazar hasta un elemento enfocado, el documento
+   reserva el alto de lo que queda fijo abajo. Por debajo de lg desplaza `html`; en lg el
+   desplazamiento ocurre dentro de `main` (ver `app-layout.tsx`). Alturas: barra inferior móvil
+   56px + safe-area; «Volver arriba» 44px a +16px sobre la barra (48px a 24px del borde en md+);
+   aviso de versión ~112px en móvil; barra de acciones pegajosa del editor de plantillas ~112px
+   en móvil (botones apilados) y ~64px en md+.
+   La reserva de «Volver arriba» no depende de que el botón esté montado: aparece tras desplazar,
+   a veces después de que el navegador ya haya llevado el foco a su zona (RDS-F5-A11Y-02). */
+@media (max-width: 767px) {
+  html:has([data-mobile-tabbar]) {
+    scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 76px);
+  }
+
+  html:has([data-mobile-tabbar]):has([data-sticky-actions]) {
+    scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 144px);
+  }
+
+  html:has([data-mobile-tabbar]):has([data-version-banner]) {
+    scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 192px);
+  }
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-bottom: 96px;
+  }
+
+  html:has([data-version-banner]) {
+    scroll-padding-bottom: 160px;
+  }
 }
 
 .light {
@@ -155,20 +488,14 @@ body,
 #root {
   min-height: 100%;
   background-color: var(--background);
+  color: var(--foreground);
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
   overscroll-behavior: none;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
+  font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -201,8 +528,37 @@ button {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--brand-soft);
+}
+
+/* Reduced motion (D4): collapse transitions and animations to ~0. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Auth entrance and brand motion: everything appears in its final state. */
+@media (prefers-reduced-motion: reduce) {
+  .auth-mark-light,
+  .auth-mark-dark,
+  .auth-mark-spin,
+  .auth-letter,
+  .auth-rule,
+  .auth-enter {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-submit:hover:not(:disabled) .auth-arrow {
+    transform: none;
+  }
 }

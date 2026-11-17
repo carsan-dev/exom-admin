@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Progreso · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/progreso-shared.css">
+  <link rel="stylesheet" href="assets/pages/progreso.css">
+  <script src="assets/vendor/lucide-local.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="progreso" data-crumbs='["Progreso"]'>
+<!-- Body silhouettes for the photo placeholders (no real photos in the mockup) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="sil-front" viewBox="0 0 120 160">
+    <circle cx="60" cy="20" r="10.5"/>
+    <path d="M55 31v6c-9 1.6-16 3.6-19.5 8.5L31 76l-3 24 3.6 1.2 4.6-23.6 4.3-18.6 1.2 22.4c-1.6 6.4-2.4 12.4-1.6 19.6L42 152h10.2l5.6-45.5h4.4l5.6 45.5H78l1.9-51.4c.8-7.2 0-13.2-1.6-19.6l1.2-22.4 4.3 18.6 4.6 23.6 3.6-1.2-3-24-4.5-30.5C81 40.6 74 38.6 65 37v-6"/>
+  </symbol>
+  <symbol id="sil-back" viewBox="0 0 120 160">
+    <circle cx="60" cy="20" r="10.5"/>
+    <path d="M55 31v6c-9 1.6-16 3.6-19.5 8.5L31 76l-3 24 3.6 1.2 4.6-23.6 4.3-18.6 1.2 22.4c-1.6 6.4-2.4 12.4-1.6 19.6L42 152h10.2l5.6-45.5h4.4l5.6 45.5H78l1.9-51.4c.8-7.2 0-13.2-1.6-19.6l1.2-22.4 4.3 18.6 4.6 23.6 3.6-1.2-3-24-4.5-30.5C81 40.6 74 38.6 65 37v-6"/>
+    <path d="M60 44v50M50 52c3 4 6 5 10 5s7-1 10-5"/>
+  </symbol>
+  <symbol id="sil-side" viewBox="0 0 120 160">
+    <circle cx="60" cy="20" r="10.5"/>
+    <path d="M57 31v6c-6 3-8.5 8-8 16l1.6 24c-1.8 7-1.4 13 .4 20L50 152h11l3-46c4-7 5-14 4-21l2-28c.6-9-2.6-15-7-19v-7"/>
+    <path d="M60 44c-3 14-3.6 32-1.6 50l1.6 6"/>
+  </symbol>
+</svg>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row prog-title">
+        <h1 class="h1">Progreso</h1>
+        <button class="client-pick" type="button" id="client-pick" data-open="#client-pop" aria-haspopup="dialog" aria-expanded="false" aria-label="Cliente: Lucía Martínez. Cambiar cliente">
+          <span class="avatar avatar-28" aria-hidden="true" data-cp-avatar>LM</span>
+          <span class="cp-name" data-cp-name>Lucía Martínez</span>
+          <i data-lucide="chevrons-up-down"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ NO CLIENT (prototype state "vacío") ============ -->
+  <div data-show="empty" class="section">
+    <div class="empty">
+      <span class="empty-x" aria-hidden="true"></span>
+      <h2 class="empty-title">Selecciona un cliente</h2>
+      <p class="empty-text">Elige un cliente en el selector de arriba para ver su progreso detallado</p>
+    </div>
+  </div>
+
+  <!-- ============ LOADING ============ -->
+  <div data-show="loading" class="prog" aria-busy="true" aria-label="Cargando el progreso del cliente">
+    <div class="prog-nav" aria-hidden="true">
+      <div class="stack-12" style="padding:8px 12px"><span class="sk-line" style="--w:70%"></span><span class="sk-line" style="--w:55%"></span><span class="sk-line" style="--w:62%"></span><span class="sk-line" style="--w:48%"></span><span class="sk-line" style="--w:66%"></span></div>
+    </div>
+    <div class="prog-main" aria-hidden="true">
+      <div class="stack-8"><span class="sk-line lg" style="--w:220px"></span><span class="sk-line" style="--w:160px"></span></div>
+      <div class="ledger" style="margin-top:24px">
+        <div class="ledger-cell"><span class="sk-line" style="--w:58%"></span><span class="sk-fig" style="margin-top:16px"></span><span class="sk-line" style="--w:72%;margin-top:14px"></span></div>
+        <div class="ledger-cell"><span class="sk-line" style="--w:62%"></span><span class="sk-fig" style="margin-top:16px"></span><span class="sk-line" style="--w:66%;margin-top:14px"></span></div>
+        <div class="ledger-cell"><span class="sk-line" style="--w:64%"></span><span class="sk-fig" style="margin-top:16px"></span><span class="sk-line" style="--w:80%;margin-top:14px"></span></div>
+        <div class="ledger-cell"><span class="sk-line" style="--w:54%"></span><span class="sk-fig" style="margin-top:16px"></span><span class="sk-line" style="--w:60%;margin-top:14px"></span></div>
+      </div>
+      <div class="dash-grid">
+        <div class="stack-12"><span class="sk-line lg" style="--w:180px"></span><span class="sk-block" style="--h:200px"></span><span class="sk-block" style="--h:200px"></span></div>
+        <div class="stack-12"><span class="sk-line lg" style="--w:140px"></span><span class="sk-block" style="--h:44px"></span><span class="sk-block" style="--h:44px"></span><span class="sk-line lg" style="--w:160px;margin-top:24px"></span><span class="sk-block" style="--h:56px"></span><span class="sk-block" style="--h:56px"></span><span class="sk-block" style="--h:56px"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DATA (also shown in "error": one block fails on its own) ============ -->
+  <div data-show="data error" class="prog">
+    <nav class="prog-nav" aria-label="Secciones de progreso">
+      <ul>
+        <li><a href="?section=dashboard" data-goto="dashboard">Dashboard</a></li>
+        <li><a href="?section=resumen" data-goto="resumen">Resumen</a></li>
+      </ul>
+      <ul>
+        <li><a href="?section=metricas" data-goto="metricas">Métricas</a></li>
+        <li><a href="?section=fotos" data-goto="fotos">Fotos</a></li>
+        <li><a href="?section=entrenamiento" data-goto="entrenamiento">Entrenamiento</a></li>
+      </ul>
+      <ul>
+        <li><a href="?section=adherencia" data-goto="adherencia">Adherencia</a></li>
+        <li><a href="?section=racha" data-goto="racha">Racha</a></li>
+      </ul>
+      <ul>
+        <li><a href="?section=seguimiento" data-goto="seguimiento">Seguimiento<span class="count" aria-label="2 tareas vencidas">2</span></a></li>
+      </ul>
+    </nav>
+
+    <div class="prog-main">
+
+<!-- =========================================================== DASHBOARD -->
+      <section class="psec" id="sec-dashboard" data-sec="dashboard" aria-labelledby="dash-t">
+        <div class="psec-head">
+          <div><h2 class="psec-title" id="dash-t">Una mirada al progreso</h2><p class="psec-sub">Actualizado a 15/11/2026</p></div>
+          <div class="period">
+            <div class="period-row">
+              <label class="period-label" for="dash-period">Periodo</label>
+              <select class="select" id="dash-period" data-period>
+                <option value="7" data-range="09/11/2026 – 15/11/2026 · Comparado con 02/11/2026 – 08/11/2026">Últimos 7 días</option>
+                <option value="30" selected data-range="16/10/2026 – 15/11/2026 · Comparado con 16/09/2026 – 15/10/2026">Últimos 30 días</option>
+              </select>
+              <button class="btn btn-ghost btn-icon info-btn" type="button" data-open="#pop-dash" aria-haspopup="dialog" aria-expanded="false" aria-label="Cómo se calcula el dashboard"><i data-lucide="info"></i></button>
+            </div>
+            <p class="period-range" data-period-range>16/10/2026 – 15/11/2026 · Comparado con 16/09/2026 – 15/10/2026</p>
+          </div>
+        </div>
+
+        <div class="ledger">
+          <a class="ledger-cell" href="?section=metricas" data-goto="metricas">
+            <span class="ledger-head"><span class="ledger-label micro">Peso actual</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+            <span class="fig-line"><span class="fig">72,4</span><span class="fig-unit">kg</span></span>
+            <span class="ledger-sub">+0,6 kg desde inicio · Registro: 14/11/2026<span class="sr-only">. Ver peso desde inicio</span></span>
+          </a>
+          <a class="ledger-cell" href="?section=adherencia" data-goto="adherencia">
+            <span class="ledger-head"><span class="ledger-label micro">Adherencia global</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+            <span class="fig-line"><span class="fig">78</span><span class="fig-unit">%</span></span>
+            <span class="ledger-foot"><span class="delta">+4 p. p.</span><span>Últimos 30 días · solo días cerrados</span></span>
+            <span class="sr-only">Ver adherencia</span>
+          </a>
+          <a class="ledger-cell" href="?section=resumen" data-goto="resumen">
+            <span class="ledger-head"><span class="ledger-label micro">Entrenos esta semana</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+            <span class="fig-line"><span class="fig">3 / 4</span></span>
+            <span class="ledger-sub">Semana 09/11/2026 – 15/11/2026<span class="sr-only">. Ver semana completa</span></span>
+          </a>
+          <a class="ledger-cell" href="?section=resumen" data-goto="resumen">
+            <span class="ledger-head"><span class="ledger-label micro">Días de dieta esta semana</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span>
+            <span class="fig-line"><span class="fig">5 / 7</span></span>
+            <span class="ledger-sub">Semana 09/11/2026 – 15/11/2026<span class="sr-only">. Ver semana completa</span></span>
+          </a>
+        </div>
+
+        <div class="dash-grid">
+          <div class="dash-main">
+            <div class="blk-head"><div><h3 class="h2">Evolución · Últimos 30 días</h3><p class="blk-sub">16/10/2026 – 15/11/2026</p></div></div>
+            <div class="chart-block">
+              <div class="blk-head"><div><h4 class="blk-title">Peso · kg</h4><p class="blk-sub">9 registros en el periodo</p></div><a class="link-btn" href="?section=metricas" data-goto="metricas">Ver métricas de este periodo<i data-lucide="arrow-right"></i></a></div>
+              <div class="chart" data-chart="weight-dash" style="--h:190px"></div>
+            </div>
+            <div class="chart-block">
+              <div data-show="data">
+                <div class="blk-head"><div><h4 class="blk-title">Evolución diaria del periodo seleccionado</h4><p class="blk-sub">Adherencia por día cerrado</p></div><a class="link-btn" href="?section=adherencia" data-goto="adherencia">Ver adherencia<i data-lucide="arrow-right"></i></a></div>
+                <div class="chart" data-chart="adherence" style="--h:190px"></div>
+                <div class="chart-foot">
+                  <div class="legend" aria-hidden="true">
+                    <span class="legend-item"><svg viewBox="0 0 22 8"><line x1="0" y1="4" x2="22" y2="4" class="lg-main"/></svg>Global</span>
+                    <span class="legend-item"><svg viewBox="0 0 22 8"><line x1="0" y1="4" x2="22" y2="4" class="lg-dashed"/></svg>Entrenamiento</span>
+                    <span class="legend-item"><svg viewBox="0 0 22 8"><line x1="1" y1="4" x2="22" y2="4" class="lg-dotted"/></svg>Nutrición</span>
+                  </div>
+                </div>
+              </div>
+              <div data-show="error">
+                <div class="blk-head"><div><h4 class="blk-title">Evolución diaria del periodo seleccionado</h4></div></div>
+                <div class="block-error" role="alert">
+                  <p><i data-lucide="circle-alert"></i>No se pudo cargar adherencia.</p>
+                  <button class="btn btn-secondary btn-sm" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar adherencia</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dash-side stack-32">
+            <section aria-labelledby="next-t">
+              <div class="blk-head"><div><h3 class="h2" id="next-t">Próximos pasos</h3></div><a class="link-btn" href="?section=seguimiento" data-goto="seguimiento">Abrir seguimiento<i data-lucide="arrow-right"></i></a></div>
+              <dl class="next-list">
+                <div><dt>Próxima tarea</dt><dd><b>Actualizar dieta</b> · 12/11/2026 · Alta · <span class="chip chip-danger">Vencida</span></dd></div>
+                <div><dt>Próxima revisión</dt><dd><b>Revisión mensual</b> · 20/11/2026 · Media</dd></div>
+              </dl>
+            </section>
+            <section aria-labelledby="alerts-t">
+              <div class="blk-head"><div><h3 class="h2" id="alerts-t">Alertas importantes</h3></div></div>
+              <ul class="alerts">
+                <li class="alert-row tone-danger">
+                  <i data-lucide="circle-alert" aria-hidden="true"></i>
+                  <span class="alert-title">Tareas y revisiones vencidas<span class="count count-muted">2</span></span>
+                  <span class="alert-body">
+                    <a href="?section=seguimiento" data-goto="seguimiento">Actualizar dieta · venció el 12/11/2026</a>
+                    <a href="?section=seguimiento" data-goto="seguimiento">Llamada · venció el 14/11/2026</a>
+                  </span>
+                </li>
+                <li class="alert-row tone-info">
+                  <i data-lucide="file-text" aria-hidden="true"></i>
+                  <span class="alert-title">Recaps enviados pendientes de revisión</span>
+                  <span class="alert-body">
+                    <a href="recaps.html?clientId=c01&amp;status=SUBMITTED">Recap · 9 nov – 15 nov 2026</a>
+                    <a class="link-btn" href="?section=seguimiento&amp;tab=recaps" data-goto="seguimiento" data-subtab="recaps" style="font-weight:400">Consultar todos los recaps en Seguimiento</a>
+                  </span>
+                </li>
+                <li class="alert-row tone-warning">
+                  <i data-lucide="trending-down" aria-hidden="true"></i>
+                  <span class="alert-title">Baja adherencia global</span>
+                  <span class="alert-body"><a href="?section=adherencia" data-goto="adherencia">Revisar los siete días cerrados</a></span>
+                </li>
+                <li class="alert-row tone-warning">
+                  <i data-lucide="calendar-x" aria-hidden="true"></i>
+                  <span class="alert-title">Días cerrados sin completar · 3</span>
+                  <span class="alert-body">
+                    <details>
+                      <summary>Ver días con entrenamiento o dieta pendientes<i data-lucide="chevron-down"></i></summary>
+                      <ul>
+                        <li><span>lunes, 9 de noviembre</span><span class="tag">Dieta</span></li>
+                        <li><span>martes, 10 de noviembre</span><span class="row"><span class="tag">Entrenamiento</span><span class="tag">Dieta</span></span></li>
+                        <li><span>jueves, 12 de noviembre</span><span class="row"><span class="tag">Entrenamiento</span><span class="tag">Dieta</span></span></li>
+                      </ul>
+                    </details>
+                  </span>
+                </li>
+              </ul>
+            </section>
+          </div>
+        </div>
+        <p class="cover-line" style="margin-top:32px">Cobertura reciente: 6 / 7 días disponibles · 5 evaluables · 1 insuficientes.</p>
+      </section>
+
+<!-- =========================================================== RESUMEN -->
+      <section class="psec" id="sec-resumen" data-sec="resumen" aria-labelledby="res-t" hidden>
+        <div class="psec-head">
+          <div><h2 class="psec-title" id="res-t">Actividad de la semana</h2><p class="psec-sub">Semana del 09/11/2026 al 15/11/2026</p></div>
+        </div>
+        <div class="ledger ledger-3" style="--cols:3">
+          <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Cumplimiento entrenamiento</span></span><span class="fig-line"><span class="fig">75</span><span class="fig-unit">%</span></span><span class="ledger-sub">3 de 4 días con entrenamiento</span></div>
+          <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Cumplimiento dieta</span></span><span class="fig-line"><span class="fig">86</span><span class="fig-unit">%</span></span><span class="ledger-sub">18 de 21 comidas</span></div>
+          <a class="ledger-cell" href="?section=racha" data-goto="racha"><span class="ledger-head"><span class="ledger-label micro">Racha actual</span><i data-lucide="arrow-up-right" class="ledger-go"></i></span><span class="fig-line"><span class="fig">12</span><span class="fig-unit">días</span></span><span class="ledger-sub">Última actividad: 14/11/2026<span class="sr-only">. Ver racha</span></span></a>
+        </div>
+
+        <div class="res-controls">
+          <div class="field"><label class="field-label" for="res-day">Día de consulta</label><input class="input" type="date" id="res-day" value="2026-11-13" max="2026-11-15"></div>
+          <button class="btn btn-secondary" type="button" data-res-today>Ir a hoy</button>
+        </div>
+
+        <div class="res-grid">
+          <div class="mcal-wrap" style="min-width:0">
+            <div class="mcal-head">
+              <button class="btn btn-ghost btn-icon" type="button" aria-label="Mes anterior" data-tip="Mes anterior"><i data-lucide="chevron-left"></i></button>
+              <h3 class="mcal-title" aria-live="polite">Noviembre 2026</h3>
+              <button class="btn btn-ghost btn-icon" type="button" aria-label="Mes siguiente" data-tip="Mes siguiente" disabled><i data-lucide="chevron-right"></i></button>
+            </div>
+            <div class="mcal" data-mcal role="group" aria-label="Calendario de actividad, noviembre de 2026"></div>
+            <ul class="st-legend" aria-label="Leyenda">
+              <li class="st-ok"><i data-lucide="check" aria-hidden="true"></i>Completado</li>
+              <li class="st-part"><i data-lucide="minus" aria-hidden="true"></i>Parcialmente completado</li>
+              <li class="st-miss"><i data-lucide="x" aria-hidden="true"></i>No completado</li>
+              <li class="st-mute"><i data-lucide="moon" aria-hidden="true"></i>Día de descanso</li>
+              <li class="st-mute"><i data-lucide="clock" aria-hidden="true"></i>Pendiente</li>
+              <li class="st-mute"><i data-lucide="circle-off" aria-hidden="true"></i>Sin asignaciones</li>
+              <li class="st-mute"><i data-lucide="circle-dashed" aria-hidden="true"></i>Sin registro</li>
+            </ul>
+            <p class="mcal-note">Selecciona un día para consultar ejercicios, comidas y notas. Sin registro no significa incumplimiento.</p>
+            <div class="disc-group" style="margin-top:16px">
+              <details class="disc"><summary>Ver historial del mes en lista<i data-lucide="chevron-down" class="disc-chev"></i></summary>
+                <div class="disc-body"><ul class="ruled" data-month-list></ul></div>
+              </details>
+            </div>
+          </div>
+
+          <article class="day-panel" aria-labelledby="day-t">
+            <h3 class="day-title" id="day-t" data-day-title>viernes, 13 de noviembre de 2026</h3>
+            <div class="day-part">
+              <div class="day-part-head"><h4 class="h3">Entrenamiento</h4><span class="chip chip-success">Completado</span><span class="caption">1 de 1 entrenamientos</span></div>
+              <ul class="ex-list">
+                <li><i data-lucide="check" aria-hidden="true"></i><span class="ex-name">Sentadilla trasera</span>
+                  <span class="ex-sets"><span class="tag">Serie 1 · 10 reps · 60 kg</span><span class="tag">Serie 2 · 8 reps · 62,5 kg</span><span class="tag">Serie 3 · 8 reps · 62,5 kg</span></span></li>
+                <li><i data-lucide="check" aria-hidden="true"></i><span class="ex-name">Peso muerto rumano</span>
+                  <span class="ex-sets"><span class="tag">Serie 1 · 10 reps · 50 kg</span><span class="tag">Serie 2 · 10 reps · 50 kg</span></span></li>
+                <li><i data-lucide="check" aria-hidden="true"></i><span class="ex-name">Plancha frontal</span>
+                  <span class="ex-sets"><span class="tag">Serie 1 · 45s</span><span class="tag">Serie 2 · 45s</span></span></li>
+              </ul>
+            </div>
+            <div class="day-part">
+              <div class="day-part-head"><h4 class="h3">Dieta</h4><span class="chip chip-neutral no-dot">3 comidas</span></div>
+              <ul class="meal-list">
+                <li><i data-lucide="check" aria-hidden="true"></i>Desayuno<span class="caption">540 kcal</span></li>
+                <li><i data-lucide="check" aria-hidden="true"></i>Comida<span class="caption">820 kcal</span></li>
+                <li><i data-lucide="check" aria-hidden="true"></i>Cena<span class="caption">690 kcal</span></li>
+              </ul>
+              <details class="disc" style="margin-top:8px;border-top:1px solid var(--rule)">
+                <summary>Histórico de dietas · Solo lectura<i data-lucide="chevron-down" class="disc-chev"></i></summary>
+                <div class="disc-body prose-13">
+                  <p><b>Definición otoño</b> · 2.400 kcal · P 150 g · C 260 g · G 80 g</p>
+                  <p>Comida: Pollo: 150 g · Arroz basmati: 80 g · Brócoli: 200 g</p>
+                </div>
+              </details>
+            </div>
+            <div class="day-part" style="border-bottom:0">
+              <h4 class="h3" style="margin-bottom:10px">Nota del cliente</h4>
+              <blockquote class="client-note">Hoy me ha costado la última serie de sentadilla, he notado la rodilla algo cargada.</blockquote>
+              <div class="field" style="margin-top:20px">
+                <label class="field-label" for="reply">Respuesta para el cliente</label>
+                <textarea class="textarea" id="reply" maxlength="1000" data-count rows="3" placeholder="Escribe una respuesta para Lucía…"></textarea>
+                <div class="field-foot"><span></span><span class="field-count" aria-live="polite">0/1000</span></div>
+              </div>
+              <p class="push-note"><i data-lucide="bell" aria-hidden="true"></i>Una respuesta nueva o modificada enviará una notificación push al cliente.</p>
+              <div class="reply-actions"><button class="btn btn-primary" type="button" data-toast="Respuesta guardada y enviada al cliente" data-toast-tone="success">Responder</button></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+<!-- =========================================================== MÉTRICAS -->
+      <section class="psec" id="sec-metricas" data-sec="metricas" aria-labelledby="met-t" hidden>
+        <div class="psec-head">
+          <div><h2 class="psec-title" id="met-t">Mediciones del periodo</h2><p class="psec-sub">Composición corporal, nutrición estimada y hábitos registrados.</p></div>
+          <div class="period">
+            <div class="period-row">
+              <label class="period-label" for="met-period">Periodo</label>
+              <select class="select" id="met-period" data-period data-period-group="mt" data-switch="metp">
+                <option value="7" data-range="09/11/2026 – 15/11/2026 · Comparado con 02/11/2026 – 08/11/2026">Últimos 7 días</option>
+                <option value="30" selected data-range="16/10/2026 – 15/11/2026 · Comparado con 16/09/2026 – 15/10/2026">Últimos 30 días</option>
+                <option value="90" data-range="18/08/2026 – 15/11/2026 · Comparado con 20/05/2026 – 17/08/2026">Últimos 90 días</option>
+                <option value="year" data-range="01/01/2026 – 15/11/2026 · Comparado con 01/01/2025 – 15/11/2025">Año actual</option>
+                <option value="all" data-range="Todo el historial · sin comparación">Todo el historial</option>
+                <option value="custom" data-range="Selecciona las fechas de inicio y fin.">Personalizado</option>
+              </select>
+              <button class="btn btn-ghost btn-icon info-btn" type="button" data-open="#pop-mt" aria-haspopup="dialog" aria-expanded="false" aria-label="Cómo funciona este periodo"><i data-lucide="info"></i></button>
+            </div>
+            <div class="period-custom" data-case="metp:custom" hidden>
+              <div class="field"><label class="field-label" for="met-from">Desde</label><input class="input input-sm" type="date" id="met-from" max="2026-11-15"></div>
+              <div class="field"><label class="field-label" for="met-to">Hasta</label><input class="input input-sm" type="date" id="met-to" max="2026-11-15"></div>
+            </div>
+            <p class="period-range" data-period-range>16/10/2026 – 15/11/2026 · Comparado con 16/09/2026 – 15/10/2026</p>
+          </div>
+        </div>
+
+        <div class="segmented" role="group" aria-label="Grupo de mediciones">
+          <button class="seg-btn" type="button" aria-pressed="true" data-mgroup="corp">Evolución corporal</button>
+          <button class="seg-btn" type="button" aria-pressed="false" data-mgroup="nut">Nutrición estimada</button>
+          <button class="seg-btn" type="button" aria-pressed="false" data-mgroup="hab">Hábitos</button>
+        </div>
+
+        <div class="met-controls">
+          <div class="field"><label class="field-label" for="met-m">Medición</label>
+            <select class="select" id="met-m"><option selected>Peso · kg</option><option>Masa muscular · kg</option><option>Cintura · cm</option><option>Cadera · cm</option></select></div>
+          <div class="field"><label class="field-label" for="met-cmp">Comparar con</label>
+            <select class="select" id="met-cmp" data-cmp><option value="" selected>Ninguna</option><option value="mm">Masa muscular · kg</option></select></div>
+          <div class="field"><label class="field-label" for="met-scale">Escala del eje Y</label>
+            <select class="select" id="met-scale" data-scale><option value="fit" selected>Ajustada a los datos</option><option value="zero">Desde cero</option></select></div>
+        </div>
+
+        <div class="blk">
+          <div class="blk-head"><div><h3 class="blk-title" data-met-title>Peso · kg</h3><p class="blk-sub">Fuente: registros corporales · 16/10/2026 – 15/11/2026</p></div>
+            <div class="legend" aria-hidden="true">
+              <span class="legend-item"><svg viewBox="0 0 22 8"><circle cx="11" cy="4" r="3.5" fill="var(--accent-line)"/></svg>Peso</span>
+              <span class="legend-item"><svg viewBox="0 0 22 8"><line x1="0" y1="4" x2="22" y2="4" class="lg-main" style="opacity:.45"/></svg>Guía lineal</span>
+              <span class="legend-item" data-cmp-legend hidden><svg viewBox="0 0 22 8"><line x1="0" y1="4" x2="22" y2="4" class="lg-cmp"/></svg>Masa muscular</span>
+            </div>
+          </div>
+          <p class="met-summary"><span>9 observaciones completas · 0 incompletas</span><span>Primera observación: 17/10/2026</span><span>Última observación: 14/11/2026</span></p>
+          <div class="chart" data-chart="weight-met" style="--h:360px"></div>
+          <dl class="statrow" style="margin-top:16px">
+            <div><dt>Primera</dt><dd>71,8 kg</dd></div>
+            <div><dt>Última</dt><dd>72,4 kg</dd></div>
+            <div><dt>Cambio</dt><dd>+0,6 kg</dd></div>
+            <div><dt>Mín</dt><dd>71,5 kg</dd></div>
+            <div><dt>Máx</dt><dd>72,6 kg</dd></div>
+            <div><dt>Media</dt><dd>72,0 kg</dd></div>
+            <div><dt>Mediciones</dt><dd>9</dd></div>
+          </dl>
+          <div class="met-pager">
+            <span class="caption">Gráficos: 16/10/2026 – 15/11/2026 · Página 2 de 2</span>
+            <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button"><i data-lucide="chevron-left"></i>Más antiguo</button><button class="btn btn-secondary btn-sm" type="button" disabled>Más reciente<i data-lucide="chevron-right"></i></button></span>
+          </div>
+        </div>
+
+        <div class="disc-group">
+          <details class="disc"><summary>Ver datos, semanas y procedencia<i data-lucide="chevron-down" class="disc-chev"></i></summary>
+            <div class="disc-body"><div class="tscroll"><table class="table table-compact">
+              <caption class="sr-only">Datos de peso por fecha y semana</caption>
+              <thead><tr><th scope="col">Fecha / semana</th><th scope="col" class="cell-num">Valor (kg)</th><th scope="col">Procedencia / estado</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-date">14/11/2026 · semana 46</td><td class="cell-num">72,4</td><td class="cell-muted">Registro corporal</td></tr>
+                <tr><td class="cell-date">11/11/2026 · semana 46</td><td class="cell-num">71,8</td><td class="cell-muted">Registro corporal</td></tr>
+                <tr><td class="cell-date">07/11/2026 · semana 45</td><td class="cell-num">72,6</td><td class="cell-muted">Registro corporal</td></tr>
+                <tr><td class="cell-date">04/11/2026 · semana 45</td><td class="cell-num">72,1</td><td class="cell-muted">Registro corporal</td></tr>
+                <tr><td class="cell-date">31/10/2026 · semana 44</td><td class="cell-num">72,0</td><td class="cell-muted">Parcial: solo parte conocida</td></tr>
+                <tr><td class="cell-date">12/10/2026 – 18/10/2026 · semana 42</td><td class="cell-num"><span aria-label="Sin datos">—</span></td><td class="cell-muted">Histórico insuficiente</td></tr>
+              </tbody></table></div></div>
+          </details>
+          <details class="disc"><summary>Comparar todas las mediciones del grupo<i data-lucide="chevron-down" class="disc-chev"></i></summary>
+            <div class="disc-body"><div class="tscroll"><table class="table table-compact">
+              <caption class="sr-only">Comparación de las mediciones del grupo Evolución corporal</caption>
+              <thead><tr><th scope="col">Métrica / fuente</th><th scope="col" class="cell-num">Inicio</th><th scope="col" class="cell-num">Actual</th><th scope="col" class="cell-num">Cambio</th><th scope="col" class="cell-num">Mín</th><th scope="col" class="cell-num">Máx</th><th scope="col" class="cell-num">Media</th></tr></thead>
+              <tbody>
+                <tr><td>Peso<span class="cell-sub">Registros corporales</span></td><td class="cell-num">71,8 kg</td><td class="cell-num">72,4 kg</td><td class="cell-num">+0,6 kg</td><td class="cell-num">71,5 kg</td><td class="cell-num">72,6 kg</td><td class="cell-num">72,0 kg</td></tr>
+                <tr><td>Masa muscular<span class="cell-sub">Registros corporales</span></td><td class="cell-num">31,6 kg</td><td class="cell-num">32,1 kg</td><td class="cell-num">+0,5 kg</td><td class="cell-num">31,6 kg</td><td class="cell-num">32,1 kg</td><td class="cell-num">31,9 kg</td></tr>
+                <tr><td>Cintura<span class="cell-sub">Registros corporales</span></td><td class="cell-num">77,5 cm</td><td class="cell-num">76,0 cm</td><td class="cell-num">−1,5 cm</td><td class="cell-num">76,0 cm</td><td class="cell-num">77,5 cm</td><td class="cell-num">76,8 cm</td></tr>
+                <tr><td>Cadera<span class="cell-sub">Registros corporales</span></td><td class="cell-num">96,5 cm</td><td class="cell-num">95,5 cm</td><td class="cell-num">−1,0 cm</td><td class="cell-num">95,5 cm</td><td class="cell-num">96,5 cm</td><td class="cell-num">96,0 cm</td></tr>
+              </tbody></table></div></div>
+          </details>
+          <details class="disc"><summary>Cómo se calculan las métricas y sus escalas<i data-lucide="chevron-down" class="disc-chev"></i></summary>
+            <div class="disc-body">
+              <p class="prose-13">Cada punto es una observación del periodo; la guía lineal resume su tendencia. Una observación parcial solo incluye la parte conocida. Las fechas se consultan en UTC.</p>
+              <dl class="kv" style="margin-top:12px;max-width:560px">
+                <div><dt>Hambre</dt><dd>1 sin hambre – 10 extrema</dd></div>
+                <div><dt>Energía</dt><dd>1–10</dd></div>
+                <div><dt>Digestión</dt><dd>1–10</dd></div>
+                <div><dt>Estrés</dt><dd>0–5</dd></div>
+              </dl>
+            </div>
+          </details>
+          <details class="disc"><summary>Registros corporales originales · historial completo<i data-lucide="chevron-down" class="disc-chev"></i></summary>
+            <div class="disc-body">
+              <div class="blk-head"><div><h3 class="blk-title">Historial de métricas</h3><p class="blk-sub">Muestra todas las mediciones, sin filtrar por periodo.</p></div>
+                <button class="btn btn-secondary btn-sm" type="button" data-open="#dlg-metric" data-ctx="" aria-haspopup="dialog"><i data-lucide="plus"></i>Añadir métricas</button></div>
+              <div data-tpl="metrics-table" data-rows="5"></div>
+              <nav class="pagination" aria-label="Paginación del historial de métricas"><span class="pagination-label">Página 1 de 3</span>
+                <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button><button class="btn btn-secondary btn-sm" type="button">Siguiente</button></span></nav>
+            </div>
+          </details>
+        </div>
+      </section>
+
+<!-- =========================================================== FOTOS -->
+      <section class="psec" id="sec-fotos" data-sec="fotos" aria-labelledby="fot-t" hidden>
+        <div class="psec-head">
+          <div><h2 class="psec-title" id="fot-t">Fotos de progreso</h2><p class="psec-sub">12 sesiones en el historial · 12 en esta página · 9 completas en esta página</p></div>
+        </div>
+
+        <section class="blk" aria-labelledby="cmp-t">
+          <div class="blk-head"><div><h3 class="h2" id="cmp-t">Comparador</h3></div></div>
+          <div class="cmp-controls">
+            <div class="field"><label class="field-label" for="cmp-a">Fecha anterior</label>
+              <select class="select" id="cmp-a"><option selected>15 de octubre de 2026 · sesión 8f3a2c1d</option><option>17 de septiembre de 2026 · sesión 4c91e07b</option><option>20 de agosto de 2026 · sesión a2d45f90</option></select></div>
+            <div class="field"><label class="field-label" for="cmp-b">Fecha posterior</label>
+              <select class="select" id="cmp-b"><option selected>12 de noviembre de 2026 · sesión 2b7e9a04</option><option>15 de octubre de 2026 · sesión 8f3a2c1d</option></select></div>
+            <fieldset class="fieldset">
+              <legend>Vista comparada</legend>
+              <div class="segmented" role="group" aria-label="Vista comparada">
+                <button class="seg-btn" type="button" aria-pressed="true" data-view="Frontal">Frontal</button>
+                <button class="seg-btn" type="button" aria-pressed="false" data-view="Lateral izquierda">Lateral izquierda</button>
+                <button class="seg-btn" type="button" aria-pressed="false" data-view="Lateral derecha">Lateral derecha</button>
+                <button class="seg-btn" type="button" aria-pressed="false" data-view="Espalda">Espalda</button>
+              </div>
+            </fieldset>
+          </div>
+          <p class="cmp-view-line" aria-live="polite">Vista seleccionada: <span data-view-name>Frontal</span> · <span data-view-count>10 de 12</span> sesiones con esta vista</p>
+
+          <div class="cmp-frames">
+            <figure class="cmp-frame" style="margin:0">
+              <figcaption><span><span class="cmp-date">15 de octubre de 2026</span><br><span class="cmp-meta">Fecha anterior · 4 / 4 vistas disponibles</span></span><span class="chip chip-success">Sesión completa</span></figcaption>
+              <div class="ph-frame" data-frame="a">
+                <svg class="sil" role="img" aria-label="Foto Frontal del 15 de octubre de 2026"><use href="#sil-front"/></svg>
+                <button class="btn btn-ghost btn-icon btn-sm ph-expand" type="button" data-open="#dlg-zoom" aria-haspopup="dialog" aria-label="Ampliar foto anterior" data-tip="Ampliar"><i data-lucide="expand"></i></button>
+              </div>
+              <details class="disc"><summary><span>Metadatos de <span data-view-name>Frontal</span></span><i data-lucide="chevron-down" class="disc-chev"></i></summary>
+                <div class="disc-body"><dl class="kv">
+                  <div><dt>Sesión</dt><dd>8f3a2c1d-5e7b-4a0f-9c21-7d3e6b1f0a42</dd></div>
+                  <div><dt>Formato</dt><dd>image/jpeg</dd></div>
+                  <div><dt>Tamaño</dt><dd>1.284.512 bytes</dd></div>
+                  <div><dt>Momento de captura</dt><dd>No proporcionado</dd></div>
+                  <div><dt>Contexto de captura</dt><dd>no proporcionado</dd></div>
+                </dl></div>
+              </details>
+            </figure>
+            <figure class="cmp-frame" style="margin:0">
+              <figcaption><span><span class="cmp-date">12 de noviembre de 2026</span><br><span class="cmp-meta">Fecha posterior · 3 / 4 vistas disponibles</span></span><span class="chip chip-warning">Sesión pendiente de completar o confirmar</span></figcaption>
+              <div class="ph-frame is-missing" data-frame="b">
+                <p class="ph-missing"><i data-lucide="image-off" aria-hidden="true"></i><span>Vista <span data-view-name>Frontal</span> no disponible en esta fecha.</span></p>
+              </div>
+            </figure>
+          </div>
+        </section>
+
+        <div class="photo-split">
+          <section class="section" aria-labelledby="hist-t">
+            <div class="section-head"><div><h3 class="h2" id="hist-t">Historial y nueva sesión</h3></div></div>
+            <div class="new-session">
+              <div class="field"><label class="field-label" for="new-sess">Nueva sesión fechada</label><input class="input" type="date" id="new-sess" value="2026-11-15" max="2026-11-15"></div>
+              <button class="btn btn-secondary" type="button" data-loading-label="Creando…" data-toast="Sesión creada" data-toast-tone="success" data-toast-desc="Sesión incompleta del 15/11/2026. Añade las cuatro vistas."><i data-lucide="plus"></i>Crear sesión incompleta</button>
+            </div>
+            <ul class="session-list">
+              <li><span class="s-date">12 de noviembre de 2026</span><span class="chip chip-warning">Incompleta · faltan 1 de 4 vistas</span><span class="caption">Pendientes: Frontal</span></li>
+              <li><span class="s-date">29 de octubre de 2026</span><span class="chip chip-warning">Incompleta · faltan 2 de 4 vistas</span><span class="caption">Pendientes: Frontal, Espalda</span></li>
+              <li><span class="s-date">15 de octubre de 2026</span><span class="chip chip-success">Completa · 4 de 4 vistas</span></li>
+              <li><span class="s-date">1 de octubre de 2026</span><span class="chip chip-info">4 de 4 vistas · finalización no confirmada</span></li>
+              <li><span class="s-date">17 de septiembre de 2026</span><span class="chip chip-success">Completa · 4 de 4 vistas</span></li>
+            </ul>
+            <nav class="pagination" aria-label="Paginación de sesiones"><span class="pagination-label">Página 1 de 1</span>
+              <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button><button class="btn btn-secondary btn-sm" type="button" disabled>Siguiente</button></span></nav>
+          </section>
+
+          <section class="section" aria-labelledby="comp-t">
+            <div class="section-head"><div><h3 class="h2" id="comp-t">Completar sesión</h3></div></div>
+            <div class="field" style="max-width:360px"><label class="field-label" for="comp-sess">Sesión a completar</label>
+              <select class="select" id="comp-sess"><option selected>12 de noviembre de 2026 · faltan 1 de 4 vistas</option><option>29 de octubre de 2026 · faltan 2 de 4 vistas</option></select></div>
+            <div class="slots">
+              <div class="slot"><span class="slot-name">Frontal</span>
+                <div class="ph-frame is-missing"><p class="ph-missing">Pendiente · sin imagen</p></div>
+                <button class="btn btn-primary btn-sm" type="button" data-toast="Selecciona la imagen Frontal" data-toast-tone="info" data-toast-desc="Se abrirá el campo de subida de imagen."><i data-lucide="upload"></i>Subir Frontal</button></div>
+              <div class="slot"><span class="slot-name">Lateral izquierda</span>
+                <div class="ph-frame"><svg class="sil" role="img" aria-label="Lateral izquierda, 12 de noviembre de 2026"><use href="#sil-side"/></svg></div>
+                <button class="btn btn-secondary btn-sm" type="button" data-open="#dlg-replace" aria-haspopup="dialog">Reemplazar Lateral izquierda</button></div>
+              <div class="slot"><span class="slot-name">Lateral derecha</span>
+                <div class="ph-frame"><svg class="sil" role="img" aria-label="Lateral derecha, 12 de noviembre de 2026" style="transform:scaleX(-1)"><use href="#sil-side"/></svg></div>
+                <button class="btn btn-secondary btn-sm" type="button" data-open="#dlg-replace" aria-haspopup="dialog">Reemplazar Lateral derecha</button></div>
+              <div class="slot"><span class="slot-name">Espalda</span>
+                <div class="ph-frame"><svg class="sil" role="img" aria-label="Espalda, 12 de noviembre de 2026"><use href="#sil-back"/></svg></div>
+                <button class="btn btn-secondary btn-sm" type="button" data-open="#dlg-replace" aria-haspopup="dialog">Reemplazar Espalda</button></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+<!-- =========================================================== ENTRENAMIENTO -->
+      <section class="psec" id="sec-entrenamiento" data-sec="entrenamiento" aria-labelledby="ent-t" hidden>
+        <div class="psec-head">
+          <div><h2 class="psec-title" id="ent-t">Entrenamiento del periodo</h2><p class="psec-sub">Registros, volumen y esfuerzo comparados con el periodo anterior.</p></div>
+          <div class="period">
+            <div class="period-row">
+              <label class="period-label" for="ent-period">Periodo</label>
+              <select class="select" id="ent-period" data-period data-period-group="mt" data-switch="entp">
+                <option value="7" data-range="09/11/2026 – 15/11/2026 · Comparado con 02/11/2026 – 08/11/2026">Últimos 7 días</option>
+                <option value="30" selected data-range="16/10/2026 – 15/11/2026 · Comparado con 16/09/2026 – 15/10/2026">Últimos 30 días</option>
+                <option value="90" data-range="18/08/2026 – 15/11/2026 · Comparado con 20/05/2026 – 17/08/2026">Últimos 90 días</option>
+                <option value="year" data-range="01/01/2026 – 15/11/2026 · Comparado con 01/01/2025 – 15/11/2025">Año actual</option>
+                <option value="all" data-range="Todo el historial · sin comparación">Todo el historial</option>
+                <option value="custom" data-range="Selecciona las fechas de inicio y fin.">Personalizado</option>
+              </select>
+              <button class="btn btn-ghost btn-icon info-btn" type="button" data-open="#pop-mt" aria-haspopup="dialog" aria-expanded="false" aria-label="Cómo funciona este periodo"><i data-lucide="info"></i></button>
+            </div>
+            <div class="period-custom" data-case="entp:custom" hidden>
+              <div class="field"><label class="field-label" for="ent-from">Desde</label><input class="input input-sm" type="date" id="ent-from" max="2026-11-15"></div>
+              <div class="field"><label class="field-label" for="ent-to">Hasta</label><input class="input input-sm" type="date" id="ent-to" max="2026-11-15"></div>
+            </div>
+            <p class="period-range" data-period-range>16/10/2026 – 15/11/2026 · Comparado con 16/09/2026 – 15/10/2026</p>
+          </div>
+        </div>
+
+        <div class="ledger">
+          <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label-row"><span class="ledger-label micro">Registros de entrenamiento</span><button class="btn btn-ghost btn-icon" type="button" data-tip="Entrenamientos registrados por el cliente en el periodo." aria-label="Qué cuenta en Registros de entrenamiento"><i data-lucide="info"></i></button></span></span>
+            <span class="fig-line"><span class="fig">14</span></span><span class="ledger-foot"><span class="delta">+2</span><span>frente al periodo anterior</span></span></div>
+          <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label-row"><span class="ledger-label micro">Volumen</span><button class="btn btn-ghost btn-icon" type="button" data-tip="Suma de carga × repeticiones de las series registradas." aria-label="Qué cuenta en Volumen"><i data-lucide="info"></i></button></span></span>
+            <span class="fig-line"><span class="fig">12.400</span><span class="fig-unit">kg·reps</span></span><span class="ledger-foot"><span class="delta">+8 %</span><span>frente al periodo anterior</span></span></div>
+          <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label-row"><span class="ledger-label micro">RIR medio</span><button class="btn btn-ghost btn-icon" type="button" data-tip="Repeticiones en reserva declaradas, media de las series." aria-label="Qué cuenta en RIR medio"><i data-lucide="info"></i></button></span></span>
+            <span class="fig-line"><span class="fig">2</span></span><span class="ledger-foot"><span class="delta">−0,4</span><span>frente al periodo anterior</span></span></div>
+          <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label-row"><span class="ledger-label micro">RPE medio</span><button class="btn btn-ghost btn-icon" type="button" data-tip="Esfuerzo percibido de la sesión, media de los registros." aria-label="Qué cuenta en RPE medio"><i data-lucide="info"></i></button></span></span>
+            <span class="fig-line"><span class="fig">7</span></span><span class="ledger-foot"><span class="delta">+0,3</span><span>frente al periodo anterior</span></span></div>
+        </div>
+
+        <section class="section" style="margin-top:48px" aria-labelledby="loads-t">
+          <div class="section-head"><div><h3 class="h2" id="loads-t">Evolución de cargas</h3><p class="section-sub">Cada punto es una serie registrada.</p></div></div>
+          <div class="ex-tools">
+            <div class="field" style="width:auto"><span class="field-label" id="ex-pick-l">Ejercicio</span>
+              <button class="btn btn-secondary ex-pick" type="button" data-open="#pop-ex" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="ex-pick-l ex-pick-v"><span id="ex-pick-v">Sentadilla trasera</span><i data-lucide="chevrons-up-down"></i></button></div>
+            <div class="field"><label class="field-label" for="ex-measure">Medida de las series</label>
+              <select class="select" id="ex-measure"><option selected>Peso externo (kg)</option><option>Repeticiones (reps)</option><option>Duración (s)</option></select></div>
+          </div>
+          <p class="met-summary"><span>Página 1 · 24 series · 24 con peso externo</span><span>Rango observado: 55–65 kg</span></p>
+          <div class="chart" data-chart="loads" style="--h:260px"></div>
+          <div class="met-pager" style="margin-bottom:16px">
+            <span class="caption">Sentadilla trasera · 16/10/2026 – 15/11/2026</span>
+            <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled><i data-lucide="chevron-left"></i>Más reciente</button><button class="btn btn-secondary btn-sm" type="button">Más antiguo<i data-lucide="chevron-right"></i></button></span>
+          </div>
+          <div class="disc-group">
+            <details class="disc" open><summary>Series de Sentadilla trasera<i data-lucide="chevron-down" class="disc-chev"></i></summary>
+              <div class="disc-body"><div class="tscroll"><table class="table table-compact">
+                <caption class="sr-only">Series registradas de Sentadilla trasera</caption>
+                <thead><tr><th scope="col">Fecha</th><th scope="col" class="cell-num">Carga (kg)</th><th scope="col" class="cell-num">Reps</th><th scope="col" class="cell-num">Segundos</th><th scope="col" class="cell-num">Serie</th></tr></thead>
+                <tbody>
+                  <tr><td class="cell-date">13/11/2026</td><td class="cell-num">60</td><td class="cell-num">10</td><td class="cell-num"><span aria-label="Sin datos">—</span></td><td class="cell-num">1</td></tr>
+                  <tr><td class="cell-date">13/11/2026</td><td class="cell-num">62,5</td><td class="cell-num">8</td><td class="cell-num"><span aria-label="Sin datos">—</span></td><td class="cell-num">2</td></tr>
+                  <tr><td class="cell-date">13/11/2026</td><td class="cell-num">62,5</td><td class="cell-num">8</td><td class="cell-num"><span aria-label="Sin datos">—</span></td><td class="cell-num">3</td></tr>
+                  <tr><td class="cell-date">09/11/2026</td><td class="cell-num">65</td><td class="cell-num">6</td><td class="cell-num"><span aria-label="Sin datos">—</span></td><td class="cell-num">1</td></tr>
+                  <tr><td class="cell-date">09/11/2026</td><td class="cell-num">65</td><td class="cell-num">5</td><td class="cell-num"><span aria-label="Sin datos">—</span></td><td class="cell-num">2</td></tr>
+                </tbody></table></div></div>
+            </details>
+          </div>
+        </section>
+
+        <section class="section" style="margin-top:48px" aria-labelledby="hist-ent-t">
+          <div class="section-head"><div><h3 class="h2" id="hist-ent-t">Historial de entrenamiento</h3><p class="section-sub">Sesiones con detalle</p></div></div>
+          <ul class="sess-list">
+            <li class="sess-row">
+              <span class="sess-name">Pierna A</span>
+              <span class="sess-date">13 de noviembre de 2026</span>
+              <button class="btn btn-ghost btn-sm" type="button" aria-expanded="true" aria-controls="sess-d1" data-sess-toggle>Cerrar detalle</button>
+              <div class="sess-detail" id="sess-d1">
+                <div class="sess-detail-head"><h4 class="h3">Detalle: Pierna A · 13 de noviembre de 2026</h4></div>
+                <p class="sess-meta"><span><b>RPE:</b> 7</span><span><b>Nota:</b> Última serie de sentadilla muy exigente, rodilla algo cargada.</span></p>
+                <div class="tscroll"><table class="table table-compact">
+                  <caption class="sr-only">Series de Pierna A del 13 de noviembre de 2026</caption>
+                  <thead><tr><th scope="col">Ejercicio</th><th scope="col" class="cell-num">Serie</th><th scope="col" class="cell-num">Carga (kg)</th><th scope="col" class="cell-num">Reps / segundos</th><th scope="col" class="cell-num">RIR</th></tr></thead>
+                  <tbody>
+                    <tr><td>Sentadilla trasera</td><td class="cell-num">1</td><td class="cell-num">60</td><td class="cell-num">10 reps</td><td class="cell-num">3</td></tr>
+                    <tr><td>Sentadilla trasera</td><td class="cell-num">2</td><td class="cell-num">62,5</td><td class="cell-num">8 reps</td><td class="cell-num">2</td></tr>
+                    <tr><td>Sentadilla trasera</td><td class="cell-num">3</td><td class="cell-num">62,5</td><td class="cell-num">8 reps</td><td class="cell-num">1</td></tr>
+                    <tr><td>Peso muerto rumano</td><td class="cell-num">1</td><td class="cell-num">50</td><td class="cell-num">10 reps</td><td class="cell-num">3</td></tr>
+                    <tr><td>Plancha frontal</td><td class="cell-num">1</td><td class="cell-num"><span aria-label="Sin datos">—</span></td><td class="cell-num">45 s</td><td class="cell-num"><span aria-label="Sin datos">—</span></td></tr>
+                  </tbody></table></div>
+              </div>
+            </li>
+            <li class="sess-row"><span class="sess-name">Torso B<span class="tag">nombre actual</span></span><span class="sess-date">11 de noviembre de 2026</span><button class="btn btn-ghost btn-sm" type="button" aria-expanded="false" data-sess-toggle>Ver detalle</button></li>
+            <li class="sess-row"><span class="sess-name">Pierna B</span><span class="sess-date">9 de noviembre de 2026</span><button class="btn btn-ghost btn-sm" type="button" aria-expanded="false" data-sess-toggle>Ver detalle</button></li>
+            <li class="sess-row"><span class="sess-name">Torso A</span><span class="sess-date">6 de noviembre de 2026</span><button class="btn btn-ghost btn-sm" type="button" aria-expanded="false" data-sess-toggle>Ver detalle</button></li>
+          </ul>
+          <nav class="pagination" aria-label="Paginación de sesiones"><span class="pagination-label">Sesiones 1–4 de 14</span>
+            <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled>Más recientes</button><button class="btn btn-secondary btn-sm" type="button">Más antiguos</button></span></nav>
+        </section>
+
+        <section class="section" style="margin-top:48px" aria-labelledby="exs-t">
+          <div class="section-head"><div><h3 class="h2" id="exs-t">Ejercicios</h3></div></div>
+          <div class="ex-tools">
+            <div class="field"><label class="field-label" for="ex-show">Mostrar ejercicios</label>
+              <select class="select" id="ex-show"><option selected>Identificados</option><option>Todos</option></select></div>
+            <div class="field" style="width:320px;max-width:100%"><label class="field-label" for="ex-search">Buscar</label>
+              <span class="input-icon"><i data-lucide="search"></i><input class="input" type="search" id="ex-search" maxlength="120" placeholder="Escribe el nombre de un ejercicio…"></span></div>
+          </div>
+          <div class="table-wrap">
+            <table class="table table--stack">
+              <caption class="sr-only">Resumen por ejercicio</caption>
+              <thead><tr><th scope="col">Ejercicio</th><th scope="col" class="cell-num">Peso del PR (kg)</th><th scope="col" class="cell-num p2">Máx. reps o segundos</th><th scope="col" class="cell-num">Series</th><th scope="col" class="cell-num p2">RIR</th><th scope="col" class="cell-num">Volumen (kg·reps)</th><th scope="col">PR</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-primary"><span class="entity-name">Sentadilla trasera</span></td><td class="cell-num" data-label="Peso del PR (kg)"><span>65</span></td><td class="cell-num p2" data-label="Máx. reps o segundos"><span>10 reps</span></td><td class="cell-num" data-label="Series"><span>24</span></td><td class="cell-num p2" data-label="RIR"><span>2</span></td><td class="cell-num" data-label="Volumen (kg·reps)"><span>11.640</span></td><td class="cell-muted" data-label="PR"><span>65 kg × 6 reps · 9 de noviembre de 2026</span></td></tr>
+                <tr><td class="cell-primary"><span class="entity-name">Peso muerto rumano</span></td><td class="cell-num" data-label="Peso del PR (kg)"><span>55</span></td><td class="cell-num p2" data-label="Máx. reps o segundos"><span>12 reps</span></td><td class="cell-num" data-label="Series"><span>12</span></td><td class="cell-num p2" data-label="RIR"><span>3</span></td><td class="cell-num" data-label="Volumen (kg·reps)"><span>6.000</span></td><td class="cell-muted" data-label="PR"><span>55 kg × 8 reps · 2 de noviembre de 2026</span></td></tr>
+                <tr><td class="cell-primary"><span class="entity-name">Press banca</span></td><td class="cell-num" data-label="Peso del PR (kg)"><span>100</span></td><td class="cell-num p2" data-label="Máx. reps o segundos"><span>8 reps</span></td><td class="cell-num" data-label="Series"><span>16</span></td><td class="cell-num p2" data-label="RIR"><span>2</span></td><td class="cell-num" data-label="Volumen (kg·reps)"><span>8.960</span></td><td class="cell-muted" data-label="PR"><span>100 kg × 5 reps · 3 de marzo de 2026</span></td></tr>
+                <tr><td class="cell-primary"><span class="entity-name">Plancha frontal</span></td><td class="cell-num" data-label="Peso del PR (kg)"><span>—</span></td><td class="cell-num p2" data-label="Máx. reps o segundos"><span>60 s</span></td><td class="cell-num" data-label="Series"><span>8</span></td><td class="cell-num p2" data-label="RIR"><span>—</span></td><td class="cell-num" data-label="Volumen (kg·reps)"><span>—</span></td><td class="cell-muted" data-label="PR"><span>60 s · 30 de octubre de 2026</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <nav class="pagination" aria-label="Paginación de ejercicios"><span class="pagination-label">Ejercicios 1–4 de 9</span>
+            <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled>Ejercicios anteriores</button><button class="btn btn-secondary btn-sm" type="button">Más ejercicios</button></span></nav>
+        </section>
+
+        <div class="disc-group" style="margin-top:40px">
+          <details class="disc"><summary>Mostrar registros históricos<span class="disc-meta">3 registros</span><i data-lucide="chevron-down" class="disc-chev"></i></summary>
+            <div class="disc-body"><ul class="legacy-list">
+              <li><span>03/02/2026</span><span>Registro antiguo</span><span class="text-3">Detalle no disponible</span></li>
+              <li><span>28/01/2026</span><span>Registro antiguo</span><span class="text-3">Detalle no disponible</span></li>
+              <li><span>21/01/2026</span><span>Registro antiguo</span><span class="text-3">Detalle no disponible</span></li>
+            </ul></div>
+          </details>
+        </div>
+      </section>
+
+<!-- =========================================================== ADHERENCIA -->
+      <section class="psec" id="sec-adherencia" data-sec="adherencia" hidden>
+        <div data-tpl="adherence" data-title="psec"></div>
+      </section>
+
+<!-- =========================================================== RACHA -->
+      <section class="psec" id="sec-racha" data-sec="racha" hidden>
+        <div data-tpl="streak" data-mode="progress"></div>
+      </section>
+
+<!-- =========================================================== SEGUIMIENTO -->
+      <section class="psec" id="sec-seguimiento" data-sec="seguimiento" aria-labelledby="seg-t" hidden>
+        <div class="psec-head">
+          <div>
+            <div class="psec-title-row"><h2 class="psec-title" id="seg-t">Seguimiento</h2>
+              <button class="btn btn-ghost btn-icon info-btn" type="button" data-open="#pop-seg" aria-haspopup="dialog" aria-expanded="false" aria-label="Cómo se calcula el vencimiento"><i data-lucide="info"></i></button></div>
+            <p class="psec-sub">Tareas internas del equipo.</p>
+          </div>
+        </div>
+        <dl class="follow-next">
+          <div><dt>Próxima tarea</dt><dd><b>Actualizar dieta</b> · 12/11/2026 · Alta <span class="chip chip-danger">Vencida</span></dd></div>
+          <div><dt>Próxima revisión</dt><dd><b>Revisión mensual</b> · 20/11/2026 · Media</dd></div>
+        </dl>
+
+        <div data-tabs id="seg-tabs">
+          <div class="tabs" role="tablist" aria-label="Seguimiento">
+            <button class="tab" type="button" role="tab" id="st-tareas" aria-controls="sp-tareas" aria-selected="true">Tareas <span class="tab-count">5</span></button>
+            <button class="tab" type="button" role="tab" id="st-recaps" aria-controls="sp-recaps" aria-selected="false">Recaps <span class="tab-count">4</span></button>
+          </div>
+
+          <section id="sp-tareas" role="tabpanel" aria-labelledby="st-tareas">
+            <div class="task-tools">
+              <div class="segmented" role="group" aria-label="Vista de tareas">
+                <button class="seg-btn" type="button" aria-pressed="true">Abiertas</button>
+                <button class="seg-btn" type="button" aria-pressed="false">Historial</button>
+              </div>
+              <div class="field"><label class="field-label" for="t-state">Filtrar por estado</label>
+                <select class="select" id="t-state"><option selected>Todos los estados de esta vista</option><option>Pendiente</option><option>En progreso</option></select></div>
+              <div class="field"><label class="field-label" for="t-owner">Filtrar por responsable</label>
+                <select class="select" id="t-owner"><option selected>Todo el equipo</option><option>Sin responsable</option><option>Moisés Sánchez</option><option>Andrés Molina</option><option>Irene Lozano</option></select></div>
+              <span class="spacer"></span>
+              <button class="btn btn-primary" type="button" data-open="#sheet-task" data-ctx="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Nueva tarea</button>
+            </div>
+            <div class="table-wrap">
+              <table class="table table--stack">
+                <caption class="sr-only">Tareas abiertas de Lucía Martínez</caption>
+                <thead><tr><th scope="col">Título / tipo</th><th scope="col">Fecha límite</th><th scope="col" class="p2">Responsable</th><th scope="col">Prioridad</th><th scope="col">Estado</th></tr></thead>
+                <tbody>
+                  <tr class="is-overdue" data-open="#sheet-task" data-ctx="edit">
+                    <td class="cell-primary"><button class="task-title row-anchor" type="button" data-open="#sheet-task" data-ctx="edit" aria-haspopup="dialog"><span class="entity-name">Ajustar calorías tras la última revisión</span><span class="entity-sub">Actualizar dieta</span></button></td>
+                    <td class="cell-date" data-label="Fecha límite"><span>12/11/2026</span></td>
+                    <td class="cell-muted p2" data-label="Responsable"><span>Moisés Sánchez</span></td>
+                    <td class="st-inline" data-label="Prioridad"><span class="tag">Alta</span></td>
+                    <td class="st-inline" data-label="Estado"><span class="row" style="gap:6px"><span class="chip chip-danger">Vencida</span><span class="chip chip-neutral">Pendiente</span></span></td>
+                  </tr>
+                  <tr class="is-overdue" data-open="#sheet-task" data-ctx="edit">
+                    <td class="cell-primary"><button class="task-title row-anchor" type="button" data-open="#sheet-task" data-ctx="edit" aria-haspopup="dialog"><span class="entity-name">Llamar para revisar molestias de rodilla</span><span class="entity-sub">Llamada</span></button></td>
+                    <td class="cell-date" data-label="Fecha límite"><span>14/11/2026</span></td>
+                    <td class="cell-muted p2" data-label="Responsable"><span>Andrés Molina</span></td>
+                    <td class="st-inline" data-label="Prioridad"><span class="tag">Media</span></td>
+                    <td class="st-inline" data-label="Estado"><span class="row" style="gap:6px"><span class="chip chip-danger">Vencida</span><span class="chip chip-info">En progreso</span></span></td>
+                  </tr>
+                  <tr data-open="#sheet-task" data-ctx="edit">
+                    <td class="cell-primary"><button class="task-title row-anchor" type="button" data-open="#sheet-task" data-ctx="edit" aria-haspopup="dialog"><span class="entity-name">Revisar recap 09/11 – 15/11</span><span class="entity-sub">Revisar recap</span></button></td>
+                    <td class="cell-date" data-label="Fecha límite"><span>17/11/2026</span></td>
+                    <td class="cell-muted p2" data-label="Responsable"><span>Moisés Sánchez</span></td>
+                    <td class="st-inline" data-label="Prioridad"><span class="tag">Alta</span></td>
+                    <td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Pendiente</span></td>
+                  </tr>
+                  <tr data-open="#sheet-task" data-ctx="edit">
+                    <td class="cell-primary"><button class="task-title row-anchor" type="button" data-open="#sheet-task" data-ctx="edit" aria-haspopup="dialog"><span class="entity-name">Revisión mensual</span><span class="entity-sub">Revisión</span></button></td>
+                    <td class="cell-date" data-label="Fecha límite"><span>20/11/2026</span></td>
+                    <td class="cell-muted p2" data-label="Responsable"><span>Irene Lozano</span></td>
+                    <td class="st-inline" data-label="Prioridad"><span class="tag">Media</span></td>
+                    <td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Pendiente</span></td>
+                  </tr>
+                  <tr data-open="#sheet-task" data-ctx="edit">
+                    <td class="cell-primary"><button class="task-title row-anchor" type="button" data-open="#sheet-task" data-ctx="edit" aria-haspopup="dialog"><span class="entity-name">Comparar fotos de octubre y noviembre</span><span class="entity-sub">Revisar fotos</span></button></td>
+                    <td class="cell-date" data-label="Fecha límite"><span>27/11/2026</span></td>
+                    <td class="cell-muted p2" data-label="Responsable"><span>Sin responsable</span></td>
+                    <td class="st-inline" data-label="Prioridad"><span class="tag">Baja</span></td>
+                    <td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Pendiente</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <nav class="pagination" aria-label="Paginación de tareas"><span class="pagination-label">Página 1 de 1 · 5 tareas</span>
+              <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled>Página anterior</button><button class="btn btn-secondary btn-sm" type="button" disabled>Página siguiente</button></span></nav>
+          </section>
+
+          <section id="sp-recaps" role="tabpanel" aria-labelledby="st-recaps" hidden>
+            <div class="table-wrap">
+              <table class="table table--stack">
+                <caption class="sr-only">Recaps de Lucía Martínez</caption>
+                <thead><tr><th scope="col">Cliente</th><th scope="col">Semana</th><th scope="col">Estado</th><th scope="col" class="p2">Enviado</th><th scope="col" class="cell-num p3">Pasos/día</th><th scope="col" class="p3">Comentario admin</th><th scope="col" class="cell-actions"><span class="sr-only">Acción</span></th></tr></thead>
+                <tbody>
+                  <tr><td class="cell-primary"><div class="entity"><span class="avatar avatar-28" aria-hidden="true">LM</span><span class="entity-name">Lucía Martínez</span></div></td><td class="cell-date" data-label="Semana"><span>9 nov - 15 nov 2026</span></td><td class="st-inline" data-label="Estado"><span class="chip chip-warning">Por revisar</span></td><td class="cell-date p2" data-label="Enviado"><span>15/11/2026</span></td><td class="cell-num p3" data-label="Pasos/día"><span>6.850</span></td><td class="cell-muted p3" data-label="Comentario admin"><span>Sin comentario</span></td><td class="cell-actions"><a class="btn btn-secondary btn-sm" href="recaps.html?clientId=c01&amp;returnTo=progreso">Abrir</a></td></tr>
+                  <tr><td class="cell-primary"><div class="entity"><span class="avatar avatar-28" aria-hidden="true">LM</span><span class="entity-name">Lucía Martínez</span></div></td><td class="cell-date" data-label="Semana"><span>2 nov - 8 nov 2026</span></td><td class="st-inline" data-label="Estado"><span class="chip chip-success">Revisado</span></td><td class="cell-date p2" data-label="Enviado"><span>08/11/2026</span></td><td class="cell-num p3" data-label="Pasos/día"><span>8.420</span></td><td class="cell-muted p3" data-label="Comentario admin"><span class="truncate" style="display:block;max-width:28ch">Buena semana; subir proteína en la cena.</span></td><td class="cell-actions"><a class="btn btn-secondary btn-sm" href="recaps.html?clientId=c01&amp;returnTo=progreso">Abrir</a></td></tr>
+                  <tr><td class="cell-primary"><div class="entity"><span class="avatar avatar-28" aria-hidden="true">LM</span><span class="entity-name">Lucía Martínez</span></div></td><td class="cell-date" data-label="Semana"><span>26 oct - 1 nov 2026</span></td><td class="st-inline" data-label="Estado"><span class="chip chip-success">Revisado</span></td><td class="cell-date p2" data-label="Enviado"><span>01/11/2026</span></td><td class="cell-num p3" data-label="Pasos/día"><span>9.130</span></td><td class="cell-muted p3" data-label="Comentario admin"><span>Sin comentario</span></td><td class="cell-actions"><a class="btn btn-secondary btn-sm" href="recaps.html?clientId=c01&amp;returnTo=progreso">Abrir</a></td></tr>
+                  <tr><td class="cell-primary"><div class="entity"><span class="avatar avatar-28" aria-hidden="true">LM</span><span class="entity-name">Lucía Martínez</span></div></td><td class="cell-date" data-label="Semana"><span>19 oct - 25 oct 2026</span></td><td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Archivado</span></td><td class="cell-date p2" data-label="Enviado"><span>25/10/2026</span></td><td class="cell-num p3" data-label="Pasos/día"><span>No indicado</span></td><td class="cell-muted p3" data-label="Comentario admin"><span>Sin comentario</span></td><td class="cell-actions"><a class="btn btn-secondary btn-sm" href="recaps.html?clientId=c01&amp;returnTo=progreso">Abrir</a></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="margin-top:16px"><a class="link-btn" href="recaps.html?clientId=c01">Ver todos en Recaps<i data-lucide="arrow-right"></i></a></p>
+          </section>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ===================== CLIENT SELECTOR ===================== -->
+<div class="popover" id="client-pop" role="dialog" aria-label="Seleccionar cliente" data-align="start" style="--w:320px" hidden>
+  <div class="popover-body" style="padding:12px">
+    <label class="input-icon"><span class="sr-only">Buscar cliente</span><i data-lucide="search"></i><input class="input" type="search" placeholder="Buscar por nombre o email..." data-cp-search></label>
+    <div class="cp-list" role="listbox" aria-label="Clientes">
+      <button class="cp-option" type="button" role="option" aria-selected="true" data-cp="Lucía Martínez" data-cp-i="LM"><i data-lucide="check" class="cp-check"></i><span class="avatar avatar-28" aria-hidden="true">LM</span><span class="entity-text"><span class="entity-name">Lucía Martínez</span><span class="entity-sub">lucia.martinez@example.com</span></span></button>
+      <button class="cp-option" type="button" role="option" aria-selected="false" data-cp="Javier Ortega" data-cp-i="JO"><i data-lucide="check" class="cp-check"></i><span class="avatar avatar-28" aria-hidden="true">JO</span><span class="entity-text"><span class="entity-name">Javier Ortega</span><span class="entity-sub">javier.ortega@example.com</span></span></button>
+      <button class="cp-option" type="button" role="option" aria-selected="false" data-cp="Marta Ruiz" data-cp-i="MR"><i data-lucide="check" class="cp-check"></i><span class="avatar avatar-28" aria-hidden="true">MR</span><span class="entity-text"><span class="entity-name">Marta Ruiz</span><span class="entity-sub">marta.ruiz@example.com</span></span></button>
+      <button class="cp-option" type="button" role="option" aria-selected="false" data-cp="Sara Gil" data-cp-i="SG"><i data-lucide="check" class="cp-check"></i><span class="avatar avatar-28" aria-hidden="true">SG</span><span class="entity-text"><span class="entity-name">Sara Gil</span><span class="entity-sub">sara.gil@example.com</span></span></button>
+      <button class="cp-option" type="button" role="option" aria-selected="false" data-cp="Carla Núñez" data-cp-i="CN"><i data-lucide="check" class="cp-check"></i><span class="avatar avatar-28" aria-hidden="true">CN</span><span class="entity-text"><span class="entity-name">Carla Núñez</span><span class="entity-sub">carla.nunez@example.com</span></span></button>
+      <button class="cp-option" type="button" role="option" aria-selected="false" data-cp="Daniel Vega" data-cp-i="DV"><i data-lucide="check" class="cp-check"></i><span class="avatar avatar-28" aria-hidden="true">DV</span><span class="entity-text"><span class="entity-name">Daniel Vega</span><span class="entity-sub">daniel.vega@example.com</span></span></button>
+    </div>
+    <p class="caption" data-cp-none hidden style="padding:12px 0 4px">Sin clientes disponibles.</p>
+  </div>
+</div>
+
+<!-- ===================== INFO POPOVERS ===================== -->
+<div class="popover" id="pop-dash" role="dialog" aria-labelledby="pop-dash-t" style="--w:340px" hidden>
+  <div class="popover-head"><h2 class="h3" id="pop-dash-t">Cómo se calcula</h2></div>
+  <div class="popover-body">
+    <p class="pop-prose">Solo 7 o 30 días: la adherencia admite periodos de hasta 31 días.</p>
+    <p class="pop-prose">La semana es la semana completa en curso. La programación futura cuenta en la semana, no genera alertas ni penaliza la adherencia cerrada.</p>
+    <p class="pop-prose">Las fechas y la hora del servidor están en UTC.</p>
+  </div>
+</div>
+<div class="popover" id="pop-mt" role="dialog" aria-labelledby="pop-mt-t" style="--w:340px" hidden>
+  <div class="popover-head"><h2 class="h3" id="pop-mt-t">Periodo de métricas y entrenamiento</h2></div>
+  <div class="popover-body">
+    <p class="pop-prose">Este periodo se comparte entre <b>Métricas</b> y <b>Entrenamiento</b>: cambiarlo en una sección lo cambia en la otra.</p>
+    <p class="pop-prose">Se compara con el periodo anterior de igual duración. Fechas en UTC.</p>
+  </div>
+</div>
+<div class="popover" id="pop-seg" role="dialog" aria-labelledby="pop-seg-t" style="--w:320px" hidden>
+  <div class="popover-head"><h2 class="h3" id="pop-seg-t">Vencimiento</h2></div>
+  <div class="popover-body"><p class="pop-prose">El vencimiento se consulta en UTC, independientemente del periodo de métricas.</p></div>
+</div>
+
+<!-- ===================== EXERCISE PICKER ===================== -->
+<div class="popover" id="pop-ex" role="dialog" aria-label="Seleccionar ejercicio" data-align="start" style="--w:300px" hidden>
+  <div class="popover-body" style="padding:12px">
+    <label class="input-icon"><span class="sr-only">Buscar ejercicio</span><i data-lucide="search"></i><input class="input" type="search" placeholder="Buscar ejercicio…"></label>
+    <div class="cp-list" role="listbox" aria-label="Ejercicios">
+      <button class="cp-option" style="grid-template-columns:16px minmax(0,1fr)" type="button" role="option" aria-selected="true" data-close><i data-lucide="check" class="cp-check"></i><span class="entity-name">Sentadilla trasera</span></button>
+      <button class="cp-option" style="grid-template-columns:16px minmax(0,1fr)" type="button" role="option" aria-selected="false" data-close><i data-lucide="check" class="cp-check"></i><span class="entity-name">Peso muerto rumano</span></button>
+      <button class="cp-option" style="grid-template-columns:16px minmax(0,1fr)" type="button" role="option" aria-selected="false" data-close><i data-lucide="check" class="cp-check"></i><span class="entity-name">Press banca</span></button>
+      <button class="cp-option" style="grid-template-columns:16px minmax(0,1fr)" type="button" role="option" aria-selected="false" data-close><i data-lucide="check" class="cp-check"></i><span class="entity-name">Plancha frontal</span></button>
+    </div>
+  </div>
+  <div class="popover-foot"><button class="btn btn-ghost btn-sm" type="button">Cargar más ejercicios</button></div>
+</div>
+
+<!-- ===================== DIALOG: AÑADIR MÉTRICAS (shared) ===================== -->
+<div data-tpl="metric-dialog"></div>
+
+<!-- ===================== DIALOG: AMPLIAR FOTO ===================== -->
+<div class="overlay" id="dlg-zoom" hidden>
+  <div class="dialog dialog-lg" role="dialog" aria-modal="true" aria-labelledby="dlg-zoom-t">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-zoom-t">Frontal · 15 de octubre de 2026</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar ampliación"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="ph-frame" style="max-width:420px;margin:0 auto"><svg class="sil" role="img" aria-label="Foto Frontal ampliada"><use href="#sil-front"/></svg></div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button"><i data-lucide="chevron-left"></i>Imagen anterior</button>
+      <button class="btn btn-secondary" type="button">Imagen siguiente<i data-lucide="chevron-right"></i></button>
+      <button class="btn btn-primary" type="button" data-close>Cerrar ampliación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: REEMPLAZAR FOTO ===================== -->
+<div class="overlay" id="dlg-replace" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dlg-replace-t" aria-describedby="dlg-replace-d">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-replace-t">¿Reemplazar esta foto activa?</h2>
+        <p class="ov-desc" id="dlg-replace-d">La foto actual dejará de ser la vista activa. Esta acción solo continúa con la identidad de la foto que estás viendo como precondición.</p></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" data-close data-toast="Selecciona la nueva imagen" data-toast-tone="info">Reemplazar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: REINICIAR RACHA ===================== -->
+<div class="overlay" id="dlg-reset-streak" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dlg-reset-t" aria-describedby="dlg-reset-d">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-reset-t">¿Reiniciar racha?</h2>
+        <p class="ov-desc" id="dlg-reset-d">Esta acción pondrá la racha actual del cliente a 0. No se puede deshacer.</p></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast="Racha reiniciada correctamente" data-toast-tone="success">Reiniciar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SHEET: NUEVA TAREA / DETALLE DE TAREA ===================== -->
+<div class="overlay overlay-sheet" id="sheet-task" data-static hidden>
+  <div class="sheet sheet-sm" role="dialog" aria-modal="true" aria-labelledby="sheet-task-t" aria-describedby="sheet-task-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="sheet-task-t"><span data-if="new">Nueva tarea</span><span data-if-not="new">Detalle de tarea</span></h2>
+        <p class="ov-desc" id="sheet-task-d">Tarea interna del equipo. Completarla no cambia pautas ni envía mensajes.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar detalle"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-task" data-validate novalidate data-success-toast="Tarea guardada">
+        <div class="stack-16">
+          <div class="field"><label class="field-label" for="tk-title">Título</label>
+            <input class="input" id="tk-title" required maxlength="160" autocomplete="off" data-error-required="Introduce un título." placeholder="Revisar recap de la semana"></div>
+          <div class="field"><label class="field-label" for="tk-type">Tipo</label>
+            <select class="select" id="tk-type"><option>Actualizar entrenamiento</option><option>Actualizar dieta</option><option>Revisar fotos</option><option>Revisar recap</option><option selected>Revisión</option><option>Llamada</option><option>Enviar feedback</option></select></div>
+          <div class="field"><label class="field-label" for="tk-desc">Descripción <span class="field-optional">Opcional</span></label>
+            <textarea class="textarea" id="tk-desc" maxlength="3000" data-count rows="4"></textarea>
+            <div class="field-foot"><span></span><span class="field-count" aria-live="polite">0/3000</span></div></div>
+          <div class="field-grid">
+            <div class="field"><label class="field-label" for="tk-owner">Responsable</label>
+              <select class="select" id="tk-owner" required data-error-required="Elige un responsable."><option value="">Selecciona…</option><option selected>Moisés Sánchez</option><option>Andrés Molina</option><option>Irene Lozano</option></select></div>
+            <div class="field"><label class="field-label" for="tk-due">Fecha límite</label>
+              <input class="input" id="tk-due" type="date" required value="2026-11-12" data-error-required="Elige una fecha límite."><p class="field-help">Se consulta en UTC.</p></div>
+            <div class="field"><label class="field-label" for="tk-prio">Prioridad</label>
+              <select class="select" id="tk-prio"><option selected>Alta</option><option>Media</option><option>Baja</option></select></div>
+            <div class="field" data-if-not="new"><label class="field-label" for="tk-state">Estado</label>
+              <select class="select" id="tk-state"><option selected>Pendiente</option><option>En progreso</option></select></div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <span class="ov-foot-start" data-if-not="new">Servidor: versión 3</span>
+      <button class="btn btn-danger" type="button" data-if-not="new" data-open="#dlg-cancel-task">Cancelar tarea</button>
+      <button class="btn btn-secondary" type="button" data-if-not="new" data-close data-toast="Tarea completada" data-toast-tone="success">Completar tarea</button>
+      <button class="btn btn-primary" type="submit" form="form-task" data-loading-label="Guardando..."><span data-if="new">Crear tarea</span><span data-if-not="new">Guardar cambios</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIALOG: CANCELAR TAREA (replaces window.confirm) ===================== -->
+<div class="overlay" id="dlg-cancel-task" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dlg-ct-t" aria-describedby="dlg-ct-d">
+    <div class="ov-head">
+      <div class="ov-head-text"><h2 class="ov-title" id="dlg-ct-t">¿Cancelar esta tarea?</h2>
+        <p class="ov-desc" id="dlg-ct-d">Quedará en el historial y no podrá reabrirse.</p></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Volver</button>
+      <button class="btn btn-danger is-solid" type="button" data-cancel-task>Cancelar tarea</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/pages/progreso-shared.js"></script>
+<script src="assets/pages/progreso.js"></script>
+</body>
+</html>

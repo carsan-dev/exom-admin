@@ -180,7 +180,7 @@ export function ImageUploadField({
               disabled={disabled || isUploading}
               className="self-start sm:self-center"
             >
-              <X className="h-3 w-3" />
+              <X aria-hidden="true" className="h-3 w-3" />
               Quitar
             </Button>
           </div>
@@ -196,7 +196,7 @@ export function ImageUploadField({
       ) : isUploading ? (
         <div className="space-y-2 rounded-lg border border-border/60 bg-muted/50 p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Image className="h-4 w-4 animate-pulse text-brand-primary" />
+            <Image aria-hidden="true" className="h-4 w-4 animate-pulse text-accent-text" />
             <span>Subiendo imagen... {progress ?? 0}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-border">
@@ -213,7 +213,7 @@ export function ImageUploadField({
           disabled={disabled}
           className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border/70 bg-muted/30 px-4 py-5 text-center transition-colors hover:border-brand-primary/50 hover:bg-brand-soft/5 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Upload className="h-6 w-6 text-muted-foreground" />
+          <Upload aria-hidden="true" className="h-6 w-6 text-muted-foreground" />
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">Seleccionar imagen</p>
             <p className="text-xs text-muted-foreground">JPG, PNG o WebP · Máx. 10 MB (se comprime automáticamente)</p>

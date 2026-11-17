@@ -176,6 +176,26 @@ describe('Adherencia canónica en el detalle', () => {
     fireEvent.click(screen.getByRole('button', { name: /2020-01-05.*Futuro/ }))
     expect(screen.getByText(/Fecha futura · no penaliza/)).toBeInTheDocument()
   })
+  it('marca como estimado un día con pauta actual de respaldo, sin tratarlo como desconocido', async () => {
+    const data = report()
+    const day = data.days[0]
+    data.days = [
+      { ...day, date: '2020-01-01', basis: 'current_fallback', revision: null },
+      { ...day, date: '2020-01-02', basis: 'original' },
+    ]
+    shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : data)))
+    mount('client-a', undefined, CUSTOM)
+    const estimated = await screen.findByRole('button', { name: /2020-01-01.*estimado/ })
+    expect(estimated).toHaveTextContent('· est.')
+    expect(screen.getByRole('button', { name: /2020-01-02/ }).getAttribute('aria-label')).not.toMatch(/estimado/)
+    fireEvent.click(estimated)
+    expect(screen.getByText('Estimado con la pauta actual')).toBeInTheDocument()
+    expect(screen.getByText('Este día no tenía la pauta guardada; se evalúa con la pauta vigente del cliente.')).toBeInTheDocument()
+    expect(screen.queryByText(/Pauta original desconocida/)).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /2020-01-02/ }))
+    expect(screen.getByText(/Pauta original al cierre UTC conservada/)).toBeInTheDocument()
+    expect(screen.queryByText('Estimado con la pauta actual')).not.toBeInTheDocument()
+  })
   it('conserva metadata histórica diaria sin clasificar baja adherencia por día', async () => {
     const data = report(); data.days[0].evaluation.global = { ...component(0.37), source: 'nutrition_only' }
     data.days[0].configuration.low_global_percent = 40

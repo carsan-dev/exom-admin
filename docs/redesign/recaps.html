@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Recaps · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/recaps.css">
+  <script src="assets/vendor/lucide-local.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="recaps" data-crumbs='["Recaps"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1">Recaps semanales</h1>
+        <span class="ph-meta" data-show="data loading">7 por revisar</span>
+        <span class="ph-meta" data-show="empty">0 por revisar</span>
+      </div>
+      <p class="ph-sub">Revisa recaps enviados o ya revisados, comenta cada caso y archiva los ya resueltos.</p>
+    </div>
+  </header>
+
+  <!-- ============ PERIOD SUMMARY ============ -->
+  <section class="stats is-collapsed" id="rc-stats" aria-labelledby="stats-title">
+    <button class="stats-toggle" type="button" aria-expanded="false" aria-controls="rc-stats-body">
+      <span><span class="tg-count">7 por revisar</span> <span class="tg-sep">·</span> Resumen</span>
+      <i data-lucide="chevron-down"></i>
+    </button>
+    <div class="stats-body" id="rc-stats-body">
+      <div class="stats-head">
+        <div class="stats-title">
+          <h2 class="h2" id="stats-title">Resumen · Últimos 30 días</h2>
+          <p class="caption stats-range">16/10/2026 – 15/11/2026 · Comparado con 16/09/2026 – 15/10/2026</p>
+        </div>
+        <div class="period">
+          <label class="field-label" for="rc-period">Periodo</label>
+          <select class="select" id="rc-period">
+            <option>Últimos 7 días</option>
+            <option selected>Últimos 30 días</option>
+            <option>Últimos 90 días</option>
+            <option>Año actual</option>
+            <option>Todo el historial</option>
+            <option>Personalizado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ledger cols-5" data-show="data">
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Total recaps</span></span><span class="fig">31</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Por revisar</span></span><span class="fig">7</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Revisados</span></span><span class="fig">20</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Archivados</span></span><span class="fig">4</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Tiempo medio de revisión</span></span><span class="fig">9 h 40 min</span><span class="ledger-sub">20 revisiones en el periodo</span></div>
+      </div>
+
+      <div class="ledger cols-5" data-show="empty">
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Total recaps</span></span><span class="fig">0</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Por revisar</span></span><span class="fig">0</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Revisados</span></span><span class="fig">0</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Archivados</span></span><span class="fig">0</span></div>
+        <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Tiempo medio de revisión</span></span><span class="fig">—</span><span class="ledger-sub">0 revisiones en el periodo</span></div>
+      </div>
+
+      <div class="ledger cols-5" data-show="loading" aria-busy="true" aria-label="Cargando el resumen">
+        <div class="ledger-cell" aria-hidden="true"><span class="sk-line" style="--w:56%"></span><span class="sk-fig" style="margin-top:12px;height:28px"></span></div>
+        <div class="ledger-cell" aria-hidden="true"><span class="sk-line" style="--w:62%"></span><span class="sk-fig" style="margin-top:12px;height:28px"></span></div>
+        <div class="ledger-cell" aria-hidden="true"><span class="sk-line" style="--w:48%"></span><span class="sk-fig" style="margin-top:12px;height:28px"></span></div>
+        <div class="ledger-cell" aria-hidden="true"><span class="sk-line" style="--w:52%"></span><span class="sk-fig" style="margin-top:12px;height:28px"></span></div>
+        <div class="ledger-cell" aria-hidden="true"><span class="sk-line" style="--w:78%"></span><span class="sk-fig" style="margin-top:12px;height:28px;--w:120px"></span></div>
+      </div>
+
+      <div class="ledger" data-show="error" style="--cols:1">
+        <div class="error-state" role="alert" style="padding:28px 16px">
+          <i data-lucide="circle-alert"></i>
+          <h3 class="empty-title">No se pudo cargar el resumen</h3>
+          <button class="btn btn-secondary btn-sm" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+        </div>
+      </div>
+
+      <p class="caption stats-note">Las tarjetas resumen el periodo y el filtro seleccionado; el listado inferior no se filtra por periodo.</p>
+    </div>
+  </section>
+
+  <!-- ============ LIST ============ -->
+  <section class="list-block" aria-labelledby="list-title">
+    <h2 class="sr-only" id="list-title">Listado de recaps</h2>
+
+    <div class="rc-toolbar" data-show="data empty">
+      <div class="rc-filters" role="search" aria-label="Filtrar recaps">
+        <div class="rc-filter">
+          <label class="field-label" for="rc-client">Cliente</label>
+          <select class="select" id="rc-client">
+            <option value="">Todos</option>
+            <option>Carla Núñez</option>
+            <option>Daniel Vega</option>
+            <option>Javier Ortega</option>
+            <option>Lucía Martínez</option>
+            <option>Marta Ruiz</option>
+            <option>Pablo Herrera</option>
+            <option>Sara Gil</option>
+          </select>
+        </div>
+        <div class="rc-filter">
+          <span class="field-label" id="rc-status-l">Estado</span>
+          <div class="segmented" role="group" aria-labelledby="rc-status-l" id="rc-status">
+            <button class="seg-btn" type="button" aria-pressed="true" value="ALL">Todos</button>
+            <button class="seg-btn" type="button" aria-pressed="false" value="SUBMITTED">Por revisar</button>
+            <button class="seg-btn" type="button" aria-pressed="false" value="REVIEWED">Revisados</button>
+          </div>
+        </div>
+      </div>
+      <div class="segmented" role="group" aria-label="Vista del listado" id="rc-view">
+        <button class="seg-btn" type="button" aria-pressed="true" data-panel="#rc-active">Activos</button>
+        <button class="seg-btn" type="button" aria-pressed="false" data-panel="#rc-archived">Archivados</button>
+      </div>
+    </div>
+
+    <!-- DATA -->
+    <div data-show="data">
+      <div id="rc-active">
+        <div class="table-wrap">
+          <table class="table table--stack">
+            <caption class="sr-only">Recaps activos, página 1 de 3. Primero los pendientes de revisión.</caption>
+            <thead><tr>
+              <th scope="col">Cliente</th>
+              <th scope="col">Semana</th>
+              <th scope="col">Estado</th>
+              <th scope="col" class="p3">Enviado</th>
+              <th scope="col" class="cell-num p2">Pasos/día</th>
+              <th scope="col">Comentario admin</th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Abrir</span></th>
+            </tr></thead>
+            <tbody>
+            <tr data-href="recap-detalle.html" data-client="Lucía Martínez" data-status="SUBMITTED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">LM</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Lucía Martínez<span class="sr-only">, semana 9 nov - 15 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>9 nov - 15 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-warning">Por revisar</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>15/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">8.500</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment is-empty">Sin comentario</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Javier Ortega" data-status="SUBMITTED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">JO</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Javier Ortega<span class="sr-only">, semana 9 nov - 15 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>9 nov - 15 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-warning">Por revisar</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>15/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">11.200</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment is-empty">Sin comentario</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Daniel Vega" data-status="SUBMITTED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">DV</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Daniel Vega<span class="sr-only">, semana 9 nov - 15 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>9 nov - 15 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-warning">Por revisar</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>15/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps is-empty">No indicado</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment is-empty">Sin comentario</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Sara Gil" data-status="SUBMITTED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">SG</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Sara Gil<span class="sr-only">, semana 2 nov - 8 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>2 nov - 8 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-warning">Por revisar</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>09/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">7.800</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment is-empty">Sin comentario</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Pablo Herrera" data-status="SUBMITTED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">PH</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Pablo Herrera<span class="sr-only">, semana 9 nov - 15 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>9 nov - 15 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-warning">Por revisar</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>15/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">6.300</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment is-empty">Sin comentario</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Carla Núñez" data-status="SUBMITTED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">CN</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Carla Núñez<span class="sr-only">, semana 9 nov - 15 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>9 nov - 15 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-warning">Por revisar</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>15/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">9.100</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment is-empty">Sin comentario</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Marta Ruiz" data-status="SUBMITTED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">MR</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Marta Ruiz<span class="sr-only">, semana 9 nov - 15 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>9 nov - 15 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-warning">Por revisar</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>15/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">12.400</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment is-empty">Sin comentario</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Marta Ruiz" data-status="REVIEWED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">MR</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Marta Ruiz<span class="sr-only">, semana 2 nov - 8 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>2 nov - 8 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Revisado</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>08/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">12.100</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment" title="Buena semana. Subimos volumen de pierna y mantenemos la dieta de mantenimiento.">Buena semana. Subimos volumen de pierna y mantenemos la dieta de manteni…</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Javier Ortega" data-status="REVIEWED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">JO</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Javier Ortega<span class="sr-only">, semana 2 nov - 8 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>2 nov - 8 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Revisado</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>08/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">10.900</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment" title="Dormir más de 7 horas antes de los días de pierna; revisar técnica de sentadilla búlgara.">Dormir más de 7 horas antes de los días de pierna; revisar técnica de se…</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Lucía Martínez" data-status="REVIEWED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">LM</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Lucía Martínez<span class="sr-only">, semana 26 oct - 1 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>26 oct - 1 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-success">Revisado</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>01/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">8.200</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment" title="Ajustar hidratación los días de entreno.">Ajustar hidratación los días de entreno.</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Sara Gil" data-status="DRAFT">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">SG</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Sara Gil<span class="sr-only">, semana 9 nov - 15 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>9 nov - 15 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Borrador</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>—</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps is-empty">No indicado</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment is-empty">Sin comentario</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="empty empty-compact" data-filtered-empty hidden>
+          <span class="empty-x" aria-hidden="true"></span>
+          <p class="empty-title">No hay recaps para los filtros seleccionados</p>
+        </div>
+        <nav class="pagination" aria-label="Paginación de recaps activos">
+          <span class="pagination-label">Página 1 de 3</span>
+          <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button><button class="btn btn-secondary btn-sm" type="button">Siguiente</button></span>
+        </nav>
+      </div>
+
+      <div id="rc-archived" hidden>
+        <div class="table-wrap">
+          <table class="table table--stack">
+            <caption class="sr-only">Recaps archivados</caption>
+            <thead><tr>
+              <th scope="col">Cliente</th>
+              <th scope="col">Semana</th>
+              <th scope="col">Estado</th>
+              <th scope="col" class="p3">Enviado</th>
+              <th scope="col" class="cell-num p2">Pasos/día</th>
+              <th scope="col">Comentario admin</th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Abrir</span></th>
+            </tr></thead>
+            <tbody>
+            <tr data-href="recap-detalle.html" data-client="Lucía Martínez" data-status="ARCHIVED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">LM</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Lucía Martínez<span class="sr-only">, semana 2 nov - 8 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>2 nov - 8 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Archivado</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>09/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">7.900</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment" title="Semana cerrada. Mantener pautas de sueño.">Semana cerrada. Mantener pautas de sueño.</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Daniel Vega" data-status="ARCHIVED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">DV</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Daniel Vega<span class="sr-only">, semana 2 nov - 8 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>2 nov - 8 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Archivado</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>09/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps is-empty">No indicado</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment" title="Molestias de hombro resueltas; volver a press militar con carga habitual.">Molestias de hombro resueltas; volver a press militar con carga habitual…</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            <tr data-href="recap-detalle.html" data-client="Pablo Herrera" data-status="ARCHIVED">
+              <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">PH</span>
+                <span class="entity-text"><a class="entity-name row-anchor" href="recap-detalle.html">Pablo Herrera<span class="sr-only">, semana 2 nov - 8 nov 2026</span></a></span></div></td>
+              <td class="cell-week" data-label="Semana"><span>2 nov - 8 nov 2026</span></td>
+              <td class="st-inline" data-label="Estado"><span class="chip chip-neutral">Archivado</span></td>
+              <td class="cell-date p3" data-label="Enviado"><span>08/11/2026</span></td>
+              <td class="cell-num p2" data-label="Pasos/día"><span class="rc-steps">5.800</span></td>
+              <td class="cell-muted cell-clip" data-label="Comentario admin"><span class="rc-comment is-empty">Sin comentario</span></td>
+              <td class="cell-actions"><span class="cell-actions-inner"><span class="sr-only">Abrir</span><i data-lucide="chevron-right" class="row-chevron"></i></span></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div data-show="loading" aria-busy="true" aria-label="Cargando los recaps">
+      <div class="table-wrap" aria-hidden="true">
+        <table class="table">
+          <thead><tr><th>Cliente</th><th>Semana</th><th>Estado</th><th class="p3">Enviado</th><th class="cell-num p2">Pasos/día</th><th>Comentario admin</th></tr></thead>
+          <tbody>
+            <tr><td><span class="row-12"><span class="sk-circle"></span><span class="sk-line" style="--w:120px"></span></span></td><td><span class="sk-line" style="--w:130px"></span></td><td><span class="sk-line" style="--w:76px"></span></td><td class="p3"><span class="sk-line" style="--w:80px"></span></td><td class="p2"><span class="sk-line" style="--w:48px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:70%"></span></td></tr>
+            <tr><td><span class="row-12"><span class="sk-circle"></span><span class="sk-line" style="--w:100px"></span></span></td><td><span class="sk-line" style="--w:130px"></span></td><td><span class="sk-line" style="--w:76px"></span></td><td class="p3"><span class="sk-line" style="--w:80px"></span></td><td class="p2"><span class="sk-line" style="--w:48px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:52%"></span></td></tr>
+            <tr><td><span class="row-12"><span class="sk-circle"></span><span class="sk-line" style="--w:110px"></span></span></td><td><span class="sk-line" style="--w:130px"></span></td><td><span class="sk-line" style="--w:76px"></span></td><td class="p3"><span class="sk-line" style="--w:80px"></span></td><td class="p2"><span class="sk-line" style="--w:48px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:64%"></span></td></tr>
+            <tr><td><span class="row-12"><span class="sk-circle"></span><span class="sk-line" style="--w:90px"></span></span></td><td><span class="sk-line" style="--w:130px"></span></td><td><span class="sk-line" style="--w:76px"></span></td><td class="p3"><span class="sk-line" style="--w:80px"></span></td><td class="p2"><span class="sk-line" style="--w:48px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:40%"></span></td></tr>
+            <tr><td><span class="row-12"><span class="sk-circle"></span><span class="sk-line" style="--w:115px"></span></span></td><td><span class="sk-line" style="--w:130px"></span></td><td><span class="sk-line" style="--w:76px"></span></td><td class="p3"><span class="sk-line" style="--w:80px"></span></td><td class="p2"><span class="sk-line" style="--w:48px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:58%"></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EMPTY -->
+    <div data-show="empty">
+      <div class="empty">
+        <span class="empty-x" aria-hidden="true"></span>
+        <h3 class="empty-title">Todavía no hay recaps disponibles para revisión</h3>
+      </div>
+    </div>
+
+    <!-- ERROR -->
+    <div data-show="error">
+      <div class="error-state" role="alert">
+        <i data-lucide="circle-alert"></i>
+        <h3 class="empty-title">Error al cargar los recaps. Intenta de nuevo.</h3>
+        <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<script>
+  /* Page-only: client / status filters over the rendered rows; mobile summary toggle. */
+  (function () {
+    var client = document.getElementById('rc-client');
+    var status = 'ALL';
+    function apply() {
+      var rows = document.querySelectorAll('#rc-active tbody tr');
+      var n = 0;
+      rows.forEach(function (tr) {
+        var ok = (!client.value || tr.getAttribute('data-client') === client.value) &&
+          (status === 'ALL' || tr.getAttribute('data-status') === status);
+        tr.hidden = !ok;
+        if (ok) n++;
+      });
+      document.querySelector('[data-filtered-empty]').hidden = n > 0;
+      document.querySelector('#rc-active .table-wrap').hidden = n === 0;
+      document.querySelector('#rc-active .pagination').hidden = n === 0;
+    }
+    client.addEventListener('change', apply);
+    document.addEventListener('click', function (e) {
+      var seg = e.target.closest && e.target.closest('#rc-status .seg-btn');
+      if (seg) { status = seg.value; apply(); }
+      var tg = e.target.closest && e.target.closest('.stats-toggle');
+      if (tg) {
+        var open = tg.getAttribute('aria-expanded') !== 'true';
+        tg.setAttribute('aria-expanded', String(open));
+        document.getElementById('rc-stats').classList.toggle('is-collapsed', !open);
+      }
+    });
+    function variant(v) {
+      client.value = v === 'filtered' ? 'Pablo Herrera' : '';
+      status = v === 'filtered' ? 'REVIEWED' : 'ALL';
+      document.querySelectorAll('#rc-status .seg-btn').forEach(function (b) { b.setAttribute('aria-pressed', String(b.value === status)); });
+      document.querySelectorAll('[data-pv]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.value === v)); });
+      apply();
+    }
+    var v0 = new URLSearchParams(location.search).get('v') === 'filtered' ? 'filtered' : 'list';
+    document.addEventListener('DOMContentLoaded', function () {
+      var panel = document.getElementById('proto-panel');
+      if (panel) panel.insertAdjacentHTML('beforeend', '<div class="proto-row"><span>Listado</span><div class="proto-opts">' +
+        '<button type="button" data-pv value="list">con datos</button><button type="button" data-pv value="filtered">filtros sin resultados</button></div></div>');
+      variant(v0);
+    });
+    document.addEventListener('click', function (e) {
+      var pv = e.target.closest && e.target.closest('[data-pv]');
+      if (pv) variant(pv.value);
+    });
+  })();
+</script>
+</body>
+</html>

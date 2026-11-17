@@ -83,7 +83,7 @@ export function CopyWeekDialog({
               control={form.control}
               name="source_week_start"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Semana origen</FormLabel>
                   <FormControl>
                     <Input {...field} type="date" disabled />
@@ -98,7 +98,7 @@ export function CopyWeekDialog({
               control={form.control}
               name="target_week_start"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Semana destino</FormLabel>
                   <FormControl>
                     <Input {...field} type="date" />

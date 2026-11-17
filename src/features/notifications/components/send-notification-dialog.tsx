@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertTriangle, Check, ChevronsUpDown, SendHorizonal, X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { useConfirmDialog } from '@/components/ui/use-confirm-dialog'
 import { cn } from '@/lib/utils'
 import { useNotificationTemplates } from '@/features/notification-templates/api'
 import type { NotificationTemplate } from '@/features/notification-templates/types'
@@ -52,8 +53,13 @@ import {
   NOTIFICATION_ROUTE_VALUES,
   type NotificationRouteType,
 } from '../types'
+import { CharCounter } from './char-counter'
+import { PushPreview } from './push-preview'
 
 const ALL_CLIENTS_LIMIT = 200
+// Mirror the limits validated by `sendNotificationSchema` below (the schema prevails).
+const TITLE_MAX_LENGTH = 100
+const BODY_MAX_LENGTH = 500
 
 const sendNotificationSchema = z
   .object({
@@ -149,6 +155,10 @@ function getRouteTypeFromTemplate(route: string | null | undefined): Notificatio
   return 'home'
 }
 
+function formatClientCount(count: number) {
+  return `${count} cliente${count === 1 ? '' : 's'}`
+}
+
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -164,6 +174,11 @@ interface RecipientsMultiSelectProps {
   disabled?: boolean
   isLoading?: boolean
   onChange: (ids: string[]) => void
+  // Reenviados por FormControl: etiqueta (`id`), mensaje de error, estado inválido y obligatorio del disparador.
+  id?: string
+  'aria-describedby'?: string
+  'aria-invalid'?: boolean
+  'aria-required'?: boolean
 }
 
 function RecipientsMultiSelect({
@@ -172,6 +187,10 @@ function RecipientsMultiSelect({
   disabled,
   isLoading,
   onChange,
+  id,
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
 }: RecipientsMultiSelectProps) {
   const [open, setOpen] = useState(false)
 
@@ -207,13 +226,17 @@ function RecipientsMultiSelect({
           <Button
             type="button"
             variant="outline"
+            id={id}
             role="combobox"
             aria-expanded={open}
+            aria-describedby={ariaDescribedBy}
+            aria-invalid={ariaInvalid || undefined}
+            aria-required={ariaRequired || undefined}
             className="w-full justify-between"
             disabled={disabled}
           >
             <span className="truncate text-left">{label}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <ChevronsUpDown aria-hidden="true" className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
 
@@ -234,7 +257,7 @@ function RecipientsMultiSelect({
                       value={`${displayName} ${client.email}`}
                       onSelect={() => toggleClient(client.id)}
                     >
-                      <Check className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
+                      <Check aria-hidden="true" className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
                       <Avatar className="mr-2 h-6 w-6">
                         <AvatarImage src={client.profile?.avatar_url ?? undefined} alt={displayName} />
                         <AvatarFallback className="text-[10px]">{getInitials(displayName)}</AvatarFallback>
@@ -261,7 +284,7 @@ function RecipientsMultiSelect({
               <Badge
                 key={client.id}
                 variant="outline"
-                className="gap-1 border-brand-primary/20 bg-brand-soft/10 pr-1 text-brand-primary"
+                className="gap-1 border-brand-primary/20 bg-brand-soft/10 pr-1 text-accent-text"
               >
                 <span className="max-w-[180px] truncate">{displayName}</span>
                 <button
@@ -269,8 +292,9 @@ function RecipientsMultiSelect({
                   className="rounded-full p-0.5 hover:bg-brand-soft/20"
                   onClick={() => removeClient(client.id)}
                   disabled={disabled}
+                  aria-label={`Quitar ${displayName}`}
                 >
-                  <X className="h-3 w-3" />
+                  <X aria-hidden="true" className="h-3 w-3" />
                 </button>
               </Badge>
             )
@@ -297,8 +321,15 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
     defaultValues,
   })
 
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
+
   const sendToAll = form.watch('sendToAll')
+  const titleValue = form.watch('title')
+  const bodyValue = form.watch('body')
   const clients = clientsQuery.data?.data ?? []
+  // The list is capped at ALL_CLIENTS_LIMIT, so the real portfolio size is the response `total`.
+  const rawTotal: unknown = clientsQuery.data?.total
+  const totalClients = typeof rawTotal === 'number' && Number.isFinite(rawTotal) && rawTotal >= 0 ? rawTotal : null
   const isSubmitting = sendNotification.isPending || sendToAllClients.isPending
   useUnsavedChanges('send-notification-form', open && (form.formState.isDirty || isSubmitting))
   const clientsLoadError = clientsQuery.isError
@@ -318,6 +349,11 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
       form.reset(defaultValues)
     }
   }, [form, open])
+
+  const clientsErrorRef = useRef(clientsQuery.isError)
+  useEffect(() => {
+    clientsErrorRef.current = clientsQuery.isError
+  }, [clientsQuery.isError])
 
   useEffect(() => {
     if (clientsQuery.isError && sendToAll) {
@@ -345,6 +381,25 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
   }
 
   const handleSubmit = form.handleSubmit(async (values) => {
+    if (values.sendToAll) {
+      const accepted = await confirm({
+        title: '¿Enviar la notificación a todos tus clientes?',
+        description:
+          totalClients !== null && totalClients > 0
+            ? `Llegará a ${formatClientCount(totalClients)} visibles de tu cartera.`
+            : 'Llegará a todos los clientes visibles de tu cartera.',
+        confirmLabel: 'Enviar a todos',
+      })
+      if (!accepted) return
+
+      // The portfolio query may have failed while the confirmation was open, which unchecks
+      // "send to all": do not send with the stale value captured before the confirmation.
+      if (!form.getValues('sendToAll') || clientsErrorRef.current) {
+        toast.error('La cartera de clientes ya no está disponible. Revisa el formulario antes de enviar.')
+        return
+      }
+    }
+
     const payload = {
       title: values.title.trim(),
       body: values.body.trim(),
@@ -389,8 +444,12 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
   })
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent disableOutsideClose className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent
+        disableOutsideClose
+        className="max-h-[90vh] grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-2xl"
+      >
         <DialogHeader>
           <DialogTitle>Enviar notificación</DialogTitle>
           <DialogDescription>
@@ -435,7 +494,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
 
         {clientsLoadError ? (
           <div className="flex items-start gap-3 rounded-xl border border-status-error/30 bg-status-error/5 p-4 text-sm text-status-error">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="space-y-1">
               <p className="font-medium">No se pudo cargar la cartera de clientes</p>
               <p>{clientsLoadError}</p>
@@ -449,7 +508,8 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
               control={form.control}
               name="sendToAll"
               render={({ field }) => (
-                <FormItem className="rounded-xl border border-border/70 p-4">
+                <FormItem className="relative rounded-xl border border-border/70 p-4">
+                  {/* Por debajo de md la etiqueta cubre la tarjeta: área pulsable de la casilla ≥ 44 px. */}
                   <div className="flex items-start gap-3">
                     <FormControl>
                       <input
@@ -457,16 +517,18 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                         checked={field.value}
                         onChange={(event) => field.onChange(event.target.checked)}
                         disabled={isClientsUnavailable || isSubmitting}
-                        className="mt-1 h-4 w-4 rounded border-input"
+                        className="mt-1 h-4 w-4 rounded border-input max-md:size-6"
                       />
                     </FormControl>
                     <div className="space-y-1">
-                      <FormLabel>Enviar a todos mis clientes</FormLabel>
+                      <FormLabel className="max-md:after:absolute max-md:after:inset-0 max-md:after:content-['']">Enviar a todos mis clientes</FormLabel>
                       <FormDescription>
                         {clientsLoadError
                           ? 'Corrige el problema de carga antes de enviar notificaciones.'
                           : clients.length > 0
-                          ? `Se enviará a ${clients.length} cliente${clients.length === 1 ? '' : 's'} visibles.`
+                          ? totalClients !== null && totalClients > 0
+                            ? `Se enviará a ${formatClientCount(totalClients)} visibles.`
+                            : 'Se enviará a todos los clientes visibles.'
                           : 'Ahora mismo no hay clientes visibles en tu cartera.'}
                       </FormDescription>
                     </div>
@@ -480,7 +542,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
               control={form.control}
               name="user_ids"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required={!sendToAll}>
                   <FormLabel>Destinatarios</FormLabel>
                   <FormControl>
                     <RecipientsMultiSelect
@@ -503,20 +565,21 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
               )}
             />
 
-            <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_220px]">
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Título</FormLabel>
                     <FormControl>
                       <input
                         {...field}
-                        className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="flex h-10 w-full max-md:h-11 rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         placeholder="Nuevo recordatorio"
                       />
                     </FormControl>
+                    <CharCounter label="título" count={titleValue.trim().length} max={TITLE_MAX_LENGTH} />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -526,7 +589,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                 control={form.control}
                 name="type"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Tipo / ruta</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
@@ -552,7 +615,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
               control={form.control}
               name="body"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Cuerpo</FormLabel>
                   <FormControl>
                     <textarea
@@ -562,17 +625,20 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                       className="flex w-full rounded-md border border-input bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                     />
                   </FormControl>
+                  <CharCounter label="cuerpo" count={bodyValue.trim().length} max={BODY_MAX_LENGTH} />
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <PushPreview title={titleValue} body={bodyValue} />
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={isSubmitting || isClientsUnavailable}>
-                <SendHorizonal className="h-4 w-4" />
+                <SendHorizonal aria-hidden="true" className="h-4 w-4" />
                 {isSubmitting ? 'Enviando...' : 'Enviar notificación'}
               </Button>
             </DialogFooter>
@@ -580,5 +646,7 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
         </Form>
       </DialogContent>
     </Dialog>
+    {confirmDialog}
+    </>
   )
 }

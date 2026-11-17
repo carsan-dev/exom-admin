@@ -1,6 +1,7 @@
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { SortableTableHead } from '@/components/sortable-table-head'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { usePageSelection } from '@/components/workspace/use-page-selection'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { formatMacroValue, formatUpdatedAt, type Ingredient } from '../types'
 import type { SortDir } from '@/lib/sort-search-params'
@@ -29,16 +31,26 @@ interface IngredientsTableProps {
   approvalById?: Record<string, IngredientApprovalSummary>
   onEdit: (ingredient: Ingredient) => void
   onDelete: (ingredient: Ingredient) => void
+  selectedIds?: Set<string>
+  onSelectionChange?: (ids: Set<string>) => void
   sortBy?: string
   sortDir?: SortDir
   onSortChange?: (field: string) => void
 }
 
-export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDelete, sortBy, sortDir = 'asc', onSortChange = () => {} }: IngredientsTableProps) {
+export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDelete, selectedIds, onSelectionChange, sortBy, sortDir = 'asc', onSortChange = () => {} }: IngredientsTableProps) {
+  const selection = usePageSelection(ingredients, selectedIds, onSelectionChange)
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-12">
+            {/* In mobile only the table exists: the 44 px wrapper keeps the touch target, as in the mobile lists. */}
+            <div className="flex items-center max-md:size-11 max-md:justify-center">
+              <Checkbox aria-label="Seleccionar página" checked={selection.headerChecked} onChange={selection.toggleAll} />
+            </div>
+          </TableHead>
           <SortableTableHead field="name" label="Nombre" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
           <SortableTableHead field="icon" label="Icono" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="text-center" />
           <SortableTableHead field="calories_per_100g" label="kcal/100g" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="text-right" />
@@ -46,17 +58,30 @@ export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDel
           <SortableTableHead field="carbs_per_100g" label="Carbohidratos/100g" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden lg:table-cell text-right" />
           <SortableTableHead field="fat_per_100g" label="Grasas/100g" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden lg:table-cell text-right" />
           <SortableTableHead field="updated_at" label="Actualizado" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="hidden xl:table-cell" />
-          <TableHead className="text-right">Acciones</TableHead>
+          <TableHead className="w-11 px-0 text-right md:w-auto md:px-3">
+            {/* En móvil el rótulo no cabe: se mantiene para lectores de pantalla. */}
+            <span className="sr-only md:not-sr-only">Acciones</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {ingredients.map((ingredient) => (
-          <TableRow key={ingredient.id}>
+          <TableRow key={ingredient.id} data-state={selectedIds?.has(ingredient.id) ? 'selected' : undefined}>
+            <TableCell>
+              <div className="flex items-center max-md:size-11 max-md:justify-center">
+                <Checkbox
+                  aria-label={`Seleccionar ${ingredient.name}`}
+                  checked={selectedIds?.has(ingredient.id) ?? false}
+                  onChange={() => selection.toggle(ingredient.id)}
+                />
+              </div>
+            </TableCell>
+
             <TableCell>
                 <div className="space-y-1">
                   <p className="font-medium text-foreground">{ingredient.name}</p>
                   <ResourceApprovalIndicator pendingActions={approvalById[ingredient.id]?.pending_approval_actions ?? []} />
-                  <div className="text-xs text-muted-foreground md:hidden">
+                  <div className="text-xs tabular-nums text-foreground-muted md:hidden">
                     P {formatMacroValue(ingredient.protein_per_100g)} g · C {formatMacroValue(ingredient.carbs_per_100g)} g · G {formatMacroValue(ingredient.fat_per_100g)} g
                   </div>
               </div>
@@ -64,7 +89,7 @@ export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDel
 
             <TableCell className="text-center">
               {ingredient.icon ? (
-                <span className="inline-flex min-h-8 min-w-8 items-center justify-center rounded-md border border-border bg-muted px-2 text-base">
+                <span className="inline-flex min-h-8 min-w-8 items-center justify-center rounded-none border border-border bg-card px-2 text-base">
                   {ingredient.icon}
                 </span>
               ) : (
@@ -72,7 +97,7 @@ export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDel
               )}
             </TableCell>
 
-            <TableCell className="text-right font-medium tabular-nums">
+            <TableCell className="text-right font-display font-bold tabular-nums">
               {formatMacroValue(ingredient.calories_per_100g)}
             </TableCell>
             <TableCell className="hidden text-right tabular-nums md:table-cell">
@@ -84,21 +109,21 @@ export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDel
             <TableCell className="hidden text-right tabular-nums lg:table-cell">
               {formatMacroValue(ingredient.fat_per_100g)}
             </TableCell>
-            <TableCell className="hidden text-sm text-muted-foreground xl:table-cell">
+            <TableCell className="hidden text-sm tabular-nums text-foreground-muted xl:table-cell">
               {formatUpdatedAt(ingredient.updated_at)}
             </TableCell>
 
-            <TableCell className="text-right">
+            <TableCell className="px-0 text-right md:px-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <MoreHorizontal className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" className="h-11 w-11 p-0 md:h-8 md:w-8">
+                    <MoreHorizontal aria-hidden="true" className="h-4 w-4" />
                     <span className="sr-only">Abrir menú</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => onEdit(ingredient)}>
-                    <Pencil className="mr-2 h-4 w-4" />
+                    <Pencil aria-hidden="true" className="mr-2 h-4 w-4" />
                     Editar
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -106,7 +131,7 @@ export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDel
                     onClick={() => onDelete(ingredient)}
                     className="text-status-error focus:text-status-error"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
+                    <Trash2 aria-hidden="true" className="mr-2 h-4 w-4" />
                     Eliminar
                   </DropdownMenuItem>
                 </DropdownMenuContent>

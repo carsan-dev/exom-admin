@@ -70,12 +70,12 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
   return (
     <div className="space-y-4">
       {/* Weight Chart */}
-      <Card>
+      <Card className="border-border shadow-none">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Scale className="h-5 w-5 text-brand-primary" />
-              <CardTitle className="text-xl">Evolución del peso</CardTitle>
+              <Scale aria-hidden="true" className="h-5 w-5 text-accent-text" />
+              <CardTitle className="font-display text-xl font-extrabold uppercase leading-none">Evolución del peso</CardTitle>
             </div>
             <ChartScaleSelect value={weightScale} onValueChange={setWeightScale} />
           </div>
@@ -85,7 +85,7 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
           {weightLoading ? (
             <Skeleton className="h-64 w-full" />
           ) : !weightChartData.some((point) => Number.isFinite(point.timestamp)) ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">Sin registros de peso</p>
+            <p className="text-sm text-foreground-muted py-8 text-center">Sin registros de peso</p>
           ) : (
             <div className="h-64 w-full">
               <ResponsiveContainer>
@@ -118,19 +118,19 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
       </Card>
 
       {/* Body Metric Chart */}
-      <Card>
+      <Card className="border-border shadow-none">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-brand-primary" />
-              <CardTitle className="text-xl">Evolución corporal</CardTitle>
+              <TrendingUp aria-hidden="true" className="h-5 w-5 text-accent-text" />
+              <CardTitle className="font-display text-xl font-extrabold uppercase leading-none">Evolución corporal</CardTitle>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Select
                 value={selectedField}
                 onValueChange={(v) => onFieldChange(v as BodyField)}
               >
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="min-h-11 w-full sm:w-[200px] md:min-h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -153,7 +153,7 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
           {bodyLoading ? (
             <Skeleton className="h-64 w-full" />
           ) : !bodyChartData.some((point) => Number.isFinite(point.timestamp)) ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">
+            <p className="text-sm text-foreground-muted py-8 text-center">
               Sin registros de {BODY_FIELD_LABELS[selectedField].toLowerCase()}
             </p>
           ) : (

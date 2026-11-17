@@ -146,7 +146,7 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
           <div className="rounded-xl border border-border/70 bg-muted/20 p-4">
             <div className="flex flex-wrap items-center gap-2">
               <p className="font-medium text-foreground">{challenge.title}</p>
-              <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-brand-primary">
+              <Badge variant="outline" className="border-brand-primary/20 bg-brand-soft/10 text-accent-text">
                 {getChallengeTypeLabel(challenge.type)}
               </Badge>
               <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
@@ -172,7 +172,7 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
         ) : clientsQuery.isError ? (
           <div className="flex flex-col items-center gap-4 rounded-xl border border-status-error/20 p-8 text-center">
             <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-              <AlertTriangle className="h-8 w-8" />
+              <AlertTriangle aria-hidden="true" className="h-8 w-8" />
             </div>
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-foreground">No se pudieron cargar tus clientes visibles</h3>
@@ -186,8 +186,8 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
           </div>
         ) : clients.length === 0 ? (
           <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border/70 p-8 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
-              <Users className="h-8 w-8" />
+            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
+              <Users aria-hidden="true" className="h-8 w-8" />
             </div>
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-foreground">No hay clientes visibles</h3>
@@ -222,7 +222,7 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
             {mode === 'specific' ? (
               <div className="space-y-4">
                 <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
@@ -257,7 +257,7 @@ export function AssignChallengeDialog({ challenge, open, onOpenChange, onAssigne
                             <Button variant={isSelected ? 'outline' : 'secondary'} onClick={() => toggleClient(client.id)}>
                               {isSelected ? (
                                 <>
-                                  <Check className="h-4 w-4" />
+                                  <Check aria-hidden="true" className="h-4 w-4" />
                                   Seleccionado
                                 </>
                               ) : (

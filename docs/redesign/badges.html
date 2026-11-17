@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Badges · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/catalogo.css">
+  <script src="assets/vendor/lucide-local.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="badges" data-group="Catálogo" data-crumbs='["Badges"]' data-variants='[["noresults","sin resultados"]]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1">Badges</h1>
+      </div>
+      <p class="ph-sub">Gestiona grupos musculares, equipamiento, tipos y tags de entrenamientos y badges nutricionales.</p>
+    </div>
+  </header>
+
+  <div class="md">
+    <!-- Vocabularies -->
+    <nav class="vocab" aria-label="Catálogos de valores">
+      <div class="vocab-select field">
+        <label class="field-label" for="vocab-sel">Catálogo</label>
+        <select class="select" id="vocab-sel"></select>
+      </div>
+      <ul class="vocab-list" id="vocab-list"></ul>
+    </nav>
+
+    <!-- Selected vocabulary -->
+    <section class="pane" aria-labelledby="pane-title">
+      <div class="pane-head">
+        <div>
+          <div class="pane-title"><h2 class="h2" id="pane-title">Grupos musculares</h2><span class="caption" id="pane-count">13 valores</span></div>
+          <p class="section-sub" id="pane-desc">Badges usados en ejercicios.</p>
+        </div>
+        <label class="input-icon" data-show="data">
+          <span class="sr-only" id="pane-search-l">Buscar en grupos musculares</span>
+          <i data-lucide="search"></i>
+          <input class="input" type="search" id="pane-search" placeholder="Buscar en grupos musculares..." autocomplete="off" aria-labelledby="pane-search-l">
+        </label>
+      </div>
+
+      <div data-show="data">
+        <div id="pane-results">
+          <div class="table-wrap">
+            <table class="table table--stack has-2act" id="tbl-vals" data-selectable>
+              <caption class="sr-only" id="tbl-caption">Valores de grupos musculares</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="cell-check"><label class="check"><input type="checkbox" data-select-all aria-label="Seleccionar todos los resultados filtrados"></label></th>
+                  <th scope="col">Valor</th>
+                  <th scope="col" class="col-color">Color</th>
+                  <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody id="vals"></tbody>
+            </table>
+          </div>
+          <div class="selection-bar is-docked" data-for="#tbl-vals" hidden>
+            <span class="selection-count">3 seleccionados</span>
+            <span class="spacer"></span>
+            <button class="btn btn-danger btn-sm" type="button" data-open="#dlg-bulk" aria-haspopup="dialog"><i data-lucide="trash-2"></i><span data-sel-n="#tbl-vals" data-sel-tpl="Eliminar seleccionados ({n})">Eliminar seleccionados (3)</span></button>
+            <button class="btn btn-ghost btn-sm" type="button" data-clear-selection>Limpiar</button>
+          </div>
+          <nav class="pagination" aria-label="Paginación">
+            <span class="pagination-label" id="pg-label">Página 1 de 2</span>
+            <span class="pagination-actions">
+              <button class="btn btn-secondary btn-sm" type="button" disabled><i data-lucide="chevron-left"></i>Anterior</button>
+              <button class="btn btn-secondary btn-sm" type="button" id="pg-next">Siguiente<i data-lucide="chevron-right"></i></button>
+            </span>
+          </nav>
+        </div>
+        <div id="pane-noresults" class="section" hidden>
+          <div class="empty empty-compact">
+            <span class="empty-x" aria-hidden="true"></span>
+            <h3 class="empty-title" id="noresults-text">Sin resultados para "zancada".</h3>
+          </div>
+        </div>
+      </div>
+
+      <div data-show="loading" aria-busy="true" aria-label="Cargando valores">
+        <div class="table-wrap" aria-hidden="true">
+          <table class="table"><thead><tr><th class="cell-check"></th><th>Valor</th><th>Color</th><th class="cell-actions"></th></tr></thead>
+            <tbody id="vals-sk"></tbody></table>
+        </div>
+      </div>
+      <div data-show="empty" class="section">
+        <div class="empty empty-compact">
+          <span class="empty-x" aria-hidden="true"></span>
+          <h3 class="empty-title">Sin valores guardados.</h3>
+        </div>
+      </div>
+      <div data-show="error" class="section">
+        <div class="error-state" role="alert">
+          <i data-lucide="circle-alert"></i>
+          <h3 class="empty-title">No se ha podido cargar el catálogo</h3>
+          <p class="empty-text">Network Error. Comprueba tu conexión y vuelve a intentarlo.</p>
+          <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</main>
+</div>
+
+<!-- ===================== EDITAR VALOR ===================== -->
+<div class="overlay" id="dlg-edit" data-static hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="de-title" aria-describedby="de-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="de-title">Editar valor</h2>
+        <p class="ov-desc" id="de-desc">Renombrar "<span data-fill="name">Alto en proteína</span>" en <span data-res>dietas</span>.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body stack-16">
+      <div class="field">
+        <label class="field-label" for="de-name">Valor</label>
+        <input class="input" id="de-name" data-fill="name" value="Alto en proteína" autocomplete="off">
+      </div>
+      <div class="field" id="de-color-field">
+        <span class="field-label" id="de-color-l">Color</span>
+        <div class="color-row" role="group" aria-labelledby="de-color-l">
+          <input class="color-native" type="color" id="de-color" data-fill="color" aria-label="Selector de color" value="#c5e384">
+          <label class="sr-only" for="de-hex">Código hexadecimal</label>
+          <input class="input" id="de-hex" data-fill="color" value="#C5E384" maxlength="7" autocomplete="off" spellcheck="false">
+          <span class="spacer"></span>
+          <span class="tag tag-c" id="de-preview" style="--c:#C5E384"><span class="dot"></span><span data-fill="name">Alto en proteína</span></span>
+        </div>
+        <p class="field-help">Formato #RRGGBB.</p>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="de-save" disabled data-close data-toast-fill='Color de "{name}" actualizado.'>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== BORRAR VALOR ===================== -->
+<div class="overlay" id="dlg-del" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="dd-title" aria-describedby="dd-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="dd-title">Borrar valor</h2>
+        <p class="ov-desc" id="dd-desc">Borrar "<b data-fill="name">Pecho</b>" de <span data-res>ejercicios</span>.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body stack-8">
+      <p class="prose-13">Se quitará de todos los <span data-res>ejercicios</span> activos donde esté asignado. Los <span data-res>ejercicios</span> no se eliminarán. Esta acción no se puede deshacer.</p>
+      <span class="proposal-tag" data-tip="Hoy el borrado individual no explica el efecto" tabindex="0">Propuesta</span>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast-fill='"{name}" borrado. 9 registros actualizados.'><i data-lucide="trash-2"></i>Borrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== BORRADO MASIVO ===================== -->
+<div class="overlay" id="dlg-bulk" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="db-title" aria-describedby="db-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="db-title" data-sel-n="#tbl-vals" data-sel-tpl="Eliminar {n} valores">Eliminar 3 valores</h2>
+        <p class="ov-desc" id="db-desc">Se quitarán de todos los <span data-res>ejercicios</span> activos donde estén asignados. Los recursos no se eliminarán. Esta acción no se puede deshacer.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast="Valores eliminados" data-toast-tone="success"><i data-lucide="trash-2"></i>Eliminar selección</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var V = [
+    { id: 'grupos', name: 'Grupos musculares', desc: 'Badges usados en ejercicios.', use: 'Ejercicios', icon: 'dumbbell', res: 'ejercicios', color: false,
+      vals: ['Antebrazos', 'Bíceps', 'Core', 'Cuádriceps', 'Espalda', 'Gemelos', 'Glúteos', 'Hombros', 'Isquiotibiales', 'Pecho', 'Posterior', 'Trapecio', 'Tríceps'] },
+    { id: 'equipamiento', name: 'Equipamiento', desc: 'Badges de material usados en ejercicios.', use: 'Ejercicios', icon: 'dumbbell', res: 'ejercicios', color: false,
+      vals: ['Banco', 'Banda elástica', 'Barra', 'Barra EZ', 'Cable', 'Disco', 'Kettlebell', 'Mancuernas', 'Máquina', 'Peso corporal', 'Polea', 'TRX'] },
+    { id: 'tipos', name: 'Tipos de entrenamientos', desc: 'Valores reutilizables en entrenamientos y en reglas de logros por tipo.', use: 'Entrenamientos', icon: 'clipboard-list', res: 'entrenamientos', color: true,
+      vals: [['Cardio', '#D76C5E'], ['Flexibilidad', '#9B7FCC'], ['Fuerza', '#7FB5D8'], ['HIIT', '#E5BE58'], ['Movilidad', '#8CCB68'], ['Resistencia', '#6B7280']] },
+    { id: 'tags-ent', name: 'Tags de entrenamientos', desc: 'Badges usados en entrenamientos.', use: 'Entrenamientos', icon: 'clipboard-list', res: 'entrenamientos', color: false,
+      vals: ['30 minutos', 'Casa', 'Gimnasio', 'Glúteo', 'Postparto', 'Principiantes', 'Sin material', 'Tren inferior', 'Tren superior'] },
+    { id: 'nutri', name: 'Badges nutricionales', desc: 'Badges usados en comidas de dietas.', use: 'Dietas', icon: 'utensils-crossed', res: 'dietas', color: true,
+      vals: [['Alto en proteína', '#C5E384'], ['Bajo en calorías', '#7FB5D8'], ['Carbos', '#E5BE58'], ['Fibra', '#8CCB68'], ['Grasa', '#D76C5E'], ['Proteína', '#A9C85D'], ['Sin gluten', '#9B7FCC'], ['Vegano', '#2A6A35']] },
+    { id: 'tags-dieta', name: 'Tags de dietas', desc: 'Tags usados para organizar dietas.', use: 'Dietas', icon: 'utensils-crossed', res: 'dietas', color: false,
+      vals: ['Ayuno intermitente', 'Definición', 'Mantenimiento', 'Vegetariana', 'Volumen'] }
+  ];
+  var params = new URLSearchParams(location.search);
+  var cur = V.filter(function (v) { return v.id === params.get('vocab'); })[0] || V[0];
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function norm(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+
+  // Vocab list + mobile select
+  document.getElementById('vocab-list').innerHTML = V.map(function (v) {
+    return '<li><button class="vocab-btn" type="button" data-vocab="' + v.id + '"' + (v === cur ? ' aria-current="true"' : '') + '>' +
+      '<span class="vocab-name">' + v.name + '</span><span class="vocab-count">' + v.vals.length + '</span>' +
+      '<span class="vocab-use"><i data-lucide="' + v.icon + '"></i>' + v.use + '</span></button></li>';
+  }).join('');
+  document.getElementById('vocab-sel').innerHTML = V.map(function (v) {
+    return '<option value="' + v.id + '"' + (v === cur ? ' selected' : '') + '>' + v.name + ' (' + v.vals.length + ')</option>';
+  }).join('');
+
+  function render(preselect) {
+    var lower = cur.name.toLowerCase();
+    document.getElementById('pane-title').textContent = cur.name;
+    document.getElementById('pane-count').textContent = cur.vals.length + ' valores';
+    document.getElementById('pane-desc').textContent = cur.desc;
+    document.getElementById('pane-search').placeholder = 'Buscar en ' + lower + '...';
+    document.getElementById('pane-search-l').textContent = 'Buscar en ' + lower;
+    document.getElementById('tbl-caption').textContent = 'Valores de ' + lower;
+    document.querySelectorAll('[data-res]').forEach(function (el) { el.textContent = cur.res; });
+    document.querySelectorAll('.col-color').forEach(function (el) { el.hidden = !cur.color; });
+    var q = norm(document.getElementById('pane-search').value || '');
+    var list = cur.vals.filter(function (v) { return norm(Array.isArray(v) ? v[0] : v).indexOf(q) > -1; });
+    var pages = Math.max(1, Math.ceil(list.length / 10));
+    document.getElementById('pg-label').textContent = 'Página 1 de ' + pages;
+    document.getElementById('pg-next').disabled = pages < 2;
+    document.getElementById('pane-results').hidden = !list.length;
+    document.getElementById('pane-noresults').hidden = !!list.length;
+    document.getElementById('noresults-text').textContent = 'Sin resultados para "' + (document.getElementById('pane-search').value || '') + '".';
+    document.getElementById('vals').innerHTML = list.slice(0, 10).map(function (v, i) {
+      var name = Array.isArray(v) ? v[0] : v, hex = Array.isArray(v) ? v[1] : null;
+      var badge = hex ? '<span class="tag tag-c" style="--c:' + hex + '"><span class="dot"></span>' + esc(name) + '</span>' : '<span class="tag">' + esc(name) + '</span>';
+      var ctx = ' data-ctx-name="' + esc(name) + '"' + (hex ? ' data-ctx-color="' + hex + '"' : '');
+      return '<tr><td class="cell-check"><label class="check"><input type="checkbox" data-select-row aria-label="Seleccionar ' + esc(name) + '"' + (preselect && i > 0 && i < 4 ? ' checked' : '') + '></label></td>' +
+        '<td class="cell-primary">' + badge + '</td>' +
+        (cur.color ? '<td class="col-color" data-label="Color"><span class="swatch-cell"><span class="sw" style="--c:' + hex + '"></span>' + hex + '</span></td>' : '') +
+        '<td class="cell-actions"><span class="cell-actions-inner">' +
+          '<button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#dlg-edit" aria-haspopup="dialog" data-tip="Editar" aria-label="Editar ' + esc(name) + '"' + ctx + '><i data-lucide="pencil"></i></button>' +
+          '<button class="btn btn-ghost btn-icon btn-sm is-del" type="button" data-open="#dlg-del" aria-haspopup="dialog" data-tip="Borrar" aria-label="Borrar ' + esc(name) + '"' + ctx + '><i data-lucide="trash-2"></i></button>' +
+        '</span></td></tr>';
+    }).join('');
+    if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.6 } });
+    var first = document.querySelector('#vals [data-select-row]');
+    var all = document.querySelector('#tbl-vals [data-select-all]');
+    if (all) all.checked = false;
+    if (first) first.dispatchEvent(new Event('change', { bubbles: true }));
+    else document.querySelector('.selection-bar').hidden = true;
+  }
+  var sk = '';
+  for (var k = 0; k < 6; k++) sk += '<tr><td class="cell-check"><span class="sk-block" style="--h:16px;width:16px"></span></td><td><span class="sk-line" style="--w:' + (90 + (k * 37) % 80) + 'px"></span></td><td><span class="sk-line" style="--w:80px"></span></td><td class="cell-actions"></td></tr>';
+  document.getElementById('vals-sk').innerHTML = sk;
+
+  function select(id) {
+    cur = V.filter(function (v) { return v.id === id; })[0];
+    document.querySelectorAll('.vocab-btn').forEach(function (b) {
+      if (b.getAttribute('data-vocab') === id) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+    });
+    document.getElementById('vocab-sel').value = id;
+    document.getElementById('pane-search').value = '';
+    render(false);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-vocab]');
+    if (b) select(b.getAttribute('data-vocab'));
+    var ed = e.target.closest && e.target.closest('[data-open="#dlg-edit"]');
+    if (ed) {
+      document.getElementById('de-color-field').hidden = !cur.color;
+      document.getElementById('de-save').disabled = true;
+      document.getElementById('de-save').setAttribute('data-toast-fill', cur.color ? 'Color de "{name}" actualizado.' : '"{name}" guardado.');
+      var hex = ed.getAttribute('data-ctx-color') || '#6B7280';
+      document.getElementById('de-preview').style.setProperty('--c', hex);
+    }
+  });
+  document.getElementById('vocab-sel').addEventListener('change', function (e) { select(e.target.value); });
+  document.getElementById('pane-search').addEventListener('input', function () { render(false); });
+
+  // Edit dialog: live preview, hex validation, save enabled on change
+  var hexIn = document.getElementById('de-hex'), colIn = document.getElementById('de-color'), nameIn = document.getElementById('de-name');
+  function syncEdit(src) {
+    var ok = /^#[0-9a-f]{6}$/i.test(hexIn.value);
+    if (src === colIn) { hexIn.value = colIn.value.toUpperCase(); ok = true; }
+    else if (src === hexIn && ok) colIn.value = hexIn.value.toLowerCase();
+    var f = hexIn.closest('.field');
+    f.classList.toggle('is-invalid', !ok);
+    hexIn.setAttribute('aria-invalid', String(!ok));
+    if (ok) document.getElementById('de-preview').style.setProperty('--c', hexIn.value);
+    document.querySelector('#de-preview [data-fill="name"]').textContent = nameIn.value;
+    document.getElementById('de-save').disabled = !ok || !nameIn.value.trim();
+  }
+  [hexIn, colIn, nameIn].forEach(function (el) { el.addEventListener('input', function () { syncEdit(el); }); });
+
+  render(params.get('sel') !== '0');
+  document.addEventListener('variantchange', function (e) {
+    var box = document.getElementById('pane-search');
+    if (e.detail.variant !== 'noresults' && !box.value) return;
+    box.value = e.detail.variant === 'noresults' ? 'zancada' : '';
+    render(false);
+  });
+})();
+</script>
+<script src="assets/pages/catalogo.js"></script>
+</body>
+</html>

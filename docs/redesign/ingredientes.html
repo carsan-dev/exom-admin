@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ingredientes · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/catalogo.css">
+  <script src="assets/vendor/lucide-local.js" defer></script>
+  <script src="assets/proto.js"></script>
+</head>
+<body data-page="ingredientes" data-group="Catálogo" data-crumbs='["Ingredientes"]' data-variants='[["filtered","vacío filtrado"],["invalid","validación"]]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <div class="ph-title-row">
+        <h1 class="h1">Ingredientes</h1>
+        <span class="ph-meta" data-show="data loading error">214 ingredientes</span>
+      </div>
+      <p class="ph-sub">Gestiona la biblioteca reutilizable de ingredientes con sus macros por 100 g para usarlos después en comidas y dietas.</p>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-primary" type="button" data-open="#dlg-form" data-mode="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Nuevo ingrediente</button>
+    </div>
+  </header>
+
+  <div class="toolbar-row" data-show="data loading error">
+    <div class="toolbar" role="search" aria-label="Buscar y filtrar ingredientes">
+      <label class="input-icon">
+        <span class="sr-only">Buscar ingredientes</span>
+        <i data-lucide="search"></i>
+        <input class="input" type="search" placeholder="Buscar por nombre..." autocomplete="off">
+      </label>
+      <button class="btn btn-secondary" type="button" data-open="#filters-pop" aria-haspopup="dialog" aria-expanded="false"><i data-lucide="sliders-horizontal"></i>Filtros<span class="count" data-filter-count>2</span></button>
+      <span class="filter-chip">Icono: <b>Con icono</b><button type="button" data-remove-chip aria-label="Quitar filtro Icono: Con icono"><i data-lucide="x"></i></button></span>
+      <span class="filter-chip">Proteína: <b>20–100 g</b><button type="button" data-remove-chip aria-label="Quitar filtro Proteína: 20 a 100 g"><i data-lucide="x"></i></button></span>
+      <button class="btn btn-ghost btn-sm clear-all" type="button" data-clear-chips>Limpiar todo</button>
+    </div>
+  </div>
+
+  <div data-show="data">
+    <div data-v-not="filtered">
+      <div class="table-wrap">
+        <table class="table table--stack" id="tbl-ing">
+          <caption class="sr-only">Listado de ingredientes con macros por 100 g, página 1 de 22</caption>
+          <thead>
+            <tr>
+              <th scope="col" aria-sort="ascending"><button class="th-sort" type="button">Nombre<i data-lucide="arrow-up-down"></i></button></th>
+              <th scope="col" class="cell-num" aria-sort="none"><button class="th-sort" type="button">kcal/100 g<i data-lucide="arrow-up-down"></i></button></th>
+              <th scope="col" class="cell-num" aria-sort="none"><button class="th-sort" type="button">Proteína<i data-lucide="arrow-up-down"></i></button></th>
+              <th scope="col" class="cell-num" aria-sort="none"><button class="th-sort" type="button">Carbohidratos<i data-lucide="arrow-up-down"></i></button></th>
+              <th scope="col" class="cell-num" aria-sort="none"><button class="th-sort" type="button">Grasas<i data-lucide="arrow-up-down"></i></button></th>
+              <th scope="col" class="cell-pcg p3"><span class="row" style="gap:6px"><span tabindex="0" data-tip="Reparto de las kcal: proteína (P), carbohidratos (C) y grasas (G)" aria-label="P/C/G: reparto de las kcal entre proteína, carbohidratos y grasas">P/C/G</span><span class="proposal-tag" tabindex="0" data-tip="Barra de proporción derivada de los macros existentes">Propuesta</span></span></th>
+              <th scope="col" class="p2" aria-sort="none"><button class="th-sort" type="button">Actualizado<i data-lucide="arrow-up-down"></i></button></th>
+              <th scope="col" class="cell-actions"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody id="ing-rows"></tbody>
+        </table>
+      </div>
+      <p class="caption pcg-legend" style="margin-top:12px" aria-hidden="true">
+        <span class="pcg-key" style="--k:var(--accent-line)">Proteína</span>
+        <span class="pcg-key" style="--k:color-mix(in srgb, var(--accent-line) 30%, var(--rule-hover))">Carbohidratos</span>
+        <span class="pcg-key" style="--k:var(--rule-hover)">Grasas</span>
+        <span>· valores por 100 g</span>
+      </p>
+      <nav class="pagination" aria-label="Paginación">
+        <span class="pagination-label">Página 1 de 22</span>
+        <span class="pagination-actions">
+          <button class="btn btn-secondary btn-sm" type="button" disabled><i data-lucide="chevron-left"></i>Anterior</button>
+          <button class="btn btn-secondary btn-sm" type="button">Siguiente<i data-lucide="chevron-right"></i></button>
+        </span>
+      </nav>
+    </div>
+    <div data-v="filtered" class="section">
+      <div class="empty empty-compact">
+        <span class="empty-x" aria-hidden="true"></span>
+        <h2 class="empty-title">Sin resultados</h2>
+        <p class="empty-text">No se encontraron ingredientes con la búsqueda y filtros actuales.</p>
+      </div>
+    </div>
+  </div>
+
+  <div data-show="loading" aria-busy="true" aria-label="Cargando ingredientes">
+    <div class="table-wrap" aria-hidden="true">
+      <table class="table"><thead><tr><th>Nombre</th><th class="cell-num">kcal/100 g</th><th class="cell-num">Proteína</th><th class="cell-num">Carbohidratos</th><th class="cell-num">Grasas</th><th class="p3">P/C/G</th><th class="p2">Actualizado</th><th class="cell-actions"></th></tr></thead>
+        <tbody id="ing-sk"></tbody></table>
+    </div>
+  </div>
+  <div data-show="empty" class="section">
+    <div class="empty">
+      <span class="empty-x" aria-hidden="true"></span>
+      <h2 class="empty-title">Aún no hay ingredientes</h2>
+      <p class="empty-text">Crea el primer ingrediente del catálogo para reutilizarlo después al construir comidas y dietas.</p>
+      <button class="btn btn-primary" type="button" data-open="#dlg-form" data-mode="new" aria-haspopup="dialog"><i data-lucide="plus"></i>Crear primer ingrediente</button>
+    </div>
+  </div>
+  <div data-show="error" class="section">
+    <div class="error-state" role="alert">
+      <i data-lucide="circle-alert"></i>
+      <h2 class="empty-title">No se ha podido cargar el catálogo</h2>
+      <p class="empty-text">Network Error. Comprueba tu conexión y vuelve a intentarlo.</p>
+      <button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..."><i data-lucide="rotate-cw"></i>Reintentar</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<div class="menu" id="row-menu" role="menu" aria-label="Acciones del ingrediente" hidden>
+  <button class="menu-item" type="button" role="menuitem" data-open="#dlg-form" data-mode="edit"><i data-lucide="pencil"></i>Editar</button>
+  <div class="menu-sep" role="separator"></div>
+  <button class="menu-item is-danger" type="button" role="menuitem" data-open="#dlg-delete"><i data-lucide="trash-2"></i>Eliminar</button>
+</div>
+
+<!-- ===================== FILTERS ===================== -->
+<div class="popover" id="filters-pop" role="dialog" aria-labelledby="filters-title" data-align="start" style="--w:440px" hidden>
+  <div class="popover-head">
+    <h2 class="h3" id="filters-title">Filtros del listado</h2>
+    <p class="caption" style="margin-top:2px">Selecciona uno o varios criterios.</p>
+  </div>
+  <div class="popover-body">
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Icono</legend>
+      <div class="filter-options">
+        <label class="check"><input type="checkbox" checked>Con icono</label>
+        <label class="check"><input type="checkbox">Sin icono</label>
+      </div>
+    </fieldset></div>
+    <div id="ranges"></div>
+    <div class="filter-group"><fieldset class="fieldset">
+      <legend class="micro">Última edición</legend>
+      <div class="field-grid">
+        <div class="field"><label class="field-label" for="f-from">Desde</label><input class="input" id="f-from" type="date"></div>
+        <div class="field"><label class="field-label" for="f-to">Hasta</label><input class="input" id="f-to" type="date"></div>
+      </div>
+    </fieldset></div>
+  </div>
+  <div class="popover-foot">
+    <button class="btn btn-ghost btn-sm" type="button">Limpiar</button>
+    <button class="btn btn-primary btn-sm" type="button" data-close>Aplicar</button>
+  </div>
+</div>
+
+<!-- ===================== FORM ===================== -->
+<div class="overlay" id="dlg-form" data-static hidden>
+  <div class="dialog dialog-sm" role="dialog" aria-modal="true" aria-labelledby="fi-title" aria-describedby="fi-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="fi-title" data-t-new="Nuevo ingrediente" data-t-edit="Editar ingrediente">Nuevo ingrediente</h2>
+        <p class="ov-desc" id="fi-desc" data-t-new="Rellena los campos para añadir un nuevo ingrediente al catálogo reutilizable." data-t-edit="Actualiza los datos nutricionales del ingrediente seleccionado.">Rellena los campos para añadir un nuevo ingrediente al catálogo reutilizable.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <form id="form-ing" data-validate novalidate data-success-toast="Ingrediente creado correctamente" data-st-new="Ingrediente creado correctamente" data-st-edit="Ingrediente actualizado correctamente">
+        <div class="stack-16">
+          <div class="name-icon">
+            <div class="field">
+              <label class="field-label" for="fi-name">Nombre</label>
+              <input class="input" id="fi-name" required placeholder="Avena" autocomplete="off" data-error-required="El nombre es obligatorio" data-val-new="" data-val-edit="Avena">
+            </div>
+            <div class="field">
+              <label class="field-label" for="fi-icon">Icono <span class="field-optional">Opcional</span></label>
+              <input class="input" id="fi-icon" maxlength="8" placeholder="🥑" autocomplete="off" style="text-align:center;font-size:18px" data-val-new="" data-val-edit="🥣">
+            </div>
+          </div>
+          <div class="macro-grid">
+            <div class="field">
+              <label class="field-label" for="fi-kcal">kcal por 100 g</label>
+              <span class="input-unit"><input class="input" id="fi-kcal" type="number" min="0" step="0.01" inputmode="decimal" data-val-new="" data-val-edit="389"><span class="unit">kcal</span></span>
+            </div>
+            <div class="field">
+              <label class="field-label" for="fi-p">Proteína por 100 g</label>
+              <span class="input-unit" style="--unit-pad:32px"><input class="input" id="fi-p" type="number" min="0" step="0.01" inputmode="decimal" data-val-new="" data-val-edit="16.9"><span class="unit">g</span></span>
+            </div>
+            <div class="field">
+              <label class="field-label" for="fi-c">Carbohidratos por 100 g</label>
+              <span class="input-unit" style="--unit-pad:32px"><input class="input" id="fi-c" type="number" min="0" step="0.01" inputmode="decimal" data-val-new="" data-val-edit="66.3"><span class="unit">g</span></span>
+            </div>
+            <div class="field is-invalid" data-v="invalid">
+              <label class="field-label" for="fi-g">Grasas por 100 g</label>
+              <span class="input-unit" style="--unit-pad:32px"><input class="input" id="fi-g" type="number" min="0" step="0.01" inputmode="decimal" value="-1" aria-invalid="true" aria-describedby="fi-g-err"><span class="unit">g</span></span>
+              <p class="field-error" id="fi-g-err"><i data-lucide="circle-alert"></i><span>Las grasas por 100 g debe ser mayor o igual a 0</span></p>
+            </div>
+            <div class="field" data-v-not="invalid">
+              <label class="field-label" for="fi-g2">Grasas por 100 g</label>
+              <span class="input-unit" style="--unit-pad:32px"><input class="input" id="fi-g2" type="number" min="0" step="0.01" inputmode="decimal" data-val-new="" data-val-edit="6.9"><span class="unit">g</span></span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="submit" form="form-ing" data-loading-label="Guardando..." data-t-new="Crear ingrediente" data-t-edit="Guardar cambios">Crear ingrediente</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="dlg-delete" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="di-title" aria-describedby="di-desc">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="di-title">Eliminar ingrediente</h2>
+        <p class="ov-desc" id="di-desc">¿Eliminar <b data-fill="name">Avena</b>? El ingrediente dejará de estar disponible en el catálogo activo, pero sus datos se conservarán.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-danger is-solid" type="button" data-close data-toast-fill='"{name}" ha sido eliminado'><i data-lucide="trash-2"></i>Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var ING = [
+    ['🥣', 'Avena', 389, 16.9, 66.3, 6.9, '14/11/2026'],
+    ['🥚', 'Huevo', 155, 13, 1.1, 11, '14/11/2026'],
+    ['🍗', 'Pechuga de pollo', 165, 31, 0, 3.6, '12/11/2026'],
+    ['🦃', 'Pechuga de pavo', 104, 24, 0, 1, '12/11/2026', 'Edición pendiente de aprobación'],
+    ['🍚', 'Arroz basmati', 349, 8.1, 77, 0.9, '10/11/2026'],
+    ['🫒', 'Aceite de oliva', 884, 0, 0, 100, '08/11/2026'],
+    ['🥛', 'Yogur griego', 97, 9, 3.9, 5, '05/11/2026'],
+    ['🍞', 'Pan integral', 247, 13, 41, 3.4, '03/11/2026'],
+    ['🐟', 'Salmón', 208, 20, 0, 13, '29/10/2026'],
+    [null, 'Brócoli', 34, 2.8, 6.6, 0.4, '21/10/2026']
+  ];
+  function f(n) { return String(n).replace('.', ','); }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+  document.getElementById('ing-rows').innerHTML = ING.map(function (x) {
+    var p = x[3] * 4, c = x[4] * 4, g = x[5] * 9, t = p + c + g || 1;
+    var pp = Math.round(p / t * 100), pc = Math.round(c / t * 100), pg = 100 - pp - pc;
+    var icon = x[0] ? '<span class="emoji" aria-hidden="true">' + x[0] + '</span>' : '<span class="emoji is-none" aria-hidden="true">--</span>';
+    var pend = x[7] ? '<span class="chip chip-warning no-dot chip-pending" tabindex="0" data-tip="' + x[7] + '"><i data-lucide="triangle-alert"></i>Pendiente</span>' : '';
+    return '<tr data-row-open class="row-link">' +
+      '<td class="cell-primary"><div class="entity">' + icon + '<span class="entity-text"><span class="name-line">' +
+        '<button type="button" class="entity-name row-anchor" data-open="#dlg-form" data-mode="edit" aria-haspopup="dialog" data-ctx-name="' + esc(x[1]) + '">' + x[1] + '</button>' + pend + '</span>' +
+        '<span class="entity-sub m-only num">' + x[2] + ' kcal · P ' + f(x[3]) + ' g · C ' + f(x[4]) + ' g · G ' + f(x[5]) + ' g</span></span></div></td>' +
+      '<td class="cell-num"><span class="num">' + x[2] + '</span></td>' +
+      '<td class="cell-num">' + f(x[3]) + '<span class="u">g</span></td>' +
+      '<td class="cell-num">' + f(x[4]) + '<span class="u">g</span></td>' +
+      '<td class="cell-num">' + f(x[5]) + '<span class="u">g</span></td>' +
+      '<td class="cell-pcg p3 d-only"><span class="pcg" role="img" aria-label="Proteína ' + pp + ' %, carbohidratos ' + pc + ' %, grasas ' + pg + ' % de las kcal" data-tip="P ' + pp + ' % · C ' + pc + ' % · G ' + pg + ' %">' +
+        '<span class="p" style="width:' + pp + '%"></span><span class="c" style="width:' + pc + '%"></span><span class="g" style="width:' + pg + '%"></span></span></td>' +
+      '<td class="cell-date p2 d-only">' + x[6] + '</td>' +
+      '<td class="cell-actions"><span class="cell-actions-inner"><i data-lucide="chevron-right" class="row-chevron"></i>' +
+        '<button class="btn btn-ghost btn-icon btn-sm" type="button" data-open="#row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Abrir menú de ' + esc(x[1]) + '" data-ctx-name="' + esc(x[1]) + '"><i data-lucide="ellipsis"></i></button></span></td>' +
+    '</tr>';
+  }).join('');
+  var sk = '';
+  for (var k = 0; k < 6; k++) sk += '<tr><td><div class="entity"><span class="sk-block" style="--h:24px;width:24px"></span><span class="sk-line" style="--w:' + (90 + k * 23 % 70) + 'px"></span></div></td>' +
+    '<td><span class="sk-line" style="--w:32px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:36px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:36px;margin-left:auto"></span></td><td><span class="sk-line" style="--w:36px;margin-left:auto"></span></td><td class="p3"><span class="sk-line" style="--w:96px"></span></td><td class="p2"><span class="sk-line" style="--w:72px"></span></td><td class="cell-actions"></td></tr>';
+  document.getElementById('ing-sk').innerHTML = sk;
+
+  // Range filter sections (dual-handle)
+  var R = [['Calorías', 'kcal', 0, 900, 5, 0, 900], ['Proteína', 'g', 0, 100, 1, 20, 100], ['Carbohidratos', 'g', 0, 100, 1, 0, 100], ['Grasas', 'g', 0, 100, 1, 0, 100]];
+  document.getElementById('ranges').outerHTML = R.map(function (r, i) {
+    var id = 'rg' + i;
+    return '<div class="filter-group"><fieldset class="fieldset"><legend class="micro">' + r[0] + '</legend>' +
+      '<div class="range2"><div class="range2-inputs">' +
+        '<div class="field"><label class="field-label" for="' + id + 'a">Mínimo</label><span class="input-unit"' + (r[1] === 'g' ? ' style="--unit-pad:28px"' : '') + '><input class="input input-sm" id="' + id + 'a" type="number" min="' + r[2] + '" max="' + r[3] + '" step="' + r[4] + '" value="' + r[5] + '"><span class="unit">' + r[1] + '</span></span></div>' +
+        '<span class="range2-dash" aria-hidden="true">–</span>' +
+        '<div class="field"><label class="field-label" for="' + id + 'b">Máximo</label><span class="input-unit"' + (r[1] === 'g' ? ' style="--unit-pad:28px"' : '') + '><input class="input input-sm" id="' + id + 'b" type="number" min="' + r[2] + '" max="' + r[3] + '" step="' + r[4] + '" value="' + r[6] + '"><span class="unit">' + r[1] + '</span></span></div>' +
+      '</div><div class="range2-track"><span class="range2-fill"></span>' +
+        '<input type="range" min="' + r[2] + '" max="' + r[3] + '" step="' + r[4] + '" value="' + r[5] + '" aria-label="' + r[0] + ' mínimo">' +
+        '<input type="range" min="' + r[2] + '" max="' + r[3] + '" step="' + r[4] + '" value="' + r[6] + '" aria-label="' + r[0] + ' máximo">' +
+      '</div><div class="range2-scale"><span>' + r[2] + ' ' + r[1] + '</span><span>' + r[3] + ' ' + r[1] + '</span></div></div></fieldset></div>';
+  }).join('');
+})();
+</script>
+<script src="assets/pages/catalogo.js"></script>
+<script>
+  /* Validation variant: re-apply the static error after proto resets the form on open */
+  document.addEventListener('variantchange', function (e) {
+    if (e.detail.variant !== 'invalid') return;
+    setTimeout(function () {
+      var inp = document.getElementById('fi-g');
+      var field = inp.closest('.field');
+      field.classList.add('is-invalid');
+      inp.value = '-1';
+      inp.setAttribute('aria-invalid', 'true');
+      inp.setAttribute('aria-describedby', 'fi-g-err');
+      if (!document.getElementById('fi-g-err')) {
+        field.insertAdjacentHTML('beforeend', '<p class="field-error" id="fi-g-err"><i data-lucide="circle-alert"></i><span>Las grasas por 100 g debe ser mayor o igual a 0</span></p>');
+        if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.6 } });
+      }
+    }, 300);
+  });
+</script>
+</body>
+</html>

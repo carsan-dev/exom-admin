@@ -98,7 +98,7 @@ function getAdminStatus(isSelected: boolean, wasAssigned: boolean) {
   if (isSelected) {
     return {
       label: 'Se añade',
-      className: 'border-brand-primary/30 bg-brand-soft/10 text-brand-primary',
+      className: 'border-brand-primary/30 bg-brand-soft/10 text-accent-text',
       actionLabel: 'Quitar',
       actionVariant: 'outline' as const,
     }
@@ -216,7 +216,7 @@ export function ManageClientAssignmentsDialog({
         ) : isError ? (
           <div className="flex flex-col items-center gap-4 rounded-xl border border-border/70 p-6 text-center">
             <div className="rounded-full bg-status-error/10 p-4 text-status-error">
-              <AlertTriangle className="h-8 w-8" />
+              <AlertTriangle aria-hidden="true" className="h-8 w-8" />
             </div>
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-foreground">No se han podido cargar las asignaciones</h3>
@@ -225,14 +225,14 @@ export function ManageClientAssignmentsDialog({
               </p>
             </div>
             <Button type="button" variant="outline" onClick={() => void handleRetry()}>
-              <RefreshCcw className="h-4 w-4" />
+              <RefreshCcw aria-hidden="true" className="h-4 w-4" />
               Reintentar
             </Button>
           </div>
         ) : hasNoAdminsAvailable ? (
           <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border/70 p-8 text-center">
-            <div className="rounded-full bg-brand-soft/10 p-4 text-brand-primary">
-              <Users className="h-8 w-8" />
+            <div className="rounded-full bg-brand-soft/10 p-4 text-accent-text">
+              <Users aria-hidden="true" className="h-8 w-8" />
             </div>
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-foreground">No hay admins disponibles</h3>
@@ -263,7 +263,7 @@ export function ManageClientAssignmentsDialog({
                     {selectedAdminIds.length} admin{selectedAdminIds.length === 1 ? '' : 's'} activo{selectedAdminIds.length === 1 ? '' : 's'} tras guardar
                   </p>
                 </div>
-                <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-brand-primary">
+                <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/10 text-accent-text">
                   {hasChanges ? 'Cambios pendientes' : 'Sin cambios'}
                 </Badge>
               </div>
@@ -369,7 +369,7 @@ export function ManageClientAssignmentsDialog({
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex items-start gap-3">
                     <div className="rounded-full bg-status-error/15 p-2 text-status-error">
-                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTriangle aria-hidden="true" className="h-4 w-4" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">No se han podido guardar los cambios</p>

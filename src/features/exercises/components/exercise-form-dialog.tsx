@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { clearUnsavedChanges, useUnsavedChanges } from '@/hooks/use-unsaved-changes'
@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { RequiredMark } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -103,6 +104,8 @@ interface MultiSelectFieldProps {
   options: readonly string[]
   placeholder: string
   error?: string
+  /** Obligatorio según el esquema: asterisco visible y descripción oculta (el rol group no admite aria-required). */
+  required?: boolean
 }
 
 function normalizeOptionLabel(option: string) {
@@ -124,8 +127,14 @@ function MultiSelectField({
   options,
   placeholder,
   error,
+  required = false,
 }: MultiSelectFieldProps) {
   const [customInput, setCustomInput] = useState('')
+  const labelId = useId()
+  const errorId = useId()
+  const requiredId = useId()
+  const describedBy =
+    [error ? errorId : null, required ? requiredId : null].filter(Boolean).join(' ') || undefined
 
   const hasOption = (option: string) => {
     const optionKey = getOptionKey(option)
@@ -167,8 +176,21 @@ function MultiSelectField({
   }
 
   return (
-    <div className="space-y-2">
-      <p className="text-sm font-medium leading-none">{label}</p>
+    <div
+      role="group"
+      aria-labelledby={labelId}
+      aria-describedby={describedBy}
+      className="space-y-2"
+    >
+      <p id={labelId} className="text-sm font-medium leading-none">
+        {label}
+        {required ? <RequiredMark /> : null}
+      </p>
+      {required ? (
+        <span id={requiredId} hidden>
+          Campo obligatorio
+        </span>
+      ) : null}
 
       <div className="flex flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2 min-h-10">
         {value.length === 0 && (
@@ -178,26 +200,27 @@ function MultiSelectField({
           <Badge
             key={item}
             variant="outline"
-            className="gap-1 border-brand-soft/40 bg-brand-soft/10 text-brand-primary pr-1"
+            className="gap-1 border-brand-soft/40 bg-brand-soft/10 text-accent-text pr-1"
           >
             {item}
             <button
               type="button"
               onClick={() => remove(item)}
-              className="ml-0.5 rounded-full hover:bg-brand-soft/20 p-0.5"
+              aria-label={`Quitar ${item}`}
+              className="relative ml-0.5 rounded-full hover:bg-brand-soft/20 p-0.5 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]"
             >
-              <X className="h-2.5 w-2.5" />
+              <X aria-hidden="true" className="h-2.5 w-2.5" />
             </button>
           </Badge>
         ))}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline" size="sm" className="flex-none">
+            <Button type="button" variant="outline" size="sm" className="flex-none max-md:h-11">
               Opciones
-              <ChevronDown className="ml-1 h-3 w-3" />
+              <ChevronDown aria-hidden="true" className="ml-1 h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="max-h-60 overflow-y-auto w-48">
@@ -218,20 +241,23 @@ function MultiSelectField({
           onChange={(e) => setCustomInput(e.target.value)}
           onKeyDown={handleCustomKeyDown}
           placeholder="Otro (Enter para añadir)"
+          aria-label={`Otro valor para ${label.toLocaleLowerCase('es')}`}
           className="h-8 text-sm"
         />
         <Button
           type="button"
           variant="outline"
           size="sm"
+          className="max-md:h-11"
           onClick={addCustom}
           disabled={!normalizeOptionLabel(customInput) || hasOption(customInput)}
+          aria-label={`Añadir a ${label.toLocaleLowerCase('es')}`}
         >
-          <Plus className="h-3 w-3" />
+          <Plus aria-hidden="true" className="h-3 w-3" />
         </Button>
       </div>
 
-      {error && <p className="text-xs text-status-error">{error}</p>}
+      {error && <p id={errorId} className="text-xs text-status-error">{error}</p>}
     </div>
   )
 }
@@ -351,7 +377,7 @@ export function ExerciseFormDialog({
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
                       <Input placeholder="Press de banca" {...field} />
@@ -365,7 +391,7 @@ export function ExerciseFormDialog({
                 control={form.control}
                 name="level"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nivel</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
@@ -396,6 +422,7 @@ export function ExerciseFormDialog({
                   <FormControl>
                     <MultiSelectField
                       label="Grupos musculares"
+                      required
                       value={field.value}
                       onChange={field.onChange}
                       options={muscleGroupOptions}

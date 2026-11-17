@@ -52,10 +52,13 @@ const useFormField = () => {
 
   const fieldState = getFieldState(fieldContext.name, formState)
 
-  const { id } = itemContext
+  const { id, hasDescription, hasMessage, required } = itemContext
 
   return {
     id,
+    hasDescription,
+    hasMessage,
+    required,
     name: fieldContext.name,
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
@@ -66,18 +69,44 @@ const useFormField = () => {
 
 type FormItemContextValue = {
   id: string
+  /** Si FormDescription / FormMessage están montados: FormControl solo referencia ids existentes. */
+  hasDescription: boolean
+  hasMessage: boolean
+  /** Campo obligatorio según el esquema: asterisco en FormLabel y aria-required en FormControl (RDS-F5-A11Y-15). */
+  required: boolean
+  /** Registra (`true`) o retira (`false`) una instancia montada; se llaman en pares montaje/limpieza. */
+  setHasDescription: (mounted: boolean) => void
+  setHasMessage: (mounted: boolean) => void
 }
 
 const FormItemContext = React.createContext<FormItemContextValue | null>(null)
 
 const FormItem = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & { required?: boolean }
+>(({ className, required = false, ...props }, ref) => {
   const id = React.useId()
+  // Contadores, no booleanos: con dos FormDescription/FormMessage en el mismo FormItem,
+  // desmontar uno no debe dejar de referenciar el otro (H-3).
+  const [descriptionCount, setDescriptionCount] = React.useState(0)
+  const [messageCount, setMessageCount] = React.useState(0)
+  const setHasDescription = React.useCallback(
+    (mounted: boolean) => setDescriptionCount((count) => Math.max(0, count + (mounted ? 1 : -1))),
+    []
+  )
+  const setHasMessage = React.useCallback(
+    (mounted: boolean) => setMessageCount((count) => Math.max(0, count + (mounted ? 1 : -1))),
+    []
+  )
+  const hasDescription = descriptionCount > 0
+  const hasMessage = messageCount > 0
+  const value = React.useMemo(
+    () => ({ id, hasDescription, hasMessage, required, setHasDescription, setHasMessage }),
+    [id, hasDescription, hasMessage, required, setHasDescription, setHasMessage]
+  )
 
   return (
-    <FormItemContext.Provider value={{ id }}>
+    <FormItemContext.Provider value={value}>
       <div ref={ref} className={cn("space-y-2", className)} {...props} />
     </FormItemContext.Provider>
   )
@@ -88,13 +117,14 @@ const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField()
+  const { error, formItemId, required } = useFormField()
 
   return (
     <Label
       ref={ref}
       className={cn(error && "text-destructive", className)}
       htmlFor={formItemId}
+      required={required}
       {...props}
     />
   )
@@ -105,18 +135,28 @@ const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   React.ComponentPropsWithoutRef<typeof Slot>
 >(({ ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+  const {
+    error,
+    formItemId,
+    formDescriptionId,
+    formMessageId,
+    hasDescription,
+    hasMessage,
+    required,
+  } = useFormField()
+  // Solo ids presentes en el DOM: un idref colgante es un error de ARIA (RDS-F5-A11Y-14).
+  const describedBy =
+    [hasDescription ? formDescriptionId : null, error && hasMessage ? formMessageId : null]
+      .filter(Boolean)
+      .join(" ") || undefined
 
   return (
     <Slot
       ref={ref}
       id={formItemId}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
+      aria-describedby={describedBy}
       aria-invalid={!!error}
+      aria-required={required || undefined}
       {...props}
     />
   )
@@ -128,6 +168,13 @@ const FormDescription = React.forwardRef<
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => {
   const { formDescriptionId } = useFormField()
+  const itemContext = React.useContext(FormItemContext)
+  const setHasDescription = itemContext?.setHasDescription
+
+  React.useLayoutEffect(() => {
+    setHasDescription?.(true)
+    return () => setHasDescription?.(false)
+  }, [setHasDescription])
 
   return (
     <p
@@ -146,6 +193,15 @@ const FormMessage = React.forwardRef<
 >(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField()
   const body = error ? String(error?.message ?? "") : children
+  const itemContext = React.useContext(FormItemContext)
+  const setHasMessage = itemContext?.setHasMessage
+  const rendered = Boolean(body)
+
+  React.useLayoutEffect(() => {
+    if (!rendered) return
+    setHasMessage?.(true)
+    return () => setHasMessage?.(false)
+  }, [rendered, setHasMessage])
 
   if (!body) {
     return null

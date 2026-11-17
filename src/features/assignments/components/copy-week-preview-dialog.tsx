@@ -1,7 +1,7 @@
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Apple, Copy, Dumbbell, PauseCircle, Trash2 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { StatusChip } from '@/components/ui/status-chip'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -56,36 +56,36 @@ export function CopyWeekPreviewDialog({
         </DialogHeader>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-border/70 bg-background/60 p-4">
+          <div className="border border-border p-4">
             <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Semana origen</p>
             <p className="mt-2 text-lg font-semibold text-foreground">{formatWeekRange(preview.source_week_start)}</p>
           </div>
-          <div className="rounded-2xl border border-brand-primary/20 bg-brand-soft/10 p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.22em] text-brand-primary">Semana destino</p>
+          <div className="border border-border-strong bg-lime-soft p-4">
+            <p className="text-xs font-medium uppercase tracking-[0.22em] text-accent-text">Semana destino</p>
             <p className="mt-2 text-lg font-semibold text-foreground">{formatWeekRange(preview.target_week_start)}</p>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className="border-status-info/30 bg-status-info/10 text-status-info">
+          <StatusChip variant="info" dot={false}>
             {preview.summary.training_days} días con entreno
-          </Badge>
-          <Badge variant="outline" className="border-status-success/30 bg-status-success/10 text-status-success">
+          </StatusChip>
+          <StatusChip variant="success" dot={false}>
             {preview.summary.diet_days} días con dieta
-          </Badge>
-          <Badge variant="outline" className="border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
+          </StatusChip>
+          <StatusChip variant="brand" dot={false}>
             {preview.summary.rest_days} descansos
-          </Badge>
-          <Badge variant="outline" className="border-status-error/30 bg-status-error/10 text-status-error">
+          </StatusChip>
+          <StatusChip variant="danger" dot={false}>
             {preview.summary.cleared_days} días se limpiarán
-          </Badge>
+          </StatusChip>
         </div>
 
         <Separator />
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {preview.days.map((day) => (
-            <div key={day.target_date} className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
+            <div key={day.target_date} className="min-w-0 border border-border bg-card p-3">
               <div className="space-y-1">
                 <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">{formatDay(day.target_date)}</p>
                 <p className="text-sm text-muted-foreground">Se copia desde {formatDay(day.source_date)}</p>
@@ -93,36 +93,36 @@ export function CopyWeekPreviewDialog({
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {day.training && (
-                  <Badge variant="outline" className="gap-1 border-status-info/30 bg-status-info/10 text-status-info">
-                    <Dumbbell className="h-3 w-3" />
+                  <StatusChip variant="info" dot={false} className="gap-1">
+                    <Dumbbell aria-hidden="true" className="h-3 w-3" />
                     Entreno
-                  </Badge>
+                  </StatusChip>
                 )}
                 {day.diet && (
-                  <Badge variant="outline" className="gap-1 border-status-success/30 bg-status-success/10 text-status-success">
-                    <Apple className="h-3 w-3" />
+                  <StatusChip variant="success" dot={false} className="gap-1">
+                    <Apple aria-hidden="true" className="h-3 w-3" />
                     Dieta
-                  </Badge>
+                  </StatusChip>
                 )}
                 {day.is_rest_day && (
-                  <Badge variant="outline" className="gap-1 border-brand-primary/30 bg-brand-soft/20 text-brand-primary">
-                    <PauseCircle className="h-3 w-3" />
+                  <StatusChip variant="brand" dot={false} className="gap-1">
+                    <PauseCircle aria-hidden="true" className="h-3 w-3" />
                     Descanso
-                  </Badge>
+                  </StatusChip>
                 )}
                 {day.will_clear_day && (
-                  <Badge variant="outline" className="gap-1 border-status-error/30 bg-status-error/10 text-status-error">
-                    <Trash2 className="h-3 w-3" />
+                  <StatusChip variant="danger" dot={false} className="gap-1">
+                    <Trash2 aria-hidden="true" className="h-3 w-3" />
                     Limpiar
-                  </Badge>
+                  </StatusChip>
                 )}
               </div>
 
               <div className="mt-4 space-y-3 text-sm">
                 {day.training && (
-                  <div className="rounded-xl border border-border/60 bg-background/50 p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Entrenamiento</p>
-                    <p className="mt-1 font-medium text-foreground">
+                  <div className="border border-border p-2.5">
+                    <p className="text-[11px] font-medium uppercase tracking-normal text-muted-foreground">Entrenamiento</p>
+                    <p className="mt-1 break-words font-medium text-foreground">
                       {(day.trainings.length ? day.trainings : [day.training])
                         .map((training) => `${training.name}${training.is_active === false ? ' (retirado)' : ''}`)
                         .join(' · ')}
@@ -131,20 +131,20 @@ export function CopyWeekPreviewDialog({
                 )}
 
                 {day.diet && (
-                  <div className="rounded-xl border border-border/60 bg-background/50 p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Plan nutricional</p>
-                    <p className="mt-1 font-medium text-foreground">{day.diet.name}</p>
+                  <div className="border border-border p-2.5">
+                    <p className="text-[11px] font-medium uppercase tracking-normal text-muted-foreground">Plan nutricional</p>
+                    <p className="mt-1 break-words font-medium text-foreground">{day.diet.name}</p>
                   </div>
                 )}
 
                 {day.is_rest_day && (
-                  <div className="rounded-xl border border-brand-primary/20 bg-brand-soft/10 p-3">
-                    <p className="font-medium text-foreground">Día de descanso</p>
+                  <div className="border border-border-strong bg-lime-soft p-2.5">
+                    <p className="break-words font-medium text-foreground">Día de descanso</p>
                   </div>
                 )}
 
                 {day.will_clear_day && (
-                  <div className="rounded-xl border border-status-error/20 bg-status-error/5 p-3">
+                  <div className="border border-status-error bg-status-error-soft p-3">
                     <p className="font-medium text-foreground">El día destino quedará sin planificación</p>
                   </div>
                 )}
@@ -158,7 +158,7 @@ export function CopyWeekPreviewDialog({
             Volver
           </Button>
           <Button type="button" onClick={() => void onConfirm()} disabled={isSubmitting}>
-            <Copy className="h-4 w-4" />
+            <Copy aria-hidden="true" className="h-4 w-4" />
             Confirmar copia
           </Button>
         </DialogFooter>

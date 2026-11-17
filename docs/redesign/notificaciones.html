@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Notificaciones · EXOM Admin</title>
+  <link rel="icon" href="assets/exom-balance.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/barlow-800.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/pages/notificaciones.css">
+  <script src="assets/vendor/lucide-local.js" defer></script>
+  <script src="assets/proto.js"></script>
+  <script src="assets/pages/notificaciones.js" defer></script>
+</head>
+<body data-page="notificaciones" data-group="Comunicación" data-crumbs='["Notificaciones"]'>
+<div id="app">
+<main class="page" id="main">
+
+  <header class="page-header">
+    <div class="ph-main">
+      <h1 class="h1">Notificaciones</h1>
+      <p class="ph-sub">Envía recordatorios a tu cartera y controla el historial de entregas desde un único lugar.</p>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-primary" type="button" data-open="#dlg-send" aria-haspopup="dialog"><i data-lucide="send"></i>Enviar notificación</button>
+    </div>
+  </header>
+
+  <!-- Summary -->
+  <section class="nt-stats" aria-labelledby="st-t">
+    <div class="nt-stats-head">
+      <div class="nt-stats-title">
+        <h2 class="h2" id="st-t">Resumen · <span data-period-label>Últimos 30 días</span></h2>
+        <p class="caption nt-range" data-period-range>16/10/2026 – 15/11/2026</p>
+      </div>
+      <div class="nt-period">
+        <label class="tb-field" for="period">Periodo
+          <select class="select" id="period" data-switch="per">
+            <option value="7">Últimos 7 días</option>
+            <option value="30" selected>Últimos 30 días</option>
+            <option value="90">Últimos 90 días</option>
+            <option value="year">Año actual</option>
+            <option value="all">Todo el historial</option>
+            <option value="custom">Personalizado</option>
+          </select></label>
+        <span class="nt-custom" data-case="per:custom" hidden>
+          <label class="tb-field">Desde <input class="input input-sm" type="date" value="2026-11-01"></label>
+          <label class="tb-field">Hasta <input class="input input-sm" type="date" value="2026-11-15"></label>
+        </span>
+      </div>
+    </div>
+    <div class="ledger nt-ledger" data-show="data empty">
+      <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Total enviadas</span></span><span class="fig" data-n="248">248</span></div>
+      <div class="ledger-cell"><span class="ledger-head"><span class="ledger-label micro">Enviadas hoy</span></span><span class="fig" data-n="6">6</span></div>
+      <div class="ledger-cell is-alert" data-tone="danger" data-failed><span class="ledger-head"><span class="ledger-dot" aria-hidden="true"></span><span class="ledger-label micro">Fallidas</span></span><span class="fig" data-n="3">3</span></div>
+    </div>
+    <div class="ledger nt-ledger" data-show="loading" aria-hidden="true" hidden>
+      <div class="ledger-cell"><span class="sk-line" style="--w:50%"></span><span class="sk-fig" style="margin-top:12px;height:26px;--w:56px"></span></div>
+      <div class="ledger-cell"><span class="sk-line" style="--w:50%"></span><span class="sk-fig" style="margin-top:12px;height:26px;--w:40px"></span></div>
+      <div class="ledger-cell"><span class="sk-line" style="--w:40%"></span><span class="sk-fig" style="margin-top:12px;height:26px;--w:30px"></span></div>
+    </div>
+    <p class="caption nt-note">Las cifras resumen el periodo seleccionado; el listado inferior no se filtra por periodo.</p>
+  </section>
+
+  <!-- Toolbar -->
+  <form class="toolbar-r" role="search" aria-label="Filtrar el historial" onsubmit="return false" data-show="data empty loading">
+    <label class="tb-field">Cliente <select class="select" data-f><option>Todos los clientes</option><option>Lucía Martínez</option><option>Javier Ortega</option><option>Marta Ruiz</option><option>Sara Gil</option><option>Carla Núñez</option><option>Daniel Vega</option><option>Pablo Herrera</option></select></label>
+    <div class="segmented" role="group" aria-label="Estado">
+      <button class="seg-btn" type="button" aria-pressed="true" data-status="all">Todos</button>
+      <button class="seg-btn" type="button" aria-pressed="false" data-status="ok">Enviadas</button>
+      <button class="seg-btn" type="button" aria-pressed="false" data-status="ko">Fallidas</button>
+    </div>
+    <label class="input-icon nt-search"><span class="sr-only">Buscar por título o cuerpo</span><i data-lucide="search"></i><input class="input input-sm" type="search" placeholder="Buscar por título o cuerpo" autocomplete="off" data-search></label>
+    <button class="btn btn-ghost btn-sm" type="reset" data-clear-filters hidden>Limpiar filtros</button>
+  </form>
+
+  <div data-show="data">
+    <div class="table-wrap">
+      <table class="table table--stack nt-table">
+        <caption class="sr-only">Historial de notificaciones, página 1 de 31</caption>
+            <thead><tr>
+              <th scope="col">Destinatario</th>
+              <th scope="col">Mensaje</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Fecha<span class="proposal-tag" data-tip="Hoy solo muestra la fecha, sin hora.">Propuesta</span></th>
+            </tr></thead>
+        <tbody>
+          <tr>
+            <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">LM</span>
+              <span class="entity-text"><span class="entity-name">Lucía Martínez</span><span class="entity-sub">lucia.martinez@example.com</span></span></div></td>
+            <td class="nt-msg-cell" data-label="Mensaje"><span class="nt-msg"><span class="nt-title">Recordatorio de recap</span><span class="nt-body">Envía tu recap semanal antes del domingo a las 21:00.</span></span></td>
+            <td class="st-inline" data-label="Estado"><span class="chip chip-success">Enviada</span></td>
+            <td class="cell-date" data-label="Fecha"><span><time datetime="2026-11-15T18:42">15/11/2026 · 18:42</time></span></td>
+          </tr>
+          <tr>
+            <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">JO</span>
+              <span class="entity-text"><span class="entity-name">Javier Ortega</span><span class="entity-sub">javier.ortega@example.com</span></span></div></td>
+            <td class="nt-msg-cell" data-label="Mensaje"><span class="nt-msg"><span class="nt-title">¡Buen trabajo esta semana!</span><span class="nt-body">Has completado 5 de 5 entrenamientos. Sigue así.</span></span></td>
+            <td class="st-inline" data-label="Estado"><span class="chip chip-success">Enviada</span></td>
+            <td class="cell-date" data-label="Fecha"><span><time datetime="2026-11-15T12:05">15/11/2026 · 12:05</time></span></td>
+          </tr>
+          <tr class="is-failed">
+            <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">MR</span>
+              <span class="entity-text"><span class="entity-name">Marta Ruiz</span><span class="entity-sub">marta.ruiz@example.com</span></span></div></td>
+            <td class="nt-msg-cell" data-label="Mensaje"><span class="nt-msg"><span class="nt-title">Recordatorio entreno</span><span class="nt-body">Hoy toca Pierna B. Recuerda calentar 10 minutos antes de empezar.</span><span class="nt-err"><i data-lucide="triangle-alert"></i><span>Token de dispositivo no válido o caducado.</span></span></span></td>
+            <td class="st-inline" data-label="Estado"><span class="chip chip-danger">Fallida</span></td>
+            <td class="cell-date" data-label="Fecha"><span><time datetime="2026-11-15T09:00">15/11/2026 · 09:00</time></span></td>
+          </tr>
+          <tr>
+            <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">SG</span>
+              <span class="entity-text"><span class="entity-name">Sara Gil</span><span class="entity-sub">sara.gil@example.com</span></span></div></td>
+            <td class="nt-msg-cell" data-label="Mensaje"><span class="nt-msg"><span class="nt-title">Recordatorio dieta</span><span class="nt-body">No olvides marcar tus comidas de hoy en la app.</span></span></td>
+            <td class="st-inline" data-label="Estado"><span class="chip chip-success">Enviada</span></td>
+            <td class="cell-date" data-label="Fecha"><span><time datetime="2026-11-14T20:30">14/11/2026 · 20:30</time></span></td>
+          </tr>
+          <tr>
+            <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">CN</span>
+              <span class="entity-text"><span class="entity-name">Carla Núñez</span><span class="entity-sub">carla.nunez@example.com</span></span></div></td>
+            <td class="nt-msg-cell" data-label="Mensaje"><span class="nt-msg"><span class="nt-title">Bienvenida a EXOM</span><span class="nt-body">Tu plan ya está listo. Abre Inicio para ver tu primer entrenamiento.</span></span></td>
+            <td class="st-inline" data-label="Estado"><span class="chip chip-success">Enviada</span></td>
+            <td class="cell-date" data-label="Fecha"><span><time datetime="2026-11-14T10:12">14/11/2026 · 10:12</time></span></td>
+          </tr>
+          <tr class="is-failed">
+            <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">DV</span>
+              <span class="entity-text"><span class="entity-name">Daniel Vega</span><span class="entity-sub">daniel.vega@example.com</span></span></div></td>
+            <td class="nt-msg-cell" data-label="Mensaje"><span class="nt-msg"><span class="nt-title">Revisión de técnica</span><span class="nt-body">He dejado comentarios sobre tu sentadilla búlgara en el feedback.</span><span class="nt-err"><i data-lucide="triangle-alert"></i><span>El cliente no tiene dispositivos registrados.</span></span></span></td>
+            <td class="st-inline" data-label="Estado"><span class="chip chip-danger">Fallida</span></td>
+            <td class="cell-date" data-label="Fecha"><span><time datetime="2026-11-13T19:15">13/11/2026 · 19:15</time></span></td>
+          </tr>
+          <tr>
+            <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">PH</span>
+              <span class="entity-text"><span class="entity-name">Pablo Herrera</span><span class="entity-sub">pablo.herrera@example.com</span></span></div></td>
+            <td class="nt-msg-cell" data-label="Mensaje"><span class="nt-msg"><span class="nt-title">Recordatorio de recap</span><span class="nt-body">Envía tu recap semanal antes del domingo a las 21:00.</span></span></td>
+            <td class="st-inline" data-label="Estado"><span class="chip chip-success">Enviada</span></td>
+            <td class="cell-date" data-label="Fecha"><span><time datetime="2026-11-13T18:00">13/11/2026 · 18:00</time></span></td>
+          </tr>
+          <tr>
+            <td class="cell-primary"><div class="entity"><span class="avatar avatar-32" aria-hidden="true">LM</span>
+              <span class="entity-text"><span class="entity-name">Lucía Martínez</span><span class="entity-sub">lucia.martinez@example.com</span></span></div></td>
+            <td class="nt-msg-cell" data-label="Mensaje"><span class="nt-msg"><span class="nt-title">Nuevo plan asignado</span><span class="nt-body">Ya tienes la planificación de la semana del 16 al 22 de noviembre.</span></span></td>
+            <td class="st-inline" data-label="Estado"><span class="chip chip-success">Enviada</span></td>
+            <td class="cell-date" data-label="Fecha"><span><time datetime="2026-11-12T08:30">12/11/2026 · 08:30</time></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="nt-noresults text-2" hidden>No hay notificaciones que coincidan con los filtros seleccionados</p>
+    <nav class="pagination" aria-label="Paginación"><span class="pagination-label">Página 1 de 31</span>
+      <span class="pagination-actions"><button class="btn btn-secondary btn-sm" type="button" disabled>Anterior</button><button class="btn btn-secondary btn-sm" type="button">Siguiente</button></span></nav>
+  </div>
+
+  <div data-show="loading" aria-busy="true" aria-label="Cargando el historial" hidden>
+    <div class="table-wrap"><table class="table nt-table" aria-hidden="true">
+            <thead><tr>
+              <th scope="col">Destinatario</th>
+              <th scope="col">Mensaje</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Fecha<span class="proposal-tag" data-tip="Hoy solo muestra la fecha, sin hora.">Propuesta</span></th>
+            </tr></thead>
+      <tbody>
+          <tr><td><div class="entity"><span class="sk-circle"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:60%"></span><span class="sk-line" style="--w:80%"></span></span></div></td><td><span class="sk-line" style="--w:40%"></span><span class="sk-line" style="--w:85%;margin-top:8px"></span></td><td><span class="sk-line" style="--w:64px"></span></td><td><span class="sk-line" style="--w:110px"></span></td></tr>
+          <tr><td><div class="entity"><span class="sk-circle"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:60%"></span><span class="sk-line" style="--w:80%"></span></span></div></td><td><span class="sk-line" style="--w:49%"></span><span class="sk-line" style="--w:85%;margin-top:8px"></span></td><td><span class="sk-line" style="--w:64px"></span></td><td><span class="sk-line" style="--w:110px"></span></td></tr>
+          <tr><td><div class="entity"><span class="sk-circle"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:60%"></span><span class="sk-line" style="--w:80%"></span></span></div></td><td><span class="sk-line" style="--w:58%"></span><span class="sk-line" style="--w:85%;margin-top:8px"></span></td><td><span class="sk-line" style="--w:64px"></span></td><td><span class="sk-line" style="--w:110px"></span></td></tr>
+          <tr><td><div class="entity"><span class="sk-circle"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:60%"></span><span class="sk-line" style="--w:80%"></span></span></div></td><td><span class="sk-line" style="--w:67%"></span><span class="sk-line" style="--w:85%;margin-top:8px"></span></td><td><span class="sk-line" style="--w:64px"></span></td><td><span class="sk-line" style="--w:110px"></span></td></tr>
+          <tr><td><div class="entity"><span class="sk-circle"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:60%"></span><span class="sk-line" style="--w:80%"></span></span></div></td><td><span class="sk-line" style="--w:76%"></span><span class="sk-line" style="--w:85%;margin-top:8px"></span></td><td><span class="sk-line" style="--w:64px"></span></td><td><span class="sk-line" style="--w:110px"></span></td></tr>
+          <tr><td><div class="entity"><span class="sk-circle"></span><span class="stack-8" style="flex:1"><span class="sk-line" style="--w:60%"></span><span class="sk-line" style="--w:80%"></span></span></div></td><td><span class="sk-line" style="--w:45%"></span><span class="sk-line" style="--w:85%;margin-top:8px"></span></td><td><span class="sk-line" style="--w:64px"></span></td><td><span class="sk-line" style="--w:110px"></span></td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div data-show="empty" class="section" hidden>
+    <div class="empty"><span class="empty-x" aria-hidden="true"></span>
+      <h2 class="empty-title">Todavía no has enviado notificaciones desde el panel</h2>
+      <p class="empty-text">Aquí verás cada envío con su destinatario, su estado y la fecha.</p>
+      <button class="btn btn-primary" type="button" data-open="#dlg-send" aria-haspopup="dialog"><i data-lucide="send"></i>Enviar notificación</button></div>
+  </div>
+
+  <div data-show="error" hidden>
+    <div class="section"><div class="error-state" role="alert"><i data-lucide="circle-alert"></i>
+      <h2 class="empty-title">Error al cargar el historial de notificaciones. Intenta de nuevo.</h2>
+      <p class="empty-text">Las notificaciones enviadas no se han visto afectadas.</p>
+      <span class="row" style="margin-top:20px"><button class="btn btn-secondary" type="button" data-set-state="data" data-loading-label="Reintentando..." style="margin:0"><i data-lucide="rotate-cw"></i>Reintentar</button><span class="proposal-tag">Propuesta</span></span></div></div>
+  </div>
+
+</main>
+</div>
+
+<!-- ===================== Send dialog ===================== -->
+<div class="overlay" id="dlg-send" data-static hidden>
+  <div class="dialog dialog-lg" role="dialog" aria-modal="true" aria-labelledby="sd-t" aria-describedby="sd-d">
+    <div class="ov-head">
+      <div class="ov-head-text">
+        <h2 class="ov-title" id="sd-t">Enviar notificación</h2>
+        <p class="ov-desc" id="sd-d">Envía un mensaje puntual a uno o varios clientes, o a toda tu cartera visible desde el panel.</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ov-body">
+      <div class="sd-grid">
+        <form id="form-send" class="sd-form" novalidate onsubmit="return false">
+          <div class="banner banner-danger" data-v="cartera" role="alert" hidden><i data-lucide="circle-alert"></i><span class="banner-text">No se pudo cargar la cartera de clientes</span><span class="banner-actions"><button class="btn btn-ghost btn-sm" type="button" data-retry-cartera><i data-lucide="rotate-cw"></i>Reintentar</button></span></div>
+
+          <div class="tpl-block">
+            <span class="field-label" id="tpl-l">Plantillas rápidas</span>
+            <div class="tpl-row" role="group" aria-labelledby="tpl-l">
+              <button class="tpl-btn" type="button" data-tpl="recap">Recordatorio recap</button>
+              <button class="tpl-btn" type="button" data-tpl="entreno">Recordatorio entreno</button>
+              <button class="tpl-btn" type="button" data-tpl="dieta">Recordatorio dieta</button>
+            </div>
+            <span class="micro">Guardadas</span>
+            <div class="tpl-row" role="group" aria-label="Plantillas guardadas">
+              <button class="tpl-btn" type="button" data-tpl="semanal">Felicitación semanal</button>
+              <button class="tpl-btn" type="button" data-tpl="mensual">Revisión mensual</button>
+            </div>
+          </div>
+
+          <div class="sd-all">
+            <label class="switch"><input type="checkbox" role="switch" id="send-all">Enviar a todos mis clientes</label>
+            <p class="field-help" id="send-all-help">Se enviará a 46 clientes visibles.</p>
+          </div>
+
+          <div class="field" id="recip-field">
+            <span class="field-label" id="recip-l">Destinatarios</span>
+            <button class="combo" type="button" id="recip-btn" data-open="#pop-recip" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="recip-l recip-btn-t"><span id="recip-btn-t">Seleccionar destinatarios...</span><i data-lucide="chevrons-up-down"></i></button>
+            <div class="recip-chips" id="recip-chips" aria-live="polite"></div>
+            <p class="field-help" id="recip-help">Puedes elegir uno o varios clientes concretos.</p>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="sd-title">Título</label>
+            <input class="input" id="sd-title" maxlength="100" placeholder="Nuevo recordatorio" required data-preview="title">
+            <div class="field-foot"><span class="proposal-tag" style="margin-top:6px">Contadores · Propuesta</span><span class="field-count" aria-live="polite" data-count-for="sd-title">0/100</span></div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="sd-route">Al abrir, lleva a <span class="proposal-tag">Propuesta</span></label>
+            <select class="select" id="sd-route">
+              <option selected>Inicio</option><option>Recap</option><option>Entrenamiento</option><option>Dieta</option><option>Reto</option><option>Calendario</option><option>Perfil</option>
+            </select>
+            <p class="field-help">Pantalla de la app que se abre al tocar la notificación.</p>
+          </div>
+          <div class="field">
+            <label class="field-label" for="sd-body">Cuerpo</label>
+            <textarea class="textarea" id="sd-body" rows="4" maxlength="500" required data-count placeholder="Escribe el mensaje que recibirán tus clientes..." data-preview="body"></textarea>
+            <div class="field-foot"><span></span><span class="field-count" aria-live="polite">0/500</span></div>
+          </div>
+        </form>
+
+        <aside class="sd-preview" aria-labelledby="pv-l">
+          <span class="row"><span class="micro" id="pv-l">Vista previa</span><span class="proposal-tag">Propuesta</span></span>
+          <div class="lock" aria-hidden="true">
+            <span class="lock-time">18:42</span>
+            <span class="lock-date">domingo, 15 de noviembre</span>
+            <div class="push">
+              <div class="push-top"><span class="push-icon"><svg viewBox="0 0 120 112" aria-hidden="true" focusable="false"><path class="half-a" d="M46 110C20 106 0 84 0 56C0 33 14 12 35 3C48-2 60 4 62 16C66 29 57 39 44 39C36 39 28 35 23 28C11 38 5 51 7 65C9 86 24 103 46 109Z"/><path class="half-b" transform="rotate(180 60 56)" d="M46 110C20 106 0 84 0 56C0 33 14 12 35 3C48-2 60 4 62 16C66 29 57 39 44 39C36 39 28 35 23 28C11 38 5 51 7 65C9 86 24 103 46 109Z"/></svg></span><span class="push-app">EXOM</span><span class="push-when">ahora</span></div>
+              <p class="push-title" data-pv-title>Nuevo recordatorio</p>
+              <p class="push-body" data-pv-body>Escribe el mensaje que recibirán tus clientes...</p>
+            </div>
+          </div>
+          <p class="sd-reach" aria-live="polite"><i data-lucide="users"></i><span data-reach>Se enviará a 3 clientes</span></p>
+          <p class="caption" data-pv-route>Al tocarla se abrirá Inicio.</p>
+        </aside>
+      </div>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="sd-send" data-loading-label="Enviando..."><i data-lucide="send"></i>Enviar notificación</button>
+    </div>
+    <div class="popover" id="pop-recip" role="dialog" aria-label="Seleccionar destinatarios" data-align="start" style="--w:360px" hidden>
+      <div class="popover-body">
+        <label class="input-icon"><span class="sr-only">Buscar por nombre o email</span><i data-lucide="search"></i><input class="input" type="search" placeholder="Buscar por nombre o email..." autocomplete="off" data-recip-search></label>
+        <div class="opt-list" role="listbox" aria-multiselectable="true" aria-label="Clientes">
+            <button class="opt" type="button" role="option" aria-selected="true" data-recip="Lucía Martínez" data-av="LM" data-q="lucía martínez lucia.martinez@example.com"><span class="opt-box" aria-hidden="true"><i data-lucide="check"></i></span><span class="avatar avatar-28" aria-hidden="true">LM</span><span><span>Lucía Martínez</span><span class="opt-sub">lucia.martinez@example.com</span></span></button>
+            <button class="opt" type="button" role="option" aria-selected="true" data-recip="Javier Ortega" data-av="JO" data-q="javier ortega javier.ortega@example.com"><span class="opt-box" aria-hidden="true"><i data-lucide="check"></i></span><span class="avatar avatar-28" aria-hidden="true">JO</span><span><span>Javier Ortega</span><span class="opt-sub">javier.ortega@example.com</span></span></button>
+            <button class="opt" type="button" role="option" aria-selected="true" data-recip="Marta Ruiz" data-av="MR" data-q="marta ruiz marta.ruiz@example.com"><span class="opt-box" aria-hidden="true"><i data-lucide="check"></i></span><span class="avatar avatar-28" aria-hidden="true">MR</span><span><span>Marta Ruiz</span><span class="opt-sub">marta.ruiz@example.com</span></span></button>
+            <button class="opt" type="button" role="option" aria-selected="false" data-recip="Sara Gil" data-av="SG" data-q="sara gil sara.gil@example.com"><span class="opt-box" aria-hidden="true"><i data-lucide="check"></i></span><span class="avatar avatar-28" aria-hidden="true">SG</span><span><span>Sara Gil</span><span class="opt-sub">sara.gil@example.com</span></span></button>
+            <button class="opt" type="button" role="option" aria-selected="false" data-recip="Carla Núñez" data-av="CN" data-q="carla núñez carla.nunez@example.com"><span class="opt-box" aria-hidden="true"><i data-lucide="check"></i></span><span class="avatar avatar-28" aria-hidden="true">CN</span><span><span>Carla Núñez</span><span class="opt-sub">carla.nunez@example.com</span></span></button>
+            <button class="opt" type="button" role="option" aria-selected="false" data-recip="Daniel Vega" data-av="DV" data-q="daniel vega daniel.vega@example.com"><span class="opt-box" aria-hidden="true"><i data-lucide="check"></i></span><span class="avatar avatar-28" aria-hidden="true">DV</span><span><span>Daniel Vega</span><span class="opt-sub">daniel.vega@example.com</span></span></button>
+            <button class="opt" type="button" role="option" aria-selected="false" data-recip="Pablo Herrera" data-av="PH" data-q="pablo herrera pablo.herrera@example.com"><span class="opt-box" aria-hidden="true"><i data-lucide="check"></i></span><span class="avatar avatar-28" aria-hidden="true">PH</span><span><span>Pablo Herrera</span><span class="opt-sub">pablo.herrera@example.com</span></span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm send to all (PROPOSAL) -->
+<div class="overlay" id="dlg-all" data-static hidden>
+  <div class="dialog dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="al-t" aria-describedby="al-d">
+    <div class="ov-head"><div class="ov-head-text"><h2 class="ov-title" id="al-t">Enviar a todos tus clientes</h2></div>
+      <button class="btn btn-ghost btn-icon" type="button" data-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+    <div class="ov-body stack-12">
+      <p class="prose-13" id="al-d">Vas a enviar esta notificación a <b>46 clientes</b>.</p>
+      <p class="caption">El envío es inmediato y no se puede deshacer. <span class="proposal-tag">Propuesta</span></p>
+    </div>
+    <div class="ov-foot">
+      <button class="btn btn-secondary" type="button" data-close>Revisar</button>
+      <button class="btn btn-primary" type="button" id="al-ok" data-loading-label="Enviando..."><i data-lucide="send"></i>Enviar a 46 clientes</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
