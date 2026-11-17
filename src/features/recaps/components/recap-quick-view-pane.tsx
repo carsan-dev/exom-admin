@@ -1,14 +1,20 @@
 import { EmptyState } from '@/components/page'
 import type { RecapListItem } from '../types'
-import { RecapQuickView, type RecapFocusRequest, type RecapReplyValues } from './recap-quick-view'
+import {
+  RecapQuickView,
+  type RecapFocusRequest,
+  type RecapReplyDraft,
+  type RecapReplyMode,
+  type RecapReplyValues,
+} from './recap-quick-view'
 
 export const RECAP_QUICK_VIEW_PANE_ID = 'recap-detail'
 
 interface RecapQuickViewPaneProps {
   item: RecapListItem | null
-  draft: RecapReplyValues | undefined
-  onDraftChange: (id: string, values: RecapReplyValues, saved: RecapReplyValues) => void
-  onSend: (item: RecapListItem, values: RecapReplyValues) => void
+  draft: RecapReplyDraft | undefined
+  onDraftChange: (id: string, values: RecapReplyDraft, saved: RecapReplyValues) => void
+  onSend: (item: RecapListItem, values: RecapReplyValues, mode: RecapReplyMode) => void
   onDraftDiscard: (id: string) => void
   isSending: boolean
   focusRequest: RecapFocusRequest | null

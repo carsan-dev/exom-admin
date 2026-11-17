@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { useRecapDetail } from '../api'
-import { isRecapPendingReview } from '../recaps-selection'
+import { hasRecapReplyChanges, isRecapEditableAfterReview, isRecapPendingReview } from '../recaps-selection'
 import { formatRecapOption, getRecapClientName } from '../types'
 import type { RecapItem, RecapListItem } from '../types'
 import { formatDate, formatWeekRange } from './recap-detail-format'
@@ -19,6 +19,14 @@ import { getRecapDetailPath } from './recaps-list-format'
 export interface RecapReplyValues {
   clientFeedback: string
   internalNote: string
+}
+
+/** `review`: primera revisión de un pendiente. `edit`: cambios en un recap ya revisado. */
+export type RecapReplyMode = 'review' | 'edit'
+
+/** Borrador local de un recap, con el modo en el que se empezó a escribir. */
+export interface RecapReplyDraft extends RecapReplyValues {
+  mode: RecapReplyMode
 }
 
 /**
@@ -131,10 +139,13 @@ interface RecapReplyFormProps {
   onChange: (values: RecapReplyValues) => void
   onSend: () => void
   isSending: boolean
+  mode: RecapReplyMode
+  /** En `edit`, solo si el comentario o la nota cambian respecto a lo guardado. */
+  canSubmit: boolean
   commentRef: RefObject<HTMLTextAreaElement | null>
 }
 
-function RecapReplyForm({ values, onChange, onSend, isSending, commentRef }: RecapReplyFormProps) {
+function RecapReplyForm({ values, onChange, onSend, isSending, mode, canSubmit, commentRef }: RecapReplyFormProps) {
   const fieldId = useId()
   const commentId = `${fieldId}-comment`
   const noteId = `${fieldId}-note`
@@ -184,8 +195,14 @@ function RecapReplyForm({ values, onChange, onSend, isSending, commentRef }: Rec
         </div>
       </details>
 
-      <Button type="button" onClick={onSend} disabled={isSending} className="max-md:h-11 max-md:w-full">
-        {isSending ? 'Enviando...' : 'Enviar y marcar revisado'}
+      <Button type="button" onClick={onSend} disabled={isSending || !canSubmit} className="max-md:h-11 max-md:w-full">
+        {mode === 'edit'
+          ? isSending
+            ? 'Guardando...'
+            : 'Guardar cambios'
+          : isSending
+            ? 'Enviando...'
+            : 'Enviar y marcar revisado'}
       </Button>
     </div>
   )
@@ -212,12 +229,12 @@ function RecapQuickViewSkeleton() {
 interface RecapQuickViewProps {
   item: RecapListItem
   /** Respuesta local de este recap; `undefined` si no se ha editado. */
-  draft: RecapReplyValues | undefined
+  draft: RecapReplyDraft | undefined
   /** `saved` son los valores guardados con los que se compara el borrador. */
-  onDraftChange: (id: string, values: RecapReplyValues, saved: RecapReplyValues) => void
-  /** Envía la revisión (valores ya recortados). La mutación vive en la página. */
-  onSend: (item: RecapListItem, values: RecapReplyValues) => void
-  /** Descarta el borrador de este recap cuando ya no admite respuesta. */
+  onDraftChange: (id: string, values: RecapReplyDraft, saved: RecapReplyValues) => void
+  /** Envía la revisión o los cambios (valores ya recortados). La mutación vive en la página. */
+  onSend: (item: RecapListItem, values: RecapReplyValues, mode: RecapReplyMode) => void
+  /** Descarta el borrador de este recap cuando ya no admite respuesta o cambia de modo. */
   onDraftDiscard: (id: string) => void
   /** Hay un envío de este recap en vuelo. */
   isSending: boolean
@@ -252,15 +269,20 @@ export function RecapQuickView({
   const archivedAt = detail ? detail.archived_at : item.archived_at
   const detailState = detail ? 'ready' : detailQuery.isError ? 'error' : 'loading'
   const canReply = Boolean(detail) && isRecapPendingReview({ status, archived_at: archivedAt })
+  const canEdit = Boolean(detail) && isRecapEditableAfterReview({ status, archived_at: archivedAt })
+  const canWrite = canReply || canEdit
+  const mode: RecapReplyMode = canEdit ? 'edit' : 'review'
   const sectionHeading: HeadingTag = Title === 'h2' ? 'h3' : 'h4'
   const SectionHeading = sectionHeading
 
-  // Con el detalle cargado y sin poder responder (revisado o archivado por otro), el borrador no se puede
-  // enviar ni descartar desde aquí: se retira para no dejar activo el aviso de cambios sin guardar.
-  const hasDraft = draft !== undefined
+  // Con el detalle cargado y sin poder escribir (archivado por otro), el borrador no se puede enviar ni
+  // descartar desde aquí: se retira para no dejar activo el aviso de cambios sin guardar. También si el
+  // modo cambió (otra persona revisó el pendiente): una respuesta pensada para un pendiente no debe
+  // sobrescribir con «Guardar cambios» lo que esa persona guardó.
+  const draftMode = draft?.mode
   useEffect(() => {
-    if (detailState === 'ready' && !canReply && hasDraft) onDraftDiscard(item.id)
-  }, [detailState, canReply, hasDraft, onDraftDiscard, item.id])
+    if (detailState === 'ready' && draftMode !== undefined && (!canWrite || draftMode !== mode)) onDraftDiscard(item.id)
+  }, [detailState, canWrite, mode, draftMode, onDraftDiscard, item.id])
 
   useEffect(() => {
     if (!focusRequest) return
@@ -286,22 +308,24 @@ export function RecapQuickView({
     const userMovedFocus =
       headingFocusedWhileLoading.current && active !== heading && active !== document.body && active !== null
     if (!userMovedFocus) {
-      if (canReply && commentRef.current) commentRef.current.focus()
+      if (canWrite && commentRef.current) commentRef.current.focus()
       else heading?.focus()
     }
     onFocusHandled()
-  }, [focusRequest, detailState, canReply, onFocusHandled])
+  }, [focusRequest, detailState, canWrite, onFocusHandled])
 
   const saved: RecapReplyValues = {
     clientFeedback: detail?.client_feedback_text ?? '',
     internalNote: detail?.admin_comments ?? '',
   }
-  const values = draft ?? saved
+  const values: RecapReplyValues = draft && draft.mode === mode ? draft : saved
   const clientNotes = detail ? getClientNotes(detail) : []
+  // Igual que la página de detalle: un pendiente se envía aunque no haya cambios; un revisado, solo si cambia algo.
+  const canSubmit = canReply || (canEdit && hasRecapReplyChanges(values, saved))
 
   function handleSend() {
-    if (!canReply || isSending) return
-    onSend(item, { clientFeedback: values.clientFeedback.trim(), internalNote: values.internalNote.trim() })
+    if (!canWrite || !canSubmit || isSending) return
+    onSend(item, { clientFeedback: values.clientFeedback.trim(), internalNote: values.internalNote.trim() }, mode)
   }
 
   return (
@@ -371,14 +395,24 @@ export function RecapQuickView({
 
           <section className="min-w-0 space-y-3">
             <SectionHeading className={SECTION_TITLE_CLASS}>Revisión del admin</SectionHeading>
-            {canReply ? (
-              <RecapReplyForm
-                values={values}
-                onChange={(next) => onDraftChange(item.id, next, saved)}
-                onSend={handleSend}
-                isSending={isSending}
-                commentRef={commentRef}
-              />
+            {canWrite ? (
+              <>
+                <RecapReplyForm
+                  key={mode}
+                  values={values}
+                  onChange={(next) => onDraftChange(item.id, { clientFeedback: next.clientFeedback, internalNote: next.internalNote, mode }, saved)}
+                  onSend={handleSend}
+                  isSending={isSending}
+                  mode={mode}
+                  canSubmit={canSubmit}
+                  commentRef={commentRef}
+                />
+                {canEdit && (
+                  <p className="text-sm text-foreground-secondary">
+                    Para la revisión compartible, imprimir o archivar, abre «Ver completo».
+                  </p>
+                )}
+              </>
             ) : (
               <div className="space-y-3">
                 {(detail.client_feedback_text?.trim() || detail.admin_comments?.trim()) && (
@@ -398,7 +432,9 @@ export function RecapQuickView({
                   </dl>
                 )}
                 <p className="text-sm text-foreground-secondary">
-                  Para editar los comentarios, la revisión compartible, imprimir o archivar, abre «Ver completo».
+                  {archivedAt
+                    ? 'Recap archivado: los comentarios son de solo lectura. Para consultar la revisión compartible o imprimir, abre «Ver completo».'
+                    : 'Para consultar la revisión compartible o imprimir, abre «Ver completo».'}
                 </p>
               </div>
             )}

@@ -8,6 +8,25 @@ export function isRecapPendingReview(item: Pick<RecapListItem, 'status' | 'archi
 }
 
 /**
+ * Recap ya revisado cuyo comentario para el cliente y nota interna se pueden editar (sin archivar).
+ * No forma parte de la cola de pendientes: `getNextPendingRecap` no lo usa.
+ */
+export function isRecapEditableAfterReview(item: Pick<RecapListItem, 'status' | 'archived_at'>) {
+  return item.status === 'REVIEWED' && !item.archived_at
+}
+
+/**
+ * ¿Cambia el comentario para el cliente o la nota interna respecto a lo guardado? Compara sin espacios
+ * en los extremos: es la regla de «Guardar cambios» de un recap revisado (página de detalle y panel).
+ */
+export function hasRecapReplyChanges(
+  current: { clientFeedback: string; internalNote: string },
+  saved: { clientFeedback: string; internalNote: string },
+) {
+  return current.internalNote.trim() !== saved.internalNote.trim() || current.clientFeedback.trim() !== saved.clientFeedback.trim()
+}
+
+/**
  * Siguiente recap POR REVISAR de la lista cargada, en el orden de la lista:
  * el primero pendiente tras `fromId` y, si no hay posterior, el primero pendiente
  * restante. `fromId` nunca se devuelve. `null` si no queda ninguno.

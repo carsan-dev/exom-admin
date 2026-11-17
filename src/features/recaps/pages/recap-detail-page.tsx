@@ -16,6 +16,7 @@ import { RecapLegacyErrorPanel } from '../components/recap-legacy-error-panel'
 import { RecapLegacyReviewCard } from '../components/recap-legacy-review-card'
 import { RecapReviewEditor } from '../components/recap-review-editor'
 import { toRecapPrintModel } from '../components/recap-print-model'
+import { hasRecapReplyChanges } from '../recaps-selection'
 import { getRecapClientName } from '../types'
 
 export function RecapDetailPage() {
@@ -83,8 +84,10 @@ function ScopedRecapDetailPage({ id, identity }: { id?: string; identity: string
       !reviewMutation.isPending && !archiveMutation.isPending && !reviewPending && !legacyError &&
       (canReviewSubmittedRecap ||
         (canEditReviewedComment &&
-          (internalNote.trim() !== existingInternalNote.trim() ||
-            clientFeedback.trim() !== existingClientFeedback.trim()))),
+          hasRecapReplyChanges(
+            { clientFeedback, internalNote },
+            { clientFeedback: existingClientFeedback, internalNote: existingInternalNote },
+          ))),
   )
 
   const reviewButtonLabel = useMemo(() => {

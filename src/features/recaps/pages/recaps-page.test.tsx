@@ -204,6 +204,10 @@ const comment = () => screen.getByLabelText('Comentario para el cliente')
 const findComment = () => screen.findByLabelText('Comentario para el cliente')
 const internalNote = () => screen.getByLabelText('Nota interna (solo visible para el equipo)')
 const sendButton = () => screen.getByRole('button', { name: 'Enviar y marcar revisado' })
+const saveButton = () => screen.getByRole('button', { name: 'Guardar cambios' })
+const PUSH_WARNING = 'Este texto es visible para el cliente. Si lo cambias se enviará una notificación push.'
+const EDIT_HELP = 'Para la revisión compartible, imprimir o archivar, abre «Ver completo».'
+const ARCHIVED_HELP = 'Recap archivado: los comentarios son de solo lectura. Para consultar la revisión compartible o imprimir, abre «Ver completo».'
 
 describe('RecapsPage', () => {
   beforeEach(() => {
@@ -390,17 +394,22 @@ describe('RecapsPage', () => {
       expect(internalNote().closest('details')).not.toHaveAttribute('open')
     })
 
-    it('renders a reviewed recap read-only with the sent comment and internal note', async () => {
+    // Decisión del propietario: un recap revisado y no archivado se edita desde el panel.
+    it('renders a reviewed, non-archived recap with the form preloaded, the push warning and «Guardar cambios»', async () => {
       mockApi()
       const user = userEvent.setup()
       renderPage()
 
       await user.click(await findRow(/Beto Test/))
-      expect(await screen.findByText('Sigue así')).toBeInTheDocument()
-      expect(screen.getByText('Buen trabajo')).toBeInTheDocument()
-      expect(screen.queryByLabelText('Comentario para el cliente')).not.toBeInTheDocument()
+      expect(await findComment()).toHaveValue('Sigue así')
+      expect(internalNote()).toHaveValue('Buen trabajo')
+      expect(internalNote().closest('details')).toHaveAttribute('open')
+      expect(screen.getByText(PUSH_WARNING)).toBeInTheDocument()
+      expect(comment()).toHaveAccessibleDescription(PUSH_WARNING)
+      // Sin cambios no hay nada que guardar.
+      expect(saveButton()).toBeDisabled()
       expect(screen.queryByRole('button', { name: 'Enviar y marcar revisado' })).not.toBeInTheDocument()
-      expect(screen.getByText(/abre «Ver completo»/)).toBeInTheDocument()
+      expect(screen.getByText(EDIT_HELP)).toBeInTheDocument()
       expect(screen.getByRole('link', { name: 'Ver completo' })).toHaveAttribute('href', '/recaps/r2')
     })
 
@@ -412,6 +421,21 @@ describe('RecapsPage', () => {
       await user.click(await findRow(/Dani Test/))
       expect(await screen.findByText('Archivado ya')).toBeInTheDocument()
       expect(screen.queryByLabelText('Comentario para el cliente')).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Guardar cambios' })).not.toBeInTheDocument()
+      expect(screen.queryByText(PUSH_WARNING)).not.toBeInTheDocument()
+      expect(screen.getByText(ARCHIVED_HELP)).toBeInTheDocument()
+    })
+
+    it('does not show the edit help text on a pending recap', async () => {
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Ana Test/))
+      await findComment()
+      expect(screen.getByText(PUSH_WARNING)).toBeInTheDocument()
+      expect(screen.queryByText(EDIT_HELP)).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Guardar cambios' })).not.toBeInTheDocument()
     })
 
     it('shows an inline error with retry when the detail fails to load, keeping the header', async () => {
@@ -529,7 +553,7 @@ describe('RecapsPage', () => {
       expect(toast.info).not.toHaveBeenCalled()
     })
 
-    it('warns when none are left and keeps the answered recap shown read-only with focus on its heading', async () => {
+    it('warns when none are left and keeps the answered recap shown, now editable, with focus on its heading', async () => {
       store = [makeRecap('r1', 'Ana'), makeRecap('r2', 'Beto', { status: 'REVIEWED' })]
       mockApi()
       const user = userEvent.setup()
@@ -541,8 +565,9 @@ describe('RecapsPage', () => {
 
       await waitFor(() => expect(toast.info).toHaveBeenCalledWith('No quedan recaps por revisar en esta lista.'))
       const heading = screen.getByRole('heading', { level: 2, name: 'Ana Test' })
-      await waitFor(() => expect(screen.queryByLabelText('Comentario para el cliente')).not.toBeInTheDocument())
-      expect(await screen.findByText('Último')).toBeInTheDocument()
+      // Ya revisado y sin archivar: se puede seguir editando con «Guardar cambios».
+      await waitFor(() => expect(saveButton()).toBeDisabled())
+      expect(comment()).toHaveValue('Último')
       expect(heading).toHaveFocus()
     })
 
@@ -632,6 +657,142 @@ describe('RecapsPage', () => {
     })
   })
 
+  describe('edición de revisados', () => {
+    it('saves the trimmed comment and note, keeps the selection and focuses the heading', async () => {
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Beto Test/))
+      await user.clear(await findComment())
+      await user.type(comment(), '  Nuevo comentario  ')
+      expect(saveButton()).toBeEnabled()
+      await user.click(saveButton())
+
+      await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Comentario guardado correctamente'))
+      expect(api.put).toHaveBeenCalledTimes(1)
+      expect(api.put).toHaveBeenCalledWith('/recaps/r2/review', {
+        admin_comments: 'Buen trabajo',
+        client_feedback_text: 'Nuevo comentario',
+      })
+      // No salta al siguiente por revisar.
+      expect(toast.info).not.toHaveBeenCalled()
+      const heading = screen.getByRole('heading', { level: 2, name: 'Beto Test' })
+      expect(row(/Beto Test/)).toHaveAttribute('aria-current', 'true')
+      await waitFor(() => expect(heading).toHaveFocus())
+      expect(comment()).toHaveValue('Nuevo comentario')
+      expect(saveButton()).toBeDisabled()
+      expect(row(/Beto Test/)).not.toHaveAccessibleName(/Borrador/)
+      expect(useUnsavedChangesStore.getState().hasUnsavedChanges).toBe(false)
+    })
+
+    it('sends the unchanged comment when only the internal note changes', async () => {
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Beto Test/))
+      await findComment()
+      await user.clear(internalNote())
+      await user.type(internalNote(), 'Nota nueva')
+      await user.click(saveButton())
+
+      await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1))
+      expect(api.put).toHaveBeenCalledWith('/recaps/r2/review', {
+        admin_comments: 'Nota nueva',
+        client_feedback_text: 'Sigue así',
+      })
+    })
+
+    it('keeps the button disabled when the change is only surrounding whitespace', async () => {
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Beto Test/))
+      await user.type(await findComment(), '   ')
+      expect(saveButton()).toBeDisabled()
+      await user.click(saveButton())
+      expect(api.put).not.toHaveBeenCalled()
+    })
+
+    it('disables the form while saving and issues a single PUT', async () => {
+      mockApi()
+      const put = deferNextPut()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Beto Test/))
+      await user.type(await findComment(), '!')
+      await user.click(saveButton())
+
+      const saving = screen.getByRole('button', { name: 'Guardando...' })
+      expect(saving).toBeDisabled()
+      expect(comment()).toBeDisabled()
+      await user.click(saving)
+      expect(api.put).toHaveBeenCalledTimes(1)
+      expect(useUnsavedChangesStore.getState().hasUnsavedChanges).toBe(true)
+
+      put.resolve()
+      await waitFor(() => expect(toast.success).toHaveBeenCalledTimes(1))
+      expect(api.put).toHaveBeenCalledTimes(1)
+    })
+
+    it('keeps the edit draft per recap across selection changes', async () => {
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Beto Test/))
+      await user.type(await findComment(), ' y más')
+      expect(row(/Beto Test/)).toHaveAccessibleName(/Borrador de respuesta sin enviar/)
+      expect(useUnsavedChangesStore.getState().hasUnsavedChanges).toBe(true)
+
+      await user.click(row(/Ana Test/))
+      expect(await findComment()).toHaveValue('')
+      await user.click(row(/Beto Test/))
+      expect(await findComment()).toHaveValue('Sigue así y más')
+      expect(saveButton()).toBeEnabled()
+    })
+
+    it('keeps the draft and the selection when the save fails', async () => {
+      mockApi()
+      const put = deferNextPut()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Beto Test/))
+      await user.type(await findComment(), '!')
+      await user.click(saveButton())
+      put.reject()
+
+      await waitFor(() => expect(toast.error).toHaveBeenCalledTimes(1))
+      expect(toast.success).not.toHaveBeenCalled()
+      expect(screen.getByRole('heading', { level: 2, name: 'Beto Test' })).toBeInTheDocument()
+      expect(comment()).toHaveValue('Sigue así!')
+      expect(saveButton()).toBeEnabled()
+      expect(useUnsavedChangesStore.getState().hasUnsavedChanges).toBe(true)
+    })
+
+    it('keeps the dialog on the edited recap after saving on mobile', async () => {
+      stubViewport(false)
+      mockApi()
+      const user = userEvent.setup()
+      renderPage()
+
+      await user.click(await findRow(/Beto Test/))
+      const dialog = await screen.findByRole('dialog', { name: 'Detalle de recap' })
+      await user.type(await within(dialog).findByLabelText('Comentario para el cliente'), '!')
+      await user.click(within(dialog).getByRole('button', { name: 'Guardar cambios' }))
+
+      await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Comentario guardado correctamente'))
+      expect(screen.getByRole('dialog', { name: 'Detalle de recap' })).toBeInTheDocument()
+      const heading = within(dialog).getByRole('heading', { level: 3, name: 'Beto Test' })
+      await waitFor(() => expect(heading).toHaveFocus())
+      expect(toast.info).not.toHaveBeenCalled()
+    })
+  })
+
   describe('foco', () => {
     it('focuses the pane heading while the detail loads, without stealing focus later, and the comment when already loaded', async () => {
       mockApi()
@@ -659,12 +820,12 @@ describe('RecapsPage', () => {
       const user = userEvent.setup()
       renderPage()
 
-      await user.click(await findRow(/Beto Test/))
-      await screen.findByText('Sigue así')
+      await user.click(await findRow(/Dani Test/))
+      await screen.findByText('Archivado ya')
       await user.click(row(/Ana Test/))
       await findComment()
-      await user.click(row(/Beto Test/))
-      expect(screen.getByRole('heading', { level: 2, name: 'Beto Test' })).toHaveFocus()
+      await user.click(row(/Dani Test/))
+      expect(screen.getByRole('heading', { level: 2, name: 'Dani Test' })).toHaveFocus()
     })
   })
 
