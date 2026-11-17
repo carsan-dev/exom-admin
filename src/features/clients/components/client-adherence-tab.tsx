@@ -91,8 +91,10 @@ function DayDetail({ day }: { day: AdherenceDay }) {
     <p className="text-sm text-foreground-secondary">{day.evaluation.period === 'provisional' ? 'Provisional · no incluido en el periodo cerrado'
       : day.evaluation.period === 'future' ? 'Fecha futura · no penaliza el periodo cerrado' : 'Día cerrado'}</p>
     <p className="text-xs text-foreground-muted">{day.basis === 'original' ? 'Pauta original al cierre UTC conservada'
-      : day.basis === 'current_provisional' ? 'Pauta actual provisional' : 'Pauta original desconocida'}
+      : day.basis === 'current_provisional' ? 'Pauta actual provisional'
+        : day.basis === 'current_fallback' ? 'Estimado con la pauta actual' : 'Pauta original desconocida'}
       {day.revision !== null && ` · Revisión ${day.revision}`}</p>
+    {day.basis === 'current_fallback' && <p className="text-xs text-foreground-muted">Este día no tenía la pauta guardada; se evalúa con la pauta vigente del cliente.</p>}
     <p className="text-sm text-foreground-secondary">Entrenamiento: {scheduleLabels[day.schedule.training]} · Nutrición: {scheduleLabels[day.schedule.nutrition]}</p>
     <Aggregate value={day.evaluation} />
     <p className="text-xs text-foreground-muted">Configuración {day.configuration.known ? `versión ${day.configuration.version ?? 'sin versión'}` : 'desconocida'}
@@ -122,10 +124,11 @@ function Report({ report, comparison }: { report: AdherenceReport; comparison?: 
         <p className="text-sm text-foreground-muted">Selecciona un día para consultar su pauta y evaluación UTC. El estado diario no clasifica baja adherencia global.</p>
         <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold uppercase text-foreground-muted" aria-hidden="true">{['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((label) => <span key={label}>{label}</span>)}</div>
         <div className="grid grid-cols-7 gap-1">
-          {days.map((day) => <button key={day.date} type="button" style={{ gridColumn: ((new Date(day.date + 'T00:00:00Z').getUTCDay() + 6) % 7) + 1 }} aria-label={`${day.date} · ${calendarLabels[day.calendar]} · ${day.evaluation.period === 'provisional' ? 'Provisional' : day.evaluation.period === 'future' ? 'Futuro' : 'Día cerrado'}`} aria-pressed={selected?.date === day.date} onClick={() => setSelectedDate(day.date)} className={cn('min-h-14 min-w-0 rounded-md border border-border p-1 text-center text-sm tabular-nums text-foreground transition-colors motion-reduce:transition-none hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', selected?.date === day.date && 'border-brand-primary bg-brand-soft/10 ring-1 ring-brand-primary', day.calendar === 'complete' && 'border-status-success/50', day.calendar === 'partial' && 'border-status-warning/50', day.calendar === 'incomplete' && 'border-status-error/50')}>
+          {days.map((day) => <button key={day.date} type="button" style={{ gridColumn: ((new Date(day.date + 'T00:00:00Z').getUTCDay() + 6) % 7) + 1 }} aria-label={`${day.date} · ${calendarLabels[day.calendar]} · ${day.evaluation.period === 'provisional' ? 'Provisional' : day.evaluation.period === 'future' ? 'Futuro' : 'Día cerrado'}${day.basis === 'current_fallback' ? ' · estimado' : ''}`} aria-pressed={selected?.date === day.date} onClick={() => setSelectedDate(day.date)} className={cn('min-h-14 min-w-0 rounded-md border border-border p-1 text-center text-sm tabular-nums text-foreground transition-colors motion-reduce:transition-none hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', selected?.date === day.date && 'border-brand-primary bg-brand-soft/10 ring-1 ring-brand-primary', day.calendar === 'complete' && 'border-status-success/50', day.calendar === 'partial' && 'border-status-warning/50', day.calendar === 'incomplete' && 'border-status-error/50')}>
             <span className="block font-semibold">{day.date.slice(8)}/{day.date.slice(5, 7)}</span>
             <span className="block text-[10px] leading-tight">{day.calendar === 'complete' ? 'Completo' : day.calendar === 'partial' ? 'Parcial' : day.calendar === 'incomplete' ? 'Sin cumplir' : day.calendar === 'insufficient' ? 'Sin datos' : day.calendar === 'not_assigned' ? 'Sin pauta' : calendarLabels[day.calendar]}</span>
             {day.evaluation.period === 'provisional' && <span className="block text-[10px]">Provisional</span>}
+            {day.basis === 'current_fallback' && <span className="block text-[10px]" aria-hidden="true">· est.</span>}
           </button>)}
         </div>
         {selected ? <DayDetail key={selected.date} day={selected} /> : <p className="text-sm text-foreground-muted">No hay días disponibles en este periodo.</p>}
