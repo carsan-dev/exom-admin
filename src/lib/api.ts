@@ -4,6 +4,17 @@ import { toast } from 'sonner'
 import { auth, getIdToken } from './firebase'
 import { ApprovalPendingError } from './api-utils'
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    /**
+     * Client-only flag (never sent to the server): skip the «solicitud enviada» toast for an
+     * approval receipt (202 with `approval_request_id`). The request still rejects with
+     * `ApprovalPendingError`. Used by bulk actions that summarise approvals themselves.
+     */
+    suppressApprovalToast?: boolean
+  }
+}
+
 const AUTH_ROUTES_WITHOUT_REDIRECT = new Set([
   '/auth/login',
   '/auth/social',
@@ -43,7 +54,9 @@ api.interceptors.response.use(
       const approvalData = response.data?.data ?? response.data
       // Deletion also returns 202; approval receipts have their own identifier.
       if (typeof approvalData?.approval_request_id !== 'string') return response
-      toast.info(approvalData?.message ?? 'Solicitud enviada para aprobación')
+      if (!response.config.suppressApprovalToast) {
+        toast.info(approvalData?.message ?? 'Solicitud enviada para aprobación')
+      }
 
       // Approval requests are a transitional UI state, not a hard failure.
       return Promise.reject(new ApprovalPendingError(approvalData))
