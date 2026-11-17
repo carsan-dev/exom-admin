@@ -37,7 +37,7 @@ export function RecapQuickViewPane({
     <section
       id={RECAP_QUICK_VIEW_PANE_ID}
       aria-label="Detalle de recap"
-      className="min-w-0 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:self-start lg:overflow-y-auto lg:pl-8"
+      className="min-w-0 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-92px)] lg:self-start lg:overflow-y-auto lg:pl-8"
     >
       {item ? (
         <RecapQuickView
