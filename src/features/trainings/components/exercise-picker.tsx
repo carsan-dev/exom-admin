@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { normalizeSearchText } from '@/lib/search'
 import { useExercisesList } from '../api'
 import {
@@ -52,6 +52,7 @@ interface ExercisePickerProps {
 }
 
 export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) {
+  const errorId = useId()
   const [search, setSearch] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)
   const [targetCircuitIndex, setTargetCircuitIndex] = useState<number | null>(null)
@@ -333,7 +334,12 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
   }
 
   return (
-    <div className="min-w-0 space-y-4">
+    <div
+      role="group"
+      aria-label="Ejercicios"
+      aria-describedby={error ? errorId : undefined}
+      className="min-w-0 space-y-4"
+    >
       <ExercisePickerHeader
         exerciseCount={exerciseCount}
         trackedCount={trackedCount}
@@ -461,7 +467,7 @@ export function ExercisePicker({ value, onChange, error }: ExercisePickerProps) 
         />
       )}
 
-      {error && <p className="text-xs text-status-error">{error}</p>}
+      {error && <p id={errorId} className="text-xs text-status-error">{error}</p>}
     </div>
   )
 }

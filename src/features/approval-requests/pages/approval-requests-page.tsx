@@ -148,7 +148,7 @@ export function ApprovalRequestsPage() {
 
           <div className="w-full md:w-64">
             <Select value={resourceType} onValueChange={(value) => updateSearchParams({ resourceType: value as ResourceType | 'ALL', page: 1 })}>
-              <SelectTrigger aria-label="Tipo de recurso" className="max-md:h-11">
+              <SelectTrigger aria-label="Tipo de recurso">
                 <SelectValue placeholder="Tipo de recurso" />
               </SelectTrigger>
               <SelectContent>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Check, LoaderCircle, Plus, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,10 +18,24 @@ interface TrainingTypesFieldProps {
   value: string[]
   onChange: (value: string[]) => void
   error?: string
+  /** Id de la etiqueta visible: convierte el contenedor en un grupo con nombre. */
+  labelId?: string
+  /** Obligatorio según el esquema: descripción oculta (el rol group no admite aria-required). */
+  required?: boolean
 }
 
-export function TrainingTypesField({ value, onChange, error }: TrainingTypesFieldProps) {
+export function TrainingTypesField({
+  value,
+  onChange,
+  error,
+  labelId,
+  required = false,
+}: TrainingTypesFieldProps) {
   const [input, setInput] = useState('')
+  const errorId = useId()
+  const requiredId = useId()
+  const describedBy =
+    [error ? errorId : null, required ? requiredId : null].filter(Boolean).join(' ') || undefined
   const trainingTypesQuery = useTrainingTypes()
   const trainingTypeColorsQuery = useTrainingTypeCatalogColors()
   const trainingTypeColorMap = getCatalogColorMap(trainingTypeColorsQuery.data)
@@ -73,7 +87,17 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
   }
 
   return (
-    <div className="space-y-2">
+    <div
+      role={labelId ? 'group' : undefined}
+      aria-labelledby={labelId}
+      aria-describedby={labelId ? describedBy : undefined}
+      className="space-y-2"
+    >
+      {required ? (
+        <span id={requiredId} hidden>
+          Campo obligatorio
+        </span>
+      ) : null}
       <div className="flex min-h-10 flex-wrap gap-1.5 rounded-md border border-input bg-input px-3 py-2">
         {value.length === 0 ? (
           <span className="self-center text-sm text-muted-foreground">Sin tipos</span>
@@ -93,37 +117,41 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
               <button
                 type="button"
                 onClick={() => remove(type)}
-                className="ml-1 rounded-full p-0.5 hover:bg-foreground/10"
+                aria-label={`Quitar ${getTrainingTypeLabel(type)}`}
+                className="relative ml-1 rounded-full p-0.5 hover:bg-foreground/10 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]"
               >
-                <X className="h-2.5 w-2.5" />
+                <X aria-hidden="true" className="h-2.5 w-2.5" />
               </button>
             </Badge>
           ))
         )}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <Input
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Nuevo tipo (Enter)"
+          aria-label="Nuevo tipo de entrenamiento"
           className="h-8 text-sm"
         />
         <Button
           type="button"
           variant="outline"
           size="sm"
+          className="max-md:h-11"
           onClick={() => add()}
           disabled={!normalizeTrainingTypeLabel(input) || hasType(input)}
+          aria-label="Añadir tipo"
         >
-          <Plus className="h-3 w-3" />
+          <Plus aria-hidden="true" className="h-3 w-3" />
         </Button>
       </div>
 
       {trainingTypesQuery.isLoading ? (
         <div className="flex items-center gap-2 rounded-md border border-dashed border-border/70 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-          <LoaderCircle className="h-3 w-3 animate-spin" />
+          <LoaderCircle aria-hidden="true" className="h-3 w-3 animate-spin" />
           Cargando tipos existentes...
         </div>
       ) : trainingTypesQuery.isError ? (
@@ -161,7 +189,7 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
                   type="button"
                   onClick={() => toggle(type)}
                   aria-pressed={isSelected}
-                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                  className={`relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))] ${
                     isSelected && !catalogStyle
                       ? getTrainingTypeBadgeClass(type)
                       : !isSelected
@@ -170,7 +198,7 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
                   }`}
                   style={isSelected ? catalogStyle : undefined}
                 >
-                  {isSelected && <Check className="h-3 w-3" />}
+                  {isSelected && <Check aria-hidden="true" className="h-3 w-3" />}
                   {getTrainingTypeLabel(type)}
                 </button>
               )
@@ -187,7 +215,11 @@ export function TrainingTypesField({ value, onChange, error }: TrainingTypesFiel
         </p>
       )}
 
-      {error && <p className="text-xs text-status-error">{error}</p>}
+      {error && (
+        <p id={errorId} className="text-xs text-status-error">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

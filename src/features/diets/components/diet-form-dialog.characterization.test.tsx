@@ -244,6 +244,14 @@ describe('DietFormDialog characterization', () => {
     expect(snapBody()).toMatchSnapshot()
   })
 
+  it('names the meal type select and the icon-only add buttons (RDS-F5-01)', async () => {
+    renderDialog()
+    await settled()
+    expect(screen.getByRole('combobox', { name: 'Tipo de la comida 1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Añadir etiqueta interna' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Añadir badge' })).toBeInTheDocument()
+  })
+
   it('create with the ingredient picker open and filtered', async () => {
     renderDialog()
     await settled()

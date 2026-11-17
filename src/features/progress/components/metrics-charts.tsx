@@ -74,7 +74,7 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Scale className="h-5 w-5 text-accent-text" />
+              <Scale aria-hidden="true" className="h-5 w-5 text-accent-text" />
               <CardTitle className="font-display text-xl font-extrabold uppercase leading-none">Evolución del peso</CardTitle>
             </div>
             <ChartScaleSelect value={weightScale} onValueChange={setWeightScale} />
@@ -122,7 +122,7 @@ export function MetricsCharts({ clientId, selectedField, onFieldChange }: Metric
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-accent-text" />
+              <TrendingUp aria-hidden="true" className="h-5 w-5 text-accent-text" />
               <CardTitle className="font-display text-xl font-extrabold uppercase leading-none">Evolución corporal</CardTitle>
             </div>
             <div className="flex flex-wrap items-center gap-2">

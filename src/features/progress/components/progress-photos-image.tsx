@@ -28,13 +28,13 @@ export function ProgressPhotosImage({ src, alt, enlarged, onEnlarge }: ProgressP
         setLoaded(false)
         setAttempt((current) => current + 1)
         container.current?.focus()
-      }}><RefreshCw className="h-4 w-4" />Reintentar imagen</Button>
+      }}><RefreshCw aria-hidden="true" className="h-4 w-4" />Reintentar imagen</Button>
     </div> : <>
       {!loaded && <span role="status" className="absolute left-3 top-3 rounded bg-background px-2 py-1 text-xs text-foreground-muted">Cargando imagen…</span>}
       {onEnlarge ? <button type="button" aria-label={`Ampliar ${alt}`} onClick={(event) => onEnlarge(event.currentTarget)}
         className="block w-full text-left transition-colors duration-150 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none">
         {image}
-        <span className="flex min-h-11 items-center justify-center gap-2 border-t border-border p-3 text-sm text-foreground"><Maximize2 className="h-4 w-4" />Ampliar imagen</span>
+        <span className="flex min-h-11 items-center justify-center gap-2 border-t border-border p-3 text-sm text-foreground"><Maximize2 aria-hidden="true" className="h-4 w-4" />Ampliar imagen</span>
       </button> : image}
     </>}
   </div>

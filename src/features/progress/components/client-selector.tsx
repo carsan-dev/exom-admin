@@ -53,7 +53,7 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
           {selectedClientId && selected ? (
             <div className="flex items-center gap-2 truncate">
               <Avatar className="h-5 w-5">
-                <AvatarImage src={selected.profile?.avatar_url ?? undefined} />
+                <AvatarImage src={selected.profile?.avatar_url ?? undefined} alt="" />
                 <AvatarFallback className="text-[10px]">{getInitials(selectedName)}</AvatarFallback>
               </Avatar>
               <span className="truncate">{selectedName}</span>
@@ -61,7 +61,7 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
           ) : (
             <span className="text-muted-foreground">Seleccionar cliente...</span>
           )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown aria-hidden="true" className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[calc(100vw-2rem)] max-w-[280px] p-0">
@@ -86,14 +86,14 @@ export function ClientSelector({ selectedClientId, onSelect }: ClientSelectorPro
                       setOpen(false)
                     }}
                   >
-                    <Check
+                    <Check aria-hidden="true"
                       className={cn(
                         'mr-2 h-4 w-4',
                         selectedClientId === client.id ? 'opacity-100' : 'opacity-0',
                       )}
                     />
                     <Avatar className="mr-2 h-6 w-6">
-                      <AvatarImage src={client.profile?.avatar_url ?? undefined} />
+                      <AvatarImage src={client.profile?.avatar_url ?? undefined} alt="" />
                       <AvatarFallback className="text-[10px]">
                         {getInitials(displayName)}
                       </AvatarFallback>
@@ -117,7 +117,7 @@ export function EmptyClientState() {
   return (
     <EmptyState
       className="py-16"
-      icon={<User />}
+      icon={<User aria-hidden="true" />}
       title="Selecciona un cliente"
       description="Elige un cliente en el selector de arriba para ver su progreso detallado"
     />

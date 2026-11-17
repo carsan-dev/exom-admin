@@ -95,13 +95,13 @@ export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDel
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-11 w-11 p-0 md:h-8 md:w-8">
-                    <MoreHorizontal className="h-4 w-4" />
+                    <MoreHorizontal aria-hidden="true" className="h-4 w-4" />
                     <span className="sr-only">Abrir menú</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => onEdit(ingredient)}>
-                    <Pencil className="mr-2 h-4 w-4" />
+                    <Pencil aria-hidden="true" className="mr-2 h-4 w-4" />
                     Editar
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -109,7 +109,7 @@ export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDel
                     onClick={() => onDelete(ingredient)}
                     className="text-status-error focus:text-status-error"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
+                    <Trash2 aria-hidden="true" className="mr-2 h-4 w-4" />
                     Eliminar
                   </DropdownMenuItem>
                 </DropdownMenuContent>

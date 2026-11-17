@@ -45,7 +45,7 @@ export function DietsPageHeader({
             onChange={onImportFile}
           />
           <Button variant="outline" onClick={onImportClick} className="max-md:h-11">
-            <Upload className="h-4 w-4" />
+            <Upload aria-hidden="true" className="h-4 w-4" />
             Importar
           </Button>
           <TooltipProvider>
@@ -59,14 +59,14 @@ export function DietsPageHeader({
                   onClick={onOpenImportPrompt}
                   className="max-md:size-11"
                 >
-                  <Info className="h-4 w-4" />
+                  <Info aria-hidden="true" className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Instrucciones y prompt de IA</TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <Button onClick={onCreate} className="max-md:h-11">
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Nueva dieta
           </Button>
         </>

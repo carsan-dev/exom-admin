@@ -19,7 +19,7 @@ const DialogConsumer = () => {
 }
 
 const overlayCloseButtonClassName =
-  "absolute right-3 top-3 inline-flex size-9 items-center justify-center text-foreground-secondary transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-background-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none sm:right-4 sm:top-4"
+  "absolute right-3 top-3 inline-flex size-9 items-center justify-center max-md:after:absolute max-md:after:-inset-1 max-md:after:content-[''] text-foreground-secondary transition-colors duration-(--dur-fast) ease-(--ease-out) hover:bg-background-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:pointer-events-none sm:right-4 sm:top-4"
 
 const Dialog = DialogPrimitive.Root
 
@@ -72,8 +72,8 @@ const DialogContent = React.forwardRef<
       <DialogConsumer />
       {children}
       <DialogPrimitive.Close className={overlayCloseButtonClassName}>
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
+        <X aria-hidden="true" className="h-4 w-4" />
+        <span className="sr-only">Cerrar diálogo</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>

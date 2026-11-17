@@ -71,7 +71,7 @@ export function ToggleUserStatusDialog({ user, open, onOpenChange }: ToggleUserS
         <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-foreground">
           <div className="flex items-start gap-3">
             <div className={nextStatus ? 'rounded-full bg-status-success/10 p-2 text-status-success' : 'rounded-full bg-status-warning/10 p-2 text-status-warning'}>
-              {nextStatus ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
+              {nextStatus ? <ShieldCheck aria-hidden="true" className="h-4 w-4" /> : <ShieldAlert aria-hidden="true" className="h-4 w-4" />}
             </div>
             <p>
               {isOwnAccount

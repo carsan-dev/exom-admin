@@ -33,11 +33,12 @@ export function CatalogTabsToolbar({ search, onSearchChange, catalogTitle }: Cat
       </TabsList>
 
       <div className="relative w-full xl:max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder={`Buscar en ${catalogTitle.toLocaleLowerCase()}...`}
+          aria-label={`Buscar en ${catalogTitle.toLocaleLowerCase()}`}
           className="h-11 pl-9 md:h-10"
         />
       </div>

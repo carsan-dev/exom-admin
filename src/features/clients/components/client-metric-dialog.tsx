@@ -132,7 +132,7 @@ export function ClientMetricDialog({ clientId, metric, open, onOpenChange }: Cli
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem className="max-w-xs">
+                <FormItem required className="max-w-xs">
                   <FormLabel>Fecha (UTC)</FormLabel>
                   <FormControl>
                     <Input type="date" max={getToday()} {...field} />

@@ -53,7 +53,7 @@ export function TrainingsPageHeader({
             disabled={importDisabled}
             className="max-md:h-11"
           >
-            <Upload className="h-4 w-4" />
+            <Upload aria-hidden="true" className="h-4 w-4" />
             Importar
           </Button>
           <TooltipProvider>
@@ -67,14 +67,14 @@ export function TrainingsPageHeader({
                   aria-label="Ver prompt para generar entrenamientos importables"
                   className="max-md:size-11"
                 >
-                  <Info className="h-4 w-4" />
+                  <Info aria-hidden="true" className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Prompt para IA</TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <Button onClick={onCreate} className="max-md:h-11">
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Nuevo entrenamiento
           </Button>
         </>

@@ -20,7 +20,7 @@ export function DietFormGeneralFields({ form, onCalculateDietMacros }: DietFormG
         control={form.control}
         name="name"
         render={({ field }) => (
-          <FormItem>
+          <FormItem required>
             <FormLabel>Nombre visible para el cliente</FormLabel>
             <FormControl>
               <Input placeholder="Ej. Dieta de definición" {...field} />

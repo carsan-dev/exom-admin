@@ -55,7 +55,7 @@ export function RecapDetailTabs({ recap }: { recap: RecapItem }) {
           flush
           title="Entrenos"
           description="Resumen del rendimiento y la percepción de la semana de entreno."
-          action={<Dumbbell className={ICON_CLASS} />}
+          action={<Dumbbell aria-hidden="true" className={ICON_CLASS} />}
         >
           <div className={FIELDS_CLASS}>
             <RecapDetailField label="Esfuerzo semanal" value={recap.training_effort?.toString() ?? 'No indicado'} />
@@ -78,7 +78,7 @@ export function RecapDetailTabs({ recap }: { recap: RecapItem }) {
           flush
           title="Nutrición"
           description="Calidad de alimentación, hidratación y observaciones nutricionales."
-          action={<Salad className={ICON_CLASS} />}
+          action={<Salad aria-hidden="true" className={ICON_CLASS} />}
         >
           <div className={FIELDS_CLASS}>
             <RecapDetailField label="Calidad de alimentación" value={formatRecapOption(recap.nutrition_quality)} />
@@ -97,7 +97,7 @@ export function RecapDetailTabs({ recap }: { recap: RecapItem }) {
           flush
           title="Recuperación y hábitos"
           description="Sueño, fatiga y molestias reportadas durante la semana."
-          action={<HeartPulse className={ICON_CLASS} />}
+          action={<HeartPulse aria-hidden="true" className={ICON_CLASS} />}
         >
           <div className={FIELDS_CLASS}>
             <RecapDetailField label="Horas de sueño" value={formatRecapOption(recap.sleep_hours_range)} />
@@ -120,7 +120,7 @@ export function RecapDetailTabs({ recap }: { recap: RecapItem }) {
           flush
           title="Sensaciones generales"
           description="Estado de ánimo, estrés y sensación global de la semana."
-          action={<MessageSquareText className={ICON_CLASS} />}
+          action={<MessageSquareText aria-hidden="true" className={ICON_CLASS} />}
         >
           <div className={FIELDS_CLASS}>
             <RecapDetailField label="Estado de ánimo" value={formatRecapOption(recap.mood)} />
@@ -139,7 +139,7 @@ export function RecapDetailTabs({ recap }: { recap: RecapItem }) {
           flush
           title="Ayúdanos a mejorar"
           description="Valoraciones del servicio y feedback abierto sobre la experiencia."
-          action={<Sparkles className={ICON_CLASS} />}
+          action={<Sparkles aria-hidden="true" className={ICON_CLASS} />}
         >
           <div className={FIELDS_CLASS}>
             <RecapDetailField

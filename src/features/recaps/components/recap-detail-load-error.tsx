@@ -17,7 +17,7 @@ export function RecapDetailLoadError({ message, backTo, backLabel, onRetry }: Re
       <div className="flex justify-center pb-14">
         <Button variant="outline" asChild>
           <Link to={backTo}>
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft aria-hidden="true" className="h-4 w-4" />
             {backLabel}
           </Link>
         </Button>

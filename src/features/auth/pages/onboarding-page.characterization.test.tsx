@@ -43,6 +43,24 @@ describe('OnboardingPage (characterization)', () => {
     expect(put).not.toHaveBeenCalled()
   })
 
+  it('marks the empty fields with aria-invalid linked to the error (RDS-F5-01)', async () => {
+    const user = userEvent.setup()
+    render(<OnboardingPage />)
+    await user.type(screen.getByLabelText('Nombre'), 'Nerea')
+    await user.click(screen.getByRole('button', { name: 'Continuar' }))
+
+    const lastName = screen.getByLabelText('Apellidos')
+    expect(lastName).toHaveAttribute('aria-invalid', 'true')
+    expect(lastName).toHaveAccessibleDescription('Nombre y apellidos son obligatorios')
+    expect(screen.getByLabelText('Nombre')).not.toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('sets the document title (RDS-F5-01)', () => {
+    document.title = 'EXOM Admin'
+    render(<OnboardingPage />)
+    expect(document.title).toBe('Completar perfil · EXOM Admin')
+  })
+
   it('shows the validation error when a field is only whitespace', async () => {
     const user = userEvent.setup()
     render(<OnboardingPage />)

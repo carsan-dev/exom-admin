@@ -1,4 +1,4 @@
-import type { Dispatch, FormEvent, SetStateAction } from 'react'
+import { useRef, type Dispatch, type FormEvent, type SetStateAction } from 'react'
 import { RotateCcw, Save, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -37,6 +37,8 @@ export function TemplateEditorForm({
   handleSubmit,
   handleResetOrDelete,
 }: TemplateEditorFormProps) {
+  const pointerFocusRef = useRef(false)
+
   return (
     <form onSubmit={handleSubmit} className="flex min-w-0 flex-col">
       <div className="space-y-3 py-5">
@@ -63,7 +65,8 @@ export function TemplateEditorForm({
       </div>
 
       <div className="space-y-6 pb-6">
-        <div className="flex items-start gap-3 max-md:min-h-11">
+        {/* Por debajo de md la etiqueta cubre toda la fila: área pulsable de la casilla ≥ 44 px. */}
+        <div className="relative flex items-start gap-3 max-md:min-h-11">
           <input
             id="template-enabled"
             type="checkbox"
@@ -73,7 +76,7 @@ export function TemplateEditorForm({
             className="mt-0.5 size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-md:size-6"
           />
           <div className="space-y-1">
-            <Label htmlFor="template-enabled">Activa</Label>
+            <Label htmlFor="template-enabled" className="max-md:after:absolute max-md:after:inset-0 max-md:after:content-['']">Activa</Label>
             <p className="text-[13px] leading-5 text-foreground-secondary">
               {selectedTemplate.is_system
                 ? 'Al pausar, el evento automático no enviará nada.'
@@ -91,7 +94,6 @@ export function TemplateEditorForm({
               onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
               disabled={isBusy}
               maxLength={120}
-              className="max-md:h-11"
             />
             <CharCounter label="título" count={draft.title.length} max={120} />
           </div>
@@ -104,7 +106,6 @@ export function TemplateEditorForm({
               onChange={(event) => setDraft((current) => ({ ...current, route: event.target.value }))}
               disabled={isBusy}
               placeholder="/trainings"
-              className="max-md:h-11"
             />
           </div>
         </div>
@@ -115,6 +116,31 @@ export function TemplateEditorForm({
             id="template-body"
             value={draft.body}
             onChange={(event) => setDraft((current) => ({ ...current, body: event.target.value }))}
+            // Al enfocar un textarea el navegador solo desplaza hasta el cursor, no la caja entera,
+            // y la barra pegajosa de acciones tapa su parte inferior. «nearest» respeta el
+            // scroll-padding de index.css (RDS-F5-A11Y-03). Solo con foco de teclado: con ratón o
+            // táctil el usuario ya ve dónde pulsa y el salto sería inesperado (H-7). No se usa
+            // :focus-visible porque en un textarea coincide también con el foco por puntero.
+            // `?.`: jsdom no implementa scrollIntoView.
+            onPointerDown={() => {
+              pointerFocusRef.current = true
+            }}
+            onFocus={(event) => {
+              const fromPointer = pointerFocusRef.current
+              pointerFocusRef.current = false
+              if (!fromPointer) event.currentTarget.scrollIntoView?.({ block: 'nearest' })
+            }}
+            // La marca solo cubre el foco de esta pulsación: un toque cancelado o un clic en la barra
+            // de desplazamiento no enfocan, y no deben suprimir un foco de teclado posterior.
+            onPointerUp={() => {
+              pointerFocusRef.current = false
+            }}
+            onPointerCancel={() => {
+              pointerFocusRef.current = false
+            }}
+            onBlur={() => {
+              pointerFocusRef.current = false
+            }}
             disabled={isBusy}
             maxLength={500}
             rows={5}
@@ -153,19 +179,19 @@ export function TemplateEditorForm({
       {/* Por debajo de md la barra inferior móvil (56px + safe-area, z-40) tapa lo que queda a bottom-0:
           se ancla sobre ella con el mismo offset que el resto de elementos fijos del layout, y el pr
           reserva el hueco del botón «Volver arriba» (fixed, right-4/6, 44-48px). */}
-      <div className="sticky bottom-0 z-[3] flex flex-col-reverse gap-2 border-t border-border-strong bg-background py-3 max-md:bottom-[calc(56px+env(safe-area-inset-bottom,0px))] max-md:pr-[60px] md:pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:flex-row sm:items-center sm:justify-between">
+      <div data-sticky-actions="" className="sticky bottom-0 z-[3] flex flex-col-reverse gap-2 border-t border-border-strong bg-background py-3 max-md:bottom-[calc(56px+env(safe-area-inset-bottom,0px))] max-md:pr-[60px] md:pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:flex-row sm:items-center sm:justify-between">
         <Button
           type="button"
           variant="outline"
           onClick={handleResetOrDelete}
           disabled={isBusy || (selectedTemplate.is_system && !selectedTemplate.customized)}
         >
-          {selectedTemplate.is_system ? <RotateCcw className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+          {selectedTemplate.is_system ? <RotateCcw aria-hidden="true" className="h-4 w-4" /> : <Trash2 aria-hidden="true" className="h-4 w-4" />}
           {selectedTemplate.is_system ? 'Restaurar defecto' : 'Eliminar plantilla'}
         </Button>
 
         <Button type="submit" disabled={isBusy || !hasChanges}>
-          <Save className="h-4 w-4" />
+          <Save aria-hidden="true" className="h-4 w-4" />
           {isSaving ? 'Guardando...' : 'Guardar cambios'}
         </Button>
       </div>

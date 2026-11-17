@@ -13,11 +13,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme}
       className="toaster group"
       icons={{
-        success: <CircleCheck className="h-4 w-4" />,
-        info: <Info className="h-4 w-4" />,
-        warning: <TriangleAlert className="h-4 w-4" />,
-        error: <OctagonX className="h-4 w-4" />,
-        loading: <LoaderCircle className="h-4 w-4 animate-spin" />,
+        success: <CircleCheck aria-hidden="true" className="h-4 w-4" />,
+        info: <Info aria-hidden="true" className="h-4 w-4" />,
+        warning: <TriangleAlert aria-hidden="true" className="h-4 w-4" />,
+        error: <OctagonX aria-hidden="true" className="h-4 w-4" />,
+        loading: <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" />,
       }}
       toastOptions={{
         classNames: {

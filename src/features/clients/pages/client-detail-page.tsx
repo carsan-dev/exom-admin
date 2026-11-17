@@ -123,7 +123,7 @@ export function ClientDetailPage() {
         <div className="flex justify-center pb-14">
           <Button variant="outline" asChild>
             <Link to={usersRoute}>
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft aria-hidden="true" className="h-4 w-4" />
               {backLabel}
             </Link>
           </Button>
@@ -139,7 +139,7 @@ export function ClientDetailPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button variant="ghost" asChild>
           <Link to={usersRoute}>
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft aria-hidden="true" className="h-4 w-4" />
             {backLabel}
           </Link>
         </Button>
@@ -147,31 +147,31 @@ export function ClientDetailPage() {
         <div className="flex flex-wrap gap-3">
           <Button asChild>
             <Link to={`/assignments?clientId=${client.id}`}>
-              <CalendarDays className="h-4 w-4" />
+              <CalendarDays aria-hidden="true" className="h-4 w-4" />
               Planificar asignaciones
             </Link>
           </Button>
           {client.is_locked && (
             <Button variant="outline" onClick={() => setUnlockDialogOpen(true)}>
-              <Unlock className="h-4 w-4" />
+              <Unlock aria-hidden="true" className="h-4 w-4" />
               Desbloquear
             </Button>
           )}
           {currentUserRole === 'SUPER_ADMIN' && (
             <Button variant="outline" onClick={() => setManageAssignmentsDialogOpen(true)}>
-              <Users className="h-4 w-4" />
+              <Users aria-hidden="true" className="h-4 w-4" />
               Gestionar admins
             </Button>
           )}
           {currentUserRole === 'SUPER_ADMIN' && (
             <Button variant="outline" onClick={() => setChangeRoleDialogOpen(true)}>
-              <ShieldCheck className="h-4 w-4" />
+              <ShieldCheck aria-hidden="true" className="h-4 w-4" />
               Cambiar rol
             </Button>
           )}
           {currentUserRole === 'SUPER_ADMIN' && (
             <Button variant="outline" onClick={() => setToggleStatusDialogOpen(true)}>
-              {client.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+              {client.is_active ? <UserX aria-hidden="true" className="h-4 w-4" /> : <UserCheck aria-hidden="true" className="h-4 w-4" />}
               {client.is_active ? 'Dar de baja' : 'Reactivar'}
             </Button>
           )}

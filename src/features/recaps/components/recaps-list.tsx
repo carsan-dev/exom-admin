@@ -66,7 +66,7 @@ export function RecapsList({ clientId, status, archived, page, onPageChange, ret
     return (
       <EmptyState
         className="border-y border-border"
-        icon={<FileText />}
+        icon={<FileText aria-hidden="true" />}
         title={
           hasActiveFilters
             ? 'No hay recaps para los filtros seleccionados'

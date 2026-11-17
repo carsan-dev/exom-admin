@@ -49,7 +49,9 @@ export function Breadcrumbs() {
               ? clientProfile.data
                 ? getUserDisplayName(clientProfile.data)
                 : 'Detalle'
-              : routeLabels[segment] ?? segment
+              : segments[0] === 'recaps' && idx === 1
+                ? 'Detalle'
+                : routeLabels[segment] ?? segment
 
           return (
             <li

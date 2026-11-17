@@ -10,12 +10,12 @@ export function TrainingsEmptyCard({ onCreate }: TrainingsEmptyCardProps) {
   return (
     <EmptyState
       className="border-y border-border"
-      icon={<Dumbbell />}
+      icon={<Dumbbell aria-hidden="true" />}
       title="Aún no hay entrenamientos"
       description="Crea el primer entrenamiento para empezar a asignarlo a tus clientes."
       action={
         <Button onClick={onCreate}>
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
           Crear primer entrenamiento
         </Button>
       }

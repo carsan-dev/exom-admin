@@ -27,8 +27,10 @@ export function FilterToolbar({
     <div className="space-y-3">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          {/* Nombre estable: el placeholder desaparece al escribir (mismo texto, sin cambiar el nombre). */}
           <Input
+            aria-label={effectivePlaceholder}
             placeholder={effectivePlaceholder}
             value={search ?? ''}
             onChange={(event) => onSearchChange(event.target.value)}

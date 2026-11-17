@@ -5,7 +5,9 @@ import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RequiredMark } from '@/components/ui/label'
 import { AuthBrandPanel } from '../components/auth-brand-panel'
+import { useDocumentTitle } from '@/components/layout/use-document-title'
 
 export function OnboardingPage() {
   const { user, logout } = useAuth()
@@ -14,17 +16,22 @@ export function OnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   useUnsavedChanges('onboarding-form', Boolean(firstName || lastName || isSubmitting))
   const [error, setError] = useState<string | null>(null)
+  // Campos vacíos en el último envío: se marcan con aria-invalid y se enlazan al aviso.
+  const [invalidFields, setInvalidFields] = useState({ firstName: false, lastName: false })
+  useDocumentTitle('Completar perfil')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!firstName.trim() || !lastName.trim()) {
+      setInvalidFields({ firstName: !firstName.trim(), lastName: !lastName.trim() })
       setError('Nombre y apellidos son obligatorios')
       return
     }
 
     setIsSubmitting(true)
     setError(null)
+    setInvalidFields({ firstName: false, lastName: false })
 
     try {
       await api.put('/profile/me', {
@@ -59,6 +66,7 @@ export function OnboardingPage() {
             <div aria-live="polite">
               {error && (
                 <div
+                  id="onboarding-error"
                   role="alert"
                   className="flex min-h-11 items-center gap-3 border border-status-error/45 bg-status-error/10 px-4 py-2 text-[13px] leading-5 text-foreground"
                 >
@@ -71,6 +79,7 @@ export function OnboardingPage() {
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground" htmlFor="firstName">
                 Nombre
+                <RequiredMark />
               </label>
               <Input
                 id="firstName"
@@ -79,7 +88,13 @@ export function OnboardingPage() {
                 autoComplete="given-name"
                 className="h-11"
                 value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                onChange={(e) => {
+                  setFirstName(e.target.value)
+                  setInvalidFields((current) => ({ ...current, firstName: false }))
+                }}
+                aria-required="true"
+                aria-invalid={invalidFields.firstName ? true : undefined}
+                aria-describedby={invalidFields.firstName && error ? 'onboarding-error' : undefined}
                 autoFocus
               />
             </div>
@@ -87,6 +102,7 @@ export function OnboardingPage() {
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground" htmlFor="lastName">
                 Apellidos
+                <RequiredMark />
               </label>
               <Input
                 id="lastName"
@@ -95,7 +111,13 @@ export function OnboardingPage() {
                 autoComplete="family-name"
                 className="h-11"
                 value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                onChange={(e) => {
+                  setLastName(e.target.value)
+                  setInvalidFields((current) => ({ ...current, lastName: false }))
+                }}
+                aria-required="true"
+                aria-invalid={invalidFields.lastName ? true : undefined}
+                aria-describedby={invalidFields.lastName && error ? 'onboarding-error' : undefined}
               />
             </div>
 

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { AppLayout } from './app-layout'
+import { VersionUpdateBanner } from './version-update-banner'
 import { SIDEBAR_STORAGE_KEY } from './sidebar-state'
 
 vi.mock('@/hooks/use-auth', () => ({
@@ -17,6 +18,10 @@ vi.mock('@/features/approval-requests/api', () => ({
 
 vi.mock('./use-pending-counts', () => ({
   usePendingCounts: () => ({ feedback: null, recaps: null }),
+}))
+
+vi.mock('@/hooks/use-version-checker', () => ({
+  useVersionChecker: () => ({ isUpdateAvailable: true }),
 }))
 
 vi.mock('./header', () => ({
@@ -150,12 +155,108 @@ describe('AppLayout responsive', () => {
     const main = container.querySelector('main')
     if (!main) throw new Error('main no encontrado')
     const bar = 'calc(56px+env(safe-area-inset-bottom,0px)+16px)'
-    expect(main).toHaveClass(`pb-[${bar}]`, `sm:pb-[${bar}]`, 'md:pb-5')
+    const withTop = 'calc(56px+env(safe-area-inset-bottom,0px)+76px)'
+    // RDS-F5-A11Y-02: por debajo de md la reserva de «Volver arriba» es fija. El botón se monta
+    // después de desplazar y, con la página en su desplazamiento máximo, el último foco quedaba
+    // bajo él; reservarlo desde el inicio deja ese foco siempre por encima.
+    expect(main).toHaveClass(`pb-[${withTop}]`, `sm:pb-[${withTop}]`, 'md:pb-5')
+    expect(main).not.toHaveClass(`pb-[${bar}]`, `sm:pb-[${bar}]`)
 
     main.scrollTop = 400
     fireEvent.scroll(main)
-    const withTop = 'calc(56px+env(safe-area-inset-bottom,0px)+76px)'
     expect(main).toHaveClass(`pb-[${withTop}]`, `sm:pb-[${withTop}]`, 'md:pb-28')
+    // lg:p-6 anularía md:pb-28 en lg: la reserva se repite con la variante lg (RDS-F5-A11Y-01).
+    expect(main).toHaveClass('lg:p-6', 'lg:pb-28')
     expect(main).not.toHaveClass(`pb-[${bar}]`, `sm:pb-[${bar}]`, 'md:pb-5', 'pb-24')
+  })
+
+  it('con el aviso de versión montado, main reserva su alto además de la barra y «Volver arriba» (RDS-F5-A11Y-04)', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <AppLayout />
+        <VersionUpdateBanner />
+      </MemoryRouter>,
+    )
+    expect(container.querySelector('[data-version-banner]')).not.toBeNull()
+    const main = container.querySelector('main')
+    if (!main) throw new Error('main no encontrado')
+    const withBanner = 'calc(56px+env(safe-area-inset-bottom,0px)+192px)'
+    expect(main).toHaveClass(
+      `[body:has([data-version-banner])_&]:pb-[${withBanner}]`,
+      'md:[body:has([data-version-banner])_&]:pb-40',
+      'lg:[body:has([data-version-banner])_&]:scroll-pb-40',
+    )
+
+    main.scrollTop = 400
+    fireEvent.scroll(main)
+    expect(main).toHaveClass(
+      `[body:has([data-version-banner])_&]:pb-[${withBanner}]`,
+      'md:[body:has([data-version-banner])_&]:pb-40',
+    )
+  })
+})
+
+describe('AppLayout accesibilidad (RDS-F5-01)', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    media.matches = true
+    media.listeners.clear()
+    installMatchMedia()
+    document.title = 'EXOM Admin'
+  })
+  afterEach(() => {
+    window.localStorage.clear()
+    Reflect.deleteProperty(window, 'matchMedia')
+  })
+
+  function renderAt(path: string) {
+    return render(
+      <MemoryRouter initialEntries={[path]}>
+        <AppLayout />
+      </MemoryRouter>,
+    )
+  }
+
+  it('«Saltar al contenido» es el primer tabulable y lleva el foco a main', async () => {
+    const user = userEvent.setup()
+    renderAt('/dashboard')
+
+    await user.tab()
+    const skip = screen.getByRole('link', { name: 'Saltar al contenido' })
+    expect(skip).toHaveFocus()
+    expect(skip).toHaveAttribute('href', '#contenido')
+
+    await user.keyboard('{Enter}')
+    const main = screen.getByRole('main')
+    expect(main).toHaveAttribute('id', 'contenido')
+    expect(main).toHaveAttribute('tabindex', '-1')
+    expect(main).toHaveFocus()
+  })
+
+  it('main muestra indicador de foco solo con teclado tras el salto', () => {
+    renderAt('/dashboard')
+    const main = screen.getByRole('main')
+    // outline-none anula --tw-outline-style: hace falta outline-solid explícito en focus-visible.
+    expect(main).toHaveClass(
+      'outline-none',
+      'focus-visible:outline-solid',
+      'focus-visible:outline-2',
+      'focus-visible:outline-focus',
+    )
+    expect(main.className).not.toMatch(/(^|\s)focus:outline/)
+  })
+
+  it.each([
+    ['/dashboard', 'Dashboard · EXOM Admin'],
+    ['/clients', 'Clientes · EXOM Admin'],
+    ['/trainings', 'Entrenamientos · EXOM Admin'],
+    ['/notification-templates', 'Plantillas · EXOM Admin'],
+    ['/clients/abc', 'Detalle de cliente · EXOM Admin'],
+    ['/recaps/7ec00000', 'Detalle de recap · EXOM Admin'],
+    ['/no-existe', 'Página no encontrada · EXOM Admin'],
+    ['/dashboard/sobra', 'Página no encontrada · EXOM Admin'],
+  ])('el título del documento en %s es «%s»', (path, title) => {
+    renderAt(path)
+    expect(document.title).toBe(title)
   })
 })

@@ -1,8 +1,9 @@
-import type { ComponentProps } from 'react'
+import { useId, type ComponentProps } from 'react'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RequiredMark } from '@/components/ui/label'
 import { LEVEL_LABELS, type Exercise } from '../../exercises/types'
 import type { TrainingItemFormValues } from '../schemas'
 import { PrescriptionFields } from './prescription-fields'
@@ -34,6 +35,8 @@ export function ExerciseRow({
   onPrescriptionChange,
   onTimedChange,
 }: ExerciseRowProps) {
+  const setsId = useId()
+
   return (
     <div className="space-y-3 py-4">
       {/* Row: order controls + exercise name + delete */}
@@ -49,7 +52,7 @@ export function ExerciseRow({
             disabled={index === 0}
             aria-label={`Subir ${exercise?.name ?? 'ejercicio'}`}
           >
-            <ChevronUp className="h-4 w-4" />
+            <ChevronUp aria-hidden="true" className="h-4 w-4" />
           </Button>
           <Button
             type="button"
@@ -60,7 +63,7 @@ export function ExerciseRow({
             disabled={index === count - 1}
             aria-label={`Bajar ${exercise?.name ?? 'ejercicio'}`}
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown aria-hidden="true" className="h-4 w-4" />
           </Button>
         </div>
 
@@ -92,15 +95,20 @@ export function ExerciseRow({
           onClick={onRemove}
           aria-label={`Quitar ${exercise?.name ?? 'ejercicio'}`}
         >
-          <X className="h-4 w-4" />
+          <X aria-hidden="true" className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Prescription fields */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-5">
         <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Series</label>
+          <label htmlFor={setsId} className="text-xs text-muted-foreground">
+            Series
+            <RequiredMark />
+          </label>
           <Input
+            id={setsId}
+            aria-required="true"
             type="number"
             min={1}
             value={item.sets}

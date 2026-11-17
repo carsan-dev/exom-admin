@@ -9,21 +9,21 @@
 /* ── Fonts (self-hosted, SIL OFL: Barlow Condensed ExtraBold, DM Sans) ─── */
 @font-face {
   font-family: 'Barlow';
-  src: url('/fonts/barlow-800.woff') format('woff');
+  src: url('/fonts/barlow-800.woff2') format('woff2');
   font-weight: 800;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'DM Sans';
-  src: url('/fonts/dm-sans-400.woff') format('woff');
+  src: url('/fonts/dm-sans-400.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'DM Sans';
-  src: url('/fonts/dm-sans-600.woff') format('woff');
+  src: url('/fonts/dm-sans-600.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -39,7 +39,7 @@
 
   --foreground: #f2f1e9;
   --foreground-secondary: #b7bcb3;
-  --foreground-muted: #8a9086;
+  --foreground-muted: #949a90;
   --foreground-accent: #baf23a;
 
   --card: #151715;
@@ -52,7 +52,7 @@
   --secondary: #22261f;
   --secondary-foreground: #f2f1e9;
   --muted: #1b1e1b;
-  --muted-foreground: #8a9086;
+  --muted-foreground: #949a90;
   --accent: #22261f;
   --accent-foreground: #baf23a;
   --destructive: #ff6b57;
@@ -104,6 +104,10 @@
   --shadow-overlay: 0 2px 4px rgb(0 0 0 / 0.3), 0 6px 12px rgb(0 0 0 / 0.42);
   --skeleton-base: #1b1e1b;
   --skeleton-hi: #242822;
+
+  /* Parte de --foreground mezclada en el texto de acentos de catálogo (types.ts de trainings):
+     en oscuro el acento se usa tal cual; en claro se oscurece hasta >= 4,5:1 (mín. 4,88). */
+  --training-accent-text-mix: 0%;
 }
 
 .light {
@@ -116,6 +120,7 @@
   --foreground-secondary: #454a42;
   --foreground-muted: #5f645a;
   --foreground-accent: #3f5c00;
+  --training-accent-text-mix: 60%;
 
   --card: #f8f7f1;
   --card-foreground: #101111;
@@ -389,6 +394,38 @@
 html {
   color-scheme: dark;
   overscroll-behavior: none;
+}
+
+/* Foco nunca oculto (WCAG 2.4.7/2.4.11): al desplazar hasta un elemento enfocado, el documento
+   reserva el alto de lo que queda fijo abajo. Por debajo de lg desplaza `html`; en lg el
+   desplazamiento ocurre dentro de `main` (ver `app-layout.tsx`). Alturas: barra inferior móvil
+   56px + safe-area; «Volver arriba» 44px a +16px sobre la barra (48px a 24px del borde en md+);
+   aviso de versión ~112px en móvil; barra de acciones pegajosa del editor de plantillas ~112px
+   en móvil (botones apilados) y ~64px en md+.
+   La reserva de «Volver arriba» no depende de que el botón esté montado: aparece tras desplazar,
+   a veces después de que el navegador ya haya llevado el foco a su zona (RDS-F5-A11Y-02). */
+@media (max-width: 767px) {
+  html:has([data-mobile-tabbar]) {
+    scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 76px);
+  }
+
+  html:has([data-mobile-tabbar]):has([data-sticky-actions]) {
+    scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 144px);
+  }
+
+  html:has([data-mobile-tabbar]):has([data-version-banner]) {
+    scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 192px);
+  }
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-bottom: 96px;
+  }
+
+  html:has([data-version-banner]) {
+    scroll-padding-bottom: 160px;
+  }
 }
 
 .light {

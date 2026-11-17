@@ -75,7 +75,7 @@ export function FeedbackList({
     return (
       <EmptyState
         className="border-y border-border"
-        icon={<MessageSquare />}
+        icon={<MessageSquare aria-hidden="true" />}
         title={hasActiveFilters ? 'No hay resultados para los filtros seleccionados' : 'No hay feedback disponible'}
       />
     )

@@ -48,8 +48,8 @@ export function ClientHeader({ client }: ClientHeaderProps) {
       <details className="mt-4 border-t border-border">
         <summary className="min-h-11 cursor-pointer content-center rounded text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Datos de contacto y alta</summary>
         <dl className="grid gap-4 pb-3 pt-2 text-sm sm:grid-cols-2">
-          <div className="min-w-0"><dt className="flex items-center gap-2 font-semibold text-foreground-secondary"><Mail className="h-4 w-4" />Email</dt><dd className="mt-1 [overflow-wrap:anywhere]">{client.email}</dd></div>
-          <div className="min-w-0"><dt className="flex items-center gap-2 font-semibold text-foreground-secondary"><CalendarClock className="h-4 w-4" />Alta</dt><dd className="mt-1">{dateFormatter.format(new Date(client.created_at))}</dd></div>
+          <div className="min-w-0"><dt className="flex items-center gap-2 font-semibold text-foreground-secondary"><Mail aria-hidden="true" className="h-4 w-4" />Email</dt><dd className="mt-1 [overflow-wrap:anywhere]">{client.email}</dd></div>
+          <div className="min-w-0"><dt className="flex items-center gap-2 font-semibold text-foreground-secondary"><CalendarClock aria-hidden="true" className="h-4 w-4" />Alta</dt><dd className="mt-1">{dateFormatter.format(new Date(client.created_at))}</dd></div>
         </dl>
       </details>
     </section>

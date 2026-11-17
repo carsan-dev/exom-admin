@@ -10,11 +10,11 @@ export function ExerciseAddActions({ onAddExercise, onAddCircuit }: ExerciseAddA
   return (
     <div className="grid gap-2 pt-1 sm:grid-cols-2">
       <Button type="button" variant="outline" size="sm" className="w-full max-md:h-11" onClick={onAddExercise}>
-        <Plus className="h-4 w-4" />
+        <Plus aria-hidden="true" className="h-4 w-4" />
         Agregar ejercicio
       </Button>
       <Button type="button" variant="outline" size="sm" className="w-full max-md:h-11" onClick={onAddCircuit}>
-        <Repeat className="h-4 w-4" />
+        <Repeat aria-hidden="true" className="h-4 w-4" />
         Agregar circuito
       </Button>
     </div>

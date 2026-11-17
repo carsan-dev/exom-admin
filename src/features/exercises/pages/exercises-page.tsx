@@ -196,7 +196,7 @@ export function ExercisesPage() {
         }
         actions={
           <Button onClick={handleCreate}>
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Nuevo ejercicio
           </Button>
         }
@@ -215,12 +215,12 @@ export function ExercisesPage() {
       ) : total === 0 && !hasQuery ? (
         <EmptyState
           className="border-y border-border"
-          icon={<Dumbbell />}
+          icon={<Dumbbell aria-hidden="true" />}
           title="Aún no hay ejercicios"
           description="Crea el primer ejercicio para empezar a construir el catálogo que usarán tus clientes."
           action={
             <Button onClick={handleCreate}>
-              <Plus className="h-4 w-4" />
+              <Plus aria-hidden="true" className="h-4 w-4" />
               Crear primer ejercicio
             </Button>
           }

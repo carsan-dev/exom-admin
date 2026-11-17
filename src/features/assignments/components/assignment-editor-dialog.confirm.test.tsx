@@ -132,3 +132,14 @@ describe('AssignmentEditorDialog removed weekdays confirmation', () => {
     expect(onSubmit).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('AssignmentEditorDialog ancho en móvil (RDS-F5-A11Y-22)', () => {
+  it('la pista del grid del diálogo puede encogerse por debajo del contenido mínimo', async () => {
+    mount()
+
+    const dialog = await screen.findByRole('dialog', { name: 'Editar autoasignación' })
+    // Sin minmax(0,1fr) la pista automática crece hasta el min-content de las filas de
+    // entrenamiento (nombre sin saltos + selector de 128 px) y el diálogo se desborda a 390 px.
+    expect(dialog).toHaveClass('grid-cols-[minmax(0,1fr)]')
+  })
+})

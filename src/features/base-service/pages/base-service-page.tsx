@@ -99,7 +99,7 @@ export function BaseServicePage() {
     if (subscribers.length === 0) {
       return (
         <div className="flex h-48 flex-col items-center justify-center gap-3 rounded-lg border px-4 text-center">
-          <Mail className="h-8 w-8 text-muted-foreground" />
+          <Mail aria-hidden="true" className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
             {hasFilters
               ? 'No hay suscriptores que coincidan con la búsqueda.'
@@ -158,14 +158,14 @@ export function BaseServicePage() {
           <p className="text-sm text-muted-foreground">Suscriptores del programa mensual en PDF</p>
         </div>
         <Button onClick={openCreate}>
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
           Nuevo suscriptor
         </Button>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-0 flex-1 sm:min-w-[260px] sm:max-w-md">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
             aria-label="Buscar suscriptores"

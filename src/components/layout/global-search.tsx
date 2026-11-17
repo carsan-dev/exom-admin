@@ -256,12 +256,13 @@ function SearchPalette({ variant, onClose }: SearchPaletteProps) {
           </kbd>
         </div>
       ) : (
+        // El input ocupa el alto del marco (44 px) incluido su borde de 1 px: el área pulsable llega a 44 sin cambiar el aspecto.
         <div className="flex shrink-0 items-center gap-1 border-b border-border pb-2 pl-3 pr-1 pt-[calc(env(safe-area-inset-top,0px)+8px)] [&_[cmdk-input-wrapper]]:h-11 [&_[cmdk-input-wrapper]]:min-w-0 [&_[cmdk-input-wrapper]]:flex-1 [&_[cmdk-input-wrapper]]:gap-2.5 [&_[cmdk-input-wrapper]]:border [&_[cmdk-input-wrapper]]:border-control-border [&_[cmdk-input-wrapper]]:bg-card [&_[cmdk-input-wrapper]:focus-within]:border-focus [&_[cmdk-input-wrapper]_svg]:mr-0 [&_[cmdk-input-wrapper]_svg]:text-muted-foreground [&_[cmdk-input-wrapper]_svg]:opacity-100">
           <CommandInput
             value={query}
             onValueChange={setQuery}
             placeholder="Buscar…"
-            className="h-full rounded-none py-0 text-base"
+            className="-my-px h-11 rounded-none py-0 text-base"
           />
           <button
             type="button"
@@ -458,7 +459,7 @@ function ResultsView({ query, role, variant, screens, actions, clients, isEmpty,
               aria-hidden="true"
               className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'pointer-events-none ml-auto h-8 px-2.5 text-[13px]')}
             >
-              <RotateCw />
+              <RotateCw aria-hidden="true" />
               Reintentar
             </span>
           </CommandItem>

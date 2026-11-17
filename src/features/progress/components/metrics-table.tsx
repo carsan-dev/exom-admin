@@ -59,7 +59,7 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-accent-text" />
+                <Activity aria-hidden="true" className="h-5 w-5 text-accent-text" />
                 <CardTitle className="font-display text-xl font-extrabold uppercase leading-none">Historial de métricas</CardTitle>
               </div>
               <CardDescription>Todas las métricas corporales registradas</CardDescription>
@@ -67,7 +67,7 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
               <p className="mt-1 text-xs text-foreground-muted">Muestra todas las mediciones, sin filtrar por periodo.</p>
             </div>
             <Button size="sm" className="min-h-11 md:min-h-8" onClick={openCreateDialog}>
-              <Plus className="h-4 w-4" />
+              <Plus aria-hidden="true" className="h-4 w-4" />
               Añadir métricas
             </Button>
           </div>
@@ -144,7 +144,7 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
                           aria-label={`Editar métricas del ${tableDateFormatter.format(new Date(metric.date))}`}
                           onClick={() => openEditDialog(metric)}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil aria-hidden="true" className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -166,7 +166,7 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
                     disabled={page <= 1}
                     onClick={() => onPageChange(page - 1)}
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft aria-hidden="true" className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
@@ -176,7 +176,7 @@ function MetricsTableContent({ clientId, page, onPageChange }: MetricsTableProps
                     disabled={page >= data.totalPages}
                     onClick={() => onPageChange(page + 1)}
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight aria-hidden="true" className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

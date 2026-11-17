@@ -78,19 +78,20 @@ export function DietTagsField({
             <button
               type="button"
               onClick={() => remove(tag)}
-              className="ml-0.5 rounded-full p-0.5 hover:bg-brand-soft/20"
+              aria-label={`Quitar ${tag}`}
+              className="relative ml-0.5 rounded-full p-0.5 hover:bg-brand-soft/20 max-md:after:absolute max-md:after:content-[''] max-md:after:inset-x-[min(0px,calc(50%-22px))] max-md:after:inset-y-[min(0px,calc(50%-22px))]"
             >
-              <X className="h-2.5 w-2.5" />
+              <X aria-hidden="true" className="h-2.5 w-2.5" />
             </button>
           </Badge>
         ))}
       </div>
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline" size="sm" className="sm:w-auto">
+            <Button type="button" variant="outline" size="sm" className="sm:w-auto max-md:h-11">
               Etiquetas existentes
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown aria-hidden="true" className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -102,7 +103,7 @@ export function DietTagsField({
             <DropdownMenuSeparator />
             {tagsQuery.isLoading ? (
               <div className="flex items-center gap-2 px-2 py-2 text-xs text-muted-foreground">
-                <LoaderCircle className="h-3 w-3 animate-spin" />
+                <LoaderCircle aria-hidden="true" className="h-3 w-3 animate-spin" />
                 Cargando etiquetas...
               </div>
             ) : tagsQuery.isError ? (
@@ -128,7 +129,7 @@ export function DietTagsField({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="flex flex-1 gap-2">
+        <div className="flex flex-1 items-center gap-2">
           <Input
             value={input}
             onChange={(event) => setInput(event.target.value)}
@@ -139,16 +140,19 @@ export function DietTagsField({
               }
             }}
             placeholder="Nueva etiqueta interna (Enter)"
+            aria-label="Nueva etiqueta interna"
             className="h-8 text-sm"
           />
           <Button
             type="button"
             variant="outline"
             size="sm"
+            className="max-md:h-11"
             onClick={() => add()}
             disabled={!normalizeDietTagLabel(input) || hasTag(input)}
+            aria-label="Añadir etiqueta interna"
           >
-            <Plus className="h-3 w-3" />
+            <Plus aria-hidden="true" className="h-3 w-3" />
           </Button>
         </div>
       </div>

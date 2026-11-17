@@ -44,7 +44,7 @@ export function ClientRowActions({
     <div className={cn('flex items-center gap-1', className)}>
       <Button variant="ghost" size="sm" asChild>
         <Link to={getClientDetailRoute(client.id, currentUserRole)}>
-          <Eye className="h-4 w-4" />
+          <Eye aria-hidden="true" className="h-4 w-4" />
           Ver perfil
         </Link>
       </Button>

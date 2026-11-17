@@ -16,4 +16,9 @@ describe('CatalogGroupStrip', () => {
     expect(onFilterChange).toHaveBeenNthCalledWith(2, 'ungrouped')
     expect(onCreate).toHaveBeenCalledTimes(1)
   })
+
+  it('names the icon-only folder menu after its folder (RDS-F5-01)', () => {
+    render(<DndContext><CatalogGroupStrip groups={[{ id: 'g1', name: 'Base', item_count: 3, created_at: '', updated_at: '' }]} activeFilter="all" onFilterChange={vi.fn()} onCreate={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} /></DndContext>)
+    expect(screen.getByRole('button', { name: 'Acciones de la carpeta Base' })).toBeInTheDocument()
+  })
 })

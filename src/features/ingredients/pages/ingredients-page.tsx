@@ -163,7 +163,7 @@ export function IngredientsPage() {
         }
         actions={
           <Button onClick={handleCreate}>
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Nuevo ingrediente
           </Button>
         }
@@ -181,12 +181,12 @@ export function IngredientsPage() {
       ) : total === 0 && !hasActiveQuery ? (
         <EmptyState
           className="border-y border-border"
-          icon={<Apple />}
+          icon={<Apple aria-hidden="true" />}
           title="Aún no hay ingredientes"
           description="Crea el primer ingrediente del catálogo para reutilizarlo después al construir comidas y dietas."
           action={
             <Button onClick={handleCreate}>
-              <Plus className="h-4 w-4" />
+              <Plus aria-hidden="true" className="h-4 w-4" />
               Crear primer ingrediente
             </Button>
           }

@@ -91,7 +91,7 @@ export function CreateAdminDialog({ open, onOpenChange }: CreateAdminDialogProps
                 control={form.control}
                 name="first_name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
                       <Input placeholder="Lucía" {...field} />
@@ -105,7 +105,7 @@ export function CreateAdminDialog({ open, onOpenChange }: CreateAdminDialogProps
                 control={form.control}
                 name="last_name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Apellido</FormLabel>
                     <FormControl>
                       <Input placeholder="Martínez" {...field} />
@@ -120,7 +120,7 @@ export function CreateAdminDialog({ open, onOpenChange }: CreateAdminDialogProps
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="admin@exom.app" autoComplete="email" {...field} />
@@ -134,7 +134,7 @@ export function CreateAdminDialog({ open, onOpenChange }: CreateAdminDialogProps
               control={form.control}
               name="send_invitation"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Método de contraseña</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(value === 'invitation')}
@@ -164,7 +164,7 @@ export function CreateAdminDialog({ open, onOpenChange }: CreateAdminDialogProps
                 control={form.control}
                 name="password"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Contraseña temporal</FormLabel>
                     <FormControl>
                       <Input

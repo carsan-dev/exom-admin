@@ -117,7 +117,7 @@ export function IngredientFormDialog({ open, onOpenChange, ingredient, onSaved }
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem required>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
                       <Input placeholder="Avena" {...field} />

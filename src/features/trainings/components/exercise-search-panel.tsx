@@ -28,7 +28,7 @@ export function ExerciseSearchPanel({
   return (
     <div className="space-y-2 border border-border-strong bg-background-surface p-3">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Search aria-hidden="true" className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
         <Input
           autoFocus
           placeholder="Buscar ejercicio..."

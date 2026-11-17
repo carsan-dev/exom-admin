@@ -94,25 +94,25 @@ export function CopyWeekPreviewDialog({
               <div className="mt-4 flex flex-wrap gap-2">
                 {day.training && (
                   <StatusChip variant="info" dot={false} className="gap-1">
-                    <Dumbbell className="h-3 w-3" />
+                    <Dumbbell aria-hidden="true" className="h-3 w-3" />
                     Entreno
                   </StatusChip>
                 )}
                 {day.diet && (
                   <StatusChip variant="success" dot={false} className="gap-1">
-                    <Apple className="h-3 w-3" />
+                    <Apple aria-hidden="true" className="h-3 w-3" />
                     Dieta
                   </StatusChip>
                 )}
                 {day.is_rest_day && (
                   <StatusChip variant="brand" dot={false} className="gap-1">
-                    <PauseCircle className="h-3 w-3" />
+                    <PauseCircle aria-hidden="true" className="h-3 w-3" />
                     Descanso
                   </StatusChip>
                 )}
                 {day.will_clear_day && (
                   <StatusChip variant="danger" dot={false} className="gap-1">
-                    <Trash2 className="h-3 w-3" />
+                    <Trash2 aria-hidden="true" className="h-3 w-3" />
                     Limpiar
                   </StatusChip>
                 )}
@@ -158,7 +158,7 @@ export function CopyWeekPreviewDialog({
             Volver
           </Button>
           <Button type="button" onClick={() => void onConfirm()} disabled={isSubmitting}>
-            <Copy className="h-4 w-4" />
+            <Copy aria-hidden="true" className="h-4 w-4" />
             Confirmar copia
           </Button>
         </DialogFooter>

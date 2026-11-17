@@ -151,19 +151,19 @@ export function TrainingDetailDialog({
           <div className="flex flex-wrap gap-4">
             {training.estimated_duration_min != null && training.estimated_duration_min > 0 && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
+                <Clock aria-hidden="true" className="h-4 w-4" />
                 <span>{training.estimated_duration_min} min</span>
               </div>
             )}
             {training.estimated_calories != null && training.estimated_calories > 0 && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Flame className="h-4 w-4" />
+                <Flame aria-hidden="true" className="h-4 w-4" />
                 <span>{training.estimated_calories} kcal</span>
               </div>
             )}
             {training.total_volume != null && training.total_volume > 0 && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Layers className="h-4 w-4" />
+                <Layers aria-hidden="true" className="h-4 w-4" />
                 <span>{training.total_volume} vol</span>
               </div>
             )}
@@ -203,7 +203,7 @@ export function TrainingDetailDialog({
                         className="space-y-2 rounded-lg border border-brand-soft/40 bg-brand-soft/10 p-3"
                       >
                         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                          <Repeat className="h-4 w-4 text-accent-text" />
+                          <Repeat aria-hidden="true" className="h-4 w-4 text-accent-text" />
                           <span>
                             {item.name ?? 'Circuito'} · {item.rounds} rondas
                           </span>
@@ -308,7 +308,7 @@ export function TrainingDetailDialog({
                   onDuplicate(training)
                 }}
               >
-                <Copy className="h-4 w-4" />
+                <Copy aria-hidden="true" className="h-4 w-4" />
                 Duplicar
               </Button>
             )}
@@ -319,7 +319,7 @@ export function TrainingDetailDialog({
                   onEdit(training)
                 }}
               >
-                <Edit className="h-4 w-4" />
+                <Edit aria-hidden="true" className="h-4 w-4" />
                 Editar
               </Button>
             )}

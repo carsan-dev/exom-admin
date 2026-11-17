@@ -65,7 +65,7 @@ export function IngredientRow({
           onClick={onRemove}
           aria-label={`Quitar ${ingredient?.name ?? 'ingrediente'}`}
         >
-          <X className="h-4 w-4" />
+          <X aria-hidden="true" className="h-4 w-4" />
         </Button>
       </div>
 

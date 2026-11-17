@@ -188,7 +188,7 @@ describe('barra inferior móvil', () => {
     renderTabbar('ADMIN')
     const { user, more, dialog } = await openMore()
 
-    await user.click(within(dialog).getByRole('button', { name: 'Close' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Cerrar panel' }))
 
     expect(more).toHaveFocus()
   })

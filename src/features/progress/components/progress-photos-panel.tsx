@@ -292,7 +292,7 @@ function ClientProgressPhotosPanel({ clientId }: { clientId: string }) {
       <Card>
         <CardContent className="space-y-3 py-8">
           <p role="alert">No se han podido cargar las fotos: {getApiErrorMessage(history.error)}</p>
-          <Button variant="outline" onClick={() => void history.refetch()}><RefreshCw className="h-4 w-4" />Reintentar</Button>
+          <Button variant="outline" onClick={() => void history.refetch()}><RefreshCw aria-hidden="true" className="h-4 w-4" />Reintentar</Button>
         </CardContent>
       </Card>
     )
@@ -329,7 +329,7 @@ function ClientProgressPhotosPanel({ clientId }: { clientId: string }) {
               }} className={controlClass} />
             </label>
             <Button variant="secondary" className="min-h-11" onClick={() => void createDatedSession()} disabled={createSession.isPending || !sessionDate}>
-              <ImagePlus className="h-4 w-4" />{createSession.isPending ? 'Creando…' : createOperation ? 'Reintentar crear sesión' : 'Crear sesión incompleta'}
+              <ImagePlus aria-hidden="true" className="h-4 w-4" />{createSession.isPending ? 'Creando…' : createOperation ? 'Reintentar crear sesión' : 'Crear sesión incompleta'}
             </Button>
           </div>
           {createSession.isError && <p role="alert" className="text-sm text-status-error">{getApiErrorMessage(createSession.error, 'No se ha podido crear la sesión. Puedes reintentarlo sin duplicarla.')}</p>}

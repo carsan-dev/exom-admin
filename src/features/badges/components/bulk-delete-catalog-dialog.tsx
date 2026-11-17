@@ -41,7 +41,7 @@ export function BulkDeleteCatalogDialog({
         <DialogFooter>
           <Button variant="outline" onClick={onCancel} disabled={isPending}>Cancelar</Button>
           <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
-            {isPending ? <><LoaderCircle className="h-4 w-4 animate-spin" />Eliminando...</> : 'Eliminar selección'}
+            {isPending ? <><LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" />Eliminando...</> : 'Eliminar selección'}
           </Button>
         </DialogFooter>
       </DialogContent>

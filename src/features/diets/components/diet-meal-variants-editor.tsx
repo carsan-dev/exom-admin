@@ -67,7 +67,7 @@ export function MealVariantsEditor({
           className="h-7 text-xs max-md:h-11"
           onClick={addVariant}
         >
-          <Plus className="h-3 w-3" />
+          <Plus aria-hidden="true" className="h-3 w-3" />
           Añadir variante
         </Button>
       </div>
@@ -78,16 +78,21 @@ export function MealVariantsEditor({
           className="min-w-0 space-y-3 border-l-2 border-border-strong pl-3"
         >
           <div className="flex items-start gap-2">
-            <span className="w-5 flex-none pt-2.5 text-center text-xs font-medium tabular-nums text-muted-foreground">
+            <span className="w-5 flex-none pt-2.5 max-md:pt-3.5 text-center text-xs font-medium tabular-nums text-muted-foreground">
               {variantIndex + 1}
             </span>
             <FormField
               control={form.control}
               name={`meals.${mealIndex}.variants.${variantIndex}.name`}
               render={({ field }) => (
-                <FormItem className="min-w-0 flex-1">
+                <FormItem required className="min-w-0 flex-1">
                   <FormControl>
-                    <Input placeholder="Nombre de la variante" className="h-9 text-sm" {...field} />
+                    <Input
+                      placeholder="Nombre de la variante"
+                      aria-label={`Nombre de la variante ${variantIndex + 1}`}
+                      className="h-9 text-sm"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
@@ -101,7 +106,7 @@ export function MealVariantsEditor({
               onClick={() => removeVariant(variantIndex)}
               aria-label={`Quitar variante ${variantIndex + 1}`}
             >
-              <X className="h-4 w-4" />
+              <X aria-hidden="true" className="h-4 w-4" />
             </Button>
           </div>
 
@@ -259,6 +264,7 @@ export function MealVariantsEditor({
               <FormItem>
                 <FormControl>
                   <IngredientPicker
+                    required
                     value={field.value}
                     onChange={field.onChange}
                     error={getFirstErrorMessage(

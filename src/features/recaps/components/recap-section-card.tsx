@@ -16,7 +16,7 @@ export function RecapSectionCard({ title, description, action, flush = false, ch
     <section className={cn('min-w-0', !flush && 'border-t border-border pt-6')}>
       <div className="mb-4 flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <h3 className="font-display text-xl font-extrabold uppercase leading-none text-foreground">{title}</h3>
+          <h2 className="font-display text-xl font-extrabold uppercase leading-none text-foreground">{title}</h2>
           <p className="text-[13px] leading-5 text-foreground-secondary">{description}</p>
         </div>
         {action}

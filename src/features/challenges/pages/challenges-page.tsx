@@ -178,7 +178,7 @@ export function ChallengesPage() {
         description="Crea objetivos principales y retos semanales, asígnalos por cliente o globalmente y revisa el progreso visible desde el panel admin."
         actions={
           <Button onClick={() => setCreateOpen(true)} className="max-md:h-11">
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Nuevo reto
           </Button>
         }
@@ -201,7 +201,6 @@ export function ChallengesPage() {
                 <div className="flex gap-2">
                   <Input
                     id="challenge-search"
-                    className="max-md:h-11"
                     value={searchDraft}
                     onChange={(event) => setSearchDraft(event.target.value)}
                     placeholder="Título o descripción"
@@ -215,7 +214,7 @@ export function ChallengesPage() {
               <div className="space-y-2">
                 <Label>Tipo</Label>
                 <Select value={type} onValueChange={(value) => updateSearchParams({ type: value as ChallengeType | 'ALL', page: 1 })}>
-                  <SelectTrigger className="max-md:h-11">
+                  <SelectTrigger aria-label="Tipo">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -232,7 +231,7 @@ export function ChallengesPage() {
               <div className="space-y-2">
                 <Label>Modo</Label>
                 <Select value={source} onValueChange={(value) => updateSearchParams({ source: value as ChallengeSourceFilter, page: 1 })}>
-                  <SelectTrigger className="max-md:h-11">
+                  <SelectTrigger aria-label="Modo">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -248,7 +247,7 @@ export function ChallengesPage() {
               <div className="space-y-2">
                 <Label>Alcance</Label>
                 <Select value={scope} onValueChange={(value) => updateSearchParams({ scope: value as ChallengeScopeFilter, page: 1 })}>
-                  <SelectTrigger className="max-md:h-11">
+                  <SelectTrigger aria-label="Alcance">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -264,7 +263,7 @@ export function ChallengesPage() {
               <div className="space-y-2">
                 <Label>Estado</Label>
                 <Select value={completionStatus} onValueChange={(value) => updateSearchParams({ status: value as ChallengeCompletionFilter, page: 1 })}>
-                  <SelectTrigger className="max-md:h-11">
+                  <SelectTrigger aria-label="Estado">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

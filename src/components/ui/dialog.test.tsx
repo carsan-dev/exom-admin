@@ -124,7 +124,7 @@ describe('nested modals keep the page scroll-locked until the last one closes (R
     await user.click(within(outer).getByRole('button', { name: 'Acción exterior 0' }))
     expect(within(outer).getByRole('button', { name: 'Acción exterior 1' })).toBeInTheDocument()
 
-    await user.click(within(outer).getByRole('button', { name: 'Close' }))
+    await user.click(within(outer).getByRole('button', { name: 'Cerrar diálogo' }))
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expectPageScrollReleased()
@@ -155,7 +155,7 @@ describe('nested modals keep the page scroll-locked until the last one closes (R
     expectPageScrollLocked()
 
     await user.click(
-      within(screen.getByRole('dialog', { name: 'Interior' })).getByRole('button', { name: 'Close' }),
+      within(screen.getByRole('dialog', { name: 'Interior' })).getByRole('button', { name: 'Cerrar diálogo' }),
     )
 
     expect(screen.queryByRole('dialog', { name: 'Interior' })).not.toBeInTheDocument()
@@ -219,7 +219,7 @@ const overlayCases = [
         </DialogContent>
       </Dialog>
     ),
-    close: () => userEvent.click(screen.getByRole('button', { name: 'Close' })),
+    close: () => userEvent.click(screen.getByRole('button', { name: 'Cerrar diálogo' })),
   },
   {
     name: 'Sheet',
@@ -234,7 +234,7 @@ const overlayCases = [
         </SheetContent>
       </Sheet>
     ),
-    close: () => userEvent.click(screen.getByRole('button', { name: 'Close' })),
+    close: () => userEvent.click(screen.getByRole('button', { name: 'Cerrar panel' })),
   },
   {
     name: 'AlertDialog',

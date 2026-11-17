@@ -181,7 +181,7 @@ export function ApprovalRequestsList({
     return (
       <EmptyState
         className="border-y border-border"
-        icon={<ShieldCheck />}
+        icon={<ShieldCheck aria-hidden="true" />}
         title="No hay solicitudes que coincidan con los filtros actuales."
       />
     )

@@ -35,6 +35,7 @@ export function RecapLegacyReviewCard({
           </label>
           <Textarea
             placeholder="Escribe un comentario que verá el cliente en su recap..."
+            aria-label="Comentario para el cliente"
             value={clientFeedback}
             onChange={(event) => onClientFeedbackChange(event.target.value)}
             rows={4}
@@ -60,6 +61,7 @@ export function RecapLegacyReviewCard({
           </label>
           <Textarea
             placeholder="Notas internas que nunca se comparten con el cliente..."
+            aria-label="Nota interna (solo visible para el equipo)"
             value={internalNote}
             onChange={(event) => onInternalNoteChange(event.target.value)}
             rows={3}

@@ -29,21 +29,21 @@ export function TrainingRowActions({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="h-8 w-8 p-0 max-md:size-11">
-          <MoreHorizontal className="h-4 w-4" />
+          <MoreHorizontal aria-hidden="true" className="h-4 w-4" />
           <span className="sr-only">Abrir menú</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => onView(training)}>
-          <Eye className="mr-2 h-4 w-4" />
+          <Eye aria-hidden="true" className="mr-2 h-4 w-4" />
           Ver detalle
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onEdit(training)}>
-          <Pencil className="mr-2 h-4 w-4" />
+          <Pencil aria-hidden="true" className="mr-2 h-4 w-4" />
           Editar
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onDuplicate(training)}>
-          <Copy className="mr-2 h-4 w-4" />
+          <Copy aria-hidden="true" className="mr-2 h-4 w-4" />
           Duplicar
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -51,7 +51,7 @@ export function TrainingRowActions({
           onClick={() => onDelete(training)}
           className="text-status-error focus:text-status-error"
         >
-          <Trash2 className="mr-2 h-4 w-4" />
+          <Trash2 aria-hidden="true" className="mr-2 h-4 w-4" />
           Eliminar
         </DropdownMenuItem>
       </DropdownMenuContent>

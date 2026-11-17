@@ -47,7 +47,7 @@ export default defineConfig({
           ],
           'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
           'vendor-utils': [
-            'axios', 'date-fns', 'sonner', 'zustand', 'next-themes',
+            'axios', 'date-fns', 'sonner', 'zustand',
             'class-variance-authority', 'clsx', 'tailwind-merge', '@dnd-kit/core',
           ],
         },

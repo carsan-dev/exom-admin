@@ -64,7 +64,7 @@ export function DietMealCard({
             disabled={mealIndex === 0}
             aria-label={`Subir comida ${mealLabel}`}
           >
-            <ChevronUp className="h-4 w-4" />
+            <ChevronUp aria-hidden="true" className="h-4 w-4" />
           </Button>
           <Button
             type="button"
@@ -75,7 +75,7 @@ export function DietMealCard({
             disabled={mealIndex === mealCount - 1}
             aria-label={`Bajar comida ${mealLabel}`}
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown aria-hidden="true" className="h-4 w-4" />
           </Button>
         </div>
 
@@ -88,10 +88,10 @@ export function DietMealCard({
             control={form.control}
             name={`meals.${mealIndex}.type`}
             render={({ field }) => (
-              <FormItem className="w-full flex-none md:w-36">
+              <FormItem required className="w-full flex-none md:w-36">
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="h-9 text-xs">
+                    <SelectTrigger aria-label={`Tipo de la comida ${mealIndex + 1}`} className="h-9 text-xs">
                       <SelectValue placeholder="Tipo" />
                     </SelectTrigger>
                   </FormControl>
@@ -111,9 +111,14 @@ export function DietMealCard({
             control={form.control}
             name={`meals.${mealIndex}.name`}
             render={({ field }) => (
-              <FormItem className="min-w-0 flex-1">
+              <FormItem required className="min-w-0 flex-1">
                 <FormControl>
-                  <Input placeholder="Nombre de la comida" className="h-9 text-sm" {...field} />
+                  <Input
+                    placeholder="Nombre de la comida"
+                    aria-label={`Nombre de la comida ${mealIndex + 1}`}
+                    className="h-9 text-sm"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>
@@ -130,7 +135,7 @@ export function DietMealCard({
             onClick={() => onRemove(mealIndex)}
             aria-label={`Quitar comida ${mealLabel}`}
           >
-            <X className="h-4 w-4" />
+            <X aria-hidden="true" className="h-4 w-4" />
           </Button>
         )}
       </div>
@@ -290,6 +295,7 @@ export function DietMealCard({
           <FormItem>
             <FormControl>
               <IngredientPicker
+                required
                 value={field.value}
                 onChange={field.onChange}
                 error={getFirstErrorMessage(form.formState.errors.meals?.[mealIndex]?.ingredients)}

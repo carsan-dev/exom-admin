@@ -84,7 +84,7 @@ export function AiImportPromptDialog({
 
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
           <Button type="button" variant="outline" size="sm" onClick={onCopyTemplate}>
-            <Copy className="h-4 w-4" />
+            <Copy aria-hidden="true" className="h-4 w-4" />
             Copiar plantilla
           </Button>
           <Button
@@ -93,7 +93,7 @@ export function AiImportPromptDialog({
             onClick={onCopyWithCatalog}
             disabled={catalogLoading || catalogCount === 0}
           >
-            <Copy className="h-4 w-4" />
+            <Copy aria-hidden="true" className="h-4 w-4" />
             Copiar con catálogo
           </Button>
         </div>

@@ -90,11 +90,11 @@ export function AssignmentsToolbar({
         actions={
           <>
             <Button variant="outline" onClick={onSelectAllVisible} disabled={!canSelectAll || isBusy}>
-              <Layers3 className="h-4 w-4" />
+              <Layers3 aria-hidden="true" className="h-4 w-4" />
               Seleccionar todos
             </Button>
             <Button variant="outline" onClick={onOpenCopyWeek} disabled={!canCopyWeek || isBusy}>
-              <Copy className="h-4 w-4" />
+              <Copy aria-hidden="true" className="h-4 w-4" />
               Copiar semana
             </Button>
           </>
@@ -105,7 +105,7 @@ export function AssignmentsToolbar({
         <div className="min-w-0 space-y-2 max-md:w-full md:w-72">
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted">Cliente</p>
           <Select value={selectedClientId || ''} onValueChange={onClientChange}>
-            <SelectTrigger className="max-md:h-11">
+            <SelectTrigger aria-label="Cliente">
               <SelectValue placeholder="Selecciona un cliente" />
             </SelectTrigger>
             <SelectContent>
@@ -133,13 +133,13 @@ export function AssignmentsToolbar({
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground-muted">Periodo visible</p>
           <div className="flex flex-wrap items-center gap-2 md:flex-nowrap">
             <Button variant="outline" className="max-md:flex-1" onClick={onPreviousPeriod} disabled={!selectedClientId || isBusy}>
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft aria-hidden="true" className="h-4 w-4" />
               Anterior
             </Button>
             <p className="text-center text-sm font-semibold tabular-nums text-foreground max-md:order-first max-md:w-full md:min-w-40">{periodLabel}</p>
             <Button variant="outline" className="max-md:flex-1" onClick={onNextPeriod} disabled={!selectedClientId || isBusy}>
               Siguiente
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight aria-hidden="true" className="h-4 w-4" />
             </Button>
             <Button variant="outline" className="max-md:flex-1" onClick={onToday} disabled={!selectedClientId || isBusy}>
               Hoy
@@ -166,11 +166,11 @@ export function AssignmentsToolbar({
         ) : null}
         <div className="flex flex-wrap items-center gap-1 md:ml-auto">
           <Button variant="ghost" size="sm" onClick={onEditAutoRule} disabled={!activeAutoRule || isBusy}>
-            <Pencil className="h-4 w-4" />
+            <Pencil aria-hidden="true" className="h-4 w-4" />
             Editar autoasignación
           </Button>
           <Button variant="ghost" size="sm" onClick={onDeactivateAutoRule} disabled={!activeAutoRule || isBusy}>
-            <Repeat2 className="h-4 w-4" />
+            <Repeat2 aria-hidden="true" className="h-4 w-4" />
             Desactivar autoasignación
           </Button>
         </div>
@@ -185,15 +185,15 @@ export function AssignmentsToolbar({
         className="fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px)+12px)] left-4 right-4 z-40 mt-0 w-auto flex-wrap max-md:overflow-x-visible md:bottom-6 md:left-1/2 md:right-auto md:w-auto md:min-w-96 md:-translate-x-1/2"
       >
         <Button onClick={onOpenEditor} disabled={!canAssign || isBusy}>
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
           {assignActionLabel}
         </Button>
         <Button variant="outline" onClick={onOpenCopySelection} disabled={!canCopySelection || isBusy}>
-          <Copy className="h-4 w-4" />
+          <Copy aria-hidden="true" className="h-4 w-4" />
           <span className="max-md:sr-only">Copiar selección</span>
         </Button>
         <Button variant="outline" onClick={onDeleteSelectedDays} disabled={!canDeleteSelectedDays || isBusy}>
-          <Trash2 className="h-4 w-4" />
+          <Trash2 aria-hidden="true" className="h-4 w-4" />
           <span className="max-md:sr-only">{selectionCount > 1 ? 'Limpiar días' : 'Limpiar día'}</span>
         </Button>
       </SelectionBar>

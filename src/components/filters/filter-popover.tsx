@@ -20,7 +20,7 @@ export function FilterPopover({ sections, filters }: FilterPopoverProps) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button type="button" variant="outline" className="gap-2">
-          <SlidersHorizontal className="h-4 w-4" />
+          <SlidersHorizontal aria-hidden="true" className="h-4 w-4" />
           Filtros
           {filters.activeCount > 0 ? (
             <Badge variant="secondary" className="rounded-full border-transparent bg-primary px-2 py-0 text-[11px] text-primary-foreground hover:bg-primary">
