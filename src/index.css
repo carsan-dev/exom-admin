@@ -72,6 +72,10 @@
   --dur-base: 180ms;
   --dur-enter: 240ms;
   --dur-exit: 160ms;
+  /* Panel de marca de autenticación (solo AuthBrandPanel; ver DESIGN.md 5.4) */
+  --dur-brand-enter: 600ms;
+  --dur-brand-letter: 500ms;
+  --dur-brand-loop: 90s;
 
   /* Brand palette */
   --brand-primary: #baf23a;
@@ -288,6 +292,53 @@
   to { background-position: 0 0; }
 }
 
+/* Auth brand panel + login entrance (DESIGN.md 5.4): transform and opacity only. */
+@keyframes auth-mark-light-in {
+  from { opacity: 0; transform: translate(-16%, -16%) rotate(-30deg); }
+}
+@keyframes auth-mark-dark-in {
+  from { opacity: 0; transform: translate(16%, 16%) rotate(-30deg); }
+}
+@keyframes auth-mark-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes auth-letter-rise {
+  from { transform: translateY(105%); }
+}
+@keyframes auth-rule-grow {
+  from { transform: scaleX(0); }
+}
+@keyframes auth-enter {
+  from { opacity: 0; transform: translateY(8px); }
+}
+.auth-mark-light {
+  animation: auth-mark-light-in var(--dur-brand-enter) var(--ease-out) backwards;
+}
+.auth-mark-dark {
+  animation: auth-mark-dark-in var(--dur-brand-enter) var(--ease-out) backwards;
+}
+.auth-mark-spin {
+  animation: auth-mark-spin var(--dur-brand-loop) linear infinite;
+}
+.auth-letter {
+  animation: auth-letter-rise var(--dur-brand-letter) var(--ease-out) backwards;
+}
+.auth-rule {
+  transform-origin: left;
+  animation: auth-rule-grow var(--dur-brand-letter) var(--ease-out) 200ms backwards;
+}
+.auth-enter {
+  animation: auth-enter var(--dur-enter) var(--ease-out) backwards;
+}
+.auth-arrow {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .auth-submit:hover:not(:disabled) .auth-arrow {
+    transform: translateX(4px);
+  }
+}
+
 /* Scrim: fade. */
 @utility anim-overlay-scrim {
   &[data-state='open'] {
@@ -492,5 +543,22 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Auth entrance and brand motion: everything appears in its final state. */
+@media (prefers-reduced-motion: reduce) {
+  .auth-mark-light,
+  .auth-mark-dark,
+  .auth-mark-spin,
+  .auth-letter,
+  .auth-rule,
+  .auth-enter {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-submit:hover:not(:disabled) .auth-arrow {
+    transform: none;
   }
 }
