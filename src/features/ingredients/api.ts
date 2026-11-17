@@ -1,5 +1,8 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { AxiosRequestConfig } from 'axios'
 import { api } from '@/lib/api'
+import type { BulkDeleteItem, BulkDeleteProgress } from '@/lib/bulk-delete'
+import { runSessionBoundBulkDelete } from '@/lib/bulk-delete-session'
 import { invalidateAdminQueries, invalidateAdminQueriesOnApprovalPending } from '@/lib/admin-query-invalidations'
 import { type ApiEnvelope, getApiErrorMessage, shouldRetryQuery, unwrapResponse } from '@/lib/api-utils'
 import type { IngredientFormValues } from './schemas'
@@ -180,14 +183,48 @@ export function useUpdateIngredient() {
   })
 }
 
+/** Single ingredient deletion (archives it). Shared by the row action and the bulk action. */
+export async function deleteIngredientRequest(id: string, config?: AxiosRequestConfig) {
+  const url = `/ingredients/${id}`
+  if (config) await api.delete(url, config)
+  else await api.delete(url)
+  return id
+}
+
+interface BulkDeleteIngredientsVariables {
+  items: ReadonlyArray<BulkDeleteItem>
+  onProgress?: (progress: BulkDeleteProgress) => void
+}
+
+/**
+ * Deletes several ingredients one request at a time (there is no batch endpoint). Approval toasts
+ * are suppressed per request; the caller summarises the result. Invalidates once at the end.
+ */
+export function useBulkDeleteIngredients() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ items, onProgress }: BulkDeleteIngredientsVariables) => {
+      const summary = await runSessionBoundBulkDelete({
+        items,
+        deleteOne: (id) => deleteIngredientRequest(id, { suppressApprovalToast: true }),
+        onProgress,
+        fallbackErrorMessage: 'No se ha podido eliminar el ingrediente',
+      })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [ingredientsQueryKeys.all],
+        includeApprovalQueries: summary.counts.pending_approval > 0,
+      })
+      return summary
+    },
+  })
+}
+
 export function useDeleteIngredient() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      await api.delete(`/ingredients/${id}`)
-      return id
-    },
+    mutationFn: (id: string) => deleteIngredientRequest(id),
     onSuccess: async () => {
       await invalidateAdminQueries(queryClient, {
         extraQueryKeys: [ingredientsQueryKeys.all],

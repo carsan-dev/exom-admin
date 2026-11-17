@@ -1,6 +1,7 @@
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { SortableTableHead } from '@/components/sortable-table-head'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { usePageSelection } from '@/components/workspace/use-page-selection'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { formatMacroValue, formatUpdatedAt, type Ingredient } from '../types'
 import type { SortDir } from '@/lib/sort-search-params'
@@ -29,16 +31,25 @@ interface IngredientsTableProps {
   approvalById?: Record<string, IngredientApprovalSummary>
   onEdit: (ingredient: Ingredient) => void
   onDelete: (ingredient: Ingredient) => void
+  selectedIds?: Set<string>
+  onSelectionChange?: (ids: Set<string>) => void
   sortBy?: string
   sortDir?: SortDir
   onSortChange?: (field: string) => void
 }
 
-export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDelete, sortBy, sortDir = 'asc', onSortChange = () => {} }: IngredientsTableProps) {
+export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDelete, selectedIds, onSelectionChange, sortBy, sortDir = 'asc', onSortChange = () => {} }: IngredientsTableProps) {
+  const selection = usePageSelection(ingredients, selectedIds, onSelectionChange)
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-12">
+            <div className="flex items-center">
+              <Checkbox aria-label="Seleccionar página" checked={selection.headerChecked} onChange={selection.toggleAll} />
+            </div>
+          </TableHead>
           <SortableTableHead field="name" label="Nombre" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
           <SortableTableHead field="icon" label="Icono" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="text-center" />
           <SortableTableHead field="calories_per_100g" label="kcal/100g" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} className="text-right" />
@@ -54,7 +65,17 @@ export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDel
       </TableHeader>
       <TableBody>
         {ingredients.map((ingredient) => (
-          <TableRow key={ingredient.id}>
+          <TableRow key={ingredient.id} data-state={selectedIds?.has(ingredient.id) ? 'selected' : undefined}>
+            <TableCell>
+              <div className="flex items-center">
+                <Checkbox
+                  aria-label={`Seleccionar ${ingredient.name}`}
+                  checked={selectedIds?.has(ingredient.id) ?? false}
+                  onChange={() => selection.toggle(ingredient.id)}
+                />
+              </div>
+            </TableCell>
+
             <TableCell>
                 <div className="space-y-1">
                   <p className="font-medium text-foreground">{ingredient.name}</p>

@@ -1,6 +1,8 @@
 import { ArrowDown, ArrowUp, ArrowUpDown, Video } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Tag } from '@/components/ui/tag'
+import { usePageSelection } from '@/components/workspace/use-page-selection'
 import { cn } from '@/lib/utils'
 import type { SortDir } from '@/lib/sort-search-params'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
@@ -61,16 +63,35 @@ export function ExercisesMobileList({
   onEdit,
   onDuplicate,
   onDelete,
+  selectedIds,
+  onSelectionChange,
   sortBy,
   sortDir = 'asc',
   onSortChange = () => {},
 }: ExercisesTableProps) {
+  const selection = usePageSelection(exercises, selectedIds, onSelectionChange)
+
   return (
     <div>
       <SortControls sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
+      <div className="flex items-center border-t border-border">
+        <span className="flex size-11 items-center justify-center">
+          <Checkbox aria-label="Seleccionar página" checked={selection.headerChecked} onChange={selection.toggleAll} />
+        </span>
+      </div>
       <ul className="divide-y divide-border border-y border-border">
         {exercises.map((exercise) => (
-          <li key={exercise.id} className="flex items-start gap-3 py-3">
+          <li
+            key={exercise.id}
+            className={cn('flex items-start gap-3 py-3', selectedIds?.has(exercise.id) && 'bg-lime-soft')}
+          >
+            <span className="-mr-2 flex size-11 flex-none items-center justify-center">
+              <Checkbox
+                aria-label={`Seleccionar ${exercise.name}`}
+                checked={selectedIds?.has(exercise.id) ?? false}
+                onChange={() => selection.toggle(exercise.id)}
+              />
+            </span>
             <ExerciseThumbnail name={exercise.name} url={exercise.thumbnail_url} className="mt-0.5" />
             <div className="min-w-0 flex-1 space-y-2">
               <div className="space-y-1.5">
