@@ -6,10 +6,14 @@ export interface BulkDeleteItem {
   name: string
 }
 
-export type BulkDeleteOutcome = 'deleted' | 'pending_approval' | 'failed' | 'not_attempted'
+/**
+ * `not_found`: the API answered 404, i.e. the item was already archived or deleted (it filters
+ * `is_active: true`). Nothing was deleted now and there is nothing left to retry.
+ */
+export type BulkDeleteOutcome = 'deleted' | 'not_found' | 'pending_approval' | 'failed' | 'not_attempted'
 
 export type BulkDeleteItemResult =
-  | (BulkDeleteItem & { outcome: 'deleted' | 'pending_approval' | 'not_attempted' })
+  | (BulkDeleteItem & { outcome: 'deleted' | 'not_found' | 'pending_approval' | 'not_attempted' })
   | (BulkDeleteItem & { outcome: 'failed'; message: string; status: number | undefined })
 
 export interface BulkDeleteProgress {
@@ -22,7 +26,7 @@ export interface BulkDeleteSummary {
   /** One result per item, in the order received. */
   results: BulkDeleteItemResult[]
   counts: Record<BulkDeleteOutcome, number>
-  /** Every item was deleted (no approvals, failures or skipped items). */
+  /** Every item was deleted now (no missing items, approvals, failures or skipped items). */
   allDeleted: boolean
   /**
    * The batch stopped early: the session is no longer usable (401, blocked account, session
@@ -45,6 +49,7 @@ export interface RunBulkDeleteOptions {
   shouldContinue?: () => boolean
 }
 
+const NOT_FOUND_STATUS = 404
 const ACCOUNT_BLOCKED_STATUS = 423
 const TOO_MANY_REQUESTS_STATUS = 429
 
@@ -98,10 +103,10 @@ function classifyFailure(error: unknown, fallbackErrorMessage: string): Classifi
 
 /**
  * Deletes items one by one, in order, and returns a per-item summary. Approval receipts
- * (`ApprovalPendingError`) count as `pending_approval`. A failing `shouldContinue`, a 401, a
+ * (`ApprovalPendingError`) count as `pending_approval` and a 404 as `not_found`. A failing `shouldContinue`, a 401, a
  * blocked account, a session cancellation, a request without server response (network/timeout)
  * or a 429 stops the batch: the remaining items are `not_attempted`. Any other failure
- * (403/404/409/5xx…) is recorded and the batch continues. It never retries and never throws.
+ * (403/409/5xx…) is recorded and the batch continues. It never retries and never throws.
  */
 export async function runBulkDelete({
   items,
@@ -130,6 +135,8 @@ export async function runBulkDelete({
     } catch (error) {
       if (isApprovalPendingError(error)) {
         results.push({ ...base, outcome: 'pending_approval' })
+      } else if (axios.isAxiosError(error) && error.response?.status === NOT_FOUND_STATUS) {
+        results.push({ ...base, outcome: 'not_found' })
       } else {
         const { message, status, stop } = classifyFailure(error, fallbackErrorMessage)
         results.push({ ...base, outcome: 'failed', message, status })
@@ -140,6 +147,7 @@ export async function runBulkDelete({
 
   const counts: Record<BulkDeleteOutcome, number> = {
     deleted: 0,
+    not_found: 0,
     pending_approval: 0,
     failed: 0,
     not_attempted: 0,

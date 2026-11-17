@@ -149,8 +149,8 @@ describe('IngredientsPage bulk delete', { timeout: 15000 }, () => {
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(api.delete.mock.calls).toEqual([
-      ['/ingredients/i-1', { suppressApprovalToast: true }],
-      ['/ingredients/i-2', { suppressApprovalToast: true }],
+      ['/ingredients/i-1', { suppressApprovalToast: true, deferLoginRedirect: true }],
+      ['/ingredients/i-2', { suppressApprovalToast: true, deferLoginRedirect: true }],
     ])
     expect(toast.success).toHaveBeenCalledTimes(1)
     expect(toast.success).toHaveBeenCalledWith('2 ingredientes eliminados')

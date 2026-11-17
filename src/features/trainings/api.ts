@@ -457,7 +457,7 @@ export function useBulkDeleteTrainings() {
     mutationFn: async ({ items, onProgress }: BulkDeleteTrainingsVariables) => {
       const summary = await runSessionBoundBulkDelete({
         items,
-        deleteOne: (id) => deleteTrainingRequest(id, { suppressApprovalToast: true }),
+        deleteOne: (id) => deleteTrainingRequest(id, { suppressApprovalToast: true, deferLoginRedirect: true }),
         onProgress,
         fallbackErrorMessage: 'No se ha podido eliminar el entrenamiento',
       })

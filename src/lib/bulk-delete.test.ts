@@ -46,7 +46,7 @@ describe('runBulkDelete', () => {
     expect(calls).toEqual(['id-1', 'id-2', 'id-3'])
     expect(maxActive).toBe(1)
     expect(summary.results.map((result) => result.outcome)).toEqual(['deleted', 'deleted', 'deleted'])
-    expect(summary.counts).toEqual({ deleted: 3, pending_approval: 0, failed: 0, not_attempted: 0 })
+    expect(summary.counts).toEqual({ deleted: 3, not_found: 0, pending_approval: 0, failed: 0, not_attempted: 0 })
     expect(summary.allDeleted).toBe(true)
     expect(progress).toEqual([
       { current: 1, total: 3 },
@@ -55,7 +55,7 @@ describe('runBulkDelete', () => {
     ])
   })
 
-  it('classifies approvals and server failures without stopping the batch', async () => {
+  it('classifies approvals, already deleted items and server failures without stopping the batch', async () => {
     const outcomes: Record<string, unknown> = {
       'id-2': new ApprovalPendingError({ approval_request_id: 'req-2', message: 'Pendiente' }),
       'id-3': httpError(403, 'No tienes permiso'),
@@ -80,7 +80,8 @@ describe('runBulkDelete', () => {
       { id: 'id-1', name: 'Elemento 1', outcome: 'deleted' },
       { id: 'id-2', name: 'Elemento 2', outcome: 'pending_approval' },
       { id: 'id-3', name: 'Elemento 3', outcome: 'failed', status: 403, message: 'No tienes permiso' },
-      { id: 'id-4', name: 'Elemento 4', outcome: 'failed', status: 404, message: 'Dieta no encontrada' },
+      // The API answers 404 for items that are already archived or deleted: nothing left to delete.
+      { id: 'id-4', name: 'Elemento 4', outcome: 'not_found' },
       { id: 'id-5', name: 'Elemento 5', outcome: 'failed', status: 409, message: 'La dieta está en uso' },
       {
         id: 'id-6',
@@ -93,7 +94,7 @@ describe('runBulkDelete', () => {
       { id: 'id-8', name: 'Elemento 8', outcome: 'failed', status: 500, message: 'Error interno' },
       { id: 'id-9', name: 'Elemento 9', outcome: 'deleted' },
     ])
-    expect(summary.counts).toEqual({ deleted: 2, pending_approval: 1, failed: 6, not_attempted: 0 })
+    expect(summary.counts).toEqual({ deleted: 2, not_found: 1, pending_approval: 1, failed: 5, not_attempted: 0 })
     expect(summary.allDeleted).toBe(false)
     expect(summary.stopped).toBe(false)
   })
@@ -177,7 +178,7 @@ describe('runBulkDelete', () => {
     const summary = await runBulkDelete({ items: items(2), deleteOne, shouldContinue: () => false })
 
     expect(deleteOne).not.toHaveBeenCalled()
-    expect(summary.counts).toEqual({ deleted: 0, pending_approval: 0, failed: 0, not_attempted: 2 })
+    expect(summary.counts).toEqual({ deleted: 0, not_found: 0, pending_approval: 0, failed: 0, not_attempted: 2 })
     expect(summary.stopped).toBe(true)
   })
 
@@ -237,6 +238,19 @@ describe('runBulkDelete', () => {
     expect(summary.results[0]).toMatchObject({ outcome: 'failed', status: 423 })
     expect(summary.results.slice(1).map((result) => result.outcome)).toEqual(['not_attempted', 'not_attempted'])
     expect(summary.counts.not_attempted).toBe(2)
+  })
+
+  it('does not count a 404 as deleted: the batch is not all deleted and goes on', async () => {
+    const deleteOne = vi.fn(async (id: string) => {
+      if (id === 'id-1') throw httpError(404, 'Ejercicio no encontrado')
+    })
+
+    const summary = await runBulkDelete({ items: items(2), deleteOne })
+
+    expect(deleteOne).toHaveBeenCalledTimes(2)
+    expect(summary.results.map((result) => result.outcome)).toEqual(['not_found', 'deleted'])
+    expect(summary.allDeleted).toBe(false)
+    expect(summary.stopped).toBe(false)
   })
 
   it('never throws and never retries', async () => {

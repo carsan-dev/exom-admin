@@ -3,6 +3,7 @@ import type { User } from 'firebase/auth'
 import { toast } from 'sonner'
 import { auth, getIdToken } from './firebase'
 import { ApprovalPendingError } from './api-utils'
+import { redirectToLogin } from './login-redirect'
 
 declare module 'axios' {
   interface AxiosRequestConfig {
@@ -12,6 +13,12 @@ declare module 'axios' {
      * `ApprovalPendingError`. Used by bulk actions that summarise approvals themselves.
      */
     suppressApprovalToast?: boolean
+    /**
+     * Client-only flag (never sent to the server): a 401 of this request may postpone the
+     * redirect to /login while a `holdLoginRedirect()` hold is active (bulk deletions, so the
+     * result can be shown first). Without an active hold it redirects at once, as usual.
+     */
+    deferLoginRedirect?: boolean
   }
 }
 
@@ -71,8 +78,8 @@ api.interceptors.response.use(
       ? AUTH_ROUTES_WITHOUT_REDIRECT.has(requestUrl)
       : false
 
-    if (error.response?.status === 401 && !shouldSkipRedirect && window.location.pathname !== '/login') {
-      window.location.href = '/login'
+    if (error.response?.status === 401 && !shouldSkipRedirect) {
+      redirectToLogin({ deferrable: error.config?.deferLoginRedirect === true })
     }
     if (error.response?.status === 423) {
       // Account blocked — propagate special error code

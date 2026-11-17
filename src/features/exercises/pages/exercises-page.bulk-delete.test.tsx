@@ -160,8 +160,8 @@ describe('ExercisesPage bulk delete', { timeout: 15000 }, () => {
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(api.delete.mock.calls).toEqual([
-      ['/exercises/e-1', { suppressApprovalToast: true }],
-      ['/exercises/e-2', { suppressApprovalToast: true }],
+      ['/exercises/e-1', { suppressApprovalToast: true, deferLoginRedirect: true }],
+      ['/exercises/e-2', { suppressApprovalToast: true, deferLoginRedirect: true }],
     ])
     expect(toast.success).toHaveBeenCalledTimes(1)
     expect(toast.success).toHaveBeenCalledWith('2 ejercicios eliminados')
@@ -284,6 +284,68 @@ describe('ExercisesPage bulk delete', { timeout: 15000 }, () => {
     await user.type(screen.getByPlaceholderText('Buscar por nombre...'), 'rem')
 
     await waitFor(() => expect(screen.queryByRole('button', { name: /^Eliminar \(/ })).not.toBeInTheDocument())
+  })
+
+  it('clears the selection when a filter changes', async () => {
+    renderPage()
+    await selectExercises('Press banca')
+    expect(screen.getByRole('button', { name: 'Eliminar (1)' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Filtros/ }))
+    await user.click(await screen.findByRole('checkbox', { name: 'Intermedio' }))
+
+    await waitFor(() => expect(screen.queryByRole('button', { name: /^Eliminar \(/ })).not.toBeInTheDocument())
+  })
+
+  it('sends every deletion once when the confirmation is double-clicked', async () => {
+    let release!: () => void
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    api.delete.mockImplementation(async () => {
+      await gate
+      return { data: '', status: 204 }
+    })
+    renderPage()
+    await selectExercises('Press banca', 'Sentadilla')
+
+    await user.click(screen.getByRole('button', { name: 'Eliminar (2)' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Eliminar 2 ejercicios' })
+    await user.dblClick(within(dialog).getByRole('button', { name: 'Eliminar 2 ejercicios' }))
+    await waitFor(() => expect(api.delete).toHaveBeenCalledTimes(1))
+    release()
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(deletedUrls()).toEqual(['/exercises/e-1', '/exercises/e-2'])
+    expect(toast.success).toHaveBeenCalledExactlyOnceWith('2 ejercicios eliminados')
+  })
+
+  it('reports an exercise that no longer exists apart from the deleted ones and drops it from the selection', async () => {
+    api.delete.mockImplementation((url: string) =>
+      url === '/exercises/e-2'
+        ? Promise.reject(httpError(404, 'Ejercicio no encontrado'))
+        : Promise.resolve({ data: '', status: 204 })
+    )
+    renderPage()
+    await selectExercises('Press banca', 'Sentadilla', 'Remo con barra')
+
+    await user.click(screen.getByRole('button', { name: 'Eliminar (3)' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Eliminar 3 ejercicios' })
+    await user.click(within(dialog).getByRole('button', { name: 'Eliminar 3 ejercicios' }))
+
+    const result = await screen.findByRole('dialog', { name: 'Resultado de la eliminación' })
+    expect(deletedUrls()).toEqual(['/exercises/e-1', '/exercises/e-2', '/exercises/e-3'])
+    expect(within(result).getByRole('status')).toHaveTextContent('2 eliminados, 1 ya no existía.')
+    expect(within(result).getByRole('region', { name: 'Eliminados (2)' })).toHaveTextContent('Press bancaRemo con barra')
+    expect(within(result).getByRole('region', { name: 'Ya no existía (1)' })).toHaveTextContent('Sentadilla')
+    expect(within(result).queryByRole('region', { name: /^Fallid/ })).not.toBeInTheDocument()
+    expect(toast.warning).not.toHaveBeenCalled()
+    expect(toast.success).toHaveBeenCalledExactlyOnceWith('2 ejercicios eliminados')
+
+    await user.click(within(result).getByRole('button', { name: 'Cerrar' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    // Nothing is left to retry: the missing exercise is not kept selected.
+    expect(screen.queryByRole('button', { name: /^Eliminar \(/ })).not.toBeInTheDocument()
   })
 
   it('stops on 401 and lists the remaining exercises as not attempted', async () => {

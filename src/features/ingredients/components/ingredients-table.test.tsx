@@ -51,6 +51,14 @@ describe('IngredientsTable selection', () => {
     expect(header().indeterminate).toBe(false)
   })
 
+  it('reserves a 44 px touch target around every checkbox in mobile (the table is the only mobile view)', () => {
+    render(<Harness ingredients={PAGE_ONE} />)
+
+    for (const checkbox of [header(), row('Arroz integral'), row('Pollo')]) {
+      expect(checkbox.closest('div')).toHaveClass('max-md:size-11', 'max-md:justify-center')
+    }
+  })
+
   it('marks selected rows with data-state', () => {
     render(<Harness ingredients={PAGE_ONE} initial={['i-2']} />)
 

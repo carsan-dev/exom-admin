@@ -25,6 +25,7 @@ function renderDialog(props: Partial<BulkDeleteDialogProps> = {}) {
       running={false}
       progress={null}
       summary={null}
+      sessionExpired={false}
       onConfirm={onConfirm}
       {...props}
     />
@@ -96,7 +97,7 @@ describe('BulkDeleteDialog', () => {
         { id: 'd-3', name: 'Mantenimiento C', outcome: 'pending_approval' },
         { id: 'd-4', name: 'Otra D', outcome: 'not_attempted' },
       ],
-      counts: { deleted: 1, pending_approval: 1, failed: 1, not_attempted: 1 },
+      counts: { deleted: 1, not_found: 0, pending_approval: 1, failed: 1, not_attempted: 1 },
       allDeleted: false,
       stopped: true,
     }
@@ -119,6 +120,47 @@ describe('BulkDeleteDialog', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 
+  it('lists items that no longer existed apart and says how many were deleted when the session expired', async () => {
+    const summary: BulkDeleteSummary = {
+      results: [
+        { id: 'd-1', name: 'Definición A', outcome: 'deleted' },
+        { id: 'd-2', name: 'Volumen B', outcome: 'not_found' },
+        { id: 'd-3', name: 'Mantenimiento C', outcome: 'not_found' },
+        { id: 'd-4', name: 'Otra D', outcome: 'failed', status: 401, message: 'Sesión caducada' },
+        { id: 'd-5', name: 'Otra E', outcome: 'not_attempted' },
+      ],
+      counts: { deleted: 1, not_found: 2, pending_approval: 0, failed: 1, not_attempted: 1 },
+      allDeleted: false,
+      stopped: true,
+    }
+    renderDialog({ summary, sessionExpired: true })
+
+    const dialog = await screen.findByRole('dialog', { name: 'Resultado de la eliminación' })
+    expect(within(dialog).getByRole('status')).toHaveTextContent(
+      '1 eliminada, 2 ya no existían, 1 fallida, 1 no intentada.'
+    )
+    expect(within(dialog).getByRole('region', { name: 'Ya no existían (2)' })).toHaveTextContent(
+      'Volumen BMantenimiento C'
+    )
+    expect(within(dialog).getByRole('alert')).toHaveTextContent(
+      'Tu sesión ha caducado: se han eliminado 1 de 5 dietas y 4 no. Al cerrar tendrás que volver a iniciar sesión.'
+    )
+  })
+
+  it('shows no session notice while the session is valid', async () => {
+    const summary: BulkDeleteSummary = {
+      results: [{ id: 'd-1', name: 'Definición A', outcome: 'not_found' }],
+      counts: { deleted: 0, not_found: 1, pending_approval: 0, failed: 0, not_attempted: 0 },
+      allDeleted: false,
+      stopped: false,
+    }
+    renderDialog({ summary })
+
+    const dialog = await screen.findByRole('dialog', { name: 'Resultado de la eliminación' })
+    expect(within(dialog).getByRole('status')).toHaveTextContent('1 ya no existía.')
+    expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
+  })
+
   describe('focus on close', () => {
     /** Page stand-in: a <main> landmark and a selection bar that unmounts when «deleteAll» runs. */
     function Page() {
@@ -137,6 +179,7 @@ describe('BulkDeleteDialog', () => {
             running={false}
             progress={null}
             summary={null}
+            sessionExpired={false}
             onConfirm={() => {
               setSelected(false)
               setOpen(false)

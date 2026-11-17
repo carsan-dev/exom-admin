@@ -34,23 +34,44 @@ export interface BulkDeleteDialogProps {
   progress: BulkDeleteProgress | null
   /** Result of the finished batch. When present the dialog shows the result phase. */
   summary: BulkDeleteSummary | null
+  /**
+   * The session expired during the batch (401): the result says so and closing it leads to
+   * /login. The caller performs the redirect when the dialog closes.
+   */
+  sessionExpired: boolean
   onConfirm: () => void
 }
 
-const RESULT_GROUPS: ReadonlyArray<{ outcome: BulkDeleteOutcome; stem: string; suffix?: string }> = [
-  { outcome: 'deleted', stem: 'Eliminad' },
-  { outcome: 'pending_approval', stem: 'Enviad', suffix: ' a aprobación' },
-  { outcome: 'failed', stem: 'Fallid' },
-  { outcome: 'not_attempted', stem: 'No intentad' },
+type Gender = BulkDeleteEntityLabels['gender']
+
+/** Result groups, in display order. `label` is the capitalised heading for `count` items. */
+const RESULT_GROUPS: ReadonlyArray<{ outcome: BulkDeleteOutcome; label: (count: number, gender: Gender) => string }> = [
+  { outcome: 'deleted', label: (count, gender) => agreeParticiple('Eliminad', count, gender) },
+  // 404: already archived or deleted before this batch; not deleted now.
+  { outcome: 'not_found', label: (count) => (count === 1 ? 'Ya no existía' : 'Ya no existían') },
+  {
+    outcome: 'pending_approval',
+    label: (count, gender) => `${agreeParticiple('Enviad', count, gender)} a aprobación`,
+  },
+  { outcome: 'failed', label: (count, gender) => agreeParticiple('Fallid', count, gender) },
+  { outcome: 'not_attempted', label: (count, gender) => agreeParticiple('No intentad', count, gender) },
 ]
 
-function describeSummary(summary: BulkDeleteSummary, gender: BulkDeleteEntityLabels['gender']) {
+function describeSummary(summary: BulkDeleteSummary, gender: Gender) {
   return RESULT_GROUPS.filter(({ outcome }) => summary.counts[outcome] > 0)
-    .map(({ outcome, stem, suffix = '' }) => {
+    .map(({ outcome, label }) => {
       const count = summary.counts[outcome]
-      return `${count} ${agreeParticiple(stem, count, gender).toLowerCase()}${suffix}`
+      const text = label(count, gender)
+      return `${count} ${text.charAt(0).toLowerCase()}${text.slice(1)}`
     })
     .join(', ')
+}
+
+/** «Tu sesión ha caducado: se han eliminado 1 de 3 dietas y 2 no. …» */
+function describeSessionExpired(summary: BulkDeleteSummary, labels: BulkDeleteEntityLabels) {
+  const total = summary.results.length
+  const deleted = summary.counts.deleted
+  return `Tu sesión ha caducado: se han eliminado ${deleted} de ${formatEntityCount(total, labels)} y ${total - deleted} no. Al cerrar tendrás que volver a iniciar sesión.`
 }
 
 /**
@@ -88,6 +109,7 @@ export function BulkDeleteDialog({
   running,
   progress,
   summary,
+  sessionExpired,
   onConfirm,
 }: BulkDeleteDialogProps) {
   const idPrefix = useId()
@@ -131,16 +153,25 @@ export function BulkDeleteDialog({
               </DialogDescription>
             </DialogHeader>
 
+            {sessionExpired && (
+              <p
+                role="alert"
+                className="flex items-start gap-2 border border-status-warning/30 bg-status-warning-soft p-3 text-[13px] text-foreground"
+              >
+                <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-warning" />
+                {describeSessionExpired(summary, labels)}
+              </p>
+            )}
+
             <div className="max-h-72 space-y-4 overflow-y-auto border-y border-border py-3">
-              {RESULT_GROUPS.map(({ outcome, stem, suffix = '' }) => {
+              {RESULT_GROUPS.map(({ outcome, label }) => {
                 const results = summary.results.filter((result) => result.outcome === outcome)
                 if (results.length === 0) return null
                 const headingId = `${idPrefix}-${outcome}`
                 return (
                   <section key={outcome} aria-labelledby={headingId}>
                     <h3 id={headingId} className="text-sm font-semibold text-foreground">
-                      {agreeParticiple(stem, results.length, labels.gender)}
-                      {suffix} ({results.length})
+                      {label(results.length, labels.gender)} ({results.length})
                     </h3>
                     <ul className="mt-1 list-disc space-y-1 pl-5 text-[13px] text-foreground-secondary">
                       {results.map((result) => (

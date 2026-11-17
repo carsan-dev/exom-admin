@@ -254,7 +254,7 @@ export function useBulkDeleteExercises() {
     mutationFn: async ({ items, onProgress }: BulkDeleteExercisesVariables) => {
       const summary = await runSessionBoundBulkDelete({
         items,
-        deleteOne: (id) => deleteExerciseRequest(id, { suppressApprovalToast: true }),
+        deleteOne: (id) => deleteExerciseRequest(id, { suppressApprovalToast: true, deferLoginRedirect: true }),
         onProgress,
         fallbackErrorMessage: 'No se ha podido eliminar el ejercicio',
       })

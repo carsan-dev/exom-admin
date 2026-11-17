@@ -20,7 +20,8 @@ export interface UseNamedSelectionResult {
 /**
  * Selection that spans pages and remembers each item's name while it is visible, so a later
  * confirmation can list items that are no longer on screen. Cleared whenever `resetKey` changes
- * (search, filters, sort), like the page it serves.
+ * (the page's search and filters, the same key that sends it back to page 1). Changing the sort
+ * order keeps the selection.
  */
 export function useNamedSelection(
   pageItems: ReadonlyArray<NamedItem>,

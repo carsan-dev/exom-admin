@@ -374,7 +374,7 @@ export function useBulkDeleteDiets() {
     mutationFn: async ({ items, onProgress }: BulkDeleteDietsVariables) => {
       const summary = await runSessionBoundBulkDelete({
         items,
-        deleteOne: (id) => deleteDietRequest(id, { suppressApprovalToast: true }),
+        deleteOne: (id) => deleteDietRequest(id, { suppressApprovalToast: true, deferLoginRedirect: true }),
         onProgress,
         fallbackErrorMessage: 'No se ha podido eliminar la dieta',
       })

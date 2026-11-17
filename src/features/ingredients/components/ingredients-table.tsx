@@ -46,7 +46,8 @@ export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDel
       <TableHeader>
         <TableRow>
           <TableHead className="w-12">
-            <div className="flex items-center">
+            {/* In mobile only the table exists: the 44 px wrapper keeps the touch target, as in the mobile lists. */}
+            <div className="flex items-center max-md:size-11 max-md:justify-center">
               <Checkbox aria-label="Seleccionar página" checked={selection.headerChecked} onChange={selection.toggleAll} />
             </div>
           </TableHead>
@@ -67,7 +68,7 @@ export function IngredientsTable({ ingredients, approvalById = {}, onEdit, onDel
         {ingredients.map((ingredient) => (
           <TableRow key={ingredient.id} data-state={selectedIds?.has(ingredient.id) ? 'selected' : undefined}>
             <TableCell>
-              <div className="flex items-center">
+              <div className="flex items-center max-md:size-11 max-md:justify-center">
                 <Checkbox
                   aria-label={`Seleccionar ${ingredient.name}`}
                   checked={selectedIds?.has(ingredient.id) ?? false}

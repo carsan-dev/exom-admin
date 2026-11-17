@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { toast } from 'sonner'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAuth } from '@/hooks/use-auth'
 import {
   type BulkDeleteItemResult,
@@ -8,6 +8,7 @@ import {
   type BulkDeleteSummary,
   runBulkDelete,
 } from '@/lib/bulk-delete'
+import { redirectToLogin } from '@/lib/login-redirect'
 import type { AuthUser } from '@/types/auth'
 import type { BulkDeleteEntityLabels } from './bulk-delete-labels'
 import { type BulkDeleteRunVariables, useBulkDeleteFlow } from './use-bulk-delete-flow'
@@ -24,7 +25,7 @@ const ITEMS = [
 ]
 
 function summaryOf(results: BulkDeleteItemResult[]): BulkDeleteSummary {
-  const counts = { deleted: 0, pending_approval: 0, failed: 0, not_attempted: 0 }
+  const counts = { deleted: 0, not_found: 0, pending_approval: 0, failed: 0, not_attempted: 0 }
   for (const result of results) counts[result.outcome] += 1
   return { results, counts, allDeleted: counts.deleted === results.length, stopped: false }
 }
@@ -213,5 +214,141 @@ describe('useBulkDeleteFlow', () => {
     await act(async () => result.current.dialogProps.onConfirm())
 
     expect(run).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('useBulkDeleteFlow outcomes without a failure', () => {
+  beforeEach(() => {
+    vi.mocked(toast.success).mockClear()
+    vi.mocked(toast.info).mockClear()
+    vi.mocked(toast.warning).mockClear()
+    setRole('SUPER_ADMIN')
+  })
+
+  it('shows the result and toasts the deletions when some items no longer existed', async () => {
+    const run = vi
+      .fn<Run>()
+      .mockResolvedValue(summaryOf([deleted('a', 'Alpha'), { id: 'b', name: 'Beta', outcome: 'not_found' }]))
+    const { result, onSettled, onDeleted } = setup(run)
+    act(() => result.current.open(ITEMS.slice(0, 2)))
+
+    await act(async () => result.current.dialogProps.onConfirm())
+
+    expect(onDeleted).toHaveBeenCalledTimes(1)
+    expect(onSettled).toHaveBeenCalledExactlyOnceWith(new Set())
+    expect(toast.success).toHaveBeenCalledExactlyOnceWith('1 ejercicio eliminado')
+    expect(toast.warning).not.toHaveBeenCalled()
+    expect(result.current.dialogProps.open).toBe(true)
+    expect(result.current.dialogProps.summary?.counts).toMatchObject({ deleted: 1, not_found: 1 })
+  })
+
+  it('says so when none of the items existed any more', async () => {
+    const run = vi.fn<Run>().mockResolvedValue(summaryOf([{ id: 'a', name: 'Alpha', outcome: 'not_found' }]))
+    const { result, onSettled, onDeleted } = setup(run)
+    act(() => result.current.open([ITEMS[0]]))
+
+    await act(async () => result.current.dialogProps.onConfirm())
+
+    expect(onDeleted).not.toHaveBeenCalled()
+    expect(onSettled).toHaveBeenCalledExactlyOnceWith(new Set())
+    expect(toast.info).toHaveBeenCalledExactlyOnceWith('1 ejercicio ya no existía')
+    expect(toast.success).not.toHaveBeenCalled()
+  })
+})
+
+describe('useBulkDeleteFlow login redirect after a 401', () => {
+  let location: { pathname: string; href: string }
+
+  beforeEach(() => {
+    setRole('SUPER_ADMIN')
+    location = { pathname: '/exercises', href: 'http://localhost/exercises' }
+    vi.stubGlobal('location', location)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  /** A batch whose request got a 401: the interceptor asks for a (deferrable) redirect. */
+  const expiringRun = (summary: BulkDeleteSummary) =>
+    vi.fn<Run>(async () => {
+      redirectToLogin({ deferrable: true })
+      return summary
+    })
+
+  it('keeps the result open with the session notice and redirects only once it is closed', async () => {
+    const { result } = setup(expiringRun(summaryOf([deleted('a', 'Alpha'), failed('b', 'Beta')])))
+    act(() => result.current.open(ITEMS.slice(0, 2)))
+
+    await act(async () => result.current.dialogProps.onConfirm())
+
+    expect(result.current.dialogProps).toMatchObject({ open: true, sessionExpired: true })
+    expect(location.href).toBe('http://localhost/exercises')
+
+    act(() => result.current.dialogProps.onOpenChange(false))
+    expect(location.href).toBe('/login')
+  })
+
+  it('shows the result even if everything was deleted before the session expired', async () => {
+    const { result, onSettled } = setup(expiringRun(summaryOf(ITEMS.map((item) => deleted(item.id, item.name)))))
+    act(() => result.current.open(ITEMS))
+
+    await act(async () => result.current.dialogProps.onConfirm())
+
+    expect(result.current.dialogProps).toMatchObject({ open: true, sessionExpired: true })
+    expect(result.current.dialogProps.summary?.allDeleted).toBe(true)
+    expect(onSettled).toHaveBeenCalledExactlyOnceWith(null)
+    expect(location.href).toBe('http://localhost/exercises')
+
+    act(() => result.current.dialogProps.onOpenChange(false))
+    expect(location.href).toBe('/login')
+  })
+
+  it('redirects when the batch throws after a 401', async () => {
+    const run = vi.fn<Run>(async () => {
+      redirectToLogin({ deferrable: true })
+      throw new Error('boom')
+    })
+    const { result } = setup(run)
+    act(() => result.current.open([ITEMS[0]]))
+
+    await act(async () => result.current.dialogProps.onConfirm())
+
+    expect(location.href).toBe('/login')
+  })
+
+  it('releases the redirect at once when the batch did not get a 401', async () => {
+    const run = vi.fn<Run>().mockResolvedValue(summaryOf([failed('a', 'Alpha')]))
+    const { result } = setup(run)
+    act(() => result.current.open([ITEMS[0]]))
+
+    await act(async () => result.current.dialogProps.onConfirm())
+
+    expect(result.current.dialogProps).toMatchObject({ open: true, sessionExpired: false })
+    // While the result is open a later 401 is not held back.
+    redirectToLogin({ deferrable: true })
+    expect(location.href).toBe('/login')
+  })
+
+  it('redirects when the page unmounts while the batch is still running', async () => {
+    let finish: (summary: BulkDeleteSummary) => void = () => {}
+    const run = vi.fn<Run>(() => {
+      redirectToLogin({ deferrable: true })
+      return new Promise<BulkDeleteSummary>((resolve) => {
+        finish = resolve
+      })
+    })
+    const { result, unmount } = setup(run)
+    act(() => result.current.open([ITEMS[0]]))
+    act(() => result.current.dialogProps.onConfirm())
+    expect(location.href).toBe('http://localhost/exercises')
+
+    unmount()
+    expect(location.href).toBe('/login')
+
+    location.href = 'http://localhost/elsewhere'
+    await act(async () => finish(summaryOf([failed('a', 'Alpha')])))
+    // The late result does not navigate a second time.
+    expect(location.href).toBe('http://localhost/elsewhere')
   })
 })

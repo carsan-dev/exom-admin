@@ -158,8 +158,8 @@ describe('TrainingsPage bulk delete', { timeout: 15000 }, () => {
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(api.delete.mock.calls).toEqual([
-      ['/trainings/t-1', { suppressApprovalToast: true }],
-      ['/trainings/t-2', { suppressApprovalToast: true }],
+      ['/trainings/t-1', { suppressApprovalToast: true, deferLoginRedirect: true }],
+      ['/trainings/t-2', { suppressApprovalToast: true, deferLoginRedirect: true }],
     ])
     expect(toast.success).toHaveBeenCalledTimes(1)
     expect(toast.success).toHaveBeenCalledWith('2 entrenamientos eliminados')

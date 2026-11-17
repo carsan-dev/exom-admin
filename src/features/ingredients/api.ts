@@ -207,7 +207,7 @@ export function useBulkDeleteIngredients() {
     mutationFn: async ({ items, onProgress }: BulkDeleteIngredientsVariables) => {
       const summary = await runSessionBoundBulkDelete({
         items,
-        deleteOne: (id) => deleteIngredientRequest(id, { suppressApprovalToast: true }),
+        deleteOne: (id) => deleteIngredientRequest(id, { suppressApprovalToast: true, deferLoginRedirect: true }),
         onProgress,
         fallbackErrorMessage: 'No se ha podido eliminar el ingrediente',
       })
