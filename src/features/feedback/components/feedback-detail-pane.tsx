@@ -16,7 +16,7 @@ export function FeedbackDetailPane({ item, draft, onDraftChange, onRespond, isRe
     <section
       id="feedback-detail"
       aria-label="Detalle de feedback"
-      className="min-w-0 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:self-start lg:overflow-y-auto lg:pl-8"
+      className="min-w-0 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-92px)] lg:self-start lg:overflow-y-auto lg:pl-8"
     >
       {item ? (
         <FeedbackDetailView
