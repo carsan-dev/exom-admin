@@ -2,7 +2,14 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { RecapListItem } from '../types'
-import { RecapQuickView, type RecapFocusRequest, type RecapReplyValues } from './recap-quick-view'
+import {
+  RecapQuickView,
+  type RecapDraftDiscardReason,
+  type RecapFocusRequest,
+  type RecapReplyDraft,
+  type RecapReplyMode,
+  type RecapReplyValues,
+} from './recap-quick-view'
 
 interface RecapQuickViewDialogProps {
   item: RecapListItem | null
@@ -10,10 +17,10 @@ interface RecapQuickViewDialogProps {
   onOpenChange: (open: boolean) => void
   /** Devuelve el foco al cerrar; se llama desde `onCloseAutoFocus`. */
   onCloseAutoFocus: (event: Event) => void
-  draft: RecapReplyValues | undefined
-  onDraftChange: (id: string, values: RecapReplyValues, saved: RecapReplyValues) => void
-  onSend: (item: RecapListItem, values: RecapReplyValues) => void
-  onDraftDiscard: (id: string) => void
+  draft: RecapReplyDraft | undefined
+  onDraftChange: (id: string, values: RecapReplyDraft, saved: RecapReplyValues) => void
+  onSend: (item: RecapListItem, values: RecapReplyValues, mode: RecapReplyMode) => void
+  onDraftDiscard: (id: string, reason: RecapDraftDiscardReason | null) => void
   isSending: boolean
   focusRequest: RecapFocusRequest | null
   onFocusHandled: () => void
