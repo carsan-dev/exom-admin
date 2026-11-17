@@ -9,6 +9,11 @@ import {
 } from '@/components/filters'
 import { EmptyState, ErrorState, PageHeader, Pagination } from '@/components/page'
 import { Button } from '@/components/ui/button'
+import { BulkDeleteDialog } from '@/components/workspace/bulk-delete-dialog'
+import type { BulkDeleteEntityLabels } from '@/components/workspace/bulk-delete-labels'
+import { SelectionBar } from '@/components/workspace/selection-bar'
+import { useBulkDeleteFlow } from '@/components/workspace/use-bulk-delete-flow'
+import { useNamedSelection } from '@/components/workspace/use-named-selection'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import {
@@ -19,6 +24,7 @@ import { getSortSearchParams, toggleSortSearchParams } from '@/lib/sort-search-p
 import {
   getApiErrorMessage,
   type ExercisesListParams,
+  useBulkDeleteExercises,
   useExerciseEquipment,
   useExerciseMuscleGroups,
   useExercises,
@@ -32,6 +38,13 @@ import { ExercisesListSkeleton } from '../components/exercises-list-skeleton'
 import type { Exercise } from '../types'
 
 const PAGE_SIZE = 10
+const EXERCISE_LABELS: BulkDeleteEntityLabels = {
+  singular: 'ejercicio',
+  plural: 'ejercicios',
+  gender: 'masculine',
+}
+const BULK_DELETE_CONSEQUENCES =
+  'Dejarán de estar disponibles en el catálogo. Los entrenamientos que ya los usan y el histórico de los clientes se conservan. No se puede deshacer desde el panel.'
 const LEVEL_OPTIONS: FilterOption[] = [
   { value: 'PRINCIPIANTE', label: 'Principiante' },
   { value: 'INTERMEDIO', label: 'Intermedio' },
@@ -66,6 +79,7 @@ export function ExercisesPage() {
   const activeSearch = deferredSearch.trim()
   const muscleGroupsQuery = useExerciseMuscleGroups()
   const equipmentQuery = useExerciseEquipment()
+  const bulkDeleteExercises = useBulkDeleteExercises()
   const sections = useMemo<FilterSectionConfig[]>(
     () => [
       {
@@ -120,6 +134,17 @@ export function ExercisesPage() {
     ...exerciseFilterParams,
   })
   const exercises = exercisesQuery.data?.data ?? []
+  const { selectedIds, updateSelection, clearSelection, retainSelection, toItems } = useNamedSelection(
+    exercises,
+    pageResetKey
+  )
+  const bulkDelete = useBulkDeleteFlow({
+    labels: EXERCISE_LABELS,
+    consequences: BULK_DELETE_CONSEQUENCES,
+    run: bulkDeleteExercises.mutateAsync,
+    onDeleted: () => replacePaginationSearchParams(setSearchParams, { page: 1 }),
+    onSettled: (retryableIds) => (retryableIds ? retainSelection(retryableIds) : clearSelection()),
+  })
   const exerciseApprovalQuery = useResourceApprovalBatch(
     'exercise',
     exercises.map((exercise) => exercise.id)
@@ -261,6 +286,8 @@ export function ExercisesPage() {
               onEdit={handleEdit}
               onDuplicate={handleDuplicate}
               onDelete={handleDelete}
+              selectedIds={selectedIds}
+              onSelectionChange={updateSelection}
               sortBy={sort.sort_by}
               sortDir={sort.sort_dir}
               onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
@@ -285,6 +312,17 @@ export function ExercisesPage() {
       )}
 
       {/* Dialogs */}
+      <SelectionBar
+        count={selectedIds.size}
+        onClear={clearSelection}
+        aria-label="Acciones de selección de ejercicios"
+        className="fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px)+12px)] left-4 right-4 z-40 mt-0 w-auto max-md:overflow-x-visible md:bottom-6 md:left-1/2 md:right-auto md:w-auto md:min-w-96 md:-translate-x-1/2"
+      >
+        <Button variant="destructive" onClick={() => bulkDelete.open(toItems())} className="max-md:h-11">
+          Eliminar ({selectedIds.size})
+        </Button>
+      </SelectionBar>
+      <BulkDeleteDialog {...bulkDelete.dialogProps} />
       <ExerciseFormDialog
         open={formDialogOpen}
         onOpenChange={handleFormDialogOpenChange}

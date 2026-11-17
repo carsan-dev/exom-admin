@@ -8,6 +8,10 @@ import {
   type FilterSectionConfig,
   useListFilters,
 } from '@/components/filters'
+import { BulkDeleteDialog } from '@/components/workspace/bulk-delete-dialog'
+import type { BulkDeleteEntityLabels } from '@/components/workspace/bulk-delete-labels'
+import { useBulkDeleteFlow } from '@/components/workspace/use-bulk-delete-flow'
+import { useNamedSelection } from '@/components/workspace/use-named-selection'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import {
@@ -22,6 +26,7 @@ import {
   useDietNutritionalBadgeCatalogColors,
   useDietNutritionalBadges,
   useDietTags,
+  useBulkDeleteDiets,
   useDiets,
   useIngredientsList,
   useDietGroups,
@@ -57,6 +62,10 @@ const MEAL_TYPE_OPTIONS: FilterOption[] = [
   { value: 'DINNER', label: 'Cena' },
 ]
 
+const DIET_LABELS: BulkDeleteEntityLabels = { singular: 'dieta', plural: 'dietas', gender: 'feminine' }
+const BULK_DELETE_CONSEQUENCES =
+  'Dejarán de estar disponibles para nuevas asignaciones. Las asignaciones y el histórico existentes se conservan. No se puede deshacer desde el panel.'
+
 function toFilterOptions(values?: string[]): FilterOption[] {
   return values?.map((value) => ({ value, label: value })) ?? []
 }
@@ -74,7 +83,6 @@ export function DietsPage() {
   const [importIssues, setImportIssues] = useState<string[]>([])
   const [importPromptOpen, setImportPromptOpen] = useState(false)
   const [ingredientCatalogRequested, setIngredientCatalogRequested] = useState(false)
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [groupDialogOpen, setGroupDialogOpen] = useState(false)
   const [groupToEdit, setGroupToEdit] = useState<CatalogGroup | null>(null)
   const [groupToDelete, setGroupToDelete] = useState<CatalogGroup | null>(null)
@@ -94,6 +102,7 @@ export function DietsPage() {
   const updateGroup = useUpdateDietGroup()
   const deleteGroup = useDeleteDietGroup()
   const moveMembership = useUpdateDietGroupMembership()
+  const bulkDeleteDiets = useBulkDeleteDiets()
   const sections = useMemo<FilterSectionConfig[]>(
     () => [
       {
@@ -168,7 +177,17 @@ export function DietsPage() {
   const activeGroupName = groupFilter === 'all' ? null : groupFilter === 'ungrouped' ? 'Sin grupo' : groups.find((group) => group.id === groupFilter)?.name ?? null
   const organizationPending = createGroup.isPending || updateGroup.isPending || deleteGroup.isPending || moveMembership.isPending
 
-  useEffect(() => { setSelectedIds(new Set()) }, [pageResetKey])
+  const { selectedIds, updateSelection, clearSelection, retainSelection, toItems } = useNamedSelection(
+    diets,
+    pageResetKey
+  )
+  const bulkDelete = useBulkDeleteFlow({
+    labels: DIET_LABELS,
+    consequences: BULK_DELETE_CONSEQUENCES,
+    run: bulkDeleteDiets.mutateAsync,
+    onDeleted: () => replacePaginationSearchParams(setSearchParams, { page: 1 }),
+    onSettled: (retryableIds) => (retryableIds ? retainSelection(retryableIds) : clearSelection()),
+  })
 
   const handleGroupSubmit = (name: string) => {
     const mutation = groupToEdit ? updateGroup.mutateAsync({ id: groupToEdit.id, name }) : createGroup.mutateAsync(name)
@@ -177,7 +196,7 @@ export function DietsPage() {
 
   const handleMove = (ids: string[], groupId: string | null) => {
     moveMembership.mutate({ ids, groupId }, {
-      onSuccess: (result) => { setSelectedIds(new Set()); setMoveDialogOpen(false); toast.success(`${result.affected_count} elementos movidos`) },
+      onSuccess: (result) => { clearSelection(); setMoveDialogOpen(false); toast.success(`${result.affected_count} elementos movidos`) },
       onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudieron mover los elementos')),
     })
   }
@@ -349,7 +368,7 @@ export function DietsPage() {
           onDuplicate={handleDuplicate}
           onDelete={handleDelete}
           selectedIds={selectedIds}
-          onSelectionChange={setSelectedIds}
+          onSelectionChange={updateSelection}
           sortBy={sort.sort_by}
           sortDir={sort.sort_dir}
           onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
@@ -376,9 +395,11 @@ export function DietsPage() {
           count={selectedIds.size}
           disabled={organizationPending}
           onMove={() => setMoveDialogOpen(true)}
-          onClear={() => setSelectedIds(new Set())}
+          onDelete={() => bulkDelete.open(toItems())}
+          onClear={clearSelection}
         />
       )}
+      <BulkDeleteDialog {...bulkDelete.dialogProps} />
       <CatalogGroupDialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen} group={groupToEdit} pending={organizationPending} onSubmit={handleGroupSubmit} />
       <DeleteCatalogGroupDialog open={Boolean(groupToDelete)} onOpenChange={(open) => !open && setGroupToDelete(null)} group={groupToDelete} pending={organizationPending} onConfirm={() => groupToDelete && deleteGroup.mutate(groupToDelete.id, { onSuccess: () => { if (groupFilter === groupToDelete.id) setGroupFilter('all'); setGroupToDelete(null); toast.success('Grupo eliminado') }, onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudo eliminar el grupo')) })} />
       <MoveToGroupDialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen} groups={groups} count={selectedIds.size} pending={organizationPending} onConfirm={(groupId) => handleMove([...selectedIds], groupId)} />

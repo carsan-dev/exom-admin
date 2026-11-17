@@ -8,6 +8,10 @@ import {
   type FilterSectionConfig,
   useListFilters,
 } from '@/components/filters'
+import { BulkDeleteDialog } from '@/components/workspace/bulk-delete-dialog'
+import type { BulkDeleteEntityLabels } from '@/components/workspace/bulk-delete-labels'
+import { useBulkDeleteFlow } from '@/components/workspace/use-bulk-delete-flow'
+import { useNamedSelection } from '@/components/workspace/use-named-selection'
 import { useResourceApprovalBatch } from '@/features/approval-requests/api'
 import { buildResourceApprovalMap } from '@/features/approval-requests/types'
 import { getPageSearchParam, replacePaginationSearchParams } from '@/lib/pagination-search-params'
@@ -15,6 +19,7 @@ import { getSortSearchParams, toggleSortSearchParams } from '@/lib/sort-search-p
 import {
   getApiErrorMessage,
   type TrainingsListParams,
+  useBulkDeleteTrainings,
   useTraining,
   useTrainingTypeCatalogColors,
   useTrainingTags,
@@ -51,6 +56,13 @@ import {
 import { resolveDraggedCatalogIds } from '../../catalog-groups/drag-selection'
 
 const PAGE_SIZE = 10
+const TRAINING_LABELS: BulkDeleteEntityLabels = {
+  singular: 'entrenamiento',
+  plural: 'entrenamientos',
+  gender: 'masculine',
+}
+const BULK_DELETE_CONSEQUENCES =
+  'Dejarán de estar disponibles para nuevas asignaciones. Las asignaciones y el histórico existentes se conservan. No se puede deshacer desde el panel.'
 const LEVEL_OPTIONS: FilterOption[] = [
   { value: 'PRINCIPIANTE', label: 'Principiante' },
   { value: 'INTERMEDIO', label: 'Intermedio' },
@@ -77,7 +89,6 @@ export function TrainingsPage() {
   const [importIssues, setImportIssues] = useState<string[]>([])
   const [importPromptOpen, setImportPromptOpen] = useState(false)
   const [exerciseCatalogRequested, setExerciseCatalogRequested] = useState(false)
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [groupDialogOpen, setGroupDialogOpen] = useState(false)
   const [groupToEdit, setGroupToEdit] = useState<CatalogGroup | null>(null)
   const [groupToDelete, setGroupToDelete] = useState<CatalogGroup | null>(null)
@@ -97,6 +108,7 @@ export function TrainingsPage() {
   const updateGroup = useUpdateTrainingGroup()
   const deleteGroup = useDeleteTrainingGroup()
   const moveMembership = useUpdateTrainingGroupMembership()
+  const bulkDeleteTrainings = useBulkDeleteTrainings()
   const sections = useMemo<FilterSectionConfig[]>(
     () => [
       {
@@ -187,9 +199,17 @@ export function TrainingsPage() {
     deleteGroup.isPending ||
     moveMembership.isPending
 
-  useEffect(() => {
-    setSelectedIds(new Set())
-  }, [pageResetKey])
+  const { selectedIds, updateSelection, clearSelection, retainSelection, toItems } = useNamedSelection(
+    trainings,
+    pageResetKey
+  )
+  const bulkDelete = useBulkDeleteFlow({
+    labels: TRAINING_LABELS,
+    consequences: BULK_DELETE_CONSEQUENCES,
+    run: bulkDeleteTrainings.mutateAsync,
+    onDeleted: () => replacePaginationSearchParams(setSearchParams, { page: 1 }),
+    onSettled: (retryableIds) => (retryableIds ? retainSelection(retryableIds) : clearSelection()),
+  })
 
   const handleGroupSubmit = (name: string) => {
     const mutation = groupToEdit
@@ -209,7 +229,7 @@ export function TrainingsPage() {
       { ids, groupId },
       {
         onSuccess: (result) => {
-          setSelectedIds(new Set())
+          clearSelection()
           setMoveDialogOpen(false)
           toast.success(`${result.affected_count} elementos movidos`)
         },
@@ -409,7 +429,7 @@ export function TrainingsPage() {
             onDuplicate={handleDuplicate}
             onDelete={handleDelete}
             selectedIds={selectedIds}
-            onSelectionChange={setSelectedIds}
+            onSelectionChange={updateSelection}
             sortBy={sort.sort_by}
             sortDir={sort.sort_dir}
             onSortChange={(field) => toggleSortSearchParams(setSearchParams, field)}
@@ -436,9 +456,11 @@ export function TrainingsPage() {
             count={selectedIds.size}
             disabled={organizationPending}
             onMove={() => setMoveDialogOpen(true)}
-            onClear={() => setSelectedIds(new Set())}
+            onDelete={() => bulkDelete.open(toItems())}
+            onClear={clearSelection}
           />
         )}
+        <BulkDeleteDialog {...bulkDelete.dialogProps} />
         <CatalogGroupDialog
           open={groupDialogOpen}
           onOpenChange={setGroupDialogOpen}

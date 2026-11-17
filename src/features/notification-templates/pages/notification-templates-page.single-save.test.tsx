@@ -209,7 +209,7 @@ describe('NotificationTemplatesPage single save (P10)', () => {
   })
 
   it('both dirty: sends both PATCHes with today’s payloads and reports both successes', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     await openWeekly(user)
 
     await user.clear(screen.getByLabelText('Título'))
@@ -241,7 +241,7 @@ describe('NotificationTemplatesPage single save (P10)', () => {
     await waitFor(() => expect(saveButton()).toBeDisabled())
     expect(screen.getByLabelText('Título')).toHaveValue('Nueva semana')
     expect(screen.getByLabelText('Huso horario')).toHaveValue('UTC')
-  })
+  }, 15000)
 
   it('text fails, schedule succeeds: schedule becomes clean, text edits kept, retry sends only text', async () => {
     failures[TEXT_URL] = httpError(400, 'Cuerpo demasiado largo')

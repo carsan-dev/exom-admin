@@ -1,5 +1,8 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { AxiosRequestConfig } from 'axios'
 import { api } from '@/lib/api'
+import type { BulkDeleteItem, BulkDeleteProgress } from '@/lib/bulk-delete'
+import { runSessionBoundBulkDelete } from '@/lib/bulk-delete-session'
 import {
   invalidateAdminQueries,
   invalidateAdminQueriesOnApprovalPending,
@@ -429,14 +432,49 @@ export function useUpdateTraining() {
   })
 }
 
+/** Single training deletion (archives it). Shared by the row action and the bulk action. */
+export async function deleteTrainingRequest(id: string, config?: AxiosRequestConfig) {
+  const url = `/trainings/${id}`
+  const response = config
+    ? await api.delete<ApiEnvelope<Training>>(url, config)
+    : await api.delete<ApiEnvelope<Training>>(url)
+  return unwrapResponse(response)
+}
+
+interface BulkDeleteTrainingsVariables {
+  items: ReadonlyArray<BulkDeleteItem>
+  onProgress?: (progress: BulkDeleteProgress) => void
+}
+
+/**
+ * Deletes several trainings one request at a time (there is no batch endpoint). Approval toasts
+ * are suppressed per request; the caller summarises the result. Invalidates once at the end.
+ */
+export function useBulkDeleteTrainings() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ items, onProgress }: BulkDeleteTrainingsVariables) => {
+      const summary = await runSessionBoundBulkDelete({
+        items,
+        deleteOne: (id) => deleteTrainingRequest(id, { suppressApprovalToast: true, deferLoginRedirect: true }),
+        onProgress,
+        fallbackErrorMessage: 'No se ha podido eliminar el entrenamiento',
+      })
+      await invalidateAdminQueries(queryClient, {
+        extraQueryKeys: [trainingsQueryKeys.all],
+        includeApprovalQueries: summary.counts.pending_approval > 0,
+      })
+      return summary
+    },
+  })
+}
+
 export function useDeleteTraining() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await api.delete<ApiEnvelope<Training>>(`/trainings/${id}`)
-      return unwrapResponse(response)
-    },
+    mutationFn: (id: string) => deleteTrainingRequest(id),
     onSuccess: async () => {
       await invalidateAdminQueries(queryClient, {
         extraQueryKeys: [trainingsQueryKeys.all],

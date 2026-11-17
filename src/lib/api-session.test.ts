@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AxiosError } from 'axios'
 
-const mocks = vi.hoisted(() => ({ auth: { currentUser: { uid: 'A' } }, token: vi.fn() }))
+const mocks = vi.hoisted(() => ({ auth: { currentUser: { uid: 'A' } }, token: vi.fn(), toastInfo: vi.fn() }))
 vi.mock('./firebase', () => ({ auth: mocks.auth, getIdToken: mocks.token }))
+vi.mock('sonner', () => ({ toast: { info: mocks.toastInfo } }))
 import { api } from './api'
 import { ApprovalPendingError } from './api-utils'
 
@@ -35,6 +36,29 @@ describe('API session ownership', () => {
       config,
     })
     await expect(api.post('/admin/trainings', {})).rejects.toBeInstanceOf(ApprovalPendingError)
+  })
+
+  it('shows the approval toast by default and skips it with suppressApprovalToast', async () => {
+    api.defaults.adapter = async (config) => ({
+      data: { data: { approval_request_id: 'approval-b', message: 'Solicitud creada' } },
+      status: 202,
+      statusText: 'Accepted',
+      headers: {},
+      config,
+    })
+    mocks.toastInfo.mockClear()
+
+    await expect(api.delete('/diets/d-1')).rejects.toBeInstanceOf(ApprovalPendingError)
+    expect(mocks.toastInfo).toHaveBeenCalledTimes(1)
+    expect(mocks.toastInfo).toHaveBeenCalledWith('Solicitud creada')
+
+    mocks.toastInfo.mockClear()
+    const rejection = await api
+      .delete('/diets/d-2', { suppressApprovalToast: true })
+      .catch((error: unknown) => error)
+    expect(rejection).toBeInstanceOf(ApprovalPendingError)
+    expect(rejection).toMatchObject({ approvalRequestId: 'approval-b' })
+    expect(mocks.toastInfo).not.toHaveBeenCalled()
   })
 
   it.each([200, 401, 403])(

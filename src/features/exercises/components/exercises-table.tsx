@@ -1,7 +1,9 @@
 import { Video } from 'lucide-react'
 import { SortableTableHead } from '@/components/sortable-table-head'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Tag } from '@/components/ui/tag'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { usePageSelection } from '@/components/workspace/use-page-selection'
 import type { SortDir } from '@/lib/sort-search-params'
 import { ResourceApprovalIndicator } from '../../approval-requests/components/resource-approval-indicator'
 import { LEVEL_LABELS, type Exercise } from '../types'
@@ -21,6 +23,8 @@ export interface ExercisesTableProps {
   onEdit: (exercise: Exercise) => void
   onDuplicate: (exercise: Exercise) => void
   onDelete: (exercise: Exercise) => void
+  selectedIds?: Set<string>
+  onSelectionChange?: (ids: Set<string>) => void
   sortBy?: string
   sortDir?: SortDir
   onSortChange?: (field: string) => void
@@ -33,14 +37,23 @@ export function ExercisesTable({
   onEdit,
   onDuplicate,
   onDelete,
+  selectedIds,
+  onSelectionChange,
   sortBy,
   sortDir = 'asc',
   onSortChange = () => {},
 }: ExercisesTableProps) {
+  const selection = usePageSelection(exercises, selectedIds, onSelectionChange)
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-12">
+            <div className="flex items-center">
+              <Checkbox aria-label="Seleccionar página" checked={selection.headerChecked} onChange={selection.toggleAll} />
+            </div>
+          </TableHead>
           <SortableTableHead field="name" label="Nombre" sortBy={sortBy} sortDir={sortDir} onSortChange={onSortChange} />
           <TableHead>Grupos musculares</TableHead>
           <TableHead className="hidden lg:table-cell">Equipamiento</TableHead>
@@ -52,7 +65,17 @@ export function ExercisesTable({
       </TableHeader>
       <TableBody>
         {exercises.map((exercise) => (
-          <TableRow key={exercise.id}>
+          <TableRow key={exercise.id} data-state={selectedIds?.has(exercise.id) ? 'selected' : undefined}>
+            <TableCell>
+              <div className="flex items-center">
+                <Checkbox
+                  aria-label={`Seleccionar ${exercise.name}`}
+                  checked={selectedIds?.has(exercise.id) ?? false}
+                  onChange={() => selection.toggle(exercise.id)}
+                />
+              </div>
+            </TableCell>
+
             <TableCell>
               <div className="flex min-w-0 items-center gap-3">
                 <ExerciseThumbnail name={exercise.name} url={exercise.thumbnail_url} />
