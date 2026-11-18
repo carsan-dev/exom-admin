@@ -9,7 +9,7 @@ export const BASIS = { ORIGINAL: 'original', CURRENT: 'current_provisional', CUR
 export type Basis = (typeof BASIS)[keyof typeof BASIS]
 export const CALENDAR = {
   FUTURE: 'future', INSUFFICIENT: 'insufficient', REST: 'rest', NOT_ASSIGNED: 'not_assigned',
-  COMPLETE: 'complete', INCOMPLETE: 'incomplete', PARTIAL: 'partial',
+  COMPLETE: 'complete', INCOMPLETE: 'incomplete', PARTIAL: 'partial', PENDING: 'pending',
 } as const
 export type CalendarStatus = (typeof CALENDAR)[keyof typeof CALENDAR]
 export const SCHEDULE = { REST: 'rest', ASSIGNED: 'assigned', NOT_ASSIGNED: 'not_assigned', UNKNOWN: 'unknown' } as const
@@ -42,6 +42,9 @@ export interface NutritionTargets { calories: number | null; protein_g: number |
 export interface Intake { estimated_calories: number | null; estimated_protein_g: number | null }
 export interface EvaluationConfiguration { known: boolean; version: number | null; low_global_percent: number | null }
 export interface EvaluationSchedule { training: ScheduleStatus; nutrition: ScheduleStatus }
+export interface TrainingActivityUnit { unit_id: string; training_id: string; recorded: number; total: number }
+// Informational only; absent with an older API, null for rest/unassigned/future days.
+export interface TrainingActivity { recorded: boolean; unverified: boolean; units: TrainingActivityUnit[] | null }
 export interface AdherenceDay {
   date: string
   revision: number | null
@@ -53,6 +56,7 @@ export interface AdherenceDay {
   targets: NutritionTargets
   configuration: EvaluationConfiguration
   schedule: EvaluationSchedule
+  training_activity?: TrainingActivity | null
 }
 export interface WeeklyStepTarget {
   date: string
