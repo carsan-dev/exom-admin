@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, useLocation } from 'react-router'
@@ -175,6 +175,83 @@ describe('Adherencia canónica en el detalle', () => {
     expect(screen.getByText(/Provisional · no incluido/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /2020-01-05.*Futuro/ }))
     expect(screen.getByText(/Fecha futura · no penaliza/)).toBeInTheDocument()
+  })
+  describe('actividad de entrenamiento y estado pendiente', () => {
+    type Activity = NonNullable<AdherenceReport['days'][number]['training_activity']>
+    async function mountDay(overrides: Record<string, unknown>, activity?: Activity | null) {
+      const data = report()
+      const day = { ...data.days[0], date: '2020-01-01', calendar: 'incomplete' as const, ...overrides } as AdherenceReport['days'][number]
+      if (activity !== undefined) day.training_activity = activity
+      data.days = [day]
+      shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : data)))
+      mount('client-a', undefined, CUSTOM)
+      return screen.findByRole('button', { name: /2020-01-01/ })
+    }
+    const units = [{ unit_id: 'u1', training_id: 't1', recorded: 2, total: 3 }]
+    it('incomplete con actividad registrada: etiqueta larga, marca en celda y n de m', async () => {
+      const cell = await mountDay({}, { recorded: true, unverified: false, units })
+      expect(cell).toHaveAttribute('aria-label', expect.stringContaining('Sin cumplir · con actividad'))
+      expect(cell).toHaveTextContent('Sin cumplir')
+      expect(cell).toHaveTextContent('con actividad')
+      expect(cell).toHaveClass('border-status-error/50')
+      const detail = screen.getByRole('article', { name: 'Día 2020-01-01' })
+      expect(detail).toHaveTextContent('Sin cumplir · con actividad')
+      expect(detail).toHaveTextContent('Ejercicios registrados: 2 de 3')
+    })
+    it('incomplete sin training_activity o con recorded false se muestra como antes', async () => {
+      const cell = await mountDay({})
+      expect(cell).toHaveAttribute('aria-label', expect.stringContaining('Sin cumplimiento registrado'))
+      expect(cell).not.toHaveTextContent('con actividad')
+      expect(screen.getByRole('article', { name: 'Día 2020-01-01' })).not.toHaveTextContent('Ejercicios registrados')
+      cleanup()
+      const cell2 = await mountDay({}, { recorded: false, unverified: false, units: [{ unit_id: 'u1', training_id: 't1', recorded: 0, total: 3 }] })
+      expect(cell2).toHaveAttribute('aria-label', expect.stringContaining('Sin cumplimiento registrado'))
+      expect(cell2).not.toHaveTextContent('con actividad')
+      expect(screen.getByRole('article', { name: 'Día 2020-01-01' })).toHaveTextContent('Ejercicios registrados: 0 de 3')
+    })
+    it('pending se etiqueta Pendiente con estilo neutro', async () => {
+      const data = report()
+      data.days = [{ ...data.days[0], calendar: 'pending', basis: 'current_provisional', revision: null,
+        evaluation: { ...data.days[0].evaluation, period: 'provisional', includeInClosedAggregate: false },
+        training_activity: { recorded: false, unverified: false, units: [{ unit_id: 'u1', training_id: 't1', recorded: 0, total: 5 }] } }]
+      shared.get.mockImplementation((url: string) => Promise.resolve(envelope(url.endsWith('/config') ? config : data)))
+      mount('client-a', undefined, CUSTOM)
+      const cell = await screen.findByRole('button', { name: /2020-01-01/ })
+      expect(cell).toHaveAttribute('aria-label', expect.stringContaining('Pendiente'))
+      expect(cell).toHaveTextContent('Pendiente')
+      expect(cell.className).not.toMatch(/border-status-/)
+      const detail = screen.getByRole('article', { name: 'Día 2020-01-01' })
+      expect(detail).toHaveTextContent('2020-01-01 · Pendiente')
+      expect(detail.className).not.toMatch(/border-status-/)
+      expect(detail).toHaveTextContent('Ejercicios registrados: 0 de 5')
+    })
+    it('un calendar desconocido usa texto de respaldo sin lanzar', async () => {
+      const cell = await mountDay({ calendar: 'something_new' })
+      expect(cell).toHaveAttribute('aria-label', expect.stringContaining('Estado desconocido'))
+      expect(cell).toHaveTextContent('Estado desconocido')
+      expect(screen.getByRole('article', { name: 'Día 2020-01-01' })).toHaveTextContent('Estado desconocido')
+    })
+    it('units null con actividad y entradas sin verificar', async () => {
+      await mountDay({ calendar: 'insufficient' }, { recorded: true, unverified: true, units: null })
+      const detail = screen.getByRole('article', { name: 'Día 2020-01-01' })
+      expect(detail).toHaveTextContent('Actividad registrada (pauta desconocida)')
+      expect(detail).toHaveTextContent('Hay ejercicios registrados sin sesión (sin verificar)')
+    })
+    it('solo entradas sin verificar y sin actividad no inventa unidades', async () => {
+      await mountDay({ calendar: 'insufficient' }, { recorded: false, unverified: true, units: null })
+      const detail = screen.getByRole('article', { name: 'Día 2020-01-01' })
+      expect(detail).toHaveTextContent('Hay ejercicios registrados sin sesión (sin verificar)')
+      expect(detail).not.toHaveTextContent('Actividad registrada')
+    })
+    it('varias unidades se numeran y null no muestra nada', async () => {
+      await mountDay({}, { recorded: true, unverified: false, units: [...units, { unit_id: 'u2', training_id: 't2', recorded: 0, total: 4 }] })
+      const detail = screen.getByRole('article', { name: 'Día 2020-01-01' })
+      expect(detail).toHaveTextContent('Entrenamiento 1: 2 de 3 ejercicios')
+      expect(detail).toHaveTextContent('Entrenamiento 2: 0 de 4 ejercicios')
+      cleanup()
+      await mountDay({ calendar: 'rest' }, null)
+      expect(screen.getByRole('article', { name: 'Día 2020-01-01' })).not.toHaveTextContent(/Ejercicios registrados|Entrenamiento 1/)
+    })
   })
   it('marca como estimado un día con pauta actual de respaldo, sin tratarlo como desconocido', async () => {
     const data = report()
