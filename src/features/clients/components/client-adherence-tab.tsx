@@ -35,7 +35,19 @@ const sourceLabels = {
 const calendarLabels = {
   complete: 'Cumplimiento completo', partial: 'Cumplimiento parcial', incomplete: 'Sin cumplimiento registrado',
   insufficient: 'Información insuficiente', rest: 'Descanso', future: 'Futuro', not_assigned: 'Sin asignación',
+  pending: 'Pendiente',
 }
+const calendarCellLabels = {
+  complete: 'Completo', partial: 'Parcial', incomplete: 'Sin cumplir', insufficient: 'Sin datos', not_assigned: 'Sin pauta',
+  rest: 'Descanso', future: 'Futuro', pending: 'Pendiente',
+}
+// The API may send a calendar value this build does not know; never render it blank.
+const calendarLabelMap = new Map<string, string>(Object.entries(calendarLabels))
+const calendarCellLabelMap = new Map<string, string>(Object.entries(calendarCellLabels))
+const UNKNOWN_CALENDAR = 'Estado desconocido'
+const hasActivity = (day: AdherenceDay) => day.calendar === 'incomplete' && day.training_activity?.recorded === true
+const dayLabel = (day: AdherenceDay) => hasActivity(day) ? 'Sin cumplir · con actividad' : calendarLabelMap.get(day.calendar) ?? UNKNOWN_CALENDAR
+const cellLabel = (day: AdherenceDay) => calendarCellLabelMap.get(day.calendar) ?? UNKNOWN_CALENDAR
 const scheduleLabels = { rest: 'Descanso', assigned: 'Pautado', not_assigned: 'Sin asignación', unknown: 'Pauta desconocida' }
 type Comparison = { state: 'ready'; value: ClosedAggregate } | { state: 'error' }
 const comparableRatio = (value: ComponentAdherence) => value.status === 'evaluable' && value.ratio !== null ? value.ratio * 100 : null
@@ -81,13 +93,27 @@ function RecentClosed({ value }: { value: RecentClosedAdherence | undefined }) {
     </> : <p className="text-sm text-foreground-secondary">Resultado de siete días no disponible. No se reconstruye desde el calendario, el agregado seleccionado ni la configuración actual.</p>}
   </section>
 }
+function TrainingActivityLines({ day }: { day: AdherenceDay }) {
+  const activity = day.training_activity
+  if (!activity) return null
+  const units = activity.units ?? []
+  const showUnits = units.length > 0 && (units.some((unit) => unit.recorded > 0) || ['incomplete', 'pending', 'partial'].includes(day.calendar))
+  if (!showUnits && !(activity.recorded && activity.units === null) && !activity.unverified) return null
+  return <div className="space-y-1 text-sm text-foreground-secondary">
+    {showUnits && (units.length === 1
+      ? <p>Ejercicios registrados: {units[0].recorded} de {units[0].total}</p>
+      : units.map((unit, index) => <p key={unit.unit_id}>Entrenamiento {index + 1}: {unit.recorded} de {unit.total} ejercicios</p>))}
+    {activity.recorded && activity.units === null && <p>Actividad registrada (pauta desconocida)</p>}
+    {activity.unverified && <p>Hay ejercicios registrados sin sesión (sin verificar)</p>}
+  </div>
+}
 function DayDetail({ day }: { day: AdherenceDay }) {
   const closed = day.evaluation.period === 'closed'
   const tone = !closed ? 'border-border' : day.calendar === 'complete' ? 'border-status-success/50'
     : day.calendar === 'partial' ? 'border-status-warning/50'
       : day.calendar === 'incomplete' ? 'border-status-error/50' : 'border-border'
   return <article aria-label={`Día ${day.date}`} className={`rounded-lg border bg-card p-4 space-y-3 ${tone}`}>
-    <h3 className="text-base font-semibold text-foreground">{day.date} · <span>{calendarLabels[day.calendar]}</span></h3>
+    <h3 className="text-base font-semibold text-foreground">{day.date} · <span>{dayLabel(day)}</span></h3>
     <p className="text-sm text-foreground-secondary">{day.evaluation.period === 'provisional' ? 'Provisional · no incluido en el periodo cerrado'
       : day.evaluation.period === 'future' ? 'Fecha futura · no penaliza el periodo cerrado' : 'Día cerrado'}</p>
     <p className="text-xs text-foreground-muted">{day.basis === 'original' ? 'Pauta original al cierre UTC conservada'
@@ -96,6 +122,7 @@ function DayDetail({ day }: { day: AdherenceDay }) {
       {day.revision !== null && ` · Revisión ${day.revision}`}</p>
     {day.basis === 'current_fallback' && <p className="text-xs text-foreground-muted">Este día no tenía la pauta guardada; se evalúa con la pauta vigente del cliente.</p>}
     <p className="text-sm text-foreground-secondary">Entrenamiento: {scheduleLabels[day.schedule.training]} · Nutrición: {scheduleLabels[day.schedule.nutrition]}</p>
+    <TrainingActivityLines day={day} />
     <Aggregate value={day.evaluation} />
     <p className="text-xs text-foreground-muted">Configuración {day.configuration.known ? `versión ${day.configuration.version ?? 'sin versión'}` : 'desconocida'}
       {day.configuration.known && day.configuration.low_global_percent !== null && ` · política global de siete días ${day.configuration.low_global_percent} %`}</p>
@@ -124,9 +151,10 @@ function Report({ report, comparison }: { report: AdherenceReport; comparison?: 
         <p className="text-sm text-foreground-muted">Selecciona un día para consultar su pauta y evaluación UTC. El estado diario no clasifica baja adherencia global.</p>
         <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold uppercase text-foreground-muted" aria-hidden="true">{['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((label) => <span key={label}>{label}</span>)}</div>
         <div className="grid grid-cols-7 gap-1">
-          {days.map((day) => <button key={day.date} type="button" style={{ gridColumn: ((new Date(day.date + 'T00:00:00Z').getUTCDay() + 6) % 7) + 1 }} aria-label={`${day.date} · ${calendarLabels[day.calendar]} · ${day.evaluation.period === 'provisional' ? 'Provisional' : day.evaluation.period === 'future' ? 'Futuro' : 'Día cerrado'}${day.basis === 'current_fallback' ? ' · estimado' : ''}`} aria-pressed={selected?.date === day.date} onClick={() => setSelectedDate(day.date)} className={cn('min-h-14 min-w-0 rounded-md border border-border p-1 text-center text-sm tabular-nums text-foreground transition-colors motion-reduce:transition-none hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', selected?.date === day.date && 'border-brand-primary bg-brand-soft/10 ring-1 ring-brand-primary', day.calendar === 'complete' && 'border-status-success/50', day.calendar === 'partial' && 'border-status-warning/50', day.calendar === 'incomplete' && 'border-status-error/50')}>
+          {days.map((day) => <button key={day.date} type="button" style={{ gridColumn: ((new Date(day.date + 'T00:00:00Z').getUTCDay() + 6) % 7) + 1 }} aria-label={`${day.date} · ${dayLabel(day)} · ${day.evaluation.period === 'provisional' ? 'Provisional' : day.evaluation.period === 'future' ? 'Futuro' : 'Día cerrado'}${day.basis === 'current_fallback' ? ' · estimado' : ''}`} aria-pressed={selected?.date === day.date} onClick={() => setSelectedDate(day.date)} className={cn('min-h-14 min-w-0 rounded-md border border-border p-1 text-center text-sm tabular-nums text-foreground transition-colors motion-reduce:transition-none hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', selected?.date === day.date && 'border-brand-primary bg-brand-soft/10 ring-1 ring-brand-primary', day.calendar === 'complete' && 'border-status-success/50', day.calendar === 'partial' && 'border-status-warning/50', day.calendar === 'incomplete' && 'border-status-error/50')}>
             <span className="block font-semibold">{day.date.slice(8)}/{day.date.slice(5, 7)}</span>
-            <span className="block text-[10px] leading-tight">{day.calendar === 'complete' ? 'Completo' : day.calendar === 'partial' ? 'Parcial' : day.calendar === 'incomplete' ? 'Sin cumplir' : day.calendar === 'insufficient' ? 'Sin datos' : day.calendar === 'not_assigned' ? 'Sin pauta' : calendarLabels[day.calendar]}</span>
+            <span className="block text-[10px] leading-tight">{cellLabel(day)}</span>
+            {hasActivity(day) && <span className="block text-[10px] leading-tight text-foreground-muted">con actividad</span>}
             {day.evaluation.period === 'provisional' && <span className="block text-[10px]">Provisional</span>}
             {day.basis === 'current_fallback' && <span className="block text-[10px]" aria-hidden="true">· est.</span>}
           </button>)}
